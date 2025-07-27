@@ -16,6 +16,7 @@ This project implements a complete Django-based EU eHealth infrastructure includ
 Based on analysis of the Java-based DomiSMP and OpenNCP implementations, this Django version provides:
 
 ### Core Components
+
 - `ncp_server/` - Main NCP backend services
 - `patient_portal/` - User interface and patient management
 - `smp_client/` - SMP (Service Metadata Publisher) integration
@@ -23,8 +24,9 @@ Based on analysis of the Java-based DomiSMP and OpenNCP implementations, this Dj
 - `security/` - Authentication, encryption, and audit logging
 
 ### Supported eHealth Services
+
 1. Patient Summary (PS)
-2. ePrescription (eP) 
+2. ePrescription (eP)
 3. eDispensation (eD)
 4. Laboratory Results
 5. Hospital Discharge Reports
@@ -33,6 +35,7 @@ Based on analysis of the Java-based DomiSMP and OpenNCP implementations, this Dj
 ## Setup
 
 ### Prerequisites
+
 - Python 3.8+
 - Virtual environment (venv)
 - Docker (for testing with DomiSMP)
@@ -40,6 +43,7 @@ Based on analysis of the Java-based DomiSMP and OpenNCP implementations, this Dj
 ### Installation
 
 1. **Clone and setup virtual environment:**
+
 ```bash
 cd C:\Users\Duncan\VS_Code_Projects\django_ncp
 python -m venv venv
@@ -48,23 +52,27 @@ source venv/bin/activate  # Linux/Mac
 ```
 
 2. **Install dependencies:**
+
 ```bash
 pip install -r requirements.txt
 ```
 
 3. **Environment configuration:**
+
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
 4. **Database setup:**
+
 ```bash
 python manage.py migrate
 python manage.py createsuperuser
 ```
 
 5. **Run development server:**
+
 ```bash
 python manage.py runserver
 ```
@@ -80,6 +88,7 @@ This Django NCP server is designed to integrate with the existing DomiSMP infras
 ## Development
 
 ### Project Structure
+
 ```
 django_ncp/
 ├── manage.py
@@ -97,11 +106,13 @@ django_ncp/
 ```
 
 ### Testing
+
 ```bash
 python manage.py test
 ```
 
 ### Docker Development
+
 ```bash
 docker-compose up --build
 ```
