@@ -1,0 +1,460 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, i        .option-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* SMP Source Configuration */
+        .smp-config {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e6f3ff 100%);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 30px auto;
+            max-width: 800px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .smp-config h3 {
+            color: #2c5282;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+        }
+
+        .smp-selection {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .smp-selection select {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .smp-selection select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .smp-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            background: rgba(56, 161, 105, 0.1);
+            border: 2px solid rgba(56, 161, 105, 0.2);
+            color: #2f855a;
+            font-weight: 600;
+            min-width: 200px;
+        }
+
+        .smp-url {
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .smp-selection {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .smp-selection select,
+            .smp-status {
+                min-width: auto;
+                width: 100%;
+            }
+        }al-scale=1.0">
+    <title>Django EU eHealth NCP Server</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(10deg);
+            }
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 3rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            margin: 20px 0 0 0;
+            font-size: 1.2rem;
+            position: relative;
+            z-index: 2;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: white;
+            margin-top: 20px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .integration-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .option-card {
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f1f3ff 100%);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #e5e7eb;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        .option-card h3 {
+            color: #2c5282;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-card p {
+            color: #4a5568;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .option-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .option-link:hover::before {
+            left: 100%;
+        }
+
+        .option-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .api-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 6px solid #27ae60;
+            margin-bottom: 30px;
+        }
+
+        .api-section h3 {
+            color: #047857;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .api-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .api-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .api-item strong {
+            color: #2c5282;
+        }
+
+        .api-item a {
+            color: #3182ce;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .api-item a:hover {
+            text-decoration: underline;
+        }
+
+        .external-services {
+            background: linear-gradient(135deg, #fff3cd 0%, #fef7e0 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 6px solid #f6ad55;
+            margin-bottom: 30px;
+        }
+
+        .external-services h3 {
+            color: #c05621;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .service-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .service-item a {
+            display: inline-block;
+            background: #f6ad55;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .service-item a:hover {
+            background: #ed8936;
+            transform: translateY(-2px);
+        }
+
+        .status-indicator {
+            background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 6px solid #3182ce;
+            text-align: center;
+        }
+
+        .status-indicator p {
+            color: #2c5282;
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .integration-options {
+                grid-template-columns: 1fr;
+            }
+
+            .api-list {
+                grid-template-columns: 1fr;
+            }
+
+            .service-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>🏥 Django EU eHealth NCP Server</h1>
+        <p>European eHealth Cross-Border Patient Portal</p>
+    </div>
+
+    <div class="container">
+        <h2 style="text-align: center; color: #2c5282; margin-bottom: 40px;">Choose Your Integration Approach</h2>
+
+        <!-- SMP Source Information -->
+        <div class="status-indicator" style="margin-bottom: 30px;">
+            <p><strong>Active SMP Source:</strong> {{ current_smp_name }}</p>
+            <p style="margin: 5px 0; font-size: 0.9rem; opacity: 0.8;">
+                Portal: <a href="{{ current_smp_ui_url }}" target="_blank"
+                    style="color: #2c5282; text-decoration: underline;">{{ current_smp_ui_url }}</a>
+            </p>
+            <p style="margin: 0; font-size: 0.8rem; font-style: italic;">SMP source configuration is managed by
+                administrators only.</p>
+        </div>
+
+        <div class="integration-options">
+            <div class="option-card">
+                <h3>🖥️ Django Portal UI</h3>
+                <p>Full eHealth portal with European SMP integration, country-specific International Search Masks (ISM),
+                    and cross-border patient lookup capabilities.</p>
+                <a href="/portal/" class="option-link">Launch Portal</a>
+            </div>
+
+            <div class="option-card">
+                <h3>⚙️ Django Admin</h3>
+                <p>Administrative interface for managing countries, ISM configurations, certificates, and monitoring
+                    European SMP connectivity status.</p>
+                <a href="/admin/" class="option-link">Admin Panel</a>
+            </div>
+
+            <div class="option-card">
+                <h3>� SMP Configuration</h3>
+                <p>Configure which SMP server (European or localhost) the application uses for metadata publishing.</p>
+                <a href="/portal/admin/smp-config/" class="option-link">Configure SMP</a>
+            </div>
+
+            <div class="option-card">
+                <h3>�🔗 API Endpoints</h3>
+                <p>REST API for Java portal integration with dynamic country data, patient lookup services, and document
+                    retrieval endpoints.</p>
+                <a href="/api/countries/" class="option-link">View API</a>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h3>🌐 Available API Endpoints</h3>
+            <div class="api-list">
+                <div class="api-item">
+                    <strong>GET</strong> <a href="/api/countries/">/api/countries/</a><br>
+                    <small>Get available EU countries with ISM support</small>
+                </div>
+                <div class="api-item">
+                    <strong>POST</strong> /api/patient/lookup/<br>
+                    <small>Cross-border patient lookup with country-specific validation</small>
+                </div>
+                <div class="api-item">
+                    <strong>GET</strong> /api/patient/{patient_id}/document/{type}/<br>
+                    <small>Retrieve patient documents from European health systems</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="external-services">
+            <h3>🔗 External Service Connections</h3>
+            <div class="service-grid">
+                <div class="service-item">
+                    <h4>Java OpenNCP Portal</h4>
+                    <p>Original Java-based portal</p>
+                    <a href="http://localhost:8093" target="_blank">localhost:8093</a>
+                </div>
+                <div class="service-item">
+                    <h4>DomiSMP Server</h4>
+                    <p>Service Metadata Publisher</p>
+                    <a href="{{ current_smp_ui_url }}" target="_blank">{{ current_smp_ui_url }}</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-indicator">
+            <p>✅ All API endpoints are accessible without authentication for Java portal integration</p>
+        </div>
+    </div>
+</body>
+
+</html>

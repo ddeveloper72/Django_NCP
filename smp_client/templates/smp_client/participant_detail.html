@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ participant.participant_name|default:participant.participant_identifier }} - SMP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .detail-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px 40px;
+        }
+
+        .participant-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .flag-emoji {
+            font-size: 3rem;
+            margin-right: 20px;
+        }
+
+        .participant-title {
+            flex: 1;
+        }
+
+        .participant-name {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 5px;
+        }
+
+        .participant-id {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content-section {
+            padding: 40px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .info-card h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .info-item {
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #495057;
+            margin-top: 3px;
+            font-size: 1rem;
+        }
+
+        .services-section {
+            background: #f8f9fa;
+            padding: 40px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .service-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .endpoints-list {
+            margin-top: 20px;
+        }
+
+        .endpoint-item {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            color: #1976d2;
+            font-weight: 600;
+        }
+
+        .endpoint-details {
+            font-size: 0.9rem;
+            color: #546e7a;
+            margin-top: 5px;
+        }
+
+        .no-services {
+            text-align: center;
+            padding: 60px;
+            color: #6c757d;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #495057;
+            transform: translateY(-2px);
+        }
+
+        .smp-url {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #4caf50;
+            margin-top: 20px;
+        }
+
+        .smp-url-label {
+            font-weight: 600;
+            color: #2e7d32;
+            margin-bottom: 5px;
+        }
+
+        .smp-url-value {
+            font-family: 'Courier New', monospace;
+            color: #1b5e20;
+            word-break: break-all;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="detail-container">
+        <div class="header">
+            <a href="{% url 'smp_client:participant_search' %}" class="back-btn">← Back to Search</a>
+
+            <div class="participant-header">
+                <span class="flag-emoji">
+                    {% if participant.country_code == 'IE' %}🇮🇪
+                    {% elif participant.country_code == 'BE' %}🇧🇪
+                    {% elif participant.country_code == 'AT' %}🇦🇹
+                    {% elif participant.country_code == 'HU' %}🇭🇺
+                    {% else %}🇪🇺{% endif %}
+                </span>
+                <div class="participant-title">
+                    <div class="participant-name">
+                        {{ participant.participant_name|default:participant.participant_identifier }}
+                    </div>
+                    <div class="participant-id">
+                        {{ participant.participant_scheme.scheme_id }}::{{ participant.participant_identifier }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="smp-url">
+                <div class="smp-url-label">SMP Service Group URL:</div>
+                <div class="smp-url-value">
+                    {{ request.build_absolute_uri }}{{ participant.participant_scheme.scheme_id }}::{{
+                    participant.participant_identifier }}/
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2 class="section-title">📋 Participant Information</h2>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🆔 Identity</h3>
+                    <div class="info-item">
+                        <div class="info-label">Participant ID</div>
+                        <div class="info-value">{{ participant.participant_identifier }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Participant Scheme</div>
+                        <div class="info-value">{{ participant.participant_scheme.scheme_name }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Domain</div>
+                        <div class="info-value">{{ participant.domain.domain_name }}</div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>🏢 Organization</h3>
+                    <div class="info-item">
+                        <div class="info-label">Name</div>
+                        <div class="info-value">{{ participant.participant_name|default:"Not specified" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Type</div>
+                        <div class="info-value">{{ participant.organization_type|default:"Not specified" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Country</div>
+                        <div class="info-value">{{ participant.country_code|default:"Not specified" }}</div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>📞 Contact</h3>
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ participant.contact_email|default:"Not specified" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Phone</div>
+                        <div class="info-value">{{ participant.contact_phone|default:"Not specified" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Last Updated</div>
+                        <div class="info-value">{{ participant.last_updated|date:"F j, Y, g:i A" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="services-section">
+            <h2 class="section-title">🌐 Service Metadata</h2>
+
+            {% if service_group and services %}
+            <p style="margin-bottom: 30px; color: #6c757d;">
+                This participant provides {{ services.count }} service{{ services.count|pluralize }}
+                with the following endpoints:
+            </p>
+
+            {% for service in services %}
+            <div class="service-card">
+                <div class="service-name">
+                    📄 {{ service.document_type.document_name }}
+                </div>
+
+                <div class="info-grid">
+                    <div>
+                        <div class="info-label">Document Type ID</div>
+                        <div class="info-value">{{ service.document_type.document_type_identifier }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Document Scheme</div>
+                        <div class="info-value">{{ service.document_type.document_scheme.scheme_name }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Profile ID</div>
+                        <div class="info-value">{{ service.document_type.profile_id|default:"Not specified" }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Version</div>
+                        <div class="info-value">{{ service.document_type.document_version|default:"Not specified" }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if service.endpoints.all %}
+                <div class="endpoints-list">
+                    <h4 style="margin-bottom: 15px; color: #495057;">🔗 Service Endpoints</h4>
+                    {% for endpoint in service.endpoints.all %}
+                    <div class="endpoint-item">
+                        <div class="endpoint-url">{{ endpoint.endpoint_url }}</div>
+                        <div class="endpoint-details">
+                            Process: {{ endpoint.process.process_name }} |
+                            Transport: {{ endpoint.transport_profile }} |
+                            {% if endpoint.is_valid %}
+                            <span style="color: #4caf50;">✓ Active</span>
+                            {% else %}
+                            <span style="color: #f44336;">✗ Inactive</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px; color: #856404;">
+                    ⚠️ No endpoints configured for this service
+                </div>
+                {% endif %}
+
+                <div class="smp-url">
+                    <div class="smp-url-label">SMP Service Metadata URL:</div>
+                    <div class="smp-url-value">
+                        {{ request.build_absolute_uri }}{{ participant.participant_scheme.scheme_id }}::{{
+                        participant.participant_identifier }}/services/{{ service.document_type.document_type_identifier
+                        }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="no-services">
+                <h3>No services configured</h3>
+                <p>This participant has not yet configured any service metadata.</p>
+                <p>Services can be added through the Django admin interface.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>

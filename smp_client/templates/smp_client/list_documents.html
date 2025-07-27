@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}SMP Documents{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-file-alt text-primary"></i>
+                    SMP Documents
+                </h1>
+                <div class="page-options">
+                    <a href="{% url 'smp_client:smp_editor' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Generate New Document
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Document Management</h3>
+                    <div class="card-options">
+                        <div class="row">
+                            <div class="col-auto">
+                                <select class="form-control" onchange="filterDocuments()">
+                                    <option value="">All Status</option>
+                                    {% for status_code, status_name in document_status %}
+                                    <option value="{{ status_code }}">{{ status_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <select class="form-control" onchange="filterDocuments()">
+                                    <option value="">All Types</option>
+                                    {% for type_code, type_name in document_types %}
+                                    <option value="{{ type_code }}">{{ type_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th>Document</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Participant</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for document in documents %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ document.document_name }}</strong>
+                                        {% if document.document_description %}
+                                        <br><small class="text-muted">{{ document.document_description }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-info">{{ document.get_document_type_display }}</span>
+                                    </td>
+                                    <td>
+                                        <span
+                                            class="badge badge-{% if document.status == 'uploaded' %}success{% elif document.status == 'signed' %}warning{% elif document.status == 'error' %}danger{% else %}secondary{% endif %}">
+                                            {{ document.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if document.participant %}
+                                        {{ document.participant.participant_identifier }}
+                                        <br><small class="text-muted">{{ document.participant.country_code }}</small>
+                                        {% else %}
+                                        <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ document.created_at|date:"M d, Y H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'smp_client:download_document' document.id %}"
+                                                class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            {% if document.signed_file %}
+                                            <a href="{% url 'smp_client:download_document' document.id %}?type=signed"
+                                                class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-certificate"></i>
+                                            </a>
+                                            {% endif %}
+                                            {% if document.status == 'generated' %}
+                                            <button class="btn btn-sm btn-outline-warning"
+                                                onclick="signDocument('{{ document.id }}')">
+                                                <i class="fas fa-signature"></i>
+                                            </button>
+                                            {% endif %}
+                                            {% if document.status == 'signed' %}
+                                            <button class="btn btn-sm btn-outline-info"
+                                                onclick="uploadToSMP('{{ document.id }}')">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        No documents found. <a href="{% url 'smp_client:smp_editor' %}">Generate your
+                                            first document</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function signDocument(documentId) {
+        if (confirm('Sign this document?')) {
+            $.ajax({
+                url: `/smp/documents/${documentId}/sign/`,
+                type: 'POST',
+                data: {
+                    csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.error);
+                    }
+                }
+            });
+        }
+    }
+
+    function uploadToSMP(documentId) {
+        if (confirm('Upload this document to SMP server?')) {
+            $.ajax({
+                url: `/smp/documents/${documentId}/upload/`,
+                type: 'POST',
+                data: {
+                    smp_server_url: 'https://smp-ehealth-trn.acc.edelivery.tech.ec.europa.eu/',
+                    csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.error);
+                    }
+                }
+            });
+        }
+    }
+
+    function filterDocuments() {
+        // Implement filtering logic if needed
+        location.reload();
+    }
+</script>
+{% endblock %}

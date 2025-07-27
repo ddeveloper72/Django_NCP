@@ -1,0 +1,704 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Patient Search - {{ country.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .country-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .country-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-20px) rotate(10deg);
+        }
+    }
+
+    .country-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .country-header .country-flag {
+        width: 60px;
+        height: 40px;
+        border-radius: 8px;
+        margin-right: 20px;
+        vertical-align: middle;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .header-actions {
+        position: relative;
+        z-index: 2;
+    }
+
+    .ism-info {
+        background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+        padding: 25px;
+        margin: 30px 0;
+        border-radius: 15px;
+        border-left: 6px solid #27ae60;
+        box-shadow: 0 5px 20px rgba(39, 174, 96, 0.1);
+        position: relative;
+    }
+
+    .ism-info::before {
+        content: '🌍';
+        position: absolute;
+        top: -10px;
+        right: 20px;
+        font-size: 3rem;
+        opacity: 0.1;
+    }
+
+    .ism-info h4 {
+        color: #27ae60;
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-form {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+
+    .field-group {
+        margin-bottom: 35px;
+        padding: 30px;
+        border: none;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #f8f9ff 0%, #f1f3ff 100%);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .field-group:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .field-group::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .field-group-title {
+        font-weight: 700;
+        color: #2c5282;
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+        padding-bottom: 12px;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-field {
+        margin-bottom: 25px;
+        position: relative;
+    }
+
+    .form-field label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #2d3748;
+        font-size: 1rem;
+        transition: color 0.3s ease;
+    }
+
+    .form-field label.required::after {
+        content: " *";
+        color: #e53e3e;
+        font-weight: bold;
+    }
+
+    .form-field input,
+    .form-field select {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: white;
+        position: relative;
+    }
+
+    .form-field input:focus,
+    .form-field select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-field input:hover,
+    .form-field select:hover {
+        border-color: #cbd5e0;
+    }
+
+    .help-text {
+        font-size: 0.875rem;
+        color: #718096;
+        margin-top: 8px;
+        font-style: italic;
+    }
+
+    .error-message {
+        color: #e53e3e;
+        font-size: 0.875rem;
+        margin-top: 8px;
+        display: none;
+        font-weight: 500;
+    }
+
+    .search-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 18px 40px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: block;
+        margin: 40px auto 0;
+        min-width: 250px;
+        position: relative;
+        overflow: hidden;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .search-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .search-button:hover::before {
+        left: 100%;
+    }
+
+    .search-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .search-button:active {
+        transform: translateY(-1px);
+    }
+
+    .refresh-ism {
+        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        margin-left: 15px;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .refresh-ism:hover {
+        background: linear-gradient(135deg, #2f855a 0%, #276749 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(56, 161, 105, 0.3);
+    }
+
+    .btn-light {
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: #2d3748;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-light:hover {
+        background: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, #fff3cd 0%, #fef7e0 100%);
+        border: none;
+        border-left: 6px solid #f6ad55;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(246, 173, 85, 0.1);
+    }
+
+    .alert-warning h4 {
+        color: #c05621;
+        font-weight: 700;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .search-form {
+            padding: 25px;
+            margin: 15px;
+        }
+
+        .field-group {
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .country-header {
+            padding: 25px;
+            margin: 15px 15px 25px 15px;
+        }
+
+        .country-header h1 {
+            font-size: 1.8rem;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .country-header .country-flag {
+            margin-right: 0;
+            margin-bottom: 15px;
+        }
+
+        .header-actions {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .header-actions a {
+            display: block;
+            margin: 10px 0;
+        }
+    }
+
+    /* Loading Animation */
+    .search-button.loading {
+        pointer-events: none;
+    }
+
+    .search-button.loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        margin: auto;
+        border: 2px solid transparent;
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    @keyframes spin {
+        0% {
+            transform: translate(-50%, -50%) rotate(0deg);
+        }
+
+        100% {
+            transform: translate(-50%, -50%) rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="country-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>
+            <img src="{% static 'flags/' %}{{ country_code }}.webp" alt="{{ country.name }} flag" class="country-flag">
+            {{ country.name }} Patient Search
+        </h1>
+        <div class="header-actions">
+            <a href="{% url 'refresh_country_ism' country_code %}" class="refresh-ism">
+                🔄 Refresh ISM
+            </a>
+            <a href="{% url 'country_selection' %}" class="btn btn-light ms-2">
+                ← Back to Countries
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="search-form">
+    {% if form_fields %}
+    <!-- ISM Information -->
+    <div class="ism-info">
+        <h4>🌍 International Search Mask (ISM)</h4>
+        <p class="mb-1">
+            <strong>Country:</strong> {{ country.name }} |
+            <strong>Fields:</strong> {{ form_fields|length }}
+            {% if ism_last_updated %}| <strong>Last Updated:</strong> {{ ism_last_updated|date:"Y-m-d H:i" }}{% endif %}
+        </p>
+        <p class="mb-0">
+            <small>Search form configured from {{ country.name }}'s SMP server</small>
+        </p>
+    </div>
+
+    <!-- Patient Search Form -->
+    <form method="post" id="patientSearchForm" novalidate>
+        {% csrf_token %}
+
+        {% for group_name, fields in grouped_fields.items %}
+        <div class="field-group">
+            {% if group_name != 'main' %}
+            <div class="field-group-title">
+                {% if group_name == 'identity' %}👤 Identity Information
+                {% elif group_name == 'demographics' %}📊 Demographics
+                {% elif group_name == 'healthcare' %}🏥 Healthcare Information
+                {% elif group_name == 'identification' %}🆔 Identification
+                {% elif group_name == 'additional' %}➕ Additional Information
+                {% else %}{{ group_name|title }}
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="row">
+                {% for field in fields %}
+                <div class="col-md-6">
+                    <div class="form-field">
+                        <label for="{{ field.code }}" {% if field.required %} class="required" {% endif %}>
+                            {{ field.label }}
+                        </label>
+
+                        {% if field.type == 'select' %}
+                        <select name="{{ field.code }}" id="{{ field.code }}" {% if field.required %} required{% endif
+                            %}>
+                            <option value="">Choose {{ field.label|lower }}...</option>
+                            {% for option in field.options %}
+                            <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                        {% elif field.type == 'date' %}
+                        <input type="date" name="{{ field.code }}" id="{{ field.code }}"
+                            value="{{ field.default_value }}" {% if field.required %} required{% endif %}>
+                        {% elif field.type == 'number' %}
+                        <input type="number" name="{{ field.code }}" id="{{ field.code }}"
+                            placeholder="{{ field.placeholder }}" value="{{ field.default_value }}" {% if field.required
+                            %} required{% endif %}>
+                        {% else %}
+                        <input type="{{ field.html_type }}" name="{{ field.code }}" id="{{ field.code }}"
+                            placeholder="{{ field.placeholder }}" value="{{ field.default_value }}" {% if field.required
+                            %} required{% endif %}>
+                        {% endif %}
+
+                        {% if field.help_text %}
+                        <div class="help-text">{{ field.help_text }}</div>
+                        {% endif %}
+
+                        <div class="error-message" id="error-{{ field.code }}"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="search-button" id="searchButton">
+            🔍 Search Patient in {{ country.name }}
+        </button>
+    </form>
+    {% else %}
+    <!-- No ISM Available -->
+    <div class="text-center py-5">
+        <div class="alert alert-warning">
+            <h4>⚠️ ISM Not Available</h4>
+            <p>The International Search Mask for {{ country.name }} is not currently available. This could be due to:
+            </p>
+            <ul class="text-start">
+                <li>SMP server is temporarily unavailable</li>
+                <li>Country has not published their ISM configuration</li>
+                <li>Network connectivity issues</li>
+            </ul>
+            <div class="mt-3">
+                <a href="{% url 'refresh_country_ism' country_code %}" class="btn btn-primary">
+                    🔄 Try Refreshing ISM
+                </a>
+                <a href="{% url 'country_selection' %}" class="btn btn-secondary ms-2">
+                    ← Back to Country Selection
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('patientSearchForm');
+        const searchButton = document.getElementById('searchButton');
+
+        if (form) {
+            // Add form validation styling
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('blur', function () {
+                    if (this.hasAttribute('required') && !this.value.trim()) {
+                        this.style.borderColor = '#e53e3e';
+                    } else {
+                        this.style.borderColor = '#e2e8f0';
+                    }
+                });
+
+                input.addEventListener('input', function () {
+                    this.style.borderColor = '#e2e8f0';
+                    const errorEl = document.getElementById(`error-${this.name}`);
+                    if (errorEl) {
+                        errorEl.style.display = 'none';
+                    }
+                });
+            });
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // Clear previous errors
+                document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+                inputs.forEach(input => input.style.borderColor = '#e2e8f0');
+
+                // Validate required fields
+                let isValid = true;
+                inputs.forEach(input => {
+                    if (input.hasAttribute('required') && !input.value.trim()) {
+                        input.style.borderColor = '#e53e3e';
+                        const errorEl = document.getElementById(`error-${input.name}`);
+                        if (errorEl) {
+                            errorEl.textContent = 'This field is required';
+                            errorEl.style.display = 'block';
+                        }
+                        isValid = false;
+                    }
+                });
+
+                if (!isValid) {
+                    // Scroll to first error
+                    const firstError = document.querySelector('.error-message[style*="block"]');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return;
+                }
+
+                // Get form data
+                const formData = new FormData(form);
+
+                // Show enhanced loading state
+                searchButton.innerHTML = '';
+                searchButton.classList.add('loading');
+                searchButton.disabled = true;
+
+                // Submit form
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Success animation
+                            searchButton.innerHTML = '✅ Found!';
+                            searchButton.style.background = 'linear-gradient(135deg, #38a169 0%, #2f855a 100%)';
+
+                            setTimeout(() => {
+                                window.location.href = data.redirect_url;
+                            }, 1000);
+                        } else {
+                            // Show errors with animation
+                            if (data.errors) {
+                                for (const [field, error] of Object.entries(data.errors)) {
+                                    const errorEl = document.getElementById(`error-${field}`);
+                                    const inputEl = document.querySelector(`[name="${field}"]`);
+                                    if (errorEl && inputEl) {
+                                        errorEl.textContent = error;
+                                        errorEl.style.display = 'block';
+                                        inputEl.style.borderColor = '#e53e3e';
+
+                                        // Shake animation
+                                        inputEl.style.animation = 'shake 0.5s';
+                                        setTimeout(() => inputEl.style.animation = '', 500);
+                                    }
+                                }
+
+                                // Scroll to first error
+                                const firstError = document.querySelector('.error-message[style*="block"]');
+                                if (firstError) {
+                                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }
+                            }
+
+                            if (data.message) {
+                                // Custom alert styling
+                                showCustomAlert(data.message, 'error');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showCustomAlert('An error occurred while searching. Please try again.', 'error');
+                    })
+                    .finally(() => {
+                        // Reset button after delay
+                        setTimeout(() => {
+                            searchButton.classList.remove('loading');
+                            searchButton.innerHTML = '🔍 Search Patient in {{ country.name }}';
+                            searchButton.disabled = false;
+                            searchButton.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                        }, 2000);
+                    });
+            });
+        }
+
+        // Custom alert function
+        function showCustomAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `custom-alert alert-${type}`;
+            alertDiv.innerHTML = `
+                <div class="alert-content">
+                    <span class="alert-icon">${type === 'error' ? '❌' : 'ℹ️'}</span>
+                    <span class="alert-message">${message}</span>
+                    <button class="alert-close" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+            `;
+
+            // Style the alert
+            alertDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                padding: 20px;
+                border-radius: 10px;
+                background: ${type === 'error' ? 'linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%)' : 'linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%)'};
+                border-left: 4px solid ${type === 'error' ? '#e53e3e' : '#3182ce'};
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                max-width: 400px;
+                animation: slideIn 0.3s ease;
+            `;
+
+            document.body.appendChild(alertDiv);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentElement) {
+                    alertDiv.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => alertDiv.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+            
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            
+            .custom-alert .alert-content {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: #2d3748;
+                font-weight: 600;
+            }
+            
+            .custom-alert .alert-close {
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                cursor: pointer;
+                margin-left: auto;
+                opacity: 0.7;
+                transition: opacity 0.3s;
+            }
+            
+            .custom-alert .alert-close:hover {
+                opacity: 1;
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+{% endblock %}

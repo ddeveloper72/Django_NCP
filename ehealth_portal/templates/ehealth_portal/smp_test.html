@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}European SMP Connectivity Test{% endblock %}
+
+{% block extra_css %}
+<style>
+    .smp-config {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .test-results {
+        margin-top: 20px;
+    }
+
+    .test-item {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+
+    .status-success {
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .status-error {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .status-warning {
+        color: #ffc107;
+        font-weight: bold;
+    }
+
+    .countries-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        gap: 10px;
+        margin: 20px 0;
+    }
+
+    .country-badge {
+        background: #007bff;
+        color: white;
+        padding: 8px;
+        border-radius: 4px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    #loading {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>🌍 European SMP Connectivity Test</h1>
+                <a href="{% url 'country_selection' %}" class="btn btn-secondary">
+                    ← Back to Country Selection
+                </a>
+            </div>
+
+            <!-- SMP Configuration Info -->
+            <div class="smp-config">
+                <h3>🔧 Current SMP Configuration</h3>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <strong>SML Domain:</strong><br>
+                        <code>{{ sml_domain }}</code>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>SMP Admin URL:</strong><br>
+                        <code>{{ smp_admin_url }}</code>
+                    </div>
+                </div>
+
+                <h4 class="mt-4">📋 Supported EU Countries</h4>
+                <div class="countries-grid">
+                    {% for country in countries %}
+                    <div class="country-badge">{{ country|upper }}</div>
+                    {% endfor %}
+                </div>
+                <p class="text-muted">
+                    <small>Based on OpenNCP configuration from ehealth-2 project</small>
+                </p>
+            </div>
+
+            <!-- Test Controls -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>🧪 Connectivity Tests</h4>
+                </div>
+                <div class="card-body">
+                    <button id="runTests" class="btn btn-primary btn-lg">
+                        🚀 Run SMP Connectivity Tests
+                    </button>
+
+                    <div id="loading">
+                        <div class="spinner"></div>
+                        <span class="ml-2">Testing European SMP infrastructure...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Results -->
+            <div id="testResults" class="test-results" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>📊 Test Results</h4>
+                    </div>
+                    <div class="card-body" id="resultsContent">
+                        <!-- Results will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('runTests').addEventListener('click', function () {
+        const button = this;
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('testResults');
+        const resultsContent = document.getElementById('resultsContent');
+
+        // Show loading state
+        button.disabled = true;
+        loading.style.display = 'block';
+        results.style.display = 'none';
+
+        // Run tests
+        fetch('{% url "european_smp_test" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading
+                loading.style.display = 'none';
+                button.disabled = false;
+
+                // Show results
+                displayResults(data);
+                results.style.display = 'block';
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                button.disabled = false;
+
+                resultsContent.innerHTML = `
+            <div class="alert alert-danger">
+                <strong>Test Failed:</strong> ${error.message}
+            </div>
+        `;
+                results.style.display = 'block';
+            });
+    });
+
+    function displayResults(data) {
+        const resultsContent = document.getElementById('resultsContent');
+        let html = '';
+
+        // SMP Admin test
+        if (data.smp_admin) {
+            const admin = data.smp_admin;
+            const statusClass = admin.accessible ? 'status-success' : 'status-error';
+            const icon = admin.accessible ? '✅' : '❌';
+
+            html += `
+            <div class="test-item">
+                <h5>${icon} SMP Admin URL Test</h5>
+                <div class="row">
+                    <div class="col-md-8">
+                        <strong>URL:</strong> <code>${admin.url}</code>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="${statusClass}">
+                            Status: ${admin.status}
+                            ${admin.accessible ? '(Accessible)' : '(Not Accessible)'}
+                        </span>
+                    </div>
+                </div>
+                ${admin.error ? `<div class="text-danger mt-2"><small>Error: ${admin.error}</small></div>` : ''}
+            </div>
+        `;
+        }
+
+        // Country SMP tests
+        if (data.country_smps) {
+            html += '<h5 class="mt-4">🏳️ Country SMP Tests</h5>';
+
+            for (const [country, test] of Object.entries(data.country_smps)) {
+                const statusClass = test.accessible ? 'status-success' : 'status-error';
+                const icon = test.accessible ? '✅' : '❌';
+
+                html += `
+                <div class="test-item">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <strong>${country.toUpperCase()}</strong>
+                        </div>
+                        <div class="col-md-6">
+                            ${test.url ? `<code>${test.url}</code>` : '<em>No URL determined</em>'}
+                        </div>
+                        <div class="col-md-4">
+                            <span class="${statusClass}">
+                                ${icon} ${test.accessible ? 'Accessible' : 'Not Accessible'}
+                            </span>
+                        </div>
+                    </div>
+                    ${test.error ? `<div class="text-danger mt-2"><small>Error: ${test.error}</small></div>` : ''}
+                </div>
+            `;
+            }
+        }
+
+        resultsContent.innerHTML = html;
+    }
+</script>
+{% endblock %}
