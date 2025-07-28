@@ -155,8 +155,13 @@
     }
 
     @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
     .certificate-preview {
@@ -200,231 +205,231 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const certificateFileInput = document.querySelector('#id_certificate_file');
-    const previewContainer = document.querySelector('#certificate-preview');
-    
-    if (certificateFileInput) {
-        certificateFileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                parseCertificateFile(file);
-            } else {
-                hidePreview();
-            }
-        });
-    }
-    
-    function parseCertificateFile(file) {
-        // Show loading indicator
-        showLoading();
-        
-        const formData = new FormData();
-        formData.append('certificate_file', file);
-        
-        fetch('/smp/ajax/parse-certificate/', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        })
-        .then(response => {
-            // Check if response is JSON
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Server returned non-JSON response. Please check if you are logged in as admin.');
-            }
-            return response.json();
-        })
-        .then(data => {
-            hideLoading();
-            if (data.success) {
-                populateCertificateFields(data);
-                showPreview(data);
-            } else {
-                showError(data.error);
-            }
-        })
-        .catch(error => {
-            hideLoading();
-            if (error.message.includes('non-JSON')) {
-                showError('Authentication error: Please ensure you are logged in as an admin user and try again.');
-            } else {
-                showError('Error parsing certificate: ' + error.message);
-            }
-        });
-    }
-    
-    function populateCertificateFields(data) {
-        const info = data.info;
-        
-        // Populate form fields
-        const fields = {
-            'id_subject': info.subject,
-            'id_issuer': info.issuer,
-            'id_serial_number': info.serial_number,
-            'id_fingerprint': info.fingerprint,
-            'id_signature_algorithm': info.signature_algorithm,
-            'id_valid_from_0': formatDateForDjango(info.valid_from, 'date'),
-            'id_valid_from_1': formatDateForDjango(info.valid_from, 'time'),
-            'id_valid_to_0': formatDateForDjango(info.valid_to, 'date'),
-            'id_valid_to_1': formatDateForDjango(info.valid_to, 'time'),
-            'id_validation_status': data.status
-        };
-        
-        Object.keys(fields).forEach(fieldId => {
-            const field = document.querySelector('#' + fieldId);
-            if (field && fields[fieldId]) {
-                field.value = fields[fieldId];
-                
-                // Trigger change event for Django admin
-                field.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        });
-        
-        // Handle warnings
-        const warningsField = document.querySelector('#id_validation_warnings');
-        if (warningsField && data.warnings && data.warnings.length > 0) {
-            warningsField.value = data.warnings.join('; ');
+    document.addEventListener('DOMContentLoaded', function () {
+        const certificateFileInput = document.querySelector('#id_certificate_file');
+        const previewContainer = document.querySelector('#certificate-preview');
+
+        if (certificateFileInput) {
+            certificateFileInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    parseCertificateFile(file);
+                } else {
+                    hidePreview();
+                }
+            });
         }
-    }
-    
-    function showPreview(data) {
-        let previewHtml = '<div class="certificate-preview show" id="certificate-preview">';
-        previewHtml += '<h4>📋 Certificate Information Preview</h4>';
-        
-        const info = data.info;
-        const statusClass = data.status === 'valid' ? 'status-valid' : 
-                           data.status === 'warning' ? 'status-warning' : 'status-invalid';
-        
-        previewHtml += `<div class="cert-field">
+
+        function parseCertificateFile(file) {
+            // Show loading indicator
+            showLoading();
+
+            const formData = new FormData();
+            formData.append('certificate_file', file);
+
+            fetch('/smp/ajax/parse-certificate/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+                .then(response => {
+                    // Check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error('Server returned non-JSON response. Please check if you are logged in as admin.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        populateCertificateFields(data);
+                        showPreview(data);
+                    } else {
+                        showError(data.error);
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    if (error.message.includes('non-JSON')) {
+                        showError('Authentication error: Please ensure you are logged in as an admin user and try again.');
+                    } else {
+                        showError('Error parsing certificate: ' + error.message);
+                    }
+                });
+        }
+
+        function populateCertificateFields(data) {
+            const info = data.info;
+
+            // Populate form fields
+            const fields = {
+                'id_subject': info.subject,
+                'id_issuer': info.issuer,
+                'id_serial_number': info.serial_number,
+                'id_fingerprint': info.fingerprint,
+                'id_signature_algorithm': info.signature_algorithm,
+                'id_valid_from_0': formatDateForDjango(info.valid_from, 'date'),
+                'id_valid_from_1': formatDateForDjango(info.valid_from, 'time'),
+                'id_valid_to_0': formatDateForDjango(info.valid_to, 'date'),
+                'id_valid_to_1': formatDateForDjango(info.valid_to, 'time'),
+                'id_validation_status': data.status
+            };
+
+            Object.keys(fields).forEach(fieldId => {
+                const field = document.querySelector('#' + fieldId);
+                if (field && fields[fieldId]) {
+                    field.value = fields[fieldId];
+
+                    // Trigger change event for Django admin
+                    field.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+
+            // Handle warnings
+            const warningsField = document.querySelector('#id_validation_warnings');
+            if (warningsField && data.warnings && data.warnings.length > 0) {
+                warningsField.value = data.warnings.join('; ');
+            }
+        }
+
+        function showPreview(data) {
+            let previewHtml = '<div class="certificate-preview show" id="certificate-preview">';
+            previewHtml += '<h4>📋 Certificate Information Preview</h4>';
+
+            const info = data.info;
+            const statusClass = data.status === 'valid' ? 'status-valid' :
+                data.status === 'warning' ? 'status-warning' : 'status-invalid';
+
+            previewHtml += `<div class="cert-field">
             <span class="cert-label">Status:</span>
             <span class="status-indicator ${statusClass}">${data.status.toUpperCase()}</span>
         </div>`;
-        
-        previewHtml += `<div class="cert-field">
+
+            previewHtml += `<div class="cert-field">
             <span class="cert-label">Subject:</span>
             <span class="cert-value">${info.subject}</span>
         </div>`;
-        
-        previewHtml += `<div class="cert-field">
+
+            previewHtml += `<div class="cert-field">
             <span class="cert-label">Issuer:</span>
             <span class="cert-value">${info.issuer}</span>
         </div>`;
-        
-        previewHtml += `<div class="cert-field">
+
+            previewHtml += `<div class="cert-field">
             <span class="cert-label">Valid From:</span>
             <span class="cert-value">${new Date(info.valid_from).toLocaleString()}</span>
         </div>`;
-        
-        previewHtml += `<div class="cert-field">
+
+            previewHtml += `<div class="cert-field">
             <span class="cert-label">Valid To:</span>
             <span class="cert-value">${new Date(info.valid_to).toLocaleString()}</span>
         </div>`;
-        
-        previewHtml += `<div class="cert-field">
+
+            previewHtml += `<div class="cert-field">
             <span class="cert-label">Fingerprint:</span>
             <span class="cert-value">${info.fingerprint}</span>
         </div>`;
-        
-        if (data.warnings && data.warnings.length > 0) {
-            previewHtml += `<div class="cert-field">
+
+            if (data.warnings && data.warnings.length > 0) {
+                previewHtml += `<div class="cert-field">
                 <span class="cert-label">Warnings:</span>
                 <span class="cert-value" style="color: #856404;">${data.warnings.join(', ')}</span>
             </div>`;
-        }
-        
-        previewHtml += '</div>';
-        
-        // Insert preview after certificate file field
-        const certificateFieldRow = document.querySelector('.field-certificate_file');
-        if (certificateFieldRow) {
-            // Remove existing preview
-            const existingPreview = document.querySelector('#certificate-preview');
-            if (existingPreview) {
-                existingPreview.remove();
             }
-            
-            certificateFieldRow.insertAdjacentHTML('afterend', previewHtml);
-        }
-    }
-    
-    function showLoading() {
-        const certificateFieldRow = document.querySelector('.field-certificate_file');
-        if (certificateFieldRow) {
-            let loadingDiv = document.querySelector('#loading-indicator');
-            if (!loadingDiv) {
-                loadingDiv = document.createElement('div');
-                loadingDiv.id = 'loading-indicator';
-                loadingDiv.innerHTML = '<p>🔍 Parsing certificate... <span class="loading-spinner"></span></p>';
-                loadingDiv.style.cssText = 'padding: 10px; background: #e3f2fd; border-radius: 4px; margin: 10px 0;';
-                certificateFieldRow.insertAdjacentElement('afterend', loadingDiv);
-            }
-        }
-    }
-    
-    function hideLoading() {
-        const loadingDiv = document.querySelector('#loading-indicator');
-        if (loadingDiv) {
-            loadingDiv.remove();
-        }
-    }
-    
-    function hidePreview() {
-        const preview = document.querySelector('#certificate-preview');
-        if (preview) {
-            preview.remove();
-        }
-    }
-    
-    function showError(message) {
-        const certificateFieldRow = document.querySelector('.field-certificate_file');
-        if (certificateFieldRow) {
-            const errorDiv = document.createElement('div');
-            errorDiv.innerHTML = `<p style="color: #721c24; background: #f8d7da; padding: 10px; border-radius: 4px; margin: 10px 0;">❌ ${message}</p>`;
-            certificateFieldRow.insertAdjacentElement('afterend', errorDiv);
-            
-            // Remove error after 5 seconds
-            setTimeout(() => {
-                if (errorDiv.parentNode) {
-                    errorDiv.remove();
+
+            previewHtml += '</div>';
+
+            // Insert preview after certificate file field
+            const certificateFieldRow = document.querySelector('.field-certificate_file');
+            if (certificateFieldRow) {
+                // Remove existing preview
+                const existingPreview = document.querySelector('#certificate-preview');
+                if (existingPreview) {
+                    existingPreview.remove();
                 }
-            }, 5000);
+
+                certificateFieldRow.insertAdjacentHTML('afterend', previewHtml);
+            }
         }
-    }
-    
-    function formatDateForDjango(dateString, type) {
-        if (!dateString) return '';
-        
-        const date = new Date(dateString);
-        
-        if (type === 'date') {
-            // Django date format: YYYY-MM-DD
-            return date.toISOString().split('T')[0];
-        } else if (type === 'time') {
-            // Django time format: HH:MM:SS
-            return date.toTimeString().split(' ')[0];
-        }
-        
-        return '';
-    }
-    
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+
+        function showLoading() {
+            const certificateFieldRow = document.querySelector('.field-certificate_file');
+            if (certificateFieldRow) {
+                let loadingDiv = document.querySelector('#loading-indicator');
+                if (!loadingDiv) {
+                    loadingDiv = document.createElement('div');
+                    loadingDiv.id = 'loading-indicator';
+                    loadingDiv.innerHTML = '<p>🔍 Parsing certificate... <span class="loading-spinner"></span></p>';
+                    loadingDiv.style.cssText = 'padding: 10px; background: #e3f2fd; border-radius: 4px; margin: 10px 0;';
+                    certificateFieldRow.insertAdjacentElement('afterend', loadingDiv);
                 }
             }
         }
-        return cookieValue;
-    }
-});
+
+        function hideLoading() {
+            const loadingDiv = document.querySelector('#loading-indicator');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+
+        function hidePreview() {
+            const preview = document.querySelector('#certificate-preview');
+            if (preview) {
+                preview.remove();
+            }
+        }
+
+        function showError(message) {
+            const certificateFieldRow = document.querySelector('.field-certificate_file');
+            if (certificateFieldRow) {
+                const errorDiv = document.createElement('div');
+                errorDiv.innerHTML = `<p style="color: #721c24; background: #f8d7da; padding: 10px; border-radius: 4px; margin: 10px 0;">❌ ${message}</p>`;
+                certificateFieldRow.insertAdjacentElement('afterend', errorDiv);
+
+                // Remove error after 5 seconds
+                setTimeout(() => {
+                    if (errorDiv.parentNode) {
+                        errorDiv.remove();
+                    }
+                }, 5000);
+            }
+        }
+
+        function formatDateForDjango(dateString, type) {
+            if (!dateString) return '';
+
+            const date = new Date(dateString);
+
+            if (type === 'date') {
+                // Django date format: YYYY-MM-DD
+                return date.toISOString().split('T')[0];
+            } else if (type === 'time') {
+                // Django time format: HH:MM:SS
+                return date.toTimeString().split(' ')[0];
+            }
+
+            return '';
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
 </script>
 {% endblock %}
 

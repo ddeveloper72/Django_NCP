@@ -5,6 +5,7 @@ A Django-based implementation of the European eHealth National Contact Point (NC
 ## 🎯 Key Features
 
 ### 🔐 Advanced Certificate Management
+
 - **Real-time certificate validation** with instant feedback
 - **X.509 certificate parsing** supporting PEM and DER formats  
 - **Visual certificate preview** with status indicators
@@ -12,6 +13,7 @@ A Django-based implementation of the European eHealth National Contact Point (NC
 - **Professional admin interface** with auto-population
 
 ### 🌐 SMP (Service Metadata Publisher)
+
 - **OASIS BDXR SMP v1.0 compliant** implementation
 - **European SMP integration** with test server synchronization
 - **Service metadata management** for participant registration

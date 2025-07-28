@@ -14,6 +14,7 @@
 ### 🔐 Environment Variables Security
 
 **Sensitive Variables (Never Commit):**
+
 ```bash
 SECRET_KEY=your-actual-secret-key
 DB_PASSWORD=your-database-password
@@ -23,6 +24,7 @@ SENTRY_DSN=your-monitoring-token
 ```
 
 **Safe to Include:**
+
 ```bash
 DEBUG=False
 COUNTRY_CODE=IE
@@ -33,6 +35,7 @@ LOG_LEVEL=INFO
 ### 📁 File Security
 
 **Never Commit These Files:**
+
 - `.env` (environment variables)
 - `*.pem`, `*.crt`, `*.key` (certificates and private keys)
 - `db.sqlite3` (database with real data)
@@ -40,6 +43,7 @@ LOG_LEVEL=INFO
 - `media/certificates/` (uploaded certificates)
 
 **Safe to Commit:**
+
 - `.env.example` (template with placeholder values)
 - `*.py` (source code)
 - `requirements.txt` (dependencies)
@@ -48,6 +52,7 @@ LOG_LEVEL=INFO
 ### 🔧 Production Security Hardening
 
 **1. Django Settings:**
+
 ```python
 # Production settings
 DEBUG = False
@@ -61,6 +66,7 @@ CSRF_COOKIE_SECURE = True
 ```
 
 **2. Certificate Management:**
+
 - Store certificates outside web root
 - Use strong passphrases for private keys
 - Implement certificate rotation
@@ -68,6 +74,7 @@ CSRF_COOKIE_SECURE = True
 - Use HSM for production private keys
 
 **3. Database Security:**
+
 - Use strong database passwords
 - Enable SSL connections
 - Regular security backups
@@ -77,6 +84,7 @@ CSRF_COOKIE_SECURE = True
 ### 🏥 eHealth Specific Security
 
 **Patient Data Protection:**
+
 - All patient data encrypted in transit and at rest
 - Implement GDPR compliance measures
 - Audit all access to patient records
@@ -84,6 +92,7 @@ CSRF_COOKIE_SECURE = True
 - Secure deletion of expired data
 
 **NCP Security Requirements:**
+
 - Mutual TLS authentication between NCPs
 - Digital signatures for all eHealth documents
 - Certificate validation according to eIDAS
@@ -93,6 +102,7 @@ CSRF_COOKIE_SECURE = True
 ### 🔍 Security Testing
 
 **Before Deployment:**
+
 ```bash
 # Check for secrets in code
 git log -p | grep -i "password\|secret\|key\|token"
@@ -110,6 +120,7 @@ bandit -r . -f json
 ### 📊 Monitoring and Logging
 
 **Security Events to Monitor:**
+
 - Failed authentication attempts
 - Certificate validation failures
 - Unauthorized API access
@@ -118,6 +129,7 @@ bandit -r . -f json
 - Unusual access patterns
 
 **Audit Logging:**
+
 - All patient data access
 - Certificate operations
 - Administrative actions
@@ -127,6 +139,7 @@ bandit -r . -f json
 ### 🚨 Incident Response
 
 **Security Incident Procedures:**
+
 1. **Immediate**: Isolate affected systems
 2. **Assess**: Determine scope and impact
 3. **Contain**: Prevent further damage
@@ -137,9 +150,10 @@ bandit -r . -f json
 ### 📞 Security Contacts
 
 **For Security Issues:**
-- **Technical Security**: ehealth.security@your-domain.com
-- **Data Protection Officer**: dpo@your-domain.com
-- **Emergency Response**: security-emergency@your-domain.com
+
+- **Technical Security**: <ehealth.security@your-domain.com>
+- **Data Protection Officer**: <dpo@your-domain.com>
+- **Emergency Response**: <security-emergency@your-domain.com>
 
 ### 📚 Compliance References
 
@@ -147,7 +161,7 @@ bandit -r . -f json
 - **eIDAS**: Electronic Identification and Trust Services
 - **ISO 27001**: Information Security Management
 - **IHE**: Integrating the Healthcare Enterprise
-- **HL7 FHIR Security**: https://www.hl7.org/fhir/security.html
+- **HL7 FHIR Security**: <https://www.hl7.org/fhir/security.html>
 
 ---
 
