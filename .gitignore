@@ -68,6 +68,10 @@ real_certificate.*
 production_certificate.*
 *_private_key.*
 
+# Uploaded media files with sensitive data
+media/
+uploads/
+
 # IDE
 .vscode/
 .idea/
