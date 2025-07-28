@@ -321,3 +321,9 @@ CERTIFICATE_CONFIG = {
 
 # API Rate Limiting
 API_RATE_LIMIT = int(os.getenv("API_RATE_LIMIT", "1000"))
+
+# Authentication Settings
+# Redirect to welcome page after logout instead of admin logout page
+LOGOUT_REDIRECT_URL = '/'  # Redirect to home/welcome page
+LOGIN_REDIRECT_URL = '/admin/'  # Keep admin login redirecting to admin
+LOGIN_URL = '/admin/login/'  # Default login URL
