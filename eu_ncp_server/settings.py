@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     "ehealth_portal",
     "smp_client",
     "fhir_services",
+    # Patient Data and Translation Services
+    "patient_data",
+    "translation_manager",
     # Third-party apps for eHealth functionality
     "rest_framework",
     "corsheaders",

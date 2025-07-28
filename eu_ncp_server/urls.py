@@ -7,10 +7,11 @@ Provides both API endpoints for Java portal integration and Django frontend
 
 from django.contrib import admin
 from django.urls import path, include
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth import logout
 import json
 
 
@@ -59,9 +60,17 @@ def update_smp_source(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
 
+def custom_admin_logout_view(request):
+    """Custom admin logout view that redirects to home page"""
+    logout(request)
+    return redirect('/')  # Redirect to home page instead of admin logout page
+
+
 urlpatterns = [
     path("", home_view, name="home"),
     path("api/update-smp-source/", update_smp_source, name="update_smp_source"),
+    # Custom admin logout that redirects to home
+    path("admin/logout/", custom_admin_logout_view, name="admin_logout"),
     path("admin/", admin.site.urls),
     # Authentication URLs
     path("accounts/", include("django.contrib.auth.urls")),
