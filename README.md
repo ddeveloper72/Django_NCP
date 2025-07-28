@@ -1,6 +1,6 @@
 # 🏥 Demonstration eHealth NCP Server
 
-A Django-based implementation of the European eHealth National Contact Point (NCP) server, providing secure healthcare data exchange capabilities compliant with EU eHealth standards.  This is a test concept, and is in development.
+A Django-based implementation of that demonstrates a eHealth National Contact Point (NCP) server, providing secure healthcare data exchange capabilities compliant with EU eHealth standards.  This is a test concept, and is in development.
 
 ## 🎯 Key Features
 
@@ -167,4 +167,4 @@ This project implements EU eHealth specifications and follows applicable healthc
 
 ---
 
-**Note**: This is a Django implementation based on analysis of the Java-based EU eHealth infrastructure. It aims to provides equivalent functionality while leveraging Python/Django ecosystem benefits.
+**Note**: This is a Django implementation based on analysis of the Java-based EU eHealth infrastructure. It aims to provide equivalent functionality while leveraging Python/Django ecosystem benefits.
