@@ -460,6 +460,16 @@
         <button type="submit" class="search-button" id="searchButton">
             🔍 Search Patient in {{ country.name }}
         </button>
+        
+        <!-- Navigation -->
+        <div class="text-center mt-4">
+            <a href="{% url 'country_selection' %}" class="btn btn-outline-secondary me-2">
+                ← Back to Country Selection
+            </a>
+            <a href="/" class="btn btn-outline-secondary">
+                🏠 Home
+            </a>
+        </div>
     </form>
     {% else %}
     <!-- No ISM Available -->
@@ -479,6 +489,9 @@
                 </a>
                 <a href="{% url 'country_selection' %}" class="btn btn-secondary ms-2">
                     ← Back to Country Selection
+                </a>
+                <a href="/" class="btn btn-outline-secondary ms-2">
+                    🏠 Home
                 </a>
             </div>
         </div>
