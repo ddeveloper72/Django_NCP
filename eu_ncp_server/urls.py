@@ -17,18 +17,18 @@ import json
 def home_view(request):
     """Home page with SMP source configuration"""
     from ehealth_portal.models import SMPSourceConfiguration
-
+    
     # Get current SMP configuration
     smp_config = SMPSourceConfiguration.get_current_config()
-
+    
     context = {
-        "smp_config": smp_config,
-        "smp_choices": SMPSourceConfiguration.SMP_SOURCE_CHOICES,
-        "current_smp_name": smp_config.get_active_smp_name(),
-        "current_smp_ui_url": smp_config.get_active_smp_ui_url(),
-        "current_smp_api_url": smp_config.get_active_smp_api_url(),
+        'smp_config': smp_config,
+        'smp_choices': SMPSourceConfiguration.SMP_SOURCE_CHOICES,
+        'current_smp_name': smp_config.get_active_smp_name(),
+        'current_smp_ui_url': smp_config.get_active_smp_ui_url(),
+        'current_smp_api_url': smp_config.get_active_smp_api_url(),
     }
-    return render(request, "home.html", context)
+    return render(request, 'home.html', context)
 
 
 @csrf_exempt
@@ -36,29 +36,27 @@ def home_view(request):
 def update_smp_source(request):
     """API endpoint to update SMP source configuration"""
     from ehealth_portal.models import SMPSourceConfiguration
-
+    
     try:
         data = json.loads(request.body)
-        source_type = data.get("source_type")
-
-        if source_type not in ["european", "localhost"]:
-            return JsonResponse({"success": False, "error": "Invalid source type"})
-
+        source_type = data.get('source_type')
+        
+        if source_type not in ['european', 'localhost']:
+            return JsonResponse({'success': False, 'error': 'Invalid source type'})
+        
         # Update the default configuration
         smp_config = SMPSourceConfiguration.get_default_config()
         smp_config.source_type = source_type
         smp_config.save()
-
-        return JsonResponse(
-            {
-                "success": True,
-                "message": f"SMP source updated to {smp_config.get_source_type_display()}",
-                "active_url": smp_config.get_active_smp_url(),
-            }
-        )
-
+        
+        return JsonResponse({
+            'success': True, 
+            'message': f'SMP source updated to {smp_config.get_source_type_display()}',
+            'active_url': smp_config.get_active_smp_url()
+        })
+        
     except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)})
+        return JsonResponse({'success': False, 'error': str(e)})
 
 
 urlpatterns = [
@@ -76,10 +74,3 @@ urlpatterns = [
     # SMP client integration
     path("smp/", include("smp_client.urls")),
 ]
-
-# Serve media files during development
-from django.conf import settings
-from django.conf.urls.static import static
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

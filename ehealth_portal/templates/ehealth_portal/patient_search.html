@@ -428,8 +428,7 @@
                         </label>
 
                         {% if field.type == 'select' %}
-                        <select name="{{ field.code }}" id="{{ field.code }}" {% if field.required %} required{% endif
-                            %}>
+                        <select name="{{ field.code }}" id="{{ field.code }}" {% if field.required %}required{% endif %}>
                             <option value="">Choose {{ field.label|lower }}...</option>
                             {% for option in field.options %}
                             <option value="{{ option.value }}">{{ option.label }}</option>
@@ -440,12 +439,10 @@
                             value="{{ field.default_value }}" {% if field.required %} required{% endif %}>
                         {% elif field.type == 'number' %}
                         <input type="number" name="{{ field.code }}" id="{{ field.code }}"
-                            placeholder="{{ field.placeholder }}" value="{{ field.default_value }}" {% if field.required
-                            %} required{% endif %}>
+                            placeholder="{{ field.placeholder }}" value="{{ field.default_value }}" {% if field.required %}required{% endif %}>
                         {% else %}
                         <input type="{{ field.html_type }}" name="{{ field.code }}" id="{{ field.code }}"
-                            placeholder="{{ field.placeholder }}" value="{{ field.default_value }}" {% if field.required
-                            %} required{% endif %}>
+                            placeholder="{{ field.placeholder }}" value="{{ field.default_value }}" {% if field.required %}required{% endif %}>
                         {% endif %}
 
                         {% if field.help_text %}

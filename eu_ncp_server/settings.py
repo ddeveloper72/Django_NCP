@@ -279,3 +279,45 @@ LOGGING = {
         },
     },
 }
+
+# European SMP Configuration
+EUROPEAN_SMP_CONFIG = {
+    "API_URL": os.getenv(
+        "EUROPEAN_SMP_API_URL",
+        "https://smp-ehealth-trn.acc.edelivery.tech.ec.europa.eu",
+    ),
+    "UI_URL": os.getenv(
+        "EUROPEAN_SMP_UI_URL",
+        "https://smp-ehealth-trn.acc.edelivery.tech.ec.europa.eu/ui/index.html",
+    ),
+    "SML_DOMAIN": os.getenv(
+        "EUROPEAN_SML_DOMAIN", "ehealth-trn.acc.edelivery.tech.ec.europa.eu"
+    ),
+    "TIMEOUT": int(os.getenv("API_TIMEOUT_SECONDS", "30")),
+}
+
+# Local SMP Configuration
+LOCALHOST_SMP_CONFIG = {
+    "API_URL": os.getenv("LOCALHOST_SMP_API_URL", "http://localhost:8290/smp"),
+    "UI_URL": os.getenv("LOCALHOST_SMP_UI_URL", "http://localhost:8290/smp"),
+    "TIMEOUT": int(os.getenv("API_TIMEOUT_SECONDS", "30")),
+}
+
+# Certificate Configuration
+CERTIFICATE_CONFIG = {
+    "EPSOS_TLS_CERT": os.getenv(
+        "EPSOS_TLS_CERT_PATH",
+        "C:/Users/Duncan/VS_Code_Projects/Certificates/Epsos_TLS_2024.pem",
+    ),
+    "EPSOS_TLS_KEY": os.getenv(
+        "EPSOS_TLS_KEY_PATH",
+        "C:/Users/Duncan/VS_Code_Projects/Certificates/Epsos_TLS_2024.key",
+    ),
+    "EPSOS_CA_CERT": os.getenv(
+        "EPSOS_CA_CERT_PATH",
+        "C:/Users/Duncan/VS_Code_Projects/Certificates/Epsos_CA_2024.pem",
+    ),
+}
+
+# API Rate Limiting
+API_RATE_LIMIT = int(os.getenv("API_RATE_LIMIT", "1000"))

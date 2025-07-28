@@ -1,11 +1,8 @@
 # Frontend URLs for Django Portal UI
 from django.urls import path
 from . import views
-from . import admin_views
 
 urlpatterns = [
-    # SMP Configuration Admin
-    path("admin/smp-config/", admin_views.smp_config_admin, name="smp_config_admin"),
     # Django frontend portal (replicating Java portal UI)
     path("", views.country_selection, name="country_selection"),
     path(

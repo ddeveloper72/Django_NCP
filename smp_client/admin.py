@@ -537,88 +537,37 @@ class DocumentTemplateAdmin(admin.ModelAdmin):
 class SigningCertificateAdmin(admin.ModelAdmin):
     list_display = [
         "certificate_name",
-        "common_name_display",
-        "key_info_display",
+        "certificate_type",
+        "subject",
         "valid_status",
-        "expires_warning",
         "is_default",
         "is_active",
         "created_at",
     ]
     list_filter = [
         "certificate_type",
-        "key_algorithm",
         "is_default",
         "is_active",
         "valid_from",
         "valid_to",
     ]
-    search_fields = [
-        "certificate_name",
-        "subject",
-        "issuer",
-        "serial_number",
-        "fingerprint",
-    ]
-    readonly_fields = [
-        "id",
-        "subject",
-        "issuer",
-        "serial_number",
-        "fingerprint",
-        "valid_from",
-        "valid_to",
-        "key_algorithm",
-        "key_size",
-        "signature_algorithm",
-        "created_at",
-        "updated_at",
-        "certificate_details_display",
-    ]
+    search_fields = ["certificate_name", "subject", "issuer", "serial_number"]
+    readonly_fields = ["id", "fingerprint", "created_at", "updated_at"]
 
     fieldsets = (
         (
             "Certificate Information",
             {"fields": ("certificate_name", "certificate_type")},
         ),
+        ("Certificate Files", {"fields": ("certificate_file", "private_key_file")}),
         (
-            "Certificate Files",
+            "Certificate Details",
             {
-                "fields": ("certificate_file", "private_key_file"),
-                "description": "Upload X.509 certificate and private key files. "
-                "Only PEM (.pem, .crt) and DER (.der, .cer) formats are supported. "
-                "Files will be validated for security and compatibility.",
-            },
-        ),
-        (
-            "Auto-Populated Certificate Details",
-            {
-                "fields": (
-                    "certificate_details_display",
-                    "subject",
-                    "issuer",
-                    "serial_number",
-                    "fingerprint",
-                ),
+                "fields": ("subject", "issuer", "serial_number", "fingerprint"),
                 "classes": ("collapse",),
-                "description": "These fields are automatically populated from the uploaded certificate.",
             },
         ),
-        (
-            "Validity Information",
-            {
-                "fields": ("valid_from", "valid_to"),
-                "description": "Certificate validity period (auto-populated from certificate).",
-            },
-        ),
-        (
-            "Key Information",
-            {
-                "fields": ("key_algorithm", "key_size", "signature_algorithm"),
-                "classes": ("collapse",),
-                "description": "Public key and signature algorithm details (auto-populated).",
-            },
-        ),
+        ("Validity", {"fields": ("valid_from", "valid_to")}),
         ("Configuration", {"fields": ("is_default", "is_active")}),
         (
             "Metadata",
@@ -626,190 +575,18 @@ class SigningCertificateAdmin(admin.ModelAdmin):
         ),
     )
 
-    def get_form(self, request, obj=None, **kwargs):
-        """Customize the form to provide better help text"""
-        form = super().get_form(request, obj, **kwargs)
-
-        # Add custom help text for file fields
-        if "certificate_file" in form.base_fields:
-            form.base_fields["certificate_file"].help_text = (
-                "Upload X.509 certificate in PEM (.pem, .crt) or DER (.der, .cer) format. "
-                "Certificate will be validated for: format, validity dates, key strength, "
-                "signature algorithm, and key usage."
-            )
-
-        if "private_key_file" in form.base_fields:
-            form.base_fields["private_key_file"].help_text = (
-                "Upload private key in PEM or DER format (optional). "
-                "If provided, will be validated to match the certificate. "
-                "Password-protected keys are not currently supported."
-            )
-
-        return form
-
-    def common_name_display(self, obj):
-        """Display the certificate's Common Name"""
-        cn = obj.common_name
-        if cn:
-            return format_html('<span title="{}">{}</span>', obj.subject, cn)
-        return format_html(
-            '<span style="color: gray;" title="{}">No CN</span>',
-            obj.subject or "No subject",
-        )
-
-    common_name_display.short_description = "Common Name"
-
-    def key_info_display(self, obj):
-        """Display key algorithm and size"""
-        if obj.key_algorithm and obj.key_size:
-            color = "green" if obj.key_size >= 2048 else "orange"
-            return format_html(
-                '<span style="color: {};">{} {}-bit</span>',
-                color,
-                obj.key_algorithm,
-                obj.key_size,
-            )
-        return format_html('<span style="color: gray;">Unknown</span>')
-
-    key_info_display.short_description = "Key Info"
-
     def valid_status(self, obj):
-        """Display certificate validity status with colors"""
         if obj.is_valid:
-            return format_html(
-                '<span style="color: green; font-weight: bold;">✓ Valid</span>'
-            )
-        elif obj.valid_to and obj.valid_to < timezone.now():
-            return format_html(
-                '<span style="color: red; font-weight: bold;">✗ Expired</span>'
-            )
-        elif obj.valid_from and obj.valid_from > timezone.now():
-            return format_html(
-                '<span style="color: orange; font-weight: bold;">⏳ Not Yet Valid</span>'
-            )
+            return format_html('<span style="color: green;">✓ Valid</span>')
         else:
-            return format_html(
-                '<span style="color: gray; font-weight: bold;">? Unknown</span>'
-            )
+            return format_html('<span style="color: red;">✗ Expired/Invalid</span>')
 
-    valid_status.short_description = "Validity"
-
-    def expires_warning(self, obj):
-        """Show warning if certificate expires soon"""
-        if obj.expires_soon:
-            return format_html(
-                '<span style="color: orange; font-weight: bold;" title="Expires: {}">⚠ Expires Soon</span>',
-                obj.valid_to.strftime("%Y-%m-%d") if obj.valid_to else "Unknown",
-            )
-        return ""
-
-    expires_warning.short_description = "Expiry Warning"
-
-    def certificate_details_display(self, obj):
-        """Display formatted certificate details"""
-        if not obj.certificate_file:
-            return format_html(
-                '<span style="color: gray;">No certificate uploaded</span>'
-            )
-
-        details = obj.get_certificate_details()
-
-        html = []
-        html.append('<div style="font-family: monospace; font-size: 12px;">')
-
-        # Validity status
-        if details["is_valid"]:
-            html.append(
-                '<div style="color: green; font-weight: bold;">✓ Certificate is currently valid</div>'
-            )
-        else:
-            html.append(
-                '<div style="color: red; font-weight: bold;">✗ Certificate is invalid or expired</div>'
-            )
-
-        if details["expires_soon"]:
-            html.append(
-                '<div style="color: orange; font-weight: bold;">⚠ Certificate expires within 30 days</div>'
-            )
-
-        html.append("<br>")
-
-        # Key details
-        html.append(
-            f"<strong>Subject:</strong> {details.get('subject', 'Unknown')}<br>"
-        )
-        html.append(f"<strong>Issuer:</strong> {details.get('issuer', 'Unknown')}<br>")
-        html.append(
-            f"<strong>Serial:</strong> {details.get('serial_number', 'Unknown')}<br>"
-        )
-        html.append(
-            f"<strong>Fingerprint:</strong> {details.get('fingerprint', 'Unknown')}<br>"
-        )
-        html.append(
-            f"<strong>Valid From:</strong> {details.get('valid_from', 'Unknown')}<br>"
-        )
-        html.append(
-            f"<strong>Valid To:</strong> {details.get('valid_to', 'Unknown')}<br>"
-        )
-        html.append(
-            f"<strong>Key:</strong> {details.get('key_algorithm', 'Unknown')} {details.get('key_size', 'Unknown')}-bit<br>"
-        )
-        html.append(
-            f"<strong>Signature:</strong> {details.get('signature_algorithm', 'Unknown')}<br>"
-        )
-
-        html.append("</div>")
-
-        return format_html("".join(html))
-
-    certificate_details_display.short_description = "Certificate Details"
+    valid_status.short_description = "Status"
 
     def save_model(self, request, obj, form, change):
-        """Enhanced save with validation feedback"""
-        try:
-            # Ensure only one default certificate
-            if obj.is_default:
-                SigningCertificate.objects.filter(is_default=True).exclude(
-                    id=obj.id
-                ).update(is_default=False)
-
-            super().save_model(request, obj, form, change)
-
-            # Provide success feedback with certificate details
-            if obj.certificate_file:
-                self.message_user(
-                    request,
-                    format_html(
-                        'Certificate "{}" uploaded and validated successfully. '
-                        "Subject: {} | Valid until: {} | Key: {} {}-bit",
-                        obj.certificate_name,
-                        obj.common_name or "Unknown",
-                        (
-                            obj.valid_to.strftime("%Y-%m-%d")
-                            if obj.valid_to
-                            else "Unknown"
-                        ),
-                        obj.key_algorithm or "Unknown",
-                        obj.key_size or "Unknown",
-                    ),
-                )
-
-                if obj.expires_soon:
-                    self.message_user(
-                        request,
-                        format_html(
-                            'Warning: Certificate "{}" expires within 30 days ({})',
-                            obj.certificate_name,
-                            (
-                                obj.valid_to.strftime("%Y-%m-%d")
-                                if obj.valid_to
-                                else "Unknown"
-                            ),
-                        ),
-                        level="WARNING",
-                    )
-
-        except Exception as e:
-            self.message_user(
-                request, f"Error saving certificate: {str(e)}", level="ERROR"
-            )
+        # Ensure only one default certificate
+        if obj.is_default:
+            SigningCertificate.objects.filter(is_default=True).exclude(
+                id=obj.id
+            ).update(is_default=False)
+        super().save_model(request, obj, form, change)

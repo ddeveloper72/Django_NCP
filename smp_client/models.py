@@ -7,235 +7,11 @@ Integrates with European test SMP server: https://smp-ehealth-trn.acc.edelivery.
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django.core.exceptions import ValidationError
 import uuid
 import xml.etree.ElementTree as ET
 import os
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from cryptography import x509
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import rsa, ec
-import datetime
-import logging
-
-logger = logging.getLogger(__name__)
-
-
-def validate_certificate_file(uploaded_file):
-    """
-    Comprehensive certificate validation for uploaded certificate files
-    Ensures only valid X.509 certificates are accepted
-    """
-    try:
-        # Read the uploaded file content
-        uploaded_file.seek(0)
-        cert_data = uploaded_file.read()
-        uploaded_file.seek(0)  # Reset file pointer
-
-        # Try to parse as PEM format first
-        try:
-            certificate = x509.load_pem_x509_certificate(cert_data)
-        except ValueError:
-            # Try DER format
-            try:
-                certificate = x509.load_der_x509_certificate(cert_data)
-            except ValueError:
-                raise ValidationError(
-                    "Invalid certificate format. Only PEM (.pem, .crt) and DER (.der, .cer) formats are supported."
-                )
-
-        # Validate certificate type
-        if not isinstance(certificate, x509.Certificate):
-            raise ValidationError("Uploaded file is not a valid X.509 certificate.")
-
-        # Check certificate validity dates
-        now = datetime.datetime.now(datetime.timezone.utc)
-
-        if certificate.not_valid_before > now:
-            raise ValidationError(
-                f"Certificate is not yet valid. Valid from: {certificate.not_valid_before}"
-            )
-
-        if certificate.not_valid_after < now:
-            raise ValidationError(
-                f"Certificate has expired. Valid until: {certificate.not_valid_after}"
-            )
-
-        # Check if certificate will expire soon (within 30 days)
-        thirty_days = datetime.timedelta(days=30)
-        if certificate.not_valid_after < (now + thirty_days):
-            logger.warning(f"Certificate expires soon: {certificate.not_valid_after}")
-
-        # Validate key usage for signing certificates
-        try:
-            key_usage = certificate.extensions.get_extension_for_oid(
-                x509.oid.ExtensionOID.KEY_USAGE
-            ).value
-
-            if not (key_usage.digital_signature or key_usage.key_cert_sign):
-                raise ValidationError(
-                    "Certificate must have Digital Signature or Certificate Sign key usage for SMP signing."
-                )
-        except x509.ExtensionNotFound:
-            logger.warning("Certificate does not have Key Usage extension")
-
-        # Validate key strength
-        public_key = certificate.public_key()
-        if isinstance(public_key, rsa.RSAPublicKey):
-            if public_key.key_size < 2048:
-                raise ValidationError(
-                    f"RSA key size {public_key.key_size} is too weak. Minimum 2048 bits required."
-                )
-        elif isinstance(public_key, ec.EllipticCurvePublicKey):
-            if public_key.curve.key_size < 256:
-                raise ValidationError(
-                    f"Elliptic curve key size {public_key.curve.key_size} is too weak. Minimum 256 bits required."
-                )
-        else:
-            logger.warning(f"Unknown key type: {type(public_key)}")
-
-        # Check for required subject attributes
-        subject = certificate.subject
-        subject_cn = None
-        subject_o = None
-
-        for attribute in subject:
-            if attribute.oid == x509.oid.NameOID.COMMON_NAME:
-                subject_cn = attribute.value
-            elif attribute.oid == x509.oid.NameOID.ORGANIZATION_NAME:
-                subject_o = attribute.value
-
-        if not subject_cn:
-            logger.warning("Certificate does not have a Common Name (CN)")
-
-        # Validate signature algorithm
-        if isinstance(
-            certificate.signature_algorithm_oid,
-            type(x509.oid.SignatureAlgorithmOID.SHA1_WITH_RSA),
-        ):
-            if (
-                certificate.signature_algorithm_oid
-                == x509.oid.SignatureAlgorithmOID.SHA1_WITH_RSA
-            ):
-                raise ValidationError(
-                    "SHA-1 signature algorithm is deprecated and not secure. Use SHA-256 or better."
-                )
-
-        logger.info(
-            f"Certificate validation successful: CN={subject_cn}, O={subject_o}"
-        )
-        return certificate
-
-    except ValidationError:
-        raise
-    except Exception as e:
-        logger.error(f"Certificate validation error: {str(e)}")
-        raise ValidationError(f"Certificate validation failed: {str(e)}")
-
-
-def validate_private_key_file(uploaded_file):
-    """
-    Validate uploaded private key files
-    Ensures private keys are in correct format and have adequate strength
-    """
-    try:
-        # Read the uploaded file content
-        uploaded_file.seek(0)
-        key_data = uploaded_file.read()
-        uploaded_file.seek(0)  # Reset file pointer
-
-        # Try to parse as PEM format
-        try:
-            private_key = serialization.load_pem_private_key(key_data, password=None)
-        except ValueError:
-            # Try with password (we'll need to handle this in the admin)
-            try:
-                private_key = serialization.load_der_private_key(
-                    key_data, password=None
-                )
-            except ValueError:
-                raise ValidationError(
-                    "Invalid private key format. Only PEM and DER formats are supported. "
-                    "Password-protected keys are not currently supported."
-                )
-
-        # Validate key type and strength
-        if isinstance(private_key, rsa.RSAPrivateKey):
-            if private_key.key_size < 2048:
-                raise ValidationError(
-                    f"RSA private key size {private_key.key_size} is too weak. Minimum 2048 bits required."
-                )
-        elif isinstance(private_key, ec.EllipticCurvePrivateKey):
-            if private_key.curve.key_size < 256:
-                raise ValidationError(
-                    f"Elliptic curve private key size {private_key.curve.key_size} is too weak. Minimum 256 bits required."
-                )
-        else:
-            raise ValidationError(f"Unsupported private key type: {type(private_key)}")
-
-        logger.info(f"Private key validation successful: {type(private_key).__name__}")
-        return private_key
-
-    except ValidationError:
-        raise
-    except Exception as e:
-        logger.error(f"Private key validation error: {str(e)}")
-        raise ValidationError(f"Private key validation failed: {str(e)}")
-
-
-def validate_certificate_key_pair(certificate, private_key):
-    """
-    Validate that a certificate and private key are a matching pair
-    """
-    try:
-        cert_public_key = certificate.public_key()
-        private_public_key = private_key.public_key()
-
-        # Compare public key components
-        if isinstance(cert_public_key, rsa.RSAPublicKey) and isinstance(
-            private_public_key, rsa.RSAPublicKey
-        ):
-            cert_numbers = cert_public_key.public_numbers()
-            private_numbers = private_public_key.public_numbers()
-
-            if (
-                cert_numbers.n != private_numbers.n
-                or cert_numbers.e != private_numbers.e
-            ):
-                raise ValidationError(
-                    "Certificate and private key do not match. The public key in the certificate "
-                    "does not correspond to the uploaded private key."
-                )
-        elif isinstance(cert_public_key, ec.EllipticCurvePublicKey) and isinstance(
-            private_public_key, ec.EllipticCurvePublicKey
-        ):
-            cert_numbers = cert_public_key.public_numbers()
-            private_numbers = private_public_key.public_numbers()
-
-            if (
-                cert_numbers.x != private_numbers.x
-                or cert_numbers.y != private_numbers.y
-            ):
-                raise ValidationError(
-                    "Certificate and private key do not match. The public key in the certificate "
-                    "does not correspond to the uploaded private key."
-                )
-        else:
-            raise ValidationError(
-                "Certificate and private key types do not match or are not supported."
-            )
-
-        logger.info(
-            "Certificate and private key validation successful - they are a matching pair"
-        )
-        return True
-
-    except ValidationError:
-        raise
-    except Exception as e:
-        logger.error(f"Certificate-key pair validation error: {str(e)}")
-        raise ValidationError(f"Certificate-key pair validation failed: {str(e)}")
 
 
 class Domain(models.Model):
@@ -875,7 +651,7 @@ class DocumentTemplate(models.Model):
 
 
 class SigningCertificate(models.Model):
-    """Digital certificates for signing SMP documents with comprehensive validation"""
+    """Digital certificates for signing SMP documents"""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
@@ -883,58 +659,25 @@ class SigningCertificate(models.Model):
     certificate_name = models.CharField(max_length=200)
     certificate_type = models.CharField(max_length=50, default="X.509")
 
-    # Certificate data with validation
-    certificate_file = models.FileField(
-        upload_to="certificates/",
-        validators=[validate_certificate_file],
-        help_text="Upload X.509 certificate in PEM (.pem, .crt) or DER (.der, .cer) format",
-    )
+    # Certificate data
+    certificate_file = models.FileField(upload_to="certificates/")
     private_key_file = models.FileField(
-        upload_to="certificates/private/",
-        blank=True,
-        null=True,
-        validators=[validate_private_key_file],
-        help_text="Upload private key in PEM or DER format (optional, password-protected keys not supported)",
+        upload_to="certificates/private/", blank=True, null=True
     )
 
-    # Certificate information (auto-populated from certificate)
-    subject = models.CharField(
-        max_length=500, blank=True, help_text="Certificate subject DN"
-    )
-    issuer = models.CharField(
-        max_length=500, blank=True, help_text="Certificate issuer DN"
-    )
-    serial_number = models.CharField(
-        max_length=100, blank=True, help_text="Certificate serial number"
-    )
-    fingerprint = models.CharField(
-        max_length=100, blank=True, help_text="SHA-256 fingerprint"
-    )
+    # Certificate information
+    subject = models.CharField(max_length=500, blank=True)
+    issuer = models.CharField(max_length=500, blank=True)
+    serial_number = models.CharField(max_length=100, blank=True)
+    fingerprint = models.CharField(max_length=100, blank=True)
 
-    # Validity (auto-populated from certificate)
-    valid_from = models.DateTimeField(
-        null=True, blank=True, help_text="Certificate valid from date"
-    )
-    valid_to = models.DateTimeField(
-        null=True, blank=True, help_text="Certificate valid until date"
-    )
-
-    # Key information
-    key_algorithm = models.CharField(
-        max_length=50, blank=True, help_text="Public key algorithm"
-    )
-    key_size = models.IntegerField(null=True, blank=True, help_text="Key size in bits")
-    signature_algorithm = models.CharField(
-        max_length=100, blank=True, help_text="Signature algorithm"
-    )
+    # Validity
+    valid_from = models.DateTimeField(null=True, blank=True)
+    valid_to = models.DateTimeField(null=True, blank=True)
 
     # Configuration
-    is_default = models.BooleanField(
-        default=False, help_text="Use as default signing certificate"
-    )
-    is_active = models.BooleanField(
-        default=True, help_text="Certificate is active for use"
-    )
+    is_default = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -946,148 +689,15 @@ class SigningCertificate(models.Model):
     def __str__(self):
         return f"{self.certificate_name}"
 
-    def clean(self):
-        """Custom validation for the entire model"""
-        super().clean()
-
-        # Extract certificate information if file is provided
-        if self.certificate_file:
-            try:
-                certificate = self._parse_certificate()
-                self._populate_certificate_info(certificate)
-
-                # If private key is also provided, validate they match
-                if self.private_key_file:
-                    private_key = self._parse_private_key()
-                    validate_certificate_key_pair(certificate, private_key)
-
-            except Exception as e:
-                raise ValidationError(f"Certificate validation failed: {str(e)}")
-
-    def save(self, *args, **kwargs):
-        """Override save to ensure only one default certificate"""
-        if self.is_default:
-            # Unset other default certificates
-            SigningCertificate.objects.filter(is_default=True).update(is_default=False)
-
-        # Populate certificate information before saving
-        if self.certificate_file:
-            try:
-                certificate = self._parse_certificate()
-                self._populate_certificate_info(certificate)
-            except Exception as e:
-                logger.error(f"Failed to parse certificate during save: {str(e)}")
-
-        super().save(*args, **kwargs)
-
-    def _parse_certificate(self):
-        """Parse the uploaded certificate file"""
-        if not self.certificate_file:
-            return None
-
-        self.certificate_file.seek(0)
-        cert_data = self.certificate_file.read()
-        self.certificate_file.seek(0)
-
-        try:
-            # Try PEM format first
-            return x509.load_pem_x509_certificate(cert_data)
-        except ValueError:
-            # Try DER format
-            return x509.load_der_x509_certificate(cert_data)
-
-    def _parse_private_key(self):
-        """Parse the uploaded private key file"""
-        if not self.private_key_file:
-            return None
-
-        self.private_key_file.seek(0)
-        key_data = self.private_key_file.read()
-        self.private_key_file.seek(0)
-
-        try:
-            # Try PEM format first
-            return serialization.load_pem_private_key(key_data, password=None)
-        except ValueError:
-            # Try DER format
-            return serialization.load_der_private_key(key_data, password=None)
-
-    def _populate_certificate_info(self, certificate):
-        """Populate model fields from parsed certificate"""
-        # Subject and issuer
-        self.subject = certificate.subject.rfc4514_string()
-        self.issuer = certificate.issuer.rfc4514_string()
-
-        # Serial number
-        self.serial_number = str(certificate.serial_number)
-
-        # Validity dates
-        self.valid_from = certificate.not_valid_before
-        self.valid_to = certificate.not_valid_after
-
-        # Fingerprint (SHA-256)
-        fingerprint = certificate.fingerprint(hashes.SHA256())
-        self.fingerprint = fingerprint.hex().upper()
-
-        # Key information
-        public_key = certificate.public_key()
-        if isinstance(public_key, rsa.RSAPublicKey):
-            self.key_algorithm = "RSA"
-            self.key_size = public_key.key_size
-        elif isinstance(public_key, ec.EllipticCurvePublicKey):
-            self.key_algorithm = "EC"
-            self.key_size = public_key.curve.key_size
-
-        # Signature algorithm
-        self.signature_algorithm = certificate.signature_algorithm_oid._name
-
     @property
     def is_valid(self):
         """Check if certificate is currently valid"""
-        if not self.valid_from or not self.valid_to:
-            return False
-
         now = timezone.now()
-        return self.valid_from <= now <= self.valid_to
-
-    @property
-    def expires_soon(self):
-        """Check if certificate expires within 30 days"""
-        if not self.valid_to:
-            return False
-
-        thirty_days = datetime.timedelta(days=30)
-        return self.valid_to <= (timezone.now() + thirty_days)
-
-    @property
-    def common_name(self):
-        """Extract Common Name from certificate subject"""
-        if not self.subject:
-            return None
-
-        # Parse the subject DN to extract CN
-        for part in self.subject.split(","):
-            part = part.strip()
-            if part.startswith("CN="):
-                return part[3:]
-        return None
-
-    def get_certificate_details(self):
-        """Get detailed certificate information"""
-        return {
-            "subject": self.subject,
-            "issuer": self.issuer,
-            "serial_number": self.serial_number,
-            "fingerprint": self.fingerprint,
-            "valid_from": self.valid_from,
-            "valid_to": self.valid_to,
-            "key_algorithm": self.key_algorithm,
-            "key_size": self.key_size,
-            "signature_algorithm": self.signature_algorithm,
-            "is_valid": self.is_valid,
-            "expires_soon": self.expires_soon,
-            "common_name": self.common_name,
-        }
+        return (
+            (self.valid_from <= now <= self.valid_to)
+            if self.valid_from and self.valid_to
+            else False
+        )
 
     def __str__(self):
         return "SMP Configuration"
