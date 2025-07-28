@@ -1,157 +1,443 @@
 {% extends "admin/change_form.html" %}
 
 {% block extrahead %}
-    {{ block.super }}
-    <style>
-        /* Certificate validation styling */
-        .field-validation_status .readonly {
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-weight: bold;
+{{ block.super }}
+<style>
+    /* Certificate validation styling */
+    .field-validation_status .readonly {
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+
+    .validation-valid {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .validation-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .validation-invalid {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .validation-expired {
+        background-color: #fce4ec;
+        color: #ad1457;
+        border: 1px solid #f8bbd9;
+    }
+
+    /* Certificate file upload styling */
+    .field-certificate_file,
+    .field-private_key_file {
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 10px 0;
+        background-color: #fafafa;
+        transition: all 0.3s ease;
+    }
+
+    .field-certificate_file:hover,
+    .field-private_key_file:hover {
+        border-color: #007cba;
+        background-color: #f0f8ff;
+    }
+
+    .field-certificate_file input[type="file"],
+    .field-private_key_file input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: white;
+    }
+
+    /* Help text styling */
+    .help {
+        font-style: italic;
+        color: #666;
+        font-size: 0.9em;
+        margin-top: 5px;
+        padding: 8px 12px;
+        background-color: #f8f9fa;
+        border-left: 3px solid #007cba;
+        border-radius: 0 4px 4px 0;
+    }
+
+    /* Readonly field styling */
+    .readonly {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 8px 12px;
+        color: #495057;
+    }
+
+    /* Fieldset styling */
+    .module h2 {
+        background: linear-gradient(135deg, #007cba 0%, #0056b3 100%);
+        color: white;
+        padding: 12px 20px;
+        margin: 0;
+        border-radius: 6px 6px 0 0;
+    }
+
+    .module {
+        margin-bottom: 20px;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Certificate info cards */
+    .certificate-info-card {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 15px;
+        margin: 10px 0;
+    }
+
+    .certificate-info-card h4 {
+        margin-top: 0;
+        color: #007cba;
+        font-size: 1.1em;
+    }
+
+    /* Status indicators */
+    .status-indicator {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .status-valid {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-invalid {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-expired {
+        background-color: #fce4ec;
+        color: #ad1457;
+    }
+
+    /* Loading indicator */
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #007cba;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-left: 10px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .certificate-preview {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 15px;
+        margin: 10px 0;
+        display: none;
+    }
+
+    .certificate-preview.show {
+        display: block;
+    }
+
+    .certificate-preview h4 {
+        margin-top: 0;
+        color: #007cba;
+    }
+
+    .cert-field {
+        margin: 8px 0;
+        padding: 5px;
+        background: white;
+        border-radius: 3px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .cert-label {
+        font-weight: bold;
+        color: #495057;
+        display: inline-block;
+        width: 120px;
+    }
+
+    .cert-value {
+        color: #212529;
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const certificateFileInput = document.querySelector('#id_certificate_file');
+    const previewContainer = document.querySelector('#certificate-preview');
+    
+    if (certificateFileInput) {
+        certificateFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                parseCertificateFile(file);
+            } else {
+                hidePreview();
+            }
+        });
+    }
+    
+    function parseCertificateFile(file) {
+        // Show loading indicator
+        showLoading();
+        
+        const formData = new FormData();
+        formData.append('certificate_file', file);
+        
+        fetch('/smp/ajax/parse-certificate/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => {
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Server returned non-JSON response. Please check if you are logged in as admin.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                populateCertificateFields(data);
+                showPreview(data);
+            } else {
+                showError(data.error);
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            if (error.message.includes('non-JSON')) {
+                showError('Authentication error: Please ensure you are logged in as an admin user and try again.');
+            } else {
+                showError('Error parsing certificate: ' + error.message);
+            }
+        });
+    }
+    
+    function populateCertificateFields(data) {
+        const info = data.info;
+        
+        // Populate form fields
+        const fields = {
+            'id_subject': info.subject,
+            'id_issuer': info.issuer,
+            'id_serial_number': info.serial_number,
+            'id_fingerprint': info.fingerprint,
+            'id_signature_algorithm': info.signature_algorithm,
+            'id_valid_from_0': formatDateForDjango(info.valid_from, 'date'),
+            'id_valid_from_1': formatDateForDjango(info.valid_from, 'time'),
+            'id_valid_to_0': formatDateForDjango(info.valid_to, 'date'),
+            'id_valid_to_1': formatDateForDjango(info.valid_to, 'time'),
+            'id_validation_status': data.status
+        };
+        
+        Object.keys(fields).forEach(fieldId => {
+            const field = document.querySelector('#' + fieldId);
+            if (field && fields[fieldId]) {
+                field.value = fields[fieldId];
+                
+                // Trigger change event for Django admin
+                field.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+        
+        // Handle warnings
+        const warningsField = document.querySelector('#id_validation_warnings');
+        if (warningsField && data.warnings && data.warnings.length > 0) {
+            warningsField.value = data.warnings.join('; ');
+        }
+    }
+    
+    function showPreview(data) {
+        let previewHtml = '<div class="certificate-preview show" id="certificate-preview">';
+        previewHtml += '<h4>📋 Certificate Information Preview</h4>';
+        
+        const info = data.info;
+        const statusClass = data.status === 'valid' ? 'status-valid' : 
+                           data.status === 'warning' ? 'status-warning' : 'status-invalid';
+        
+        previewHtml += `<div class="cert-field">
+            <span class="cert-label">Status:</span>
+            <span class="status-indicator ${statusClass}">${data.status.toUpperCase()}</span>
+        </div>`;
+        
+        previewHtml += `<div class="cert-field">
+            <span class="cert-label">Subject:</span>
+            <span class="cert-value">${info.subject}</span>
+        </div>`;
+        
+        previewHtml += `<div class="cert-field">
+            <span class="cert-label">Issuer:</span>
+            <span class="cert-value">${info.issuer}</span>
+        </div>`;
+        
+        previewHtml += `<div class="cert-field">
+            <span class="cert-label">Valid From:</span>
+            <span class="cert-value">${new Date(info.valid_from).toLocaleString()}</span>
+        </div>`;
+        
+        previewHtml += `<div class="cert-field">
+            <span class="cert-label">Valid To:</span>
+            <span class="cert-value">${new Date(info.valid_to).toLocaleString()}</span>
+        </div>`;
+        
+        previewHtml += `<div class="cert-field">
+            <span class="cert-label">Fingerprint:</span>
+            <span class="cert-value">${info.fingerprint}</span>
+        </div>`;
+        
+        if (data.warnings && data.warnings.length > 0) {
+            previewHtml += `<div class="cert-field">
+                <span class="cert-label">Warnings:</span>
+                <span class="cert-value" style="color: #856404;">${data.warnings.join(', ')}</span>
+            </div>`;
         }
         
-        .validation-valid {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        previewHtml += '</div>';
+        
+        // Insert preview after certificate file field
+        const certificateFieldRow = document.querySelector('.field-certificate_file');
+        if (certificateFieldRow) {
+            // Remove existing preview
+            const existingPreview = document.querySelector('#certificate-preview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+            
+            certificateFieldRow.insertAdjacentHTML('afterend', previewHtml);
+        }
+    }
+    
+    function showLoading() {
+        const certificateFieldRow = document.querySelector('.field-certificate_file');
+        if (certificateFieldRow) {
+            let loadingDiv = document.querySelector('#loading-indicator');
+            if (!loadingDiv) {
+                loadingDiv = document.createElement('div');
+                loadingDiv.id = 'loading-indicator';
+                loadingDiv.innerHTML = '<p>🔍 Parsing certificate... <span class="loading-spinner"></span></p>';
+                loadingDiv.style.cssText = 'padding: 10px; background: #e3f2fd; border-radius: 4px; margin: 10px 0;';
+                certificateFieldRow.insertAdjacentElement('afterend', loadingDiv);
+            }
+        }
+    }
+    
+    function hideLoading() {
+        const loadingDiv = document.querySelector('#loading-indicator');
+        if (loadingDiv) {
+            loadingDiv.remove();
+        }
+    }
+    
+    function hidePreview() {
+        const preview = document.querySelector('#certificate-preview');
+        if (preview) {
+            preview.remove();
+        }
+    }
+    
+    function showError(message) {
+        const certificateFieldRow = document.querySelector('.field-certificate_file');
+        if (certificateFieldRow) {
+            const errorDiv = document.createElement('div');
+            errorDiv.innerHTML = `<p style="color: #721c24; background: #f8d7da; padding: 10px; border-radius: 4px; margin: 10px 0;">❌ ${message}</p>`;
+            certificateFieldRow.insertAdjacentElement('afterend', errorDiv);
+            
+            // Remove error after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+    }
+    
+    function formatDateForDjango(dateString, type) {
+        if (!dateString) return '';
+        
+        const date = new Date(dateString);
+        
+        if (type === 'date') {
+            // Django date format: YYYY-MM-DD
+            return date.toISOString().split('T')[0];
+        } else if (type === 'time') {
+            // Django time format: HH:MM:SS
+            return date.toTimeString().split(' ')[0];
         }
         
-        .validation-warning {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
+        return '';
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
-        
-        .validation-invalid {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .validation-expired {
-            background-color: #fce4ec;
-            color: #ad1457;
-            border: 1px solid #f8bbd9;
-        }
-        
-        /* Certificate file upload styling */
-        .field-certificate_file, .field-private_key_file {
-            border: 2px dashed #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 10px 0;
-            background-color: #fafafa;
-            transition: all 0.3s ease;
-        }
-        
-        .field-certificate_file:hover, .field-private_key_file:hover {
-            border-color: #007cba;
-            background-color: #f0f8ff;
-        }
-        
-        .field-certificate_file input[type="file"], 
-        .field-private_key_file input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: white;
-        }
-        
-        /* Help text styling */
-        .help {
-            font-style: italic;
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 5px;
-            padding: 8px 12px;
-            background-color: #f8f9fa;
-            border-left: 3px solid #007cba;
-            border-radius: 0 4px 4px 0;
-        }
-        
-        /* Readonly field styling */
-        .readonly {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            padding: 8px 12px;
-            color: #495057;
-        }
-        
-        /* Fieldset styling */
-        .module h2 {
-            background: linear-gradient(135deg, #007cba 0%, #0056b3 100%);
-            color: white;
-            padding: 12px 20px;
-            margin: 0;
-            border-radius: 6px 6px 0 0;
-        }
-        
-        .module {
-            margin-bottom: 20px;
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        /* Certificate info cards */
-        .certificate-info-card {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 15px;
-            margin: 10px 0;
-        }
-        
-        .certificate-info-card h4 {
-            margin-top: 0;
-            color: #007cba;
-            font-size: 1.1em;
-        }
-        
-        /* Status indicators */
-        .status-indicator {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.85em;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .status-valid {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        
-        .status-warning {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        
-        .status-invalid {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        
-        .status-expired {
-            background-color: #fce4ec;
-            color: #ad1457;
-        }
-    </style>
+        return cookieValue;
+    }
+});
+</script>
 {% endblock %}
 
 {% block submit_buttons_bottom %}
-    <div style="margin-top: 20px; padding: 15px; background-color: #e9ecef; border-radius: 6px;">
-        <h4 style="margin-top: 0; color: #007cba;">🛡️ Certificate Upload Instructions</h4>
-        <ul style="margin-bottom: 0;">
-            <li><strong>Supported formats:</strong> PEM (.pem, .crt, .cer) or DER (.der)</li>
-            <li><strong>Validation:</strong> Certificates are automatically validated for SMP signing compatibility</li>
-            <li><strong>Private key:</strong> Optional but required for signing operations</li>
-            <li><strong>Default certificate:</strong> Only one certificate can be set as default at a time</li>
-            <li><strong>Key requirements:</strong> RSA 2048+ bits or ECDSA with standard curves</li>
-        </ul>
-    </div>
-    {{ block.super }}
+<div style="margin-top: 20px; padding: 15px; background-color: #e9ecef; border-radius: 6px;">
+    <h4 style="margin-top: 0; color: #007cba;">🛡️ Certificate Upload Instructions</h4>
+    <ul style="margin-bottom: 0;">
+        <li><strong>Supported formats:</strong> PEM (.pem, .crt, .cer) or DER (.der)</li>
+        <li><strong>Validation:</strong> Certificates are automatically validated for SMP signing compatibility</li>
+        <li><strong>Private key:</strong> Optional but required for signing operations</li>
+        <li><strong>Default certificate:</strong> Only one certificate can be set as default at a time</li>
+        <li><strong>Key requirements:</strong> RSA 2048+ bits or ECDSA with standard curves</li>
+    </ul>
+</div>
+{{ block.super }}
 {% endblock %}

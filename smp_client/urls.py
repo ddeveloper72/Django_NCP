@@ -5,6 +5,7 @@ URL patterns for SMP service metadata management
 
 from django.urls import path
 from . import views
+from . import ajax_views
 
 app_name = "smp_client"
 
@@ -41,6 +42,10 @@ urlpatterns = [
         name="upload_to_smp_server",
     ),
     path("sync/", views.synchronize_from_smp, name="synchronize_from_smp"),
+    
+    # AJAX endpoints
+    path("ajax/parse-certificate/", ajax_views.parse_certificate_ajax, name="parse_certificate_ajax"),
+    
     # SMP API Endpoints (OASIS BDXR SMP v1.0 compatible)
     path(
         "api/participants/", views.smp_participants_list, name="api_participants_list"

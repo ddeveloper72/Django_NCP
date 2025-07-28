@@ -44,6 +44,30 @@ venv.bak/
 .env.test
 .env.production
 
+# Certificates and Keys (SECURITY)
+*.pem
+*.crt
+*.cer
+*.der
+*.key
+*.p12
+*.pfx
+certificates/
+media/certificates/
+uploads/certificates/
+private_keys/
+
+# Database backups and dumps
+*.sql
+*.dump
+*.backup
+
+# Test certificates (keep sample_test_certificate.pem for testing)
+test_certificate.pem
+real_certificate.*
+production_certificate.*
+*_private_key.*
+
 # IDE
 .vscode/
 .idea/

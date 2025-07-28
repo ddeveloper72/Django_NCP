@@ -27,13 +27,71 @@ class CertificateValidator:
         if hasattr(certificate_data, 'read'):
             certificate_data = certificate_data.read()
         
+        # Ensure we have bytes
+        if isinstance(certificate_data, str):
+            certificate_data = certificate_data.encode('utf-8')
+        
+        # Clean up common PEM formatting issues
+        certificate_data = self._clean_pem_data(certificate_data)
+        
         try:
+            # Try PEM format first
             self.certificate = x509.load_pem_x509_certificate(certificate_data)
-        except Exception as e:
+        except Exception as pem_error:
             try:
+                # Try DER format
                 self.certificate = x509.load_der_x509_certificate(certificate_data)
-            except Exception:
-                raise ValidationError(f"Invalid certificate format: {str(e)}")
+            except Exception as der_error:
+                # Provide helpful error message
+                error_msg = f"Invalid certificate format. PEM error: {str(pem_error)}. DER error: {str(der_error)}"
+                if "MalformedFraming" in str(pem_error):
+                    error_msg += "\n\nPEM file formatting tips:\n"
+                    error_msg += "- Ensure file starts with '-----BEGIN CERTIFICATE-----'\n"
+                    error_msg += "- Ensure file ends with '-----END CERTIFICATE-----'\n"
+                    error_msg += "- No extra spaces or characters before/after headers\n"
+                    error_msg += "- Each line should be exactly 64 characters (except last line)\n"
+                    error_msg += "- Use Unix line endings (LF, not CRLF)"
+                raise ValidationError(error_msg)
+
+    def _clean_pem_data(self, data):
+        """Clean up common PEM formatting issues"""
+        if not data:
+            return data
+            
+        # Convert to string for processing
+        if isinstance(data, bytes):
+            try:
+                data_str = data.decode('utf-8')
+            except UnicodeDecodeError:
+                # If it's not UTF-8, assume it's binary (DER)
+                return data
+        else:
+            data_str = data
+        
+        # Remove any BOM
+        data_str = data_str.lstrip('\ufeff')
+        
+        # Normalize line endings to Unix style
+        data_str = data_str.replace('\r\n', '\n').replace('\r', '\n')
+        
+        # Remove any leading/trailing whitespace
+        data_str = data_str.strip()
+        
+        # Check if it looks like PEM
+        if '-----BEGIN' in data_str and '-----END' in data_str:
+            lines = data_str.split('\n')
+            cleaned_lines = []
+            
+            for line in lines:
+                # Remove trailing whitespace but preserve the line structure
+                line = line.rstrip()
+                if line:  # Skip empty lines
+                    cleaned_lines.append(line)
+            
+            # Ensure proper line endings
+            data_str = '\n'.join(cleaned_lines) + '\n'
+        
+        return data_str.encode('utf-8')
 
     def validate_for_smp_signing(self):
         """
@@ -183,20 +241,35 @@ def validate_certificate_file(certificate_file):
         raise ValidationError("Certificate file is too large (max 10MB)")
     
     # Check file extension
-    allowed_extensions = ['.pem', '.crt', '.cer', '.der']
+    allowed_extensions = ['.pem', '.crt', '.cer', '.der', '.cert']
     file_extension = None
     if hasattr(certificate_file, 'name') and certificate_file.name:
         file_extension = '.' + certificate_file.name.split('.')[-1].lower()
         if file_extension not in allowed_extensions:
             raise ValidationError(
-                f"Invalid file extension. Allowed: {', '.join(allowed_extensions)}"
+                f"Invalid file extension '{file_extension}'. Allowed: {', '.join(allowed_extensions)}"
             )
+    
+    # Read file content
+    try:
+        certificate_file.seek(0)  # Ensure we're at the beginning
+        file_content = certificate_file.read()
+        certificate_file.seek(0)  # Reset for later use
+        
+        if not file_content:
+            raise ValidationError("Certificate file is empty")
+            
+    except Exception as e:
+        raise ValidationError(f"Error reading certificate file: {str(e)}")
     
     # Validate certificate content
     try:
-        validator = CertificateValidator(certificate_file)
+        validator = CertificateValidator(file_content)
         result = validator.validate_for_smp_signing()
         return result
+    except ValidationError as e:
+        # Re-raise validation errors as-is
+        raise e
     except Exception as e:
         raise ValidationError(f"Certificate validation failed: {str(e)}")
 

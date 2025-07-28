@@ -537,10 +537,10 @@ class DocumentTemplateAdmin(admin.ModelAdmin):
 @admin.register(SigningCertificate)
 class SigningCertificateAdmin(admin.ModelAdmin):
     form = SigningCertificateAdminForm
-    
+
     list_display = [
         "certificate_name",
-        "certificate_type", 
+        "certificate_type",
         "subject_short",
         "valid_status",
         "validation_status",
@@ -553,62 +553,73 @@ class SigningCertificateAdmin(admin.ModelAdmin):
         "certificate_type",
         "validation_status",
         "is_default",
-        "is_active", 
+        "is_active",
         "valid_from",
         "valid_to",
     ]
     search_fields = ["certificate_name", "subject", "issuer", "serial_number"]
     readonly_fields = [
-        "id", 
-        "subject", 
-        "issuer", 
-        "serial_number", 
+        "id",
+        "subject",
+        "issuer",
+        "serial_number",
         "fingerprint",
         "signature_algorithm",
-        "valid_from", 
+        "valid_from",
         "valid_to",
         "validation_status",
         "validation_warnings",
-        "created_at", 
-        "updated_at"
+        "created_at",
+        "updated_at",
     ]
 
     fieldsets = (
         (
             "Certificate Upload",
             {
-                "fields": ("certificate_name", "certificate_type", "certificate_file", "private_key_file"),
-                "description": "Upload certificate and private key files. Certificate information will be automatically extracted and validated."
+                "fields": (
+                    "certificate_name",
+                    "certificate_type",
+                    "certificate_file",
+                    "private_key_file",
+                ),
+                "description": "Upload certificate and private key files. Certificate information will be automatically extracted and validated.",
             },
         ),
         (
-            "Certificate Information", 
+            "Certificate Information",
             {
-                "fields": ("subject", "issuer", "serial_number", "fingerprint", "signature_algorithm"),
+                "fields": (
+                    "subject",
+                    "issuer",
+                    "serial_number",
+                    "fingerprint",
+                    "signature_algorithm",
+                ),
                 "classes": ("collapse",),
-                "description": "Auto-populated from uploaded certificate"
+                "description": "Auto-populated from uploaded certificate",
             },
         ),
         (
             "Validity Period",
             {
                 "fields": ("valid_from", "valid_to"),
-                "description": "Auto-populated from certificate"
+                "description": "Auto-populated from certificate",
             },
         ),
         (
             "Validation Status",
             {
                 "fields": ("validation_status", "validation_warnings"),
-                "description": "Certificate validation results"
+                "description": "Certificate validation results",
             },
         ),
         (
-            "Configuration", 
+            "Configuration",
             {
                 "fields": ("is_default", "is_active"),
-                "description": "Only one certificate can be set as default"
-            }
+                "description": "Only one certificate can be set as default",
+            },
         ),
         (
             "Metadata",
@@ -620,72 +631,92 @@ class SigningCertificateAdmin(admin.ModelAdmin):
         """Display shortened subject for list view"""
         if obj.subject:
             # Extract CN (Common Name) if available
-            parts = obj.subject.split(',')
+            parts = obj.subject.split(",")
             for part in parts:
-                if part.strip().startswith('CN='):
+                if part.strip().startswith("CN="):
                     return part.strip()[3:]  # Remove 'CN='
             # If no CN, return first 50 characters
-            return obj.subject[:50] + '...' if len(obj.subject) > 50 else obj.subject
-        return '-'
+            return obj.subject[:50] + "..." if len(obj.subject) > 50 else obj.subject
+        return "-"
+
     subject_short.short_description = "Subject (CN)"
 
     def valid_status(self, obj):
         """Display validity status with color coding"""
         if obj.is_valid:
-            return format_html('<span style="color: green; font-weight: bold;">✓ Valid</span>')
-        elif obj.validation_status == 'expired':
-            return format_html('<span style="color: orange; font-weight: bold;">⏰ Expired</span>')
-        elif obj.validation_status == 'warning':
-            return format_html('<span style="color: #ff9800; font-weight: bold;">⚠ Valid (Warnings)</span>')
+            return format_html(
+                '<span style="color: green; font-weight: bold;">✓ Valid</span>'
+            )
+        elif obj.validation_status == "expired":
+            return format_html(
+                '<span style="color: orange; font-weight: bold;">⏰ Expired</span>'
+            )
+        elif obj.validation_status == "warning":
+            return format_html(
+                '<span style="color: #ff9800; font-weight: bold;">⚠ Valid (Warnings)</span>'
+            )
         else:
-            return format_html('<span style="color: red; font-weight: bold;">✗ Invalid</span>')
+            return format_html(
+                '<span style="color: red; font-weight: bold;">✗ Invalid</span>'
+            )
+
     valid_status.short_description = "Status"
 
     def save_model(self, request, obj, form, change):
         """Enhanced save with validation feedback"""
         try:
             super().save_model(request, obj, form, change)
-            
+
             # Add success message with validation info
-            if obj.validation_status == 'valid':
-                self.message_user(request, f"Certificate '{obj.certificate_name}' uploaded and validated successfully.", level='SUCCESS')
-            elif obj.validation_status == 'warning':
-                self.message_user(request, f"Certificate '{obj.certificate_name}' uploaded with warnings: {obj.validation_warnings}", level='WARNING')
-                
+            if obj.validation_status == "valid":
+                self.message_user(
+                    request,
+                    f"Certificate '{obj.certificate_name}' uploaded and validated successfully.",
+                    level="SUCCESS",
+                )
+            elif obj.validation_status == "warning":
+                self.message_user(
+                    request,
+                    f"Certificate '{obj.certificate_name}' uploaded with warnings: {obj.validation_warnings}",
+                    level="WARNING",
+                )
+
         except Exception as e:
-            self.message_user(request, f"Certificate validation failed: {str(e)}", level='ERROR')
+            self.message_user(
+                request, f"Certificate validation failed: {str(e)}", level="ERROR"
+            )
             raise
 
     def get_form(self, request, obj=None, **kwargs):
         """Customize form for better UX"""
         form = super().get_form(request, obj, **kwargs)
-        
+
         # Add help text for file fields
-        if 'certificate_file' in form.base_fields:
-            form.base_fields['certificate_file'].help_text = (
+        if "certificate_file" in form.base_fields:
+            form.base_fields["certificate_file"].help_text = (
                 "Upload X.509 certificate file (.pem, .crt, .cer, .der). "
                 "Certificate will be validated for SMP signing compatibility."
             )
-        
-        if 'private_key_file' in form.base_fields:
-            form.base_fields['private_key_file'].help_text = (
+
+        if "private_key_file" in form.base_fields:
+            form.base_fields["private_key_file"].help_text = (
                 "Optional: Upload private key file (.pem, .key, .der). "
                 "Required for signing operations."
             )
-            
+
         return form
 
     def get_readonly_fields(self, request, obj=None):
         """Make validation fields readonly after creation"""
         readonly = list(self.readonly_fields)
-        
+
         # If editing existing object, make more fields readonly
         if obj:
-            readonly.extend(['certificate_type'])
-            
+            readonly.extend(["certificate_type"])
+
         return readonly
 
-    actions = ['validate_certificates', 'set_as_default']
+    actions = ["validate_certificates", "set_as_default"]
 
     def validate_certificates(self, request, queryset):
         """Re-validate selected certificates"""
@@ -696,29 +727,49 @@ class SigningCertificateAdmin(admin.ModelAdmin):
                 cert.save()
                 validated_count += 1
             except Exception as e:
-                self.message_user(request, f"Failed to validate {cert.certificate_name}: {str(e)}", level='ERROR')
-        
+                self.message_user(
+                    request,
+                    f"Failed to validate {cert.certificate_name}: {str(e)}",
+                    level="ERROR",
+                )
+
         if validated_count:
-            self.message_user(request, f"Successfully re-validated {validated_count} certificate(s).", level='SUCCESS')
-    
+            self.message_user(
+                request,
+                f"Successfully re-validated {validated_count} certificate(s).",
+                level="SUCCESS",
+            )
+
     validate_certificates.short_description = "Re-validate selected certificates"
 
     def set_as_default(self, request, queryset):
         """Set a certificate as default"""
         if queryset.count() != 1:
-            self.message_user(request, "Please select exactly one certificate to set as default.", level='ERROR')
+            self.message_user(
+                request,
+                "Please select exactly one certificate to set as default.",
+                level="ERROR",
+            )
             return
-        
+
         cert = queryset.first()
         if not cert.is_valid:
-            self.message_user(request, "Cannot set invalid/expired certificate as default.", level='ERROR')
+            self.message_user(
+                request,
+                "Cannot set invalid/expired certificate as default.",
+                level="ERROR",
+            )
             return
-        
+
         # Clear existing default
         SigningCertificate.objects.filter(is_default=True).update(is_default=False)
         cert.is_default = True
         cert.save()
-        
-        self.message_user(request, f"'{cert.certificate_name}' set as default signing certificate.", level='SUCCESS')
-    
+
+        self.message_user(
+            request,
+            f"'{cert.certificate_name}' set as default signing certificate.",
+            level="SUCCESS",
+        )
+
     set_as_default.short_description = "Set as default certificate"
