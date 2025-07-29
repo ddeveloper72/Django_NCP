@@ -455,7 +455,7 @@ def patient_data_view(request, patient_data_id):
     """
     try:
         patient_data = get_object_or_404(PatientData, id=patient_data_id)
-        member_state = patient_data.patient_identifier.member_state
+        member_state = patient_data.patient_identifier.home_member_state
 
         # Get translation service
         terminology_service = TranslationServiceFactory.get_terminology_service()

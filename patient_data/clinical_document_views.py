@@ -56,7 +56,13 @@ def _render_document_request_page(request, patient_data):
         "member_state": patient_data.patient_identifier.home_member_state,
         "existing_documents": existing_documents,
         "supported_formats": ["CDA", "FHIR_BUNDLE"],
-        "available_translations": ["en", "fr", "de", "es", "it"],
+        "available_languages": {
+            "en": "English",
+            "fr": "French", 
+            "de": "German",
+            "es": "Spanish",
+            "it": "Italian"
+        },
         "summary_sections": [
             "patient_demographics",
             "conditions",

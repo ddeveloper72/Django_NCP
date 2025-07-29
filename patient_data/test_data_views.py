@@ -306,7 +306,7 @@ def test_data_document_pdf(request, document_id):
 
         # Create response
         response = HttpResponse(pdf_data, content_type="application/pdf")
-        filename = f"test_data_{document.patient_data.member_state.country_code}_{document.patient_data.patient_id}_{document.document_type}.pdf"
+        filename = f"test_data_{document.patient_data.patient_identifier.home_member_state.country_code}_{document.patient_data.patient_id}_{document.document_type}.pdf"
 
         # Check if this is a download or preview request
         if request.GET.get("preview") == "true":

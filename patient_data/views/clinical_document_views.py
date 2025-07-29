@@ -53,7 +53,7 @@ def _render_document_request_page(request, patient_data):
     context = {
         "patient_data": patient_data,
         "patient_identifier": patient_data.patient_identifier,
-        "member_state": patient_data.patient_identifier.member_state,
+        "member_state": patient_data.patient_identifier.home_member_state,
         "existing_documents": existing_documents,
         "supported_formats": ["CDA", "FHIR_BUNDLE"],
         "available_translations": ["en", "fr", "de", "es", "it"],
