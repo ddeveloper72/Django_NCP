@@ -587,27 +587,72 @@ def perform_patient_search(country, search_fields, user):
 
     try:
         # In production, this would make actual NCP API calls
-        # For demo, we'll simulate different responses based on search criteria
+        # For demo, we'll check both simulated test data and actual database
 
-        # Simulate patient found for certain test IDs
-        test_ids = ["EU-TEST-12345", "1234567A", "XX.XX.XX-XXX.XX"]
+        # First check actual database for patient data
+        from patient_data.models import PatientData, PatientIdentifier, MemberState
         found_patient = False
-
-        for field_value in search_fields.values():
-            if any(test_id in str(field_value) for test_id in test_ids):
+        database_patient = None
+        
+        # Try to find patient in database
+        patient_id_value = (
+            search_fields.get('patient_id') or 
+            search_fields.get('national_id') or 
+            search_fields.get('identifier') or
+            search_fields.get('pps_number')
+        )
+        birth_date_value = search_fields.get('birth_date') or search_fields.get('birthdate')
+        
+        if patient_id_value:
+            try:
+                # Find patient identifier matching the search
+                patient_identifier = PatientIdentifier.objects.get(
+                    patient_id=patient_id_value,
+                    home_member_state__country_code=country.code.upper()
+                )
+                
+                # Find patient data
+                database_patient = PatientData.objects.get(patient_identifier=patient_identifier)
                 found_patient = True
-                break
+                
+                logger.info(f"Found patient in database: {database_patient.given_name} {database_patient.family_name}")
+                
+            except (PatientIdentifier.DoesNotExist, PatientData.DoesNotExist):
+                logger.info(f"Patient {patient_id_value} not found in database for country {country.code}")
+        
+        # If not found in database, check simulated test IDs
+        if not found_patient:
+            test_ids = ["EU-TEST-12345", "1234567A", "XX.XX.XX-XXX.XX"]
+            for field_value in search_fields.values():
+                if any(test_id in str(field_value) for test_id in test_ids):
+                    found_patient = True
+                    break
 
         if found_patient:
-            # Simulate successful patient data
-            result.patient_found = True
-            result.patient_data = {
-                "id": list(search_fields.values())[0],  # Use first search field as ID
-                "name": f"{search_fields.get('first_name', search_fields.get('given_name', 'John'))} {search_fields.get('last_name', search_fields.get('surname', search_fields.get('family_name', 'Doe')))}",
-                "birth_date": search_fields.get("birth_date", "1980-01-01"),
-                "country": country.code,
-                "last_updated": timezone.now().isoformat(),
-            }
+            # Use database patient data if available, otherwise simulate
+            if database_patient:
+                result.patient_found = True
+                result.patient_data = {
+                    "id": database_patient.patient_identifier.patient_id,
+                    "name": f"{database_patient.given_name} {database_patient.family_name}",
+                    "birth_date": database_patient.birth_date.strftime('%Y-%m-%d'),
+                    "gender": database_patient.gender,
+                    "country": database_patient.patient_identifier.home_member_state.country_code,
+                    "address": f"{database_patient.address_line}, {database_patient.city}, {database_patient.postal_code}",
+                    "last_updated": database_patient.access_timestamp.isoformat(),
+                    "database_id": database_patient.id,  # Store for later use
+                }
+            else:
+                # Simulate successful patient data for test IDs
+                result.patient_found = True
+                result.patient_data = {
+                    "id": list(search_fields.values())[0],  # Use first search field as ID
+                    "name": f"{search_fields.get('first_name', search_fields.get('given_name', 'John'))} {search_fields.get('last_name', search_fields.get('surname', search_fields.get('family_name', 'Doe')))}",
+                    "birth_date": search_fields.get("birth_date", "1980-01-01"),
+                    "country": country.code,
+                    "last_updated": timezone.now().isoformat(),
+                }
+            
             result.available_documents = [
                 {
                     "type": "PS",
@@ -626,7 +671,7 @@ def perform_patient_search(country, search_fields, user):
             result.ncp_status_code = "200"
         else:
             result.patient_found = False
-            result.error_message = "No patient found matching the search criteria"
+            result.error_message = f"Patient {patient_id_value} not found in {country.name} (searched both EU test data and legacy sample data)"
             result.ncp_status_code = "404"
 
         result.save()
