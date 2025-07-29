@@ -27,6 +27,7 @@ from .services.pdf_generation_service import PDFGenerationService
 logger = logging.getLogger(__name__)
 
 
+@login_required
 @require_http_methods(["GET", "POST"])
 def request_clinical_documents(request, patient_data_id):
     """
