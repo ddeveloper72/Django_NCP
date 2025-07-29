@@ -153,6 +153,39 @@
                             <i class="fas fa-network-wired"></i> SMP Test
                         </a>
                     </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-injured"></i> Patients
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'patient_data:patient_search' %}">
+                                    <i class="fas fa-search"></i> Search Patient
+                                </a></li>
+                            <li><a class="dropdown-item" href="{% url 'patient_data:patient_demo' %}">
+                                    <i class="fas fa-database"></i> Sample Data Demo
+                                </a></li>
+                        </ul>
+                    </li>
+                    {% if user.is_staff or user.is_superuser %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tools"></i> Admin Services
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'patient_data:eadc_dashboard' %}">
+                                    <i class="fas fa-exchange-alt"></i> EADC Integration
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'admin:index' %}">
+                                    <i class="fas fa-cog"></i> Django Admin
+                                </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    {% endif %}
                 </ul>
 
                 <ul class="navbar-nav">

@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <realmCode code="EU"/>
+    <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.1.3"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1"/>
+    
+    <id extension="12345" root="1.2.3.4.5.6.7.8.9"/>
+    <code code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Patient Summary"/>
+    <title>Patient Summary Document</title>
+    <effectiveTime value="20240101120000"/>
+    <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25"/>
+    <languageCode code="en-US"/>
+    
+    <recordTarget>
+        <patientRole>
+            <id extension="DEMO123" root="1.3.6.1.4.1.12559.11.10.1.3.1.1.3"/>
+            <addr use="HP">
+                <streetAddressLine>123 Main Street</streetAddressLine>
+                <city>Berlin</city>
+                <postalCode>10115</postalCode>
+                <country>Germany</country>
+            </addr>
+            <telecom value="tel:+49-30-12345678" use="HP"/>
+            <telecom value="mailto:demo.patient@example.de" use="HP"/>
+            <patient>
+                <name use="L">
+                    <given>Demo</given>
+                    <family>Patient</family>
+                </name>
+                <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" displayName="Male"/>
+                <birthTime value="19850315"/>
+                <maritalStatusCode code="M" codeSystem="2.16.840.1.113883.5.2" displayName="Married"/>
+            </patient>
+        </patientRole>
+    </recordTarget>
+    
+    <author>
+        <time value="20240101120000"/>
+        <assignedAuthor>
+            <id extension="DOC001" root="1.2.3.4.5.6.7.8.9"/>
+            <code code="309343006" codeSystem="2.16.840.1.113883.6.96" displayName="Physician"/>
+            <addr use="WP">
+                <streetAddressLine>Hospital Main Street 1</streetAddressLine>
+                <city>Berlin</city>
+                <postalCode>10117</postalCode>
+                <country>Germany</country>
+            </addr>
+            <telecom value="tel:+49-30-98765432" use="WP"/>
+            <assignedPerson>
+                <name>
+                    <given>Dr. Hans</given>
+                    <family>Mueller</family>
+                </name>
+            </assignedPerson>
+            <representedOrganization>
+                <id root="1.2.3.4.5.6.7.8.9" extension="HOSPITAL001"/>
+                <name>Berlin University Hospital</name>
+                <telecom value="tel:+49-30-98765432" use="WP"/>
+                <addr use="WP">
+                    <streetAddressLine>Hospital Main Street 1</streetAddressLine>
+                    <city>Berlin</city>
+                    <postalCode>10117</postalCode>
+                    <country>Germany</country>
+                </addr>
+            </representedOrganization>
+        </assignedAuthor>
+    </author>
+    
+    <custodian>
+        <assignedCustodian>
+            <representedCustodianOrganization>
+                <id root="1.2.3.4.5.6.7.8.9" extension="HOSPITAL001"/>
+                <name>Berlin University Hospital</name>
+                <telecom value="tel:+49-30-98765432" use="WP"/>
+                <addr use="WP">
+                    <streetAddressLine>Hospital Main Street 1</streetAddressLine>
+                    <city>Berlin</city>
+                    <postalCode>10117</postalCode>
+                    <country>Germany</country>
+                </addr>
+            </representedCustodianOrganization>
+        </assignedCustodian>
+    </custodian>
+    
+    <component>
+        <structuredBody>
+            <!-- Active Problems Section -->
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.1.11"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.6"/>
+                    <code code="11450-4" codeSystem="2.16.840.1.113883.6.1" displayName="Problem list"/>
+                    <title>Active Problems</title>
+                    <text>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Problem</th>
+                                    <th>Status</th>
+                                    <th>Onset</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Hypertension</td>
+                                    <td>Active</td>
+                                    <td>2020-03-15</td>
+                                </tr>
+                                <tr>
+                                    <td>Type 2 Diabetes Mellitus</td>
+                                    <td>Active</td>
+                                    <td>2019-08-22</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </text>
+                    <entry>
+                        <observation classCode="OBS" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.1.28"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+                            <id root="1.2.3.4.5.6.7.8.9" extension="PROB001"/>
+                            <code code="ASSERTION" codeSystem="2.16.840.1.113883.5.4"/>
+                            <statusCode code="completed"/>
+                            <effectiveTime>
+                                <low value="20200315"/>
+                            </effectiveTime>
+                            <value xsi:type="CD" code="38341003" codeSystem="2.16.840.1.113883.6.96" displayName="Hypertension"/>
+                        </observation>
+                    </entry>
+                    <entry>
+                        <observation classCode="OBS" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.1.28"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+                            <id root="1.2.3.4.5.6.7.8.9" extension="PROB002"/>
+                            <code code="ASSERTION" codeSystem="2.16.840.1.113883.5.4"/>
+                            <statusCode code="completed"/>
+                            <effectiveTime>
+                                <low value="20190822"/>
+                            </effectiveTime>
+                            <value xsi:type="CD" code="44054006" codeSystem="2.16.840.1.113883.6.96" displayName="Type 2 diabetes mellitus"/>
+                        </observation>
+                    </entry>
+                </section>
+            </component>
+            
+            <!-- Medications Section -->
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.1.8"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.19"/>
+                    <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" displayName="History of Medication use"/>
+                    <title>Current Medications</title>
+                    <text>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Medication</th>
+                                    <th>Dosage</th>
+                                    <th>Frequency</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Metformin</td>
+                                    <td>500mg</td>
+                                    <td>Twice daily</td>
+                                    <td>Active</td>
+                                </tr>
+                                <tr>
+                                    <td>Lisinopril</td>
+                                    <td>10mg</td>
+                                    <td>Once daily</td>
+                                    <td>Active</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </text>
+                    <entry>
+                        <substanceAdministration classCode="SBADM" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7"/>
+                            <id root="1.2.3.4.5.6.7.8.9" extension="MED001"/>
+                            <statusCode code="active"/>
+                            <effectiveTime xsi:type="IVL_TS">
+                                <low value="20190822"/>
+                            </effectiveTime>
+                            <routeCode code="26643006" codeSystem="2.16.840.1.113883.6.96" displayName="Oral"/>
+                            <doseQuantity value="500" unit="mg"/>
+                            <consumable>
+                                <manufacturedProduct>
+                                    <manufacturedMaterial>
+                                        <code code="6809" codeSystem="2.16.840.1.113883.6.88" displayName="Metformin"/>
+                                        <name>Metformin 500mg</name>
+                                    </manufacturedMaterial>
+                                </manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                    <entry>
+                        <substanceAdministration classCode="SBADM" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7"/>
+                            <id root="1.2.3.4.5.6.7.8.9" extension="MED002"/>
+                            <statusCode code="active"/>
+                            <effectiveTime xsi:type="IVL_TS">
+                                <low value="20200315"/>
+                            </effectiveTime>
+                            <routeCode code="26643006" codeSystem="2.16.840.1.113883.6.96" displayName="Oral"/>
+                            <doseQuantity value="10" unit="mg"/>
+                            <consumable>
+                                <manufacturedProduct>
+                                    <manufacturedMaterial>
+                                        <code code="29046" codeSystem="2.16.840.1.113883.6.88" displayName="Lisinopril"/>
+                                        <name>Lisinopril 10mg</name>
+                                    </manufacturedMaterial>
+                                </manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                </section>
+            </component>
+            
+            <!-- Allergies and Intolerances Section -->
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.1.2"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.13"/>
+                    <code code="48765-2" codeSystem="2.16.840.1.113883.6.1" displayName="Allergies"/>
+                    <title>Allergies and Intolerances</title>
+                    <text>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Allergen</th>
+                                    <th>Reaction</th>
+                                    <th>Severity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Penicillin</td>
+                                    <td>Rash</td>
+                                    <td>Moderate</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </text>
+                    <entry>
+                        <observation classCode="OBS" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.1.18"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.6"/>
+                            <id root="1.2.3.4.5.6.7.8.9" extension="ALLERGY001"/>
+                            <code code="ASSERTION" codeSystem="2.16.840.1.113883.5.4"/>
+                            <statusCode code="completed"/>
+                            <effectiveTime>
+                                <low value="20150601"/>
+                            </effectiveTime>
+                            <value xsi:type="CD" code="416098002" codeSystem="2.16.840.1.113883.6.96" displayName="Drug allergy"/>
+                            <participant typeCode="CSM">
+                                <participantRole classCode="MANU">
+                                    <playingEntity classCode="MMAT">
+                                        <code code="70618" codeSystem="2.16.840.1.113883.6.88" displayName="Penicillin"/>
+                                        <name>Penicillin</name>
+                                    </playingEntity>
+                                </participantRole>
+                            </participant>
+                            <entryRelationship typeCode="MFST" inversionInd="true">
+                                <observation classCode="OBS" moodCode="EVN">
+                                    <templateId root="2.16.840.1.113883.10.20.1.54"/>
+                                    <code code="ASSERTION" codeSystem="2.16.840.1.113883.5.4"/>
+                                    <text>Rash</text>
+                                    <statusCode code="completed"/>
+                                    <value xsi:type="CD" code="271807003" codeSystem="2.16.840.1.113883.6.96" displayName="Rash"/>
+                                </observation>
+                            </entryRelationship>
+                        </observation>
+                    </entry>
+                </section>
+            </component>
+            
+            <!-- Vital Signs Section -->
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.1.16"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.25"/>
+                    <code code="8716-3" codeSystem="2.16.840.1.113883.6.1" displayName="Vital signs"/>
+                    <title>Vital Signs</title>
+                    <text>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Vital Sign</th>
+                                    <th>Value</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Blood Pressure</td>
+                                    <td>140/90 mmHg</td>
+                                    <td>2024-01-01</td>
+                                </tr>
+                                <tr>
+                                    <td>Heart Rate</td>
+                                    <td>72 bpm</td>
+                                    <td>2024-01-01</td>
+                                </tr>
+                                <tr>
+                                    <td>Weight</td>
+                                    <td>80 kg</td>
+                                    <td>2024-01-01</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </text>
+                    <entry>
+                        <organizer classCode="CLUSTER" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.1.35"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.13.1"/>
+                            <id root="1.2.3.4.5.6.7.8.9" extension="VITALS001"/>
+                            <code code="46680005" codeSystem="2.16.840.1.113883.6.96" displayName="Vital signs"/>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20240101"/>
+                            <component>
+                                <observation classCode="OBS" moodCode="EVN">
+                                    <templateId root="2.16.840.1.113883.10.20.1.31"/>
+                                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.13.2"/>
+                                    <id root="1.2.3.4.5.6.7.8.9" extension="BP001"/>
+                                    <code code="35094-2" codeSystem="2.16.840.1.113883.6.1" displayName="Blood pressure"/>
+                                    <text>140/90 mmHg</text>
+                                    <statusCode code="completed"/>
+                                    <effectiveTime value="20240101"/>
+                                    <value xsi:type="PQ" value="140" unit="mm[Hg]"/>
+                                    <component>
+                                        <observation classCode="OBS" moodCode="EVN">
+                                            <code code="8462-4" codeSystem="2.16.840.1.113883.6.1" displayName="Diastolic blood pressure"/>
+                                            <value xsi:type="PQ" value="90" unit="mm[Hg]"/>
+                                        </observation>
+                                    </component>
+                                </observation>
+                            </component>
+                        </organizer>
+                    </entry>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>

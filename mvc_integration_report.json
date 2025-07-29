@@ -1,0 +1,1606 @@
+{
+  "timestamp": "2025-07-28T22:35:14.963061",
+  "environment": "training",
+  "languages": [
+    "en",
+    "fr",
+    "de"
+  ],
+  "dry_run": true,
+  "local_mvc_import": {
+    "file_path": "MVC_9.0.0.xlsx",
+    "status": "success",
+    "sheets_analyzed": [
+      {
+        "name": "Info",
+        "rows": 4,
+        "columns": [
+          "VALUE SET CATALOG INFO",
+          "Unnamed: 1"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 1"
+        }
+      },
+      {
+        "name": "Introduction",
+        "rows": 3,
+        "columns": [
+          "Introduction"
+        ],
+        "key_columns": {}
+      },
+      {
+        "name": "Changelog 8.1.0 - 9.0.0",
+        "rows": 86358,
+        "columns": [
+          "All changes made to MVC 8.1.0 to produce MVC 9.0.0",
+          "Unnamed: 1",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5",
+          "Unnamed: 6",
+          "Unnamed: 7"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 1"
+        }
+      },
+      {
+        "name": "AdministrativeGender",
+        "rows": 10,
+        "columns": [
+          "Value Set ID",
+          "2.16.840.1.113883.4.642.3.1",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "AllergyIntoleranceCategory",
+        "rows": 10,
+        "columns": [
+          "Value Set ID",
+          "2.16.840.1.113883.4.642.3.133",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "CompositionStatus",
+        "rows": 10,
+        "columns": [
+          "Value Set ID",
+          "2.16.840.1.113883.4.642.3.241",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "ConditionClinicalStatusCodes",
+        "rows": 12,
+        "columns": [
+          "Value Set ID",
+          "2.16.840.1.113883.4.642.3.164",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "DiagnosticReportStatus",
+        "rows": 16,
+        "columns": [
+          "Value Set ID",
+          "2.16.840.1.113883.4.642.3.235",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAbsentOrUnknownAllergy",
+        "rows": 11,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.47",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAbsentOrUnknownDevice",
+        "rows": 8,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.48",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAbsentOrUnknownMedication",
+        "rows": 8,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.49",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAbsentOrUnknownProblem",
+        "rows": 8,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.50",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAbsentOrUnknownProcedure",
+        "rows": 8,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.51",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIActiveIngredient",
+        "rows": 6903,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.24",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAdministrativeGender",
+        "rows": 9,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.34",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAdmissionUrgency",
+        "rows": 10,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.83",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAdverseEventType",
+        "rows": 9,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.18",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAllergyCertainty",
+        "rows": 9,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.58",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAllergenNoDrug",
+        "rows": 476,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.19",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAllergyStatus",
+        "rows": 9,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.59",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAnatomicalRegion",
+        "rows": 16,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.100",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAnimalSpecies",
+        "rows": 28,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.72",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIAnthropometricCode",
+        "rows": 25,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.89",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIBloodGroup",
+        "rows": 18,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.20",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIBloodGroupLab",
+        "rows": 213,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.105",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIBloodPressure",
+        "rows": 8,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.21",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIBodySite",
+        "rows": 37262,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.65",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIBodySiteLaterality",
+        "rows": 9,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.68",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIBodyStructureLocQual",
+        "rows": 31,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.80",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSICertainty",
+        "rows": 11,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.64",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIClinicalSpecialty",
+        "rows": 267,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.101",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIClinLocRoleType",
+        "rows": 118,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.85",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSICodeProb",
+        "rows": 13,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.23",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIConditionPOA",
+        "rows": 8,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.87",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSICountry",
+        "rows": 255,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.4",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSICriticality",
+        "rows": 9,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.57",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSICurrentPregnancyStatus",
+        "rows": 11,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.60",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIDataAbsentReason",
+        "rows": 21,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.92",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIDischargeDisposition",
+        "rows": 16,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.84",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIDisplayLabel",
+        "rows": 166,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.46",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIDocumentCode",
+        "rows": 12,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.32",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIDoseForm",
+        "rows": 648,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.2",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIEncounterClass",
+        "rows": 11,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.82",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIEventTiming",
+        "rows": 18,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.95",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIExceptionalValue",
+        "rows": 9,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.81",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIHealthcareProfessionalRole",
+        "rows": 45,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.1",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIHospitalDischargeReportTyp",
+        "rows": 7,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.53",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIllnessandDisorder",
+        "rows": 14164,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.5",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIImagingCode",
+        "rows": 6770,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.90",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIImagingFinding",
+        "rows": 610,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.104",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIImagingObservationMethod",
+        "rows": 15,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.102",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIImagingProcedure",
+        "rows": 6731,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.91",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSILabCode",
+        "rows": 57653,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.70",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSILaboratoryReportType",
+        "rows": 7,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.52",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSILabTechnique",
+        "rows": 148,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.79",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSILabSpecimenType",
+        "rows": 1817,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.67",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSILabStudyType",
+        "rows": 13,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.66",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSILanguage",
+        "rows": 386,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.6",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIMediaType",
+        "rows": 20,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.103",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIMedicalDevice",
+        "rows": 1190,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.8",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIMedicalImagesType",
+        "rows": 7,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.55",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIMedicalImagingReportType",
+        "rows": 7,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.54",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIMedicationStatusReason",
+        "rows": 243,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.97",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIMicroorganism",
+        "rows": 22871,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.78",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIModality",
+        "rows": 57,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.98",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIMorphologicAbnormality",
+        "rows": 5206,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.69",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSINullFlavor",
+        "rows": 17,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.37",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIObservationCategory",
+        "rows": 10,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.71",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIObservationInterpretation",
+        "rows": 45,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.73",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIOncologyDisease",
+        "rows": 1148,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.93",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIOutcomeOfPregnancy",
+        "rows": 14,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.62",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIPackage",
+        "rows": 85,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.3",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIPerformerFunction",
+        "rows": 20,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.76",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIPersonalRelationship",
+        "rows": 60,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.38",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIPregnancyInformation",
+        "rows": 9,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.9",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIPresenceAbsence",
+        "rows": 93,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.77",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIProcedure",
+        "rows": 6806,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.10",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIQuantityUnit",
+        "rows": 57,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.56",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIRareDisease",
+        "rows": 7451,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.63",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIReactionAllergy",
+        "rows": 69,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.11",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIReferenceRangeAppliesTo",
+        "rows": 8,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.75",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIReferenceRangeMeaning",
+        "rows": 17,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.74",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIResolutionOutcome",
+        "rows": 14,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.30",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIRoleClass",
+        "rows": 10,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.39",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIRouteofAdministration",
+        "rows": 91,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.12",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSISection",
+        "rows": 35,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.26",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSISeverity",
+        "rows": 12,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.13",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSISocialHistory",
+        "rows": 14,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.14",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSISpecimenCollectionMethod",
+        "rows": 508,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.94",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIStatusCode",
+        "rows": 14,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.15",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSISubstance",
+        "rows": 62185,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.61",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSISubstitutionCode",
+        "rows": 9,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.7",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSITechnicalModality",
+        "rows": 29,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.99",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSITelecomAddress",
+        "rows": 17,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.40",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSITimingEvent",
+        "rows": 19,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.41",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSITreatmentClass",
+        "rows": 8,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.88",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIUnit",
+        "rows": 895,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.16",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIVaccine",
+        "rows": 226,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.28",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "eHDSIVitalSignCode",
+        "rows": 19,
+        "columns": [
+          "Value Set ID",
+          "1.3.6.1.4.1.12559.11.10.1.3.1.42.96",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "MedicationRequestIntent",
+        "rows": 14,
+        "columns": [
+          "Value Set ID",
+          "2.16.840.1.113883.4.642.3.1321",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "MedicationRequestStatus",
+        "rows": 14,
+        "columns": [
+          "Value Set ID",
+          "2.16.840.1.113883.4.642.3.1320",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "MedicationStatusCodes",
+        "rows": 14,
+        "columns": [
+          "Value Set ID",
+          "2.16.840.1.113883.4.642.3.367",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "RequestPriority",
+        "rows": 10,
+        "columns": [
+          "Value Set ID",
+          "2.16.840.1.113883.4.642.3.115",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "SexParameterForClinicalUse",
+        "rows": 10,
+        "columns": [
+          "Value Set ID",
+          "2.16.840.1.113883.4.642.3.3181",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      },
+      {
+        "name": "v3.ConfidentialityClassificatio",
+        "rows": 12,
+        "columns": [
+          "Value Set ID",
+          "2.16.840.1.113883.1.11.10228",
+          "Unnamed: 2",
+          "Unnamed: 3",
+          "Unnamed: 4",
+          "Unnamed: 5"
+        ],
+        "key_columns": {
+          "name": "Unnamed: 2"
+        }
+      }
+    ],
+    "value_sets_found": 331142,
+    "value_sets_imported": 0,
+    "errors": []
+  },
+  "cts_synchronization": {
+    "environment": "training",
+    "languages": [
+      "en",
+      "fr",
+      "de"
+    ],
+    "status": "failed",
+    "mvc_sync": {},
+    "mtc_sync": {},
+    "errors": [
+      "CTS sync error: 'CTSAPIClient' object has no attribute 'country_code'"
+    ]
+  },
+  "summary": {
+    "Local MVC Import": "Found 331142 value sets, imported 0",
+    "CTS MVC Sync": "Fetched 0 value sets, updated 0",
+    "CTS MTC Sync": "Fetched 0 mappings, updated 0",
+    "Total Errors": 1,
+    "Overall Status": "Completed with errors"
+  }
+}

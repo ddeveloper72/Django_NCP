@@ -1,0 +1,247 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='translation_services' %}">Translation Services</a>
+    &rsaquo; <a href="{% url 'admin:translation_services_valuesetcatalogue_changelist' %}">Value Set Catalogues</a>
+    &rsaquo; Import MVC File
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module aligned">
+    <h1>{{ title }}</h1>
+
+    <div class="form-row">
+        <div class="form-help">
+            <h3>Import MVC File from EU Central Terminology Server</h3>
+            <p>
+                Use this interface to import Master Value Set Catalogue (MVC) data from the EU Central Terminology
+                Server.
+                The MVC file contains healthcare value sets and their concepts for cross-border healthcare services.
+            </p>
+
+            <div class="help-content" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <h4>What is an MVC File?</h4>
+                <ul>
+                    <li><strong>Master Value Set Catalogue</strong> - Contains standardized healthcare terminology</li>
+                    <li><strong>Multiple Sheets</strong> - Each sheet represents one value set (e.g., countries,
+                        languages, medical devices)</li>
+                    <li><strong>Concepts</strong> - Each value set contains multiple concepts with codes and
+                        descriptions</li>
+                    <li><strong>Multi-language</strong> - Supports translations for cross-border healthcare</li>
+                </ul>
+
+                <h4>Import Modes:</h4>
+                <ul>
+                    <li><strong>Sample Import</strong> - Import first 5 sheets only (recommended for testing)</li>
+                    <li><strong>Selective Import</strong> - Choose specific sheets to import</li>
+                    <li><strong>Full Import</strong> - Import all sheets (may take several minutes)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="form-horizontal">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="errornote">
+            <h3>Please correct the errors below:</h3>
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <fieldset class="module aligned">
+            <h2>File Upload</h2>
+
+            <div class="form-row field-mvc_file">
+                <div>
+                    <label for="{{ form.mvc_file.id_for_label }}" class="required">{{ form.mvc_file.label }}:</label>
+                    {{ form.mvc_file }}
+                    {% if form.mvc_file.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.mvc_file.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <div class="help">{{ form.mvc_file.help_text|safe }}</div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="module aligned">
+            <h2>Import Options</h2>
+
+            <div class="form-row field-import_mode">
+                <div>
+                    <label for="{{ form.import_mode.id_for_label }}" class="required">{{ form.import_mode.label
+                        }}:</label>
+                    {{ form.import_mode }}
+                    {% if form.import_mode.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.import_mode.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <div class="help">{{ form.import_mode.help_text|safe }}</div>
+                </div>
+            </div>
+
+            <div class="form-row field-selected_sheets">
+                <div>
+                    <label for="{{ form.selected_sheets.id_for_label }}">{{ form.selected_sheets.label }}:</label>
+                    {{ form.selected_sheets }}
+                    {% if form.selected_sheets.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.selected_sheets.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <div class="help">{{ form.selected_sheets.help_text|safe }}</div>
+                </div>
+            </div>
+
+            <div class="form-row field-overwrite_existing">
+                <div>
+                    <label for="{{ form.overwrite_existing.id_for_label }}">
+                        {{ form.overwrite_existing }} {{ form.overwrite_existing.label }}
+                    </label>
+                    {% if form.overwrite_existing.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.overwrite_existing.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <div class="help">{{ form.overwrite_existing.help_text|safe }}</div>
+                </div>
+            </div>
+
+            <div class="form-row field-dry_run">
+                <div>
+                    <label for="{{ form.dry_run.id_for_label }}">
+                        {{ form.dry_run }} {{ form.dry_run.label }}
+                    </label>
+                    {% if form.dry_run.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.dry_run.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <div class="help">{{ form.dry_run.help_text|safe }}</div>
+                </div>
+            </div>
+
+            <div class="form-row field-async_import">
+                <div>
+                    <label for="id_async_import">
+                        <input type="checkbox" name="async_import" id="id_async_import" value="1" checked>
+                        Run import in background (Recommended)
+                    </label>
+                    <div class="help">
+                        <strong>Background Import:</strong> When enabled, the import runs asynchronously and you can
+                        safely navigate away from this page.
+                        You'll receive a task ID to track progress. For large files, this prevents browser timeouts and
+                        server issues.
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="submit-row">
+            <input type="submit" value="Start Import" class="default" id="submit-btn" />
+            <a href="{% url 'admin:translation_services_valuesetcatalogue_changelist' %}"
+                class="button cancel-link">Cancel</a>
+        </div>
+    </form>
+
+    <!-- Progress indicator (hidden initially) -->
+    <div id="progress-indicator"
+        style="display: none; margin-top: 20px; padding: 20px; background: #e8f4fd; border-radius: 5px;">
+        <h3>Import in Progress...</h3>
+        <div class="progress-bar-container"
+            style="background: #ddd; border-radius: 10px; height: 20px; margin: 10px 0;">
+            <div id="progress-bar"
+                style="background: #28a745; height: 100%; border-radius: 10px; width: 0%; transition: width 0.3s;">
+            </div>
+        </div>
+        <div id="progress-message">Preparing import...</div>
+        <p><small>You can safely navigate away from this page. The import will continue in the background.</small></p>
+    </div>
+
+    <div class="help-section" style="margin-top: 30px; padding: 20px; background: #e8f4fd; border-radius: 5px;">
+        <h3>Need Help?</h3>
+        <ul>
+            <li>MVC files are available from the <a
+                    href="https://webgate.ec.europa.eu/cas/login?TARGET=https%3A%2F%2Fterminology.ehdsi.eu%2F"
+                    target="_blank">EU Central Terminology Server</a></li>
+            <li>For large imports, consider using selective mode to import specific value sets</li>
+            <li>Always test with a sample import first before doing a full import</li>
+            <li>Check the <a href="{% url 'admin:translation_services_mvcsynclog_changelist' %}">MVC Sync Logs</a> to
+                monitor import progress</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // Show/hide selected sheets field based on import mode
+    document.addEventListener('DOMContentLoaded', function () {
+        const importModeRadios = document.querySelectorAll('input[name="import_mode"]');
+        const selectedSheetsRow = document.querySelector('.form-row.field-selected_sheets');
+        const asyncCheckbox = document.getElementById('id_async_import');
+        const submitBtn = document.getElementById('submit-btn');
+        const progressIndicator = document.getElementById('progress-indicator');
+
+        function toggleSelectedSheets() {
+            const selectedMode = document.querySelector('input[name="import_mode"]:checked').value;
+            if (selectedMode === 'selective') {
+                selectedSheetsRow.style.display = 'block';
+            } else {
+                selectedSheetsRow.style.display = 'none';
+            }
+        }
+
+        importModeRadios.forEach(radio => {
+            radio.addEventListener('change', toggleSelectedSheets);
+        });
+
+        // Update submit button text based on async mode
+        function updateSubmitButton() {
+            if (asyncCheckbox.checked) {
+                submitBtn.value = 'Start Background Import';
+            } else {
+                submitBtn.value = 'Import Now (Synchronous)';
+            }
+        }
+
+        asyncCheckbox.addEventListener('change', updateSubmitButton);
+
+        // Handle form submission for async imports
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function (e) {
+            if (asyncCheckbox.checked) {
+                // Show progress indicator for async imports
+                progressIndicator.style.display = 'block';
+                submitBtn.disabled = true;
+                submitBtn.value = 'Starting Import...';
+
+                // The form will submit normally and redirect to progress page
+                // No need to prevent default for async imports
+            }
+        });
+
+        // Initial states
+        toggleSelectedSheets();
+        updateSubmitButton();
+    });
+</script>
+{% endblock %}

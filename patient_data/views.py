@@ -1,3 +1,521 @@
-from django.shortcuts import render
+"""
+Patient Search Views
+Django views for cross-border patient search functionality
+"""
 
-# Create your views here.
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+from .models import (
+    MemberState,
+    PatientIdentifier,
+    PatientData,
+    AvailableService,
+    PatientServiceRequest,
+)
+
+# Import translation services
+from translation_services.core import TranslationServiceFactory
+from .patient_loader import patient_loader
+import json
+import logging
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
+
+@login_required
+def patient_search_view(request):
+    """Patient search page - replicates Java portal interface"""
+
+    # Get all active member states for country selection
+    member_states = MemberState.objects.filter(is_active=True).order_by("country_name")
+
+    context = {
+        "member_states": member_states,
+        "current_user": request.user,
+    }
+
+    if request.method == "POST":
+        return handle_patient_search(request, context)
+
+    return render(request, "patient_data/patient_search.html", context)
+
+
+def handle_patient_search(request, context):
+    """Handle patient search form submission"""
+
+    try:
+        logger.info("Starting patient search form handling")
+
+        # Extract form data
+        national_person_id = request.POST.get("national_person_id", "").strip()
+        birthdate_str = request.POST.get("birthdate", "").strip()
+        member_state_id = request.POST.get("member_state_id")
+        break_glass = request.POST.get("break_glass") == "on"
+        break_glass_reason = request.POST.get("break_glass_reason", "").strip()
+
+        logger.info(
+            f"Form data: patient_id={national_person_id}, birthdate={birthdate_str}, member_state_id={member_state_id}"
+        )
+
+        # Validation
+        errors = []
+
+        if not national_person_id:
+            errors.append("National Person Identifier is required")
+
+        if not birthdate_str:
+            errors.append("Birthdate is required")
+        else:
+            try:
+                # Parse birthdate (expecting yyyy/MM/dd format)
+                birthdate = datetime.strptime(birthdate_str, "%Y/%m/%d").date()
+            except ValueError:
+                errors.append("Birthdate must be in format yyyy/MM/dd")
+                birthdate = None
+
+        if not member_state_id:
+            errors.append("Please select a member state")
+        else:
+            try:
+                member_state = MemberState.objects.get(
+                    id=member_state_id, is_active=True
+                )
+                logger.info(
+                    f"Found member state: {member_state.country_name} with sample_oid: {member_state.sample_data_oid}"
+                )
+            except MemberState.DoesNotExist:
+                errors.append("Invalid member state selected")
+                member_state = None
+
+        if break_glass and not break_glass_reason:
+            errors.append("Break-the-glass reason is required for emergency access")
+
+        # Search for patient in both old sample data and new EU test data
+        patient_found = False
+        sample_patient_info = None
+
+        if not errors and member_state:
+            logger.info(
+                f"Searching for patient {national_person_id} in {member_state.country_name}"
+            )
+
+            # First, try to find patient in new EU test data (database)
+            try:
+                # Look for patient in PatientData table
+                eu_patient_data = PatientData.objects.filter(
+                    patient_identifier__patient_id=national_person_id,
+                    patient_identifier__home_member_state=member_state,
+                    birth_date=birthdate,
+                ).first()
+
+                if eu_patient_data:
+                    patient_found = True
+                    # Create compatible patient info object for session storage
+                    sample_patient_info = type(
+                        "PatientInfo",
+                        (),
+                        {
+                            "family_name": eu_patient_data.family_name or "",
+                            "given_name": eu_patient_data.given_name or "",
+                            "administrative_gender": eu_patient_data.administrative_gender
+                            or "",
+                            "birth_date_formatted": birthdate_str,
+                            "street": eu_patient_data.street or "",
+                            "city": eu_patient_data.city or "",
+                            "postal_code": eu_patient_data.postal_code or "",
+                            "country": eu_patient_data.country
+                            or member_state.country_name,
+                            "telephone": eu_patient_data.telephone or "",
+                            "email": eu_patient_data.email or "",
+                            "oid": f"EU_TEST_DATA_{member_state.country_code}",
+                        },
+                    )()
+                    logger.info(
+                        f"Patient {national_person_id} found in EU test data: {eu_patient_data.given_name} {eu_patient_data.family_name}"
+                    )
+                else:
+                    logger.info(
+                        f"Patient {national_person_id} not found in EU test data"
+                    )
+            except Exception as e:
+                logger.warning(f"Error searching EU test data: {e}")
+
+            # If not found in EU test data, try old sample data files
+            if not patient_found and member_state.sample_data_oid:
+                logger.info(
+                    f"Searching for patient {national_person_id} in legacy sample data OID {member_state.sample_data_oid}"
+                )
+
+                # Try to find patient in old sample data
+                found, patient_info, message = patient_loader.search_patient(
+                    member_state.sample_data_oid, national_person_id, birthdate_str
+                )
+
+                logger.info(f"Legacy search result: found={found}, message='{message}'")
+
+                if found:
+                    patient_found = True
+                    sample_patient_info = patient_info
+                    logger.info(
+                        f"Patient {national_person_id} found in legacy sample data: {message}"
+                    )
+                else:
+                    if patient_info:  # Patient exists but birth date doesn't match
+                        logger.info(
+                            f"Patient found in legacy data but {message.lower()}"
+                        )
+
+            # If patient not found in either source
+            if not patient_found:
+                if member_state.sample_data_oid:
+                    errors.append(
+                        f"Patient {national_person_id} not found in {member_state.country_name} (searched both EU test data and legacy sample data)"
+                    )
+                else:
+                    errors.append(
+                        f"Patient {national_person_id} not found in {member_state.country_name} EU test data"
+                    )
+        else:
+            logger.warning(
+                f"Validation failed: errors={errors}, member_state={member_state}"
+            )
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            context.update(
+                {
+                    "national_person_id": national_person_id,
+                    "birthdate": birthdate_str,
+                    "member_state_id": (
+                        int(member_state_id)
+                        if member_state_id and member_state_id.isdigit()
+                        else member_state_id
+                    ),
+                    "break_glass": break_glass,
+                    "break_glass_reason": break_glass_reason,
+                }
+            )
+            return render(request, "patient_data/patient_search.html", context)
+
+        # Check if patient identifier already exists
+        logger.info(
+            f"Creating patient identifier for {national_person_id} in {member_state.country_name}"
+        )
+
+        patient_identifier, created = PatientIdentifier.objects.get_or_create(
+            patient_id=national_person_id,
+            home_member_state=member_state,
+            defaults={
+                "id_root": member_state.home_community_id,
+                "id_extension": sample_patient_info.oid if sample_patient_info else "",
+            },
+        )
+
+        logger.info(
+            f"Patient identifier {'created' if created else 'found'}: ID={patient_identifier.id}"
+        )
+
+        # Store the sample patient info in session for use in results page
+        if sample_patient_info:
+            request.session[f"patient_info_{patient_identifier.id}"] = {
+                "family_name": sample_patient_info.family_name,
+                "given_name": sample_patient_info.given_name,
+                "administrative_gender": sample_patient_info.administrative_gender,
+                "birth_date": sample_patient_info.birth_date_formatted,
+                "street": sample_patient_info.street,
+                "city": sample_patient_info.city,
+                "postal_code": sample_patient_info.postal_code,
+                "country": sample_patient_info.country,
+                "telephone": sample_patient_info.telephone,
+                "email": sample_patient_info.email,
+                "oid": sample_patient_info.oid,
+            }
+
+        # Log the search attempt
+        logger.info(
+            f"Patient search initiated by {request.user.username} for "
+            f"patient {national_person_id} from {member_state.country_code}. "
+            f"Break glass: {break_glass}"
+        )
+
+        # In a real implementation, this would query the member state's NCP
+        # For now, we'll simulate the search and redirect to results
+        return redirect(
+            "patient_data:patient_search_results", patient_id=patient_identifier.id
+        )
+
+    except Exception as e:
+        logger.error(f"Error in patient search: {str(e)}", exc_info=True)
+        messages.error(request, f"An error occurred during patient search: {str(e)}")
+        return render(request, "patient_data/patient_search.html", context)
+
+
+@login_required
+def patient_search_results(request, patient_id):
+    """Display patient search results"""
+
+    try:
+        patient_identifier = PatientIdentifier.objects.get(id=patient_id)
+        member_state = patient_identifier.home_member_state
+
+        # Get available services for this member state
+        available_services = AvailableService.objects.filter(
+            member_state=member_state, is_active=True
+        ).order_by("service_type")
+
+        # Check if we already have data for this patient
+        existing_data = PatientData.objects.filter(
+            patient_identifier=patient_identifier
+        ).order_by("-access_timestamp")
+
+        # Get sample patient info from session
+        sample_patient_info = request.session.get(
+            f"patient_info_{patient_identifier.id}"
+        )
+
+        context = {
+            "patient_identifier": patient_identifier,
+            "member_state": member_state,
+            "available_services": available_services,
+            "existing_data": existing_data,
+            "sample_patient_info": sample_patient_info,
+            "current_user": request.user,
+        }
+
+        return render(request, "patient_data/patient_search_results.html", context)
+
+    except PatientIdentifier.DoesNotExist:
+        messages.error(request, "Patient identifier not found.")
+        return redirect("patient_search")
+
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def request_patient_service(request):
+    """AJAX endpoint to request a specific patient service"""
+
+    try:
+        data = json.loads(request.body)
+        patient_identifier_id = data.get("patient_identifier_id")
+        service_id = data.get("service_id")
+        consent_method = data.get("consent_method", "EXPLICIT")
+        break_glass_reason = data.get("break_glass_reason", "")
+
+        # Validate inputs
+        try:
+            patient_identifier = PatientIdentifier.objects.get(id=patient_identifier_id)
+            service = AvailableService.objects.get(id=service_id, is_active=True)
+        except (PatientIdentifier.DoesNotExist, AvailableService.DoesNotExist):
+            return JsonResponse(
+                {"success": False, "error": "Invalid patient identifier or service"}
+            )
+
+        # Create service request
+        service_request = PatientServiceRequest.objects.create(
+            patient_identifier=patient_identifier,
+            requested_service=service,
+            requested_by=request.user,
+            consent_method=consent_method,
+            consent_required=consent_method != "BREAK_GLASS",
+            consent_obtained=consent_method == "BREAK_GLASS",
+            status="PENDING",
+        )
+
+        # If break glass, create patient data record immediately
+        if consent_method == "BREAK_GLASS":
+            patient_data = PatientData.objects.create(
+                patient_identifier=patient_identifier,
+                accessed_by=request.user,
+                break_glass_access=True,
+                break_glass_reason=break_glass_reason,
+                break_glass_by=request.user,
+                break_glass_timestamp=timezone.now(),
+                # In real implementation, this would contain actual patient data
+                # from the member state's NCP
+                raw_patient_summary="<!-- Simulated patient data for break glass access -->",
+            )
+
+            service_request.status = "COMPLETED"
+            service_request.response_timestamp = timezone.now()
+            service_request.save()
+
+        # Log the request
+        logger.info(
+            f"Service request {service_request.request_id} created by {request.user.username} "
+            f"for {service.service_name} from {patient_identifier.home_member_state.country_code}. "
+            f"Consent method: {consent_method}"
+        )
+
+        return JsonResponse(
+            {
+                "success": True,
+                "request_id": str(service_request.request_id),
+                "status": service_request.status,
+                "message": f"{service.service_name} request submitted successfully",
+            }
+        )
+
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON data"})
+    except Exception as e:
+        logger.error(f"Error in service request: {str(e)}")
+        return JsonResponse(
+            {"success": False, "error": "An error occurred processing your request"}
+        )
+
+
+@login_required
+def patient_data_view(request, patient_data_id):
+    """View patient data with translations"""
+
+    try:
+        patient_data = PatientData.objects.get(id=patient_data_id)
+
+        # Check if user has permission to view this data
+        if patient_data.accessed_by != request.user and not request.user.is_staff:
+            messages.error(
+                request, "You don't have permission to view this patient data."
+            )
+            return redirect("patient_search")
+
+        context = {
+            "patient_data": patient_data,
+            "member_state": patient_data.patient_identifier.home_member_state,
+            "current_user": request.user,
+        }
+
+        return render(request, "patient_data/patient_data_view.html", context)
+
+    except PatientData.DoesNotExist:
+        messages.error(request, "Patient data not found.")
+        return redirect("patient_search")
+
+
+@login_required
+def consent_management(request, patient_identifier_id):
+    """Manage patient consent for data access"""
+
+    try:
+        patient_identifier = PatientIdentifier.objects.get(id=patient_identifier_id)
+
+        if request.method == "POST":
+            consent_given = request.POST.get("consent_given") == "on"
+
+            # Update or create patient data record with consent
+            patient_data, created = PatientData.objects.get_or_create(
+                patient_identifier=patient_identifier,
+                accessed_by=request.user,
+                defaults={
+                    "consent_given": consent_given,
+                    "consent_timestamp": timezone.now() if consent_given else None,
+                    "consent_given_by": request.user if consent_given else None,
+                },
+            )
+
+            if not created:
+                patient_data.consent_given = consent_given
+                patient_data.consent_timestamp = (
+                    timezone.now() if consent_given else None
+                )
+                patient_data.consent_given_by = request.user if consent_given else None
+                patient_data.save()
+
+            messages.success(
+                request,
+                f"Consent {'granted' if consent_given else 'revoked'} for patient {patient_identifier.patient_id}",
+            )
+
+            return redirect("patient_search_results", patient_id=patient_identifier.id)
+
+        context = {
+            "patient_identifier": patient_identifier,
+            "current_user": request.user,
+        }
+
+        return render(request, "patient_data/consent_management.html", context)
+
+    except PatientIdentifier.DoesNotExist:
+        messages.error(request, "Patient identifier not found.")
+        return redirect("patient_search")
+
+
+def patient_data_view(request, patient_data_id):
+    """
+    Display translated patient summary document
+    Integrates with translation services to show original and translated clinical data
+    """
+    try:
+        patient_data = get_object_or_404(PatientData, id=patient_data_id)
+        member_state = patient_data.patient_identifier.member_state
+
+        # Get translation service
+        terminology_service = TranslationServiceFactory.get_terminology_service()
+
+        # Sample FHIR data for demonstration (in real implementation, this would come from the NCP)
+        sample_fhir_bundle = {
+            "resourceType": "Bundle",
+            "id": f"patient-summary-{patient_data.patient_identifier.patient_id}",
+            "type": "document",
+            "entry": [
+                {
+                    "resource": {
+                        "resourceType": "AllergyIntolerance",
+                        "id": "allergy-1",
+                        "code": {
+                            "coding": [
+                                {
+                                    "system": "ICD-10",
+                                    "code": "T78.40",
+                                    "display": "Allergy, unspecified",
+                                }
+                            ]
+                        },
+                        "reaction": [
+                            {
+                                "manifestation": [
+                                    {
+                                        "coding": [
+                                            {
+                                                "system": "SNOMED-CT",
+                                                "code": "294505008",
+                                                "display": "Penicillin allergy",
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                    }
+                }
+            ],
+        }
+
+        # Translate FHIR bundle to target language (English for demo)
+        fhir_service = TranslationServiceFactory.get_fhir_translation_service()
+        translation_response = fhir_service.translate_fhir_bundle(
+            sample_fhir_bundle, "en-GB"
+        )
+
+        context = {
+            "patient_data": patient_data,
+            "member_state": member_state,
+            "translation_response": translation_response,
+            "fhir_bundle": translation_response.translated_document,
+            "translation_errors": translation_response.errors,
+            "translation_warnings": translation_response.warnings,
+        }
+
+        return render(request, "patient_data/patient_data_view.html", context)
+
+    except PatientData.DoesNotExist:
+        messages.error(request, "Patient data not found.")
+        return redirect("patient_data:patient_search")

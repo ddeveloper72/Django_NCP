@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Patient Summary - EU eHealth NCP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .document-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .document-header {
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .document-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .patient-section {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        margin: 1rem;
+        border-radius: 6px;
+    }
+
+    .section-header {
+        background: #e2e8f0;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid #cbd5e1;
+    }
+
+    .section-header.expandable {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .section-header.expandable:hover {
+        background: #cbd5e1;
+    }
+
+    .section-content {
+        padding: 1rem;
+    }
+
+    .patient-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .detail-row {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 1rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .detail-value {
+        color: #1e293b;
+    }
+
+    .document-metadata {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+        background: #f1f5f9;
+        border-radius: 4px;
+        margin: 1rem;
+    }
+
+    .metadata-item {
+        text-align: center;
+    }
+
+    .metadata-label {
+        font-size: 0.875rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .metadata-value {
+        font-weight: 600;
+        color: #1e293b;
+        margin-top: 0.25rem;
+    }
+
+    .clinical-section {
+        margin: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .clinical-header {
+        background: linear-gradient(135deg, #1e40af, #3b82f6);
+        color: white;
+        padding: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .subsection {
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .subsection-header {
+        background: #f8fafc;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        color: #374151;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .subsection-header:hover {
+        background: #f1f5f9;
+    }
+
+    .subsection-content {
+        padding: 1rem;
+        background: white;
+    }
+
+    .original-narrative {
+        background: #fefce8;
+        border-left: 4px solid #eab308;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+    }
+
+    .translated-coded {
+        background: #f0f9ff;
+        border-left: 4px solid #0ea5e9;
+        padding: 1rem;
+        border-radius: 4px;
+    }
+
+    .coded-data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .coded-data-table th,
+    .coded-data-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .coded-data-table th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #374151;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .coded-data-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .expand-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .expand-icon.expanded {
+        transform: rotate(90deg);
+    }
+
+    .access-info {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border-left: 4px solid #f59e0b;
+        padding: 1rem;
+        margin: 1rem;
+        border-radius: 4px;
+    }
+
+    .access-break-glass {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        border-left: 4px solid #ef4444;
+    }
+
+    .language-indicator {
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .collapsible-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .collapsible-content.expanded {
+        max-height: 2000px;
+    }
+
+    .back-nav {
+        margin: 1rem;
+    }
+
+    .back-button {
+        background: #6b7280;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .back-button:hover {
+        background: #4b5563;
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="document-container">
+    <div class="back-nav">
+        <a href="{% url 'patient_data:patient_search_results' patient_data.patient_identifier.id %}"
+            class="back-button">
+            ← Back to Search Results
+        </a>
+    </div>
+
+    <div class="document-header">
+        <h1 class="document-title">Patient Summary Document</h1>
+    </div>
+
+    <!-- Access Information -->
+    <div class="access-info {% if patient_data.break_glass_access %}access-break-glass{% endif %}">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong>Access Type:</strong> {{ patient_data.get_access_type }}
+                {% if patient_data.break_glass_access %}
+                - <strong>Emergency Access</strong>
+                {% endif %}
+            </div>
+            <div>
+                <strong>Accessed:</strong> {{ patient_data.access_timestamp|date:"Y-m-d H:i:s T" }}
+            </div>
+        </div>
+        {% if patient_data.break_glass_reason %}
+        <div style="margin-top: 0.5rem;">
+            <strong>Emergency Reason:</strong> {{ patient_data.break_glass_reason }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Patient Information Section -->
+    <div class="patient-section">
+        <div class="section-header">
+            <span>▼</span> Patient
+        </div>
+        <div class="patient-details-grid">
+            <div class="detail-row">
+                <div class="detail-label">Prefix</div>
+                <div class="detail-value">{{ patient_data.prefix|default:"-" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Family Name</div>
+                <div class="detail-value">{{ patient_data.family_name|default:"-" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Given Name</div>
+                <div class="detail-value">{{ patient_data.given_name|default:"-" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Primary Patient Identifier</div>
+                <div class="detail-value">{{ patient_data.patient_identifier.patient_id }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Gender</div>
+                <div class="detail-value">{{ patient_data.get_gender_display|default:"-" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Date of Birth</div>
+                <div class="detail-value">
+                    {% if patient_data.birth_date %}
+                    {{ patient_data.birth_date|date:"Y-m-d H:i:s T" }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Expandable Details Section -->
+        <div class="section-header expandable" onclick="toggleSection('patientDetails')">
+            <span class="expand-icon" id="patientDetailsIcon">▶</span> See details
+        </div>
+        <div class="collapsible-content" id="patientDetailsContent">
+            <div class="section-content">
+                <div class="detail-row">
+                    <div class="detail-label">Address</div>
+                    <div class="detail-value">{{ patient_data.address_line|default:"-" }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">City</div>
+                    <div class="detail-value">{{ patient_data.city|default:"-" }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Postal Code</div>
+                    <div class="detail-value">{{ patient_data.postal_code|default:"-" }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Country</div>
+                    <div class="detail-value">{{ patient_data.country|default:member_state.country_name }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Metadata -->
+    <div class="document-metadata">
+        <div class="metadata-item">
+            <div class="metadata-label">Creation Date of the Document</div>
+            <div class="metadata-value">{{ patient_data.access_timestamp|date:"Y-m-d H:i:s T" }}</div>
+        </div>
+        <div class="metadata-item">
+            <div class="metadata-label">Last Update of the Information</div>
+            <div class="metadata-value">{{ patient_data.access_timestamp|date:"Y-m-d H:i:s T" }}</div>
+        </div>
+        <div class="metadata-item">
+            <div class="metadata-label">Original Document Language</div>
+            <div class="metadata-value">
+                <span class="language-indicator">
+                    {{ member_state.language_code|upper }} - {{ member_state.country_name }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clinical Sections -->
+    {% if patient_data.raw_patient_summary %}
+    <!-- Allergies and Adverse Reactions -->
+    <div class="clinical-section">
+        <div class="clinical-header">
+            <span>▼ Allergies and adverse reactions Document</span>
+        </div>
+
+        <!-- Original Narrative -->
+        <div class="subsection">
+            <div class="subsection-header" onclick="toggleSection('allergiesOriginal')">
+                <span class="expand-icon" id="allergiesOriginalIcon">▶</span> Original narrative
+            </div>
+            <div class="collapsible-content" id="allergiesOriginalContent">
+                <div class="subsection-content">
+                    <div class="original-narrative">
+                        <p><strong>Original Language:</strong> {{ member_state.language_code|upper }}</p>
+                        <p>{{ patient_data.allergies_narrative|default:"No allergies information available in original
+                            language." }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Translated Coded -->
+        <div class="subsection">
+            <div class="subsection-header" onclick="toggleSection('allergiesTranslated')">
+                <span class="expand-icon" id="allergiesTranslatedIcon">▶</span> Translated coded
+            </div>
+            <div class="collapsible-content" id="allergiesTranslatedContent">
+                <div class="subsection-content">
+                    <div class="translated-coded">
+                        <table class="coded-data-table">
+                            <thead>
+                                <tr>
+                                    <th>Reaction Type</th>
+                                    <th>Clinical Manifestation</th>
+                                    <th>Agent</th>
+                                    <th>Duration</th>
+                                    <th>Severity</th>
+                                    <th>Criticality</th>
+                                    <th>Allergy Status</th>
+                                    <th>Certainty</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Allergic disposition</td>
+                                    <td>-</td>
+                                    <td>BETA-LACTAM ANTIBACTERIALS, PENICILLINS</td>
+                                    <td>From 2018-01-12 00:00:00 (CET)</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                                <!-- Additional allergy records would be rendered here -->
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">
+                            <em>Translated from {{ member_state.language_code|upper }} to English using EU terminology
+                                mapping services.</em>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Problem List -->
+    <div class="clinical-section">
+        <div class="clinical-header">
+            <span>▼ Problem list - Reported Problem list - Reported</span>
+        </div>
+
+        <!-- Original Narrative -->
+        <div class="subsection">
+            <div class="subsection-header" onclick="toggleSection('problemsOriginal')">
+                <span class="expand-icon" id="problemsOriginalIcon">▶</span> Original narrative
+            </div>
+            <div class="collapsible-content" id="problemsOriginalContent">
+                <div class="subsection-content">
+                    <div class="original-narrative">
+                        <p><strong>Original Language:</strong> {{ member_state.language_code|upper }}</p>
+                        <p>{{ patient_data.problems_narrative|default:"No problems information available in original
+                            language." }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Translated Coded -->
+        <div class="subsection">
+            <div class="subsection-header" onclick="toggleSection('problemsTranslated')">
+                <span class="expand-icon" id="problemsTranslatedIcon">▶</span> Translated coded
+            </div>
+            <div class="collapsible-content" id="problemsTranslatedContent">
+                <div class="subsection-content">
+                    <div class="translated-coded">
+                        <p>Structured problem list data would be displayed here after translation processing.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div style="padding: 2rem; text-align: center; color: #6b7280;">
+        <p>No clinical data available for this patient.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function toggleSection(sectionId) {
+        const content = document.getElementById(sectionId + 'Content');
+        const icon = document.getElementById(sectionId + 'Icon');
+
+        if (content.classList.contains('expanded')) {
+            content.classList.remove('expanded');
+            icon.classList.remove('expanded');
+            icon.textContent = '▶';
+        } else {
+            content.classList.add('expanded');
+            icon.classList.add('expanded');
+            icon.textContent = '▼';
+        }
+    }
+
+    // Initialize some sections as expanded
+    document.addEventListener('DOMContentLoaded', function () {
+        // You can auto-expand certain sections here if needed
+    });
+</script>
+{% endblock %}

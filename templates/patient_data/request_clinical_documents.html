@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Request Clinical Documents - EU eHealth NCP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .document-request-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .request-header {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: white;
+        padding: 1.5rem;
+    }
+
+    .patient-summary {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .request-form {
+        padding: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+    }
+
+    .form-section h4 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+
+    .format-selector {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .format-card {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .format-card:hover,
+    .format-card.selected {
+        border-color: #3498db;
+        background: #f0f8ff;
+    }
+
+    .format-card input[type="radio"] {
+        margin-right: 0.5rem;
+    }
+
+    .section-checkboxes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: white;
+        border-radius: 4px;
+    }
+
+    .language-selector {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .language-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .language-option:hover,
+    .language-option.selected {
+        background: #3498db;
+        color: white;
+        border-color: #3498db;
+    }
+
+    .request-button {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1.1rem;
+    }
+
+    .request-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+    }
+
+    .existing-documents {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: #e8f5e8;
+        border-radius: 6px;
+        border-left: 4px solid #27ae60;
+    }
+
+    .document-list {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0 0 0;
+    }
+
+    .document-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: white;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .document-info {
+        flex: 1;
+    }
+
+    .document-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-view {
+        background: #3498db;
+        color: white;
+    }
+
+    .btn-download {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .format-description {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0;
+    }
+
+    .feature-list li {
+        padding: 0.25rem 0;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .feature-list li:before {
+        content: "✓";
+        color: #27ae60;
+        margin-right: 0.5rem;
+    }
+
+    .back-button {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .back-button:hover {
+        background: #5a6268;
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="document-request-container">
+    <div class="request-header">
+        <a href="{% url 'patient_data:patient_search_results' patient_identifier.id %}" class="back-button">
+            ← Back to Patient
+        </a>
+        <h1>Request Clinical Documents</h1>
+        <p>Generate comprehensive patient summaries from clinical documents</p>
+    </div>
+
+    <div class="patient-summary">
+        <h3>Patient Information</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+            <div>
+                <strong>Patient ID:</strong> {{ patient_identifier.patient_id }}
+            </div>
+            <div>
+                <strong>Country:</strong> {{ member_state.country_name }} ({{ member_state.country_code }})
+            </div>
+            <div>
+                <strong>Access Date:</strong> {{ patient_data.access_timestamp|date:"Y-m-d H:i" }}
+            </div>
+        </div>
+    </div>
+
+    <div class="request-form">
+        <form method="post" id="documentRequestForm">
+            {% csrf_token %}
+
+            <!-- Document Format Selection -->
+            <div class="form-section">
+                <h4><i class="fas fa-file-alt"></i> Document Format</h4>
+                <p>Choose the clinical document format to process:</p>
+
+                <div class="format-selector">
+                    <div class="format-card" onclick="selectFormat('CDA')">
+                        <input type="radio" name="document_format" value="CDA" id="format_cda" checked>
+                        <label for="format_cda"><strong>Clinical Document Architecture (CDA)</strong></label>
+                        <div class="format-description">
+                            HL7 CDA R2 XML documents with structured clinical content
+                        </div>
+                        <ul class="feature-list">
+                            <li>Standardized medical terminology</li>
+                            <li>Structured narrative text</li>
+                            <li>Clinical coding (SNOMED, ICD-10)</li>
+                            <li>Digital signatures support</li>
+                        </ul>
+                    </div>
+
+                    <div class="format-card" onclick="selectFormat('FHIR_BUNDLE')">
+                        <input type="radio" name="document_format" value="FHIR_BUNDLE" id="format_fhir">
+                        <label for="format_fhir"><strong>FHIR Bundle</strong></label>
+                        <div class="format-description">
+                            Modern FHIR R4 bundles with discrete clinical resources
+                        </div>
+                        <ul class="feature-list">
+                            <li>Resource-based data model</li>
+                            <li>RESTful API compatibility</li>
+                            <li>Comprehensive FHIR datatypes</li>
+                            <li>Interoperability focus</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Language Selection -->
+            <div class="form-section">
+                <h4><i class="fas fa-language"></i> Target Language</h4>
+                <p>Select the language for the translated patient summary:</p>
+
+                <div class="language-selector">
+                    {% for lang_code, lang_name in available_languages.items %}
+                    <div class="language-option" onclick="selectLanguage('{{ lang_code }}')">
+                        <input type="radio" name="target_language" value="{{ lang_code }}" id="lang_{{ lang_code }}" {%
+                            if lang_code=='en' %}checked{% endif %}>
+                        <label for="lang_{{ lang_code }}">{{ lang_name }}</label>
+                    </div>
+                    {% empty %}
+                    <div class="language-option" onclick="selectLanguage('en')">
+                        <input type="radio" name="target_language" value="en" id="lang_en" checked>
+                        <label for="lang_en">English</label>
+                    </div>
+                    <div class="language-option" onclick="selectLanguage('fr')">
+                        <input type="radio" name="target_language" value="fr" id="lang_fr">
+                        <label for="lang_fr">French</label>
+                    </div>
+                    <div class="language-option" onclick="selectLanguage('de')">
+                        <input type="radio" name="target_language" value="de" id="lang_de">
+                        <label for="lang_de">German</label>
+                    </div>
+                    <div class="language-option" onclick="selectLanguage('es')">
+                        <input type="radio" name="target_language" value="es" id="lang_es">
+                        <label for="lang_es">Spanish</label>
+                    </div>
+                    <div class="language-option" onclick="selectLanguage('it')">
+                        <input type="radio" name="target_language" value="it" id="lang_it">
+                        <label for="lang_it">Italian</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Section Selection -->
+            <div class="form-section">
+                <h4><i class="fas fa-list-check"></i> Summary Sections</h4>
+                <p>Select which sections to include in the patient summary:</p>
+
+                <div style="margin-bottom: 1rem;">
+                    <button type="button" onclick="selectAllSections()" class="action-btn btn-view">Select All</button>
+                    <button type="button" onclick="deselectAllSections()" class="action-btn btn-download">Deselect
+                        All</button>
+                </div>
+
+                <div class="section-checkboxes">
+                    {% for section in summary_sections %}
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="include_sections" value="{{ section }}" id="section_{{ section }}"
+                            checked>
+                        <label for="section_{{ section }}">
+                            {% if section == 'patient_demographics' %}Patient Demographics
+                            {% elif section == 'conditions' %}Medical Conditions
+                            {% elif section == 'medications' %}Current Medications
+                            {% elif section == 'observations' %}Vital Signs & Lab Results
+                            {% elif section == 'procedures' %}Procedures & Interventions
+                            {% elif section == 'allergies' %}Allergies & Intolerances
+                            {% elif section == 'immunizations' %}Immunization History
+                            {% elif section == 'encounters' %}Healthcare Encounters
+                            {% elif section == 'diagnostic_reports' %}Diagnostic Reports
+                            {% else %}{{ section|title }}{% endif %}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Output Options -->
+            <div class="form-section">
+                <h4><i class="fas fa-download"></i> Output Options</h4>
+
+                <div class="checkbox-item">
+                    <input type="checkbox" name="generate_pdf" id="generate_pdf" checked>
+                    <label for="generate_pdf">Generate PDF summary for download</label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div style="text-align: center; margin-top: 2rem;">
+                <button type="submit" class="request-button">
+                    <i class="fas fa-play"></i> Process Clinical Document
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Existing Documents -->
+    {% if existing_documents %}
+    <div class="existing-documents">
+        <h4><i class="fas fa-history"></i> Previously Processed Documents</h4>
+        <p>Documents that have been previously processed for this patient:</p>
+
+        <ul class="document-list">
+            {% for doc in existing_documents %}
+            <li class="document-item">
+                <div class="document-info">
+                    <strong>{{ doc.get_document_type_display }}</strong> - {{ doc.language|upper }}
+                    <br>
+                    <small>Processed: {{ doc.created_at|date:"Y-m-d H:i" }} by {{
+                        doc.created_by.get_full_name|default:doc.created_by.username }}</small>
+                    <br>
+                    <small>Status: <span class="badge badge-{{ doc.processing_status }}">{{
+                            doc.get_processing_status_display }}</span></small>
+                </div>
+                <div class="document-actions">
+                    <a href="{% url 'patient_data:clinical_document_detail' doc.id %}" class="action-btn btn-view">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    {% if doc.pdf_content %}
+                    <a href="{% url 'patient_data:download_summary_pdf' doc.id %}" class="action-btn btn-download">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </a>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function selectFormat(format) {
+        // Remove selected class from all cards
+        document.querySelectorAll('.format-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        // Add selected class to clicked card
+        event.currentTarget.classList.add('selected');
+
+        // Check the radio button
+        document.getElementById('format_' + format.toLowerCase()).checked = true;
+    }
+
+    function selectLanguage(langCode) {
+        // Remove selected class from all language options
+        document.querySelectorAll('.language-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+
+        // Add selected class to clicked option
+        event.currentTarget.classList.add('selected');
+
+        // Check the radio button
+        document.getElementById('lang_' + langCode).checked = true;
+    }
+
+    function selectAllSections() {
+        document.querySelectorAll('input[name="include_sections"]').forEach(checkbox => {
+            checkbox.checked = true;
+        });
+    }
+
+    function deselectAllSections() {
+        document.querySelectorAll('input[name="include_sections"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    }
+
+    // Initialize selected cards
+    document.addEventListener('DOMContentLoaded', function () {
+        // Mark initially selected format
+        const selectedFormat = document.querySelector('input[name="document_format"]:checked');
+        if (selectedFormat) {
+            selectedFormat.closest('.format-card').classList.add('selected');
+        }
+
+        // Mark initially selected language
+        const selectedLanguage = document.querySelector('input[name="target_language"]:checked');
+        if (selectedLanguage) {
+            selectedLanguage.closest('.language-option').classList.add('selected');
+        }
+    });
+
+    // Form submission
+    document.getElementById('documentRequestForm').addEventListener('submit', function (e) {
+        const submitButton = this.querySelector('.request-button');
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitButton.disabled = true;
+    });
+</script>
+{% endblock %}

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # Patient Data and Translation Services
     "patient_data",
     "translation_manager",
+    "translation_services",
     # Third-party apps for eHealth functionality
     "rest_framework",
     "corsheaders",

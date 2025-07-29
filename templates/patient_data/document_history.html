@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Document History - {{ patient_data.given_name }} {{ patient_data.family_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4><i class="fas fa-history"></i> Clinical Document History</h4>
+                        <a href="{% url 'patient_data:request_clinical_documents' patient_data.id %}"
+                            class="btn btn-light btn-sm">
+                            <i class="fas fa-plus"></i> Request New Document
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Patient Information -->
+                    <div class="alert alert-info">
+                        <h5>Patient Information</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Name:</strong> {{ patient_data.given_name }} {{ patient_data.family_name }}
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Birth Date:</strong> {{ patient_data.birth_date|date:"d/m/Y" }}
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Member State:</strong> {{ patient_identifier.home_member_state.country_name }}
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Patient ID:</strong> {{ patient_identifier.patient_id }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if doc_requests %}
+                    <!-- Document Requests Table -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Request Date</th>
+                                    <th>Document Type</th>
+                                    <th>Status</th>
+                                    <th>Consent Method</th>
+                                    <th>Purpose</th>
+                                    <th>Title</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in doc_requests %}
+                                <tr>
+                                    <td>
+                                        <div class="small">
+                                            {{ request.request_date|date:"d/m/Y" }}<br>
+                                            <span class="text-muted">{{ request.request_date|time:"H:i" }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ request.document_type }}</span>
+                                    </td>
+                                    <td>
+                                        {% if request.status == 'COMPLETED' %}
+                                        <span class="badge bg-success">{{ request.status }}</span>
+                                        {% elif request.status == 'PENDING' %}
+                                        <span class="badge bg-warning text-dark">{{ request.status }}</span>
+                                        {% elif request.status == 'FAILED' %}
+                                        <span class="badge bg-danger">{{ request.status }}</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ request.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="small">{{ request.consent_method }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="small">{{ request.purpose_of_use }}</span>
+                                    </td>
+                                    <td>
+                                        {% if request.status == 'COMPLETED' and request.clinicaldocument %}
+                                        {{ request.clinicaldocument.title }}
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            {% if request.status == 'COMPLETED' and request.clinicaldocument %}
+                                            <a href="{% url 'view_clinical_document' request.id %}"
+                                                class="btn btn-outline-primary btn-sm" title="View Document">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+
+                                            {% if request.clinicaldocument.has_embedded_pdf %}
+                                            <a href="{% url 'download_document_pdf' request.id %}"
+                                                class="btn btn-outline-danger btn-sm" title="Download PDF">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                            {% endif %}
+
+                                            <a href="{% url 'download_document_raw' request.id %}"
+                                                class="btn btn-outline-secondary btn-sm" title="Download Raw Data">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            {% elif request.status == 'PENDING' %}
+                                            <span class="btn btn-sm btn-outline-warning disabled">
+                                                <i class="fas fa-clock"></i> Processing
+                                            </span>
+                                            {% elif request.status == 'FAILED' %}
+                                            <span class="btn btn-sm btn-outline-danger disabled">
+                                                <i class="fas fa-exclamation-triangle"></i> Failed
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Summary Statistics -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h4 class="text-primary">{{ doc_requests|length }}</h4>
+                                    <p class="mb-0">Total Requests</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h4 class="text-success">
+                                        {% with completed=doc_requests|dictsort:"status" %}
+                                        {{ doc_requests|length|add:"-1"|add:"1" }}
+                                        {% endwith %}
+                                    </h4>
+                                    <p class="mb-0">Completed</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h4 class="text-warning">0</h4>
+                                    <p class="mb-0">Pending</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h4 class="text-danger">0</h4>
+                                    <p class="mb-0">Failed</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <!-- No Requests Found -->
+                    <div class="text-center py-5">
+                        <i class="fas fa-file-medical fa-3x text-muted mb-3"></i>
+                        <h5>No Clinical Document Requests Found</h5>
+                        <p class="text-muted">
+                            No clinical documents have been requested for this patient yet.
+                        </p>
+                        <a href="{% url 'patient_data:request_clinical_documents' patient_data.id %}"
+                            class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Request First Document
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Navigation -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'patient_data:patient_search_results' patient_identifier.id %}"
+                            class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Patient Details
+                        </a>
+                        <a href="{% url 'patient_data:patient_search' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-search"></i> Search Other Patients
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add tooltips to action buttons
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Auto-refresh for pending requests (every 30 seconds)
+        const hasPendingRequests = document.querySelector('.badge.bg-warning');
+        if (hasPendingRequests) {
+            setTimeout(function () {
+                location.reload();
+            }, 30000);
+        }
+    });
+</script>
+{% endblock %}

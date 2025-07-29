@@ -1,0 +1,959 @@
+<ClinicalDocument xmlns="urn:hl7-org:v3" classCode="DOCCLIN" moodCode="EVN">
+   <realmCode code="LU"/>
+   <typeId extension="POCD_HD000040" root="2.16.840.1.113883.1.3"/>
+   <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.1.3"/>
+   <id extension="1" root="1.3.182.3.1.1.10000734.6.3.1.20240603091854"/>
+   <code code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Patient summary Document"><translation code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Résumé Patient"/></code>
+   <title>Résumé patient</title>
+   <effectiveTime value="20240603111854+0200"/>
+   <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" codeSystemName="Confidentiality" codeSystemVersion="2018-08-12" displayName="normal"><translation code="N" codeSystem="2.16.840.1.113883.5.25" codeSystemName="Confidentiality" displayName="Normal"/></confidentialityCode>
+   <languageCode code="fr-LU"/>
+   <versionNumber value="1"/>
+   <recordTarget>
+      <patientRole>
+         <id extension="3843082788" root="1.3.182.2.4.2"/>
+         <id extension="1968101545978" root="1.3.182.4.4"/>
+         <addr use="H">
+            <streetAddressLine>1133 RUE DES PRES</streetAddressLine>
+            <postalCode>9160</postalCode>
+            <city>INGELDORF</city>
+            <country>LU</country>
+         </addr>
+         <telecom use="H" value="tel:+352-12778182"/>
+         <telecom use="MC" value="tel:+352-691-123456"/>
+         <telecom use="H" value="mailto:celestina@pt-test.lu"/>
+         <patient>
+            <name>
+               <family>DOE-CALLA</family>
+               <given>CELESTINA</given>
+            </name>
+            <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1" codeSystemName="AdministrativeGender" codeSystemVersion="913-20091020" displayName="Female"><translation code="F" codeSystem="2.16.840.1.113883.5.1" codeSystemName="AdministrativeGender" displayName="Féminin"/></administrativeGenderCode>
+            <birthTime value="19681015"/>
+         </patient>
+      </patientRole>
+   </recordTarget>
+   <author>
+      <time value="20240603111854+0200"/>
+      <assignedAuthor classCode="ASSIGNED">
+         <id extension="2999980475" root="1.3.182.4.1"/>
+         <addr use="WP">
+            <streetAddressLine>2-4, route Eugène Ruppert</streetAddressLine>
+            <postalCode>2453</postalCode>
+            <city>Luxembourg</city>
+            <country>LU</country>
+         </addr>
+         <telecom use="H" value="tel:(352)2712501839"/>
+         <assignedPerson>
+            <name>
+               <family>FERRING</family>
+               <given>JENS</given>
+            </name>
+         </assignedPerson>
+         <representedOrganization>
+            <id extension="2999980475" root="1.3.182.4.1"/>
+            <name>Cabinet Médicale</name>
+            <telecom use="H" value="tel:(352)2712501839"/>
+            <addr use="WP">
+               <streetAddressLine>2-4, route Eugène Ruppert</streetAddressLine>
+               <postalCode>2453</postalCode>
+               <city>Luxembourg</city>
+               <country>LU</country>
+            </addr>
+         </representedOrganization>
+      </assignedAuthor>
+   </author>
+   <custodian>
+      <assignedCustodian>
+         <representedCustodianOrganization>
+            <id extension="2999980475" root="1.3.182.4.1"/>
+            <name>Cabinet Médicale</name>
+            <telecom use="H" value="tel:(352)2712501839"/>
+            <addr use="WP">
+               <streetAddressLine>2-4, route Eugène Ruppert</streetAddressLine>
+               <postalCode>2453</postalCode>
+               <city>Luxembourg</city>
+               <country>LU</country>
+            </addr>
+         </representedCustodianOrganization>
+      </assignedCustodian>
+   </custodian>
+   <legalAuthenticator>
+      <time value="20240603111854+0200"/>
+      <signatureCode code="S"/>
+      <assignedEntity>
+         <id extension="2999980475" root="1.3.182.4.1"/>
+         <addr use="WP">
+            <streetAddressLine>2-4, route Eugène Ruppert</streetAddressLine>
+            <postalCode>2453</postalCode>
+            <city>Luxembourg</city>
+            <country>LU</country>
+         </addr>
+         <telecom use="H" value="tel:(352)2712501839"/>
+         <assignedPerson>
+            <name>
+               <family>FERRING</family>
+               <given>JENS</given>
+            </name>
+         </assignedPerson>
+         <representedOrganization>
+            <id extension="2999980475" root="1.3.182.4.1"/>
+            <name>Cabinet Médicale</name>
+            <telecom use="H" value="tel:(352)2712501839"/>
+            <addr use="WP">
+               <streetAddressLine>2-4, route Eugène Ruppert</streetAddressLine>
+               <postalCode>2453</postalCode>
+               <city>Luxembourg</city>
+               <country>LU</country>
+            </addr>
+         </representedOrganization>
+      </assignedEntity>
+   </legalAuthenticator>
+   <participant typeCode="IND">
+      <templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.4"/>
+      <functionCode code="PCP" codeSystem="2.16.840.1.113883.5.88"/>
+      <associatedEntity classCode="PRS">
+         <addr use="WP">
+            <streetAddressLine>2-4, route Eugène Ruppert</streetAddressLine>
+            <postalCode>2453</postalCode>
+            <city>Luxembourg</city>
+            <country>LU</country>
+         </addr>
+         <telecom use="H" value="tel:(352)2712501839"/>
+         <associatedPerson>
+            <name>
+               <family>FERRING</family>
+               <given>JENS</given>
+            </name>
+         </associatedPerson>
+      </associatedEntity>
+   </participant>
+   <documentationOf typeCode="DOC">
+      <serviceEvent classCode="PCPR" moodCode="EVN">
+         <code nullFlavor="UNK"/>
+         <effectiveTime>
+            <low value="20240603101854+0200"/>
+            <high value="20240603111854+0200"/>
+         </effectiveTime>
+      </serviceEvent>
+   </documentationOf>
+   <relatedDocument typeCode="XFRM">
+      <parentDocument>
+         <id root="1.3.182.3.1.1.10000734.6.3.1.20240603091854"/>
+      </parentDocument>
+   </relatedDocument>
+   <component>
+      <structuredBody>
+         <component>
+            <section>
+               <templateId root="2.16.840.1.113883.10.20.1.8"/>
+               <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.3"/>
+               <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of Medication use Narrative"><translation code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Historique de la prise médicamenteuse"/></code>
+               <title>Historique de la prise médicamenteuse</title>
+               <text>
+                  <table>
+                     <thead>
+                        <tr>
+                           <th>Code</th>
+                           <th>Nom commercial</th>
+                           <th>Principe actif et dosage</th>
+                           <th>Forme pharmaceutique</th>
+                           <th>Route</th>
+                           <th>Posologie</th>
+                           <th>Date de début</th>
+                           <th>Date de fin</th>
+                           <th>Notes</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr ID="medication1">
+                           <td ID="medication1-code">2009050307</td>
+                           <td ID="medication1-nom">RETROVIR</td>
+                           <td ID="medication1-principe">zidovudine 10.0mg/ml</td>
+                           <td ID="medication1-forme">sol buv</td>
+                           <td ID="medication1-route">orale</td>
+                           <td ID="medication1-posologie">300 mg par 12 Heure</td>
+                           <td ID="medication1-start">01/08/2022</td>
+                           <td ID="medication1-end">18/08/2023</td>
+                           <td ID="medication1-notes">abc</td>
+                        </tr>
+                        <tr ID="medication2">
+                           <td ID="medication2-code">2007029189</td>
+                           <td ID="medication2-nom">VIREAD</td>
+                           <td ID="medication2-principe">ténofovir disoproxil fumarate 245.0mg</td>
+                           <td ID="medication2-forme">cp</td>
+                           <td ID="medication2-route">orale</td>
+                           <td ID="medication2-posologie">1 cp par Jour</td>
+                           <td ID="medication2-start">01/08/2022</td>
+                           <td ID="medication2-end">18/08/2023</td>
+                           <td ID="medication2-notes"/>
+                        </tr>
+                        <tr ID="medication3">
+                           <td ID="medication3-code">2008039720</td>
+                           <td ID="medication3-nom">VIRAMUNE</td>
+                           <td ID="medication3-principe">névirapine 200.0mg</td>
+                           <td ID="medication3-forme">cp</td>
+                           <td ID="medication3-route">orale</td>
+                           <td ID="medication3-posologie">1 cp par Jour</td>
+                           <td ID="medication3-start">01/08/2022</td>
+                           <td ID="medication3-end">18/08/2023</td>
+                           <td ID="medication3-notes"/>
+                        </tr>
+                     </tbody>
+                  </table>
+               </text>
+               <entry>
+                  <substanceAdministration classCode="SBADM" moodCode="EVN">
+                     <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.4"/>
+                     <id root="DD603E7A-F38C-466E-8EA5-ED17CCCC75E7"/>
+                     <text><reference value="#medication1"/></text>
+                     <statusCode code="completed"/>
+                     <effectiveTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                        <low value="20220801"/>
+                        <high value="20230818"/>
+                     </effectiveTime>
+                     <effectiveTime institutionSpecified="false" operator="A" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PIVL_TS">
+                        <period unit="h" value="12"/>
+                     </effectiveTime>
+                     <routeCode code="20053000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" codeSystemVersion="2025-01-07" displayName="Oral use"><translation code="38" codeSystem="1.3.182.5.31" codeSystemName="VIDAL ROUTES" displayName="orale"/></routeCode>
+                     <doseQuantity unit="mg" value="300"/>
+                     <consumable>
+                        <manufacturedProduct classCode="MANU">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.31"/>
+                           <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+                              <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.32"/>
+                              <code code="2009050307" codeSystem="1.3.182.5.47" codeSystemName="ESANTE DRUGS" displayName="RETROVIR">
+                                 <originalText><reference value="#medication1"/></originalText>
+                              </code>
+                              <name>RETROVIR</name>
+                              <pharm:formCode xmlns:pharm="urn:hl7-org:pharm" code="10105000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" codeSystemVersion="2025-01-07" displayName="Oral solution"><pharm:translation xmlns:pharm="urn:hl7-org:v3" code="461" codeSystem="1.3.182.5.36" codeSystemName="VIDAL FORMS" displayName="sol buv"/></pharm:formCode>
+                              <pharm:ingredient xmlns:pharm="urn:hl7-org:pharm" classCode="ACTI">
+                                 <pharm:quantity>
+                                    <cda:numerator xmlns:cda="urn:hl7-org:v3" unit="mg" value="10.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/>
+                                    <cda:denominator xmlns:cda="urn:hl7-org:v3" unit="mL" value="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/>
+                                 </pharm:quantity>
+                                 <pharm:ingredientSubstance classCode="MMAT" determinerCode="KIND">
+                                    <pharm:code code="J05AF01" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="zidovudine"><pharm:translation xmlns:pharm="urn:hl7-org:v3" code="3728" codeSystem="1.3.182.5.35" codeSystemName="VIDAL SUBSTANCES"/></pharm:code>
+                                    <pharm:name>zidovudine</pharm:name>
+                                 </pharm:ingredientSubstance>
+                              </pharm:ingredient>
+                           </manufacturedMaterial>
+                        </manufacturedProduct>
+                     </consumable>
+                  </substanceAdministration>
+               </entry>
+               <entry>
+                  <substanceAdministration classCode="SBADM" moodCode="EVN">
+                     <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.4"/>
+                     <id root="8FA0BED3-8884-4ED9-89D3-2B483F4D68A9"/>
+                     <text><reference value="#medication2"/></text>
+                     <statusCode code="completed"/>
+                     <effectiveTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                        <low value="20220801"/>
+                        <high value="20230818"/>
+                     </effectiveTime>
+                     <effectiveTime institutionSpecified="false" operator="A" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PIVL_TS">
+                        <period unit="d" value="1"/>
+                     </effectiveTime>
+                     <routeCode code="20053000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" codeSystemVersion="2025-01-07" displayName="Oral use"><translation code="38" codeSystem="1.3.182.5.31" codeSystemName="VIDAL ROUTES" displayName="orale"/></routeCode>
+                     <doseQuantity unit="1" value="1"/>
+                     <consumable>
+                        <manufacturedProduct classCode="MANU">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.31"/>
+                           <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+                              <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.32"/>
+                              <code code="2007029189" codeSystem="1.3.182.5.47" codeSystemName="ESANTE DRUGS" displayName="VIREAD">
+                                 <originalText><reference value="#medication2"/></originalText>
+                              </code>
+                              <name>VIREAD</name>
+                              <pharm:formCode xmlns:pharm="urn:hl7-org:pharm" code="10219000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" codeSystemVersion="2025-01-07" displayName="Tablet"><pharm:translation xmlns:pharm="urn:hl7-org:v3" code="59" codeSystem="1.3.182.5.36" codeSystemName="VIDAL FORMS" displayName="cp"/></pharm:formCode>
+                              <pharm:ingredient xmlns:pharm="urn:hl7-org:pharm" classCode="ACTI">
+                                 <pharm:quantity>
+                                    <cda:numerator xmlns:cda="urn:hl7-org:v3" unit="mg" value="245.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/>
+                                    <cda:denominator xmlns:cda="urn:hl7-org:v3" unit="1" value="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/>
+                                 </pharm:quantity>
+                                 <pharm:ingredientSubstance classCode="MMAT" determinerCode="KIND">
+                                    <pharm:code code="J05AF07" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="tenofovir disoproxil"><pharm:translation xmlns:pharm="urn:hl7-org:v3" code="18996" codeSystem="1.3.182.5.35" codeSystemName="VIDAL SUBSTANCES" displayName="ténofovir disoproxil fumarate"/></pharm:code>
+                                    <pharm:name>ténofovir disoproxil fumarate</pharm:name>
+                                 </pharm:ingredientSubstance>
+                              </pharm:ingredient>
+                           </manufacturedMaterial>
+                        </manufacturedProduct>
+                     </consumable>
+                  </substanceAdministration>
+               </entry>
+               <entry>
+                  <substanceAdministration classCode="SBADM" moodCode="EVN">
+                     <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.4"/>
+                     <id root="37876477-388A-44F9-9B3F-085476180624"/>
+                     <text><reference value="#medication3"/></text>
+                     <statusCode code="completed"/>
+                     <effectiveTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                        <low value="20220801"/>
+                        <high value="20230818"/>
+                     </effectiveTime>
+                     <effectiveTime institutionSpecified="false" operator="A" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PIVL_TS">
+                        <period unit="d" value="1"/>
+                     </effectiveTime>
+                     <routeCode code="20053000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" codeSystemVersion="2025-01-07" displayName="Oral use"><translation code="38" codeSystem="1.3.182.5.31" codeSystemName="VIDAL ROUTES" displayName="orale"/></routeCode>
+                     <doseQuantity unit="1" value="1"/>
+                     <consumable>
+                        <manufacturedProduct classCode="MANU">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.31"/>
+                           <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+                              <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.32"/>
+                              <code code="2008039720" codeSystem="1.3.182.5.47" codeSystemName="ESANTE DRUGS" displayName="VIRAMUNE">
+                                 <originalText><reference value="#medication3"/></originalText>
+                              </code>
+                              <name>VIRAMUNE</name>
+                              <pharm:formCode xmlns:pharm="urn:hl7-org:pharm" code="10219000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" codeSystemVersion="2025-01-07" displayName="Tablet"><pharm:translation xmlns:pharm="urn:hl7-org:v3" code="59" codeSystem="1.3.182.5.36" codeSystemName="VIDAL FORMS" displayName="cp"/></pharm:formCode>
+                              <pharm:ingredient xmlns:pharm="urn:hl7-org:pharm" classCode="ACTI">
+                                 <pharm:quantity>
+                                    <cda:numerator xmlns:cda="urn:hl7-org:v3" unit="mg" value="200.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/>
+                                    <cda:denominator xmlns:cda="urn:hl7-org:v3" unit="1" value="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/>
+                                 </pharm:quantity>
+                                 <pharm:ingredientSubstance classCode="MMAT" determinerCode="KIND">
+                                    <pharm:code code="J05AG01" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="nevirapine"><pharm:translation xmlns:pharm="urn:hl7-org:v3" code="18204" codeSystem="1.3.182.5.35" codeSystemName="VIDAL SUBSTANCES" displayName="névirapine"/></pharm:code>
+                                    <pharm:name>névirapine</pharm:name>
+                                 </pharm:ingredientSubstance>
+                              </pharm:ingredient>
+                           </manufacturedMaterial>
+                        </manufacturedProduct>
+                     </consumable>
+                  </substanceAdministration>
+               </entry>
+            </section>
+         </component>
+         <component>
+            <section>
+               <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.13"/>
+               <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.12"/>
+               <templateId root="2.16.840.1.113883.10.20.1.2"/>
+               <code code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Allergies and adverse reactions Document"><translation code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Allergies, effets indésirables, alertes"/></code>
+               <title>Allergies, effets indésirables, alertes</title>
+               <text>
+                  <table>
+                     <thead>
+                        <tr>
+                           <th>Code (SNOMED-CT)</th>
+                           <th>Type</th>
+                           <th>Agent</th>
+                           <th>Symptôme</th>
+                           <th>Gravité</th>
+                           <th>Date de début</th>
+                           <th>Date de fin</th>
+                           <th>Notes</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr ID="allergy1">
+                           <td ID="allergy1-code">416098002</td>
+                           <td ID="allergy1-type">Allergie médicamenteuse</td>
+                           <td ID="allergy1-participant">abacavir sulfate</td>
+                           <td ID="allergy1-manif">Anaphylaxie</td>
+                           <td ID="allergy1-sev">Sévère</td>
+                           <td ID="allergy1-start">01/08/2022</td>
+                           <td ID="allergy1-end"/>
+                           <td ID="allergy1-notes">note</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </text>
+               <entry>
+                  <act classCode="ACT" moodCode="EVN">
+                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.3"/>
+                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.16"/>
+                     <templateId root="2.16.840.1.113883.10.20.1.27"/>
+                     <code code="CONC" codeSystem="2.16.840.1.113883.5.6" codeSystemName="ActClass" displayName="concern"/>
+                     <statusCode code="active"/>
+                     <entryRelationship inversionInd="false" typeCode="SUBJ">
+                        <observation classCode="OBS" moodCode="EVN">
+                           <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.6"/>
+                           <templateId root="2.16.840.1.113883.10.20.1.28"/>
+                           <templateId root="2.16.840.1.113883.10.20.1.18"/>
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.17"/>
+                           <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+                           <id root="5BB5736A-0952-4D31-895C-B7C8F80E09C8"/>
+                           <code code="609328004" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Allergic disposition">
+                              <originalText><reference value="#allergy1"/></originalText>
+                           <translation code="416098002" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Allergie médicamenteuse"/></code>
+                           <text><reference value="#allergy1"/></text>
+                           <statusCode code="completed"/>
+                           <effectiveTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                              <low value="20220801"/>
+                              <high nullFlavor="UNK"/>
+                           </effectiveTime>
+                           <participant typeCode="CSM">
+                              <participantRole classCode="MANU">
+                                 <playingEntity classCode="MMAT">
+                                    <code code="J05AF06" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="abacavir">
+                                       <originalText><reference value="#allergy1"/></originalText>
+                                    <translation code="18416" codeSystem="1.3.182.5.35" codeSystemName="VIDAL SUBSTANCES" displayName="abacavir sulfate"/></code>
+                                 </playingEntity>
+                              </participantRole>
+                           </participant>
+                           <entryRelationship typeCode="MFST">
+                              <observation classCode="OBS" moodCode="EVN">
+                                 <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.44"/>
+                                 <id root="12D7318A-921C-42D6-9302-934D5C5230F7"/>
+                                 <code nullFlavor="UNK"/>
+                                 <text><reference value="#allergy1"/></text>
+                                 <statusCode code="completed"/>
+                                 <effectiveTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                                    <low value="20220801"/>
+                                    <high nullFlavor="UNK"/>
+                                 </effectiveTime>
+                                 <value code="39579001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Anaphylaxis" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CD">
+                                    <originalText><reference value="#allergy1"/></originalText>
+                                 <translation code="39579001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Anaphylaxie"/></value>
+                                 <entryRelationship inversionInd="true" typeCode="SUBJ">
+                                    <observation classCode="OBS" moodCode="EVN">
+                                       <templateId root="2.16.840.1.113883.10.20.1.55"/>
+                                       <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.8"/>
+                                       <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1"/>
+                                       <code code="SEV" codeSystem="2.16.840.1.113883.5.4" codeSystemName="ActCode" displayName="inconnue"/>
+                                       <text><reference value="#allergy1"/></text>
+                                       <statusCode code="completed"/>
+                                       <value code="24484000" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Severe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CD">
+                                          <originalText><reference value="#allergy1"/></originalText>
+                                       <translation code="24484000" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Sévère"/></value>
+                                    </observation>
+                                 </entryRelationship>
+                              </observation>
+                           </entryRelationship>
+                        </observation>
+                     </entryRelationship>
+                  </act>
+               </entry>
+            </section>
+         </component>
+         <component>
+            <section>
+               <templateId root="2.16.840.1.113883.10.20.1.6"/>
+               <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.15"/>
+               <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.23"/>
+               <code code="11369-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of Immunization Narrative"><translation code="11369-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Vaccinations"/></code>
+               <title>Vaccinations</title>
+               <text>
+                  <table>
+                     <thead>
+                        <tr>
+                           <th>Nom commercial</th>
+                           <th>Type</th>
+                           <th>Date d'administration</th>
+                           <th>Producteur</th>
+                           <th>Numéro de lot</th>
+                           <th>Date d'expiration</th>
+                           <th>Site</th>
+                           <th>Voie</th>
+                           <th>Status</th>
+                           <th>Quantité</th>
+                           <th>Vaccinateur</th>
+                           <th>Réaction</th>
+                           <th>Note</th>
+                           <th>Protocole</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr ID="vacc1">
+                           <td ID="vacc1-comName">BOOSTRIX-POLIO</td>
+                           <td ID="vacc1-type">Vaccin ant diphtérique</td>
+                           <td ID="vacc1-admDate">01/08/2022</td>
+                           <td ID="vacc1-producer">GSK</td>
+                           <td ID="vacc1-lotNum">123456789</td>
+                           <td ID="vacc1-expDate">31/08/2022</td>
+                           <td ID="vacc1-site">Bras supérieur droit</td>
+                           <td ID="vacc1-route">orale</td>
+                           <td ID="vacc1-status">Délivré </td>
+                           <td ID="vacc1-qte">Dose complète</td>
+                           <td ID="vacc1-hp"/>
+                           <td ID="vacc1-reaction">sevère</td>
+                           <td ID="vacc1-note"/>
+                           <td ID="vacc1-protocol"/>
+                        </tr>
+                        <tr ID="vacc2">
+                           <td ID="vacc2-comName">PREVENAR 13</td>
+                           <td ID="vacc2-type">Vaccin anti pneumococcique</td>
+                           <td ID="vacc2-admDate">01/09/2022</td>
+                           <td ID="vacc2-producer">Pfizer</td>
+                           <td ID="vacc2-lotNum">167813785</td>
+                           <td ID="vacc2-expDate"/>
+                           <td ID="vacc2-site">Bras supérieur droit</td>
+                           <td ID="vacc2-route">intramusculaire</td>
+                           <td ID="vacc2-status">Délivré </td>
+                           <td ID="vacc2-qte">Dose complète</td>
+                           <td ID="vacc2-hp"/>
+                           <td ID="vacc2-reaction"/>
+                           <td ID="vacc2-note"/>
+                           <td ID="vacc2-protocol"/>
+                        </tr>
+                        <tr ID="vacc3">
+                           <td ID="vacc3-comName">NEIS-VAC-C</td>
+                           <td ID="vacc3-type">Vaccin anti méningococcique</td>
+                           <td ID="vacc3-admDate">02/10/2022</td>
+                           <td ID="vacc3-producer">Pfizer</td>
+                           <td ID="vacc3-lotNum">9853788125</td>
+                           <td ID="vacc3-expDate"/>
+                           <td ID="vacc3-site">Bras supérieur droit</td>
+                           <td ID="vacc3-route">intramusculaire</td>
+                           <td ID="vacc3-status">Délivré </td>
+                           <td ID="vacc3-qte">Dose complète</td>
+                           <td ID="vacc3-hp"/>
+                           <td ID="vacc3-reaction"/>
+                           <td ID="vacc3-note"/>
+                           <td ID="vacc3-protocol"/>
+                        </tr>
+                        <tr ID="vacc4">
+                           <td ID="vacc4-comName">PRIORIX</td>
+                           <td ID="vacc4-type">Vaccin rougeole-oreillons-rubéole</td>
+                           <td ID="vacc4-admDate">08/09/2022</td>
+                           <td ID="vacc4-producer">GSK</td>
+                           <td ID="vacc4-lotNum">8321487624</td>
+                           <td ID="vacc4-expDate"/>
+                           <td ID="vacc4-site">Bras supérieur droit</td>
+                           <td ID="vacc4-route">intramusculaire</td>
+                           <td ID="vacc4-status">Délivré </td>
+                           <td ID="vacc4-qte">Dose complète</td>
+                           <td ID="vacc4-hp"/>
+                           <td ID="vacc4-reaction"/>
+                           <td ID="vacc4-note"/>
+                           <td ID="vacc4-protocol"/>
+                        </tr>
+                     </tbody>
+                  </table>
+               </text>
+               <entry>
+                  <substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="false">
+                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.19"/>
+                     <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.12"/>
+                     <id root="7FCA29FC-0049-4E3B-9D00-1F51886B4B79"/>
+                     <code code="IMMUNIZ" codeSystem="1.3.5.1.4.1.19376.1.5.3.2" codeSystemName="IHEActCode" displayName="inconnue"/>
+                     <text><reference value="#vacc1"/></text>
+                     <statusCode code="completed"/>
+                     <effectiveTime value="20220801"/>
+                     <routeCode code="38" codeSystem="1.3.182.5.31" codeSystemName="VIDAL ROUTES" displayName="orale"/>
+                     <approachSiteCode code="368209003" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Bras supérieur droit"/>
+                     <administrationUnitCode code="1" codeSystem="1.3.182.5.32" codeSystemName="VACCINATION DOSE" displayName="inconnue"/>
+                     <consumable typeCode="CSM">
+                        <manufacturedProduct classCode="MANU">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.18"/>
+                           <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7.2"/>
+                           <templateId root="2.16.840.1.113883.10.20.1.53"/>
+                           <id extension="85347940" root="1.3.182.4.17"/>
+                           <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+                              <code code="J07AF" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="Diphtheria vaccines">
+                                 <originalText><reference value="#vacc1"/></originalText>
+                              <translation code="428214002" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Vaccin ant diphtérique"/></code>
+                              <name>BOOSTRIX-POLIO</name>
+                              <lotNumberText>123456789</lotNumberText>
+                           </manufacturedMaterial>
+                           <manufacturerOrganization>
+                              <name>GSK</name>
+                           </manufacturerOrganization>
+                        </manufacturedProduct>
+                     </consumable>
+                     <entryRelationship typeCode="REFR">
+                        <observation classCode="OBS" moodCode="EVN">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.44"/>
+                           <id root="2FE2C6BC-04A2-4E67-B0FF-E73DB315ECED"/>
+                           <code nullFlavor="UNK"/>
+                           <text><reference value="#vacc1"/></text>
+                           <statusCode code="completed"/>
+                           <effectiveTime>
+                              <low value="20220801"/>
+                              <high nullFlavor="UNK"/>
+                           </effectiveTime>
+                           <value codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.42.5" codeSystemName="eHDSIIllnessandDisorder" nullFlavor="OTH" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CD">
+                              <originalText>sevère</originalText>
+                           </value>
+                        </observation>
+                     </entryRelationship>
+                  </substanceAdministration>
+               </entry>
+               <entry>
+                  <substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="false">
+                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.19"/>
+                     <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.12"/>
+                     <id root="1AE6A1A4-B77A-48B9-A98E-CDF20873053F"/>
+                     <code code="IMMUNIZ" codeSystem="1.3.5.1.4.1.19376.1.5.3.2" codeSystemName="IHEActCode" displayName="inconnue"/>
+                     <text><reference value="#vacc2"/></text>
+                     <statusCode code="completed"/>
+                     <effectiveTime value="20220901"/>
+                     <routeCode code="27" codeSystem="1.3.182.5.31" codeSystemName="VIDAL ROUTES" displayName="intramusculaire"/>
+                     <approachSiteCode code="368209003" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Bras supérieur droit"/>
+                     <administrationUnitCode code="1" codeSystem="1.3.182.5.32" codeSystemName="VACCINATION DOSE" displayName="inconnue"/>
+                     <consumable typeCode="CSM">
+                        <manufacturedProduct classCode="MANU">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.18"/>
+                           <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7.2"/>
+                           <templateId root="2.16.840.1.113883.10.20.1.53"/>
+                           <id extension="07045399" root="1.3.182.4.17"/>
+                           <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+                              <code code="J07AL" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="Pneumococcal vaccines">
+                                 <originalText><reference value="#vacc2"/></originalText>
+                              <translation code="333598008" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Vaccin anti pneumococcique"/></code>
+                              <name>PREVENAR 13</name>
+                              <lotNumberText>167813785</lotNumberText>
+                           </manufacturedMaterial>
+                           <manufacturerOrganization>
+                              <name>Pfizer</name>
+                           </manufacturerOrganization>
+                        </manufacturedProduct>
+                     </consumable>
+                     <entryRelationship typeCode="REFR">
+                        <observation classCode="OBS" moodCode="EVN">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.44"/>
+                           <id root="0490B3F6-6F0E-4427-98ED-C5422C181973"/>
+                           <code nullFlavor="UNK"/>
+                           <text><reference value="#vacc2"/></text>
+                           <statusCode code="completed"/>
+                           <effectiveTime>
+                              <low value="20220901"/>
+                              <high nullFlavor="UNK"/>
+                           </effectiveTime>
+                           <value codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.42.5" codeSystemName="eHDSIIllnessandDisorder" nullFlavor="OTH" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CD">
+                              <originalText/>
+                           </value>
+                        </observation>
+                     </entryRelationship>
+                  </substanceAdministration>
+               </entry>
+               <entry>
+                  <substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="false">
+                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.19"/>
+                     <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.12"/>
+                     <id root="EA04A0D8-5641-41E1-8822-1FE72EFCE40D"/>
+                     <code code="IMMUNIZ" codeSystem="1.3.5.1.4.1.19376.1.5.3.2" codeSystemName="IHEActCode" displayName="inconnue"/>
+                     <text><reference value="#vacc3"/></text>
+                     <statusCode code="completed"/>
+                     <effectiveTime value="20221002"/>
+                     <routeCode code="27" codeSystem="1.3.182.5.31" codeSystemName="VIDAL ROUTES" displayName="intramusculaire"/>
+                     <approachSiteCode code="368209003" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Bras supérieur droit"/>
+                     <administrationUnitCode code="1" codeSystem="1.3.182.5.32" codeSystemName="VACCINATION DOSE" displayName="inconnue"/>
+                     <consumable typeCode="CSM">
+                        <manufacturedProduct classCode="MANU">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.18"/>
+                           <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7.2"/>
+                           <templateId root="2.16.840.1.113883.10.20.1.53"/>
+                           <id extension="98406874" root="1.3.182.4.17"/>
+                           <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+                              <code code="J07AH" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="Meningococcal vaccines">
+                                 <originalText><reference value="#vacc3"/></originalText>
+                              <translation code="423531006" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Vaccin anti méningococcique"/></code>
+                              <name>NEIS-VAC-C</name>
+                              <lotNumberText>9853788125</lotNumberText>
+                           </manufacturedMaterial>
+                           <manufacturerOrganization>
+                              <name>Pfizer</name>
+                           </manufacturerOrganization>
+                        </manufacturedProduct>
+                     </consumable>
+                     <entryRelationship typeCode="REFR">
+                        <observation classCode="OBS" moodCode="EVN">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.44"/>
+                           <id root="EF998196-06CA-4EF1-BFA2-7B2EC6981088"/>
+                           <code nullFlavor="UNK"/>
+                           <text><reference value="#vacc3"/></text>
+                           <statusCode code="completed"/>
+                           <effectiveTime>
+                              <low value="20221002"/>
+                              <high nullFlavor="UNK"/>
+                           </effectiveTime>
+                           <value codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.42.5" codeSystemName="eHDSIIllnessandDisorder" nullFlavor="OTH" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CD">
+                              <originalText/>
+                           </value>
+                        </observation>
+                     </entryRelationship>
+                  </substanceAdministration>
+               </entry>
+               <entry>
+                  <substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="false">
+                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.19"/>
+                     <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.12"/>
+                     <id root="5AEF27FD-4D93-4271-9702-8F8F3178EC79"/>
+                     <code code="IMMUNIZ" codeSystem="1.3.5.1.4.1.19376.1.5.3.2" codeSystemName="IHEActCode" displayName="inconnue"/>
+                     <text><reference value="#vacc4"/></text>
+                     <statusCode code="completed"/>
+                     <effectiveTime value="20220908"/>
+                     <routeCode code="27" codeSystem="1.3.182.5.31" codeSystemName="VIDAL ROUTES" displayName="intramusculaire"/>
+                     <approachSiteCode code="368209003" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Bras supérieur droit"/>
+                     <administrationUnitCode code="1" codeSystem="1.3.182.5.32" codeSystemName="VACCINATION DOSE" displayName="inconnue"/>
+                     <consumable typeCode="CSM">
+                        <manufacturedProduct classCode="MANU">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.18"/>
+                           <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7.2"/>
+                           <templateId root="2.16.840.1.113883.10.20.1.53"/>
+                           <id extension="67868718" root="1.3.182.4.17"/>
+                           <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+                              <code code="J07BD52" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="measles, combinations with mumps and rubella, live attenuated">
+                                 <originalText><reference value="#vacc4"/></originalText>
+                              <translation code="61153008" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Vaccin rougeole-oreillons-rubéole"/></code>
+                              <name>PRIORIX</name>
+                              <lotNumberText>8321487624</lotNumberText>
+                           </manufacturedMaterial>
+                           <manufacturerOrganization>
+                              <name>GSK</name>
+                           </manufacturerOrganization>
+                        </manufacturedProduct>
+                     </consumable>
+                     <entryRelationship typeCode="REFR">
+                        <observation classCode="OBS" moodCode="EVN">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.44"/>
+                           <id root="AF41D0A1-E106-4505-8349-D59A5F839FD9"/>
+                           <code nullFlavor="UNK"/>
+                           <text><reference value="#vacc4"/></text>
+                           <statusCode code="completed"/>
+                           <effectiveTime>
+                              <low value="20220908"/>
+                              <high nullFlavor="UNK"/>
+                           </effectiveTime>
+                           <value codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.42.5" codeSystemName="eHDSIIllnessandDisorder" nullFlavor="OTH" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CD">
+                              <originalText/>
+                           </value>
+                        </observation>
+                     </entryRelationship>
+                  </substanceAdministration>
+               </entry>
+            </section>
+         </component>
+         <component>
+            <section>
+               <templateId root="2.16.840.1.113883.10.20.1.11"/>
+               <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.9"/>
+               <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.6"/>
+               <code code="11450-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Problem list - Reported"><translation code="11450-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Liste des problèmes"/></code>
+               <title>Liste des problèmes</title>
+               <text>
+                  <table ID="history">
+                     <thead>
+                        <tr>
+                           <th>Code (ICD-10CM)</th>
+                           <th>Type</th>
+                           <th>Description</th>
+                           <th>Date d'apparition présumée</th>
+                           <th>Date d'fin présumée</th>
+                           <th>Prise en charge</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr ID="history1">
+                           <td ID="history1-code">A06.6</td>
+                           <td ID="history1-type">abcès amibien de l'encéphale</td>
+                           <td ID="history1-desc">abc</td>
+                           <td ID="history1-start">01/08/2022</td>
+                           <td ID="history1-end"/>
+                           <td ID="history1-part">Dr. Laurent Vandenhove</td>
+                        </tr>
+                        <tr ID="history2">
+                           <td ID="history2-code">B20</td>
+                           <td ID="history2-type">immunodéficience humaine virale [VIH], à l'origine de maladies infectieuses et parasitaires</td>
+                           <td ID="history2-desc"/>
+                           <td ID="history2-start">02/08/2022</td>
+                           <td ID="history2-end"/>
+                           <td ID="history2-part">Dr. Laurent Vandenhove</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </text>
+               <entry>
+                  <act classCode="ACT" moodCode="EVN">
+                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.2"/>
+                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.15"/>
+                     <templateId root="2.16.840.1.113883.10.20.1.27"/>
+                     <id root="5BB5736A-0952-4D31-895C-B7C8F80E09C8"/>
+                     <code code="CONC" codeSystem="2.16.840.1.113883.5.6" codeSystemName="ActClass" displayName="concern"/>
+                     <text><reference value="#history"/></text>
+                     <statusCode code="active"/>
+                     <effectiveTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                        <low value="20220801"/>
+                        <high nullFlavor="UNK"/>
+                     </effectiveTime>
+                     <entryRelationship typeCode="SUBJ">
+                        <observation classCode="OBS" moodCode="EVN">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.7"/>
+                           <id root="C0653AA8-48FC-4BB9-873D-416B4562C6FB"/>
+                           <code nullFlavor="NI"/>
+                           <text><reference value="#history1"/></text>
+                           <statusCode code="completed"/>
+                           <value code="A06.6" codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.44.2" codeSystemName="ICD-10" codeSystemVersion="2019" displayName="Amoebic brain abscess" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CD">
+                              <originalText><reference value="#history1"/></originalText>
+                           <translation code="A06.6" codeSystem="1.3.182.5.29" codeSystemName="ICD-10CM" displayName="abcès amibien de l'encéphale"/></value>
+                           <entryRelationship inversionInd="false" typeCode="REFR">
+                              <act classCode="PCPR" moodCode="EVN">
+                                 <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.48"/>
+                                 <code code="85847-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="inconnue"/>
+                                 <statusCode code="normal"/>
+                                 <performer typeCode="PRF">
+                                    <assignedEntity classCode="ASSIGNED">
+                                       <id root="09007BE5-3443-4D56-91D3-F25875064D98"/>
+                                       <assignedPerson classCode="PSN" determinerCode="INSTANCE">
+                                          <name>Dr. Laurent Vandenhove</name>
+                                       </assignedPerson>
+                                    </assignedEntity>
+                                 </performer>
+                              </act>
+                           </entryRelationship>
+                        </observation>
+                     </entryRelationship>
+                  </act>
+               </entry>
+               <entry>
+                  <act classCode="ACT" moodCode="EVN">
+                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.2"/>
+                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.15"/>
+                     <templateId root="2.16.840.1.113883.10.20.1.27"/>
+                     <id root="5BB5736A-0952-4D31-895C-B7C8F80E09C8"/>
+                     <code code="CONC" codeSystem="2.16.840.1.113883.5.6" codeSystemName="ActClass" displayName="concern"/>
+                     <text><reference value="#history"/></text>
+                     <statusCode code="active"/>
+                     <effectiveTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                        <low value="20220802"/>
+                        <high nullFlavor="UNK"/>
+                     </effectiveTime>
+                     <entryRelationship typeCode="SUBJ">
+                        <observation classCode="OBS" moodCode="EVN">
+                           <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.7"/>
+                           <id root="E31F36C9-54E2-48BF-8B5E-F73B4308092A"/>
+                           <code nullFlavor="NI"/>
+                           <text><reference value="#history2"/></text>
+                           <statusCode code="completed"/>
+                           <value code="B20" codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.44.2" codeSystemName="ICD-10" codeSystemVersion="2019" displayName="Human immunodeficiency virus [HIV] disease resulting in infectious and parasitic diseases" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CD">
+                              <originalText><reference value="#history2"/></originalText>
+                           <translation code="B20" codeSystem="1.3.182.5.29" codeSystemName="ICD-10CM" displayName="immunodéficience humaine virale [VIH], à l'origine de maladies infectieuses et parasitaires"/></value>
+                           <entryRelationship inversionInd="false" typeCode="REFR">
+                              <act classCode="PCPR" moodCode="EVN">
+                                 <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.48"/>
+                                 <code code="85847-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="inconnue"/>
+                                 <statusCode code="normal"/>
+                                 <performer typeCode="PRF">
+                                    <assignedEntity classCode="ASSIGNED">
+                                       <id root="F95645E0-8EB8-48F0-9031-38BB8DACD8CB"/>
+                                       <assignedPerson classCode="PSN" determinerCode="INSTANCE">
+                                          <name>Dr. Laurent Vandenhove</name>
+                                       </assignedPerson>
+                                    </assignedEntity>
+                                 </performer>
+                              </act>
+                           </entryRelationship>
+                        </observation>
+                     </entryRelationship>
+                  </act>
+               </entry>
+            </section>
+         </component>
+         <component>
+            <section>
+               <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.11"/>
+               <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.11"/>
+               <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.12"/>
+               <code code="47519-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of Procedures Document"><translation code="47519-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Antécédents chirurgicaux"/></code>
+               <title>Antécédents chirurgicaux</title>
+               <text>
+                  <table ID="surg">
+                     <thead>
+                        <tr>
+                           <th>Code (SNOMED-CT)</th>
+                           <th>Procédure</th>
+                           <th>Date de début</th>
+                           <th>Date de fin</th>
+                           <th>Note</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr ID="surg1">
+                           <td ID="surg1-code">118950002</td>
+                           <td ID="surg1-type">Intervention sur la tête et/ou le cou</td>
+                           <td ID="surg1-datestart">03/08/2022</td>
+                           <td ID="surg1-dateend">03/08/2022</td>
+                           <td ID="surg1-note">abcès amibien de l'encéphale</td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </text>
+               <entry>
+                  <procedure classCode="PROC" moodCode="EVN">
+                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.26"/>
+                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.19"/>
+                     <id root="DD2F6807-40AE-4096-9584-48374D4A6641"/>
+                     <code code="118950002" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Procedure on head AND/OR neck">
+                        <originalText><reference value="#surg1"/></originalText>
+                     <translation code="118950002" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Intervention sur la tête et/ou le cou"/></code>
+                     <text><reference value="#surg1"/></text>
+                     <statusCode code="completed"/>
+                     <effectiveTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                        <low value="20220803"/>
+                     </effectiveTime>
+                  </procedure>
+               </entry>
+            </section>
+         </component>
+         <component>
+            <section>
+               <templateId root="2.16.840.1.113883.10.20.1.7"/>
+               <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.5.3.5"/>
+               <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.4"/>
+               <code code="46264-8" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of medical device use"><translation code="46264-8" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Liste des dispositifs médicaux"/></code>
+               <title>Liste des dispositifs médicaux</title>
+               <text>
+                  <table ID="devices">
+                     <thead>
+                        <tr>
+                           <th>Code (FHL MEDDEV)</th>
+                           <th>Nom commercial</th>
+                           <th>Type</th>
+                           <th>Date d'implant</th>
+                           <th>Date de retrait</th>
+                           <th>Date d'expiration</th>
+                           <th>Numéro de série</th>
+                           <th>Notes</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr ID="devices1">
+                           <td ID="devices1-code">71231130</td>
+                           <td ID="devices1-name">GENOU ADAPTATEUR LEGION Implant Chrome-Cobalt décalé +2mm B/1 stér</td>
+                           <td ID="devices1-desc">IMPLANT GENOU AUTRE</td>
+                           <td ID="devices1-dateImp">01/07/2017</td>
+                           <td ID="devices1-dateOut"/>
+                           <td ID="devices1-dateExp">01/02/2028</td>
+                           <td ID="devices1-serial">123456789</td>
+                           <td ID="devices1-note"/>
+                        </tr>
+                     </tbody>
+                  </table>
+               </text>
+               <entry>
+                  <supply classCode="SPLY" moodCode="EVN">
+                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.5"/>
+                     <text><reference value="#devices1"/></text>
+                     <effectiveTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                        <low value="20170701"/>
+                     </effectiveTime>
+                     <expectedUseTime value="20280201"/>
+                     <participant typeCode="DEV">
+                        <participantRole classCode="MANU">
+                           <id extension="123456789" root="1.3.182.4.15"/>
+                           <playingDevice classCode="DEV" determinerCode="INSTANCE">
+                              <code code="314523008" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Joint implant">
+                                 <originalText><reference value="#devices1"/></originalText>
+                              <translation code="M52CB99" codeSystem="1.3.182.5.33" codeSystemName="CLADIMED" displayName="IMPLANT GENOU AUTRE"/></code>
+                              <manufacturerModelName code="71231130" codeSystem="1.3.182.5.34" codeSystemName="FHL MEDDEV" displayName="GENOU ADAPTATEUR LEGION Implant Chrome-Cobalt décalé +2mm B/1 stér">GENOU ADAPTATEUR LEGION Implant Chrome-Cobalt décalé +2mm B/1 stér</manufacturerModelName>
+                           </playingDevice>
+                        </participantRole>
+                     </participant>
+                  </supply>
+               </entry>
+            </section>
+         </component>
+      </structuredBody>
+   </component>
+</ClinicalDocument>

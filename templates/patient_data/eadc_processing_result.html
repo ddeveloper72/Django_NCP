@@ -1,0 +1,330 @@
+{% extends 'patient_data/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">🔄 EADC Processing Result</h1>
+                <div class="btn-group">
+                    <a href="{% url 'eadc_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    {% if processing_result.clinical_document_id %}
+                    <a href="{% url 'view_clinical_document' processing_result.clinical_document_id %}"
+                        class="btn btn-outline-primary">
+                        <i class="fas fa-eye"></i> View Document
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            {% if success %}
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle"></i>
+                <strong>Success!</strong> Document processed successfully through EADC pipeline.
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+            {% else %}
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Error!</strong> {{ error|default:"Processing failed" }}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if processing_result %}
+    <!-- Processing Details -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> Processing Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Processing ID:</strong></td>
+                            <td><code>{{ processing_result.processing_id }}</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Timestamp:</strong></td>
+                            <td>{{ processing_result.timestamp }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Transformation Applied:</strong></td>
+                            <td>
+                                {% if processing_result.transformation_applied %}
+                                <span class="badge badge-success">Yes</span>
+                                {% else %}
+                                <span class="badge badge-info">No (Already compliant)</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>epSOS Compliant:</strong></td>
+                            <td>
+                                {% if processing_result.epsos_compliant %}
+                                <span class="badge badge-success">
+                                    <i class="fas fa-check"></i> Yes
+                                </span>
+                                {% else %}
+                                <span class="badge badge-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> No
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% if processing_result.clinical_document_id %}
+                        <tr>
+                            <td><strong>Document Saved:</strong></td>
+                            <td>
+                                <span class="badge badge-success">
+                                    <i class="fas fa-database"></i> ID: {{ processing_result.clinical_document_id }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-medical"></i> Document Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if demo_document %}
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Source:</strong></td>
+                            <td>{{ demo_document.source }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Document Name:</strong></td>
+                            <td>{{ demo_document.name }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Document Type:</strong></td>
+                            <td><span class="badge badge-primary">{{ demo_document.type }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Description:</strong></td>
+                            <td>{{ demo_document.description }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Original Size:</strong></td>
+                            <td>{{ demo_document.content|length|filesizeformat }}</td>
+                        </tr>
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validation Results -->
+    {% if processing_result.initial_validation or processing_result.final_validation %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-check-double"></i> Validation Results
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if processing_result.initial_validation %}
+                        <div class="col-md-6">
+                            <h6>Initial Validation</h6>
+                            <div class="validation-result">
+                                {% include 'patient_data/validation_partial.html' with
+                                validation=processing_result.initial_validation %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if processing_result.final_validation %}
+                        <div class="col-md-6">
+                            <h6>Final Validation</h6>
+                            <div class="validation-result">
+                                {% include 'patient_data/validation_partial.html' with
+                                validation=processing_result.final_validation %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Document Content Preview -->
+    {% if processing_result.processed_document %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-code"></i> Processed Document Preview
+                        </h5>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="toggleDocumentView()">
+                                <i class="fas fa-eye"></i> Toggle View
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="downloadDocument()">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="documentPreview" class="document-preview">
+                        <pre
+                            class="bg-light p-3 document-content">{{ processing_result.processed_document|truncatechars:2000 }}</pre>
+                        {% if processing_result.processed_document|length > 2000 %}
+                        <p class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            Content truncated for display. Full document has {{
+                            processing_result.processed_document|length|filesizeformat }}.
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div id="documentRaw" class="document-raw d-none">
+                        <textarea class="form-control" rows="20"
+                            readonly>{{ processing_result.processed_document }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tasks"></i> Available Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group-vertical w-100">
+                        {% if success and processing_result.clinical_document_id %}
+                        <a href="{% url 'view_clinical_document' processing_result.clinical_document_id %}"
+                            class="btn btn-primary mb-2">
+                            <i class="fas fa-eye"></i> View Full Document
+                        </a>
+                        <a href="{% url 'download_eadc_document' processing_result.clinical_document_id 'epsos' %}"
+                            class="btn btn-outline-success mb-2">
+                            <i class="fas fa-download"></i> Download epSOS Format
+                        </a>
+                        <a href="{% url 'download_eadc_document' processing_result.clinical_document_id 'national' %}"
+                            class="btn btn-outline-info mb-2">
+                            <i class="fas fa-download"></i> Download National Format
+                        </a>
+                        {% endif %}
+
+                        <a href="{% url 'process_demo_document' 'PS' %}" class="btn btn-outline-secondary mb-2">
+                            <i class="fas fa-redo"></i> Process Another Demo
+                        </a>
+
+                        <a href="{% url 'eadc_transformation_history' %}" class="btn btn-outline-info mb-2">
+                            <i class="fas fa-history"></i> View Transformation History
+                        </a>
+
+                        <a href="{% url 'eadc_dashboard' %}" class="btn btn-outline-dark">
+                            <i class="fas fa-home"></i> Return to EADC Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .validation-result .badge {
+        margin-right: 5px;
+    }
+
+    .document-preview {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .document-content {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .btn-group-vertical .btn {
+        text-align: left;
+    }
+
+    .card-header .btn-group {
+        margin-left: auto;
+    }
+</style>
+
+<script>
+    function toggleDocumentView() {
+        const previewDiv = document.getElementById('documentPreview');
+        const rawDiv = document.getElementById('documentRaw');
+
+        if (previewDiv.classList.contains('d-none')) {
+            previewDiv.classList.remove('d-none');
+            rawDiv.classList.add('d-none');
+        } else {
+            previewDiv.classList.add('d-none');
+            rawDiv.classList.remove('d-none');
+        }
+    }
+
+    function downloadDocument() {
+        {% if processing_result.clinical_document_id %}
+        window.location.href = '{% url "download_eadc_document" processing_result.clinical_document_id "epsos" %}';
+        {% else %}
+        // Create and download the document content
+        const content = {{ processing_result.processed_document| escapejs
+    }};
+    const blob = new Blob([content], { type: 'application/xml' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'eadc_processed_document.xml';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    {% endif %}
+}
+</script>
+{% endblock %}
