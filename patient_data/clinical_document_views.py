@@ -46,8 +46,8 @@ def _render_document_request_page(request, patient_data):
     """Render the clinical document request page."""
     # Check for existing clinical documents
     existing_documents = ClinicalDocument.objects.filter(
-        patient_data=patient_data
-    ).order_by("-created_at")
+        request__patient_data=patient_data
+    ).order_by("-received_timestamp")
 
     # Prepare context
     context = {
@@ -118,15 +118,32 @@ def _handle_document_request(request, patient_data):
                 patient_data_id=patient_data.id,
             )
 
-        # Save clinical document record
-        clinical_doc = ClinicalDocument.objects.create(
+        # Create clinical document request first
+        from .clinical_models import ClinicalDocumentRequest
+        
+        doc_request = ClinicalDocumentRequest.objects.create(
             patient_data=patient_data,
             document_type=document_format,
-            document_format=document_format,
-            original_content=json.dumps(document_data),
-            processed_content=json.dumps(processed_data["patient_summary"]),
-            language=target_language,
+            requesting_user=request.user,
+            consent_method="EXPLICIT",  # Default for this demo
+            status="COMPLETED"
+        )
+
+        # Save clinical document record
+        clinical_doc = ClinicalDocument.objects.create(
+            request=doc_request,
+            document_type=document_format,
+            service_type="PS",  # Patient Summary
+            document_id=f"DOC_{timezone.now().strftime('%Y%m%d_%H%M%S')}",
+            document_title=f"Patient Summary - {patient_data.patient_id}",
+            creation_date=timezone.now(),
+            raw_document=json.dumps(document_data),
+            document_size=len(json.dumps(document_data).encode('utf-8')),
+            patient_summary=json.dumps(processed_data["patient_summary"]),
+            target_language=target_language,
             processing_status="completed",
+            processed=True,
+            processing_completed=timezone.now(),
             created_by=request.user,
         )
 
