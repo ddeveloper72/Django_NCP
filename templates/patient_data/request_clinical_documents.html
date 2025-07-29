@@ -299,8 +299,7 @@
                 <div class="language-selector">
                     {% for lang_code, lang_name in available_languages.items %}
                     <div class="language-option" onclick="selectLanguage('{{ lang_code }}')">
-                        <input type="radio" name="target_language" value="{{ lang_code }}" id="lang_{{ lang_code }}" {%
-                            if lang_code=='en' %}checked{% endif %}>
+                        <input type="radio" name="target_language" value="{{ lang_code }}" id="lang_{{ lang_code }}"{% if lang_code == 'en' %} checked{% endif %}>
                         <label for="lang_{{ lang_code }}">{{ lang_name }}</label>
                     </div>
                     {% empty %}
