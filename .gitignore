@@ -32,6 +32,7 @@ db.sqlite3-journal
 
 # Virtual Environment
 venv/
+.venv/
 env/
 ENV/
 env.bak/

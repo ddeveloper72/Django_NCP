@@ -62,7 +62,8 @@ Based on analysis of the Java-based DomiSMP and OpenNCP implementations, this Dj
 1. **Clone and setup virtual environment:**
 
 ```bash
-cd C:\Users\Duncan\VS_Code_Projects\django_ncp
+git clone https://github.com/yourusername/django_ncp.git
+cd django_ncp
 python -m venv venv
 venv\Scripts\activate  # Windows
 source venv/bin/activate  # Linux/Mac

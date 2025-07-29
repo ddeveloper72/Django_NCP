@@ -107,5 +107,6 @@ def analyze_mvc_file(file_path):
 
 
 if __name__ == "__main__":
-    mvc_file = r"C:\Users\Duncan\Downloads\MVC_9.0.0.xlsx"
+    # Update this path to point to your MVC file
+    mvc_file = r"path/to/your/MVC_9.0.0.xlsx"
     analyze_mvc_file(mvc_file)
