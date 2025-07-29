@@ -19,7 +19,7 @@ import os
 from typing import Dict, Any, Optional
 
 from .models import PatientData
-from .clinical_models import ClinicalDocument
+from .clinical_models import ClinicalDocument, ClinicalDocumentRequest
 from .services.cda_parser_service import CDAParserService
 from .services.fhir_bundle_service import FHIRBundleService
 from .services.pdf_generation_service import PDFGenerationService
@@ -53,7 +53,7 @@ def _render_document_request_page(request, patient_data):
     context = {
         "patient_data": patient_data,
         "patient_identifier": patient_data.patient_identifier,
-        "member_state": patient_data.patient_identifier.member_state,
+        "member_state": patient_data.patient_identifier.home_member_state,
         "existing_documents": existing_documents,
         "supported_formats": ["CDA", "FHIR_BUNDLE"],
         "available_translations": ["en", "fr", "de", "es", "it"],
@@ -119,30 +119,27 @@ def _handle_document_request(request, patient_data):
             )
 
         # Create clinical document request first
-        from .clinical_models import ClinicalDocumentRequest
-        
         doc_request = ClinicalDocumentRequest.objects.create(
             patient_data=patient_data,
             document_type=document_format,
             requesting_user=request.user,
-            consent_method="EXPLICIT",  # Default for this demo
-            status="COMPLETED"
+            consent_method="EXPLICIT",  # Default to explicit consent
+            status="COMPLETED",
         )
 
         # Save clinical document record
         clinical_doc = ClinicalDocument.objects.create(
             request=doc_request,
             document_type=document_format,
-            service_type="PS",  # Patient Summary
-            document_id=f"DOC_{timezone.now().strftime('%Y%m%d_%H%M%S')}",
-            document_title=f"Patient Summary - {patient_data.patient_id}",
+            service_type="PS",  # Default to Patient Summary
+            document_id=f"doc_{doc_request.id}",
+            document_title=f"Patient Summary - {document_format}",
             creation_date=timezone.now(),
             raw_document=json.dumps(document_data),
-            document_size=len(json.dumps(document_data).encode('utf-8')),
-            patient_summary=json.dumps(processed_data["patient_summary"]),
+            document_size=len(json.dumps(document_data)),
+            patient_summary=processed_data["patient_summary"],
             target_language=target_language,
             processing_status="completed",
-            processed=True,
             processing_completed=timezone.now(),
             created_by=request.user,
         )
