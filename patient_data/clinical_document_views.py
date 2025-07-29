@@ -27,7 +27,6 @@ from .services.pdf_generation_service import PDFGenerationService
 logger = logging.getLogger(__name__)
 
 
-@login_required
 @require_http_methods(["GET", "POST"])
 def request_clinical_documents(request, patient_data_id):
     """
@@ -58,10 +57,10 @@ def _render_document_request_page(request, patient_data):
         "supported_formats": ["CDA", "FHIR_BUNDLE"],
         "available_languages": {
             "en": "English",
-            "fr": "French", 
+            "fr": "French",
             "de": "German",
             "es": "Spanish",
-            "it": "Italian"
+            "it": "Italian",
         },
         "summary_sections": [
             "patient_demographics",

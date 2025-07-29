@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Template Test</h1>
+
+{% for lang_code, lang_name in available_languages.items %}
+    <p>Language: {{ lang_code }}{% if lang_code == 'en' %} (default){% endif %} - {{ lang_name }}</p>
+{% empty %}
+    <p>No languages available</p>
+{% endfor %}
+
+{% endblock %}
