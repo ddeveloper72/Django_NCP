@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Django EU eHealth NCP Server{% endblock %}
+
+{% block content %}
+<div class="home-page">
+    <div class="header">
+        <h1>🏥 Django EU eHealth NCP Server</h1>
+        <p>European eHealth Cross-Border Patient Portal</p>
+    </div>
+
+    <div class="container">
+        <h2 class="text-center text-primary mb-xl">Choose Your Integration Approach</h2>
+
+        <!-- SMP Source Information -->
+        <div class="status-indicator mb-xl">
+            <p><strong>Active SMP Source:</strong> {{ current_smp_name }}</p>
+            <p class="mt-sm text-sm opacity-80">
+                Portal: <a href="{{ current_smp_ui_url }}" target="_blank" rel="noopener" class="text-primary">{{ current_smp_ui_url }}</a>
+            </p>
+            <p class="text-xs italic">SMP source configuration is managed by administrators only.</p>
+        </div>
+
+        <!-- Integration Options Grid -->
+        <div class="integration-options">
+            <div class="option-card">
+                <h3>🔍 Patient Search</h3>
+                <p>Search for patients across EU member states with break-the-glass emergency access capabilities. GDPR-compliant cross-border patient data retrieval.</p>
+                <a href="/patients/search/" class="option-link">Search Patients</a>
+            </div>
+
+            <div class="option-card">
+                <h3>🖥️ Django Portal UI</h3>
+                <p>Full eHealth portal with European SMP integration, country-specific International Search Masks (ISM), and cross-border patient lookup capabilities.</p>
+                <a href="/portal/" class="option-link">Launch Portal</a>
+            </div>
+
+            <div class="option-card">
+                <h3>⚙️ Django Admin</h3>
+                <p>Administrative interface for managing countries, ISM configurations, certificates, and monitoring European SMP connectivity status.</p>
+                <a href="/admin/" class="option-link">Admin Panel</a>
+            </div>
+
+            <div class="option-card">
+                <h3>🔗 API Endpoints</h3>
+                <p>REST API for Java portal integration with dynamic country data, patient lookup services, and document retrieval endpoints.</p>
+                <a href="/api/" class="option-link">API Documentation</a>
+            </div>
+
+            <div class="option-card">
+                <h3>📊 Service Status</h3>
+                <p>Real-time monitoring of European SMP connectivity, service health checks, and system status across all integrated member states.</p>
+                <a href="/status/" class="option-link">View Status</a>
+            </div>
+
+            <div class="option-card">
+                <h3>🛠️ DomiSMP Server</h3>
+                <p>Connect to the Java-based DomiSMP server for advanced SMP management, certificate configuration, and European Gateway integration.</p>
+                <a href="{{ current_smp_ui_url }}" target="_blank" rel="noopener" class="option-link">Open DomiSMP</a>
+            </div>
+        </div>
+
+        <!-- API List Section -->
+        <div class="api-section mt-xxl">
+            <h3 class="section-title">Available API Endpoints</h3>
+            <div class="api-list">
+                <div class="service-grid">
+                    <div class="api-endpoint">
+                        <h4>/api/countries/</h4>
+                        <p>Get list of all supported EU member states with ISM availability status</p>
+                        <span class="method-badge">GET</span>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <h4>/api/ism/{country}/</h4>
+                        <p>Retrieve country-specific International Search Mask configuration</p>
+                        <span class="method-badge">GET</span>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <h4>/api/patients/search/</h4>
+                        <p>Cross-border patient search with GDPR compliance and break-the-glass support</p>
+                        <span class="method-badge method-post">POST</span>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <h4>/api/documents/{patient}/</h4>
+                        <p>Retrieve clinical documents for authenticated patient across EU borders</p>
+                        <span class="method-badge">GET</span>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <h4>/api/status/</h4>
+                        <p>System health status and SMP connectivity monitoring</p>
+                        <span class="method-badge">GET</span>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <h4>/api/smp/test/</h4>
+                        <p>Test SMP connectivity and validate European Gateway integration</p>
+                        <span class="method-badge method-post">POST</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ self.title() or "EU NCP Portal" }}</title>
+
+    <!-- DMZ-Compatible CSS (no external CDNs) -->
+    <link href="{{ static('css/main.css') }}" rel="stylesheet" media="screen">
+
+    {{ self.extra_css() }}
+</head>
+
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                <span class="brand-logo">🏥</span>
+                <span class="brand-text">EU NCP Portal</span>
+            </a>
+
+            <ul class="navbar-nav">
+                <li><a href="/" class="{{ 'active' if request.resolver_match.url_name == 'home' else '' }}">Home</a>
+                </li>
+                <li><a href="/patients/search/" class="{{ 'active' if 'patients' in request.path else '' }}">Patient
+                        Search</a></li>
+                <li><a href="/portal/" class="{{ 'active' if 'portal' in request.path else '' }}">Portal</a></li>
+                <li><a href="/admin/" class="{{ 'active' if 'admin' in request.path else '' }}">Admin</a></li>
+            </ul>
+
+            <button class="navbar-toggle" type="button">
+                <span>☰</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        {% if messages %}
+        <div class="container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible">
+                {{ message }}
+                <button type="button" class="alert-close">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {{ self.content() }}
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>EU eHealth NCP Portal</h3>
+                <p>Cross-border healthcare document exchange system built with Django and powered by secure medical data
+                    standards.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/patients/search/">Patient Search</a></li>
+                    <li><a href="/portal/">Portal</a></li>
+                    <li><a href="/admin/">Administration</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Technical Info</h3>
+                <p class="tech-info">Django {{ django_version }} | Python {{ python_version }}</p>
+                <p class="build-info">Built for DMZ deployment</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 EU eHealth NCP Portal. Compliant with European Cross-Border Healthcare Standards.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        document.querySelector('.navbar-toggle').addEventListener('click', function () {
+            document.querySelector('.navbar-nav').classList.toggle('active');
+        });
+
+        // Alert dismissal
+        document.querySelectorAll('.alert-close').forEach(button => {
+            button.addEventListener('click', function () {
+                this.parentElement.style.display = 'none';
+            });
+        });
+    </script>
+
+    {{ self.extra_js() }}
+</body>
+
+</html>
+
+{# Define block placeholders #}
+{% block title %}{% endblock %}
+{% block extra_css %}{% endblock %}
+{% block content %}{% endblock %}
+{% block extra_js %}{% endblock %}

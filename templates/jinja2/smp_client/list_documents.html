@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}SMP Documents{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>SMP Documents</h1>
+    <p>Service Metadata Publisher Document Listing</p>
+    
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        This is a simplified version of the document listing for Jinja2 compatibility.
+        Full functionality will be restored in the next update.
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5>Available Documents</h5>
+        </div>
+        <div class="card-body">
+            <p>Document listing functionality is being updated for Jinja2 compatibility.</p>
+            <a href="{{ url('smp_client:dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
