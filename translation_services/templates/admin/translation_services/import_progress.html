@@ -3,6 +3,11 @@
 
 {% block title %}MVC Import Progress | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
+{% block extrahead %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+{% endblock %}
+
 {% block breadcrumbs %}
 <div class="breadcrumbs">
     <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
@@ -17,183 +22,109 @@
     <h1>{{ title }}</h1>
 
     <div class="form-row">
-        <div class="import-status-card" style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 15px 0;">
+        <div class="import-status-card">
             <h3>Import Status</h3>
 
             <div class="status-info">
                 <p><strong>Task ID:</strong> <code>{{ task_id }}</code></p>
                 <p><strong>File:</strong> {{ task_status.filename }}</p>
-                <p><strong>Status:</strong> <span id="import-status" class="status-{{ task_status.status }}">{{
-                        task_status.status|title }}</span></p>
+                <p><strong>Status:</strong> <span id="import-status" class="status-{{ task_status.status }}">{{ task_status.status|title }}</span></p>
                 <p><strong>Started:</strong> {{ task_status.created_at|date:"M d, Y H:i:s" }}</p>
                 {% if task_status.completed_at %}
                 <p><strong>Completed:</strong> {{ task_status.completed_at|date:"M d, Y H:i:s" }}</p>
                 {% endif %}
             </div>
 
-            <div class="progress-section" style="margin: 20px 0;">
+            <div class="progress-section">
                 <h4>Progress</h4>
-                <div class="progress-bar-container"
-                    style="background: #ddd; border-radius: 10px; height: 25px; margin: 10px 0; position: relative;">
-                    <div id="progress-bar"
-                        style="background: #28a745; height: 100%; border-radius: 10px; width: {{ task_status.progress_percentage }}%; transition: width 0.5s;">
+                <div class="progress-bar-container">
+                    <div id="progress-bar" class="progress-bar" data-width="{{ task_status.progress_percentage }}">
                     </div>
-                    <div
-                        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; color: #333;">
+                    <div class="progress-text">
                         <span id="progress-percentage">{{ task_status.progress_percentage }}%</span>
                     </div>
                 </div>
-                <div id="progress-message" style="margin: 10px 0; font-style: italic;">
+                <div id="progress-message" class="progress-message">
                     {{ task_status.progress_message }}
                 </div>
 
                 {% if task_status.total_items > 0 %}
-                <div class="progress-details" style="margin: 10px 0;">
-                    <span id="processed-items">{{ task_status.processed_items }}</span> of
-                    <span id="total-items">{{ task_status.total_items }}</span> items processed
+                <div class="progress-details">
+                    <p><strong>Items Processed:</strong> <span id="processed-count">{{ task_status.processed_items }}</span> / {{ task_status.total_items }}</p>
+                    <p><strong>Success Rate:</strong> {{ task_status.success_rate|floatformat:1 }}%</p>
                 </div>
                 {% endif %}
             </div>
 
-            {% if task_status.is_finished %}
-            <div class="results-section" style="margin: 20px 0;">
+            <div class="results-section">
                 <h4>Results</h4>
-                {% if task_status.status == 'completed' %}
-                <div class="alert alert-success"
-                    style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <strong>Import Completed Successfully!</strong>
-                    <ul style="margin: 10px 0;">
-                        <li>Value Sets Imported: {{ task_status.success_count }}</li>
-                        <li>Concepts Processed: {{ task_status.processed_items }}</li>
+                {% if task_status.success_count > 0 %}
+                <div class="success-message">
+                    <strong>✅ Successfully imported {{ task_status.success_count }} items</strong>
+                    <ul class="success-list">
+                        {% for result in task_status.success_results %}
+                        <li>{{ result }}</li>
+                        {% endfor %}
                     </ul>
-                </div>
-                {% elif task_status.status == 'failed' %}
-                <div class="alert alert-danger"
-                    style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <strong>Import Failed</strong>
-                    <p>{{ task_status.progress_message }}</p>
                 </div>
                 {% endif %}
 
                 {% if task_status.error_count > 0 %}
-                <div class="error-details" style="margin: 15px 0;">
-                    <h5>Errors ({{ task_status.error_count }})</h5>
-                    <div
-                        style="max-height: 200px; overflow-y: auto; background: #f1f1f1; padding: 10px; border-radius: 3px;">
+                <div class="error-message">
+                    <strong>❌ {{ task_status.error_count }} errors encountered</strong>
+                </div>
+
+                {% if task_status.error_details %}
+                <div class="error-details">
+                    <h5>Error Details</h5>
+                    <div class="error-log">
                         {% for error in task_status.error_details %}
-                        <div style="margin: 5px 0; font-family: monospace; font-size: 12px;">
-                            {{ error.error|default:error }}
+                        <div class="error-item">
+                            <strong>Error {{ forloop.counter }}:</strong> {{ error.message }}
                         </div>
                         {% endfor %}
                     </div>
                 </div>
                 {% endif %}
+                {% endif %}
             </div>
-            {% endif %}
         </div>
     </div>
 
-    <div class="navigation-actions" style="margin: 20px 0;">
-        <a href="{% url 'admin:translation_services_valuesetcatalogue_changelist' %}" class="button">
-            View Value Set Catalogues
+    <div class="navigation-actions">
+        <a href="{% url 'admin:translation_services_valuesetcatalogue_changelist' %}" class="btn btn-secondary">
+            ← Back to Value Set Catalogues
         </a>
-        {% if not task_status.is_finished %}
-        <button id="refresh-btn" class="button" onclick="refreshStatus()">
-            Refresh Status
-        </button>
+        {% if task_status.status == 'completed' %}
+        <a href="{% url 'admin:translation_services_valuesetcatalogue_import_mvc' %}" class="btn btn-primary">
+            Import Another File
+        </a>
         {% endif %}
-        <a href="{% url 'admin:translation_services_valuesetcatalogue_import_mvc' %}" class="button">
-            Start New Import
-        </a>
     </div>
 
-    {% if not task_status.is_finished %}
-    <div class="auto-refresh-info" style="margin: 15px 0; padding: 10px; background: #e8f4fd; border-radius: 5px;">
-        <p><strong>Auto-refresh:</strong> This page will automatically update every 3 seconds until the import
-            completes.</p>
-        <p>You can safely navigate away and return to this page later using the task ID: <code>{{ task_id }}</code></p>
+    {% if task_status.status == 'pending' or task_status.status == 'running' %}
+    <div class="auto-refresh-info">
+        <p><em>This page will automatically refresh every 5 seconds until the import is complete.</em></p>
+        <button onclick="stopAutoRefresh()" class="btn btn-small">Stop Auto-Refresh</button>
     </div>
     {% endif %}
 </div>
 
-<style>
-    .status-pending {
-        color: #856404;
-        background: #fff3cd;
-        padding: 2px 8px;
-        border-radius: 3px;
-    }
-
-    .status-processing {
-        color: #004085;
-        background: #cce7ff;
-        padding: 2px 8px;
-        border-radius: 3px;
-    }
-
-    .status-completed {
-        color: #155724;
-        background: #d4edda;
-        padding: 2px 8px;
-        border-radius: 3px;
-    }
-
-    .status-failed {
-        color: #721c24;
-        background: #f8d7da;
-        padding: 2px 8px;
-        border-radius: 3px;
-    }
-</style>
-
 <script>
     let autoRefreshInterval;
-
-    function refreshStatus() {
-        fetch('{% url "admin:mvc_import_status" task_id %}')
-            .then(response => response.json())
-            .then(data => {
-                // Update progress bar
-                document.getElementById('progress-bar').style.width = data.progress_percentage + '%';
-                document.getElementById('progress-percentage').textContent = data.progress_percentage + '%';
-                document.getElementById('progress-message').textContent = data.progress_message;
-
-                // Update status
-                const statusElement = document.getElementById('import-status');
-                statusElement.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
-                statusElement.className = 'status-' + data.status;
-
-                // Update items if available
-                if (data.total_items > 0) {
-                    document.getElementById('processed-items').textContent = data.processed_items;
-                    document.getElementById('total-items').textContent = data.total_items;
-                }
-
-                // If finished, stop auto-refresh and reload page to show results
-                if (data.is_finished) {
-                    clearInterval(autoRefreshInterval);
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                }
-            })
-            .catch(error => {
-                console.error('Error refreshing status:', error);
-            });
-    }
-
-    // Auto-refresh for non-finished tasks
-    document.addEventListener('DOMContentLoaded', function () {
-        {% if not task_status.is_finished %}
-        autoRefreshInterval = setInterval(refreshStatus, 3000); // Refresh every 3 seconds
-        {% endif %}
-    });
-
-    // Clear interval when leaving page
-    window.addEventListener('beforeunload', function () {
+    
+    {% if task_status.status == 'pending' or task_status.status == 'running' %}
+    // Auto-refresh functionality
+    autoRefreshInterval = setInterval(function() {
+        window.location.reload();
+    }, 5000);
+    {% endif %}
+    
+    function stopAutoRefresh() {
         if (autoRefreshInterval) {
             clearInterval(autoRefreshInterval);
+            document.querySelector('.auto-refresh-info').innerHTML = '<p><em>Auto-refresh stopped.</em></p>';
         }
-    });
+    }
 </script>
 {% endblock %}

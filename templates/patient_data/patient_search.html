@@ -293,7 +293,7 @@
                             <option value="">Select Member State</option>
                             {% for state in member_states %}
                             <option value="{{ state.id }}" {% if
-                                state.id|stringformat:"s"==member_state_id|stringformat:"s" %}selected>
+                                state.id|stringformat:"s"==member_state_id|stringformat:"s" %}selected{% endif %}>
                                 {{ state.country_name }} ({{ state.country_code }})
                             </option>
                             {% endfor %}

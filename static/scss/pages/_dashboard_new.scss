@@ -1,0 +1,260 @@
+// ========================================
+// Dashboard Page Styles
+// ========================================
+
+.dashboard-page {
+  background: $neutral-lightest;
+  min-height: 100vh;
+
+  .page-header {
+    background: linear-gradient(135deg, $primary-blue 0%, $secondary-blue 100%);
+    color: $white;
+    padding: $space-xxl;
+    text-align: center;
+
+    h1 {
+      margin: 0 0 $space-sm 0;
+      font-size: $font-size-xxxl;
+      font-weight: $font-weight-bold;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .page-subtitle {
+      margin: 0;
+      font-size: $font-size-lg;
+      opacity: 0.9;
+    }
+  }
+}
+
+// Dashboard Statistics Cards
+.dashboard-stats {
+  @include grid-auto;
+  gap: $space-lg;
+  margin: $space-xl 0;
+
+  .stat-card {
+    @include card-elevated;
+    padding: $space-xl;
+    text-align: center;
+    color: $white;
+    border-radius: $border-radius-lg;
+    transition: transform $transition-normal;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+
+    // Default gradient
+    background: linear-gradient(135deg, $primary-pink 0%, $secondary-pink 100%);
+
+    &.stat-card-primary {
+      background: linear-gradient(
+        135deg,
+        $primary-blue 0%,
+        $secondary-blue 100%
+      );
+    }
+
+    &.stat-card-success {
+      background: linear-gradient(
+        135deg,
+        $success-light 0%,
+        $success-dark 100%
+      );
+    }
+
+    &.stat-card-warning {
+      background: linear-gradient(
+        135deg,
+        $warning-light 0%,
+        $warning-dark 100%
+      );
+    }
+
+    &.stat-card-info {
+      background: linear-gradient(135deg, $info-light 0%, $info-dark 100%);
+      color: $text-dark;
+    }
+
+    .stat-content {
+      .stat-label {
+        font-size: $font-size-sm;
+        opacity: 0.9;
+        margin-bottom: $space-sm;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .stat-value {
+        font-size: $font-size-xxxl;
+        font-weight: $font-weight-bold;
+        margin-bottom: $space-sm;
+      }
+
+      .stat-change {
+        font-size: $font-size-xs;
+        opacity: 0.8;
+
+        &.positive {
+          &::before {
+            content: '↗ ';
+          }
+        }
+      }
+    }
+
+    .stat-icon {
+      font-size: $font-size-xxl;
+      margin-top: $space-md;
+    }
+  }
+}
+
+// Content sections
+.content-section {
+  padding: $space-xl 0;
+  border-top: 1px solid $border-light;
+
+  .section-title {
+    font-size: $font-size-xl;
+    margin-bottom: $space-xl;
+    color: $text-dark;
+    border-bottom: 3px solid $primary-blue;
+    padding-bottom: $space-sm;
+    display: inline-block;
+  }
+}
+
+// Actions grid
+.actions-grid {
+  @include grid-auto;
+  gap: $space-lg;
+  margin-bottom: $space-xl;
+
+  .action-card {
+    @include card-base;
+    padding: $space-xl;
+    text-align: center;
+    transition: all $transition-normal;
+
+    &:hover {
+      border-color: $primary-blue;
+      background: $primary-blue-light;
+      transform: translateY(-2px);
+    }
+
+    .action-icon {
+      font-size: $font-size-xxl;
+      margin-bottom: $space-md;
+    }
+
+    h3 {
+      margin: 0 0 $space-md 0;
+      color: $text-dark;
+      font-size: $font-size-lg;
+    }
+
+    p {
+      color: $text-muted;
+      margin-bottom: $space-lg;
+      line-height: 1.5;
+    }
+
+    .sync-result {
+      margin-top: $space-md;
+    }
+  }
+}
+
+// Activity grid
+.activity-grid {
+  @include grid-auto-lg;
+  gap: $space-lg;
+
+  .activity-card {
+    @include card-base;
+    padding: $space-xl;
+
+    h3 {
+      margin: 0 0 $space-lg 0;
+      color: $text-dark;
+      font-size: $font-size-lg;
+      border-bottom: 2px solid $border-light;
+      padding-bottom: $space-sm;
+    }
+
+    .activity-list {
+      .activity-item {
+        @include flex-between;
+        padding: $space-md 0;
+        border-bottom: 1px solid $border-light;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .activity-content {
+          .activity-title {
+            font-weight: $font-weight-semibold;
+            color: $text-dark;
+            margin-bottom: $space-xs;
+          }
+
+          .activity-meta {
+            font-size: $font-size-sm;
+            color: $text-muted;
+          }
+        }
+
+        .activity-time {
+          font-size: $font-size-xs;
+          color: $text-muted;
+          font-style: italic;
+        }
+      }
+    }
+  }
+}
+
+// Status grid
+.status-grid {
+  .status-item {
+    @include flex-between;
+    padding: $space-md 0;
+    border-bottom: 1px solid $border-light;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .status-label {
+      font-weight: $font-weight-semibold;
+      color: $text-dark;
+    }
+
+    .status-badge {
+      padding: $space-xs $space-sm;
+      border-radius: $border-radius-sm;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &.status-active {
+        background: $success-light;
+        color: $success-dark;
+      }
+
+      &.status-warning {
+        background: $warning-light;
+        color: $warning-dark;
+      }
+
+      &.status-pending {
+        background: $info-light;
+        color: $info-dark;
+      }
+    }
+  }
+}

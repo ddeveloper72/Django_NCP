@@ -25,7 +25,7 @@
                 The MVC file contains healthcare value sets and their concepts for cross-border healthcare services.
             </p>
 
-            <div class="help-content" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">
+            <div class="help-content">
                 <h4>What is an MVC File?</h4>
                 <ul>
                     <li><strong>Master Value Set Catalogue</strong> - Contains standardized healthcare terminology</li>
@@ -165,20 +165,17 @@
     </form>
 
     <!-- Progress indicator (hidden initially) -->
-    <div id="progress-indicator"
-        style="display: none; margin-top: 20px; padding: 20px; background: #e8f4fd; border-radius: 5px;">
+    <div id="progress-indicator" class="progress-indicator hidden">
         <h3>Import in Progress...</h3>
-        <div class="progress-bar-container"
-            style="background: #ddd; border-radius: 10px; height: 20px; margin: 10px 0;">
-            <div id="progress-bar"
-                style="background: #28a745; height: 100%; border-radius: 10px; width: 0%; transition: width 0.3s;">
+        <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar" data-width="0">
             </div>
         </div>
         <div id="progress-message">Preparing import...</div>
         <p><small>You can safely navigate away from this page. The import will continue in the background.</small></p>
     </div>
 
-    <div class="help-section" style="margin-top: 30px; padding: 20px; background: #e8f4fd; border-radius: 5px;">
+    <div class="help-section">
         <h3>Need Help?</h3>
         <ul>
             <li>MVC files are available from the <a

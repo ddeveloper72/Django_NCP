@@ -1,0 +1,264 @@
+// ========================================
+// Admin Import Progress Styles
+// ========================================
+
+.import-status-card {
+  background: $neutral-lightest;
+  padding: $space-lg;
+  border-radius: $border-radius-md;
+  margin: $space-md 0;
+  border: 1px solid $border-light;
+}
+
+.status-info {
+  margin-bottom: $space-lg;
+
+  p {
+    margin: $space-sm 0;
+  }
+
+  code {
+    background: $bg-dark;
+    color: $white;
+    padding: $space-xs $space-sm;
+    border-radius: $border-radius-sm;
+    font-family: monospace;
+  }
+}
+
+.progress-section {
+  margin: $space-lg 0;
+
+  h4 {
+    margin-bottom: $space-md;
+  }
+}
+
+.progress-bar-container {
+  background: $neutral-light;
+  border-radius: $border-radius-md;
+  height: 25px;
+  margin: $space-md 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar {
+  background: $success-green;
+  height: 100%;
+  border-radius: $border-radius-md;
+  transition: width 0.5s ease;
+
+  // Use data attribute for width
+  &[data-width='0'] {
+    width: 0%;
+  }
+  &[data-width='10'] {
+    width: 10%;
+  }
+  &[data-width='20'] {
+    width: 20%;
+  }
+  &[data-width='30'] {
+    width: 30%;
+  }
+  &[data-width='40'] {
+    width: 40%;
+  }
+  &[data-width='50'] {
+    width: 50%;
+  }
+  &[data-width='60'] {
+    width: 60%;
+  }
+  &[data-width='70'] {
+    width: 70%;
+  }
+  &[data-width='80'] {
+    width: 80%;
+  }
+  &[data-width='90'] {
+    width: 90%;
+  }
+  &[data-width='100'] {
+    width: 100%;
+  }
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: $font-weight-bold;
+  color: $text-dark;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.progress-message {
+  margin: $space-md 0;
+  font-style: italic;
+  color: $text-muted;
+}
+
+.progress-details {
+  margin: $space-md 0;
+
+  p {
+    margin: $space-sm 0;
+  }
+}
+
+.results-section {
+  margin: $space-lg 0;
+
+  h4 {
+    margin-bottom: $space-md;
+  }
+}
+
+.success-message {
+  background: $success-light;
+  color: $success-dark;
+  padding: $space-md;
+  border-radius: $border-radius-md;
+  margin: $space-md 0;
+
+  .success-list {
+    margin: $space-md 0;
+    padding-left: $space-lg;
+
+    li {
+      margin: $space-xs 0;
+    }
+  }
+}
+
+.error-message {
+  background: $error-light;
+  color: $error-dark;
+  padding: $space-md;
+  border-radius: $border-radius-md;
+  margin: $space-md 0;
+}
+
+.error-details {
+  margin: $space-md 0;
+
+  h5 {
+    margin-bottom: $space-sm;
+  }
+}
+
+.error-log {
+  max-height: 200px;
+  overflow-y: auto;
+  background: $neutral-lightest;
+  padding: $space-md;
+  border-radius: $border-radius-sm;
+
+  .error-item {
+    margin: $space-xs 0;
+    font-family: monospace;
+    font-size: $font-size-sm;
+  }
+}
+
+.navigation-actions {
+  margin: $space-lg 0;
+  @include flex-center;
+  gap: $space-md;
+  justify-content: flex-start;
+}
+
+.auto-refresh-info {
+  margin: $space-md 0;
+  padding: $space-md;
+  background: $info-light;
+  border-radius: $border-radius-md;
+  color: $info-dark;
+
+  p {
+    margin: 0 0 $space-sm 0;
+  }
+}
+
+// Additional styles for import_mvc.html
+.help-content {
+  background: $neutral-lightest;
+  padding: $space-md;
+  border-radius: $border-radius-md;
+  margin: $space-md 0;
+  border: 1px solid $border-light;
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: $space-sm;
+  }
+
+  ul {
+    margin: $space-sm 0;
+    padding-left: $space-lg;
+  }
+
+  li {
+    margin: $space-xs 0;
+  }
+}
+
+.help-section {
+  margin-top: $space-xl;
+  padding: $space-lg;
+  background: $info-light;
+  border-radius: $border-radius-md;
+  color: $info-dark;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: $space-md;
+  }
+
+  ul {
+    margin: $space-sm 0;
+    padding-left: $space-lg;
+  }
+
+  li {
+    margin: $space-xs 0;
+  }
+
+  a {
+    color: $primary-blue;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.progress-indicator {
+  margin-top: $space-lg;
+  padding: $space-lg;
+  background: $info-light;
+  border-radius: $border-radius-md;
+  color: $info-dark;
+
+  &.hidden {
+    display: none;
+  }
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: $space-md;
+  }
+
+  p {
+    margin: $space-sm 0;
+
+    small {
+      font-size: $font-size-xs;
+      color: $text-muted;
+    }
+  }
+}

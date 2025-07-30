@@ -1,0 +1,173 @@
+// ========================================
+// Form Components
+// ========================================
+
+.form-group {
+  margin-bottom: $space-lg;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: $space-sm;
+  font-weight: $font-weight-medium;
+  color: $neutral-dark;
+
+  &.required::after {
+    content: ' *';
+    color: $error-red;
+  }
+}
+
+.form-input {
+  @include input-base;
+
+  &.form-input-sm {
+    height: 2rem;
+    padding: $space-xs $space-sm;
+    font-size: $font-size-sm;
+  }
+
+  &.form-input-lg {
+    height: 3rem;
+    padding: $space-md $space-lg;
+    font-size: $font-size-lg;
+  }
+
+  &.form-input-error {
+    border-color: $error-red;
+
+    &:focus {
+      border-color: $error-red;
+      box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.1);
+    }
+  }
+
+  &.form-input-success {
+    border-color: $success-green;
+
+    &:focus {
+      border-color: $success-green;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+    }
+  }
+}
+
+.form-textarea {
+  @include input-base;
+  min-height: 120px;
+  resize: vertical;
+}
+
+.form-select {
+  @include input-base;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right $space-sm center;
+  background-repeat: no-repeat;
+  background-size: 1rem;
+  padding-right: $space-xl;
+  appearance: none;
+}
+
+.form-checkbox,
+.form-radio {
+  display: flex;
+  align-items: center;
+  margin-bottom: $space-sm;
+
+  input {
+    margin-right: $space-sm;
+
+    &:focus {
+      @include focus-outline;
+    }
+  }
+
+  label {
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+}
+
+.form-help {
+  margin-top: $space-xs;
+  font-size: $font-size-sm;
+  color: $neutral-light;
+}
+
+.form-error {
+  margin-top: $space-xs;
+  font-size: $font-size-sm;
+  color: $error-red;
+}
+
+.form-success {
+  margin-top: $space-xs;
+  font-size: $font-size-sm;
+  color: $success-green;
+}
+
+// Form layouts
+.form-row {
+  @include flex-wrap;
+  margin: 0 (-$space-sm);
+
+  .form-col {
+    flex: 1;
+    padding: 0 $space-sm;
+    min-width: 0;
+
+    &.form-col-auto {
+      flex: 0 0 auto;
+    }
+
+    &.form-col-6 {
+      flex: 0 0 50%;
+    }
+
+    &.form-col-4 {
+      flex: 0 0 33.333333%;
+    }
+
+    &.form-col-3 {
+      flex: 0 0 25%;
+    }
+  }
+}
+
+// Input groups
+.input-group {
+  display: flex;
+
+  .form-input {
+    border-radius: 0;
+
+    &:first-child {
+      border-top-left-radius: $border-radius-md;
+      border-bottom-left-radius: $border-radius-md;
+    }
+
+    &:last-child {
+      border-top-right-radius: $border-radius-md;
+      border-bottom-right-radius: $border-radius-md;
+    }
+
+    &:not(:last-child) {
+      border-right: none;
+    }
+  }
+
+  .input-group-text {
+    display: flex;
+    align-items: center;
+    padding: $input-padding;
+    background-color: $neutral-lightest;
+    border: $input-border;
+    border-left: none;
+    white-space: nowrap;
+
+    &:last-child {
+      border-top-right-radius: $border-radius-md;
+      border-bottom-right-radius: $border-radius-md;
+    }
+  }
+}

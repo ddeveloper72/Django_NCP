@@ -1,0 +1,152 @@
+// ========================================
+// CSS Reset - Modern Normalize Base
+// ========================================
+
+// Box Sizing Reset
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+// Remove default margins and padding
+* {
+  margin: 0;
+  padding: 0;
+}
+
+// Root element setup
+html {
+  font-size: 16px; // Base font size
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+}
+
+// Body defaults
+body {
+  font-family: $font-family-primary;
+  font-size: $font-size-base;
+  line-height: 1.6;
+  color: $neutral-dark;
+  background-color: $white;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Typography reset
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: $font-weight-medium;
+  line-height: 1.2;
+  margin-bottom: $space-md;
+}
+
+h1 {
+  font-size: $font-size-xxxl;
+}
+
+h2 {
+  font-size: $font-size-xxl;
+}
+
+h3 {
+  font-size: $font-size-xl;
+}
+
+h4 {
+  font-size: $font-size-lg;
+}
+
+h5 {
+  font-size: $font-size-base;
+}
+
+h6 {
+  font-size: $font-size-sm;
+}
+
+// Paragraph spacing
+p {
+  margin-bottom: $space-md;
+}
+
+// Link reset
+a {
+  color: $primary-blue;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    @include focus-outline;
+  }
+}
+
+// List reset
+ul,
+ol {
+  list-style: none;
+}
+
+// Form element reset
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  border: $input-border;
+  border-radius: $border-radius-sm;
+}
+
+// Table reset
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+// Image reset
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+// Remove default button styles
+button:focus {
+  outline: none;
+}
+
+// Remove default field styles
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+// Screen reader only utility
+.sr-only {
+  @include sr-only;
+}

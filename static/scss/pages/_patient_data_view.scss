@@ -1,0 +1,49 @@
+// ========================================
+// Patient Data View Page Styles
+// ========================================
+
+.patient-data-view {
+  .access-info {
+    @include card-base;
+    margin-bottom: $space-lg;
+    padding: $space-lg;
+    border-left: 4px solid $primary-blue;
+
+    &.access-break-glass {
+      border-left-color: $warning-orange;
+      background: $warning-light;
+    }
+
+    .access-header {
+      @include flex-between;
+      align-items: center;
+
+      @include mobile-up {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $space-sm;
+      }
+    }
+
+    .emergency-reason {
+      margin-top: $space-sm;
+    }
+  }
+
+  .translation-note {
+    margin-top: $space-md;
+    font-size: $font-size-sm;
+    color: $text-muted;
+    font-style: italic;
+  }
+
+  .no-data-message {
+    padding: $space-xxl;
+    text-align: center;
+    color: $text-muted;
+
+    p {
+      margin: 0;
+    }
+  }
+}

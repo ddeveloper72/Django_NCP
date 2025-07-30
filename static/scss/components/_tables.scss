@@ -1,0 +1,228 @@
+// ========================================
+// Table Components
+// ========================================
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: $space-lg;
+  background-color: $white;
+
+  th,
+  td {
+    padding: $space-md;
+    text-align: left;
+    border-bottom: $border-width solid $neutral-lighter;
+    vertical-align: middle;
+  }
+
+  th {
+    background-color: $neutral-lightest;
+    font-weight: $font-weight-medium;
+    color: $neutral-dark;
+    border-bottom: 2px solid $neutral-lighter;
+  }
+
+  tbody {
+    tr {
+      transition: background-color $transition-normal;
+
+      &:hover {
+        background-color: $neutral-lightest;
+      }
+
+      &.table-row-selected {
+        background-color: $light-blue;
+      }
+    }
+  }
+
+  // Table variants
+  &.table-bordered {
+    border: $border-width solid $neutral-lighter;
+
+    th,
+    td {
+      border: $border-width solid $neutral-lighter;
+    }
+  }
+
+  &.table-striped {
+    tbody tr:nth-child(even) {
+      background-color: rgba($neutral-lightest, 0.5);
+    }
+  }
+
+  &.table-sm {
+    th,
+    td {
+      padding: $space-sm;
+    }
+  }
+
+  &.table-lg {
+    th,
+    td {
+      padding: $space-lg;
+    }
+  }
+}
+
+// Responsive table wrapper
+.table-responsive {
+  overflow-x: auto;
+  border: $border-width solid $neutral-lighter;
+  border-radius: $border-radius-md;
+
+  .table {
+    margin-bottom: 0;
+
+    th:first-child,
+    td:first-child {
+      border-left: none;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: none;
+    }
+  }
+}
+
+// Table actions
+.table-actions {
+  @include flex-center;
+  gap: $space-sm;
+
+  .btn {
+    padding: $space-xs $space-sm;
+    font-size: $font-size-sm;
+  }
+}
+
+// Table search and filters
+.table-controls {
+  @include flex-between;
+  margin-bottom: $space-lg;
+  gap: $space-md;
+
+  @include mobile-up {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table-search {
+    flex: 1;
+    max-width: 400px;
+
+    @include mobile-up {
+      max-width: none;
+    }
+  }
+
+  .table-filters {
+    @include flex-center;
+    gap: $space-md;
+
+    @include mobile-up {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+}
+
+// Data table specific styles
+.data-table {
+  .sort-header {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+
+    &:hover {
+      background-color: darken($neutral-lightest, 5%);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      right: $space-sm;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-bottom: 4px solid $neutral-light;
+      opacity: 0.5;
+    }
+
+    &.sort-asc::after {
+      border-bottom: 4px solid $primary-blue;
+      border-top: none;
+      opacity: 1;
+    }
+
+    &.sort-desc::after {
+      border-top: 4px solid $primary-blue;
+      border-bottom: none;
+      opacity: 1;
+    }
+  }
+
+  .row-checkbox {
+    width: 40px;
+    text-align: center;
+
+    input[type='checkbox'] {
+      margin: 0;
+    }
+  }
+
+  .row-actions {
+    width: 120px;
+    text-align: right;
+  }
+}
+
+// Table pagination
+.table-pagination {
+  @include flex-between;
+  margin-top: $space-lg;
+
+  @include mobile-up {
+    flex-direction: column;
+    gap: $space-md;
+  }
+
+  .pagination-info {
+    color: $neutral-medium;
+    font-size: $font-size-sm;
+  }
+
+  .pagination-controls {
+    @include flex-center;
+    gap: $space-sm;
+  }
+}
+
+// Empty table state
+.table-empty {
+  text-align: center;
+  padding: $space-xxl;
+  color: $neutral-medium;
+
+  .empty-icon {
+    font-size: $font-size-xxxl;
+    margin-bottom: $space-lg;
+    opacity: 0.5;
+  }
+
+  h3 {
+    margin-bottom: $space-sm;
+    color: $neutral-medium;
+  }
+
+  p {
+    margin-bottom: $space-lg;
+  }
+}
