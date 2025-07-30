@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Search - EU eHealth NCP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .patient-search-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .search-header {
+        background: linear-gradient(135deg, #2c3e50, #3498db);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .search-header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+
+    .country-flag {
+        width: 32px;
+        height: 24px;
+        border-radius: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 12px;
+    }
+
+    .search-content {
+        padding: 2rem;
+    }
+
+    .search-intro {
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .search-form {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .required {
+        color: #e74c3c;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .date-helper {
+        font-size: 0.9rem;
+        color: #666;
+        font-style: italic;
+    }
+
+    .break-glass-section {
+        background: #fff5f5;
+        border: 2px solid #fed7d7;
+        border-radius: 6px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+
+    .break-glass-checkbox {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .break-glass-checkbox input[type="checkbox"] {
+        margin-top: 0.25rem;
+        transform: scale(1.2);
+    }
+
+    .break-glass-label {
+        font-weight: 600;
+        color: #c53030;
+    }
+
+    .break-glass-explanation {
+        font-size: 0.9rem;
+        color: #666;
+        font-style: italic;
+        margin-top: 0.5rem;
+    }
+
+    .break-glass-reason {
+        margin-top: 1rem;
+        display: none;
+    }
+
+    .break-glass-reason.show {
+        display: block;
+    }
+
+    .break-glass-reason textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 4px;
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .search-button {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .search-button:hover {
+        background: linear-gradient(135deg, #2980b9, #1f618d);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .search-button:active {
+        transform: translateY(0);
+    }
+
+    .sidebar {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-right: 1px solid #e0e0e0;
+    }
+
+    .sidebar h3 {
+        margin-top: 0;
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-menu li {
+        margin-bottom: 0.5rem;
+    }
+
+    .sidebar-menu a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        color: #2c3e50;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-menu a:hover {
+        background-color: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .sidebar-menu a.active {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .main-container {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        min-height: calc(100vh - 120px);
+    }
+
+    .content-area {
+        padding: 2rem;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .alert-error {
+        background: #fed7d7;
+        border: 1px solid #e53e3e;
+        color: #c53030;
+    }
+
+    .alert-success {
+        background: #c6f6d5;
+        border: 1px solid #38a169;
+        color: #2f855a;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <div class="sidebar">
+        <h3 style="margin-top: 0; color: #2c3e50;">Patients</h3>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{{ url('patient_data:patient_search') }}" class="active">
+                    <span>🔍</span> Search Patient
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span>💊</span> Dispensations
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span>👁️</span> Dispensation viewer
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span>📋</span> Prescription viewer
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="content-area">
+        <!-- Display Django messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="patient-search-container">
+            <div class="search-header">
+                <h1>Patients</h1>
+                <div class="country-flag" style="background: #000; color: #ff0000;">DE</div>
+            </div>
+
+            <div class="search-content">
+                <div class="search-intro">
+                    <span>🇪🇺</span>
+                    <span>You can find the patient using the following criteria</span>
+                </div>
+
+                <form method="post" class="search-form" id="patientSearchForm">
+                    {{ csrf_token() }}
+
+                    <div class="form-group">
+                        <label for="member_state_id">
+                            Member State <span class="required">*</span>
+                        </label>
+                        <select name="member_state_id" id="member_state_id" required>
+                            <option value="">Select Member State</option>
+                            {% for state in member_states %}
+                                <option value="{{ state.id }}" 
+                                    {% if state.id|string == member_state_id|string %}selected{% endif %}>
+                                    {{ state.country_name }} ({{ state.country_code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="national_person_id">
+                            National Person Identifier <span class="required">*</span>
+                        </label>
+                        <input type="text" name="national_person_id" id="national_person_id"
+                            value="{{ national_person_id or '' }}"
+                            placeholder="Enter patient's national identifier" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="birthdate">
+                            Birthdate <span class="required">*</span>
+                        </label>
+                        <input type="text" name="birthdate" id="birthdate" value="{{ birthdate or '' }}"
+                            placeholder="yyyy/MM/dd" pattern="\d{4}/\d{2}/\d{2}" required>
+                        <div class="date-helper">(yyyy/MM/dd)</div>
+                    </div>
+
+                    <div class="break-glass-section">
+                        <div class="break-glass-checkbox">
+                            <input type="checkbox" name="break_glass" id="break_glass" 
+                                {% if break_glass %}checked{% endif %} onchange="toggleBreakGlassReason()">
+                            <div>
+                                <label for="break_glass" class="break-glass-label">
+                                    Break the glass (*)
+                                </label>
+                                <div class="break-glass-explanation">
+                                    (*) Tick Break-the-glass if there is a medical emergency that prevents the patient
+                                    from giving consent.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="break-glass-reason" id="breakGlassReason" 
+                            {% if break_glass %}style="display: block;"{% endif %}>
+                            <label for="break_glass_reason_text">
+                                Emergency Reason <span class="required">*</span>
+                            </label>
+                            <textarea name="break_glass_reason" id="break_glass_reason_text"
+                                placeholder="Please describe the medical emergency that prevents patient consent...">{{ break_glass_reason or '' }}</textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="search-button">
+                        🔍 Search Patient
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleBreakGlassReason() {
+        const checkbox = document.getElementById('break_glass');
+        const reasonSection = document.getElementById('breakGlassReason');
+        const reasonTextarea = document.getElementById('break_glass_reason_text');
+
+        if (checkbox.checked) {
+            reasonSection.style.display = 'block';
+            reasonTextarea.required = true;
+        } else {
+            reasonSection.style.display = 'none';
+            reasonTextarea.required = false;
+            reasonTextarea.value = '';
+        }
+    }
+
+    // Date input formatting
+    document.getElementById('birthdate').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 4) {
+            value = value.substring(0, 4) + '/' + value.substring(4);
+        }
+        if (value.length >= 7) {
+            value = value.substring(0, 7) + '/' + value.substring(7, 9);
+        }
+        e.target.value = value;
+    });
+
+    // Initialize break glass reason visibility
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleBreakGlassReason();
+    });
+</script>
+{% endblock %}
