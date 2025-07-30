@@ -76,7 +76,7 @@
         {% endif %}
 
         <form method="post">
-            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            {% csrf_token %}
             
             <div class="form-group">
                 <label for="id_username">Username:</label>

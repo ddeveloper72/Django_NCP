@@ -298,7 +298,7 @@
                 </div>
 
                 <form method="post" class="search-form" id="patientSearchForm">
-                    {{ csrf_token() }}
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
                     <div class="form-group">
                         <label for="member_state_id">

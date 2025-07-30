@@ -45,7 +45,7 @@
 
         <!-- Patient Search Form -->
         <form method="post" id="patientSearchForm" novalidate>
-            {{ csrf_token() }}
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
             {% for group_name, fields in grouped_fields.items() %}
                 <div class="field-group">

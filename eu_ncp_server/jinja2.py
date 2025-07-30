@@ -1,5 +1,6 @@
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import reverse
+from django.template.context_processors import csrf
 from jinja2 import Environment
 
 
