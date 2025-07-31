@@ -120,9 +120,7 @@ class Command(BaseCommand):
 
         # Create search fields
         for order, field_config in enumerate(config["fields"]):
-            field_type = SearchFieldType.objects.get(
-                type_code=field_config["type"]
-            )
+            field_type = SearchFieldType.objects.get(type_code=field_config["type"])
 
             SearchField.objects.create(
                 search_mask=ism,
@@ -283,7 +281,10 @@ class Command(BaseCommand):
                         "type": "select",
                         "label": "Versicherungsart",
                         "options": [
-                            {"value": "gkv", "label": "Gesetzliche Krankenversicherung"},
+                            {
+                                "value": "gkv",
+                                "label": "Gesetzliche Krankenversicherung",
+                            },
                             {"value": "pkv", "label": "Private Krankenversicherung"},
                             {"value": "beihilfe", "label": "Beihilfe"},
                         ],

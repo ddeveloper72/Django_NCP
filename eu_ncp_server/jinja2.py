@@ -2,6 +2,8 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import reverse
 from django.template.context_processors import csrf
 from jinja2 import Environment
+import django
+import sys
 
 
 def environment(**options):
@@ -16,6 +18,8 @@ def environment(**options):
         {
             "static": staticfiles_storage.url,
             "url": reverse,
+            "django_version": django.get_version(),
+            "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         }
     )
 
