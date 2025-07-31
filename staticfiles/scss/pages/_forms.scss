@@ -1,0 +1,184 @@
+// ========================================
+// Forms Page Styles
+// ========================================
+
+.forms-page {
+  .form-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .form-header {
+    text-align: center;
+    margin-bottom: $space-xxl;
+
+    h1 {
+      margin-bottom: $space-md;
+      color: $neutral-dark;
+    }
+
+    .form-description {
+      color: $neutral-medium;
+      font-size: $font-size-lg;
+    }
+  }
+
+  .form-card {
+    @include card-base;
+
+    .form-steps {
+      @include flex-center;
+      justify-content: center;
+      margin-bottom: $space-xxl;
+
+      .step {
+        @include flex-center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: $neutral-lighter;
+        color: $neutral-medium;
+        font-weight: $font-weight-medium;
+        position: relative;
+
+        &.step-active {
+          background-color: $primary-blue;
+          color: $white;
+        }
+
+        &.step-completed {
+          background-color: $success-green;
+          color: $white;
+        }
+
+        &:not(:last-child)::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 100%;
+          width: 60px;
+          height: 2px;
+          background-color: $neutral-lighter;
+          transform: translateY(-50%);
+        }
+
+        &.step-completed:not(:last-child)::after {
+          background-color: $success-green;
+        }
+      }
+    }
+  }
+
+  .form-section {
+    margin-bottom: $space-xxl;
+
+    .section-header {
+      border-bottom: $border-width solid $neutral-lighter;
+      padding-bottom: $space-md;
+      margin-bottom: $space-lg;
+
+      h2 {
+        margin: 0;
+        color: $neutral-dark;
+        font-size: $font-size-xl;
+      }
+
+      .section-description {
+        margin-top: $space-sm;
+        color: $neutral-medium;
+        font-size: $font-size-sm;
+      }
+    }
+  }
+
+  .form-actions {
+    @include flex-between;
+    margin-top: $space-xxl;
+    padding-top: $space-lg;
+    border-top: $border-width solid $neutral-lighter;
+
+    @include mobile-up {
+      flex-direction: column;
+      gap: $space-md;
+    }
+
+    .form-actions-left {
+      @include flex-center;
+      gap: $space-md;
+    }
+
+    .form-actions-right {
+      @include flex-center;
+      gap: $space-md;
+
+      @include mobile-up {
+        width: 100%;
+
+        .btn {
+          flex: 1;
+        }
+      }
+    }
+  }
+
+  .form-progress {
+    background-color: $neutral-lightest;
+    height: 8px;
+    border-radius: 4px;
+    margin-bottom: $space-xxl;
+    overflow: hidden;
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, $primary-blue, $accent-blue);
+      transition: width $transition-slow;
+      border-radius: 4px;
+    }
+  }
+
+  .form-validation-summary {
+    @include card-base;
+    background-color: #f8d7da;
+    border-left: 4px solid $error-red;
+    margin-bottom: $space-lg;
+
+    h3 {
+      color: #721c24;
+      margin-bottom: $space-md;
+      font-size: $font-size-lg;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: $space-lg;
+
+      li {
+        color: #721c24;
+        margin-bottom: $space-xs;
+      }
+    }
+  }
+
+  .form-success-message {
+    @include card-base;
+    background-color: $light-green;
+    border-left: 4px solid $success-green;
+    text-align: center;
+
+    .success-icon {
+      font-size: $font-size-xxxl;
+      color: $success-green;
+      margin-bottom: $space-lg;
+    }
+
+    h2 {
+      color: $primary-green;
+      margin-bottom: $space-md;
+    }
+
+    p {
+      color: $primary-green;
+      margin-bottom: $space-lg;
+    }
+  }
+}

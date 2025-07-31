@@ -1,0 +1,89 @@
+// ========================================
+// Button Components
+// ========================================
+
+.btn {
+  @include button-base;
+
+  // Size variants
+  &.btn-sm {
+    height: $button-height-sm;
+    padding: $space-xs $space-sm;
+    font-size: $font-size-sm;
+  }
+
+  &.btn-md {
+    height: $button-height-md;
+  }
+
+  &.btn-lg {
+    height: $button-height-lg;
+    padding: $space-md $space-lg;
+    font-size: $font-size-lg;
+  }
+
+  // Style variants
+  &.btn-primary {
+    @include button-primary;
+  }
+
+  &.btn-secondary {
+    @include button-secondary;
+  }
+
+  &.btn-success {
+    background-color: $success-green;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background-color: darken($success-green, 10%);
+    }
+  }
+
+  &.btn-warning {
+    background-color: $warning-orange;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background-color: darken($warning-orange, 10%);
+    }
+  }
+
+  &.btn-danger {
+    background-color: $error-red;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background-color: darken($error-red, 10%);
+    }
+  }
+
+  &.btn-outline {
+    background-color: transparent;
+    border: $border-width solid currentColor;
+
+    &:hover:not(:disabled) {
+      background-color: currentColor;
+      color: $white;
+    }
+  }
+
+  // Full width button
+  &.btn-block {
+    width: 100%;
+  }
+
+  // Loading state
+  &.btn-loading {
+    position: relative;
+    color: transparent;
+
+    &::after {
+      @include loading-spinner;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+}

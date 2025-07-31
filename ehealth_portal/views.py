@@ -105,6 +105,7 @@ def country_selection(request):
     context = {
         "countries": countries_list,
         "page_title": "eHealth OpenNCP Portal",
+        "step": "STEP 1: COUNTRY SELECTION",
         "total_countries": len(countries_list),
         "available_countries": len([c for c in countries_list if c["available"]]),
     }
