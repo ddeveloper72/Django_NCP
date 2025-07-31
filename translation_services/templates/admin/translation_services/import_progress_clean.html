@@ -1,0 +1,132 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block title %}MVC Import Progress | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='translation_services' %}">Translation Services</a>
+    &rsaquo; <a href="{% url 'admin:translation_services_valuesetcatalogue_changelist' %}">Value Set Catalogues</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module aligned">
+    <h1>{{ title }}</h1>
+
+    <div class="form-row">
+        <div class="import-status-card">
+            <h3>Import Status</h3>
+
+            <div class="status-info">
+                <p><strong>Task ID:</strong> <code>{{ task_id }}</code></p>
+                <p><strong>File:</strong> {{ task_status.filename }}</p>
+                <p><strong>Status:</strong> <span id="import-status" class="status-{{ task_status.status }}">{{
+                        task_status.status|title }}</span></p>
+                <p><strong>Started:</strong> {{ task_status.created_at|date:"M d, Y H:i:s" }}</p>
+                {% if task_status.completed_at %}
+                <p><strong>Completed:</strong> {{ task_status.completed_at|date:"M d, Y H:i:s" }}</p>
+                {% endif %}
+            </div>
+
+            <div class="progress-section">
+                <h4>Progress</h4>
+                <div class="progress-bar-container">
+                    <div id="progress-bar" class="progress-bar" data-width="{{ task_status.progress_percentage }}">
+                    </div>
+                    <div class="progress-text">
+                        <span id="progress-percentage">{{ task_status.progress_percentage }}%</span>
+                    </div>
+                </div>
+                <div id="progress-message" class="progress-message">
+                    {{ task_status.progress_message }}
+                </div>
+
+                {% if task_status.total_items > 0 %}
+                <div class="progress-details">
+                    <p><strong>Items Processed:</strong> <span id="processed-count">{{ task_status.processed_items
+                            }}</span> / {{ task_status.total_items }}</p>
+                    <p><strong>Success Rate:</strong> {{ task_status.success_rate|floatformat:1 }}%</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="results-section">
+                <h4>Results</h4>
+                {% if task_status.success_count > 0 %}
+                <div class="success-message">
+                    <strong>✅ Successfully imported {{ task_status.success_count }} items</strong>
+                    <ul class="success-list">
+                        {% for result in task_status.success_results %}
+                        <li>{{ result }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if task_status.error_count > 0 %}
+                <div class="error-message">
+                    <strong>❌ {{ task_status.error_count }} errors encountered</strong>
+                </div>
+
+                {% if task_status.error_details %}
+                <div class="error-details">
+                    <h5>Error Details</h5>
+                    <div class="error-log">
+                        {% for error in task_status.error_details %}
+                        <div class="error-item">
+                            <strong>Error {{ forloop.counter }}:</strong> {{ error.message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation-actions">
+        <a href="{% url 'admin:translation_services_valuesetcatalogue_changelist' %}" class="btn btn-secondary">
+            ← Back to Value Set Catalogues
+        </a>
+        {% if task_status.status == 'completed' %}
+        <a href="{% url 'admin:translation_services_valuesetcatalogue_import_mvc' %}" class="btn btn-primary">
+            Import Another File
+        </a>
+        {% endif %}
+    </div>
+
+    {% if task_status.status == 'pending' or task_status.status == 'running' %}
+    <div class="auto-refresh-info">
+        <p><em>This page will automatically refresh every 5 seconds until the import is complete.</em></p>
+        <button onclick="stopAutoRefresh()" class="btn btn-small">Stop Auto-Refresh</button>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    let autoRefreshInterval;
+
+    {% if task_status.status == 'pending' or task_status.status == 'running' %}
+    // Auto-refresh functionality
+    autoRefreshInterval = setInterval(function () {
+        window.location.reload();
+    }, 5000);
+    {% endif %}
+
+    function stopAutoRefresh() {
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+            document.querySelector('.auto-refresh-info').innerHTML = '<p><em>Auto-refresh stopped.</em></p>';
+        }
+    }
+</script>
+{% endblock %}

@@ -290,7 +290,7 @@ def patient_search_results(request, patient_id):
             "current_user": request.user,
         }
 
-        return render(request, "patient_data/patient_search_results.html", context)
+        return render(request, "patient_data/patient_search_results.html", context, using='jinja2')
 
     except PatientIdentifier.DoesNotExist:
         messages.error(request, "Patient identifier not found.")

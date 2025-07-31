@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}SMP Dashboard - EU eHealth NCP{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <!-- Dashboard Header -->
+    <div class="page-header">
+        <h1>🔗 SMP Dashboard</h1>
+        <p class="page-subtitle">Service Metadata Publisher Management Console</p>
+    </div>
+
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="dashboard-stats">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-content">
+                    <div class="stat-label">Total Participants</div>
+                    <div class="stat-value">{{ total_participants|default:"0" }}</div>
+                    <div class="stat-change positive">+12% from last month</div>
+                </div>
+                <div class="stat-icon">👥</div>
+            </div>
+
+            <div class="stat-card stat-card-success">
+                <div class="stat-content">
+                    <div class="stat-label">Active Services</div>
+                    <div class="stat-value">{{ active_services|default:"0" }}</div>
+                    <div class="stat-change positive">+5% from last month</div>
+                </div>
+                <div class="stat-icon">🔧</div>
+            </div>
+
+            <div class="stat-card stat-card-warning">
+                <div class="stat-content">
+                    <div class="stat-label">Documents</div>
+                    <div class="stat-value">{{ total_documents|default:"0" }}</div>
+                    <div class="stat-change positive">+8% from last month</div>
+                </div>
+                <div class="stat-icon">📄</div>
+            </div>
+
+            <div class="stat-card stat-card-info">
+                <div class="stat-content">
+                    <div class="stat-label">Countries</div>
+                    <div class="stat-value">{{ country_count|default:"0" }}</div>
+                </div>
+                <div class="stat-icon">🌍</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="content-section">
+            <h2 class="section-title">Quick Actions</h2>
+
+            <div class="actions-grid">
+                <div class="action-card">
+                    <div class="action-icon">👥</div>
+                    <h3>Manage Participants</h3>
+                    <p>Add, edit, or remove SMP participants and their metadata.</p>
+                    <a href="{% url 'smp_client:participant_search' %}" class="btn btn-primary">
+                        View Participants
+                    </a>
+                </div>
+
+                <div class="action-card">
+                    <div class="action-icon">📄</div>
+                    <h3>Document Services</h3>
+                    <p>Configure and manage document service endpoints.</p>
+                    <a href="{% url 'smp_client:list_documents' %}" class="btn btn-primary">
+                        Manage Documents
+                    </a>
+                </div>
+
+                <div class="action-card">
+                    <div class="action-icon">🔄</div>
+                    <h3>European SMP Sync</h3>
+                    <p>Synchronize with the European SMP registry for cross-border services.</p>
+                    <button onclick="syncWithEuropeanSMP()" class="btn btn-primary">
+                        🔄 Sync with European SMP
+                    </button>
+                    <div id="sync-result" class="sync-result"></div>
+                </div>
+
+                <div class="action-card">
+                    <div class="action-icon">⚙️</div>
+                    <h3>System Configuration</h3>
+                    <p>Configure SMP server settings and preferences.</p>
+                    <a href="/admin/" class="btn btn-primary">
+                        Admin Panel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <div class="content-section">
+            <h2 class="section-title">Recent Activity</h2>
+
+            <div class="activity-grid">
+                <div class="activity-card">
+                    <h3>Recent Participants</h3>
+                    <div class="activity-list">
+                        {% for participant in recent_participants %}
+                        <div class="activity-item">
+                            <div class="activity-content">
+                                <div class="activity-title">{{ participant.participant_identifier }}</div>
+                                <div class="activity-meta">{{ participant.participant_scheme }}</div>
+                            </div>
+                            <div class="activity-time">{{ participant.created_at|timesince }} ago</div>
+                        </div>
+                        {% empty %}
+                        <div class="activity-item">
+                            <div class="activity-content">No participants found</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="activity-card">
+                    <h3>System Status</h3>
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="status-label">SMP Server</div>
+                            <div class="status-badge status-active">
+                                Online
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">Database</div>
+                            <div class="status-badge status-active">
+                                Connected
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">European Registry</div>
+                            <div class="status-badge status-warning">
+                                Sync Pending
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">Backup</div>
+                            <div class="status-badge status-pending">
+                                Scheduled
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function syncWithEuropeanSMP() {
+        const resultDiv = document.getElementById('sync-result');
+        const button = event.target;
+
+        button.textContent = '🔄 Syncing...';
+        button.disabled = true;
+
+        try {
+            const response = await fetch('{% url "smp_client:european_smp_sync" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        ✅ Sync completed! Synced ${data.synced_participants} participants.
+                    </div>
+                `;
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        ❌ Sync failed: ${data.error}
+                    </div>
+                `;
+            }
+        } catch (error) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    ❌ Network error: ${error.message}
+                </div>
+            `;
+        }
+
+        button.textContent = '🔄 Sync with European SMP';
+        button.disabled = false;
+    }
+</script>
+{% endblock %}

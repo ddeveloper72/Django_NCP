@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="country-selection-page">
+    <!-- Page Header -->
+    <div class="hero-header">
+        <div class="hero-content">
+            <h1>🏥 {{ page_title }}</h1>
+        </div>
+    </div>
+
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+        {{ step }}
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="page-header">
+            <h2 class="page-title">Please choose the patient country</h2>
+            <p class="page-subtitle">Select a country to search for patient records using their International Search
+                Mask (ISM)</p>
+        </div>
+
+        <!-- Search Box -->
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" placeholder="Search countries..." id="countrySearch" class="search-input">
+            </div>
+        </div>
+
+        <!-- Country Grid -->
+        <div class="country-grid">
+            {% for country in countries %}
+            <div class="country-card{% if not country.available %} unavailable{% endif %}"
+                onclick="{% if country.available %}selectCountry('{{ country.code }}'){% endif %}">
+                <div class="country-flag">
+                    <img src="{% static 'flags/' %}{{ country.code }}.webp" alt="{{ country.name }} flag" />
+                </div>
+                <div class="country-name">{{ country.name }}</div>
+                <div class="country-status {% if country.available %}available{% else %}unavailable{% endif %}">
+                    {% if country.available %}✅ Available{% else %}❌ Unavailable{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Navigation Section -->
+        <div class="footer-actions">
+            <a href="/" class="btn btn-primary btn-lg">
+                🏠 Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectCountry(countryCode) {
+        window.location.href = `/portal/country/${countryCode}/search/`;
+    }
+
+    // Country search functionality
+    document.getElementById('countrySearch').addEventListener('input', function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.country-card');
+
+        cards.forEach(card => {
+            const countryName = card.querySelector('.country-name').textContent.toLowerCase();
+            if (countryName.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // Add hover sound effect (optional)
+    document.querySelectorAll('.country-card').forEach(card => {
+        card.addEventListener('mouseenter', function () {
+            if (!this.classList.contains('unavailable')) {
+                // Could add sound effect here
+            }
+        });
+    });
+</script>
+{% endblock %}
