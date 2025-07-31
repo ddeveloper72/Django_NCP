@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ self.title() or "EU NCP Portal" }}</title>
+    <title>{% block title %}EU NCP Portal{% endblock %}</title>
 
     <!-- DMZ-Compatible CSS (no external CDNs) -->
     <link href="{{ static('css/main.css') }}" rel="stylesheet" media="screen">
 
-    {{ self.extra_css() }}
+    {% block extra_css %}{% endblock %}
 </head>
 
 <body>
@@ -49,7 +49,7 @@
         </div>
         {% endif %}
 
-        {{ self.content() }}
+        {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
@@ -95,13 +95,7 @@
         });
     </script>
 
-    {{ self.extra_js() }}
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>
-
-{# Define block placeholders #}
-{% block title %}{% endblock %}
-{% block extra_css %}{% endblock %}
-{% block content %}{% endblock %}
-{% block extra_js %}{% endblock %}
