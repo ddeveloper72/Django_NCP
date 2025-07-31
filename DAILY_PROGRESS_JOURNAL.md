@@ -227,3 +227,53 @@ Once the CSS loading issue is resolved, we should see:
 **Files Ready:** All architecture in place, just needs browser testing
 
 **Session Status: COMPLETE ✅**
+
+---
+
+## 🔧 TEMPLATE DUPLICATION RESOLUTION (July 31, 2025)
+
+### ✅ **CRITICAL BUG FIX: Template Content Rendering Twice**
+
+**Problem Identified:** Both `/portal/` and `/patients/search/` pages were rendering content twice
+- Country flags duplicating on country selection page
+- Patient search forms duplicating on search page
+
+**Root Cause:** Mixed template syntax in `base.html`
+```html
+<!-- PROBLEMATIC: Mixed Jinja2 + Django syntax -->
+{{ self.content() }}  <!-- Jinja2 function call -->
+{% block content %}{% endblock %}  <!-- Django block tag -->
+```
+
+**Solution Applied:** Converted to pure Django block syntax
+```html
+<!-- FIXED: Consistent Django block syntax -->
+{% block content %}{% endblock %}  <!-- Single rendering point -->
+```
+
+### 📋 **Files Modified**
+
+**`templates/jinja2/base.html`** - Template inheritance fix
+- `{{ self.title() }}` → `{% block title %}EU NCP Portal{% endblock %}`
+- `{{ self.extra_css() }}` → `{% block extra_css %}{% endblock %}`
+- `{{ self.content() }}` → `{% block content %}{% endblock %}`
+- `{{ self.extra_js() }}` → `{% block extra_js %}{% endblock %}`
+- Removed duplicate block definitions at template bottom
+
+### 🎯 **Verification Complete**
+
+- ✅ Country selection page: Single country grid rendering
+- ✅ Patient search page: Single form rendering  
+- ✅ Template inheritance: Working correctly
+- ✅ SASS/CSS Grid: Still functioning from previous session
+
+### 📊 **Git Commit Details**
+
+```bash
+Commit: 0ee4cbf
+Message: "fix: Resolve template duplication issue - Convert base.html to pure Django block syntax"
+Files: 2 changed, 13 insertions(+), 13 deletions(-)
+Branch: feature/patient-data-translation-services
+```
+
+**Status: DUPLICATION ISSUE RESOLVED ✅**
