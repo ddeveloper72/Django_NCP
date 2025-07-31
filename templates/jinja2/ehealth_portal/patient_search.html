@@ -237,6 +237,72 @@
         }
     }
 
+    // Enhanced validation for patient ID fields
+    function validatePatientId(input, countryCode) {
+        const value = input.value.trim();
+        const errorDiv = input.parentElement.querySelector('.validation-error') || createErrorDiv(input);
+        
+        // Country-specific validation patterns and messages
+        const validationRules = {
+            'GR': {
+                pattern: /^\d{11}$/,
+                message: 'Greek National ID must be exactly 11 digits',
+                example: 'e.g., 12345678901'
+            },
+            'IT': {
+                pattern: /^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/,
+                message: 'Italian Codice Fiscale must follow the format: 6 letters, 2 digits, 1 letter, 2 digits, 1 letter, 3 digits, 1 letter',
+                example: 'e.g., RSSMRA85M01H501Z'
+            },
+            'LU': {
+                pattern: /^\d{13}$/,
+                message: 'Luxembourg National ID must be exactly 13 digits',
+                example: 'e.g., 1234567890123'
+            },
+            'LV': {
+                pattern: /^\d{6}-\d{5}$/,
+                message: 'Latvian Personal Code must follow format: DDMMYY-NNNNN',
+                example: 'e.g., 123456-12345'
+            },
+            'MT': {
+                pattern: /^\d{7}[A-Z]$/,
+                message: 'Maltese ID must be 7 digits followed by 1 letter',
+                example: 'e.g., 1234567M'
+            }
+        };
+
+        const rule = validationRules[countryCode];
+        if (!rule) return true; // No validation rule defined
+
+        if (value && !rule.pattern.test(value)) {
+            showValidationError(errorDiv, rule.message + ' (' + rule.example + ')');
+            input.classList.add('is-invalid');
+            return false;
+        } else {
+            hideValidationError(errorDiv);
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+            return true;
+        }
+    }
+
+    function createErrorDiv(input) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'validation-error text-danger small mt-1';
+        errorDiv.style.display = 'none';
+        input.parentElement.appendChild(errorDiv);
+        return errorDiv;
+    }
+
+    function showValidationError(errorDiv, message) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+
+    function hideValidationError(errorDiv) {
+        errorDiv.style.display = 'none';
+    }
+
     // Form validation
     document.getElementById('patientSearchForm').addEventListener('submit', function (e) {
         const breakGlass = document.getElementById('break_glass').checked;
@@ -249,13 +315,40 @@
             return false;
         }
 
-        // Additional validation can be added here
+        // Validate patient ID field
+        const patientIdField = document.getElementById('patient_id');
+        if (patientIdField) {
+            const countryCode = '{{ country_code }}';
+            if (!validatePatientId(patientIdField, countryCode)) {
+                e.preventDefault();
+                patientIdField.focus();
+                return false;
+            }
+        }
+
         return true;
     });
 
-    // Initialize break glass visibility
+    // Initialize validation and break glass visibility
     document.addEventListener('DOMContentLoaded', function () {
         toggleBreakGlassReason();
+        
+        // Add real-time validation to patient ID field
+        const patientIdField = document.getElementById('patient_id');
+        if (patientIdField) {
+            const countryCode = '{{ country_code }}';
+            patientIdField.addEventListener('input', function() {
+                // Debounce validation
+                clearTimeout(this.validationTimeout);
+                this.validationTimeout = setTimeout(() => {
+                    validatePatientId(this, countryCode);
+                }, 500);
+            });
+            
+            patientIdField.addEventListener('blur', function() {
+                validatePatientId(this, countryCode);
+            });
+        }
     });
 </script>
 {% endblock %}

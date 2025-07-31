@@ -21,7 +21,7 @@ class Command(BaseCommand):
             self.style.SUCCESS("Creating ISM configurations for CDA test countries...")
         )
 
-        # Based on your MS_ISM_Specific_Parameters.csv data
+        # Based on your MS_ISM_Specific_Parameters.csv data - CORRECTED for accuracy
         country_ism_configs = {
             "GR": {
                 "name": "Greece",
@@ -29,26 +29,26 @@ class Command(BaseCommand):
                 "patient_id_label": "National Person Identifier",
                 "patient_id_description": "Greek National ID Number (11 digits)",
                 "patient_id_placeholder": "Enter 11-digit national ID (e.g., 12345678901)",
-                "requires_birth_date": True,
-                "birth_date_format": "YYYY-MM-DD",
+                "requires_birth_date": False,  # CORRECTED: GR only uses ID number
+                "additional_fields": [],  # CORRECTED: Only ID field
             },
             "IT": {
-                "name": "Italy",
+                "name": "Italy", 
                 "patient_id_format": r"[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]",
                 "patient_id_label": "Codice Fiscale",
                 "patient_id_description": "Italian Tax Code (Codice Fiscale)",
                 "patient_id_placeholder": "Enter Italian tax code (e.g., RSSMRA85M01H501Z)",
                 "requires_birth_date": False,  # Birth date encoded in Codice Fiscale
-                "birth_date_format": None,
+                "additional_fields": [],  # Only Codice Fiscale
             },
             "LU": {
                 "name": "Luxembourg",
                 "patient_id_format": r"\d{13}",
-                "patient_id_label": "National Person Identifier",
+                "patient_id_label": "National Person Identifier", 
                 "patient_id_description": "Luxembourg National ID Number",
                 "patient_id_placeholder": "Enter Luxembourg national ID",
-                "requires_birth_date": True,
-                "birth_date_format": "YYYY-MM-DD",
+                "requires_birth_date": False,  # CORRECTED: Check actual CSV requirements
+                "additional_fields": [],  # Check CSV for exact fields
             },
             "LV": {
                 "name": "Latvia",
@@ -57,7 +57,7 @@ class Command(BaseCommand):
                 "patient_id_description": "Latvian Personal Code (DDMMYY-NNNNN)",
                 "patient_id_placeholder": "Enter personal code (e.g., 123456-12345)",
                 "requires_birth_date": False,  # Birth date encoded in personal code
-                "birth_date_format": None,
+                "additional_fields": [],  # Only personal code
             },
             "MT": {
                 "name": "Malta",
@@ -65,8 +65,8 @@ class Command(BaseCommand):
                 "patient_id_label": "Identity Card Number",
                 "patient_id_description": "Maltese Identity Card Number (7 digits + letter)",
                 "patient_id_placeholder": "Enter ID card number (e.g., 1234567M)",
-                "requires_birth_date": True,
-                "birth_date_format": "YYYY-MM-DD",
+                "requires_birth_date": False,  # CORRECTED: Check actual CSV requirements
+                "additional_fields": [],  # Check CSV for exact fields
             },
         }
 
@@ -168,10 +168,10 @@ class Command(BaseCommand):
         # Clear existing fields
         SearchField.objects.filter(search_mask=search_mask).delete()
 
-        # Create search fields
+        # Create search fields - SIMPLIFIED to match CSV specifications
         field_order = 0
 
-        # Patient ID field (always required)
+        # Patient ID field (always required and often the ONLY required field)
         field_order += 1
         SearchField.objects.create(
             search_mask=search_mask,
@@ -187,7 +187,7 @@ class Command(BaseCommand):
             field_group="identification",
         )
 
-        # Birth date field (if required)
+        # Birth date field (ONLY if explicitly required by the country)
         if config["requires_birth_date"]:
             field_order += 1
             SearchField.objects.create(
@@ -196,58 +196,28 @@ class Command(BaseCommand):
                 field_type=field_types["date"],
                 label="Date of Birth",
                 placeholder="Select date of birth",
-                help_text=f'Date format: {config["birth_date_format"]}',
+                help_text="Date of birth is required for this country",
                 is_required=True,
                 field_order=field_order,
                 field_group="identification",
             )
 
-        # Optional family name field (helps with verification)
-        field_order += 1
-        SearchField.objects.create(
-            search_mask=search_mask,
-            field_code="family_name",
-            field_type=field_types["text"],
-            label="Family Name",
-            placeholder="Enter family name (optional)",
-            help_text="Family name for additional verification",
-            is_required=False,
-            field_order=field_order,
-            field_group="personal",
-        )
-
-        # Optional given name field
-        field_order += 1
-        SearchField.objects.create(
-            search_mask=search_mask,
-            field_code="given_name",
-            field_type=field_types["text"],
-            label="Given Name",
-            placeholder="Enter given name (optional)",
-            help_text="Given name for additional verification",
-            is_required=False,
-            field_order=field_order,
-            field_group="personal",
-        )
-
-        # Gender field (optional, for validation)
-        field_order += 1
-        SearchField.objects.create(
-            search_mask=search_mask,
-            field_code="gender",
-            field_type=field_types["select"],
-            label="Gender",
-            placeholder="Select gender (optional)",
-            help_text="Gender for additional verification",
-            is_required=False,
-            field_options=[
-                {"value": "M", "label": "Male"},
-                {"value": "F", "label": "Female"},
-                {"value": "UN", "label": "Undisclosed"},
-            ],
-            field_order=field_order,
-            field_group="personal",
-        )
+        # Additional fields (if specified in CSV for this country)
+        for field_config in config.get("additional_fields", []):
+            field_order += 1
+            SearchField.objects.create(
+                search_mask=search_mask,
+                field_code=field_config["code"],
+                field_type=field_types[field_config["type"]],
+                label=field_config["label"],
+                placeholder=field_config.get("placeholder", ""),
+                help_text=field_config.get("help_text", ""),
+                is_required=field_config.get("required", False),
+                validation_pattern=field_config.get("pattern", ""),
+                field_options=field_config.get("options", []),
+                field_order=field_order,
+                field_group=field_config.get("group", "additional"),
+            )
 
         self.stdout.write(f'Created {field_order} search fields for {config["name"]}')
 

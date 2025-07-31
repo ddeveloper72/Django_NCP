@@ -449,3 +449,57 @@
     }
   }
 }
+
+// Enhanced Form Validation Styles
+.form-control {
+  &.is-valid {
+    border-color: $success-green;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    
+    &:focus {
+      border-color: $success-green;
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+  }
+
+  &.is-invalid {
+    border-color: $error-red;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    
+    &:focus {
+      border-color: $error-red;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+  }
+}
+
+.validation-error {
+  color: $error-red;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+  
+  &::before {
+    content: "⚠ ";
+    margin-right: 0.25rem;
+  }
+}
+
+// Patient ID Field Enhancement
+#patient_id {
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  
+  &:focus {
+    font-weight: bold;
+  }
+  
+  &.is-valid {
+    background-color: rgba($success-green, 0.05);
+  }
+  
+  &.is-invalid {
+    background-color: rgba($error-red, 0.05);
+  }
+}
