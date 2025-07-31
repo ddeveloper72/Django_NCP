@@ -18,7 +18,7 @@
                 {{ country.name }} Patient Search
             </h1>
             <div class="header-actions">
-                <a href="{{ url('refresh_country_ism', country_code) }}" class="refresh-ism">
+                <a href="/portal/country/{{ country_code }}/refresh-ism/" class="refresh-ism">
                     🔄 Refresh ISM
                 </a>
                 <a href="{{ url('country_selection') }}" class="btn btn-light ms-2">
@@ -54,27 +54,28 @@
 
                 {% for field in fields %}
                 <div class="form-group">
-                    <label for="{{ field.name }}" class="form-label">
-                        {{ field.display_name }}
+                    <label for="{{ field.code }}" class="form-label">
+                        {{ field.label }}
                         {% if field.required %}
                         <span class="required">*</span>
                         {% endif %}
                     </label>
 
-                    {% if field.field_type == 'text' %}
-                    <input type="text" name="{{ field.name }}" id="{{ field.name }}" class="form-control"
-                        value="{{ field.value or '' }}" {% if field.required %}required{% endif %} {% if
-                        field.placeholder %}placeholder="{{ field.placeholder }}" {% endif %} {% if field.pattern
-                        %}pattern="{{ field.pattern }}" {% endif %}>
-                    {% elif field.field_type == 'date' %}
-                    <input type="date" name="{{ field.name }}" id="{{ field.name }}" class="form-control"
-                        value="{{ field.value or '' }}" {% if field.required %}required{% endif %}>
-                    {% elif field.field_type == 'select' %}
-                    <select name="{{ field.name }}" id="{{ field.name }}" class="form-control" {% if field.required
+                    {% if field.type == 'text' or field.type == 'ssn' %}
+                    <input type="text" name="{{ field.code }}" id="{{ field.code }}" class="form-control"
+                        value="{{ field.default_value or '' }}" {% if field.required %}required{% endif %} {% if
+                        field.placeholder %}placeholder="{{ field.placeholder }}" {% endif %} {% if
+                        field.validation_pattern %}pattern="{{ field.validation_pattern }}" {% endif %}>
+                    {% elif field.type == 'date' %}
+                    <input type="date" name="{{ field.code }}" id="{{ field.code }}" class="form-control"
+                        value="{{ field.default_value or '' }}" {% if field.required %}required{% endif %}>
+                    {% elif field.type == 'select' %}
+                    <select name="{{ field.code }}" id="{{ field.code }}" class="form-control" {% if field.required
                         %}required{% endif %}>
-                        <option value="">Select {{ field.display_name }}</option>
+                        <option value="">Select {{ field.label }}</option>
                         {% for option in field.options %}
-                        <option value="{{ option.value }}" {% if option.value==field.value %}selected{% endif %}>
+                        <option value="{{ option.value }}" {% if option.value==field.default_value %}selected{% endif
+                            %}>
                             {{ option.label }}
                         </option>
                         {% endfor %}
@@ -140,7 +141,7 @@
                     <li>The ISM data needs to be refreshed</li>
                 </ul>
                 <div class="mt-3">
-                    <a href="{{ url('refresh_country_ism', country_code) }}" class="btn btn-primary">
+                    <a href="/portal/country/{{ country_code }}/refresh-ism/" class="btn btn-primary">
                         🔄 Try Refreshing ISM
                     </a>
                     <a href="{{ url('country_selection') }}" class="btn btn-secondary ms-2">

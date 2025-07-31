@@ -235,10 +235,12 @@ Once the CSS loading issue is resolved, we should see:
 ### ✅ **CRITICAL BUG FIX: Template Content Rendering Twice**
 
 **Problem Identified:** Both `/portal/` and `/patients/search/` pages were rendering content twice
+
 - Country flags duplicating on country selection page
 - Patient search forms duplicating on search page
 
 **Root Cause:** Mixed template syntax in `base.html`
+
 ```html
 <!-- PROBLEMATIC: Mixed Jinja2 + Django syntax -->
 {{ self.content() }}  <!-- Jinja2 function call -->
@@ -246,6 +248,7 @@ Once the CSS loading issue is resolved, we should see:
 ```
 
 **Solution Applied:** Converted to pure Django block syntax
+
 ```html
 <!-- FIXED: Consistent Django block syntax -->
 {% block content %}{% endblock %}  <!-- Single rendering point -->
@@ -254,6 +257,7 @@ Once the CSS loading issue is resolved, we should see:
 ### 📋 **Files Modified**
 
 **`templates/jinja2/base.html`** - Template inheritance fix
+
 - `{{ self.title() }}` → `{% block title %}EU NCP Portal{% endblock %}`
 - `{{ self.extra_css() }}` → `{% block extra_css %}{% endblock %}`
 - `{{ self.content() }}` → `{% block content %}{% endblock %}`
