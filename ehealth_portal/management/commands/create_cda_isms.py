@@ -33,7 +33,7 @@ class Command(BaseCommand):
                 "additional_fields": [],  # CORRECTED: Only ID field
             },
             "IT": {
-                "name": "Italy", 
+                "name": "Italy",
                 "patient_id_format": r"[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]",
                 "patient_id_label": "Codice Fiscale",
                 "patient_id_description": "Italian Tax Code (Codice Fiscale)",
@@ -44,7 +44,7 @@ class Command(BaseCommand):
             "LU": {
                 "name": "Luxembourg",
                 "patient_id_format": r"\d{13}",
-                "patient_id_label": "National Person Identifier", 
+                "patient_id_label": "National Person Identifier",
                 "patient_id_description": "Luxembourg National ID Number",
                 "patient_id_placeholder": "Enter Luxembourg national ID",
                 "requires_birth_date": False,  # CORRECTED: Check actual CSV requirements

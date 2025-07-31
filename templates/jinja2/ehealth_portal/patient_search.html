@@ -241,7 +241,7 @@
     function validatePatientId(input, countryCode) {
         const value = input.value.trim();
         const errorDiv = input.parentElement.querySelector('.validation-error') || createErrorDiv(input);
-        
+
         // Country-specific validation patterns and messages
         const validationRules = {
             'GR': {
@@ -332,20 +332,20 @@
     // Initialize validation and break glass visibility
     document.addEventListener('DOMContentLoaded', function () {
         toggleBreakGlassReason();
-        
+
         // Add real-time validation to patient ID field
         const patientIdField = document.getElementById('patient_id');
         if (patientIdField) {
             const countryCode = '{{ country_code }}';
-            patientIdField.addEventListener('input', function() {
+            patientIdField.addEventListener('input', function () {
                 // Debounce validation
                 clearTimeout(this.validationTimeout);
                 this.validationTimeout = setTimeout(() => {
                     validatePatientId(this, countryCode);
                 }, 500);
             });
-            
-            patientIdField.addEventListener('blur', function() {
+
+            patientIdField.addEventListener('blur', function () {
                 validatePatientId(this, countryCode);
             });
         }
