@@ -2,6 +2,58 @@
 // Mixins - Reusable SASS Functions
 // ========================================
 
+// Flexbox Grid Utilities (Replacing CSS Grid for DMZ compatibility)
+@mixin grid-auto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-md;
+}
+
+@mixin grid-auto-sm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-sm;
+}
+
+@mixin grid-auto-lg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-lg;
+}
+
+@mixin grid-cols-2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-md;
+
+  > * {
+    flex: 1 1 calc(50% - ($space-md / 2));
+    min-width: 0;
+  }
+}
+
+@mixin grid-cols-3 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-md;
+
+  > * {
+    flex: 1 1 calc(33.333% - ($space-md * 2 / 3));
+    min-width: 0;
+  }
+}
+
+@mixin grid-cols-4 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-md;
+
+  > * {
+    flex: 1 1 calc(25% - ($space-md * 3 / 4));
+    min-width: 0;
+  }
+}
+
 // Flexbox Utilities for Layout
 @mixin flex-center {
   display: flex;
@@ -138,6 +190,17 @@
   &:hover {
     box-shadow: $shadow-md;
     transition: box-shadow $transition-normal;
+  }
+}
+
+@mixin card-elevated {
+  @include card-base;
+  box-shadow: $shadow-md;
+
+  &:hover {
+    box-shadow: $shadow-lg;
+    transform: translateY(-2px);
+    transition: all $transition-normal;
   }
 }
 

@@ -18,20 +18,52 @@ $neutral-light: #999999;
 $neutral-lighter: #cccccc;
 $neutral-lightest: #f5f5f5;
 
+// Text Colors
+$text-dark: #2d3748;
+$text-muted: #718096;
+
+// Background Colors
+$bg-light: #f7fafc;
+$bg-dark: #2d3748;
+$bg-white: #ffffff;
+
+// Border Colors
+$border-light: #e2e8f0;
+
 $white: #ffffff;
 $error-red: #d32f2f;
 $warning-orange: #ff9800;
 $success-green: #4caf50;
 
 // Status Colors with Variations
+$success: #4caf50;
+$success-dark: #388e3c;
 $success-light: #81c784;
 $success-lighter: #c8e6c9;
+
+$error: #d32f2f;
+$error-dark: #c62828;
 $error-light: #ef5350;
 $error-lighter: #ffcdd2;
+
+$warning: #ff9800;
+$warning-dark: #f57c00;
+$warning-light: #ffb74d;
+$warning-lighter: #ffe0b2;
+
+$info: #2196f3;
+$info-dark: #1976d2;
+$info-light: #64b5f6;
+$info-lighter: #bbdefb;
 
 // Healthcare Theme Colors
 $primary-pink: #c2185b;
 $secondary-pink: #e91e63;
+
+// Primary Blue Theme  
+$primary-blue: #1976d2;
+$primary-blue-light: #64b5f6;
+$secondary-blue: #0d47a1;
 
 // Typography
 $font-family-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -40,14 +72,16 @@ $font-family-mono: 'Courier New', Courier, monospace;
 $font-size-xs: 0.75rem; // 12px
 $font-size-sm: 0.875rem; // 14px
 $font-size-base: 1rem; // 16px
-$font-size-lg: 1.125rem; // 18px
-$font-size-xl: 1.25rem; // 20px
-$font-size-xxl: 1.5rem; // 24px
-$font-size-xxxl: 2rem; // 32px
+$font-size-md: 1.125rem; // 18px
+$font-size-lg: 1.25rem; // 20px
+$font-size-xl: 1.5rem; // 24px
+$font-size-xxl: 2rem; // 32px
+$font-size-xxxl: 2.5rem; // 40px
 
 $font-weight-light: 300;
 $font-weight-normal: 400;
 $font-weight-medium: 500;
+$font-weight-semibold: 600;
 $font-weight-bold: 700;
 
 // Spacing Scale
@@ -62,12 +96,15 @@ $space-xxxl: 4rem; // 64px
 // Border & Radius
 $border-width: 1px;
 $border-width-thick: 2px;
+$border-radius-xs: 0.125rem;
 $border-radius-sm: 0.25rem;
 $border-radius-md: 0.5rem;
 $border-radius-lg: 1rem;
+$border-radius-full: 9999px;
 
 // Shadows
 $shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+$shadow-base: 0 2px 4px rgba(0, 0, 0, 0.1);
 $shadow-md: 0 2px 6px rgba(0, 0, 0, 0.15);
 $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
 
