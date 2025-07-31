@@ -1,24 +1,130 @@
 {
-  "1.3.6.1.4.1.48336": {
-    "country_name": "Country_1.3.6.1.4.1.48336",
-    "patient_count": 5,
+  "1.3.6.1.4.1.12559.11.10.1.3.1.1.3.1": {
+    "country_name": "Country_1.3.6.1.4.1.12559.11.10.1.3.1.1.3.1",
+    "country_code": "AT",
+    "country_display_name": "Austria",
+    "patient_count": 3,
     "patient_files": [
       "1-1234-W8.properties",
-      "1-5678-W8.properties",
-      "2-1234-W8.properties",
       "2-5678-W8.properties",
-      "3-1234-W8.properties"
-    ]
+      "3-9012-W8.properties"
+    ],
+    "ism_version": "1.0"
   },
-  "2.16.17.710.813.1000.990.1": {
-    "country_name": "Country_2.16.17.710.813.1000.990.1",
-    "patient_count": 5,
+  "1.3.6.1.4.1.12559.11.10.1.3.1.1.3.2": {
+    "country_name": "Country_1.3.6.1.4.1.12559.11.10.1.3.1.1.3.2",
+    "country_code": "BE",
+    "country_display_name": "Belgium",
+    "patient_count": 3,
     "patient_files": [
       "1-1234-W8.properties",
-      "1-5678-W8.properties",
-      "2-1234-W8.properties",
       "2-5678-W8.properties",
-      "3-1234-W8.properties"
-    ]
+      "3-9012-W8.properties"
+    ],
+    "ism_version": "1.0"
+  },
+  "1.3.6.1.4.1.12559.11.10.1.3.1.1.3.999": {
+    "country_name": "Country_1.3.6.1.4.1.12559.11.10.1.3.1.1.3.999",
+    "country_code": "SK",
+    "country_display_name": "Slovakia",
+    "patient_count": 0,
+    "patient_files": [],
+    "ism_version": "1.0"
+  },
+  "1.3.6.1.4.1.12559.11.10.1.3.1.1.3.9": {
+    "country_name": "Country_1.3.6.1.4.1.12559.11.10.1.3.1.1.3.9",
+    "country_code": "CZ",
+    "country_display_name": "Czech Republic",
+    "patient_count": 3,
+    "patient_files": [
+      "1-1234-W8.properties",
+      "2-5678-W8.properties",
+      "3-9012-W8.properties"
+    ],
+    "ism_version": "1.0"
+  },
+  "1.3.6.1.4.1.12559.11.10.1.3.1.1.3.4": {
+    "country_name": "Country_1.3.6.1.4.1.12559.11.10.1.3.1.1.3.4",
+    "country_code": "FR",
+    "country_display_name": "France",
+    "patient_count": 3,
+    "patient_files": [
+      "1-1234-W8.properties",
+      "2-5678-W8.properties",
+      "3-9012-W8.properties"
+    ],
+    "ism_version": "1.0"
+  },
+  "1.3.6.1.4.1.12559.11.10.1.3.1.1.3.3": {
+    "country_name": "Country_1.3.6.1.4.1.12559.11.10.1.3.1.1.3.3",
+    "country_code": "DE",
+    "country_display_name": "Germany",
+    "patient_count": 3,
+    "patient_files": [
+      "1-1234-W8.properties",
+      "2-5678-W8.properties",
+      "3-9012-W8.properties"
+    ],
+    "ism_version": "1.0"
+  },
+  "1.3.6.1.4.1.12559.11.10.1.3.1.1.3.5": {
+    "country_name": "Country_1.3.6.1.4.1.12559.11.10.1.3.1.1.3.5",
+    "country_code": "IT",
+    "country_display_name": "Italy",
+    "patient_count": 3,
+    "patient_files": [
+      "1-1234-W8.properties",
+      "2-5678-W8.properties",
+      "3-9012-W8.properties"
+    ],
+    "ism_version": "1.0"
+  },
+  "1.3.6.1.4.1.12559.11.10.1.3.1.1.3.6": {
+    "country_name": "Country_1.3.6.1.4.1.12559.11.10.1.3.1.1.3.6",
+    "country_code": "NL",
+    "country_display_name": "Netherlands",
+    "patient_count": 3,
+    "patient_files": [
+      "1-1234-W8.properties",
+      "2-5678-W8.properties",
+      "3-9012-W8.properties"
+    ],
+    "ism_version": "2.3"
+  },
+  "1.3.6.1.4.1.12559.11.10.1.3.1.1.3.8": {
+    "country_name": "Country_1.3.6.1.4.1.12559.11.10.1.3.1.1.3.8",
+    "country_code": "PL",
+    "country_display_name": "Poland",
+    "patient_count": 3,
+    "patient_files": [
+      "1-1234-W8.properties",
+      "2-5678-W8.properties",
+      "3-9012-W8.properties"
+    ],
+    "ism_version": "1.4"
+  },
+  "1.3.6.1.4.1.12559.11.10.1.3.1.1.3.7": {
+    "country_name": "Country_1.3.6.1.4.1.12559.11.10.1.3.1.1.3.7",
+    "country_code": "ES",
+    "country_display_name": "Spain",
+    "patient_count": 3,
+    "patient_files": [
+      "1-1234-W8.properties",
+      "2-5678-W8.properties",
+      "3-9012-W8.properties"
+    ],
+    "ism_version": "1.7"
+  },
+  "1.3.6.1.4.1.12559.11.10.1.3.1.1.3.10": {
+    "country_name": "Country_1.3.6.1.4.1.12559.11.10.1.3.1.1.3.10",
+    "country_code": "SE",
+    "country_display_name": "Sweden",
+    "patient_count": 3,
+    "patient_files": [
+      "1-1234-W8.properties",
+      "2-5678-W8.properties",
+      "3-9012-W8.properties"
+    ],
+    "ism_version": "1.0"
   }
 }
