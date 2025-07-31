@@ -229,7 +229,8 @@
             {% if sample_patient_info %}
             <div class="detail-item">
                 <span class="detail-label">Full Name</span>
-                <span class="detail-value">{{ sample_patient_info.given_name }} {{ sample_patient_info.family_name }}</span>
+                <span class="detail-value">{{ sample_patient_info.given_name }} {{ sample_patient_info.family_name
+                    }}</span>
             </div>
             <div class="detail-item">
                 <span class="detail-label">Birth Date</span>
@@ -250,8 +251,10 @@
             <div class="detail-item">
                 <span class="detail-label">Address</span>
                 <span class="detail-value">
-                    {{ sample_patient_info.street }}{% if sample_patient_info.street and sample_patient_info.city %}, {% endif %}
-                    {{ sample_patient_info.city }}{% if sample_patient_info.city and sample_patient_info.postal_code %}, {% endif %}
+                    {{ sample_patient_info.street }}{% if sample_patient_info.street and sample_patient_info.city %}, {%
+                    endif %}
+                    {{ sample_patient_info.city }}{% if sample_patient_info.city and sample_patient_info.postal_code %},
+                    {% endif %}
                     {{ sample_patient_info.postal_code }}<br>
                     {{ sample_patient_info.country }}
                 </span>
@@ -282,6 +285,53 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- Local CDA Documents Section (if available) -->
+    {% if is_local_cda_search and sample_patient_info and sample_patient_info.cda_documents %}
+    <div class="services-section">
+        <h3>🏠 Local CDA Documents</h3>
+        <p>The following Patient Summary documents were found in the local test data repository following PS Display
+            Guidelines:</p>
+
+        <div class="services-grid">
+            {% for doc in sample_patient_info.cda_documents %}
+            <div class="service-card" onclick="viewLocalCDADocument({{ loop.index0 }})">
+                <div class="service-header">
+                    <div class="service-icon" style="background-color: #e8f5e8; color: #27ae60;">
+                        📄
+                    </div>
+                    <div>
+                        <h4 class="service-title">{{ doc.document_format }} CDA Document</h4>
+                        <div style="font-size: 0.9rem; color: #666;">{{ doc.validation_level }} Validation</div>
+                    </div>
+                </div>
+                <div class="service-description">
+                    <strong>File:</strong> {{ doc.file_name|truncate(50) }}<br>
+                    <strong>Patient:</strong> {{ doc.patient_given_name }} {{ doc.patient_family_name }}<br>
+                    <strong>Document ID:</strong> {{ doc.document_id or 'N/A' }}<br>
+                    <strong>Modified:</strong> {{ doc.file_modified.strftime('%Y-%m-%d %H:%M') }}<br>
+                    {% if doc.extracted_pdfs %}
+                    <strong>📄 PDFs:</strong> {{ doc.extracted_pdfs|length }} embedded document(s)
+                    {% endif %}
+                </div>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <button class="btn btn-success btn-sm">
+                        🔍 View Document with PS Guidelines
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div
+            style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #27ae60;">
+            <strong>🏠 Local Search Mode:</strong> These documents are stored locally and rendered following PS Display
+            Guidelines for cross-border patient summary exchange.
+            This mode allows testing of eIDAS Patient Summary rendering without connecting to remote National Contact
+            Points.
+        </div>
+    </div>
+    {% endif %}
 
     <div class="services-section">
         <h3>Available Services</h3>
@@ -349,7 +399,10 @@
                     <div class="service-icon"
                         style="background: 
                         {% if service.service_type == 'PS' %}#e3f2fd{% elif service.service_type == 'EP' %}#f3e5f5{% elif service.service_type == 'LR' %}#e8f5e8{% else %}#fff3e0{% endif %};">
-                        {% if service.service_type == 'PS' %}📋{% elif service.service_type == 'EP' %}💊{% elif service.service_type == 'LR' %}🔬{% elif service.service_type == 'MR' %}📄{% elif service.service_type == 'DI' %}🩻{% elif service.service_type == 'VR' %}💉{% else %}📊{% endif %}
+                        {% if service.service_type == 'PS' %}📋{% elif service.service_type == 'EP' %}💊{% elif
+                        service.service_type == 'LR' %}🔬{% elif service.service_type == 'MR' %}📄{% elif
+                        service.service_type == 'DI' %}🩻{% elif service.service_type == 'VR' %}💉{% else %}📊{% endif
+                        %}
                     </div>
                     <h4 class="service-title">{{ service.service_name }}</h4>
                 </div>
@@ -480,6 +533,11 @@
         closeBreakGlassModal();
     }
 
+    // Function to view local CDA documents
+    function viewLocalCDADocument(documentIndex) {
+        window.location.href = "{{ url('patient_data:local_cda_document_view_indexed', args=[patient_identifier.id, '__INDEX__']) }}".replace('__INDEX__', documentIndex);
+    }
+
     function submitServiceRequest(serviceId, consentMethod, breakGlassReason) {
         fetch('{{ url("patient_data:request_patient_service") }}', {
             method: 'POST',
@@ -489,9 +547,9 @@
             },
             body: JSON.stringify({
                 patient_identifier_id: {{ patient_identifier.id }},
-                service_id: serviceId,
-                consent_method: consentMethod,
-                break_glass_reason: breakGlassReason
+            service_id: serviceId,
+            consent_method: consentMethod,
+            break_glass_reason: breakGlassReason
             })
         })
         .then(response => response.json())

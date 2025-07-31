@@ -90,6 +90,25 @@
             </div>
             {% endfor %}
 
+            <!-- Local CDA Search Option -->
+            <div class="local-search-section" style="margin-bottom: 2rem;">
+                <div
+                    style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: #f8f9fa; border-radius: 6px; border: 2px solid #e3f2fd;">
+                    <input type="checkbox" name="use_local_search" id="use_local_search"
+                        style="transform: scale(1.2); accent-color: #3498db;">
+                    <div>
+                        <label for="use_local_search"
+                            style="font-weight: 600; color: #2c3e50; cursor: pointer; margin: 0;">
+                            🏠 Search Local CDA Documents
+                        </label>
+                        <div style="font-size: 0.9rem; color: #666; font-style: italic; margin-top: 0.25rem;">
+                            Search Patient Summary documents in local test data following PS Display Guidelines for {{
+                            country.name }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Break Glass Section -->
             <div class="break-glass-section">
                 <h5 class="break-glass-title">🚨 Emergency Access</h5>

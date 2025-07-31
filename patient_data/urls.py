@@ -33,6 +33,17 @@ urlpatterns = [
     path(
         "data/<int:patient_data_id>/", views.patient_data_view, name="patient_data_view"
     ),
+    # Local CDA document viewing
+    path(
+        "local-cda/<int:patient_id>/",
+        views.local_cda_document_view,
+        name="local_cda_document_view",
+    ),
+    path(
+        "local-cda/<int:patient_id>/<int:document_index>/",
+        views.local_cda_document_view,
+        name="local_cda_document_view_indexed",
+    ),
     # Consent management
     path(
         "consent/<int:patient_identifier_id>/",

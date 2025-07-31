@@ -139,6 +139,7 @@ def patient_search(request, country_code):
     if request.method == "POST":
         # Process search form submission
         search_fields = {}
+        use_local_search = request.POST.get("use_local_search") == "on"
 
         # Collect all search field values
         for field in search_mask.fields.all():
@@ -157,8 +158,10 @@ def patient_search(request, country_code):
                 request, f"Required fields missing: {', '.join(missing_fields)}"
             )
         else:
-            # Perform patient search
-            result = perform_patient_search(country, search_fields, request.user)
+            # Perform patient search (with local CDA option)
+            result = perform_patient_search(
+                country, search_fields, request.user, use_local_search
+            )
 
             if result.patient_found:
                 # Redirect to patient data view with search result ID
@@ -573,9 +576,9 @@ def create_search_fields_from_ism(search_mask, ism_data):
         )
 
 
-def perform_patient_search(country, search_fields, user):
+def perform_patient_search(country, search_fields, user, use_local_search=False):
     """
-    Perform patient search using NCP
+    Perform patient search using NCP or local CDA documents
     Returns PatientSearchResult object
     """
     # Create search result record
@@ -587,6 +590,76 @@ def perform_patient_search(country, search_fields, user):
     )
 
     try:
+        # NEW: Local CDA document search if enabled
+        if use_local_search:
+            logger.info(f"Using local CDA document search for {country.code}")
+
+            # Extract patient ID from search fields
+            patient_id_value = (
+                search_fields.get("patient_id")
+                or search_fields.get("national_id")
+                or search_fields.get("identifier")
+                or search_fields.get("pps_number")
+                or search_fields.get("social_security_number")
+                or search_fields.get("health_card_number")
+            )
+
+            if patient_id_value:
+                try:
+                    from patient_data.services.local_patient_search import (
+                        LocalPatientSearchService,
+                    )
+
+                    local_search_service = LocalPatientSearchService()
+                    found, cda_documents, message = (
+                        local_search_service.search_patient_summaries(
+                            country_code=country.code, patient_id=patient_id_value
+                        )
+                    )
+
+                    if found and cda_documents:
+                        # Use data from first matching CDA document
+                        first_doc = cda_documents[0]
+                        result.patient_found = True
+                        result.patient_data = {
+                            "id": patient_id_value,
+                            "name": f"{first_doc.get('patient_given_name', '')} {first_doc.get('patient_family_name', '')}".strip(),
+                            "birth_date": first_doc.get("patient_birth_time", ""),
+                            "gender": first_doc.get("patient_gender", ""),
+                            "country": first_doc.get("patient_country", country.name),
+                            "city": first_doc.get("patient_city", ""),
+                            "document_format": first_doc.get("document_format", ""),
+                            "validation_level": first_doc.get("validation_level", ""),
+                            "file_name": first_doc.get("file_name", ""),
+                            "cda_documents": cda_documents,  # Store all CDA documents
+                            "source": "LOCAL_CDA_SEARCH",
+                        }
+                        result.available_documents = []
+                        for doc in cda_documents:
+                            result.available_documents.append(
+                                {
+                                    "type": "PS",
+                                    "title": f"Patient Summary ({doc.get('validation_level', 'Unknown')} - {doc.get('document_format', 'Unknown')})",
+                                    "date": doc.get("effective_time", ""),
+                                    "available": True,
+                                    "file_path": doc.get("file_path", ""),
+                                    "extracted_pdfs": doc.get("extracted_pdfs", []),
+                                }
+                            )
+                        result.ncp_response_time = 0.1  # Local search is fast
+                        result.ncp_status_code = "200"
+                        result.save()
+                        logger.info(
+                            f"Patient {patient_id_value} found in local CDA documents: {message}"
+                        )
+                        return result
+                    else:
+                        logger.info(
+                            f"Patient {patient_id_value} not found in local CDA documents"
+                        )
+                except Exception as e:
+                    logger.warning(f"Error in local CDA search: {e}")
+
         # In production, this would make actual NCP API calls
         # For demo, we'll check both simulated test data and actual database
 
@@ -713,6 +786,23 @@ def patient_data(request, country_code, patient_id):
         patient_data = search_result.patient_data
         available_documents = search_result.available_documents
 
+        # Check if this is from local CDA search and process PDF extractions
+        is_local_cda_search = patient_data.get("source") == "LOCAL_CDA_SEARCH"
+
+        if is_local_cda_search:
+            # Process documents for PDF viewing
+            from patient_data.services.clinical_pdf_service import ClinicalPDFService
+
+            pdf_service = ClinicalPDFService()
+
+            for doc in available_documents:
+                file_path = doc.get("file_path")
+                if file_path and not doc.get("extracted_pdfs"):
+                    # Extract PDFs from CDA document
+                    extracted_pdfs = pdf_service.extract_pdfs_from_cda(file_path)
+                    doc["extracted_pdfs"] = extracted_pdfs
+                    doc["has_pdfs"] = len(extracted_pdfs) > 0
+
     except (PatientSearchResult.DoesNotExist, ValueError):
         # Fallback to mock data for direct access
         patient_data = {
@@ -737,6 +827,7 @@ def patient_data(request, country_code, patient_id):
             },
         ]
         search_result = None
+        is_local_cda_search = False
 
     context = {
         "country": country,
@@ -744,6 +835,7 @@ def patient_data(request, country_code, patient_id):
         "patient": patient_data,
         "documents": available_documents,
         "search_result": search_result,
+        "is_local_cda_search": is_local_cda_search,
         "page_title": f"Patient Data - {country.name}",
         "step": "PATIENT DATA",
     }

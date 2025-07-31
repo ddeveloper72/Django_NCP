@@ -18,13 +18,15 @@
 
 **Problem:** Patient search results showing literal `{{ sample_patient_info.family_name }}` instead of rendered variable
 **Root Cause:** Template was Django format but needed to use Jinja2 template engine for proper variable rendering
-**Solution:** 
+**Solution:**
+
 - Converted `templates/patient_data/patient_search_results.html` to Jinja2 format
 - Created `templates/jinja2/patient_data/patient_search_results.html` with proper Jinja2 syntax
 - Updated view to use `using='jinja2'` parameter in render() call
 - **Result:** ✅ Template loads successfully with Jinja2 backend, variable rendering issue resolved
 
 **Verification:**
+
 - ✅ Jinja2 template backend confirmed active
 - ✅ Template loads without errors  
 - ✅ HTTP requests return status 200 (accessible)
@@ -34,7 +36,8 @@
 
 **Problem:** Django Compressor failing with "Undefined variable: $success-dark" error
 **Root Cause:** Variable definitions split between `staticfiles/scss/` and `static/scss/` directories
-**Solution:** 
+**Solution:**
+
 - Synchronized complete variable definitions from `staticfiles/scss/utils/_variables.scss` to `static/scss/utils/_variables.scss`
 - Added missing variables: `$success-dark`, `$warning-light`, `$info-light`, `$text-dark`, etc.
 - **Result:** SASS compilation successful (66KB CSS generated), patient search results page now accessible

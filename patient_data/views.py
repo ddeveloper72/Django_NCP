@@ -22,6 +22,7 @@ from .models import (
 # Import translation services
 from translation_services.core import TranslationServiceFactory
 from .patient_loader import patient_loader
+from .services.local_patient_search import LocalPatientSearchService
 import json
 import logging
 from datetime import datetime
@@ -59,6 +60,7 @@ def handle_patient_search(request, context):
         member_state_id = request.POST.get("member_state_id")
         break_glass = request.POST.get("break_glass") == "on"
         break_glass_reason = request.POST.get("break_glass_reason", "").strip()
+        use_local_search = request.POST.get("use_local_search") == "on"
 
         logger.info(
             f"Form data: patient_id={national_person_id}, birthdate={birthdate_str}, member_state_id={member_state_id}"
@@ -103,74 +105,127 @@ def handle_patient_search(request, context):
 
         if not errors and member_state:
             logger.info(
-                f"Searching for patient {national_person_id} in {member_state.country_name}"
+                f"Searching for patient {national_person_id} in {member_state.country_name}, use_local_search={use_local_search}"
             )
 
-            # First, try to find patient in new EU test data (database)
-            try:
-                # Look for patient in PatientData table
-                eu_patient_data = PatientData.objects.filter(
-                    patient_identifier__patient_id=national_person_id,
-                    patient_identifier__home_member_state=member_state,
-                    birth_date=birthdate,
-                ).first()
-
-                if eu_patient_data:
-                    patient_found = True
-                    # Create compatible patient info object for session storage
-                    sample_patient_info = type(
-                        "PatientInfo",
-                        (),
-                        {
-                            "family_name": eu_patient_data.family_name or "",
-                            "given_name": eu_patient_data.given_name or "",
-                            "administrative_gender": eu_patient_data.administrative_gender
-                            or "",
-                            "birth_date_formatted": birthdate_str,
-                            "street": eu_patient_data.street or "",
-                            "city": eu_patient_data.city or "",
-                            "postal_code": eu_patient_data.postal_code or "",
-                            "country": eu_patient_data.country
-                            or member_state.country_name,
-                            "telephone": eu_patient_data.telephone or "",
-                            "email": eu_patient_data.email or "",
-                            "oid": f"EU_TEST_DATA_{member_state.country_code}",
-                        },
-                    )()
-                    logger.info(
-                        f"Patient {national_person_id} found in EU test data: {eu_patient_data.given_name} {eu_patient_data.family_name}"
-                    )
-                else:
-                    logger.info(
-                        f"Patient {national_person_id} not found in EU test data"
-                    )
-            except Exception as e:
-                logger.warning(f"Error searching EU test data: {e}")
-
-            # If not found in EU test data, try old sample data files
-            if not patient_found and member_state.sample_data_oid:
+            # NEW: Local CDA document search if enabled
+            if use_local_search:
                 logger.info(
-                    f"Searching for patient {national_person_id} in legacy sample data OID {member_state.sample_data_oid}"
+                    f"Using local CDA document search for {member_state.country_code}"
                 )
-
-                # Try to find patient in old sample data
-                found, patient_info, message = patient_loader.search_patient(
-                    member_state.sample_data_oid, national_person_id, birthdate_str
-                )
-
-                logger.info(f"Legacy search result: found={found}, message='{message}'")
-
-                if found:
-                    patient_found = True
-                    sample_patient_info = patient_info
-                    logger.info(
-                        f"Patient {national_person_id} found in legacy sample data: {message}"
-                    )
-                else:
-                    if patient_info:  # Patient exists but birth date doesn't match
-                        logger.info(
-                            f"Patient found in legacy data but {message.lower()}"
+                try:
+                    local_search_service = LocalPatientSearchService()
+                    found, cda_documents, message = (
+                        local_search_service.search_patient_summaries(
+                            country_code=member_state.country_code,
+                            patient_id=national_person_id,
                         )
+                    )
+
+                    if found and cda_documents:
+                        patient_found = True
+                        # Create patient info from first matching CDA document
+                        first_doc = cda_documents[0]
+                        sample_patient_info = type(
+                            "PatientInfo",
+                            (),
+                            {
+                                "family_name": first_doc.get("patient_family_name", ""),
+                                "given_name": first_doc.get("patient_given_name", ""),
+                                "administrative_gender": first_doc.get(
+                                    "patient_gender", ""
+                                ),
+                                "birth_date_formatted": birthdate_str,
+                                "street": "",
+                                "city": first_doc.get("patient_city", ""),
+                                "postal_code": "",
+                                "country": first_doc.get(
+                                    "patient_country", member_state.country_name
+                                ),
+                                "telephone": "",
+                                "email": "",
+                                "oid": f"LOCAL_CDA_{member_state.country_code}",
+                                "cda_documents": cda_documents,  # Store CDA documents for later use
+                            },
+                        )()
+                        logger.info(
+                            f"Patient {national_person_id} found in local CDA documents: {message}"
+                        )
+                    else:
+                        logger.info(
+                            f"Patient {national_person_id} not found in local CDA documents: {message}"
+                        )
+                except Exception as e:
+                    logger.warning(f"Error in local CDA search: {e}")
+
+            # If not found in local CDA and not using local search only, try EU test data
+            if not patient_found and not use_local_search:
+                try:
+                    # Look for patient in PatientData table
+                    eu_patient_data = PatientData.objects.filter(
+                        patient_identifier__patient_id=national_person_id,
+                        patient_identifier__home_member_state=member_state,
+                        birth_date=birthdate,
+                    ).first()
+
+                    if eu_patient_data:
+                        patient_found = True
+                        # Create compatible patient info object for session storage
+                        sample_patient_info = type(
+                            "PatientInfo",
+                            (),
+                            {
+                                "family_name": eu_patient_data.family_name or "",
+                                "given_name": eu_patient_data.given_name or "",
+                                "administrative_gender": eu_patient_data.administrative_gender
+                                or "",
+                                "birth_date_formatted": birthdate_str,
+                                "street": eu_patient_data.street or "",
+                                "city": eu_patient_data.city or "",
+                                "postal_code": eu_patient_data.postal_code or "",
+                                "country": eu_patient_data.country
+                                or member_state.country_name,
+                                "telephone": eu_patient_data.telephone or "",
+                                "email": eu_patient_data.email or "",
+                                "oid": f"EU_TEST_DATA_{member_state.country_code}",
+                            },
+                        )()
+                        logger.info(
+                            f"Patient {national_person_id} found in EU test data: {eu_patient_data.given_name} {eu_patient_data.family_name}"
+                        )
+                    else:
+                        logger.info(
+                            f"Patient {national_person_id} not found in EU test data"
+                        )
+                except Exception as e:
+                    logger.warning(f"Error searching EU test data: {e}")
+
+                # If not found in EU test data, try old sample data files
+                if not patient_found and member_state.sample_data_oid:
+                    logger.info(
+                        f"Searching for patient {national_person_id} in legacy sample data OID {member_state.sample_data_oid}"
+                    )
+
+                    # Try to find patient in old sample data
+                    found, patient_info, message = patient_loader.search_patient(
+                        member_state.sample_data_oid, national_person_id, birthdate_str
+                    )
+
+                    logger.info(
+                        f"Legacy search result: found={found}, message='{message}'"
+                    )
+
+                    if found:
+                        patient_found = True
+                        sample_patient_info = patient_info
+                        logger.info(
+                            f"Patient {national_person_id} found in legacy sample data: {message}"
+                        )
+                    else:
+                        if patient_info:  # Patient exists but birth date doesn't match
+                            logger.info(
+                                f"Patient found in legacy data but {message.lower()}"
+                            )
 
             # If patient not found in either source
             if not patient_found:
@@ -201,6 +256,7 @@ def handle_patient_search(request, context):
                     ),
                     "break_glass": break_glass,
                     "break_glass_reason": break_glass_reason,
+                    "use_local_search": use_local_search,
                 }
             )
             return render(request, "patient_data/patient_search.html", context)
@@ -281,6 +337,13 @@ def patient_search_results(request, patient_id):
             f"patient_info_{patient_identifier.id}"
         )
 
+        # Check if this is a local CDA search result
+        is_local_cda_search = (
+            sample_patient_info
+            and sample_patient_info.get("oid", "").startswith("LOCAL_CDA_")
+            and "cda_documents" in sample_patient_info
+        )
+
         context = {
             "patient_identifier": patient_identifier,
             "member_state": member_state,
@@ -288,9 +351,12 @@ def patient_search_results(request, patient_id):
             "existing_data": existing_data,
             "sample_patient_info": sample_patient_info,
             "current_user": request.user,
+            "is_local_cda_search": is_local_cda_search,
         }
 
-        return render(request, "patient_data/patient_search_results.html", context, using='jinja2')
+        return render(
+            request, "patient_data/patient_search_results.html", context, using="jinja2"
+        )
 
     except PatientIdentifier.DoesNotExist:
         messages.error(request, "Patient identifier not found.")
@@ -519,3 +585,67 @@ def patient_data_view(request, patient_data_id):
     except PatientData.DoesNotExist:
         messages.error(request, "Patient data not found.")
         return redirect("patient_data:patient_search")
+
+
+@login_required
+def local_cda_document_view(request, patient_id, document_index=0):
+    """
+    View for displaying local CDA documents with PS Display Guidelines compliance
+    """
+    try:
+        patient_identifier = PatientIdentifier.objects.get(id=patient_id)
+        member_state = patient_identifier.home_member_state
+
+        # Get sample patient info from session
+        sample_patient_info = request.session.get(
+            f"patient_info_{patient_identifier.id}"
+        )
+
+        if not sample_patient_info or "cda_documents" not in sample_patient_info:
+            messages.error(request, "No local CDA documents found for this patient.")
+            return redirect(
+                "patient_data:patient_search_results", patient_id=patient_id
+            )
+
+        cda_documents = sample_patient_info["cda_documents"]
+
+        if document_index >= len(cda_documents):
+            messages.error(request, "Document not found.")
+            return redirect(
+                "patient_data:patient_search_results", patient_id=patient_id
+            )
+
+        selected_document = cda_documents[document_index]
+
+        # Render document with PS Display Guidelines
+        local_search_service = LocalPatientSearchService()
+        rendered_result = local_search_service.render_patient_summary_with_guidelines(
+            selected_document["file_path"],
+            target_language="en",  # Can be made configurable
+        )
+
+        context = {
+            "patient_identifier": patient_identifier,
+            "member_state": member_state,
+            "selected_document": selected_document,
+            "all_documents": cda_documents,
+            "document_index": document_index,
+            "rendered_result": rendered_result,
+            "sample_patient_info": sample_patient_info,
+            "current_user": request.user,
+        }
+
+        return render(
+            request,
+            "patient_data/local_cda_document_view.html",
+            context,
+            using="jinja2",
+        )
+
+    except PatientIdentifier.DoesNotExist:
+        messages.error(request, "Patient identifier not found.")
+        return redirect("patient_data:patient_search")
+    except Exception as e:
+        logger.error(f"Error displaying local CDA document: {e}", exc_info=True)
+        messages.error(request, f"Error displaying document: {str(e)}")
+        return redirect("patient_data:patient_search_results", patient_id=patient_id)

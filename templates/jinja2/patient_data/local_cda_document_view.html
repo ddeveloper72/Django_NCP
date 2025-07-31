@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+
+{% block title %}Local CDA Document - {{ selected_document.file_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cda-document-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .document-header {
+        background: linear-gradient(135deg, #2c3e50, #3498db);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .document-header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+
+    .document-meta {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .document-meta span {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+    }
+
+    .document-navigation {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .nav-buttons {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .nav-button {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .nav-button:hover {
+        background: #2980b9;
+        color: white;
+        text-decoration: none;
+    }
+
+    .nav-button.disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+    }
+
+    .document-selector {
+        margin-left: auto;
+    }
+
+    .document-selector select {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .document-content {
+        padding: 2rem;
+    }
+
+    .patient-summary-card {
+        background: #f8f9fa;
+        border: 2px solid #e3f2fd;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .patient-summary-card h3 {
+        margin-top: 0;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .patient-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .info-item {
+        background: white;
+        padding: 1rem;
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        color: #34495e;
+        font-size: 1rem;
+    }
+
+    .rendered-content {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .ps-guidelines-header {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: white;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .error-message {
+        background: #fed7d7;
+        border: 2px solid #e53e3e;
+        color: #c53030;
+        padding: 1rem;
+        border-radius: 6px;
+        margin: 1rem 0;
+    }
+
+    .success-message {
+        background: #c6f6d5;
+        border: 2px solid #38a169;
+        color: #2f855a;
+        padding: 1rem;
+        border-radius: 6px;
+        margin: 1rem 0;
+    }
+
+    .document-actions {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .action-button {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .action-button:hover {
+        background: #2980b9;
+        color: white;
+        text-decoration: none;
+    }
+
+    .action-button.secondary {
+        background: #95a5a6;
+    }
+
+    .action-button.secondary:hover {
+        background: #7f8c8d;
+    }
+
+    .cda-file-info {
+        background: #ecf0f1;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+
+    .extracted-pdfs {
+        margin-top: 2rem;
+    }
+
+    .pdf-list {
+        display: grid;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .pdf-item {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .pdf-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .pdf-download {
+        background: #e74c3c;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .header-right {
+        text-align: right;
+    }
+
+    .country-code {
+        font-size: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cda-document-container">
+    <!-- Document Header -->
+    <div class="document-header">
+        <div>
+            <h1>🏥 Patient Summary Document</h1>
+            <div class="document-meta">
+                <span>📍 {{ member_state.country_name }}</span>
+                <span>🔍 {{ selected_document.validation_level }} Validation</span>
+                <span>📄 {{ selected_document.document_format }} Format</span>
+                <span>📅 {{ selected_document.file_modified.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="country-code">{{ member_state.country_code }}</div>
+        </div>
+    </div>
+
+    <!-- Document Navigation -->
+    <div class="document-navigation">
+        <div class="nav-buttons">
+            <a href="{{ url('patient_data:patient_search_results', args=[patient_identifier.id]) }}" class="nav-button">
+                ← Back to Search Results
+            </a>
+
+            {% if document_index > 0 %}
+            <a href="{{ url('patient_data:local_cda_document_view_indexed', args=[patient_identifier.id, document_index - 1]) }}"
+                class="nav-button">
+                ← Previous Document
+            </a>
+            {% else %}
+            <span class="nav-button disabled">← Previous Document</span>
+            {% endif %}
+
+            {% if document_index < all_documents|length - 1 %} <a
+                href="{{ url('patient_data:local_cda_document_view_indexed', args=[patient_identifier.id, document_index + 1]) }}"
+                class="nav-button">
+                Next Document →
+                </a>
+                {% else %}
+                <span class="nav-button disabled">Next Document →</span>
+                {% endif %}
+
+                <div class="document-selector">
+                    <label for="document-select">Document:</label>
+                    <select id="document-select" onchange="changeDocument(this.value)">
+                        {% for doc in all_documents %}
+                        <option value="{{ loop.index0 }}" {% if loop.index0==document_index %}selected{% endif %}>
+                            {{ loop.index }}/{{ all_documents|length }}: {{ doc.file_name|truncate(50) }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+        </div>
+    </div>
+
+    <!-- Document Content -->
+    <div class="document-content">
+        <!-- Patient Summary Card -->
+        <div class="patient-summary-card">
+            <h3>👤 Patient Information</h3>
+            <div class="patient-info-grid">
+                <div class="info-item">
+                    <div class="info-label">Patient ID</div>
+                    <div class="info-value">{{ selected_document.patient_id or 'N/A' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Full Name</div>
+                    <div class="info-value">{{ selected_document.patient_given_name }} {{
+                        selected_document.patient_family_name }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Gender</div>
+                    <div class="info-value">{{ selected_document.patient_gender or 'N/A' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Birth Date</div>
+                    <div class="info-value">{{ selected_document.patient_birth_time or 'N/A' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Country</div>
+                    <div class="info-value">{{ selected_document.patient_country or 'N/A' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">City</div>
+                    <div class="info-value">{{ selected_document.patient_city or 'N/A' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CDA File Information -->
+        <div class="cda-file-info">
+            <strong>📁 File:</strong> {{ selected_document.file_name }}<br>
+            <strong>🆔 Document ID:</strong> {{ selected_document.document_id or 'N/A' }}<br>
+            <strong>🌐 Document Root:</strong> {{ selected_document.document_root or 'N/A' }}<br>
+            <strong>🏥 Assigning Authority:</strong> {{ selected_document.assigning_authority or 'N/A' }}<br>
+            <strong>⏰ Effective Time:</strong> {{ selected_document.effective_time or 'N/A' }}
+        </div>
+
+        <!-- PS Display Guidelines Rendering -->
+        {% if rendered_result %}
+        {% if rendered_result.success %}
+        <div class="rendered-content">
+            <div class="ps-guidelines-header">
+                ✅ PS Display Guidelines Compliant Rendering
+            </div>
+            {{ rendered_result.rendered_content|safe }}
+        </div>
+        {% else %}
+        <div class="error-message">
+            <strong>❌ Rendering Error:</strong> {{ rendered_result.error }}
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="error-message">
+            <strong>⚠️ Warning:</strong> No rendered content available.
+        </div>
+        {% endif %}
+
+        <!-- Extracted PDFs -->
+        {% if selected_document.extracted_pdfs and selected_document.extracted_pdfs|length > 0 %}
+        <div class="extracted-pdfs">
+            <h3>📄 Extracted PDF Documents</h3>
+            <div class="pdf-list">
+                {% for pdf in selected_document.extracted_pdfs %}
+                <div class="pdf-item">
+                    <div class="pdf-info">
+                        <span>📄</span>
+                        <div>
+                            <strong>{{ pdf.title or 'PDF Document' }}</strong><br>
+                            <small>{{ pdf.size_mb }} MB • {{ pdf.mime_type }}</small>
+                        </div>
+                    </div>
+                    <a href="{{ pdf.download_url }}" class="pdf-download" target="_blank">
+                        Download PDF
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Document Actions -->
+        <div class="document-actions">
+            <a href="{{ url('patient_data:patient_search_results', args=[patient_identifier.id]) }}"
+                class="action-button secondary">
+                ← Back to Results
+            </a>
+            <button onclick="window.print()" class="action-button">
+                🖨️ Print Document
+            </button>
+            {% if rendered_result and rendered_result.success %}
+            <button onclick="downloadRenderedContent()" class="action-button">
+                💾 Download Rendered HTML
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function changeDocument(index) {
+        window.location.href = "{{ url('patient_data:local_cda_document_view_indexed', args=[patient_identifier.id, '__INDEX__']) }}".replace('__INDEX__', index);
+    }
+
+    function downloadRenderedContent() {
+        const content = document.querySelector('.rendered-content').innerHTML;
+        const blob = new Blob([content], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'patient_summary_{{ selected_document.patient_id }}_{{ selected_document.validation_level }}.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+    // Auto-refresh functionality (optional)
+    {% if not rendered_result or(rendered_result and not rendered_result.success) %}
+    setTimeout(() => {
+        location.reload();
+    }, 30000); // Refresh every 30 seconds if there's an error
+    {% endif %}
+</script>
+{% endblock %}

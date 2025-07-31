@@ -58,9 +58,18 @@
                     <p class="text-success">
                         <i class="fas fa-check-circle"></i> Patient found
                     </p>
+                    {% if is_local_cda_search %}
+                    <p class="text-info mb-1">
+                        <i class="fas fa-database"></i> Local CDA Search
+                    </p>
+                    <small class="text-muted">
+                        Searched local CDA documents
+                    </small>
+                    {% else %}
                     <small class="text-muted">
                         Search performed: {{ search_result.search_timestamp|date:"Y-m-d H:i" }}
                     </small>
+                    {% endif %}
                     {% else %}
                     <p class="text-info">
                         <i class="fas fa-search"></i> Mock data displayed
@@ -102,6 +111,23 @@
                                     <p class="card-text">
                                         <small class="text-muted">{{ document.date }}</small>
                                     </p>
+
+                                    {% if is_local_cda_search and document.has_pdfs %}
+                                    <!-- Local CDA with extracted PDFs -->
+                                    <div class="mb-2">
+                                        <small class="text-success">
+                                            <i class="fas fa-file-pdf"></i> {{ document.extracted_pdfs|length }} PDF(s)
+                                            extracted
+                                        </small>
+                                    </div>
+                                    {% for pdf in document.extracted_pdfs %}
+                                    <a href="{{ pdf.url }}" target="_blank"
+                                        class="btn btn-outline-danger btn-sm mb-1 d-block">
+                                        <i class="fas fa-file-pdf"></i> {{ pdf.title|default:"PDF Document" }}
+                                    </a>
+                                    {% endfor %}
+                                    {% endif %}
+
                                     {% if document.available %}
                                     <a href="{% url 'document_viewer' country_code|lower patient.id document.type %}"
                                         class="btn btn-primary btn-sm">
