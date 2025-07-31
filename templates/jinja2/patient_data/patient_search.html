@@ -278,11 +278,11 @@
     <div class="content-area">
         <!-- Display Django messages -->
         {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
         {% endif %}
 
         <div class="patient-search-container">
@@ -307,10 +307,10 @@
                         <select name="member_state_id" id="member_state_id" required>
                             <option value="">Select Member State</option>
                             {% for state in member_states %}
-                                <option value="{{ state.id }}" 
-                                    {% if state.id|string == member_state_id|string %}selected{% endif %}>
-                                    {{ state.country_name }} ({{ state.country_code }})
-                                </option>
+                            <option value="{{ state.id }}" {% if state.id|string==member_state_id|string %}selected{%
+                                endif %}>
+                                {{ state.country_name }} ({{ state.country_code }})
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -320,8 +320,8 @@
                             National Person Identifier <span class="required">*</span>
                         </label>
                         <input type="text" name="national_person_id" id="national_person_id"
-                            value="{{ national_person_id or '' }}"
-                            placeholder="Enter patient's national identifier" required>
+                            value="{{ national_person_id or '' }}" placeholder="Enter patient's national identifier"
+                            required>
                     </div>
 
                     <div class="form-group">
@@ -335,8 +335,8 @@
 
                     <div class="break-glass-section">
                         <div class="break-glass-checkbox">
-                            <input type="checkbox" name="break_glass" id="break_glass" 
-                                {% if break_glass %}checked{% endif %} onchange="toggleBreakGlassReason()">
+                            <input type="checkbox" name="break_glass" id="break_glass" {% if break_glass %}checked{%
+                                endif %} onchange="toggleBreakGlassReason()">
                             <div>
                                 <label for="break_glass" class="break-glass-label">
                                     Break the glass (*)
@@ -348,8 +348,8 @@
                             </div>
                         </div>
 
-                        <div class="break-glass-reason" id="breakGlassReason" 
-                            {% if break_glass %}style="display: block;"{% endif %}>
+                        <div class="break-glass-reason" id="breakGlassReason" {% if break_glass
+                            %}style="display: block;" {% endif %}>
                             <label for="break_glass_reason_text">
                                 Emergency Reason <span class="required">*</span>
                             </label>

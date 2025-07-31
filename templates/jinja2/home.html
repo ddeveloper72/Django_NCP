@@ -16,7 +16,8 @@
         <div class="status-indicator mb-xl">
             <p><strong>Active SMP Source:</strong> {{ current_smp_name }}</p>
             <p class="mt-sm text-sm opacity-80">
-                Portal: <a href="{{ current_smp_ui_url }}" target="_blank" rel="noopener" class="text-primary">{{ current_smp_ui_url }}</a>
+                Portal: <a href="{{ current_smp_ui_url }}" target="_blank" rel="noopener" class="text-primary">{{
+                    current_smp_ui_url }}</a>
             </p>
             <p class="text-xs italic">SMP source configuration is managed by administrators only.</p>
         </div>
@@ -25,37 +26,43 @@
         <div class="integration-options">
             <div class="option-card">
                 <h3>🔍 Patient Search</h3>
-                <p>Search for patients across EU member states with break-the-glass emergency access capabilities. GDPR-compliant cross-border patient data retrieval.</p>
+                <p>Search for patients across EU member states with break-the-glass emergency access capabilities.
+                    GDPR-compliant cross-border patient data retrieval.</p>
                 <a href="/patients/search/" class="option-link">Search Patients</a>
             </div>
 
             <div class="option-card">
                 <h3>🖥️ Django Portal UI</h3>
-                <p>Full eHealth portal with European SMP integration, country-specific International Search Masks (ISM), and cross-border patient lookup capabilities.</p>
+                <p>Full eHealth portal with European SMP integration, country-specific International Search Masks (ISM),
+                    and cross-border patient lookup capabilities.</p>
                 <a href="/portal/" class="option-link">Launch Portal</a>
             </div>
 
             <div class="option-card">
                 <h3>⚙️ Django Admin</h3>
-                <p>Administrative interface for managing countries, ISM configurations, certificates, and monitoring European SMP connectivity status.</p>
+                <p>Administrative interface for managing countries, ISM configurations, certificates, and monitoring
+                    European SMP connectivity status.</p>
                 <a href="/admin/" class="option-link">Admin Panel</a>
             </div>
 
             <div class="option-card">
                 <h3>🔗 API Endpoints</h3>
-                <p>REST API for Java portal integration with dynamic country data, patient lookup services, and document retrieval endpoints.</p>
+                <p>REST API for Java portal integration with dynamic country data, patient lookup services, and document
+                    retrieval endpoints.</p>
                 <a href="/api/" class="option-link">API Documentation</a>
             </div>
 
             <div class="option-card">
                 <h3>📊 Service Status</h3>
-                <p>Real-time monitoring of European SMP connectivity, service health checks, and system status across all integrated member states.</p>
+                <p>Real-time monitoring of European SMP connectivity, service health checks, and system status across
+                    all integrated member states.</p>
                 <a href="/status/" class="option-link">View Status</a>
             </div>
 
             <div class="option-card">
                 <h3>🛠️ DomiSMP Server</h3>
-                <p>Connect to the Java-based DomiSMP server for advanced SMP management, certificate configuration, and European Gateway integration.</p>
+                <p>Connect to the Java-based DomiSMP server for advanced SMP management, certificate configuration, and
+                    European Gateway integration.</p>
                 <a href="{{ current_smp_ui_url }}" target="_blank" rel="noopener" class="option-link">Open DomiSMP</a>
             </div>
         </div>

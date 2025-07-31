@@ -12,8 +12,8 @@
         <div class="d-flex justify-content-between align-items-center">
             <h1>
                 {% if country_code %}
-                    <img src="{{ static('flags/' + country_code + '.webp') }}" alt="{{ country.name }} flag"
-                        class="country-flag">
+                <img src="{{ static('flags/' + country_code + '.webp') }}" alt="{{ country.name }} flag"
+                    class="country-flag">
                 {% endif %}
                 {{ country.name }} Patient Search
             </h1>
@@ -36,7 +36,8 @@
             <p class="mb-1">
                 <strong>Country:</strong> {{ country.name }} |
                 <strong>Fields:</strong> {{ form_fields|length }}
-                {% if ism_last_updated %}| <strong>Last Updated:</strong> {{ ism_last_updated.strftime('%Y-%m-%d %H:%M') }}{% endif %}
+                {% if ism_last_updated %}| <strong>Last Updated:</strong> {{ ism_last_updated.strftime('%Y-%m-%d %H:%M')
+                }}{% endif %}
             </p>
             <p class="mb-0">
                 <small>Search form configured from {{ country.name }}'s SMP server</small>
@@ -48,64 +49,52 @@
             <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
             {% for group_name, fields in grouped_fields.items() %}
-                <div class="field-group">
-                    <h5 class="field-group-title">{{ group_name }}</h5>
-                    
-                    {% for field in fields %}
-                        <div class="form-group">
-                            <label for="{{ field.name }}" class="form-label">
-                                {{ field.display_name }}
-                                {% if field.required %}
-                                    <span class="required">*</span>
-                                {% endif %}
-                            </label>
-                            
-                            {% if field.field_type == 'text' %}
-                                <input type="text" 
-                                       name="{{ field.name }}" 
-                                       id="{{ field.name }}"
-                                       class="form-control"
-                                       value="{{ field.value or '' }}"
-                                       {% if field.required %}required{% endif %}
-                                       {% if field.placeholder %}placeholder="{{ field.placeholder }}"{% endif %}
-                                       {% if field.pattern %}pattern="{{ field.pattern }}"{% endif %}>
-                            {% elif field.field_type == 'date' %}
-                                <input type="date" 
-                                       name="{{ field.name }}" 
-                                       id="{{ field.name }}"
-                                       class="form-control"
-                                       value="{{ field.value or '' }}"
-                                       {% if field.required %}required{% endif %}>
-                            {% elif field.field_type == 'select' %}
-                                <select name="{{ field.name }}" 
-                                        id="{{ field.name }}"
-                                        class="form-control"
-                                        {% if field.required %}required{% endif %}>
-                                    <option value="">Select {{ field.display_name }}</option>
-                                    {% for option in field.options %}
-                                        <option value="{{ option.value }}" 
-                                                {% if option.value == field.value %}selected{% endif %}>
-                                            {{ option.label }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            {% endif %}
-                            
-                            {% if field.help_text %}
-                                <small class="form-text text-muted">{{ field.help_text }}</small>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
+            <div class="field-group">
+                <h5 class="field-group-title">{{ group_name }}</h5>
+
+                {% for field in fields %}
+                <div class="form-group">
+                    <label for="{{ field.name }}" class="form-label">
+                        {{ field.display_name }}
+                        {% if field.required %}
+                        <span class="required">*</span>
+                        {% endif %}
+                    </label>
+
+                    {% if field.field_type == 'text' %}
+                    <input type="text" name="{{ field.name }}" id="{{ field.name }}" class="form-control"
+                        value="{{ field.value or '' }}" {% if field.required %}required{% endif %} {% if
+                        field.placeholder %}placeholder="{{ field.placeholder }}" {% endif %} {% if field.pattern
+                        %}pattern="{{ field.pattern }}" {% endif %}>
+                    {% elif field.field_type == 'date' %}
+                    <input type="date" name="{{ field.name }}" id="{{ field.name }}" class="form-control"
+                        value="{{ field.value or '' }}" {% if field.required %}required{% endif %}>
+                    {% elif field.field_type == 'select' %}
+                    <select name="{{ field.name }}" id="{{ field.name }}" class="form-control" {% if field.required
+                        %}required{% endif %}>
+                        <option value="">Select {{ field.display_name }}</option>
+                        {% for option in field.options %}
+                        <option value="{{ option.value }}" {% if option.value==field.value %}selected{% endif %}>
+                            {{ option.label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+
+                    {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
                 </div>
+                {% endfor %}
+            </div>
             {% endfor %}
 
             <!-- Break Glass Section -->
             <div class="break-glass-section">
                 <h5 class="break-glass-title">🚨 Emergency Access</h5>
                 <div class="break-glass-checkbox">
-                    <input type="checkbox" name="break_glass" id="break_glass" 
-                           {% if break_glass %}checked{% endif %}
-                           onchange="toggleBreakGlassReason()">
+                    <input type="checkbox" name="break_glass" id="break_glass" {% if break_glass %}checked{% endif %}
+                        onchange="toggleBreakGlassReason()">
                     <label for="break_glass" class="break-glass-label">
                         Break the glass - Emergency access without patient consent
                     </label>
@@ -114,17 +103,14 @@
                     Check this box only in medical emergencies where patient consent cannot be obtained.
                     This action will be logged and audited.
                 </p>
-                
-                <div class="break-glass-reason" id="breakGlassReason" 
-                     {% if not break_glass %}style="display: none;"{% endif %}>
+
+                <div class="break-glass-reason" id="breakGlassReason" {% if not break_glass %}style="display: none;" {%
+                    endif %}>
                     <label for="break_glass_reason" class="form-label">
                         Emergency Reason <span class="required">*</span>
                     </label>
-                    <textarea name="break_glass_reason" 
-                              id="break_glass_reason"
-                              class="form-control"
-                              rows="3"
-                              placeholder="Please provide a detailed explanation of the medical emergency...">{{ break_glass_reason or '' }}</textarea>
+                    <textarea name="break_glass_reason" id="break_glass_reason" class="form-control" rows="3"
+                        placeholder="Please provide a detailed explanation of the medical emergency...">{{ break_glass_reason or '' }}</textarea>
                 </div>
             </div>
 
@@ -168,44 +154,43 @@
 
     <!-- Search Results -->
     {% if search_results %}
-        <div class="search-results">
-            <h3>Search Results</h3>
-            
-            {% if search_results.patients %}
-                <div class="patients-list">
-                    {% for patient in search_results.patients %}
-                        <div class="patient-card">
-                            <div class="patient-info">
-                                <h4>{{ patient.name }}</h4>
-                                <p><strong>Date of Birth:</strong> {{ patient.birth_date }}</p>
-                                <p><strong>ID:</strong> {{ patient.id }}</p>
-                                {% if patient.address %}
-                                    <p><strong>Address:</strong> {{ patient.address }}</p>
-                                {% endif %}
-                            </div>
-                            <div class="patient-actions">
-                                <a href="{{ url('ehealth_portal:patient_documents', patient.id) }}" 
-                                   class="btn btn-primary">
-                                    📋 View Documents
-                                </a>
-                            </div>
-                        </div>
-                    {% endfor %}
+    <div class="search-results">
+        <h3>Search Results</h3>
+
+        {% if search_results.patients %}
+        <div class="patients-list">
+            {% for patient in search_results.patients %}
+            <div class="patient-card">
+                <div class="patient-info">
+                    <h4>{{ patient.name }}</h4>
+                    <p><strong>Date of Birth:</strong> {{ patient.birth_date }}</p>
+                    <p><strong>ID:</strong> {{ patient.id }}</p>
+                    {% if patient.address %}
+                    <p><strong>Address:</strong> {{ patient.address }}</p>
+                    {% endif %}
                 </div>
-            {% else %}
-                <div class="no-results">
-                    <div class="alert alert-info">
-                        <h4>No Patients Found</h4>
-                        <p>No patients were found matching your search criteria. Please try:</p>
-                        <ul>
-                            <li>Checking the spelling of the entered information</li>
-                            <li>Using different search criteria</li>
-                            <li>Verifying the patient exists in {{ country.name }}'s system</li>
-                        </ul>
-                    </div>
+                <div class="patient-actions">
+                    <a href="{{ url('ehealth_portal:patient_documents', patient.id) }}" class="btn btn-primary">
+                        📋 View Documents
+                    </a>
                 </div>
-            {% endif %}
+            </div>
+            {% endfor %}
         </div>
+        {% else %}
+        <div class="no-results">
+            <div class="alert alert-info">
+                <h4>No Patients Found</h4>
+                <p>No patients were found matching your search criteria. Please try:</p>
+                <ul>
+                    <li>Checking the spelling of the entered information</li>
+                    <li>Using different search criteria</li>
+                    <li>Verifying the patient exists in {{ country.name }}'s system</li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
     {% endif %}
 </div>
 
@@ -233,7 +218,7 @@
     }
 
     // Form validation
-    document.getElementById('patientSearchForm').addEventListener('submit', function(e) {
+    document.getElementById('patientSearchForm').addEventListener('submit', function (e) {
         const breakGlass = document.getElementById('break_glass').checked;
         const breakGlassReason = document.getElementById('break_glass_reason').value.trim();
 
@@ -249,7 +234,7 @@
     });
 
     // Initialize break glass visibility
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         toggleBreakGlassReason();
     });
 </script>

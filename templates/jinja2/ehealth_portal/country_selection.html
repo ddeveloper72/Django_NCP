@@ -31,8 +31,8 @@
         <!-- Country Grid -->
         <div class="country-grid">
             {% for country in countries %}
-            <div class="country-card{% if not country.available %} unavailable{% endif %}"
-                {% if country.available %}onclick="selectCountry('{{ country.code }}')"{% endif %}>
+            <div class="country-card{% if not country.available %} unavailable{% endif %}" {% if country.available
+                %}onclick="selectCountry('{{ country.code }}')" {% endif %}>
                 <div class="country-flag">
                     <img src="{{ static('flags/' + country.code + '.webp') }}" alt="{{ country.name }} flag" />
                 </div>

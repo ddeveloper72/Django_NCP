@@ -52,7 +52,7 @@
         <!-- Quick Actions Section -->
         <div class="content-section">
             <h2 class="section-title">Quick Actions</h2>
-            
+
             <div class="actions-grid">
                 <div class="action-card">
                     <div class="action-icon">👥</div>
@@ -96,47 +96,47 @@
         <!-- Recent Activity Section -->
         <div class="content-section">
             <h2 class="section-title">Recent Activity</h2>
-            
+
             {% if recent_activities %}
-                <div class="activity-list">
-                    {% for activity in recent_activities %}
-                        <div class="activity-item">
-                            <div class="activity-icon">
-                                {% if activity.type == 'participant_added' %}
-                                    👥
-                                {% elif activity.type == 'document_updated' %}
-                                    📄
-                                {% elif activity.type == 'sync_completed' %}
-                                    🔄
-                                {% else %}
-                                    📝
-                                {% endif %}
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-description">{{ activity.description }}</div>
-                                <div class="activity-timestamp">{{ activity.timestamp }}</div>
-                            </div>
-                        </div>
-                    {% endfor %}
+            <div class="activity-list">
+                {% for activity in recent_activities %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        {% if activity.type == 'participant_added' %}
+                        👥
+                        {% elif activity.type == 'document_updated' %}
+                        📄
+                        {% elif activity.type == 'sync_completed' %}
+                        🔄
+                        {% else %}
+                        📝
+                        {% endif %}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-description">{{ activity.description }}</div>
+                        <div class="activity-timestamp">{{ activity.timestamp }}</div>
+                    </div>
                 </div>
-                <div class="activity-footer">
-                    <a href="{{ url('smp_client:activity_log') }}" class="btn btn-outline-primary">
-                        View All Activity
-                    </a>
-                </div>
+                {% endfor %}
+            </div>
+            <div class="activity-footer">
+                <a href="{{ url('smp_client:activity_log') }}" class="btn btn-outline-primary">
+                    View All Activity
+                </a>
+            </div>
             {% else %}
-                <div class="empty-state">
-                    <div class="empty-icon">📝</div>
-                    <h3>No Recent Activity</h3>
-                    <p>There has been no recent activity on this SMP server.</p>
-                </div>
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <h3>No Recent Activity</h3>
+                <p>There has been no recent activity on this SMP server.</p>
+            </div>
             {% endif %}
         </div>
 
         <!-- System Status Section -->
         <div class="content-section">
             <h2 class="section-title">System Status</h2>
-            
+
             <div class="status-grid">
                 <div class="status-item">
                     <div class="status-label">SMP Server</div>
@@ -145,7 +145,7 @@
                         Online
                     </div>
                 </div>
-                
+
                 <div class="status-item">
                     <div class="status-label">Database</div>
                     <div class="status-value status-online">
@@ -153,7 +153,7 @@
                         Connected
                     </div>
                 </div>
-                
+
                 <div class="status-item">
                     <div class="status-label">European SMP</div>
                     <div class="status-value {{ european_smp_status|lower }}">
@@ -161,7 +161,7 @@
                         {{ european_smp_status or 'Unknown' }}
                     </div>
                 </div>
-                
+
                 <div class="status-item">
                     <div class="status-label">Last Sync</div>
                     <div class="status-value">
