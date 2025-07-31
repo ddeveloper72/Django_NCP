@@ -10,6 +10,7 @@ from . import document_views
 from . import eadc_views
 from . import test_data_views
 from . import clinical_document_views
+from . import api_views
 
 app_name = "patient_data"
 
@@ -22,6 +23,17 @@ urlpatterns = [
         "search/results/<int:patient_id>/",
         views.patient_search_results,
         name="patient_search_results",
+    ),
+    # ISM API endpoints
+    path(
+        "api/ism/<str:country_code>/",
+        api_views.get_country_ism_config,
+        name="get_country_ism_config",
+    ),
+    path(
+        "api/validate/<str:country_code>/",
+        api_views.validate_patient_id,
+        name="validate_patient_id",
     ),
     # AJAX endpoints
     path(

@@ -72,7 +72,10 @@ class LocalPatientSearchService:
                         continue
 
                     # Extract PDFs from the document using existing service
-                    pdf_results = self.pdf_service.extract_pdfs_from_xml(str(cda_file))
+                    # Read the XML content from file
+                    with open(cda_file, 'r', encoding='utf-8') as f:
+                        xml_content = f.read()
+                    pdf_results = self.pdf_service.extract_pdfs_from_xml(xml_content)
                     doc_info["extracted_pdfs"] = pdf_results
 
                     matching_documents.append(doc_info)

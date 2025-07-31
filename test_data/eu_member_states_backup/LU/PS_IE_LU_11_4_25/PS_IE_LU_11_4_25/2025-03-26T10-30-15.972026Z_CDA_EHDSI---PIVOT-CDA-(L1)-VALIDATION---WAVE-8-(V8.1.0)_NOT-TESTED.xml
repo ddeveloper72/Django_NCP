@@ -1,0 +1,149 @@
+<ClinicalDocument xmlns="urn:hl7-org:v3" classCode="DOCCLIN" moodCode="EVN">
+   <realmCode code="LU"/>
+   <typeId extension="POCD_HD000040" root="2.16.840.1.113883.1.3"/>
+   <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.1.7"/>
+   <id extension="2" root="1.3.182.3.1.1.10000734.6.3.1.20240603091854"/>
+   <code code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Patient summary Document"><translation code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Résumé Patient"/></code>
+   <title>Résumé patient</title>
+   <effectiveTime value="20240603111854+0200"/>
+   <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" codeSystemName="Confidentiality" codeSystemVersion="2018-08-12" displayName="normal"><translation code="N" codeSystem="2.16.840.1.113883.5.25" codeSystemName="Confidentiality" displayName="Normal"/></confidentialityCode>
+   <languageCode code="fr-LU"/>
+   <versionNumber value="1"/>
+   <recordTarget>
+      <patientRole>
+         <id extension="3843082788" root="1.3.182.2.4.2"/>
+         <id extension="1968101545978" root="1.3.182.4.4"/>
+         <addr use="H">
+            <streetAddressLine>1133 RUE DES PRES</streetAddressLine>
+            <postalCode>9160</postalCode>
+            <city>INGELDORF</city>
+            <country>LUX</country>
+         </addr>
+         <telecom use="H" value="tel:+352-12778182"/>
+         <telecom use="MC" value="tel:+352-691-123456"/>
+         <telecom use="H" value="mailto:celestina@pt-test.lu"/>
+         <patient>
+            <name>
+               <family>DOE-CALLA</family>
+               <given>CELESTINA</given>
+            </name>
+            <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1" codeSystemName="AdministrativeGender" codeSystemVersion="913-20091020" displayName="Female"><translation code="F" codeSystem="2.16.840.1.113883.5.1" codeSystemName="AdministrativeGender" displayName="Féminin"/></administrativeGenderCode>
+            <birthTime value="19681015"/>
+         </patient>
+      </patientRole>
+   </recordTarget>
+   <author>
+      <time value="20240603111854+0200"/>
+      <assignedAuthor classCode="ASSIGNED">
+         <id extension="2999980475" root="1.3.182.4.1"/>
+         <addr use="WP">
+            <streetAddressLine>2-4, route Eugène Ruppert</streetAddressLine>
+            <postalCode>2453</postalCode>
+            <city>Luxembourg</city>
+            <country>LUX</country>
+         </addr>
+         <telecom use="H" value="tel:(352)2712501839"/>
+         <assignedPerson>
+            <name>
+               <family>FERRING</family>
+               <given>JENS</given>
+            </name>
+         </assignedPerson>
+         <representedOrganization>
+            <id extension="2999980475" root="1.3.182.4.1"/>
+            <name>Cabinet Médicale</name>
+            <telecom use="H" value="tel:(352)2712501839"/>
+            <addr use="WP">
+               <streetAddressLine>2-4, route Eugène Ruppert</streetAddressLine>
+               <postalCode>2453</postalCode>
+               <city>Luxembourg</city>
+               <country>LUX</country>
+            </addr>
+         </representedOrganization>
+      </assignedAuthor>
+   </author>
+   <custodian>
+      <assignedCustodian>
+         <representedCustodianOrganization>
+            <id extension="2999980475" root="1.3.182.4.1"/>
+            <name>Cabinet Médicale</name>
+            <telecom use="H" value="tel:(352)2712501839"/>
+            <addr use="WP">
+               <streetAddressLine>2-4, route Eugène Ruppert</streetAddressLine>
+               <postalCode>2453</postalCode>
+               <city>Luxembourg</city>
+               <country>LUX</country>
+            </addr>
+         </representedCustodianOrganization>
+      </assignedCustodian>
+   </custodian>
+   <legalAuthenticator>
+      <time value="20240603111854+0200"/>
+      <signatureCode code="S"/>
+      <assignedEntity>
+         <id extension="2999980475" root="1.3.182.4.1"/>
+         <addr use="WP">
+            <streetAddressLine>2-4, route Eugène Ruppert</streetAddressLine>
+            <postalCode>2453</postalCode>
+            <city>Luxembourg</city>
+            <country>LUX</country>
+         </addr>
+         <telecom use="H" value="tel:(352)2712501839"/>
+         <assignedPerson>
+            <name>
+               <family>FERRING</family>
+               <given>JENS</given>
+            </name>
+         </assignedPerson>
+         <representedOrganization>
+            <id extension="2999980475" root="1.3.182.4.1"/>
+            <name>Cabinet Médicale</name>
+            <telecom use="H" value="tel:(352)2712501839"/>
+            <addr use="WP">
+               <streetAddressLine>2-4, route Eugène Ruppert</streetAddressLine>
+               <postalCode>2453</postalCode>
+               <city>Luxembourg</city>
+               <country>LUX</country>
+            </addr>
+         </representedOrganization>
+      </assignedEntity>
+   </legalAuthenticator>
+   <participant typeCode="IND">
+      <templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.4"/>
+      <functionCode code="PCP" codeSystem="2.16.840.1.113883.5.88"/>
+      <associatedEntity classCode="PRS">
+         <addr use="WP">
+            <streetAddressLine>2-4, route Eugène Ruppert</streetAddressLine>
+            <postalCode>2453</postalCode>
+            <city>Luxembourg</city>
+            <country>LUX</country>
+         </addr>
+         <telecom use="H" value="tel:(352)2712501839"/>
+         <associatedPerson>
+            <name>
+               <family>FERRING</family>
+               <given>JENS</given>
+            </name>
+         </associatedPerson>
+      </associatedEntity>
+   </participant>
+   <documentationOf typeCode="DOC">
+      <serviceEvent classCode="PCPR" moodCode="EVN">
+         <code nullFlavor="UNK"/>
+         <effectiveTime>
+            <low value="20240603101854+0200"/>
+            <high value="20240603111854+0200"/>
+         </effectiveTime>
+      </serviceEvent>
+   </documentationOf>
+   <relatedDocument typeCode="XFRM">
+      <parentDocument>
+         <id root="1.3.182.3.1.1.10000734.6.3.1.20240603091854"/>
+      </parentDocument>
+   </relatedDocument>
+   <component>
+      <nonXMLBody classCode="DOCBODY" moodCode="EVN">
+         <text mediaType="application/pdf" representation="B64">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MCAxNjYuMzUgMF0+Pi9TdWJ0eXBlL0xpbmsvQ1swIDAgMV0vQm9yZGVyWzAgMCAwXS9SZWN0WzU4LjM1IDcyNy45NSAxNTAuOTggNzM3LjUxXT4+CmVuZG9iagoxMyAwIG9iago8PC9CUzw8L1MvUy9XIDA+Pi9BPDwvUy9Hb1RvL0RbNyAwIFIvWFlaIDAgODA1LjIgMF0+Pi9TdWJ0eXBlL0xpbmsvQ1swIDAgMV0vQm9yZGVyWzAgMCAwXS9SZWN0WzU4LjM1IDcxOC4zOSAxNjcuNDggNzI3Ljk1XT4+CmVuZG9iagoxNCAwIG9iago8PC9CUzw8L1MvUy9XIDA+Pi9BPDwvUy9Hb1RvL0RbNiAwIFIvWFlaIDAgNzk4LjA4IDBdPj4vU3VidHlwZS9MaW5rL0NbMCAwIDFdL0JvcmRlclswIDAgMF0vUmVjdFsyOC4zNSA2ODUuOTEgMjE0LjI0IDY5Ny44NF0+PgplbmRvYmoKMTUgMCBvYmoKPDwvQlM8PC9TL1MvVyAwPj4vQTw8L1MvR29Uby9EWzYgMCBSL1hZWiAwIDc5OC4wOCAwXT4+L1N1YnR5cGUvTGluay9DWzAgMCAxXS9Cb3JkZXJbMCAwIDBdL1JlY3RbMjguMzUgNTQ2Ljk0IDIwMi4wMSA1NTguODZdPj4KZW5kb2JqCjE2IDAgb2JqCjw8L0JTPDwvUy9TL1cgMD4+L0E8PC9TL0dvVG8vRFs2IDAgUi9YWVogMCA3OTguMDggMF0+Pi9TdWJ0eXBlL0xpbmsvQ1swIDAgMV0vQm9yZGVyWzAgMCAwXS9SZWN0WzI4LjM1IDQ4Mi40NCA5MC4xNSA0OTQuMzZdPj4KZW5kb2JqCjE3IDAgb2JqCjw8L0JTPDwvUy9TL1cgMD4+L0E8PC9TL0dvVG8vRFs2IDAgUi9YWVogMCA3OTguMDggMF0+Pi9TdWJ0eXBlL0xpbmsvQ1swIDAgMV0vQm9yZGVyWzAgMCAwXS9SZWN0WzI4LjM1IDI3Ni4xOSAxMjUuMTggMjg4LjExXT4+CmVuZG9iagoxOCAwIG9iago8PC9CUzw8L1MvUy9XIDA+Pi9BPDwvUy9Hb1RvL0RbNiAwIFIvWFlaIDAgNzk4LjA4IDBdPj4vU3VidHlwZS9MaW5rL0NbMCAwIDFdL0JvcmRlclswIDAgMF0v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OSAwIFI+PgplbmRvYmoKMzEgMCBvYmoKPDwvRGVzdFs2IDAgUi9YWVogMCAxNzQuNjcgMF0vTmV4dCAzMiAwIFIvVGl0bGUoQW506WPpZGVudHMgY2hpcnVyZ2ljYXV4KS9QYXJlbnQgMjYgMCBSL1ByZXYgMzAgMCBSPj4KZW5kb2JqCjMyIDAgb2JqCjw8L0Rlc3RbNyAwIFIvWFlaIDAgODEzLjUzIDBdL1RpdGxlKExpc3RlIGRlcyBkaXNwb3NpdGlmcyBt6WRpY2F1eCkvUGFyZW50IDI2IDAgUi9QcmV2IDMxIDAgUj4+CmVuZG9iagoyNCAwIG9iago8PC9EZXN0WzEgMCBSL1hZWiAwIDc3MC44OSAwXS9OZXh0IDI1IDAgUi9UaXRsZShQcm9wcmnpdOlzIGR1IGRvY3VtZW50KS9QYXJlbnQgMjMgMCBSPj4KZW5kb2JqCjI1IDAgb2JqCjw8L0Rlc3RbNiAwIFIvWFlaIDAgODA2LjQgMF0vTmV4dCAyNiAwIFIvVGl0bGUoKS9QYXJlbnQgMjMgMCBSL1ByZXYgMjQgMCBSPj4KZW5kb2JqCjI2IDAgb2JqCjw8L0Rlc3RbNiAwIFIvWFlaIDAgODA2LjQgMF0vQ291bnQgNi9UaXRsZShJbmRleCkvUGFyZW50IDIzIDAgUi9GaXJzdCAyNyAwIFIvUHJldiAyNSAwIFIvTGFzdCAzMiAwIFI+PgplbmRvYmoKMjMgMCBvYmoKPDwvRGVzdFsxIDAgUi9YWVogMCA3ODUuMTcgMF0vQ291bnQgOS9UaXRsZShS6XN1bekgcGF0aWVudCkvUGFyZW50IDIyIDAgUi9GaXJzdCAyNCAwIFIvTGFzdCAyNiAwIFI+PgplbmRvYmoKMjIgMCBvYmoKPDwvVHlwZS9PdXRsaW5lcy9Db3VudCAxMC9GaXJzdCAyMyAwIFIvTGFzdCAyMyAwIFI+PgplbmRvYmoKMiAwIG9iago8PC9TdWJ0eXBlL1R5cGUxL1R5cGUvRm9udC9CYXNlRm9udC9IZWx2ZXRpY2EtQm9sZC9FbmNvZGluZy9XaW5BbnNpRW5jb2Rpbmc+PgplbmRvYmoKMyAwIG9iago8PC9TdWJ0eXBlL1R5cGUxL1R5cGUvRm9udC9CYXNlRm9udC9IZWx2ZXRpY2EvRW5jb2RpbmcvV2luQW5zaUVuY29kaW5nPj4KZW5kb2JqCjUgMCBvYmoKPDwvS2lkc1sxIDAgUiA2IDAgUiA3IDAgUl0vVHlwZS9QYWdlcy9Db3VudCAzPj4KZW5kb2JqCjMzIDAgb2JqCjw8L1BhZ2VNb2RlL1VzZU91dGxpbmVzL1R5cGUvQ2F0YWxvZy9PdXRsaW5lcyAyMiAwIFIvUGFnZXMgNSAwIFI+PgplbmRvYmoKMzQgMCBvYmoKPDwvQ3JlYXRpb25EYXRlKEQ6MjAyNTAzMjYxMTMwMTQrMDEnMDAnKS9Qcm9kdWNlcihPcGVuUERGIDEuMy40MCkvVGl0bGUoUulzdW3pIHBhdGllbnQpPj4KZW5kb2JqCnhyZWYKMCAzNQowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDE5NTkgMDAwMDAgbiAKMDAwMDAxMTU0NyAwMDAwMCBuIAowMDAwMDExNjQwIDAwMDAwIG4gCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAxMTcyOCAwMDAwMCBuIAowMDAwMDA4ODQ4IDAwMDAwIG4gCjAwMDAwMTAyMDEgMDAwMDAgbiAKMDAwMDAwMjA4NiAwMDAwMCBuIAowMDAwMDAyMjI2IDAwMDAwIG4gCjAwMDAwMDIzNjYgMDAwMDAgbiAKMDAwMDAwMjUwOCAwMDAwMCBuIAowMDAwMDAyNjUwIDAwMDAwIG4gCjAwMDAwMDI3OTIgMDAwMDAgbiAKMDAwMDAwMjkzMyAwMDAwMCBuIAowMDAwMDAzMDc1IDAwMDAwIG4gCjAwMDAwMDMyMTcgMDAwMDAgbiAKMDAwMDAwMzM1OCAwMDAwMCBuIAowMDAwMDAzNTAwIDAwMDAwIG4gCjAwMDAwMDM2NDIgMDAwMDAgbiAKMDAwMDAwOTA1OSAwMDAwMCBuIAowMDAwMDA5MjAwIDAwMDAwIG4gCjAwMDAwMTE0NzggMDAwMDAgbiAKMDAwMDAxMTM2MSAwMDAwMCBuIAowMDAwMDExMDQ1IDAwMDAwIG4gCjAwMDAwMTExNDkgMDAwMDAgbiAKMDAwMDAxMTI0MiAwMDAwMCBuIAowMDAwMDEwMzQ0IDAwMDAwIG4gCjAwMDAwMTA0NjMgMDAwMDAgbiAKMDAwMDAxMDU5NiAwMDAwMCBuIAowMDAwMDEwNzAyIDAwMDAwIG4gCjAwMDAwMTA4MTUgMDAwMDAgbiAKMDAwMDAxMDkzMyAwMDAwMCBuIAowMDAwMDExNzkxIDAwMDAwIG4gCjAwMDAwMTE4NzQgMDAwMDAgbiAKdHJhaWxlcgo8PC9JbmZvIDM0IDAgUi9JRCBbPDA5Y2M3NzBmNDA0Y2UxZmFmNTkyYzU4Y2M4YWZmOGI2PjwwOWNjNzcwZjQwNGNlMWZhZjU5MmM1OGNjOGFmZjhiNj5dL1Jvb3QgMzMgMCBSL1NpemUgMzU+PgpzdGFydHhyZWYKMTE5ODAKJSVFT0YK</text>
+      </nonXMLBody>
+   </component>
+</ClinicalDocument>

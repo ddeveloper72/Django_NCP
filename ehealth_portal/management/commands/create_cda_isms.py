@@ -23,6 +23,17 @@ class Command(BaseCommand):
 
         # Based on your MS_ISM_Specific_Parameters.csv data - CORRECTED for accuracy
         country_ism_configs = {
+            "IE": {
+                "name": "Ireland",
+                "patient_id_format": r"\d{18}",
+                "patient_id_label": "PPSN",
+                "patient_id_description": "Personal Public Service Number (PPSN) - 18 digits",
+                "patient_id_placeholder": "Enter 18-digit PPSN (e.g., 539305455995368085)",
+                "requires_birth_date": False,  # PPSN is sufficient
+                "additional_fields": [],  # Only PPSN required per ISM
+                "domain": "1.2.372.980010.1.2",
+                "scope": "ALL",
+            },
             "GR": {
                 "name": "Greece",
                 "patient_id_format": r"\d{11}",

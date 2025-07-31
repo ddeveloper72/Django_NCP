@@ -32,13 +32,30 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def patient_search_view(request):
-    """Patient search page - replicates Java portal interface"""
+    """Enhanced patient search page with dynamic ISM support"""
 
     # Get all active member states for country selection
     member_states = MemberState.objects.filter(is_active=True).order_by("country_name")
 
+    # Get ISM configurations for enhanced countries
+    from ehealth_portal.models import Country, InternationalSearchMask
+    ism_countries = []
+    try:
+        ism_configs = InternationalSearchMask.objects.filter(is_active=True).select_related('country')
+        for ism in ism_configs:
+            ism_countries.append({
+                'code': ism.country.code,
+                'name': ism.country.name,
+                'has_ism': True,
+                'ism_version': ism.mask_version,
+                'description': ism.mask_description
+            })
+    except Exception as e:
+        logger.warning(f"Error loading ISM configurations: {e}")
+
     context = {
         "member_states": member_states,
+        "ism_countries": ism_countries,
         "current_user": request.user,
     }
 
@@ -49,63 +66,126 @@ def patient_search_view(request):
 
 
 def handle_patient_search(request, context):
-    """Handle patient search form submission"""
+    """Enhanced patient search form submission with ISM support"""
 
     try:
-        logger.info("Starting patient search form handling")
+        logger.info("Starting enhanced patient search form handling")
 
-        # Extract form data
-        national_person_id = request.POST.get("national_person_id", "").strip()
-        birthdate_str = request.POST.get("birthdate", "").strip()
+        # Extract basic form data
         member_state_id = request.POST.get("member_state_id")
         break_glass = request.POST.get("break_glass") == "on"
         break_glass_reason = request.POST.get("break_glass_reason", "").strip()
         use_local_search = request.POST.get("use_local_search") == "on"
 
-        logger.info(
-            f"Form data: patient_id={national_person_id}, birthdate={birthdate_str}, member_state_id={member_state_id}"
-        )
-
-        # Validation
-        errors = []
-
-        if not national_person_id:
-            errors.append("National Person Identifier is required")
-
-        if not birthdate_str:
-            errors.append("Birthdate is required")
-        else:
-            try:
-                # Parse birthdate (expecting yyyy/MM/dd format)
-                birthdate = datetime.strptime(birthdate_str, "%Y/%m/%d").date()
-            except ValueError:
-                errors.append("Birthdate must be in format yyyy/MM/dd")
-                birthdate = None
-
-        if not member_state_id:
-            errors.append("Please select a member state")
-        else:
+        # Get member state
+        member_state = None
+        if member_state_id:
             try:
                 member_state = MemberState.objects.get(
                     id=member_state_id, is_active=True
                 )
                 logger.info(
-                    f"Found member state: {member_state.country_name} with sample_oid: {member_state.sample_data_oid}"
+                    f"Found member state: {member_state.country_name} ({member_state.country_code})"
                 )
             except MemberState.DoesNotExist:
-                errors.append("Invalid member state selected")
-                member_state = None
+                logger.error(f"Invalid member state ID: {member_state_id}")
 
+        # Initialize patient search parameters
+        patient_search_params = {}
+        errors = []
+
+        # Extract dynamic ISM fields or fallback to default fields
+        if member_state:
+            # Try to get ISM configuration
+            from ehealth_portal.models import Country, InternationalSearchMask
+            try:
+                country = Country.objects.get(code=member_state.country_code)
+                ism = InternationalSearchMask.objects.get(country=country, is_active=True)
+                
+                # Extract ISM fields
+                for field in ism.fields.all():
+                    field_value = request.POST.get(field.field_code, "").strip()
+                    
+                    # Validate required fields
+                    if field.is_required and not field_value:
+                        errors.append(f"{field.label} is required")
+                        continue
+                    
+                    # Validate field format
+                    if field_value and field.validation_pattern:
+                        import re
+                        pattern = f"^{field.validation_pattern}$"
+                        if not re.match(pattern, field_value):
+                            errors.append(f"Invalid {field.label} format")
+                            continue
+                    
+                    # Store validated field
+                    patient_search_params[field.field_code] = field_value
+                    
+                    # Special handling for common field mappings
+                    if field.field_code == "patient_id":
+                        patient_search_params["national_person_id"] = field_value
+                    elif field.field_code == "birth_date":
+                        patient_search_params["birthdate"] = field_value
+
+                logger.info(f"Using ISM fields for {member_state.country_name}: {list(patient_search_params.keys())}")
+
+            except (Country.DoesNotExist, InternationalSearchMask.DoesNotExist):
+                # Fallback to traditional fields
+                logger.info(f"No ISM configuration found for {member_state.country_code}, using default fields")
+                
+                national_person_id = request.POST.get("national_person_id", "").strip()
+                birthdate_str = request.POST.get("birthdate", "").strip()
+                
+                if not national_person_id:
+                    errors.append("National Person Identifier is required")
+                if not birthdate_str:
+                    errors.append("Birthdate is required")
+                
+                patient_search_params = {
+                    "national_person_id": national_person_id,
+                    "birthdate": birthdate_str
+                }
+        else:
+            errors.append("Please select a member state")
+
+        # Parse birthdate if provided
+        birthdate = None
+        birthdate_str = patient_search_params.get("birthdate") or patient_search_params.get("birth_date")
+        if birthdate_str:
+            try:
+                # Handle different date formats
+                for date_format in ["%Y/%m/%d", "%Y-%m-%d", "%d/%m/%Y"]:
+                    try:
+                        birthdate = datetime.strptime(birthdate_str, date_format).date()
+                        break
+                    except ValueError:
+                        continue
+                
+                if not birthdate:
+                    errors.append("Invalid birthdate format. Please use yyyy/MM/dd")
+            except Exception as e:
+                errors.append("Invalid birthdate format")
+                logger.warning(f"Date parsing error: {e}")
+
+        # Validate break-the-glass
         if break_glass and not break_glass_reason:
             errors.append("Break-the-glass reason is required for emergency access")
+
+        # Get patient identifier for search
+        patient_id = patient_search_params.get("national_person_id") or patient_search_params.get("patient_id")
+        
+        logger.info(
+            f"Search parameters: patient_id={patient_id}, birthdate={birthdate_str}, member_state={member_state.country_code if member_state else None}, use_local_search={use_local_search}"
+        )
 
         # Search for patient in both old sample data and new EU test data
         patient_found = False
         sample_patient_info = None
 
-        if not errors and member_state:
+        if not errors and member_state and patient_id:
             logger.info(
-                f"Searching for patient {national_person_id} in {member_state.country_name}, use_local_search={use_local_search}"
+                f"Searching for patient {patient_id} in {member_state.country_name}, use_local_search={use_local_search}"
             )
 
             # NEW: Local CDA document search if enabled
@@ -118,7 +198,7 @@ def handle_patient_search(request, context):
                     found, cda_documents, message = (
                         local_search_service.search_patient_summaries(
                             country_code=member_state.country_code,
-                            patient_id=national_person_id,
+                            patient_id=patient_id,
                         )
                     )
 
@@ -135,7 +215,7 @@ def handle_patient_search(request, context):
                                 "administrative_gender": first_doc.get(
                                     "patient_gender", ""
                                 ),
-                                "birth_date_formatted": birthdate_str,
+                                "birth_date_formatted": birthdate_str or first_doc.get("patient_birth_time", ""),
                                 "street": "",
                                 "city": first_doc.get("patient_city", ""),
                                 "postal_code": "",
@@ -149,11 +229,11 @@ def handle_patient_search(request, context):
                             },
                         )()
                         logger.info(
-                            f"Patient {national_person_id} found in local CDA documents: {message}"
+                            f"Patient {patient_id} found in local CDA documents: {message}"
                         )
                     else:
                         logger.info(
-                            f"Patient {national_person_id} not found in local CDA documents: {message}"
+                            f"Patient {patient_id} not found in local CDA documents: {message}"
                         )
                 except Exception as e:
                     logger.warning(f"Error in local CDA search: {e}")
@@ -163,10 +243,15 @@ def handle_patient_search(request, context):
                 try:
                     # Look for patient in PatientData table
                     eu_patient_data = PatientData.objects.filter(
-                        patient_identifier__patient_id=national_person_id,
+                        patient_identifier__patient_id=patient_id,
                         patient_identifier__home_member_state=member_state,
-                        birth_date=birthdate,
-                    ).first()
+                    )
+                    
+                    # Add birthdate filter if provided
+                    if birthdate:
+                        eu_patient_data = eu_patient_data.filter(birth_date=birthdate)
+                    
+                    eu_patient_data = eu_patient_data.first()
 
                     if eu_patient_data:
                         patient_found = True
@@ -179,7 +264,7 @@ def handle_patient_search(request, context):
                                 "given_name": eu_patient_data.given_name or "",
                                 "administrative_gender": eu_patient_data.administrative_gender
                                 or "",
-                                "birth_date_formatted": birthdate_str,
+                                "birth_date_formatted": birthdate_str or "",
                                 "street": eu_patient_data.street or "",
                                 "city": eu_patient_data.city or "",
                                 "postal_code": eu_patient_data.postal_code or "",
@@ -191,11 +276,11 @@ def handle_patient_search(request, context):
                             },
                         )()
                         logger.info(
-                            f"Patient {national_person_id} found in EU test data: {eu_patient_data.given_name} {eu_patient_data.family_name}"
+                            f"Patient {patient_id} found in EU test data: {eu_patient_data.given_name} {eu_patient_data.family_name}"
                         )
                     else:
                         logger.info(
-                            f"Patient {national_person_id} not found in EU test data"
+                            f"Patient {patient_id} not found in EU test data"
                         )
                 except Exception as e:
                     logger.warning(f"Error searching EU test data: {e}")
@@ -203,12 +288,12 @@ def handle_patient_search(request, context):
                 # If not found in EU test data, try old sample data files
                 if not patient_found and member_state.sample_data_oid:
                     logger.info(
-                        f"Searching for patient {national_person_id} in legacy sample data OID {member_state.sample_data_oid}"
+                        f"Searching for patient {patient_id} in legacy sample data OID {member_state.sample_data_oid}"
                     )
 
                     # Try to find patient in old sample data
                     found, patient_info, message = patient_loader.search_patient(
-                        member_state.sample_data_oid, national_person_id, birthdate_str
+                        member_state.sample_data_oid, patient_id, birthdate_str or ""
                     )
 
                     logger.info(
@@ -219,7 +304,7 @@ def handle_patient_search(request, context):
                         patient_found = True
                         sample_patient_info = patient_info
                         logger.info(
-                            f"Patient {national_person_id} found in legacy sample data: {message}"
+                            f"Patient {patient_id} found in legacy sample data: {message}"
                         )
                     else:
                         if patient_info:  # Patient exists but birth date doesn't match
@@ -231,11 +316,11 @@ def handle_patient_search(request, context):
             if not patient_found:
                 if member_state.sample_data_oid:
                     errors.append(
-                        f"Patient {national_person_id} not found in {member_state.country_name} (searched both EU test data and legacy sample data)"
+                        f"Patient {patient_id} not found in {member_state.country_name} (searched both EU test data and legacy sample data)"
                     )
                 else:
                     errors.append(
-                        f"Patient {national_person_id} not found in {member_state.country_name} EU test data"
+                        f"Patient {patient_id} not found in {member_state.country_name} EU test data"
                     )
         else:
             logger.warning(
@@ -245,20 +330,29 @@ def handle_patient_search(request, context):
         if errors:
             for error in errors:
                 messages.error(request, error)
-            context.update(
-                {
-                    "national_person_id": national_person_id,
-                    "birthdate": birthdate_str,
-                    "member_state_id": (
-                        int(member_state_id)
-                        if member_state_id and member_state_id.isdigit()
-                        else member_state_id
-                    ),
-                    "break_glass": break_glass,
-                    "break_glass_reason": break_glass_reason,
-                    "use_local_search": use_local_search,
-                }
-            )
+            
+            # Update context with form values for re-display
+            context.update({
+                "member_state_id": (
+                    int(member_state_id)
+                    if member_state_id and member_state_id.isdigit()
+                    else member_state_id
+                ),
+                "break_glass": break_glass,
+                "break_glass_reason": break_glass_reason,
+                "use_local_search": use_local_search,
+            })
+            
+            # Add all patient search parameters back to context
+            for key, value in patient_search_params.items():
+                context[key] = value
+                
+            # Maintain backwards compatibility with old field names
+            if "national_person_id" in patient_search_params:
+                context["national_person_id"] = patient_search_params["national_person_id"]
+            if "birthdate" in patient_search_params:
+                context["birthdate"] = patient_search_params["birthdate"]
+                
             return render(request, "patient_data/patient_search.html", context)
 
         # Check if patient identifier already exists
@@ -623,6 +717,32 @@ def local_cda_document_view(request, patient_id, document_index=0):
             selected_document["file_path"],
             target_language="en",  # Can be made configurable
         )
+        
+        # Experimental FHIR conversion (if requested)
+        fhir_conversion = None
+        fhir_clinical_sections = None
+        convert_to_fhir = request.GET.get('fhir', '').lower() == 'true'
+        
+        if convert_to_fhir:
+            try:
+                from .services.cda_to_fhir_service import CDAToFHIRService
+                fhir_service = CDAToFHIRService()
+                fhir_conversion = fhir_service.convert_cda_to_fhir(selected_document["file_path"])
+                
+                if fhir_conversion.get('success'):
+                    fhir_clinical_sections = fhir_service.extract_clinical_sections(
+                        fhir_conversion['fhir_bundle']
+                    )
+                    logger.info(f"Successfully converted CDA to FHIR for document {document_index}")
+                else:
+                    logger.warning(f"FHIR conversion failed: {fhir_conversion.get('error')}")
+                    
+            except Exception as e:
+                logger.error(f"Error during experimental FHIR conversion: {e}", exc_info=True)
+                fhir_conversion = {
+                    'success': False,
+                    'error': f"Experimental FHIR conversion failed: {str(e)}"
+                }
 
         context = {
             "patient_identifier": patient_identifier,
@@ -633,6 +753,9 @@ def local_cda_document_view(request, patient_id, document_index=0):
             "rendered_result": rendered_result,
             "sample_patient_info": sample_patient_info,
             "current_user": request.user,
+            "fhir_conversion": fhir_conversion,
+            "fhir_clinical_sections": fhir_clinical_sections,
+            "convert_to_fhir": convert_to_fhir,
         }
 
         return render(

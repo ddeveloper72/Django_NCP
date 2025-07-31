@@ -61,7 +61,7 @@ div.page-header img.country-flag {
   object-fit: cover;
   max-width: 48px !important;
   max-height: 32px !important;
-  
+
   @media (max-width: $breakpoint-sm) {
     width: 40px !important;
     height: 27px !important;
@@ -73,16 +73,16 @@ div.page-header img.country-flag {
 .page-header h1 {
   display: flex;
   align-items: center;
-  
+
   .country-flag {
     margin-right: 0.75rem;
     flex-shrink: 0; // Prevent flag from shrinking
   }
-  
+
   @media (max-width: $breakpoint-sm) {
     flex-direction: column;
     text-align: center;
-    
+
     .country-flag {
       margin-right: 0;
       margin-bottom: 0.5rem;

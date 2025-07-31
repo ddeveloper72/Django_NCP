@@ -1,36 +1,45 @@
 # Country Flag Styling Fix
 
 ## Issue
+
 The country flag on patient data pages was displaying at full size (taking up the whole screen) instead of being properly constrained.
 
 ## Root Cause
+
 The patient data template (`patient_data.html`) was missing the `country-flag` CSS class that provides proper sizing constraints.
 
 ## Solution
 
 ### 1. Template Fix
+
 **File**: `ehealth_portal/templates/ehealth_portal/patient_data.html`
+
 - Added `country-flag` class to the flag image element
 - This ensures consistent flag styling across all pages
 
 **Before**:
+
 ```html
 <img src="{% static 'flags/' %}{{ country_code }}.webp" alt="{{ country.name }} flag" class="me-2">
 ```
 
 **After**:
+
 ```html
 <img src="{% static 'flags/' %}{{ country_code }}.webp" alt="{{ country.name }} flag" class="country-flag me-2">
 ```
 
 ### 2. SCSS Enhancement
+
 **File**: `static/scss/pages/_patient_data_view.scss`
+
 - Added specific flag styling for patient data pages
 - Sized flags at 48px x 32px (smaller than search pages for headers)
 - Added responsive sizing for mobile devices
 - Included proper alignment and spacing
 
 **New Styles**:
+
 ```scss
 .page-header {
   .country-flag {
@@ -58,9 +67,9 @@ The patient data template (`patient_data.html`) was missing the `country-flag` C
 
 ## Testing Results
 
-✅ Italy: http://127.0.0.1:8000/portal/country/IT/patient/10/
-✅ Greece: http://127.0.0.1:8000/portal/country/GR/patient/10/
-✅ Luxembourg: http://127.0.0.1:8000/portal/country/LU/patient/10/
+✅ Italy: <http://127.0.0.1:8000/portal/country/IT/patient/10/>
+✅ Greece: <http://127.0.0.1:8000/portal/country/GR/patient/10/>
+✅ Luxembourg: <http://127.0.0.1:8000/portal/country/LU/patient/10/>
 
 All country flags now display at appropriate sizes with proper styling.
 

@@ -302,6 +302,19 @@
                 <span class="nav-button disabled">Next Document →</span>
                 {% endif %}
 
+                <!-- Experimental FHIR Toggle -->
+                <div style="margin-left: 1rem;">
+                    {% if convert_to_fhir %}
+                    <a href="?fhir=false" class="nav-button" style="background: #e74c3c;">
+                        🔬 Switch to Original CDA View
+                    </a>
+                    {% else %}
+                    <a href="?fhir=true" class="nav-button" style="background: #f39c12;">
+                        🧪 Try Experimental FHIR View
+                    </a>
+                    {% endif %}
+                </div>
+
                 <div class="document-selector">
                     <label for="document-select">Document:</label>
                     <select id="document-select" onchange="changeDocument(this.value)">
@@ -358,7 +371,266 @@
             <strong>⏰ Effective Time:</strong> {{ selected_document.effective_time or 'N/A' }}
         </div>
 
+        <!-- Experimental FHIR Clinical Sections (if converted) -->
+        {% if convert_to_fhir and fhir_clinical_sections %}
+        <div class="fhir-clinical-content">
+            <div class="fhir-header">
+                🧪 Experimental FHIR Clinical Sections
+                <span class="experimental-badge">EXPERIMENTAL</span>
+            </div>
+
+            {% if fhir_conversion.warnings %}
+            <div class="fhir-warnings">
+                <h4>⚠️ Conversion Warnings:</h4>
+                <ul>
+                    {% for warning in fhir_conversion.warnings %}
+                    <li>{{ warning }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- FHIR Patient Information -->
+            {% if fhir_clinical_sections.patient %}
+            <div class="fhir-section">
+                <h3>👤 FHIR Patient Resource</h3>
+                <div class="fhir-patient-grid">
+                    {% if fhir_clinical_sections.patient.name %}
+                    <div class="fhir-item">
+                        <div class="fhir-label">Name</div>
+                        <div class="fhir-value">{{ fhir_clinical_sections.patient.name }}</div>
+                    </div>
+                    {% endif %}
+                    {% if fhir_clinical_sections.patient.gender %}
+                    <div class="fhir-item">
+                        <div class="fhir-label">Gender</div>
+                        <div class="fhir-value">{{ fhir_clinical_sections.patient.gender|title }}</div>
+                    </div>
+                    {% endif %}
+                    {% if fhir_clinical_sections.patient.birth_date %}
+                    <div class="fhir-item">
+                        <div class="fhir-label">Birth Date</div>
+                        <div class="fhir-value">{{ fhir_clinical_sections.patient.birth_date }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- FHIR Medications -->
+            {% if fhir_clinical_sections.medications %}
+            <div class="fhir-section">
+                <h3>💊 Medications ({{ fhir_clinical_sections.medications|length }})</h3>
+                <div class="fhir-list">
+                    {% for med in fhir_clinical_sections.medications %}
+                    <div class="fhir-card medication-card">
+                        <div class="fhir-card-header">
+                            <strong>{{ med.name }}</strong>
+                            {% if med.status %}
+                            <span class="fhir-status status-{{ med.status }}">{{ med.status|title }}</span>
+                            {% endif %}
+                        </div>
+                        {% if med.dosage or med.effective_period %}
+                        <div class="fhir-card-details">
+                            {% if med.dosage %}
+                            <div><strong>Dosage:</strong> {{ med.dosage|first.text if med.dosage|first.text else 'See
+                                original document' }}</div>
+                            {% endif %}
+                            {% if med.effective_period %}
+                            <div><strong>Period:</strong> {{ med.effective_period.start }} - {{ med.effective_period.end
+                                or 'Ongoing' }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- FHIR Allergies -->
+            {% if fhir_clinical_sections.allergies %}
+            <div class="fhir-section">
+                <h3>🚫 Allergies & Intolerances ({{ fhir_clinical_sections.allergies|length }})</h3>
+                <div class="fhir-list">
+                    {% for allergy in fhir_clinical_sections.allergies %}
+                    <div class="fhir-card allergy-card">
+                        <div class="fhir-card-header">
+                            <strong>{{ allergy.allergen }}</strong>
+                            {% if allergy.clinical_status %}
+                            <span class="fhir-status status-{{ allergy.clinical_status }}">{{
+                                allergy.clinical_status|title }}</span>
+                            {% endif %}
+                        </div>
+                        {% if allergy.reactions %}
+                        <div class="fhir-card-details">
+                            <strong>Reactions:</strong>
+                            {% for reaction in allergy.reactions %}
+                            {{ reaction.manifestations|join(', ') }}
+                            {% if reaction.severity %}<span class="severity-{{ reaction.severity }}">({{
+                                reaction.severity|title }})</span>{% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if allergy.onset %}
+                        <div class="fhir-card-details">
+                            <strong>Onset:</strong> {{ allergy.onset }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- FHIR Conditions -->
+            {% if fhir_clinical_sections.conditions %}
+            <div class="fhir-section">
+                <h3>🏥 Conditions ({{ fhir_clinical_sections.conditions|length }})</h3>
+                <div class="fhir-list">
+                    {% for condition in fhir_clinical_sections.conditions %}
+                    <div class="fhir-card condition-card">
+                        <div class="fhir-card-header">
+                            <strong>{{ condition.name }}</strong>
+                            {% if condition.clinical_status %}
+                            <span class="fhir-status status-{{ condition.clinical_status }}">{{
+                                condition.clinical_status|title }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="fhir-card-details">
+                            {% if condition.onset %}
+                            <div><strong>Onset:</strong> {{ condition.onset }}</div>
+                            {% endif %}
+                            {% if condition.recorded_date %}
+                            <div><strong>Recorded:</strong> {{ condition.recorded_date }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- FHIR Procedures -->
+            {% if fhir_clinical_sections.procedures %}
+            <div class="fhir-section">
+                <h3>🔬 Procedures ({{ fhir_clinical_sections.procedures|length }})</h3>
+                <div class="fhir-list">
+                    {% for procedure in fhir_clinical_sections.procedures %}
+                    <div class="fhir-card procedure-card">
+                        <div class="fhir-card-header">
+                            <strong>{{ procedure.name }}</strong>
+                            {% if procedure.status %}
+                            <span class="fhir-status status-{{ procedure.status }}">{{ procedure.status|title }}</span>
+                            {% endif %}
+                        </div>
+                        {% if procedure.performed %}
+                        <div class="fhir-card-details">
+                            <strong>Performed:</strong> {{ procedure.performed.start if procedure.performed.start else
+                            procedure.performed }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- FHIR Observations -->
+            {% if fhir_clinical_sections.observations %}
+            <div class="fhir-section">
+                <h3>📊 Observations ({{ fhir_clinical_sections.observations|length }})</h3>
+                <div class="fhir-list">
+                    {% for obs in fhir_clinical_sections.observations %}
+                    <div class="fhir-card observation-card">
+                        <div class="fhir-card-header">
+                            <strong>{{ obs.name }}</strong>
+                            {% if obs.status %}
+                            <span class="fhir-status status-{{ obs.status }}">{{ obs.status|title }}</span>
+                            {% endif %}
+                        </div>
+                        {% if obs.value or obs.effective %}
+                        <div class="fhir-card-details">
+                            {% if obs.value %}
+                            <div><strong>Value:</strong> {{ obs.value }}</div>
+                            {% endif %}
+                            {% if obs.effective %}
+                            <div><strong>Date:</strong> {{ obs.effective.start if obs.effective.start else obs.effective
+                                }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- FHIR Devices -->
+            {% if fhir_clinical_sections.devices %}
+            <div class="fhir-section">
+                <h3>🔧 Medical Devices ({{ fhir_clinical_sections.devices|length }})</h3>
+                <div class="fhir-list">
+                    {% for device in fhir_clinical_sections.devices %}
+                    <div class="fhir-card device-card">
+                        <div class="fhir-card-header">
+                            <strong>{{ device.name }}</strong>
+                            {% if device.status %}
+                            <span class="fhir-status status-{{ device.status }}">{{ device.status|title }}</span>
+                            {% endif %}
+                        </div>
+                        {% if device.manufacturer or device.model %}
+                        <div class="fhir-card-details">
+                            {% if device.manufacturer %}
+                            <div><strong>Manufacturer:</strong> {{ device.manufacturer }}</div>
+                            {% endif %}
+                            {% if device.model %}
+                            <div><strong>Model:</strong> {{ device.model }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- FHIR Bundle Summary -->
+            <div class="fhir-summary">
+                <h4>📋 FHIR Bundle Summary</h4>
+                <div class="fhir-summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ fhir_conversion.conversion_metadata.resource_count or 0 }}</div>
+                        <div class="stat-label">Total Resources</div>
+                    </div>
+                    {% for resource_type, count in fhir_conversion.conversion_metadata.resource_types.items() %}
+                    <div class="stat-item">
+                        <div class="stat-value">{{ count }}</div>
+                        <div class="stat-label">{{ resource_type }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% elif convert_to_fhir and fhir_conversion and not fhir_conversion.success %}
+        <div class="fhir-error">
+            <div class="fhir-header">
+                🧪 Experimental FHIR Conversion Failed
+            </div>
+            <div class="error-message">
+                <strong>❌ Conversion Error:</strong> {{ fhir_conversion.error }}
+                {% if fhir_conversion.details %}
+                <details style="margin-top: 1rem;">
+                    <summary>Technical Details</summary>
+                    <pre>{{ fhir_conversion.details }}</pre>
+                </details>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
         <!-- PS Display Guidelines Rendering -->
+        {% if not convert_to_fhir %}
         {% if rendered_result %}
         {% if rendered_result.success %}
         <div class="rendered-content">
@@ -376,6 +648,7 @@
         <div class="error-message">
             <strong>⚠️ Warning:</strong> No rendered content available.
         </div>
+        {% endif %}
         {% endif %}
 
         <!-- Extracted PDFs -->
