@@ -665,51 +665,18 @@ class SigningCertificate(models.Model):
         upload_to="certificates/private/", blank=True, null=True
     )
 
-    # Certificate information (auto-populated from certificate)
-    subject = models.CharField(
-        max_length=500, blank=True, help_text="Extracted from certificate"
-    )
-    issuer = models.CharField(
-        max_length=500, blank=True, help_text="Extracted from certificate"
-    )
-    serial_number = models.CharField(
-        max_length=100, blank=True, help_text="Extracted from certificate"
-    )
-    fingerprint = models.CharField(
-        max_length=100, blank=True, help_text="SHA-256 fingerprint"
-    )
-    signature_algorithm = models.CharField(
-        max_length=100, blank=True, help_text="Certificate signature algorithm"
-    )
+    # Certificate information
+    subject = models.CharField(max_length=500, blank=True)
+    issuer = models.CharField(max_length=500, blank=True)
+    serial_number = models.CharField(max_length=100, blank=True)
+    fingerprint = models.CharField(max_length=100, blank=True)
 
-    # Validity (auto-populated from certificate)
-    valid_from = models.DateTimeField(
-        null=True, blank=True, help_text="Certificate valid from date"
-    )
-    valid_to = models.DateTimeField(
-        null=True, blank=True, help_text="Certificate valid until date"
-    )
-
-    # Validation status
-    validation_status = models.CharField(
-        max_length=20,
-        choices=[
-            ("valid", "Valid"),
-            ("expired", "Expired"),
-            ("invalid", "Invalid"),
-            ("warning", "Valid with Warnings"),
-        ],
-        default="invalid",
-        help_text="Validation status after certificate check",
-    )
-    validation_warnings = models.TextField(
-        blank=True, help_text="Validation warnings and notices"
-    )
+    # Validity
+    valid_from = models.DateTimeField(null=True, blank=True)
+    valid_to = models.DateTimeField(null=True, blank=True)
 
     # Configuration
-    is_default = models.BooleanField(
-        default=False, help_text="Use as default signing certificate"
-    )
+    is_default = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     # Metadata
@@ -721,75 +688,6 @@ class SigningCertificate(models.Model):
 
     def __str__(self):
         return f"{self.certificate_name}"
-
-    @property
-    def is_valid(self):
-        """Check if certificate is currently valid"""
-        from django.utils import timezone
-
-        now = timezone.now()
-        return (
-            self.validation_status in ["valid", "warning"]
-            and (self.valid_from <= now <= self.valid_to)
-            if self.valid_from and self.valid_to
-            else False
-        )
-
-    def clean(self):
-        """Validate certificate file and extract information"""
-        from django.core.exceptions import ValidationError
-        from .certificate_validators import (
-            validate_certificate_file,
-            validate_private_key_file,
-            CertificateValidator,
-        )
-
-        super().clean()
-
-        # Validate certificate file
-        if self.certificate_file:
-            try:
-                validation_result = validate_certificate_file(self.certificate_file)
-
-                # Auto-populate certificate information
-                info = validation_result["info"]
-                self.subject = info["subject"]
-                self.issuer = info["issuer"]
-                self.serial_number = info["serial_number"]
-                self.fingerprint = info["fingerprint"]
-                self.signature_algorithm = info["signature_algorithm"]
-                self.valid_from = info["valid_from"]
-                self.valid_to = info["valid_to"]
-
-                # Set validation status
-                if validation_result["warnings"]:
-                    self.validation_status = "warning"
-                    self.validation_warnings = "; ".join(validation_result["warnings"])
-                else:
-                    self.validation_status = "valid"
-                    self.validation_warnings = ""
-
-            except ValidationError as e:
-                self.validation_status = "invalid"
-                self.validation_warnings = str(e)
-                raise e
-
-        # Validate private key file
-        if self.private_key_file:
-            validate_private_key_file(self.private_key_file)
-
-    def save(self, *args, **kwargs):
-        """Override save to ensure only one default certificate"""
-        # Run validation first
-        self.full_clean()
-
-        # Ensure only one default certificate
-        if self.is_default:
-            SigningCertificate.objects.filter(is_default=True).exclude(
-                id=self.id
-            ).update(is_default=False)
-
-        super().save(*args, **kwargs)
 
     @property
     def is_valid(self):

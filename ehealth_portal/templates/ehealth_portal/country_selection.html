@@ -1,93 +1,196 @@
-{% extends "base.html" %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block title %}{{ page_title }}{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
 
-{% block extra_css %}
-<!-- Country selection styles now handled by SASS compilation -->
-{% endblock %}
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-{% block content %}
-<div class="country-selection-page">
-    <!-- Page Header -->
-    <div class="hero-header">
-        <div class="hero-content">
-            <h1>🏥 {{ page_title }}</h1>
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-indicator {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            margin: 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: white;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .country-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .country-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .country-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .country-flag {
+            width: 60px;
+            height: 40px;
+            border-radius: 5px;
+            margin: 0 auto 15px;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .country-name {
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+
+        .country-status {
+            font-size: 0.9rem;
+            color: #16a34a;
+        }
+
+        .search-box {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .page-title {
+            color: #374151;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>{{ page_title }}</h1>
+        <div class="user-info">
+            <span>👤 user</span>
+            <span>🔄</span>
         </div>
     </div>
 
-    <!-- Step Indicator -->
     <div class="step-indicator">
         {{ step }}
     </div>
 
-    <!-- Main Content -->
     <div class="container">
-        <div class="page-header">
-            <h2 class="page-title">Please choose the patient country</h2>
-            <p class="page-subtitle">Select a country to search for patient records using their International Search
-                Mask (ISM)</p>
+        <h2 class="page-title">Please choose the patient country</h2>
+        <p class="page-subtitle">Select a country to search for patient records</p>
+
+        <div class="search-box">
+            <input type="text" placeholder="Search countries..." id="countrySearch">
         </div>
 
-        <!-- Search Box -->
-        <div class="search-section">
-            <div class="search-box">
-                <input type="text" placeholder="Search countries..." id="countrySearch" class="search-input">
-            </div>
-        </div>
-
-        <!-- Country Grid -->
         <div class="country-grid">
             {% for country in countries %}
-            <div class="country-card{% if not country.available %} unavailable{% endif %}"
-                onclick="{% if country.available %}selectCountry('{{ country.code }}'){% endif %}">
+            <div class="country-card" onclick="selectCountry('{{ country.code }}')">
                 <div class="country-flag">
-                    <img src="{% static 'flags/' %}{{ country.code }}.webp" alt="{{ country.name }} flag" />
+                    {% if country.code == 'BE' %}🇧🇪
+                    {% elif country.code == 'AT' %}🇦🇹
+                    {% elif country.code == 'HU' %}🇭🇺
+                    {% elif country.code == 'EU' %}🇪🇺
+                    {% elif country.code == 'IE' %}🇮🇪
+                    {% else %}🏳️{% endif %}
                 </div>
                 <div class="country-name">{{ country.name }}</div>
-                <div class="country-status {% if country.available %}available{% else %}unavailable{% endif %}">
+                <div class="country-status">
                     {% if country.available %}✅ Available{% else %}❌ Unavailable{% endif %}
                 </div>
             </div>
             {% endfor %}
         </div>
-
-        <!-- Navigation Section -->
-        <div class="footer-actions">
-            <a href="/" class="btn btn-primary btn-lg">
-                🏠 Back to Home
-            </a>
-        </div>
     </div>
-</div>
 
-<script>
-    function selectCountry(countryCode) {
-        window.location.href = `/portal/country/${countryCode}/search/`;
-    }
+    <script>
+        function selectCountry(countryCode) {
+            window.location.href = `/portal/country/${countryCode}/search/`;
+        }
 
-    // Country search functionality
-    document.getElementById('countrySearch').addEventListener('input', function (e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const cards = document.querySelectorAll('.country-card');
+        // Country search functionality
+        document.getElementById('countrySearch').addEventListener('input', function (e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.country-card');
 
-        cards.forEach(card => {
-            const countryName = card.querySelector('.country-name').textContent.toLowerCase();
-            if (countryName.includes(searchTerm)) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
+            cards.forEach(card => {
+                const countryName = card.querySelector('.country-name').textContent.toLowerCase();
+                if (countryName.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         });
-    });
+    </script>
+</body>
 
-    // Add hover sound effect (optional)
-    document.querySelectorAll('.country-card').forEach(card => {
-        card.addEventListener('mouseenter', function () {
-            if (!this.classList.contains('unavailable')) {
-                // Could add sound effect here
-            }
-        });
-    });
-</script>
-{% endblock %}
+</html>

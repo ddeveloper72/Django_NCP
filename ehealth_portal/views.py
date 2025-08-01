@@ -105,7 +105,6 @@ def country_selection(request):
     context = {
         "countries": countries_list,
         "page_title": "eHealth OpenNCP Portal",
-        "step": "STEP 1: COUNTRY SELECTION",
         "total_countries": len(countries_list),
         "available_countries": len([c for c in countries_list if c["available"]]),
     }
@@ -113,7 +112,7 @@ def country_selection(request):
     return render(request, "ehealth_portal/country_selection.html", context)
 
 
-# @login_required
+@login_required
 def patient_search(request, country_code):
     """
     Dynamic patient search page based on country's International Search Mask (ISM)
@@ -139,7 +138,6 @@ def patient_search(request, country_code):
     if request.method == "POST":
         # Process search form submission
         search_fields = {}
-        use_local_search = request.POST.get("use_local_search") == "on"
 
         # Collect all search field values
         for field in search_mask.fields.all():
@@ -158,10 +156,8 @@ def patient_search(request, country_code):
                 request, f"Required fields missing: {', '.join(missing_fields)}"
             )
         else:
-            # Perform patient search (with local CDA option)
-            result = perform_patient_search(
-                country, search_fields, request.user, use_local_search
-            )
+            # Perform patient search
+            result = perform_patient_search(country, search_fields, request.user)
 
             if result.patient_found:
                 # Redirect to patient data view with search result ID
@@ -202,13 +198,6 @@ def patient_search(request, country_code):
         if group not in grouped_fields:
             grouped_fields[group] = []
         grouped_fields[group].append(field)
-
-    # DEBUG: Print context data - Updated at 21:52
-    print(f"DEBUG: Country: {country}")
-    print(f"DEBUG: Search mask: {search_mask}")
-    print(f"DEBUG: Form fields count: {len(form_fields)}")
-    print(f"DEBUG: First few fields: {form_fields[:2] if form_fields else 'No fields'}")
-    print(f"DEBUG: Grouped fields keys: {list(grouped_fields.keys())}")
 
     context = {
         "country": country,
@@ -576,9 +565,9 @@ def create_search_fields_from_ism(search_mask, ism_data):
         )
 
 
-def perform_patient_search(country, search_fields, user, use_local_search=False):
+def perform_patient_search(country, search_fields, user):
     """
-    Perform patient search using NCP or local CDA documents
+    Perform patient search using NCP
     Returns PatientSearchResult object
     """
     # Create search result record
@@ -590,154 +579,28 @@ def perform_patient_search(country, search_fields, user, use_local_search=False)
     )
 
     try:
-        # NEW: Local CDA document search if enabled
-        if use_local_search:
-            logger.info(f"Using local CDA document search for {country.code}")
-
-            # Extract patient ID from search fields
-            patient_id_value = (
-                search_fields.get("patient_id")
-                or search_fields.get("national_id")
-                or search_fields.get("identifier")
-                or search_fields.get("pps_number")
-                or search_fields.get("social_security_number")
-                or search_fields.get("health_card_number")
-            )
-
-            if patient_id_value:
-                try:
-                    from patient_data.services.local_patient_search import (
-                        LocalPatientSearchService,
-                    )
-
-                    local_search_service = LocalPatientSearchService()
-                    found, cda_documents, message = (
-                        local_search_service.search_patient_summaries(
-                            country_code=country.code, patient_id=patient_id_value
-                        )
-                    )
-
-                    if found and cda_documents:
-                        # Use data from first matching CDA document
-                        first_doc = cda_documents[0]
-                        result.patient_found = True
-                        result.patient_data = {
-                            "id": patient_id_value,
-                            "name": f"{first_doc.get('patient_given_name', '')} {first_doc.get('patient_family_name', '')}".strip(),
-                            "birth_date": first_doc.get("patient_birth_time", ""),
-                            "gender": first_doc.get("patient_gender", ""),
-                            "country": first_doc.get("patient_country", country.name),
-                            "city": first_doc.get("patient_city", ""),
-                            "document_format": first_doc.get("document_format", ""),
-                            "validation_level": first_doc.get("validation_level", ""),
-                            "file_name": first_doc.get("file_name", ""),
-                            "cda_documents": cda_documents,  # Store all CDA documents
-                            "source": "LOCAL_CDA_SEARCH",
-                        }
-                        result.available_documents = []
-                        for doc in cda_documents:
-                            result.available_documents.append(
-                                {
-                                    "type": "PS",
-                                    "title": f"Patient Summary ({doc.get('validation_level', 'Unknown')} - {doc.get('document_format', 'Unknown')})",
-                                    "date": doc.get("effective_time", ""),
-                                    "available": True,
-                                    "file_path": doc.get("file_path", ""),
-                                    "extracted_pdfs": doc.get("extracted_pdfs", []),
-                                }
-                            )
-                        result.ncp_response_time = 0.1  # Local search is fast
-                        result.ncp_status_code = "200"
-                        result.save()
-                        logger.info(
-                            f"Patient {patient_id_value} found in local CDA documents: {message}"
-                        )
-                        return result
-                    else:
-                        logger.info(
-                            f"Patient {patient_id_value} not found in local CDA documents"
-                        )
-                except Exception as e:
-                    logger.warning(f"Error in local CDA search: {e}")
-
         # In production, this would make actual NCP API calls
-        # For demo, we'll check both simulated test data and actual database
+        # For demo, we'll simulate different responses based on search criteria
 
-        # First check actual database for patient data
-        from patient_data.models import PatientData, PatientIdentifier, MemberState
-
+        # Simulate patient found for certain test IDs
+        test_ids = ["EU-TEST-12345", "1234567A", "XX.XX.XX-XXX.XX"]
         found_patient = False
-        database_patient = None
 
-        # Try to find patient in database
-        patient_id_value = (
-            search_fields.get("patient_id")
-            or search_fields.get("national_id")
-            or search_fields.get("identifier")
-            or search_fields.get("pps_number")
-        )
-        birth_date_value = search_fields.get("birth_date") or search_fields.get(
-            "birthdate"
-        )
-
-        if patient_id_value:
-            try:
-                # Find patient identifier matching the search
-                patient_identifier = PatientIdentifier.objects.get(
-                    patient_id=patient_id_value,
-                    home_member_state__country_code=country.code.upper(),
-                )
-
-                # Find patient data
-                database_patient = PatientData.objects.get(
-                    patient_identifier=patient_identifier
-                )
+        for field_value in search_fields.values():
+            if any(test_id in str(field_value) for test_id in test_ids):
                 found_patient = True
-
-                logger.info(
-                    f"Found patient in database: {database_patient.given_name} {database_patient.family_name}"
-                )
-
-            except (PatientIdentifier.DoesNotExist, PatientData.DoesNotExist):
-                logger.info(
-                    f"Patient {patient_id_value} not found in database for country {country.code}"
-                )
-
-        # If not found in database, check simulated test IDs
-        if not found_patient:
-            test_ids = ["EU-TEST-12345", "1234567A", "XX.XX.XX-XXX.XX"]
-            for field_value in search_fields.values():
-                if any(test_id in str(field_value) for test_id in test_ids):
-                    found_patient = True
-                    break
+                break
 
         if found_patient:
-            # Use database patient data if available, otherwise simulate
-            if database_patient:
-                result.patient_found = True
-                result.patient_data = {
-                    "id": database_patient.patient_identifier.patient_id,
-                    "name": f"{database_patient.given_name} {database_patient.family_name}",
-                    "birth_date": database_patient.birth_date.strftime("%Y-%m-%d"),
-                    "gender": database_patient.gender,
-                    "country": database_patient.patient_identifier.home_member_state.country_code,
-                    "address": f"{database_patient.address_line}, {database_patient.city}, {database_patient.postal_code}",
-                    "last_updated": database_patient.access_timestamp.isoformat(),
-                    "database_id": database_patient.id,  # Store for later use
-                }
-            else:
-                # Simulate successful patient data for test IDs
-                result.patient_found = True
-                result.patient_data = {
-                    "id": list(search_fields.values())[
-                        0
-                    ],  # Use first search field as ID
-                    "name": f"{search_fields.get('first_name', search_fields.get('given_name', 'John'))} {search_fields.get('last_name', search_fields.get('surname', search_fields.get('family_name', 'Doe')))}",
-                    "birth_date": search_fields.get("birth_date", "1980-01-01"),
-                    "country": country.code,
-                    "last_updated": timezone.now().isoformat(),
-                }
-
+            # Simulate successful patient data
+            result.patient_found = True
+            result.patient_data = {
+                "id": list(search_fields.values())[0],  # Use first search field as ID
+                "name": f"{search_fields.get('first_name', search_fields.get('given_name', 'John'))} {search_fields.get('last_name', search_fields.get('surname', search_fields.get('family_name', 'Doe')))}",
+                "birth_date": search_fields.get("birth_date", "1980-01-01"),
+                "country": country.code,
+                "last_updated": timezone.now().isoformat(),
+            }
             result.available_documents = [
                 {
                     "type": "PS",
@@ -756,7 +619,7 @@ def perform_patient_search(country, search_fields, user, use_local_search=False)
             result.ncp_status_code = "200"
         else:
             result.patient_found = False
-            result.error_message = f"Patient {patient_id_value} not found in {country.name} (searched both EU test data and legacy sample data)"
+            result.error_message = "No patient found matching the search criteria"
             result.ncp_status_code = "404"
 
         result.save()
@@ -786,23 +649,6 @@ def patient_data(request, country_code, patient_id):
         patient_data = search_result.patient_data
         available_documents = search_result.available_documents
 
-        # Check if this is from local CDA search and process PDF extractions
-        is_local_cda_search = patient_data.get("source") == "LOCAL_CDA_SEARCH"
-
-        if is_local_cda_search:
-            # Process documents for PDF viewing
-            from patient_data.services.clinical_pdf_service import ClinicalPDFService
-
-            pdf_service = ClinicalPDFService()
-
-            for doc in available_documents:
-                file_path = doc.get("file_path")
-                if file_path and not doc.get("extracted_pdfs"):
-                    # Extract PDFs from CDA document
-                    extracted_pdfs = pdf_service.extract_pdfs_from_cda(file_path)
-                    doc["extracted_pdfs"] = extracted_pdfs
-                    doc["has_pdfs"] = len(extracted_pdfs) > 0
-
     except (PatientSearchResult.DoesNotExist, ValueError):
         # Fallback to mock data for direct access
         patient_data = {
@@ -827,7 +673,6 @@ def patient_data(request, country_code, patient_id):
             },
         ]
         search_result = None
-        is_local_cda_search = False
 
     context = {
         "country": country,
@@ -835,7 +680,6 @@ def patient_data(request, country_code, patient_id):
         "patient": patient_data,
         "documents": available_documents,
         "search_result": search_result,
-        "is_local_cda_search": is_local_cda_search,
         "page_title": f"Patient Data - {country.name}",
         "step": "PATIENT DATA",
     }
@@ -866,33 +710,6 @@ def document_viewer(request, country_code, patient_id, document_type):
     }
 
     return render(request, "ehealth_portal/document_viewer.html", context)
-
-
-@login_required
-def smp_status(request):
-    """
-    Display detailed SMP connectivity and certificate status
-    """
-    from .european_smp_client import european_smp_client
-
-    # Get connectivity test results
-    connectivity_results = european_smp_client.test_connectivity()
-
-    # Get certificate info
-    cert_info = connectivity_results.get("certificate_config", {})
-
-    context = {
-        "page_title": "European SMP Status",
-        "connectivity_results": connectivity_results,
-        "cert_configured": cert_info.get("configured", False),
-        "cert_name": cert_info.get("config_name"),
-        "cert_path": cert_info.get("cert_path"),
-        "ca_cert_path": cert_info.get("ca_cert_path"),
-        "smp_admin": connectivity_results.get("smp_admin", {}),
-        "country_smps": connectivity_results.get("country_smps", {}),
-    }
-
-    return render(request, "ehealth_portal/smp_status.html", context)
 
 
 @login_required
@@ -933,20 +750,10 @@ def refresh_country_ism(request, country_code):
                 f"Successfully updated ISM for {country.name} from European SMP",
             )
         else:
-            # Check if certificates are configured
-            from .european_smp_client import european_smp_client
-
-            if european_smp_client.cert_config:
-                cert_name = european_smp_client.cert_config.get("name", "Unknown")
-                messages.info(
-                    request,
-                    f"Using enhanced fallback ISM for {country.name}. Certificates configured ({cert_name}) but European SMP infrastructure requires VPN access to EU internal networks.",
-                )
-            else:
-                messages.info(
-                    request,
-                    f"Using enhanced fallback ISM for {country.name}. European SMP requires client certificates and VPN access to EU internal networks.",
-                )
+            messages.warning(
+                request,
+                f"Could not fetch ISM for {country.name} from SMP, using fallback configuration",
+            )
 
         return redirect("patient_search", country_code=country_code)
 

@@ -69,6 +69,51 @@
     }
   }
 
+  // Page Title
+  .page-title {
+    text-align: center;
+    color: $primary-dark;
+    margin-bottom: $space-xxl;
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+  }
+
+  // SMP Information Section
+  .smp-info {
+    background: $neutral-lightest;
+    border: 1px solid $neutral-lighter;
+    border-radius: $border-radius-md;
+    padding: $space-lg;
+    margin-bottom: $space-xxl;
+
+    p {
+      margin: 0;
+
+      &.smp-portal-link {
+        margin: $space-xs 0;
+        font-size: $font-size-sm;
+        opacity: 0.8;
+      }
+
+      &.smp-note {
+        margin: 0;
+        font-size: $font-size-xs;
+        font-style: italic;
+        color: $text-muted;
+      }
+    }
+
+    .smp-link {
+      color: $primary-dark;
+      text-decoration: underline;
+
+      &:hover {
+        color: $primary;
+        text-decoration: none;
+      }
+    }
+  }
+
   // Integration Options Grid -> Flexbox
   .integration-options {
     @include flex-wrap;

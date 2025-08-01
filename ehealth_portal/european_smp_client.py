@@ -9,22 +9,16 @@ import xml.etree.ElementTree as ET
 from urllib.parse import urljoin
 from django.conf import settings
 import logging
-import os
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 
 class EuropeanSMPClient:
-    """Client for European Commission SMP/SML services with certificate authentication"""
+    """Client for European Commission SMP/SML services"""
 
     # Configuration from OpenNCP ehealth-2 project
     SML_DOMAIN = "ehealth-trn.acc.edelivery.tech.ec.europa.eu"
     SMP_ADMIN_URL = "https://smp-ehealth-trn-cert-auth.acc.edelivery.tech.ec.europa.eu"
-
-    # Certificate paths
-    CERT_BASE_PATH = Path("C:/Users/Duncan/VS_Code_Projects/Certificates")
-    EHEALTH2_CERT_PATH = Path("C:/Users/Duncan/VS_Code_Projects/ehealth-2")
 
     # European countries supported
     EU_COUNTRIES = [
@@ -62,68 +56,6 @@ class EuropeanSMPClient:
         self.session = requests.Session()
         self.session.verify = True  # Enable SSL verification
         self.session.timeout = 30
-
-        # Configure client certificates for SMP authentication
-        self._configure_certificates()
-
-    def _configure_certificates(self):
-        """Configure client certificates for European SMP access"""
-        try:
-            # Try different certificate configurations
-            cert_configs = [
-                # New Epsos TLS certificates (2024)
-                {
-                    "cert": self.CERT_BASE_PATH / "Epsos TLS/2024 Bootcamp/602.pem",
-                    "key": self.CERT_BASE_PATH / "Epsos TLS/2024 Bootcamp/602.key",
-                    "ca_cert": self.CERT_BASE_PATH
-                    / "Epsos TLS/2024 Bootcamp/GazelleRoot.pem",
-                    "name": "Epsos TLS 2024",
-                },
-                # Alternative client certificate
-                {
-                    "cert": self.CERT_BASE_PATH / "Epsos TLS/client-certificate.pem",
-                    "key": self.CERT_BASE_PATH
-                    / "Epsos TLS/gazelle-service-consumer-private.key",
-                    "ca_cert": self.CERT_BASE_PATH
-                    / "Epsos TLS/GRP_EHEALTH_NCP_DEV_IE_EHDSI_CA.pem",
-                    "name": "Epsos TLS Client",
-                },
-                # Epsos Seal certificates
-                {
-                    "cert": self.CERT_BASE_PATH / "Epsos Seal/2024 Bootcamp/604.pem",
-                    "key": self.CERT_BASE_PATH / "Epsos Seal/2024 Bootcamp/604.key",
-                    "ca_cert": self.CERT_BASE_PATH
-                    / "Epsos Seal/2024 Bootcamp/GazelleRoot.pem",
-                    "name": "Epsos Seal 2024",
-                },
-            ]
-
-            # Find and configure the first available certificate
-            for config in cert_configs:
-                if all(path.exists() for path in [config["cert"], config["key"]]):
-                    logger.info(
-                        f"Configuring SMP client with {config['name']} certificates"
-                    )
-
-                    # Set client certificate
-                    self.session.cert = (str(config["cert"]), str(config["key"]))
-
-                    # For testing, disable SSL verification since our CA may not match EC servers
-                    # In production, this would use the proper CA certificate from EC
-                    self.session.verify = False
-                    logger.warning(
-                        "SSL verification disabled for testing - would use proper CA in production"
-                    )
-
-                    self.cert_config = config
-                    return
-
-            logger.warning("No suitable certificates found for SMP authentication")
-            self.cert_config = None
-
-        except Exception as e:
-            logger.error(f"Error configuring certificates: {e}")
-            self.cert_config = None
 
     def get_country_smp_url(self, country_code):
         """
@@ -226,58 +158,31 @@ class EuropeanSMPClient:
 
     def fetch_international_search_mask(self, country_code):
         """
-        Fetch International Search Mask (ISM) configuration from country's SMP with certificate authentication
+        Fetch International Search Mask (ISM) configuration from country's SMP
+        This is the key function for dynamic form generation
         """
         try:
-            # Log certificate status
-            if self.cert_config:
-                logger.info(
-                    f"Attempting ISM fetch for {country_code} with {self.cert_config['name']} certificates"
-                )
-            else:
-                logger.warning(
-                    f"No certificates configured for ISM fetch for {country_code}"
-                )
-
             smp_url = self.get_country_smp_url(country_code)
             if not smp_url:
-                logger.info(
-                    f"SMP URL not accessible for {country_code}, using enhanced fallback ISM"
-                )
                 return self._get_fallback_ism(country_code)
 
-            # Look for ISM service in SMP with certificate authentication
+            # Look for ISM service in SMP
             ism_url = urljoin(smp_url, f"/ism/{country_code}")
-            logger.info(f"Trying ISM endpoint: {ism_url}")
 
-            response = self.session.get(ism_url, timeout=20)
-            logger.info(f"ISM endpoint response: {response.status_code}")
-
+            response = self.session.get(ism_url)
             if response.status_code == 404:
                 # Try alternative ISM endpoint
                 ism_url = urljoin(smp_url, f"/services/ism/{country_code}")
-                logger.info(f"Trying alternative ISM endpoint: {ism_url}")
-                response = self.session.get(ism_url, timeout=20)
-                logger.info(
-                    f"Alternative ISM endpoint response: {response.status_code}"
-                )
+                response = self.session.get(ism_url)
 
             if response.status_code == 200:
-                logger.info(f"Successfully fetched ISM for {country_code} from SMP")
                 return self._parse_ism_response(response.content, country_code)
-            elif response.status_code in [401, 403]:
-                logger.warning(
-                    f"Authentication failed for {country_code} ISM (status {response.status_code})"
-                )
-                return self._get_fallback_ism(country_code)
             else:
-                logger.info(
-                    f"ISM not found for {country_code} (status {response.status_code}), using enhanced fallback"
-                )
+                logger.warning(f"ISM not found for {country_code}, using fallback")
                 return self._get_fallback_ism(country_code)
 
         except Exception as e:
-            logger.info(f"SMP not accessible for {country_code}: {e}")
+            logger.error(f"Error fetching ISM for {country_code}: {e}")
             return self._get_fallback_ism(country_code)
 
     def _parse_ism_response(self, xml_content, country_code):
@@ -316,14 +221,7 @@ class EuropeanSMPClient:
 
     def _get_fallback_ism(self, country_code):
         """
-        Enhanced fallback ISM configuration when SMP is not available
-
-        These configurations are based on real OpenNCP country implementations
-        and demonstrate the actual differences in patient identification
-        requirements across EU member states.
-
-        In production, these would be fetched from each country's SMP server,
-        but for demonstration we provide realistic country-specific ISMs.
+        Fallback ISM configuration when SMP is not available
         """
         country_code = country_code.upper()
 
@@ -454,45 +352,18 @@ class EuropeanSMPClient:
 
     def test_connectivity(self):
         """
-        Test connectivity to European SMP infrastructure with certificate authentication
+        Test connectivity to European SMP infrastructure
         """
-        results = {
-            "certificate_config": {
-                "configured": self.cert_config is not None,
-                "config_name": self.cert_config["name"] if self.cert_config else None,
-                "cert_path": (
-                    str(self.cert_config["cert"]) if self.cert_config else None
-                ),
-                "ca_cert_path": (
-                    str(self.cert_config.get("ca_cert", ""))
-                    if self.cert_config
-                    else None
-                ),
-            }
-        }
+        results = {}
 
-        # Test main SMP admin URL with certificates
+        # Test main SMP admin URL
         try:
-            logger.info(f"Testing SMP admin connectivity with certificates...")
-            response = self.session.head(
-                self.SMP_ADMIN_URL, timeout=15, allow_redirects=True
-            )
+            response = self.session.head(self.SMP_ADMIN_URL, timeout=10)
             results["smp_admin"] = {
                 "url": self.SMP_ADMIN_URL,
                 "status": response.status_code,
-                "accessible": response.status_code
-                in [
-                    200,
-                    302,
-                    401,
-                    403,
-                ],  # 302 redirect is good, 401/403 means server is reachable
-                "headers": (
-                    dict(response.headers) if hasattr(response, "headers") else {}
-                ),
-                "final_url": response.url if hasattr(response, "url") else None,
+                "accessible": response.status_code == 200,
             }
-            logger.info(f"SMP admin response: {response.status_code}")
         except Exception as e:
             results["smp_admin"] = {
                 "url": self.SMP_ADMIN_URL,
@@ -500,41 +371,22 @@ class EuropeanSMPClient:
                 "accessible": False,
                 "error": str(e),
             }
-            logger.error(f"SMP admin connection error: {e}")
 
-        # Test a few country SMPs with certificates
+        # Test a few country SMPs
         test_countries = ["ie", "be", "at", "eu"]
         results["country_smps"] = {}
 
         for country in test_countries:
             try:
-                logger.info(f"Testing {country.upper()} SMP connectivity...")
                 smp_url = self.get_country_smp_url(country)
                 if smp_url:
-                    response = self.session.head(
-                        smp_url, timeout=15, allow_redirects=True
-                    )
+                    response = self.session.head(smp_url, timeout=10)
                     results["country_smps"][country] = {
                         "url": smp_url,
                         "status": response.status_code,
                         "accessible": response.status_code
-                        in [
-                            200,
-                            302,
-                            401,
-                            403,
-                            404,
-                        ],  # 404 is OK for SMP root, 302 is redirect
-                        "headers": (
-                            dict(response.headers)
-                            if hasattr(response, "headers")
-                            else {}
-                        ),
-                        "final_url": response.url if hasattr(response, "url") else None,
+                        in [200, 404],  # 404 is OK for SMP root
                     }
-                    logger.info(
-                        f"{country.upper()} SMP response: {response.status_code}"
-                    )
                 else:
                     results["country_smps"][country] = {
                         "url": None,
@@ -547,7 +399,6 @@ class EuropeanSMPClient:
                     "accessible": False,
                     "error": str(e),
                 }
-                logger.error(f"{country.upper()} SMP connection error: {e}")
 
         return results
 

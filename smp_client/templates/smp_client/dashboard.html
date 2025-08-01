@@ -1,200 +1,369 @@
-{% extends "base.html" %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block title %}SMP Dashboard - EU eHealth NCP{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMP Dashboard - EU eHealth NCP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block content %}
-<div class="dashboard-page">
-    <!-- Dashboard Header -->
-    <div class="page-header">
-        <h1>🔗 SMP Dashboard</h1>
-        <p class="page-subtitle">Service Metadata Publisher Management Console</p>
-    </div>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    <div class="container">
-        <!-- Statistics Cards -->
-        <div class="dashboard-stats">
-            <div class="stat-card stat-card-primary">
-                <div class="stat-content">
-                    <div class="stat-label">Total Participants</div>
-                    <div class="stat-value">{{ total_participants|default:"0" }}</div>
-                    <div class="stat-change positive">+12% from last month</div>
-                </div>
-                <div class="stat-icon">👥</div>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            padding: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card:nth-child(1) {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card:nth-child(2) {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .stat-card:nth-child(3) {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .stat-card:nth-child(4) {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content-section {
+            padding: 40px;
+            border-top: 1px solid #eee;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .action-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover {
+            border-color: #667eea;
+            background: #f1f3ff;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .sync-btn {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .recent-list {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .recent-item {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .recent-item:last-child {
+            border-bottom: none;
+        }
+
+        .recent-item strong {
+            color: #495057;
+        }
+
+        .recent-time {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .european-smp-section {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .european-smp-section h3 {
+            color: #2d3436;
+            margin-bottom: 15px;
+        }
+
+        .sync-status {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #00b894;
+        }
+
+        .flag-emoji {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>🌐 SMP Management Dashboard</h1>
+            <p>Service Metadata Publishing for EU eHealth Network</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ participant_count }}</div>
+                <div class="stat-label">Active Participants</div>
             </div>
-
-            <div class="stat-card stat-card-success">
-                <div class="stat-content">
-                    <div class="stat-label">Active Services</div>
-                    <div class="stat-value">{{ active_services|default:"0" }}</div>
-                    <div class="stat-change positive">+5% from last month</div>
-                </div>
-                <div class="stat-icon">🔧</div>
+            <div class="stat-card">
+                <div class="stat-number">{{ service_count }}</div>
+                <div class="stat-label">Active Services</div>
             </div>
-
-            <div class="stat-card stat-card-warning">
-                <div class="stat-content">
-                    <div class="stat-label">Documents</div>
-                    <div class="stat-value">{{ total_documents|default:"0" }}</div>
-                    <div class="stat-change positive">+8% from last month</div>
-                </div>
-                <div class="stat-icon">📄</div>
+            <div class="stat-card">
+                <div class="stat-number">{{ endpoint_count }}</div>
+                <div class="stat-label">Service Endpoints</div>
             </div>
-
-            <div class="stat-card stat-card-info">
-                <div class="stat-content">
-                    <div class="stat-label">Countries</div>
-                    <div class="stat-value">{{ country_count|default:"0" }}</div>
-                </div>
-                <div class="stat-icon">🌍</div>
+            <div class="stat-card">
+                <div class="stat-number">{{ domain_count }}</div>
+                <div class="stat-label">SMP Domains</div>
             </div>
         </div>
 
-        <!-- Quick Actions Section -->
         <div class="content-section">
-            <h2 class="section-title">Quick Actions</h2>
-            
+            <h2 class="section-title">🚀 Quick Actions</h2>
             <div class="actions-grid">
                 <div class="action-card">
-                    <div class="action-icon">👥</div>
-                    <h3>Manage Participants</h3>
-                    <p>Add, edit, or remove SMP participants and their metadata.</p>
-                    <a href="{% url 'smp_client:participant_search' %}" class="btn btn-primary">
-                        View Participants
-                    </a>
+                    <h3>🔍 Search Participants</h3>
+                    <p>Find and manage SMP participants across all domains</p>
+                    <a href="{% url 'smp_client:participant_search' %}" class="action-btn">Search Participants</a>
                 </div>
-
                 <div class="action-card">
-                    <div class="action-icon">📄</div>
-                    <h3>Document Services</h3>
-                    <p>Configure and manage document service endpoints.</p>
-                    <a href="{% url 'smp_client:list_documents' %}" class="btn btn-primary">
-                        Manage Documents
-                    </a>
+                    <h3>📝 SMP Editor</h3>
+                    <p>Generate, sign, and upload SMP documents</p>
+                    <a href="{% url 'smp_client:smp_editor' %}" class="action-btn">SMP Editor</a>
                 </div>
-
                 <div class="action-card">
-                    <div class="action-icon">🔄</div>
-                    <h3>European SMP Sync</h3>
-                    <p>Synchronize with the European SMP registry for cross-border services.</p>
-                    <button onclick="syncWithEuropeanSMP()" class="btn btn-primary">
-                        🔄 Sync with European SMP
-                    </button>
-                    <div id="sync-result" class="sync-result"></div>
+                    <h3>� Documents</h3>
+                    <p>Manage generated and signed SMP documents</p>
+                    <a href="{% url 'smp_client:list_documents' %}" class="action-btn">View Documents</a>
                 </div>
-
                 <div class="action-card">
-                    <div class="action-icon">⚙️</div>
-                    <h3>System Configuration</h3>
-                    <p>Configure SMP server settings and preferences.</p>
-                    <a href="/admin/" class="btn btn-primary">
-                        Admin Panel
-                    </a>
+                    <h3>⚙️ Manage Services</h3>
+                    <p>Configure service metadata and endpoints</p>
+                    <a href="/admin/smp_client/" class="action-btn">Admin Interface</a>
                 </div>
             </div>
         </div>
 
-        <!-- Recent Activity Section -->
-        <div class="content-section">
-            <h2 class="section-title">Recent Activity</h2>
-            
-            <div class="activity-grid">
-                <div class="activity-card">
-                    <h3>Recent Participants</h3>
-                    <div class="activity-list">
-                        {% for participant in recent_participants %}
-                        <div class="activity-item">
-                            <div class="activity-content">
-                                <div class="activity-title">{{ participant.participant_identifier }}</div>
-                                <div class="activity-meta">{{ participant.participant_scheme }}</div>
-                            </div>
-                            <div class="activity-time">{{ participant.created_at|timesince }} ago</div>
-                        </div>
-                        {% empty %}
-                        <div class="activity-item">
-                            <div class="activity-content">No participants found</div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
+        <div class="european-smp-section">
+            <h3>🇪🇺 European SMP Integration</h3>
+            <p>Sync with the official European test SMP server</p>
+            <div class="sync-status">
+                <strong>European SMP Server:</strong> https://smp-ehealth-trn.acc.edelivery.tech.ec.europa.eu/
+            </div>
+            <button onclick="syncWithEuropeanSMP()" class="action-btn sync-btn">
+                🔄 Sync with European SMP
+            </button>
+            <div id="sync-result" style="margin-top: 15px;"></div>
+        </div>
 
-                <div class="activity-card">
-                    <h3>System Status</h3>
-                    <div class="status-grid">
-                        <div class="status-item">
-                            <div class="status-label">SMP Server</div>
-                            <div class="status-badge status-active">
-                                Online
-                            </div>
-                        </div>
-                        <div class="status-item">
-                            <div class="status-label">Database</div>
-                            <div class="status-badge status-active">
-                                Connected
-                            </div>
-                        </div>
-                        <div class="status-item">
-                            <div class="status-label">European Registry</div>
-                            <div class="status-badge status-warning">
-                                Sync Pending
-                            </div>
-                        </div>
-                        <div class="status-item">
-                            <div class="status-label">Backup</div>
-                            <div class="status-badge status-pending">
-                                Scheduled
-                            </div>
-                        </div>
+        <div class="content-section">
+            <h2 class="section-title">📋 Recent Activity</h2>
+            <div class="recent-list">
+                {% if recent_queries %}
+                {% for query in recent_queries %}
+                <div class="recent-item">
+                    <div>
+                        <strong>{{ query.query_type|title }}</strong>: {{ query.participant_id }}
+                        <br><small>{{ query.participant_scheme }}</small>
                     </div>
+                    <div class="recent-time">{{ query.timestamp|timesince }} ago</div>
                 </div>
+                {% endfor %}
+                {% else %}
+                <div class="recent-item">
+                    <div>No recent SMP queries found</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2 class="section-title">👥 Recent Participants</h2>
+            <div class="recent-list">
+                {% if recent_participants %}
+                {% for participant in recent_participants %}
+                <div class="recent-item">
+                    <div>
+                        <span class="flag-emoji">
+                            {% if participant.country_code == 'IE' %}🇮🇪{% elif participant.country_code == 'BE'
+                            %}🇧🇪{% elif participant.country_code == 'AT' %}🇦🇹{% elif participant.country_code ==
+                            'HU' %}🇭🇺{% else %}🇪🇺{% endif %}
+                        </span>
+                        <strong>{{ participant.participant_name|default:participant.participant_identifier }}</strong>
+                        <br><small>{{ participant.participant_scheme.scheme_name }}</small>
+                    </div>
+                    <div class="recent-time">{{ participant.created_at|timesince }} ago</div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="recent-item">
+                    <div>No participants found</div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    async function syncWithEuropeanSMP() {
-        const resultDiv = document.getElementById('sync-result');
-        const button = event.target;
+    <script>
+        async function syncWithEuropeanSMP() {
+            const resultDiv = document.getElementById('sync-result');
+            const button = event.target;
 
-        button.textContent = '🔄 Syncing...';
-        button.disabled = true;
+            button.textContent = '🔄 Syncing...';
+            button.disabled = true;
 
-        try {
-            const response = await fetch('{% url "smp_client:european_smp_sync" %}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json'
+            try {
+                const response = await fetch('{% url "smp_client:european_smp_sync" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                            ✅ Sync completed! Synced ${data.synced_participants} participants.
+                        </div>
+                    `;
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                            ❌ Sync failed: ${data.error}
+                        </div>
+                    `;
                 }
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
+            } catch (error) {
                 resultDiv.innerHTML = `
-                    <div class="alert alert-success">
-                        ✅ Sync completed! Synced ${data.synced_participants} participants.
-                    </div>
-                `;
-                setTimeout(() => location.reload(), 2000);
-            } else {
-                resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        ❌ Sync failed: ${data.error}
+                    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                        ❌ Network error: ${error.message}
                     </div>
                 `;
             }
-        } catch (error) {
-            resultDiv.innerHTML = `
-                <div class="alert alert-danger">
-                    ❌ Network error: ${error.message}
-                </div>
-            `;
-        }
 
-        button.textContent = '🔄 Sync with European SMP';
-        button.disabled = false;
-    }
-</script>
-{% endblock %}
+            button.textContent = '🔄 Sync with European SMP';
+            button.disabled = false;
+        }
+    </script>
+</body>
+
+</html>

@@ -3,7 +3,6 @@ Sample data setup for SMP Editor
 Creates document templates and sample certificates
 """
 
-import os
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from smp_client.models import (
@@ -21,36 +20,18 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Setting up SMP Editor..."))
 
         # Create admin user if it doesn't exist
-        admin_username = os.getenv("ADMIN_USERNAME", "admin")
-        admin_password = os.getenv("ADMIN_PASSWORD")
-        admin_email = os.getenv("ADMIN_EMAIL", "admin@localhost")
-
-        if not admin_password:
-            self.stdout.write(
-                self.style.ERROR(
-                    "ADMIN_PASSWORD environment variable not set. Please set it in your .env file."
-                )
-            )
-            return
-
         admin_user, created = User.objects.get_or_create(
-            username=admin_username,
+            username="admin",
             defaults={
-                "email": admin_email,
+                "email": "admin@example.com",
                 "is_staff": True,
                 "is_superuser": True,
             },
         )
         if created:
-            admin_user.set_password(admin_password)
+            admin_user.set_password("admin123")
             admin_user.save()
-            self.stdout.write(
-                self.style.SUCCESS(f"Created admin user: {admin_username}")
-            )
-        else:
-            self.stdout.write(
-                self.style.WARNING(f"Admin user {admin_username} already exists")
-            )
+            self.stdout.write(self.style.SUCCESS(f"Created admin user: admin/admin123"))
 
         # Create sample document templates
         templates_data = [

@@ -17,26 +17,37 @@ import json
 
 def home_view(request):
     """Home page with SMP source configuration"""
-    from ehealth_portal.models import SMPSourceConfiguration
+    from smp_client.models import SMPConfiguration
 
     # Get current SMP configuration
-    smp_config = SMPSourceConfiguration.get_current_config()
+    try:
+        smp_config = SMPConfiguration.objects.first()
+        if smp_config:
+            current_smp_name = "European SMP (Test Environment)"
+            current_smp_ui_url = smp_config.european_smp_url
+            current_smp_api_url = smp_config.european_smp_url
+        else:
+            current_smp_name = "No SMP configured"
+            current_smp_ui_url = "#"
+            current_smp_api_url = "#"
+    except Exception as e:
+        current_smp_name = "SMP configuration loading..."
+        current_smp_ui_url = "#"
+        current_smp_api_url = "#"
 
     context = {
-        "smp_config": smp_config,
-        "smp_choices": SMPSourceConfiguration.SMP_SOURCE_CHOICES,
-        "current_smp_name": smp_config.get_active_smp_name(),
-        "current_smp_ui_url": smp_config.get_active_smp_ui_url(),
-        "current_smp_api_url": smp_config.get_active_smp_api_url(),
+        "current_smp_name": current_smp_name,
+        "current_smp_ui_url": current_smp_ui_url,
+        "current_smp_api_url": current_smp_api_url,
     }
-    return render(request, "home.html", context)
+    return render(request, "home.html", context, using="jinja2")
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def update_smp_source(request):
     """API endpoint to update SMP source configuration"""
-    from ehealth_portal.models import SMPSourceConfiguration
+    from smp_client.models import SMPConfiguration
 
     try:
         data = json.loads(request.body)
@@ -45,16 +56,33 @@ def update_smp_source(request):
         if source_type not in ["european", "localhost"]:
             return JsonResponse({"success": False, "error": "Invalid source type"})
 
-        # Update the default configuration
-        smp_config = SMPSourceConfiguration.get_default_config()
-        smp_config.source_type = source_type
+        # Get or create default configuration
+        smp_config, created = SMPConfiguration.objects.get_or_create(
+            id=1,
+            defaults={
+                "european_smp_url": "https://smp-ehealth-trn.acc.edelivery.tech.ec.europa.eu",
+                "sync_enabled": True,
+                "local_smp_enabled": source_type == "localhost",
+            },
+        )
+
+        # Update based on source type
+        if source_type == "localhost":
+            smp_config.local_smp_enabled = True
+            active_url = "http://localhost:8290/smp"
+            message = "SMP source updated to localhost"
+        else:
+            smp_config.local_smp_enabled = False
+            active_url = smp_config.european_smp_url
+            message = "SMP source updated to European SMP"
+
         smp_config.save()
 
         return JsonResponse(
             {
                 "success": True,
-                "message": f"SMP source updated to {smp_config.get_source_type_display()}",
-                "active_url": smp_config.get_active_smp_url(),
+                "message": message,
+                "active_url": active_url,
             }
         )
 
@@ -84,8 +112,8 @@ urlpatterns = [
     path("fhir/", include("fhir_services.urls")),
     # SMP client integration
     path("smp/", include("smp_client.urls")),
-    # Patient data management
-    path("patients/", include("patient_data.urls")),
-    # Translation services API
-    path("api/translation/", include("translation_services.urls")),
+    # Patient data management (temporarily disabled due to import errors)
+    # path("patients/", include("patient_data.urls")),
+    # Translation services API (temporarily disabled due to import errors)
+    # path("api/translation/", include("translation_services.urls")),
 ]

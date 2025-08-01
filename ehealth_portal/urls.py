@@ -21,7 +21,6 @@ urlpatterns = [
         name="document_viewer",
     ),
     # European SMP integration endpoints
-    path("smp/status/", views.smp_status, name="smp_status"),
     path("smp/test/", views.european_smp_test, name="european_smp_test"),
     path(
         "country/<str:country_code>/refresh-ism/",
