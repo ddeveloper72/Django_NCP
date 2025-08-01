@@ -5,12 +5,19 @@ URL patterns for patient search, data retrieval, and document request functional
 """
 
 from django.urls import path
-from . import views, demo_views
+from . import views
 
 app_name = "patient_data"
 
 urlpatterns = [
-    # Patient search interface
+    # Patient data form and search
+    path("", views.patient_data_view, name="patient_data_form"),
+    path(
+        "details/<int:patient_id>/", views.patient_details_view, name="patient_details"
+    ),
+    path("cda/<int:patient_id>/", views.patient_cda_view, name="patient_cda"),
+    path("download/<int:patient_id>/", views.download_cda_pdf, name="download_cda_pdf"),
+    # Legacy search interface (can be removed if not needed)
     path("search/", views.patient_search_view, name="patient_search"),
     path(
         "search/results/",

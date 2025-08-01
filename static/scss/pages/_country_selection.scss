@@ -22,7 +22,11 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba($white, 0.1) 1px, transparent 1px);
+      background: radial-gradient(
+        circle,
+        rgba($white, 0.1) 1px,
+        transparent 1px
+      );
       background-size: 20px 20px;
       animation: float 10s linear infinite;
     }
@@ -56,7 +60,7 @@
 
     @include mobile-up {
       padding: $space-lg;
-      
+
       h1 {
         font-size: $font-size-xl;
       }
@@ -284,7 +288,14 @@
 
 // Floating animation for header background
 @keyframes float {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  33% { transform: translate(1px, -1px) rotate(1deg); }
-  66% { transform: translate(-1px, 1px) rotate(-1deg); }
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(1px, -1px) rotate(1deg);
+  }
+  66% {
+    transform: translate(-1px, 1px) rotate(-1deg);
+  }
 }

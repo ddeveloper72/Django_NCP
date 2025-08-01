@@ -51,20 +51,18 @@
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 {% for ism_value, ism_label in ism_type_choices %}
                 <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; background: {% if current_ism_type == ism_value %}#e3f2fd{% else %}#f8f9fa{% endif %}; border-radius: 6px; border: 2px solid {% if current_ism_type == ism_value %}#1976d2{% else %}#e9ecef{% endif %}; cursor: pointer;"
-                     onclick="changeIsmType('{{ ism_value }}')">
-                    <input type="radio" name="ism_type" value="{{ ism_value }}" 
-                           {% if current_ism_type == ism_value %}checked{% endif %}
-                           onchange="changeIsmType('{{ ism_value }}')"
-                           style="accent-color: #1976d2;">
+                    onclick="changeIsmType('{{ ism_value }}')">
+                    <input type="radio" name="ism_type" value="{{ ism_value }}" {% if current_ism_type==ism_value
+                        %}checked{% endif %} onchange="changeIsmType('{{ ism_value }}')" style="accent-color: #1976d2;">
                     <div>
                         <label style="font-weight: 600; color: #2c3e50; cursor: pointer; margin: 0;">
                             {{ ism_label }}
                         </label>
                         <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">
                             {% if ism_value == 'eu_members' %}
-                                Use ISM format for EU Member States and PTT Partners with L1 & L3 CDA documents
+                            Use ISM format for EU Member States and PTT Partners with L1 & L3 CDA documents
                             {% else %}
-                                Use simplified ISM format for Bootcamp test partners (Finland-style format)
+                            Use simplified ISM format for Bootcamp test partners (Finland-style format)
                             {% endif %}
                         </div>
                     </div>
@@ -363,14 +361,14 @@
     function changeIsmType(ismType) {
         const currentUrl = new URL(window.location);
         currentUrl.searchParams.set('ism_type', ismType);
-        
+
         // Show loading indicator
         const form = document.getElementById('patientSearchForm');
         if (form) {
             form.style.opacity = '0.5';
             form.style.pointerEvents = 'none';
         }
-        
+
         // Redirect to reload the form with new ISM type
         window.location.href = currentUrl.toString();
     }

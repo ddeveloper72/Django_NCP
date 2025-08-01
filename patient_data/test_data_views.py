@@ -21,11 +21,12 @@ from django.db.models import Q, Count
 
 from .models import PatientData, MemberState
 from .clinical_models import ClinicalDocument
-from .services.clinical_pdf_service import (
-    ClinicalDocumentPDFService,
-    TranslatedDocumentRenderer,
-    TestDataManager,
-)
+
+# from .services.clinical_pdf_service import (  # Temporarily disabled
+#     ClinicalDocumentPDFService,
+#     TranslatedDocumentRenderer,
+#     TestDataManager,
+# )
 
 # Import translation services
 try:

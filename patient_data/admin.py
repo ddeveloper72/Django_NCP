@@ -16,6 +16,7 @@ from .models import (
     AvailableService,
     PatientServiceRequest,
 )
+
 # from . import test_data_views  # Temporarily disabled - needs fixing
 
 
@@ -178,33 +179,9 @@ class PatientDataAdmin(admin.ModelAdmin):
         #         self.admin_site.admin_view(test_data_views.test_data_patient_view),
         #         name="patient_data_test_data_patient_view",
         #     ),
-            path(
-                "test-data/document/<int:document_id>/",
-                self.admin_site.admin_view(test_data_views.test_data_document_view),
-                name="patient_data_test_data_document_view",
-            ),
-            path(
-                "test-data/document/<int:document_id>/pdf/",
-                self.admin_site.admin_view(test_data_views.test_data_document_pdf),
-                name="patient_data_test_data_document_pdf",
-            ),
-            path(
-                "test-data/document/<int:document_id>/translated/",
-                self.admin_site.admin_view(test_data_views.test_data_translated_view),
-                name="patient_data_test_data_translated_view",
-            ),
-            path(
-                "test-data/import/",
-                self.admin_site.admin_view(test_data_views.import_external_test_data),
-                name="patient_data_import_external_test_data",
-            ),
-            path(
-                "test-data/api/stats/",
-                self.admin_site.admin_view(test_data_views.test_data_stats_api),
-                name="patient_data_test_data_stats_api",
-            ),
-        ]
-        return custom_urls + urls
+        # ]
+        # return custom_urls + urls  # Temporarily disabled
+        return urls
 
     def get_patient_name(self, obj):
         name = f"{obj.given_name} {obj.family_name}".strip()
