@@ -648,39 +648,112 @@ def perform_patient_search(country, search_fields, user):
         # In production, this would make actual NCP API calls
         # For demo, we'll simulate different responses based on search criteria
 
-        # Simulate patient found for certain test IDs
+        # Simulate patient found for various test IDs based on country
         test_ids = ["EU-TEST-12345", "1234567A", "XX.XX.XX-XXX.XX"]
+        
+        # Add country-specific test IDs
+        if country.code == "IE":  # Ireland
+            # Add Irish test patient IDs
+            test_ids.extend([
+                "53930545",  # Patrick Murphy from test data
+                "2-1234-W8",  # Bootcamp test ID
+                "1-2345-V9",  # Additional test patterns
+                "3-4567-X0",
+                "4-5678-Y1",
+                "5-6789-Z2",
+            ])
+        elif country.code == "FI":  # Finland
+            test_ids.extend([
+                "FI-TEST-001",
+                "FI-BOOTCAMP-123",
+            ])
+        
         found_patient = False
 
         for field_value in search_fields.values():
-            if any(test_id in str(field_value) for test_id in test_ids):
+            field_str = str(field_value).strip()
+            if any(test_id in field_str for test_id in test_ids):
                 found_patient = True
                 break
 
         if found_patient:
+            # Generate realistic patient data based on country and search criteria
+            patient_id = list(search_fields.values())[0]
+            
+            # Generate country-specific patient names and data
+            if country.code == "IE":  # Ireland
+                if "53930545" in str(patient_id):
+                    patient_name = "Patrick Murphy"
+                    birth_date = "1975-03-15"
+                elif "2-1234-W8" in str(patient_id):
+                    patient_name = "Seán O'Connor"
+                    birth_date = "1982-07-22"
+                else:
+                    patient_name = "Aoife Kelly"  # Default Irish name
+                    birth_date = "1985-11-08"
+            else:
+                # Default patient data
+                patient_name = f"{search_fields.get('first_name', search_fields.get('given_name', 'John'))} {search_fields.get('last_name', search_fields.get('surname', search_fields.get('family_name', 'Doe')))}"
+                birth_date = search_fields.get("birth_date", "1980-01-01")
+            
             # Simulate successful patient data
             result.patient_found = True
             result.patient_data = {
-                "id": list(search_fields.values())[0],  # Use first search field as ID
-                "name": f"{search_fields.get('first_name', search_fields.get('given_name', 'John'))} {search_fields.get('last_name', search_fields.get('surname', search_fields.get('family_name', 'Doe')))}",
-                "birth_date": search_fields.get("birth_date", "1980-01-01"),
+                "id": patient_id,
+                "name": patient_name,
+                "birth_date": birth_date,
                 "country": country.code,
                 "last_updated": timezone.now().isoformat(),
+                "gender": "M" if "Murphy" in patient_name or "Seán" in patient_name else "F",
+                "address": f"Test Address, {country.name}",
             }
-            result.available_documents = [
-                {
-                    "type": "PS",
-                    "title": "Patient Summary",
-                    "date": "2024-12-01",
-                    "available": True,
-                },
-                {
-                    "type": "eP",
-                    "title": "ePrescription",
-                    "date": "2024-11-28",
-                    "available": True,
-                },
-            ]
+            # Add realistic document availability based on ISM type and country
+            documents = []
+            if country.code == "IE":
+                # Irish patient documents
+                documents = [
+                    {
+                        "type": "PS",
+                        "title": "Patient Summary (Ireland)",
+                        "date": "2024-12-01",
+                        "available": True,
+                        "format": "CDA L1",
+                    },
+                    {
+                        "type": "PS_L3",
+                        "title": "Patient Summary L3 (Detailed)",
+                        "date": "2024-12-01", 
+                        "available": True,
+                        "format": "CDA L3",
+                    },
+                    {
+                        "type": "eP",
+                        "title": "ePrescription Summary",
+                        "date": "2024-11-28",
+                        "available": True,
+                        "format": "CDA",
+                    },
+                ]
+            else:
+                # Default documents
+                documents = [
+                    {
+                        "type": "PS",
+                        "title": "Patient Summary",
+                        "date": "2024-12-01",
+                        "available": True,
+                        "format": "CDA",
+                    },
+                    {
+                        "type": "eP",
+                        "title": "ePrescription",
+                        "date": "2024-11-28",
+                        "available": True,
+                        "format": "CDA",
+                    },
+                ]
+            
+            result.available_documents = documents
             result.ncp_response_time = 1.2
             result.ncp_status_code = "200"
         else:
