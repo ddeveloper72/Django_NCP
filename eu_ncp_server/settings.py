@@ -68,7 +68,10 @@ ROOT_URLCONF = "eu_ncp_server.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.jinja2.Jinja2",
-        "DIRS": [BASE_DIR / "templates" / "jinja2"],
+        "DIRS": [
+            BASE_DIR / "templates" / "jinja2",
+            BASE_DIR / "ehealth_portal" / "templates" / "jinja2",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "environment": "eu_ncp_server.jinja2.environment",
