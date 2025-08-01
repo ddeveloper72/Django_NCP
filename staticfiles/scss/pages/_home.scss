@@ -72,7 +72,7 @@
   // Page Title
   .page-title {
     text-align: center;
-    color: $primary-dark;
+    color: $text-dark;
     margin-bottom: $space-xxl;
     font-size: $font-size-xxl;
     font-weight: $font-weight-bold;
@@ -104,11 +104,11 @@
     }
 
     .smp-link {
-      color: $primary-dark;
+      color: $primary-blue;
       text-decoration: underline;
 
       &:hover {
-        color: $primary;
+        color: $secondary-blue;
         text-decoration: none;
       }
     }

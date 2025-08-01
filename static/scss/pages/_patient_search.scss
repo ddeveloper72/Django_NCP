@@ -503,3 +503,211 @@
     background-color: rgba($error-red, 0.05);
   }
 }
+
+// ISM Type Selection
+.ism-type-selection {
+  margin-bottom: 2rem;
+
+  .ism-type-title {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    font-weight: $font-weight-medium;
+    font-size: $font-size-lg;
+  }
+
+  .ism-type-options {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .ism-type-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 2px solid #e9ecef;
+    cursor: pointer;
+    transition: all $transition-normal;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &.selected {
+      background: #e3f2fd;
+      border-color: #1976d2;
+    }
+
+    .ism-type-radio {
+      accent-color: #1976d2;
+    }
+
+    .ism-type-content {
+      .ism-type-label {
+        font-weight: 600;
+        color: #2c3e50;
+        cursor: pointer;
+        margin: 0;
+        display: block;
+      }
+
+      .ism-type-description {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.25rem;
+        line-height: 1.3;
+      }
+    }
+  }
+}
+
+// Local CDA Search Section
+.local-search-section {
+  margin-bottom: 2rem;
+
+  .local-search-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 2px solid #e3f2fd;
+    transition: all $transition-normal;
+
+    &:hover {
+      background: #f0f7ff;
+      border-color: #3498db;
+    }
+
+    .local-search-checkbox {
+      transform: scale(1.2);
+      accent-color: #3498db;
+    }
+
+    .local-search-content {
+      .local-search-label {
+        font-weight: 600;
+        color: #2c3e50;
+        cursor: pointer;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .local-search-description {
+        font-size: 0.9rem;
+        color: #666;
+        font-style: italic;
+        margin-top: 0.25rem;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Break Glass Emergency Access Section
+.break-glass-section {
+  background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+  border: 2px solid #fc8181;
+  border-radius: 15px;
+  padding: $space-xl;
+  margin-bottom: 2rem;
+  position: relative;
+
+  &::before {
+    content: '🚨';
+    position: absolute;
+    top: -15px;
+    right: 20px;
+    font-size: 2rem;
+    background: $white;
+    padding: 5px 10px;
+    border-radius: 50%;
+    border: 2px solid #fc8181;
+  }
+
+  .break-glass-title {
+    color: #c53030;
+    font-weight: $font-weight-bold;
+    margin-bottom: $space-lg;
+    font-size: $font-size-lg;
+  }
+
+  .break-glass-checkbox {
+    display: flex;
+    align-items: center;
+    gap: $space-md;
+    margin-bottom: $space-md;
+
+    input[type="checkbox"] {
+      transform: scale(1.3);
+      accent-color: #c53030;
+    }
+
+    .break-glass-label {
+      font-weight: $font-weight-medium;
+      color: #c53030;
+      cursor: pointer;
+      margin: 0;
+      user-select: none;
+    }
+  }
+
+  .break-glass-explanation {
+    color: #742a2a;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: $space-lg;
+    font-style: italic;
+  }
+
+  .break-glass-reason {
+    animation: slideDown 0.3s ease-out;
+
+    label {
+      font-weight: $font-weight-medium;
+      color: #c53030;
+    }
+
+    textarea {
+      border: 2px solid #fc8181;
+      border-radius: 8px;
+      padding: $space-md;
+      resize: vertical;
+      min-height: 100px;
+
+      &:focus {
+        outline: none;
+        border-color: #c53030;
+        box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
