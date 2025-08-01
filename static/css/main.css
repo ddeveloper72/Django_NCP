@@ -4223,6 +4223,7 @@ select:focus {
 .country-selection-page .country-header .header-actions {
   position: relative;
   z-index: 2;
+  margin-left: 2rem;
 }
 @media (max-width: 768px) {
   .country-selection-page .country-header h1 {
@@ -4231,6 +4232,7 @@ select:focus {
   }
   .country-selection-page .country-header .header-actions {
     margin-top: 1.5rem;
+    margin-left: 0;
     text-align: center;
   }
   .country-selection-page .country-header .header-actions a {
