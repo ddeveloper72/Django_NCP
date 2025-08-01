@@ -15,8 +15,17 @@
 
     <!-- Main Content Container -->
     <div class="container">
-        <div class="page-header">
-            <h1 class="page-title">🏥 {{ page_title }}</h1>
+        <div class="country-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>
+                    🏥 {{ page_title }}
+                </h1>
+                <div class="header-actions">
+                    <a href="/" class="btn btn-light">
+                        🏠 Back to Home
+                    </a>
+                </div>
+            </div>
             <p class="page-subtitle">Select a country to search for patient records using their International Search
                 Mask (ISM)</p>
         </div>
@@ -42,13 +51,6 @@
                 </div>
             </div>
             {% endfor %}
-        </div>
-
-        <!-- Navigation Section -->
-        <div class="footer-actions">
-            <a href="/" class="btn btn-primary btn-lg">
-                🏠 Back to Home
-            </a>
         </div>
     </div>
 </div>
