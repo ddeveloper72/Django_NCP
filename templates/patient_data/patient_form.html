@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Patient Search - EU NCP Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="patient-form-container">
+    <div class="form-header">
+        <h1 class="page-title">EU Patient Data Search</h1>
+        <p class="page-subtitle">
+            Search for patient records across EU member states using the patient's credentials
+        </p>
+    </div>
+
+    <!-- Display Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i
+                class="icon-{% if message.tags == 'error' %}alert-circle{% elif message.tags == 'warning' %}alert-triangle{% else %}check-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="patient-form-wrapper">
+        <div class="form-card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="icon-search"></i>
+                    Patient Search Form
+                </h2>
+                <p class="card-description">
+                    Enter the patient's details to search for their medical records in EU member states
+                </p>
+            </div>
+
+            <div class="card-content">
+                <form method="post" class="patient-search-form">
+                    {% csrf_token %}
+
+                    <div class="form-grid">
+                        <!-- Patient Name Fields -->
+                        <div class="form-group">
+                            <label for="id_given_name" class="form-label required">
+                                {{ form.given_name.label }}
+                            </label>
+                            {{ form.given_name }}
+                            {% if form.given_name.errors %}
+                            <div class="field-errors">
+                                {% for error in form.given_name.errors %}
+                                <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_family_name" class="form-label required">
+                                {{ form.family_name.label }}
+                            </label>
+                            {{ form.family_name }}
+                            {% if form.family_name.errors %}
+                            <div class="field-errors">
+                                {% for error in form.family_name.errors %}
+                                <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Date of Birth -->
+                        <div class="form-group">
+                            <label for="id_birth_date" class="form-label">
+                                {{ form.birth_date.label }}
+                            </label>
+                            {{ form.birth_date }}
+                            {% if form.birth_date.errors %}
+                            <div class="field-errors">
+                                {% for error in form.birth_date.errors %}
+                                <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Gender -->
+                        <div class="form-group">
+                            <label for="id_gender" class="form-label">
+                                {{ form.gender.label }}
+                            </label>
+                            {{ form.gender }}
+                            {% if form.gender.errors %}
+                            <div class="field-errors">
+                                {% for error in form.gender.errors %}
+                                <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Country -->
+                        <div class="form-group">
+                            <label for="id_country_code" class="form-label">
+                                {{ form.country_code.label }}
+                            </label>
+                            {{ form.country_code }}
+                            {% if form.country_code.errors %}
+                            <div class="field-errors">
+                                {% for error in form.country_code.errors %}
+                                <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Patient ID -->
+                        <div class="form-group">
+                            <label for="id_patient_id" class="form-label">
+                                {{ form.patient_id.label }}
+                            </label>
+                            {{ form.patient_id }}
+                            {% if form.patient_id.errors %}
+                            <div class="field-errors">
+                                {% for error in form.patient_id.errors %}
+                                <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-large">
+                            <i class="icon-search"></i>
+                            Search Patient Records
+                        </button>
+
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="icon-refresh"></i>
+                            Clear Form
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Search Information -->
+        <div class="search-info-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="icon-info"></i>
+                    Search Information
+                </h3>
+            </div>
+
+            <div class="card-content">
+                <div class="info-section">
+                    <h4>How it works:</h4>
+                    <ol>
+                        <li>Enter the patient's name and other known details</li>
+                        <li>Select the country of origin if known</li>
+                        <li>Our system searches EU member state databases</li>
+                        <li>View matching patient records and clinical documents</li>
+                    </ol>
+                </div>
+
+                <div class="info-section">
+                    <h4>Supported Countries:</h4>
+                    <div class="country-badges">
+                        <span class="country-badge">🇮🇪 Ireland</span>
+                        <span class="country-badge">🇮🇹 Italy</span>
+                        <span class="country-badge">🇬🇷 Greece</span>
+                        <span class="country-badge">🇱🇺 Luxembourg</span>
+                        <span class="country-badge">🇱🇻 Latvia</span>
+                        <span class="country-badge">🇲🇹 Malta</span>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h4>Privacy & Security:</h4>
+                    <p>All searches are logged and comply with EU GDPR regulations. Patient data is encrypted and access
+                        is audited.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
