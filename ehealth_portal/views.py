@@ -650,24 +650,28 @@ def perform_patient_search(country, search_fields, user):
 
         # Simulate patient found for various test IDs based on country
         test_ids = ["EU-TEST-12345", "1234567A", "XX.XX.XX-XXX.XX"]
-        
+
         # Add country-specific test IDs
         if country.code == "IE":  # Ireland
             # Add Irish test patient IDs
-            test_ids.extend([
-                "53930545",  # Patrick Murphy from test data
-                "2-1234-W8",  # Bootcamp test ID
-                "1-2345-V9",  # Additional test patterns
-                "3-4567-X0",
-                "4-5678-Y1",
-                "5-6789-Z2",
-            ])
+            test_ids.extend(
+                [
+                    "53930545",  # Patrick Murphy from test data
+                    "2-1234-W8",  # Bootcamp test ID
+                    "1-2345-V9",  # Additional test patterns
+                    "3-4567-X0",
+                    "4-5678-Y1",
+                    "5-6789-Z2",
+                ]
+            )
         elif country.code == "FI":  # Finland
-            test_ids.extend([
-                "FI-TEST-001",
-                "FI-BOOTCAMP-123",
-            ])
-        
+            test_ids.extend(
+                [
+                    "FI-TEST-001",
+                    "FI-BOOTCAMP-123",
+                ]
+            )
+
         found_patient = False
 
         for field_value in search_fields.values():
@@ -679,7 +683,7 @@ def perform_patient_search(country, search_fields, user):
         if found_patient:
             # Generate realistic patient data based on country and search criteria
             patient_id = list(search_fields.values())[0]
-            
+
             # Generate country-specific patient names and data
             if country.code == "IE":  # Ireland
                 if "53930545" in str(patient_id):
@@ -695,7 +699,7 @@ def perform_patient_search(country, search_fields, user):
                 # Default patient data
                 patient_name = f"{search_fields.get('first_name', search_fields.get('given_name', 'John'))} {search_fields.get('last_name', search_fields.get('surname', search_fields.get('family_name', 'Doe')))}"
                 birth_date = search_fields.get("birth_date", "1980-01-01")
-            
+
             # Simulate successful patient data
             result.patient_found = True
             result.patient_data = {
@@ -704,7 +708,9 @@ def perform_patient_search(country, search_fields, user):
                 "birth_date": birth_date,
                 "country": country.code,
                 "last_updated": timezone.now().isoformat(),
-                "gender": "M" if "Murphy" in patient_name or "Seán" in patient_name else "F",
+                "gender": (
+                    "M" if "Murphy" in patient_name or "Seán" in patient_name else "F"
+                ),
                 "address": f"Test Address, {country.name}",
             }
             # Add realistic document availability based on ISM type and country
@@ -722,7 +728,7 @@ def perform_patient_search(country, search_fields, user):
                     {
                         "type": "PS_L3",
                         "title": "Patient Summary L3 (Detailed)",
-                        "date": "2024-12-01", 
+                        "date": "2024-12-01",
                         "available": True,
                         "format": "CDA L3",
                     },
@@ -752,7 +758,7 @@ def perform_patient_search(country, search_fields, user):
                         "format": "CDA",
                     },
                 ]
-            
+
             result.available_documents = documents
             result.ncp_response_time = 1.2
             result.ncp_status_code = "200"
