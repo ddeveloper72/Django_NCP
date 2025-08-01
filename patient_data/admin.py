@@ -16,7 +16,7 @@ from .models import (
     AvailableService,
     PatientServiceRequest,
 )
-from . import test_data_views
+# from . import test_data_views  # Temporarily disabled - needs fixing
 
 
 @admin.register(MemberState)
@@ -162,22 +162,22 @@ class PatientDataAdmin(admin.ModelAdmin):
     def get_urls(self):
         """Add custom URLs for test data management."""
         urls = super().get_urls()
-        custom_urls = [
-            path(
-                "test-data/dashboard/",
-                self.admin_site.admin_view(test_data_views.test_data_dashboard),
-                name="patient_data_test_data_dashboard",
-            ),
-            path(
-                "test-data/list/",
-                self.admin_site.admin_view(test_data_views.test_data_list),
-                name="patient_data_test_data_list",
-            ),
-            path(
-                "test-data/patient/<int:patient_data_id>/",
-                self.admin_site.admin_view(test_data_views.test_data_patient_view),
-                name="patient_data_test_data_patient_view",
-            ),
+        # custom_urls = [  # Temporarily disabled - needs fixing
+        #     path(
+        #         "test-data/dashboard/",
+        #         self.admin_site.admin_view(test_data_views.test_data_dashboard),
+        #         name="patient_data_test_data_dashboard",
+        #     ),
+        #     path(
+        #         "test-data/list/",
+        #         self.admin_site.admin_view(test_data_views.test_data_list),
+        #         name="patient_data_test_data_list",
+        #     ),
+        #     path(
+        #         "test-data/patient/<int:patient_data_id>/",
+        #         self.admin_site.admin_view(test_data_views.test_data_patient_view),
+        #         name="patient_data_test_data_patient_view",
+        #     ),
             path(
                 "test-data/document/<int:document_id>/",
                 self.admin_site.admin_view(test_data_views.test_data_document_view),

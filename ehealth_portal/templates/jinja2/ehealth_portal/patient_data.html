@@ -104,7 +104,7 @@
     <div class="actions-section">
         <h4>Available Actions</h4>
         <div class="action-buttons">
-            <a href="{{ url('ehealth_portal:patient_search', country_code=country_code) }}" class="btn btn-secondary">
+            <a href="{{ url('patient_search', country_code=country_code) }}" class="btn btn-secondary">
                 🔍 New Search
             </a>
             <a href="{{ url('country_selection') }}" class="btn btn-outline-secondary">
@@ -125,7 +125,7 @@
     <div class="no-patient">
         <h3>❌ Patient Not Found</h3>
         <p>No patient data available for the requested ID.</p>
-        <a href="{{ url('ehealth_portal:patient_search', country_code=country_code) }}" class="btn btn-primary">
+        <a href="{{ url('patient_search', country_code=country_code) }}" class="btn btn-primary">
             🔍 Try Another Search
         </a>
     </div>
@@ -380,7 +380,7 @@
 
 <script>
     function viewDocument(documentType, patientId) {
-        const url = `{{ url('ehealth_portal:document_viewer', country_code=country_code, patient_id='PATIENT_ID', document_type='DOCUMENT_TYPE') }}`.replace('PATIENT_ID', patientId).replace('DOCUMENT_TYPE', documentType);
+        const url = `{{ url('document_viewer', country_code=country_code, patient_id='PATIENT_ID', document_type='DOCUMENT_TYPE') }}`.replace('PATIENT_ID', patientId).replace('DOCUMENT_TYPE', documentType);
         window.open(url, '_blank');
     }
 
