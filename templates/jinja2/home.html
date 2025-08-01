@@ -16,73 +16,73 @@
             <p class="smp-note">SMP source configuration is managed by administrators only.</p>
         </div>
 
-    <div class="integration-options">
-        <div class="option-card">
-            <h3>� Patient Search</h3>
-            <p>Search for patients across EU member states with break-the-glass emergency access capabilities.
-                GDPR-compliant cross-border patient data retrieval.</p>
-            <a href="/patients/search/" class="option-link">Search Patients</a>
-        </div>
-
-        <div class="option-card">
-            <h3>�🖥️ Django Portal UI</h3>
-            <p>Full eHealth portal with European SMP integration, country-specific International Search Masks (ISM),
-                and cross-border patient lookup capabilities.</p>
-            <a href="/portal/" class="option-link">Launch Portal</a>
-        </div>
-
-        <div class="option-card">
-            <h3>⚙️ Django Admin</h3>
-            <p>Administrative interface for managing countries, ISM configurations, certificates, and monitoring
-                European SMP connectivity status.</p>
-            <a href="/admin/" class="option-link">Admin Panel</a>
-        </div>
-
-        <div class="option-card">
-            <h3>🔗 API Endpoints</h3>
-            <p>REST API for Java portal integration with dynamic country data, patient lookup services, and document
-                retrieval endpoints.</p>
-            <a href="/api/countries/" class="option-link">View API</a>
-        </div>
-    </div>
-
-    <div class="api-section">
-        <h3>🌐 Available API Endpoints</h3>
-        <div class="api-list">
-            <div class="api-item">
-                <strong>GET</strong> <a href="/api/countries/">/api/countries/</a><br>
-                <small>Get available EU countries with ISM support</small>
+        <div class="integration-options">
+            <div class="option-card">
+                <h3>� Patient Search</h3>
+                <p>Search for patients across EU member states with break-the-glass emergency access capabilities.
+                    GDPR-compliant cross-border patient data retrieval.</p>
+                <a href="/patients/search/" class="option-link">Search Patients</a>
             </div>
-            <div class="api-item">
-                <strong>POST</strong> /api/patient/lookup/<br>
-                <small>Cross-border patient lookup with country-specific validation</small>
+
+            <div class="option-card">
+                <h3>�🖥️ Django Portal UI</h3>
+                <p>Full eHealth portal with European SMP integration, country-specific International Search Masks (ISM),
+                    and cross-border patient lookup capabilities.</p>
+                <a href="/portal/" class="option-link">Launch Portal</a>
             </div>
-            <div class="api-item">
-                <strong>GET</strong> /api/patient/{patient_id}/document/{type}/<br>
-                <small>Retrieve patient documents from European health systems</small>
+
+            <div class="option-card">
+                <h3>⚙️ Django Admin</h3>
+                <p>Administrative interface for managing countries, ISM configurations, certificates, and monitoring
+                    European SMP connectivity status.</p>
+                <a href="/admin/" class="option-link">Admin Panel</a>
+            </div>
+
+            <div class="option-card">
+                <h3>🔗 API Endpoints</h3>
+                <p>REST API for Java portal integration with dynamic country data, patient lookup services, and document
+                    retrieval endpoints.</p>
+                <a href="/api/countries/" class="option-link">View API</a>
             </div>
         </div>
-    </div>
 
-    <div class="external-services">
-        <h3>🔗 External Service Connections</h3>
-        <div class="service-grid">
-            <div class="service-item">
-                <h4>Java OpenNCP Portal</h4>
-                <p>Original Java-based portal</p>
-                <a href="http://localhost:8093" target="_blank">localhost:8093</a>
-            </div>
-            <div class="service-item">
-                <h4>DomiSMP Server</h4>
-                <p>Service Metadata Publisher</p>
-                <a href="{{ current_smp_ui_url }}" target="_blank">{{ current_smp_ui_url }}</a>
+        <div class="api-section">
+            <h3>🌐 Available API Endpoints</h3>
+            <div class="api-list">
+                <div class="api-item">
+                    <strong>GET</strong> <a href="/api/countries/">/api/countries/</a><br>
+                    <small>Get available EU countries with ISM support</small>
+                </div>
+                <div class="api-item">
+                    <strong>POST</strong> /api/patient/lookup/<br>
+                    <small>Cross-border patient lookup with country-specific validation</small>
+                </div>
+                <div class="api-item">
+                    <strong>GET</strong> /api/patient/{patient_id}/document/{type}/<br>
+                    <small>Retrieve patient documents from European health systems</small>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="status-indicator">
-        <p>✅ All API endpoints are accessible without authentication for Java portal integration</p>
-    </div>
+        <div class="external-services">
+            <h3>🔗 External Service Connections</h3>
+            <div class="service-grid">
+                <div class="service-item">
+                    <h4>Java OpenNCP Portal</h4>
+                    <p>Original Java-based portal</p>
+                    <a href="http://localhost:8093" target="_blank">localhost:8093</a>
+                </div>
+                <div class="service-item">
+                    <h4>DomiSMP Server</h4>
+                    <p>Service Metadata Publisher</p>
+                    <a href="{{ current_smp_ui_url }}" target="_blank">{{ current_smp_ui_url }}</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-indicator">
+            <p>✅ All API endpoints are accessible without authentication for Java portal integration</p>
+        </div>
     </div>
 </div>
 {% endblock %}
