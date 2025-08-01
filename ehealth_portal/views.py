@@ -498,28 +498,7 @@ def get_mock_ism_data(country_code, ism_type="eu_members"):
                         "help_text": "Personal Public Service Number (EU Member States format)",
                         "group": "main",
                     },
-                    {
-                        "code": "surname",
-                        "type": "text",
-                        "label": "Surname",
-                        "required": True,
-                        "group": "main",
-                    },
-                    {
-                        "code": "first_name",
-                        "type": "text",
-                        "label": "First Name",
-                        "required": True,
-                        "group": "main",
-                    },
-                    {
-                        "code": "birth_date",
-                        "type": "date",
-                        "label": "Date of Birth",
-                        "required": True,
-                        "group": "main",
-                    },
-                ]
+                ],
             },
             "bootcamp": {  # For Bootcamp Test Partners (simplified ISM)
                 "fields": [
@@ -601,8 +580,11 @@ def get_mock_ism_data(country_code, ism_type="eu_members"):
     country_config = ism_configs.get(country_code, {})
     if "eu_members" in country_config or "bootcamp" in country_config:
         # Country has structured ISM types
-        return country_config.get(ism_type, country_config.get("eu_members", country_config.get("bootcamp", {})))
-    
+        return country_config.get(
+            ism_type,
+            country_config.get("eu_members", country_config.get("bootcamp", {})),
+        )
+
     # Handle countries with single ISM format (legacy format)
     return ism_configs.get(country_code, ism_configs["EU"])
 
