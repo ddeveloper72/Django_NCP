@@ -112,8 +112,8 @@ urlpatterns = [
     path("fhir/", include("fhir_services.urls")),
     # SMP client integration
     path("smp/", include("smp_client.urls")),
-    # Patient data management (temporarily disabled due to import errors)
-    # path("patients/", include("patient_data.urls")),
+    # Patient data management
+    path("patients/", include("patient_data.urls")),
     # Translation services API (temporarily disabled due to import errors)
     # path("api/translation/", include("translation_services.urls")),
 ]
