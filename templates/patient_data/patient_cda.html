@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Patient CDA Document - EU NCP Portal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+<style>
+    /* CDA Document Viewer Styles */
+    .cda-viewer {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .cda-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        padding: 1rem;
+    }
+
+    .cda-content {
+        max-height: 70vh;
+        overflow-y: auto;
+        padding: 2rem;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        background: #fafafa;
+    }
+
+    .cda-content pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        margin: 0;
+        color: #333;
+    }
+
+    /* XML Syntax Highlighting */
+    .xml-tag {
+        color: #0066cc;
+        font-weight: bold;
+    }
+
+    .xml-attribute {
+        color: #cc6600;
+    }
+
+    .xml-value {
+        color: #009900;
+    }
+
+    .xml-comment {
+        color: #888888;
+        font-style: italic;
+    }
+
+    .cda-metadata {
+        background: #e3f2fd;
+        padding: 1rem;
+        border-left: 4px solid #2196f3;
+        margin-bottom: 1rem;
+    }
+
+    .metadata-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .metadata-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .metadata-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #666;
+        margin-bottom: 0.25rem;
+    }
+
+    .metadata-value {
+        font-size: 0.9rem;
+        color: #333;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cda-document-container">
+    <div class="page-header">
+        <div class="breadcrumb-nav">
+            <a href="{% url 'patient_data:patient_details' patient_data.id %}" class="breadcrumb-link">
+                <i class="icon-arrow-left"></i> Back to Patient Details
+            </a>
+        </div>
+
+        <h1 class="page-title">CDA Document Viewer</h1>
+        <div class="page-subtitle">
+            Patient: {{ patient_data.given_name }} {{ patient_data.family_name }} |
+            Source: {{ source_country }} |
+            Confidence: {{ confidence }}%
+        </div>
+    </div>
+
+    <!-- Document Metadata -->
+    <div class="cda-metadata">
+        <h3>Document Information</h3>
+        <div class="metadata-grid">
+            <div class="metadata-item">
+                <span class="metadata-label">File Name:</span>
+                <span class="metadata-value">{{ file_name }}</span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">Source Country:</span>
+                <span class="metadata-value">{{ source_country }}</span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">Match Confidence:</span>
+                <span class="metadata-value">{{ confidence }}%</span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">Document Type:</span>
+                <span class="metadata-value">HL7 CDA Patient Summary</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CDA Document Viewer -->
+    <div class="cda-viewer">
+        <div class="cda-toolbar">
+            <div class="toolbar-left">
+                <h3>Clinical Document Architecture (CDA) XML</h3>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn btn-secondary" onclick="toggleFormatting()">
+                    <i class="icon-code"></i> Toggle Formatting
+                </button>
+                <a href="{% url 'patient_data:download_cda_pdf' patient_data.id %}" class="btn btn-primary" download>
+                    <i class="icon-download"></i> Download
+                </a>
+            </div>
+        </div>
+
+        <div class="cda-content" id="cdaContent">
+            <pre id="xmlContent">{{ cda_content|escape }}</pre>
+        </div>
+    </div>
+
+    <!-- Navigation Actions -->
+    <div class="document-actions">
+        <a href="{% url 'patient_data:patient_details' patient_data.id %}" class="action-button secondary">
+            <i class="icon-arrow-left"></i>
+            Back to Patient Details
+        </a>
+
+        <a href="{% url 'patient_data:download_cda_pdf' patient_data.id %}" class="action-button primary" download>
+            <i class="icon-download"></i>
+            Download CDA Document
+        </a>
+
+        <a href="{% url 'patient_data:patient_data_form' %}" class="action-button outline">
+            <i class="icon-search"></i>
+            New Search
+        </a>
+    </div>
+</div>
+
+<script>
+    // Simple XML formatting toggle
+    function toggleFormatting() {
+        const xmlContent = document.getElementById('xmlContent');
+        const content = xmlContent.textContent;
+
+        if (xmlContent.classList.contains('formatted')) {
+            // Remove formatting
+            xmlContent.innerHTML = content;
+            xmlContent.classList.remove('formatted');
+        } else {
+            // Add basic XML syntax highlighting
+            let formatted = content
+                .replace(/(&lt;[^&]*&gt;)/g, '<span class="xml-tag">$1</span>')
+                .replace(/(\w+)=&quot;([^&]*)&quot;/g, '<span class="xml-attribute">$1</span>=<span class="xml-value">&quot;$2&quot;</span>')
+                .replace(/(&lt;!--.*?--&gt;)/gs, '<span class="xml-comment">$1</span>');
+
+            xmlContent.innerHTML = formatted;
+            xmlContent.classList.add('formatted');
+        }
+    }
+
+    // Auto-format on load
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleFormatting();
+    });
+</script>
+{% endblock %}
