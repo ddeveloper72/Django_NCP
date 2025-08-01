@@ -3110,6 +3110,58 @@ select:focus {
   margin: 0;
   font-size: 1.25rem;
 }
+
+/* SMP Source Information Section */
+.home-page .smp-info {
+  background: linear-gradient(135deg, #fff9e6 0%, #fef3d2 100%);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border-left: 6px solid #f59e0b;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+}
+
+.home-page .smp-info p {
+  margin-bottom: 0.5rem;
+  color: #7c2d12;
+}
+
+.home-page .smp-info p:last-child {
+  margin-bottom: 0;
+}
+
+.home-page .smp-portal-link {
+  font-weight: 500;
+}
+
+.home-page .smp-link {
+  color: #c2410c;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.home-page .smp-link:hover {
+  color: #ea580c;
+  text-decoration: underline;
+}
+
+.home-page .smp-note {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: #92400e;
+}
+
+/* Page Title Styling */
+.home-page .page-title {
+  color: #1976d2;
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(25, 118, 210, 0.1);
+}
+
 .home-page .smp-config {
   background: linear-gradient(135deg, #f0f7ff 0%, #e6f3ff 100%);
   padding: 2rem;

@@ -3,17 +3,18 @@
 {% block title %}Django EU eHealth NCP Server{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2 class="page-title">Choose Your Integration Approach</h2>
+<div class="home-page">
+    <div class="container">
+        <h2 class="page-title">Choose Your Integration Approach</h2>
 
-    <!-- SMP Source Information -->
-    <div class="smp-info">
-        <p><strong>Active SMP Source:</strong> {{ current_smp_name }}</p>
-        <p class="smp-portal-link">
-            Portal: <a href="{{ current_smp_ui_url }}" target="_blank" class="smp-link">{{ current_smp_ui_url }}</a>
-        </p>
-        <p class="smp-note">SMP source configuration is managed by administrators only.</p>
-    </div>
+        <!-- SMP Source Information -->
+        <div class="smp-info">
+            <p><strong>Active SMP Source:</strong> {{ current_smp_name }}</p>
+            <p class="smp-portal-link">
+                Portal: <a href="{{ current_smp_ui_url }}" target="_blank" class="smp-link">{{ current_smp_ui_url }}</a>
+            </p>
+            <p class="smp-note">SMP source configuration is managed by administrators only.</p>
+        </div>
 
     <div class="integration-options">
         <div class="option-card">
@@ -81,6 +82,7 @@
 
     <div class="status-indicator">
         <p>✅ All API endpoints are accessible without authentication for Java portal integration</p>
+    </div>
     </div>
 </div>
 {% endblock %}
