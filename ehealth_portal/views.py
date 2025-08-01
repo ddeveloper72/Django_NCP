@@ -121,19 +121,48 @@ def patient_search(request, country_code):
     # Get country configuration
     country = get_object_or_404(Country, code=country_code.upper())
 
-    # Get or create/update ISM for this country
+    # Get ISM type from request (default to eu_members)
+    ism_type = request.GET.get("ism_type", "eu_members")
+
+    # Validate ISM type
+    if ism_type not in ["eu_members", "bootcamp"]:
+        ism_type = "eu_members"
+
+    # Get or create/update ISM for this country and type
     try:
         search_mask = country.search_mask
-        # Check if ISM needs updating (older than 24 hours)
+        # Check if ISM needs updating or if type has changed
+        current_ism_type = search_mask.raw_ism_data.get("ism_type", "eu_members")
         if (
             not search_mask.last_synchronized
             or (timezone.now() - search_mask.last_synchronized).days >= 1
+            or current_ism_type != ism_type
         ):
-            update_ism_from_smp(country)
-            search_mask.refresh_from_db()
+            # Update ISM with new type
+            ism_data = get_mock_ism_data(country.code, ism_type)
+            ism_data["ism_type"] = ism_type  # Store the ISM type
+            search_mask.raw_ism_data = ism_data
+            search_mask.mask_name = (
+                f"{country.name} Search ({ism_type.replace('_', ' ').title()})"
+            )
+            search_mask.save()
+
+            # Recreate search fields
+            search_mask.fields.all().delete()
+            create_search_fields_from_ism(search_mask, ism_data)
+
     except InternationalSearchMask.DoesNotExist:
-        # Create default ISM if none exists
-        search_mask = create_default_ism(country)
+        # Create default ISM with specified type
+        ism_data = get_mock_ism_data(country.code, ism_type)
+        ism_data["ism_type"] = ism_type
+        search_mask = InternationalSearchMask.objects.create(
+            country=country,
+            mask_name=f"{country.name} Search ({ism_type.replace('_', ' ').title()})",
+            mask_version="1.0",
+            source_smp_url=country.smp_url or "default",
+            raw_ism_data=ism_data,
+        )
+        create_search_fields_from_ism(search_mask, ism_data)
 
     if request.method == "POST":
         # Process search form submission
@@ -208,6 +237,13 @@ def patient_search(request, country_code):
         "page_title": f"Patient Search - {country.name}",
         "step": "PATIENT SEARCH",
         "ism_last_updated": search_mask.last_synchronized,
+        "current_ism_type": ism_type,
+        "ism_type_choices": [
+            ("eu_members", "EU Member States (PTT Partners)"),
+            ("bootcamp", "Bootcamp Test Partners"),
+        ],
+        "has_ism_types": country_code.upper()
+        in ["IE", "FI"],  # Countries with multiple ISM types
     }
 
     return render(request, "ehealth_portal/patient_search.html", context)
@@ -292,10 +328,14 @@ def create_default_ism(country):
     return search_mask
 
 
-def get_mock_ism_data(country_code):
+def get_mock_ism_data(country_code, ism_type="eu_members"):
     """
     Mock ISM data - different for each country to demonstrate dynamic rendering
     In production, this would come from actual SMP API calls
+
+    Args:
+        country_code: The country code (e.g., 'IE', 'BE')
+        ism_type: The ISM type ('eu_members' for PTT partners, 'bootcamp' for Bootcamp test partners)
     """
     ism_configs = {
         "BE": {  # Belgium - Comprehensive form
@@ -430,33 +470,70 @@ def get_mock_ism_data(country_code):
                 },
             ]
         },
-        "IE": {  # Ireland - Minimal form
-            "fields": [
-                {
-                    "code": "pps_number",
-                    "type": "text",
-                    "label": "PPS Number",
-                    "placeholder": "1234567A",
-                    "required": True,
-                    "validation_pattern": r"^\d{7}[A-Z]$",
-                    "help_text": "Personal Public Service Number",
-                    "group": "main",
-                },
-                {
-                    "code": "surname",
-                    "type": "text",
-                    "label": "Surname",
-                    "required": True,
-                    "group": "main",
-                },
-                {
-                    "code": "first_name",
-                    "type": "text",
-                    "label": "First Name",
-                    "required": True,
-                    "group": "main",
-                },
-            ]
+        "FI": {  # Finland - Example of Bootcamp format
+            "bootcamp": {
+                "fields": [
+                    {
+                        "code": "national_identifier",
+                        "type": "text",
+                        "label": "National Person Identifier",
+                        "placeholder": "Enter Finnish national identifier",
+                        "required": True,
+                        "help_text": "National Person Identifier for Finnish test data (domain: 1.2.246.556.12001.4.1000.990.1)",
+                        "group": "main",
+                    },
+                ]
+            }
+        },
+        "IE": {  # Ireland - Two ISM types
+            "eu_members": {  # For EU Member States (PTT Partners)
+                "fields": [
+                    {
+                        "code": "pps_number",
+                        "type": "text",
+                        "label": "PPS Number",
+                        "placeholder": "1234567A",
+                        "required": True,
+                        "validation_pattern": r"^\d{7}[A-Z]$",
+                        "help_text": "Personal Public Service Number (EU Member States format)",
+                        "group": "main",
+                    },
+                    {
+                        "code": "surname",
+                        "type": "text",
+                        "label": "Surname",
+                        "required": True,
+                        "group": "main",
+                    },
+                    {
+                        "code": "first_name",
+                        "type": "text",
+                        "label": "First Name",
+                        "required": True,
+                        "group": "main",
+                    },
+                    {
+                        "code": "birth_date",
+                        "type": "date",
+                        "label": "Date of Birth",
+                        "required": True,
+                        "group": "main",
+                    },
+                ]
+            },
+            "bootcamp": {  # For Bootcamp Test Partners (simplified ISM)
+                "fields": [
+                    {
+                        "code": "national_identifier",
+                        "type": "text",
+                        "label": "National Person Identifier",
+                        "placeholder": "Enter national identifier",
+                        "required": True,
+                        "help_text": "National Person Identifier for Bootcamp test data",
+                        "group": "main",
+                    },
+                ]
+            },
         },
         "EU": {  # European Commission Test - Comprehensive test form
             "fields": [
@@ -520,6 +597,13 @@ def get_mock_ism_data(country_code):
         },
     }
 
+    # Handle countries with multiple ISM types (structured format)
+    country_config = ism_configs.get(country_code, {})
+    if "eu_members" in country_config or "bootcamp" in country_config:
+        # Country has structured ISM types
+        return country_config.get(ism_type, country_config.get("eu_members", country_config.get("bootcamp", {})))
+    
+    # Handle countries with single ISM format (legacy format)
     return ism_configs.get(country_code, ism_configs["EU"])
 
 
