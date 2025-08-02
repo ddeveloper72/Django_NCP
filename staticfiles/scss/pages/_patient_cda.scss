@@ -1,64 +1,245 @@
-// Professional CDA Document Styling - Working Version
+// Professional CDA Document Styling - PS Display Guideline Compliant
 @import url('https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700');
+
+// PS Display Guidelines - Variables
+$ps-primary-blue: #085a9f;
+$ps-secondary-blue: #009fd1;
+$ps-success-green: #28a745;
+$ps-warning-orange: #ffc107;
+$ps-danger-red: #dc3545;
+$ps-light-blue: #e6f2ff;
+$ps-white: #ffffff;
+$ps-dark-gray: #4a4a4a;
+$ps-light-gray: #f8f9fa;
 
 // Professional CDA Document Page Styles
 .cda-document-container {
   font-family: 'Montserrat', sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6;
-  background: #fff;
-  color: #4a4a4a;
+  background: $ps-white;
+  color: $ps-dark-gray;
   padding: 0;
   max-width: 1400px;
   margin: 0 auto;
 }
 
-.h1center {
-  font-size: 1.5em;
-  font-weight: bold;
+// PS Display Guidelines - Header Section
+.ps-header {
+  background: linear-gradient(135deg, $ps-primary-blue 0%, $ps-secondary-blue 100%);
+  color: $ps-white;
+  padding: 2rem;
   text-align: center;
-  background-color: #085a9f;
-  color: #fff;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  border-radius: 4px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  
+  .ps-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  
+  .ps-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 400;
+  }
 }
 
-// Professional Dashboard
-.cda-translation-dashboard {
-  background: linear-gradient(135deg, #085a9f 0%, #009fd1 100%);
-  color: white;
+// Patient Identity Banner - Critical for Safety
+.patient-identity-banner {
+  background: $ps-light-blue;
+  border: 3px solid $ps-primary-blue;
   padding: 1.5rem;
+  margin: 1rem 0;
   border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  
+  .patient-identity-left {
+    .patient-name {
+      font-size: 1.5rem;
+      color: $ps-primary-blue;
+      margin-bottom: 0.5rem;
+    }
+    
+    .patient-details {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      
+      span {
+        background: $ps-white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        border: 1px solid $ps-secondary-blue;
+      }
+    }
+  }
+  
+  .patient-identity-right {
+    text-align: right;
+    
+    .document-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      
+      div {
+        background: $ps-white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        border: 1px solid $ps-secondary-blue;
+      }
+    }
+  }
+}
+
+// Safety Alerts Section - Critical Information
+.safety-alerts-section {
+  background: linear-gradient(135deg, $ps-danger-red 0%, #e74c3c 100%);
+  color: $ps-white;
+  padding: 1.5rem;
+  margin: 1rem 0 2rem 0;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+  
+  .alert-header {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-align: center;
+    
+    i {
+      font-size: 1.5rem;
+      animation: pulse 2s infinite;
+    }
+  }
+  
+  .allergy-alerts, .medical-alerts {
+    margin-bottom: 1rem;
+    
+    h4 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 0.5rem;
+    }
+    
+    .alert-item {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      
+      &.allergy {
+        display: flex;
+        justify-content: space-between;
+        
+        .alert-substance {
+          font-weight: 600;
+        }
+        
+        .alert-reaction {
+          font-style: italic;
+        }
+      }
+    }
+  }
+}
+
+// Enhanced Translation Dashboard
+.cda-translation-dashboard {
+  background: linear-gradient(135deg, $ps-primary-blue 0%, $ps-secondary-blue 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 15px;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  
+  .dashboard-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  .dashboard-subtitle {
+    opacity: 0.9;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+  }
 }
 
 .translation-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 1rem;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 1.5rem;
+  border-radius: 12px;
   text-align: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.stat-value {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-.stat-label {
-  font-size: 0.9rem;
-  opacity: 0.9;
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  
+  &.quality {
+    border-left: 5px solid $ps-success-green;
+  }
+  
+  &.sections {
+    border-left: 5px solid $ps-secondary-blue;
+  }
+  
+  &.medical-terms {
+    border-left: 5px solid $ps-warning-orange;
+  }
+  
+  &.coded {
+    border-left: 5px solid #6f42c1;
+  }
+  
+  &.compliance {
+    border-left: 5px solid $ps-success-green;
+  }
+  
+  .stat-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+  }
+  
+  .stat-content {
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+  }
 }
 
 // Modern Container System
@@ -412,15 +593,76 @@ input[type='checkbox'] {
   margin-left: 0.5rem;
 }
 
-// Animation Effects
+// Animation Effects - PS Guidelines Compliant
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(40px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Accessibility Features - PS Guidelines Compliance
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+// High Contrast Mode Support
+@media (prefers-contrast: high) {
+  .stat-card {
+    border: 3px solid $ps-white;
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  .patient-identity-banner {
+    border-width: 4px;
+  }
+  
+  .safety-alerts-section {
+    border: 3px solid $ps-white;
+  }
+}
+
+// Reduced Motion Support
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

@@ -1,45 +1,137 @@
 {% extends "base.html" %}
 
-{% block title %}CDA Translation Dashboard - {{ patient_data.family_name }}, {{ patient_data.given_name }}{% endblock %}
+{% block title %}Patient Summary - {{ patient_data.family_name }}, {{ patient_data.given_name }}{% endblock %}
 
 {% block content %}
 <div class="cda-document-container">
-    <!-- Professional Header -->
-    <div class="h1center">Clinical Document Architecture - Translation Dashboard</div>
+    <!-- PS Display Header - Guideline Compliant -->
+    <div class="ps-header">
+        <div class="ps-title">
+            <i class="fas fa-user-md me-2"></i>
+            European Patient Summary
+        </div>
+        <div class="ps-subtitle">
+            Cross-Border Healthcare Document Display
+        </div>
+    </div>
 
-    <!-- Translation Dashboard -->
-    <div class="cda-translation-dashboard">
-        <h2 class="mb-0">
-            <i class="fas fa-language me-2"></i>
-            Bilingual Medical Document Viewer
-        </h2>
-        <p class="mb-3 opacity-75">
-            Enhanced CDA translation with {{ medical_terms_count }} medical terms from {{ source_country }}
-        </p>
-
-        <div class="translation-stats">
-            <div class="stat-card">
-                <div class="stat-value">{{ translation_quality }}</div>
-                <div class="stat-label">Translation Quality</div>
+    <!-- Patient Identity Banner - Critical Safety Information -->
+    <div class="patient-identity-banner">
+        <div class="patient-identity-left">
+            <div class="patient-name">
+                <strong>{{ patient_data.family_name }}, {{ patient_data.given_name }}</strong>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">{{ sections_count }}</div>
-                <div class="stat-label">Medical Sections</div>
+            <div class="patient-details">
+                <span class="patient-birth">Born: {{ patient_data.birth_date|default:'Unknown' }}</span>
+                <span class="patient-gender">{{ patient_data.gender|default:'Unknown' }}</span>
+                <span class="patient-id">ID: {{ patient_data.patient_id|default:'Unknown' }}</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">{{ medical_terms_count }}</div>
-                <div class="stat-label">Medical Terms</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">{{ coded_sections_count }}</div>
-                <div class="stat-label">Coded Sections</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">{{ coded_sections_percentage }}%</div>
-                <div class="stat-label">Standards Compliance</div>
+        </div>
+        <div class="patient-identity-right">
+            <div class="document-meta">
+                <div class="document-country">
+                    <i class="fas fa-flag me-1"></i>
+                    {{ source_country|upper }}
+                </div>
+                <div class="document-date">
+                    {{ document_date|default:'Date Unknown' }}
+                </div>
+                <div class="document-language">
+                    Original: {{ source_language|upper }} → English
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Translation Quality & Standards Dashboard -->
+    <div class="cda-translation-dashboard">
+        <h3 class="dashboard-title">
+            <i class="fas fa-shield-alt me-2"></i>
+            Translation Quality & Standards Compliance
+        </h3>
+        <p class="dashboard-subtitle">
+            Enhanced medical translation with {{ medical_terms_count }} verified medical terms
+        </p>
+
+        <div class="translation-stats">
+            <div class="stat-card quality">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ translation_quality }}</div>
+                    <div class="stat-label">Translation Quality</div>
+                </div>
+            </div>
+            <div class="stat-card sections">
+                <div class="stat-icon">
+                    <i class="fas fa-list-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ sections_count }}</div>
+                    <div class="stat-label">Clinical Sections</div>
+                </div>
+            </div>
+            <div class="stat-card medical-terms">
+                <div class="stat-icon">
+                    <i class="fas fa-stethoscope"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ medical_terms_count }}</div>
+                    <div class="stat-label">Medical Terms</div>
+                </div>
+            </div>
+            <div class="stat-card coded">
+                <div class="stat-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ coded_sections_count }}</div>
+                    <div class="stat-label">HL7 Coded Sections</div>
+                </div>
+            </div>
+            <div class="stat-card compliance">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ coded_sections_percentage }}%</div>
+                    <div class="stat-label">Standards Compliance</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Safety Alerts & Warnings Section -->
+    {% if safety_alerts or allergy_alerts %}
+    <div class="safety-alerts-section">
+        <div class="alert-header">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>SAFETY ALERTS</strong>
+        </div>
+        {% if allergy_alerts %}
+        <div class="allergy-alerts">
+            <h4><i class="fas fa-allergies me-2"></i>Known Allergies</h4>
+            {% for allergy in allergy_alerts %}
+            <div class="alert-item allergy">
+                <span class="alert-substance">{{ allergy.substance }}</span>
+                <span class="alert-reaction">{{ allergy.reaction }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if safety_alerts %}
+        <div class="medical-alerts">
+            <h4><i class="fas fa-medical-cross me-2"></i>Medical Alerts</h4>
+            {% for alert in safety_alerts %}
+            <div class="alert-item medical">
+                {{ alert }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
 
     <!-- Translation Quality Notice -->
     {% if uses_coded_sections %}

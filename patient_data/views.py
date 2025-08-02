@@ -486,6 +486,47 @@ def patient_cda_view(request, patient_id):
             (coded_sections_count / total_sections * 100) if total_sections > 0 else 0
         )
 
+        # Extract safety information for PS Display Guidelines
+        safety_alerts = []
+        allergy_alerts = []
+        
+        # Extract allergy information from translation result
+        for section in translation_result.get("sections", []):
+            section_title = section.get("title", {}).get("translated", "").lower()
+            if "allerg" in section_title or "adverse" in section_title:
+                # Extract allergy information from table data
+                if section.get("content", {}).get("table_data"):
+                    for row in section["content"]["table_data"]:
+                        if len(row) >= 2:  # Assuming substance and reaction columns
+                            allergy_alerts.append({
+                                "substance": row[0] if len(row) > 0 else "Unknown",
+                                "reaction": row[1] if len(row) > 1 else "Unknown reaction"
+                            })
+            
+            # Extract other safety alerts from problem lists or conditions
+            if "problem" in section_title or "condition" in section_title or "diagnosis" in section_title:
+                if section.get("content", {}).get("table_data"):
+                    for row in section["content"]["table_data"]:
+                        if row and len(row) > 0:
+                            problem_text = str(row[0])
+                            # Check for critical conditions
+                            critical_keywords = ["cancer", "tumor", "heart", "cardiac", "stroke", "diabetes", "hypertension"]
+                            if any(keyword in problem_text.lower() for keyword in critical_keywords):
+                                safety_alerts.append(problem_text)
+
+        # Extract document metadata for PS Guidelines
+        document_date = doc_info.get("document_date", "Date Unknown")
+        document_country = match_data["country_code"]
+        
+        # Enhanced patient identity information
+        patient_identity = {
+            "family_name": patient_data.family_name,
+            "given_name": patient_data.given_name,
+            "birth_date": patient_data.birth_date.strftime("%d/%m/%Y") if patient_data.birth_date else "Unknown",
+            "gender": getattr(patient_data, 'gender', 'Unknown'),
+            "patient_id": getattr(patient_data, 'patient_identifier_id', 'Unknown'),
+        }
+
         context = {
             "patient_data": patient_data,
             "cda_content": rendering_cda_content,
@@ -507,6 +548,13 @@ def patient_cda_view(request, patient_id):
             "coded_sections_count": coded_sections_count,
             "coded_sections_percentage": round(coded_sections_percentage, 1),
             "uses_coded_sections": coded_sections_count > 0,
+            # PS Display Guidelines requirements
+            "document_date": document_date,
+            "document_country": document_country,
+            "patient_identity": patient_identity,
+            "safety_alerts": safety_alerts,
+            "allergy_alerts": allergy_alerts,
+            "has_safety_alerts": len(safety_alerts) > 0 or len(allergy_alerts) > 0,
         }
 
         return render(request, "patient_data/patient_cda.html", context, using="jinja2")
