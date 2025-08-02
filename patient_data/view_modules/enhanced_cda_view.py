@@ -71,7 +71,12 @@ class EnhancedCDADocumentView(View):
                 ),  # 'side-by-side', 'toggle', 'translated-only'
             }
 
-            return render(request, "patient_data/enhanced_cda_document.html", context)
+            return render(
+                request,
+                "patient_data/enhanced_cda_document.html",
+                context,
+                using="jinja2",
+            )
 
         except Exception as e:
             logger.error(f"Error in enhanced CDA view for patient {patient_id}: {e}")
@@ -84,15 +89,23 @@ class EnhancedCDADocumentView(View):
 
     def _get_cda_document(self, request, patient_data):
         """Retrieve CDA document from session or database"""
-        # Try to get from session first
+        # Try to get from session first using the same key pattern as patient views
+        match_data = request.session.get(f"patient_match_{patient_data.id}")
+
+        if match_data and "cda_content" in match_data:
+            return match_data["cda_content"]
+
+        # Fallback: try old session structure for backwards compatibility
         cda_data = request.session.get("cda_documents", {})
         patient_cda = cda_data.get(str(patient_data.id))
 
         if patient_cda and "xml_content" in patient_cda:
             return patient_cda["xml_content"]
 
-        # Fallback to database or file system
-        # This would depend on how CDA documents are stored
+        # No CDA document found
+        logger.warning(
+            f"No CDA document found for patient {patient_data.id} in session"
+        )
         return None
 
     def _detect_source_language(self, cda_document):

@@ -9,13 +9,13 @@
             <i class="icon-alert-triangle"></i>
             An Error Occurred
         </h4>
-        
+
         {% if error_message %}
         <p><strong>Error Details:</strong> {{ error_message }}</p>
         {% else %}
         <p>An unexpected error occurred while processing your request.</p>
         {% endif %}
-        
+
         {% if patient_id %}
         <hr>
         <p class="mb-0">
@@ -35,13 +35,13 @@
                 <li>Verify the document is available</li>
                 <li>Contact support if the problem persists</li>
             </ul>
-            
+
             <div class="mt-3">
                 <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-primary">
                     <i class="icon-arrow-left"></i>
                     Back to Patient Search
                 </a>
-                
+
                 {% if patient_id %}
                 <a href="{% url 'patient_data:patient_details' patient_id %}" class="btn btn-outline-secondary ml-2">
                     <i class="icon-user"></i>

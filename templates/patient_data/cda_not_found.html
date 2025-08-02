@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}CDA Document Not Found - EU NCP Portal{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">
+            <i class="icon-file-text"></i>
+            CDA Document Not Found
+        </h4>
+        <p>No CDA document was found for patient <strong>{{ patient_data.given_name }} {{ patient_data.family_name
+                }}</strong>.</p>
+        <hr>
+        <p class="mb-0">
+            This could happen if:
+        </p>
+        <ul class="mb-0 mt-2">
+            <li>The patient search has not been completed yet</li>
+            <li>No matching documents were found in the source country</li>
+            <li>The document session has expired</li>
+            <li>There was an error retrieving the document</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>
+                <i class="icon-user"></i>
+                Patient Information
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Name:</strong> {{ patient_data.given_name }} {{ patient_data.family_name }}</p>
+                    <p><strong>Date of Birth:</strong> {{ patient_data.birth_date|date:"d F Y" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Gender:</strong> {{ patient_data.gender }}</p>
+                    <p><strong>Patient ID:</strong> {{ patient_data.patient_id|default:"Not provided" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'patient_data:patient_details' patient_data.id %}" class="btn btn-primary">
+            <i class="icon-arrow-left"></i>
+            Back to Patient Details
+        </a>
+
+        <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-outline-secondary ml-2">
+            <i class="icon-search"></i>
+            New Patient Search
+        </a>
+    </div>
+</div>
+{% endblock %}
