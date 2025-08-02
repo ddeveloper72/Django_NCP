@@ -58,13 +58,21 @@ def patient_data_view(request):
                 # Get the first (best) match
                 match = matches[0]
 
-                # Store the CDA match in session for later use
+                # Store the CDA match in session for later use with L1/L3 support
                 request.session[f"patient_match_{patient_data.id}"] = {
                     "file_path": match.file_path,
                     "country_code": match.country_code,
                     "confidence_score": match.confidence_score,
                     "patient_data": match.patient_data,
                     "cda_content": match.cda_content,
+                    # Enhanced L1/L3 CDA support
+                    "l1_cda_content": match.l1_cda_content,
+                    "l3_cda_content": match.l3_cda_content,
+                    "l1_cda_path": match.l1_cda_path,
+                    "l3_cda_path": match.l3_cda_path,
+                    "preferred_cda_type": match.preferred_cda_type,
+                    "has_l1": match.has_l1_cda(),
+                    "has_l3": match.has_l3_cda(),
                 }
 
                 # Add success message
@@ -136,6 +144,12 @@ def patient_details_view(request, patient_id):
                 file_path=match_data["file_path"],
                 patient_data=match_data["patient_data"],
                 cda_content=match_data["cda_content"],
+                # Include L1/L3 CDA data
+                l1_cda_content=match_data.get("l1_cda_content"),
+                l3_cda_content=match_data.get("l3_cda_content"),
+                l1_cda_path=match_data.get("l1_cda_path"),
+                l3_cda_path=match_data.get("l3_cda_path"),
+                preferred_cda_type=match_data.get("preferred_cda_type", "L3"),
             )
 
             patient_summary = search_service.get_patient_summary(match)
@@ -159,6 +173,10 @@ def patient_details_view(request, patient_id):
                     "source_country": match_data["country_code"],
                     "source_country_display": country_display,
                     "cda_file_name": os.path.basename(match_data["file_path"]),
+                    # L1/L3 CDA availability information
+                    "l1_available": match_data.get("has_l1", False),
+                    "l3_available": match_data.get("has_l3", False),
+                    "preferred_cda_type": match_data.get("preferred_cda_type", "L3"),
                 }
             )
 
@@ -184,12 +202,33 @@ def patient_cda_view(request, patient_id):
             messages.error(request, "No CDA document found for this patient.")
             return redirect("patient_data:patient_details", patient_id=patient_id)
 
+        # For rendering, prefer L3 CDA as it has structured clinical content
+        # Fall back to L1 CDA if L3 is not available
+        l3_cda_content = match_data.get("l3_cda_content")
+        l1_cda_content = match_data.get("l1_cda_content")
+
+        rendering_cda_content = (
+            l3_cda_content or l1_cda_content or match_data.get("cda_content", "")
+        )
+        rendering_cda_type = (
+            "L3" if l3_cda_content else ("L1" if l1_cda_content else "Unknown")
+        )
+        rendering_file_path = (
+            match_data.get("l3_cda_path")
+            if l3_cda_content
+            else (match_data.get("l1_cda_path") or match_data.get("file_path", ""))
+        )
+
         context = {
             "patient_data": patient_data,
-            "cda_content": match_data["cda_content"],
+            "cda_content": rendering_cda_content,
             "source_country": match_data["country_code"],
             "confidence": round(match_data["confidence_score"] * 100, 1),
-            "file_name": os.path.basename(match_data["file_path"]),
+            "file_name": os.path.basename(rendering_file_path),
+            "cda_type": rendering_cda_type,
+            "l1_available": bool(l1_cda_content),
+            "l3_available": bool(l3_cda_content),
+            "is_l3_rendering": bool(l3_cda_content),
         }
 
         return render(request, "patient_data/patient_cda.html", context, using="jinja2")
@@ -264,25 +303,44 @@ def patient_orcd_view(request, patient_id):
         # Initialize PDF service
         pdf_service = ClinicalDocumentPDFService()
 
-        # Extract PDF attachments from CDA content
-        cda_content = match_data.get("cda_content", "")
+        # For ORCD, we prefer L1 CDA as it typically contains the embedded PDF
+        # Fall back to L3 CDA if L1 is not available
+        l1_cda_content = match_data.get("l1_cda_content")
+        l3_cda_content = match_data.get("l3_cda_content")
+
+        # Try L1 first for ORCD extraction
+        orcd_cda_content = (
+            l1_cda_content or l3_cda_content or match_data.get("cda_content", "")
+        )
+        cda_type_used = (
+            "L1" if l1_cda_content else ("L3" if l3_cda_content else "Unknown")
+        )
+
         pdf_attachments = []
         orcd_available = False
 
-        if cda_content:
+        if orcd_cda_content:
             try:
-                pdf_attachments = pdf_service.extract_pdfs_from_xml(cda_content)
+                pdf_attachments = pdf_service.extract_pdfs_from_xml(orcd_cda_content)
                 orcd_available = len(pdf_attachments) > 0
+                logger.info(
+                    f"ORCD extraction from {cda_type_used} CDA: {len(pdf_attachments)} PDFs found"
+                )
             except Exception as e:
-                logger.error(f"Error extracting PDFs from CDA: {e}")
+                logger.error(f"Error extracting PDFs from {cda_type_used} CDA: {e}")
 
         context = {
             "patient_data": patient_data,
             "source_country": match_data["country_code"],
             "confidence": round(match_data["confidence_score"] * 100, 1),
-            "file_name": os.path.basename(match_data["file_path"]),
+            "file_name": os.path.basename(
+                match_data.get("l1_cda_path") or match_data.get("file_path", "")
+            ),
             "orcd_available": orcd_available,
             "pdf_attachments": pdf_attachments,
+            "cda_type_used": cda_type_used,
+            "l1_available": bool(l1_cda_content),
+            "l3_available": bool(l3_cda_content),
         }
 
         return render(
@@ -307,23 +365,38 @@ def download_orcd_pdf(request, patient_id, attachment_index=0):
 
         # Initialize PDF service and extract PDFs
         pdf_service = ClinicalDocumentPDFService()
-        cda_content = match_data.get("cda_content", "")
 
-        if not cda_content:
+        # For ORCD download, prefer L1 CDA
+        l1_cda_content = match_data.get("l1_cda_content")
+        l3_cda_content = match_data.get("l3_cda_content")
+        orcd_cda_content = (
+            l1_cda_content or l3_cda_content or match_data.get("cda_content", "")
+        )
+        cda_type_used = (
+            "L1" if l1_cda_content else ("L3" if l3_cda_content else "Unknown")
+        )
+
+        if not orcd_cda_content:
             messages.error(request, "No CDA content available.")
             return redirect("patient_data:patient_orcd_view", patient_id=patient_id)
 
         try:
-            pdf_attachments = pdf_service.extract_pdfs_from_xml(cda_content)
+            pdf_attachments = pdf_service.extract_pdfs_from_xml(orcd_cda_content)
 
             if not pdf_attachments or attachment_index >= len(pdf_attachments):
-                messages.error(request, "PDF attachment not found.")
+                messages.error(
+                    request, f"PDF attachment not found in {cda_type_used} CDA."
+                )
                 return redirect("patient_data:patient_orcd_view", patient_id=patient_id)
 
             # Get the requested PDF attachment
             pdf_attachment = pdf_attachments[attachment_index]
             pdf_data = pdf_attachment["data"]
-            filename = f"{patient_data.given_name}_{patient_data.family_name}_ORCD.pdf"
+            filename = f"{patient_data.given_name}_{patient_data.family_name}_ORCD_{cda_type_used}.pdf"
+
+            logger.info(
+                f"Downloaded ORCD PDF from {cda_type_used} CDA for patient {patient_id}"
+            )
 
             # Return PDF response
             return pdf_service.get_pdf_response(

@@ -38,7 +38,25 @@
                 </div>
                 <div class="metadata-item">
                     <span class="metadata-label">Document Type:</span>
-                    <span class="metadata-value">HL7 CDA Patient Summary</span>
+                    <span class="metadata-value">{{ cda_type }} CDA Patient Summary</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Rendering:</span>
+                    <span class="metadata-value">
+                        {% if is_l3_rendering %}
+                            L3 CDA (Structured Clinical Content)
+                        {% else %}
+                            L1 CDA (Original Document Headers)
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Available Types:</span>
+                    <span class="metadata-value">
+                        {% if l1_available %}L1 CDA{% endif %}
+                        {% if l1_available and l3_available %}, {% endif %}
+                        {% if l3_available %}L3 CDA{% endif %}
+                    </span>
                 </div>
             </div>
         </div>
@@ -47,7 +65,12 @@
         <div class="cda-viewer">
             <div class="cda-toolbar">
                 <div class="toolbar-left">
-                    <h3>Clinical Document Architecture (L3 CDA)</h3>
+                    <h3>Clinical Document Architecture ({{ cda_type }} CDA)</h3>
+                    {% if is_l3_rendering %}
+                    <span class="cda-type-badge l3">L3 - Structured Clinical Content</span>
+                    {% else %}
+                    <span class="cda-type-badge l1">L1 - Original Document Headers</span>
+                    {% endif %}
                 </div>
                 <div class="toolbar-right">
                     <button class="btn btn-secondary" onclick="toggleView()">
@@ -103,6 +126,39 @@
     </div>
 
     <style>
+        /* CDA Type Badge Styling */
+        .cda-type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 10px;
+        }
+        
+        .cda-type-badge.l3 {
+            background: #e6f3ff;
+            color: #0066cc;
+            border: 1px solid #99ccff;
+        }
+        
+        .cda-type-badge.l1 {
+            background: #fff3e6;
+            color: #cc6600;
+            border: 1px solid #ffcc99;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-left h3 {
+            margin: 0;
+        }
+
         .cda-iframe-container {
             background: white;
             border-radius: 8px;

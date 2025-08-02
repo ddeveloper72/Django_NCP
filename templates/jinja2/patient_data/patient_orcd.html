@@ -77,9 +77,24 @@
                             <div class="info-item">
                                 <strong>Document Type:</strong> Original Clinical Document (PDF)
                             </div>
+                            <div class="info-item">
+                                <strong>CDA Type Used:</strong> {{ cda_type_used }} CDA
+                                {% if cda_type_used == 'L1' %}
+                                    <small class="text-success">(Preferred for ORCD extraction)</small>
+                                {% elif cda_type_used == 'L3' %}
+                                    <small class="text-info">(L1 not available, using L3 fallback)</small>
+                                {% endif %}
+                            </div>
+                            <div class="info-item">
+                                <strong>Available Types:</strong>
+                                {% if l1_available %}L1 CDA{% endif %}
+                                {% if l1_available and l3_available %}, {% endif %}
+                                {% if l3_available %}L3 CDA{% endif %}
+                            </div>
                         </div>
 
-                        <button class="btn btn-primary mt-3" {% if orcd_available %}onclick="downloadORCD()"{% else %}disabled{% endif %}>
+                        <button class="btn btn-primary mt-3" {% if orcd_available %}onclick="downloadORCD()" {% else
+                            %}disabled{% endif %}>
                             <i class="icon-download"></i>
                             {% if orcd_available %}Download Original PDF{% else %}PDF Not Available{% endif %}
                         </button>
@@ -304,18 +319,18 @@
 </style>
 
 <script>
-function downloadORCD() {
-    {% if orcd_available %}
-    // Use the actual download URL
-    window.location.href = "{{ url('patient_data:download_orcd_pdf', patient_data.id) }}";
-    {% else %}
-    alert('PDF is not available for this document. This could be because the source document is L3 CDA only (no embedded PDF).');
-    {% endif %}
-}
+    function downloadORCD() {
+        {% if orcd_available %}
+        // Use the actual download URL
+        window.location.href = "{{ url('patient_data:download_orcd_pdf', patient_data.id) }}";
+        {% else %}
+        alert('PDF is not available for this document. This could be because the source document is L3 CDA only (no embedded PDF).');
+        {% endif %}
+    }
 
-function openFullscreen() {
-    // This would open the PDF in fullscreen mode
-    alert('Fullscreen PDF viewer would be implemented here.');
-}
+    function openFullscreen() {
+        // This would open the PDF in fullscreen mode
+        alert('Fullscreen PDF viewer would be implemented here.');
+    }
 </script>
 {% endblock %}

@@ -38,12 +38,46 @@ class PatientMatch:
     confidence_score: float = 1.0
     patient_data: Optional[Dict[str, Any]] = None
     cda_content: Optional[str] = None
+    # Enhanced CDA support
+    l1_cda_content: Optional[str] = None
+    l3_cda_content: Optional[str] = None
+    l1_cda_path: Optional[str] = None
+    l3_cda_path: Optional[str] = None
+    preferred_cda_type: str = "L3"  # Default to L3 for rendering
 
     def __post_init__(self):
         if self.available_documents is None:
             self.available_documents = []
         if self.confidence_score == 1.0 and self.match_score != 1.0:
             self.confidence_score = self.match_score
+
+        # Set legacy cda_content to preferred type for backward compatibility
+        if self.preferred_cda_type == "L3" and self.l3_cda_content:
+            self.cda_content = self.l3_cda_content
+            self.file_path = self.l3_cda_path
+        elif self.l1_cda_content:
+            self.cda_content = self.l1_cda_content
+            self.file_path = self.l1_cda_path
+
+    def has_l1_cda(self) -> bool:
+        """Check if L1 CDA is available"""
+        return bool(self.l1_cda_content)
+
+    def has_l3_cda(self) -> bool:
+        """Check if L3 CDA is available"""
+        return bool(self.l3_cda_content)
+
+    def get_rendering_cda(self) -> tuple[Optional[str], str]:
+        """Get the CDA content and type for rendering"""
+        if self.l3_cda_content:
+            return self.l3_cda_content, "L3"
+        elif self.l1_cda_content:
+            return self.l1_cda_content, "L1"
+        return None, "None"
+
+    def get_orcd_cda(self) -> Optional[str]:
+        """Get the CDA content for ORCD (PDF) extraction - prefer L1"""
+        return self.l1_cda_content or self.l3_cda_content
 
 
 class EUPatientSearchService:
@@ -74,8 +108,52 @@ class EUPatientSearchService:
 
         if credentials.patient_id:
             # Direct patient ID match
-            # Create a mock file path for testing
-            file_path = f"test_data/eu_member_states/{credentials.country_code.lower()}/cda_sample.xml"
+            # Simulate finding both L1 and L3 CDA documents
+            l1_file_path = f"test_data/eu_member_states/{credentials.country_code.lower()}/l1_cda_sample.xml"
+            l3_file_path = f"test_data/eu_member_states/{credentials.country_code.lower()}/l3_cda_sample.xml"
+
+            # Mock CDA content for both types
+            l1_mock_content = """<?xml version="1.0" encoding="UTF-8"?>
+<ClinicalDocument xmlns="urn:hl7-org:v3">
+    <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1" extension="L1"/>
+    <!-- L1 CDA with embedded PDF in nonXMLBody -->
+    <component>
+        <nonXMLBody>
+            <text mediaType="application/pdf" representation="B64">
+                JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKPD4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQo+PgplbmRvYmoKeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDEzNiAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDQKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjIwNAolJUVPRgo=
+            </text>
+        </nonXMLBody>
+    </component>
+</ClinicalDocument>"""
+
+            l3_mock_content = """<?xml version="1.0" encoding="UTF-8"?>
+<ClinicalDocument xmlns="urn:hl7-org:v3">
+    <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1" extension="L3"/>
+    <!-- L3 CDA with structured clinical content -->
+    <component>
+        <structuredBody>
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.1.8"/>
+                    <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" displayName="HISTORY OF MEDICATION USE"/>
+                    <title>Medications</title>
+                    <text>
+                        <table>
+                            <thead>
+                                <tr><th>Medication</th><th>Dosage</th><th>Frequency</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Aspirin</td><td>100mg</td><td>Once daily</td></tr>
+                            </tbody>
+                        </table>
+                    </text>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>"""
 
             match = PatientMatch(
                 patient_id=credentials.patient_id,
@@ -86,15 +164,17 @@ class EUPatientSearchService:
                 country_code=credentials.country_code,
                 match_score=1.0,
                 confidence_score=1.0,
-                file_path=file_path,
+                l1_cda_path=l1_file_path,
+                l3_cda_path=l3_file_path,
+                l1_cda_content=l1_mock_content,
+                l3_cda_content=l3_mock_content,
                 patient_data={
                     "id": credentials.patient_id,
                     "name": f"{credentials.given_name} {credentials.family_name}",
                     "birth_date": credentials.birth_date,
                     "gender": credentials.gender,
                 },
-                cda_content="Mock CDA content - to be loaded from file",
-                available_documents=["CDA", "eDispensation", "ePS"],
+                available_documents=["L1_CDA", "L3_CDA", "eDispensation", "ePS"],
             )
             matches.append(match)
 
@@ -150,6 +230,8 @@ class EUPatientSearchService:
         self.logger.info(f"Getting patient summary for {match.patient_id}")
 
         # Create a comprehensive patient summary with nested structure for template
+        rendering_cda, cda_type = match.get_rendering_cda()
+
         summary = {
             "patient_info": {
                 "name": f"{match.given_name} {match.family_name}",
@@ -161,11 +243,14 @@ class EUPatientSearchService:
                 "country_code": match.country_code,
             },
             "document_info": {
-                "title": "Clinical Document Architecture (CDA)",
+                "title": f"Clinical Document Architecture ({cda_type})",
                 "date": "2024-01-15",  # Mock date
-                "type": "CDA",
+                "type": cda_type,
                 "file_path": match.file_path,
                 "status": "available",
+                "rendering_type": cda_type,
+                "has_l1": match.has_l1_cda(),
+                "has_l3": match.has_l3_cda(),
             },
             "match_info": {
                 "confidence_score": match.confidence_score,
@@ -173,7 +258,9 @@ class EUPatientSearchService:
                 "status": "active" if match.confidence_score > 0.8 else "uncertain",
             },
             "available_documents": match.available_documents or [],
-            "cda_available": "CDA" in (match.available_documents or []),
+            "cda_available": match.has_l1_cda() or match.has_l3_cda(),
+            "l1_cda_available": match.has_l1_cda(),
+            "l3_cda_available": match.has_l3_cda(),
             "eps_available": "ePS" in (match.available_documents or []),
             "edispensation_available": "eDispensation"
             in (match.available_documents or []),

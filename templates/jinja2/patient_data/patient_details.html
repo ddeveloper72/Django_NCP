@@ -178,46 +178,59 @@
                     </div>
                     <div class="metadata-item">
                         <i class="icon-layers"></i>
-                        <span>Document Type: L3 CDA with L1 ORCD</span>
+                        <span>Available Types:
+                            {% if l1_available %}L1 CDA{% endif %}
+                            {% if l1_available and l3_available %}, {% endif %}
+                            {% if l3_available %}L3 CDA{% endif %}
+                            {% if not l1_available and not l3_available %}Unknown{% endif %}
+                        </span>
+                    </div>
+                    <div class="metadata-item">
+                        <i class="icon-eye"></i>
+                        <span>Rendering: {{ preferred_cda_type }} CDA ({{ 'Structured Clinical Content' if
+                            preferred_cda_type == 'L3' else 'Original Document Headers' }})</span>
                     </div>
                 </div>
+                <span>Document Type: L3 CDA with L1 ORCD</span>
             </div>
         </div>
-        {% else %}
-        <!-- No Match Found -->
-        <div class="no-match-card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="icon-search"></i>
-                    Search Results
-                </h2>
-            </div>
-
-            <div class="card-content">
-                <div class="no-match-message">
-                    <i class="icon-alert-circle"></i>
-                    <h3>No Matching Records Found</h3>
-                    <p>We could not find any patient records in the EU member states database that match the provided
-                        credentials.</p>
-
-                    <div class="search-suggestions">
-                        <h4>Suggestions:</h4>
-                        <ul>
-                            <li>Verify the patient name spelling</li>
-                            <li>Check the date of birth format</li>
-                            <li>Ensure the correct country is selected</li>
-                            <li>Try providing additional patient identifiers</li>
-                        </ul>
-                    </div>
-
-                    <a href="{{ url('patient_data:patient_data_form') }}" class="action-button primary">
-                        <i class="icon-search"></i>
-                        Try Another Search
-                    </a>
-                </div>
-            </div>
-        </div>
-        {% endif %}
     </div>
+</div>
+{% else %}
+<!-- No Match Found -->
+<div class="no-match-card">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="icon-search"></i>
+            Search Results
+        </h2>
+    </div>
+
+    <div class="card-content">
+        <div class="no-match-message">
+            <i class="icon-alert-circle"></i>
+            <h3>No Matching Records Found</h3>
+            <p>We could not find any patient records in the EU member states database that match the provided
+                credentials.</p>
+
+            <div class="search-suggestions">
+                <h4>Suggestions:</h4>
+                <ul>
+                    <li>Verify the patient name spelling</li>
+                    <li>Check the date of birth format</li>
+                    <li>Ensure the correct country is selected</li>
+                    <li>Try providing additional patient identifiers</li>
+                </ul>
+            </div>
+
+            <a href="{{ url('patient_data:patient_data_form') }}" class="action-button primary">
+                <i class="icon-search"></i>
+                Try Another Search
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+</div>
 </div>
 {% endblock %}
