@@ -36,6 +36,17 @@ urlpatterns = [
         main_views.download_cda_pdf,
         name="download_cda_pdf",
     ),
+    # New CDA/ORCD views based on requirements
+    path(
+        "download/html/<int:patient_id>/",
+        main_views.download_cda_html,
+        name="download_cda_html",
+    ),
+    path(
+        "orcd/<int:patient_id>/",
+        main_views.patient_orcd_view,
+        name="patient_orcd_view",
+    ),
     # Enhanced CDA Translation Views
     path(
         "cda/enhanced/<int:patient_id>/",

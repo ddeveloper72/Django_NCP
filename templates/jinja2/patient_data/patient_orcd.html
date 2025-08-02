@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}ORCD Document - {{ patient_data.given_name }} {{ patient_data.family_name }}{% endblock %}
+
+{% block content %}
+<div class="orcd-container">
+    <div class="orcd-header">
+        <div class="breadcrumb-nav">
+            <a href="{{ url('patient_data:patient_details', patient_data.id) }}" class="breadcrumb-link">
+                <i class="icon-arrow-left"></i> Back to Patient Details
+            </a>
+        </div>
+
+        <h1 class="page-title">Original Clinical Document (ORCD)</h1>
+        
+        <div class="document-info">
+            <div class="info-badge">
+                <i class="icon-file-text"></i>
+                PDF Document
+            </div>
+            <div class="info-badge">
+                <i class="icon-globe"></i>
+                Source: {{ source_country }}
+            </div>
+            <div class="info-badge success">
+                <i class="icon-check-circle"></i>
+                {{ confidence }}% Match
+            </div>
+        </div>
+    </div>
+
+    <div class="orcd-content">
+        {% if orcd_available %}
+        <!-- PDF Preview Container -->
+        <div class="pdf-preview-container">
+            <div class="pdf-toolbar">
+                <div class="toolbar-left">
+                    <h2>{{ patient_data.given_name }} {{ patient_data.family_name }} - Clinical Document</h2>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-secondary" onclick="downloadORCD()">
+                        <i class="icon-download"></i>
+                        Download PDF
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="openFullscreen()">
+                        <i class="icon-maximize"></i>
+                        Fullscreen
+                    </button>
+                </div>
+            </div>
+
+            <!-- PDF Viewer -->
+            <div class="pdf-viewer">
+                <div class="pdf-placeholder">
+                    <div class="placeholder-content">
+                        <i class="icon-file-text"></i>
+                        <h3>ORCD PDF Preview</h3>
+                        <p>This would display the original clinical document (ORCD) extracted from the L1 CDA as a PDF.</p>
+                        <p><strong>Implementation Note:</strong> The PDF content would be extracted from the base64 encoded section of the L1 CDA document.</p>
+                        
+                        <div class="pdf-info">
+                            <div class="info-item">
+                                <strong>Patient:</strong> {{ patient_data.given_name }} {{ patient_data.family_name }}
+                            </div>
+                            <div class="info-item">
+                                <strong>Source File:</strong> {{ file_name }}
+                            </div>
+                            <div class="info-item">
+                                <strong>Document Type:</strong> Original Clinical Document (PDF)
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary mt-3" onclick="downloadORCD()">
+                            <i class="icon-download"></i>
+                            Download Original PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Metadata -->
+        <div class="document-metadata-panel">
+            <h3>Document Information</h3>
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <label>Patient Name:</label>
+                    <span>{{ patient_data.given_name }} {{ patient_data.family_name }}</span>
+                </div>
+                <div class="metadata-item">
+                    <label>Date of Birth:</label>
+                    <span>{{ patient_data.birth_date|date:"d F Y" }}</span>
+                </div>
+                <div class="metadata-item">
+                    <label>Source Country:</label>
+                    <span>{{ source_country }}</span>
+                </div>
+                <div class="metadata-item">
+                    <label>Match Confidence:</label>
+                    <span>{{ confidence }}%</span>
+                </div>
+                <div class="metadata-item">
+                    <label>Source File:</label>
+                    <span>{{ file_name }}</span>
+                </div>
+                <div class="metadata-item">
+                    <label>Document Format:</label>
+                    <span>PDF (Base64 encoded in L1 CDA)</span>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- No ORCD Available -->
+        <div class="no-orcd-container">
+            <div class="alert alert-warning">
+                <h3><i class="icon-alert-triangle"></i> ORCD Not Available</h3>
+                <p>The Original Clinical Document (ORCD) is not available for this patient record.</p>
+                <p>This could be because:</p>
+                <ul>
+                    <li>The source document is L3 CDA only (no embedded PDF)</li>
+                    <li>The ORCD was not included in the original submission</li>
+                    <li>The document format does not support embedded PDFs</li>
+                </ul>
+            </div>
+
+            <div class="alternative-actions">
+                <h4>Alternative Actions:</h4>
+                <a href="{{ url('patient_data:patient_cda_view', patient_data.id) }}" class="btn btn-primary">
+                    <i class="icon-eye"></i>
+                    View L3 CDA Document
+                </a>
+                <a href="{{ url('patient_data:download_cda_html', patient_data.id) }}" class="btn btn-secondary">
+                    <i class="icon-download"></i>
+                    Download HTML Version
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.orcd-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.orcd-header {
+    margin-bottom: 30px;
+}
+
+.document-info {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    background: var(--neutral-lighter);
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.info-badge.success {
+    background: var(--success-lighter);
+    color: var(--success-darker);
+}
+
+.pdf-preview-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.pdf-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--neutral-lighter);
+    background: var(--neutral-lightest);
+    border-radius: 8px 8px 0 0;
+}
+
+.toolbar-right {
+    display: flex;
+    gap: 10px;
+}
+
+.pdf-viewer {
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+}
+
+.pdf-placeholder {
+    text-align: center;
+    padding: 60px 40px;
+    max-width: 500px;
+}
+
+.pdf-placeholder .icon-file-text {
+    font-size: 4rem;
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+}
+
+.pdf-info {
+    background: white;
+    border-radius: 6px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.pdf-info .info-item {
+    margin-bottom: 10px;
+}
+
+.document-metadata-panel {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.metadata-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.metadata-item label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.metadata-item span {
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.no-orcd-container {
+    text-align: center;
+    padding: 60px 40px;
+}
+
+.alternative-actions {
+    margin-top: 30px;
+}
+
+.alternative-actions .btn {
+    margin: 0 10px 10px 0;
+}
+
+@media (max-width: 768px) {
+    .pdf-toolbar {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .toolbar-right {
+        justify-content: center;
+    }
+    
+    .document-info {
+        justify-content: center;
+    }
+    
+    .metadata-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function downloadORCD() {
+    // This would implement the actual PDF download functionality
+    // For now, show a placeholder message
+    alert('PDF download would be implemented here. This would extract and download the base64 PDF from the L1 CDA document.');
+}
+
+function openFullscreen() {
+    // This would open the PDF in fullscreen mode
+    alert('Fullscreen PDF viewer would be implemented here.');
+}
+</script>
+{% endblock %}

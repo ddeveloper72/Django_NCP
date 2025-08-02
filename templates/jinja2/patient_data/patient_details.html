@@ -140,30 +140,26 @@
 
             <div class="card-content">
                 <div class="action-buttons">
+                    <!-- View CDA Document - L3 Browser View -->
                     <a href="{{ url('patient_data:patient_cda_view', patient_data.id) }}" class="action-button primary">
                         <i class="icon-eye"></i>
                         View CDA Document
                         <span class="button-subtitle">L3 Browser View</span>
                     </a>
 
-                    <a href="{{ url('patient_data:enhanced_cda_view', patient_data.id) }}" class="action-button accent">
-                        <i class="icon-globe"></i>
-                        Enhanced Translation View
-                        <span class="button-subtitle">Section-by-Section Translation</span>
-                    </a>
-
-                    <a href="{{ url('patient_data:patient_cda_translated_view', patient_data.id) }}"
-                        class="action-button accent">
-                        <i class="icon-globe"></i>
-                        View Translated
-                        <span class="button-subtitle">Multi-language Support</span>
-                    </a>
-
-                    <a href="{{ url('patient_data:download_cda_pdf', patient_data.id) }}"
+                    <!-- CDA Download - HTML Transcoded View -->
+                    <a href="{{ url('patient_data:download_cda_html', patient_data.id) }}"
                         class="action-button secondary" download>
                         <i class="icon-download"></i>
-                        Download PDF
-                        <span class="button-subtitle">{{ cda_file_name }}</span>
+                        CDA Download
+                        <span class="button-subtitle">HTML Document</span>
+                    </a>
+
+                    <!-- ORCD - PDF Preview and Download -->
+                    <a href="{{ url('patient_data:patient_orcd_view', patient_data.id) }}" class="action-button accent">
+                        <i class="icon-file-text"></i>
+                        ORCD
+                        <span class="button-subtitle">PDF Preview & Download</span>
                     </a>
                 </div>
 
@@ -179,6 +175,10 @@
                     <div class="metadata-item">
                         <i class="icon-check"></i>
                         <span>Match Confidence: {{ match_confidence }}%</span>
+                    </div>
+                    <div class="metadata-item">
+                        <i class="icon-layers"></i>
+                        <span>Document Type: L3 CDA with L1 ORCD</span>
                     </div>
                 </div>
             </div>

@@ -47,21 +47,33 @@
         <div class="cda-viewer">
             <div class="cda-toolbar">
                 <div class="toolbar-left">
-                    <h3>Clinical Document Architecture (CDA) XML</h3>
+                    <h3>Clinical Document Architecture (L3 CDA)</h3>
                 </div>
                 <div class="toolbar-right">
-                    <button class="btn btn-secondary" onclick="toggleFormatting()">
-                        <i class="icon-code"></i> Toggle Formatting
+                    <button class="btn btn-secondary" onclick="toggleView()">
+                        <i class="icon-code"></i> Toggle Source View
                     </button>
-                    <a href="{{ url('patient_data:download_cda_pdf', patient_data.id) }}" class="btn btn-primary"
+                    <a href="{{ url('patient_data:download_cda_html', patient_data.id) }}" class="btn btn-primary"
                         download>
-                        <i class="icon-download"></i> Download
+                        <i class="icon-download"></i> Download HTML
                     </a>
                 </div>
             </div>
 
-            <div class="cda-content" id="cdaContent">
-                <pre id="xmlContent">{{ cda_content|escape }}</pre>
+            <!-- Rendered HTML View -->
+            <div class="cda-rendered-view" id="renderedView">
+                <div class="cda-iframe-container">
+                    <iframe id="cdaFrame" srcdoc="{{ cda_content|escape }}" 
+                            style="width: 100%; height: 700px; border: none; background: white;">
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Source XML View (hidden by default) -->
+            <div class="cda-source-view" id="sourceView" style="display: none;">
+                <div class="cda-content">
+                    <pre id="xmlContent">{{ cda_content|escape }}</pre>
+                </div>
             </div>
         </div>
 
@@ -72,10 +84,15 @@
                 Back to Patient Details
             </a>
 
-            <a href="{{ url('patient_data:download_cda_pdf', patient_data.id) }}" class="action-button primary"
+            <a href="{{ url('patient_data:download_cda_html', patient_data.id) }}" class="action-button primary"
                 download>
                 <i class="icon-download"></i>
-                Download CDA Document
+                Download HTML Document
+            </a>
+
+            <a href="{{ url('patient_data:patient_orcd_view', patient_data.id) }}" class="action-button accent">
+                <i class="icon-file-text"></i>
+                View ORCD
             </a>
 
             <a href="{{ url('patient_data:patient_data_form') }}" class="action-button outline">
@@ -85,17 +102,61 @@
         </div>
     </div>
 
-    <script>
-        // Simple XML formatting toggle
-        function toggleFormatting() {
-            const xmlContent = document.getElementById('xmlContent');
-            const content = xmlContent.textContent;
+    <style>
+    .cda-iframe-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
 
-            if (xmlContent.classList.contains('formatted')) {
-                // Remove formatting
-                xmlContent.innerHTML = content;
-                xmlContent.classList.remove('formatted');
+    .cda-rendered-view {
+        margin-top: 20px;
+    }
+
+    .cda-source-view {
+        margin-top: 20px;
+    }
+
+    .action-button.accent {
+        background: var(--accent-color, #6f42c1);
+        color: white;
+    }
+
+    .action-button.accent:hover {
+        background: var(--accent-color-dark, #5a32a3);
+    }
+    </style>
+
+    <script>
+        let showingSource = false;
+
+        function toggleView() {
+            const renderedView = document.getElementById('renderedView');
+            const sourceView = document.getElementById('sourceView');
+            const toggleButton = document.querySelector('.btn-secondary');
+
+            if (showingSource) {
+                // Show rendered view
+                renderedView.style.display = 'block';
+                sourceView.style.display = 'none';
+                toggleButton.innerHTML = '<i class="icon-code"></i> Toggle Source View';
+                showingSource = false;
             } else {
+                // Show source view
+                renderedView.style.display = 'none';
+                sourceView.style.display = 'block';
+                toggleButton.innerHTML = '<i class="icon-eye"></i> Toggle Rendered View';
+                formatXML();
+                showingSource = true;
+            }
+        }
+
+        function formatXML() {
+            const xmlContent = document.getElementById('xmlContent');
+            if (xmlContent && !xmlContent.classList.contains('formatted')) {
+                const content = xmlContent.textContent;
+                
                 // Add basic XML syntax highlighting
                 let formatted = content
                     .replace(/(&lt;[^&]*&gt;)/g, '<span class="xml-tag">$1</span>')
@@ -106,10 +167,5 @@
                 xmlContent.classList.add('formatted');
             }
         }
-
-        // Auto-format on load
-        document.addEventListener('DOMContentLoaded', function () {
-            toggleFormatting();
-        });
     </script>
     {% endblock %}

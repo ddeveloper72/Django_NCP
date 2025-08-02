@@ -221,6 +221,61 @@ def download_cda_pdf(request, patient_id):
         return redirect("patient_data:patient_data_form")
 
 
+def download_cda_html(request, patient_id):
+    """Download CDA document as HTML transcoded view"""
+
+    try:
+        patient_data = PatientData.objects.get(id=patient_id)
+        match_data = request.session.get(f"patient_match_{patient_id}")
+
+        if not match_data:
+            messages.error(request, "No CDA document found for this patient.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+        # Return the HTML content for download
+        # The CDA content should already be in HTML format from the L3 transformation
+        response = HttpResponse(
+            match_data["cda_content"], content_type="text/html"
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="patient_cda_{patient_id}.html"'
+        )
+
+        return response
+
+    except PatientData.DoesNotExist:
+        messages.error(request, "Patient data not found.")
+        return redirect("patient_data:patient_data_form")
+
+
+def patient_orcd_view(request, patient_id):
+    """View for displaying ORCD (Original Clinical Document) PDF preview"""
+
+    try:
+        patient_data = PatientData.objects.get(id=patient_id)
+        match_data = request.session.get(f"patient_match_{patient_id}")
+
+        if not match_data:
+            messages.error(request, "No CDA document found for this patient.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+        # For now, we'll create a placeholder ORCD view
+        # In a real implementation, this would extract the base64 PDF from L1 CDA
+        context = {
+            "patient_data": patient_data,
+            "source_country": match_data["country_code"],
+            "confidence": round(match_data["confidence_score"] * 100, 1),
+            "file_name": os.path.basename(match_data["file_path"]),
+            "orcd_available": True,  # This would be determined by checking L1 CDA for base64 PDF
+        }
+
+        return render(request, "patient_data/patient_orcd.html", context, using="jinja2")
+
+    except PatientData.DoesNotExist:
+        messages.error(request, "Patient data not found.")
+        return redirect("patient_data:patient_data_form")
+
+
 # ========================================
 # Legacy Views (Minimal Implementation)
 # ========================================
