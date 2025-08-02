@@ -37,7 +37,7 @@ class ClinicalDocumentPDFService:
         pdf_attachments = []
 
         # HL7 CDA namespace
-        ns = {'hl7': 'urn:hl7-org:v3'}
+        ns = {"hl7": "urn:hl7-org:v3"}
 
         # Define common patterns for base64 content in clinical documents
         # Both with and without namespaces for compatibility
@@ -66,7 +66,7 @@ class ClinicalDocumentPDFService:
 
         for pattern in base64_patterns:
             try:
-                if pattern.startswith('.//hl7:'):
+                if pattern.startswith(".//hl7:"):
                     elements = root.findall(pattern, ns)
                 else:
                     elements = root.findall(pattern)

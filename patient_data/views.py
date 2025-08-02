@@ -423,7 +423,7 @@ def view_orcd_pdf(request, patient_id, attachment_index=0):
         if not match_data:
             return HttpResponse(
                 "<html><body><h1>No CDA document found</h1><p>Please return to the patient details page.</p></body></html>",
-                status=404
+                status=404,
             )
 
         # Initialize PDF service and extract PDFs
@@ -442,7 +442,7 @@ def view_orcd_pdf(request, patient_id, attachment_index=0):
         if not orcd_cda_content:
             return HttpResponse(
                 "<html><body><h1>No CDA content available</h1><p>No document content could be retrieved.</p></body></html>",
-                status=404
+                status=404,
             )
 
         try:
@@ -451,7 +451,7 @@ def view_orcd_pdf(request, patient_id, attachment_index=0):
             if not pdf_attachments or attachment_index >= len(pdf_attachments):
                 return HttpResponse(
                     f"<html><body><h1>PDF not found</h1><p>PDF attachment not found in {cda_type_used} CDA.</p></body></html>",
-                    status=404
+                    status=404,
                 )
 
             # Get the requested PDF attachment
@@ -463,23 +463,301 @@ def view_orcd_pdf(request, patient_id, attachment_index=0):
                 f"Viewing ORCD PDF inline from {cda_type_used} CDA for patient {patient_id}"
             )
 
-            # Return PDF response for inline viewing
-            return pdf_service.get_pdf_response(
+            # Return PDF response for inline viewing with enhanced headers
+            response = pdf_service.get_pdf_response(
                 pdf_data, filename, disposition="inline"
             )
+
+            # Add headers to help with PDF display
+            response["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response["Pragma"] = "no-cache"
+            response["Expires"] = "0"
+            response["X-Content-Type-Options"] = "nosniff"
+            response["X-Frame-Options"] = "SAMEORIGIN"
+
+            return response
 
         except Exception as e:
             logger.error(f"Error viewing PDF: {e}")
             return HttpResponse(
                 f"<html><body><h1>Error loading PDF</h1><p>Error extracting PDF from document: {e}</p></body></html>",
-                status=500
+                status=500,
             )
 
     except PatientData.DoesNotExist:
         return HttpResponse(
             "<html><body><h1>Patient not found</h1><p>Patient data not found.</p></body></html>",
-            status=404
+            status=404,
         )
+
+
+def debug_orcd_pdf(request, patient_id):
+    """Debug ORCD PDF extraction and display"""
+
+    try:
+        patient_data = PatientData.objects.get(id=patient_id)
+        match_data = request.session.get(f"patient_match_{patient_id}")
+
+        debug_info = []
+        debug_info.append(f"<h2>PDF Debug Information for Patient {patient_id}</h2>")
+        debug_info.append(
+            f"<p><strong>Patient:</strong> {patient_data.given_name} {patient_data.family_name}</p>"
+        )
+
+        if not match_data:
+            debug_info.append(
+                "<p><strong>Error:</strong> No CDA document found in session</p>"
+            )
+        else:
+            debug_info.append("<p><strong>Session data found:</strong> ✓</p>")
+
+            # Check CDA content
+            l1_cda_content = match_data.get("l1_cda_content")
+            l3_cda_content = match_data.get("l3_cda_content")
+            debug_info.append(
+                f"<p><strong>L1 CDA Available:</strong> {'✓' if l1_cda_content else '✗'}</p>"
+            )
+            debug_info.append(
+                f"<p><strong>L3 CDA Available:</strong> {'✓' if l3_cda_content else '✗'}</p>"
+            )
+
+            if l1_cda_content:
+                debug_info.append(
+                    f"<p><strong>L1 CDA Length:</strong> {len(l1_cda_content)} characters</p>"
+                )
+            if l3_cda_content:
+                debug_info.append(
+                    f"<p><strong>L3 CDA Length:</strong> {len(l3_cda_content)} characters</p>"
+                )
+
+            # Test PDF extraction
+            pdf_service = ClinicalDocumentPDFService()
+            orcd_cda_content = l1_cda_content or l3_cda_content or ""
+            cda_type_used = (
+                "L1" if l1_cda_content else ("L3" if l3_cda_content else "Unknown")
+            )
+
+            if orcd_cda_content:
+                try:
+                    pdf_attachments = pdf_service.extract_pdfs_from_xml(
+                        orcd_cda_content
+                    )
+                    debug_info.append(
+                        f"<p><strong>PDF Attachments Found:</strong> {len(pdf_attachments)}</p>"
+                    )
+                    debug_info.append(
+                        f"<p><strong>CDA Type Used:</strong> {cda_type_used}</p>"
+                    )
+
+                    for i, pdf in enumerate(pdf_attachments):
+                        debug_info.append(f"<p><strong>PDF {i + 1}:</strong></p>")
+                        debug_info.append(f"<ul>")
+                        debug_info.append(f"  <li>Size: {pdf['size']} bytes</li>")
+                        debug_info.append(f"  <li>Filename: {pdf['filename']}</li>")
+                        debug_info.append(
+                            f"  <li>Valid PDF header: {'✓' if pdf['data'].startswith(b'%PDF') else '✗'}</li>"
+                        )
+                        debug_info.append(
+                            f"  <li>First 100 bytes: {pdf['data'][:100]}</li>"
+                        )
+                        debug_info.append(f"</ul>")
+
+                        # Create download link for this PDF
+                        debug_info.append(
+                            f"<p><a href='/patients/orcd/{patient_id}/download/{i}/' target='_blank'>Download PDF {i + 1}</a></p>"
+                        )
+                        debug_info.append(
+                            f"<p><a href='/patients/orcd/{patient_id}/view/' target='_blank'>View PDF {i + 1} Inline</a></p>"
+                        )
+
+                except Exception as e:
+                    debug_info.append(
+                        f"<p><strong>PDF Extraction Error:</strong> {str(e)}</p>"
+                    )
+            else:
+                debug_info.append(
+                    "<p><strong>Error:</strong> No CDA content available</p>"
+                )
+
+        debug_info.append("<hr>")
+        debug_info.append(
+            f"<p><a href='/patients/{patient_id}/details/'>← Back to Patient Details</a></p>"
+        )
+        debug_info.append(
+            f"<p><a href='/patients/{patient_id}/orcd/'>← Back to ORCD Viewer</a></p>"
+        )
+
+        html_content = f"""
+        <html>
+        <head>
+            <title>ORCD PDF Debug - {patient_data.given_name} {patient_data.family_name}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 40px; }}
+                h2 {{ color: #2c3e50; }}
+                p {{ margin: 10px 0; }}
+                ul {{ margin: 10px 0; }}
+                a {{ color: #3498db; text-decoration: none; }}
+                a:hover {{ text-decoration: underline; }}
+            </style>
+        </head>
+        <body>
+            {''.join(debug_info)}
+        </body>
+        </html>
+        """
+
+        return HttpResponse(html_content)
+
+    except PatientData.DoesNotExist:
+        return HttpResponse(
+            "<html><body><h1>Patient not found</h1><p>Patient data not found.</p></body></html>",
+            status=404,
+        )
+    except Exception as e:
+        return HttpResponse(
+            f"<html><body><h1>Debug Error</h1><p>Error during debug: {str(e)}</p></body></html>",
+            status=500,
+        )
+
+
+def orcd_pdf_base64(request, patient_id, attachment_index=0):
+    """Return ORCD PDF as base64 data URL for direct embedding"""
+
+    try:
+        patient_data = PatientData.objects.get(id=patient_id)
+        match_data = request.session.get(f"patient_match_{patient_id}")
+
+        if not match_data:
+            return HttpResponse("No CDA document found", status=404)
+
+        # Initialize PDF service and extract PDFs
+        pdf_service = ClinicalDocumentPDFService()
+        l1_cda_content = match_data.get("l1_cda_content")
+        l3_cda_content = match_data.get("l3_cda_content")
+        orcd_cda_content = (
+            l1_cda_content or l3_cda_content or match_data.get("cda_content", "")
+        )
+
+        if not orcd_cda_content:
+            return HttpResponse("No CDA content available", status=404)
+
+        try:
+            pdf_attachments = pdf_service.extract_pdfs_from_xml(orcd_cda_content)
+
+            if not pdf_attachments or attachment_index >= len(pdf_attachments):
+                return HttpResponse("PDF attachment not found", status=404)
+
+            # Get the PDF data
+            pdf_attachment = pdf_attachments[attachment_index]
+            pdf_data = pdf_attachment["data"]
+
+            # Convert to base64
+            import base64
+
+            pdf_base64 = base64.b64encode(pdf_data).decode("utf-8")
+
+            # Create HTML page with embedded PDF using data URL
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>ORCD PDF - {patient_data.given_name} {patient_data.family_name}</title>
+                <style>
+                    body {{ 
+                        margin: 0; 
+                        padding: 20px; 
+                        font-family: Arial, sans-serif; 
+                        background: #f5f5f5;
+                    }}
+                    .pdf-container {{ 
+                        background: white; 
+                        border-radius: 8px; 
+                        padding: 20px; 
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    }}
+                    .pdf-header {{
+                        margin-bottom: 20px;
+                        padding-bottom: 15px;
+                        border-bottom: 1px solid #eee;
+                    }}
+                    .pdf-viewer {{
+                        width: 100%;
+                        height: 800px;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                    }}
+                    .fallback {{
+                        text-align: center;
+                        padding: 40px;
+                        background: #f8f9fa;
+                        border-radius: 4px;
+                        border: 2px dashed #dee2e6;
+                    }}
+                    .btn {{
+                        display: inline-block;
+                        padding: 8px 16px;
+                        background: #007bff;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 4px;
+                        margin: 5px;
+                    }}
+                    .btn:hover {{
+                        background: #0056b3;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="pdf-container">
+                    <div class="pdf-header">
+                        <h2>ORCD PDF Document</h2>
+                        <p><strong>Patient:</strong> {patient_data.given_name} {patient_data.family_name}</p>
+                        <p><strong>Document Size:</strong> {len(pdf_data):,} bytes</p>
+                        <a href="javascript:history.back()" class="btn">← Back</a>
+                        <a href="/patients/orcd/{patient_id}/download/" class="btn">Download PDF</a>
+                    </div>
+                    
+                    <!-- Primary: Object with data URL -->
+                    <object 
+                        class="pdf-viewer" 
+                        data="data:application/pdf;base64,{pdf_base64}" 
+                        type="application/pdf">
+                        
+                        <!-- Fallback: Embed with data URL -->
+                        <embed 
+                            src="data:application/pdf;base64,{pdf_base64}" 
+                            type="application/pdf" 
+                            width="100%" 
+                            height="800px" />
+                        
+                        <!-- Final fallback -->
+                        <div class="fallback">
+                            <h3>PDF Preview Not Available</h3>
+                            <p>Your browser doesn't support inline PDF viewing.</p>
+                            <a href="/patients/orcd/{patient_id}/download/" class="btn">Download PDF Instead</a>
+                        </div>
+                    </object>
+                </div>
+                
+                <script>
+                    // Try to detect if PDF loaded successfully
+                    setTimeout(function() {{
+                        console.log('PDF data URL length: {len(pdf_base64)} characters');
+                        console.log('PDF starts with valid header: {str(pdf_data.startswith(b"%PDF")).lower()}');
+                    }}, 1000);
+                </script>
+            </body>
+            </html>
+            """
+
+            return HttpResponse(html_content)
+
+        except Exception as e:
+            logger.error(f"Error creating base64 PDF: {{e}}")
+            return HttpResponse(f"Error processing PDF: {{str(e)}}", status=500)
+
+    except PatientData.DoesNotExist:
+        return HttpResponse("Patient not found", status=404)
 
 
 # ========================================

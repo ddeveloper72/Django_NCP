@@ -58,6 +58,16 @@ urlpatterns = [
         name="view_orcd_pdf",
     ),
     path(
+        "orcd/<int:patient_id>/debug/",
+        main_views.debug_orcd_pdf,
+        name="debug_orcd_pdf",
+    ),
+    path(
+        "orcd/<int:patient_id>/base64/",
+        main_views.orcd_pdf_base64,
+        name="orcd_pdf_base64",
+    ),
+    path(
         "orcd/<int:patient_id>/download/<int:attachment_index>/",
         main_views.download_orcd_pdf,
         name="download_orcd_pdf_indexed",
