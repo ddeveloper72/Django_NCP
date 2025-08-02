@@ -48,9 +48,12 @@ def patient_data_view(request):
 
             # Search for matching CDA documents
             search_service = EUPatientSearchService()
-            match = search_service.search_patient(credentials)
+            matches = search_service.search_patient(credentials)
 
-            if match:
+            if matches:
+                # Get the first (best) match
+                match = matches[0]
+
                 # Store the CDA match in session for later use
                 request.session[f"patient_match_{patient_data.id}"] = {
                     "file_path": match.file_path,
@@ -106,10 +109,27 @@ def patient_details_view(request, patient_id):
             # Reconstruct match object for summary
             from .services import PatientMatch
 
+            # Extract required fields from patient_data or use defaults
+            patient_info = match_data.get("patient_data", {})
+            patient_name_parts = patient_info.get("name", "Unknown Unknown").split(
+                " ", 1
+            )
+            given_name = (
+                patient_name_parts[0] if len(patient_name_parts) > 0 else "Unknown"
+            )
+            family_name = (
+                patient_name_parts[1] if len(patient_name_parts) > 1 else "Unknown"
+            )
+
             match = PatientMatch(
-                file_path=match_data["file_path"],
+                patient_id=patient_info.get("id", "unknown"),
+                given_name=given_name,
+                family_name=family_name,
+                birth_date=patient_info.get("birth_date", "unknown"),
+                gender=patient_info.get("gender", "unknown"),
                 country_code=match_data["country_code"],
                 confidence_score=match_data["confidence_score"],
+                file_path=match_data["file_path"],
                 patient_data=match_data["patient_data"],
                 cda_content=match_data["cda_content"],
             )

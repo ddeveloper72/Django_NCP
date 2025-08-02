@@ -34,10 +34,16 @@ class PatientMatch:
     country_code: str
     match_score: float = 1.0
     available_documents: List[str] = None
+    file_path: Optional[str] = None
+    confidence_score: float = 1.0
+    patient_data: Optional[Dict[str, Any]] = None
+    cda_content: Optional[str] = None
 
     def __post_init__(self):
         if self.available_documents is None:
             self.available_documents = []
+        if self.confidence_score == 1.0 and self.match_score != 1.0:
+            self.confidence_score = self.match_score
 
 
 class EUPatientSearchService:
@@ -68,6 +74,9 @@ class EUPatientSearchService:
 
         if credentials.patient_id:
             # Direct patient ID match
+            # Create a mock file path for testing
+            file_path = f"test_data/eu_member_states/{credentials.country_code.lower()}/cda_sample.xml"
+
             match = PatientMatch(
                 patient_id=credentials.patient_id,
                 given_name=credentials.given_name,
@@ -76,6 +85,15 @@ class EUPatientSearchService:
                 gender=credentials.gender,
                 country_code=credentials.country_code,
                 match_score=1.0,
+                confidence_score=1.0,
+                file_path=file_path,
+                patient_data={
+                    "id": credentials.patient_id,
+                    "name": f"{credentials.given_name} {credentials.family_name}",
+                    "birth_date": credentials.birth_date,
+                    "gender": credentials.gender,
+                },
+                cda_content="Mock CDA content - to be loaded from file",
                 available_documents=["CDA", "eDispensation", "ePS"],
             )
             matches.append(match)
@@ -118,3 +136,49 @@ class EUPatientSearchService:
         ]
 
         return documents
+
+    def get_patient_summary(self, match: "PatientMatch") -> Dict[str, Any]:
+        """
+        Get a summary of patient information for display
+
+        Args:
+            match: PatientMatch object with patient information
+
+        Returns:
+            Dictionary with patient summary data structured for template access
+        """
+        self.logger.info(f"Getting patient summary for {match.patient_id}")
+
+        # Create a comprehensive patient summary with nested structure for template
+        summary = {
+            "patient_info": {
+                "name": f"{match.given_name} {match.family_name}",
+                "patient_id": match.patient_id,
+                "given_name": match.given_name,
+                "family_name": match.family_name,
+                "birth_date": match.birth_date,
+                "gender": match.gender,
+                "country_code": match.country_code,
+            },
+            "document_info": {
+                "title": "Clinical Document Architecture (CDA)",
+                "date": "2024-01-15",  # Mock date
+                "type": "CDA",
+                "file_path": match.file_path,
+                "status": "available",
+            },
+            "match_info": {
+                "confidence_score": match.confidence_score,
+                "match_score": match.match_score,
+                "status": "active" if match.confidence_score > 0.8 else "uncertain",
+            },
+            "available_documents": match.available_documents or [],
+            "cda_available": "CDA" in (match.available_documents or []),
+            "eps_available": "ePS" in (match.available_documents or []),
+            "edispensation_available": "eDispensation"
+            in (match.available_documents or []),
+            "document_count": len(match.available_documents or []),
+            "last_updated": "2024-01-15",  # Mock date
+        }
+
+        return summary
