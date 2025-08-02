@@ -1,0 +1,231 @@
+// Patient CDA Document Page Styles
+.cda-document-container {
+  padding: $space-xl;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: $space-xl;
+
+  .breadcrumb-nav {
+    margin-bottom: $space-lg;
+
+    .breadcrumb-link {
+      display: inline-flex;
+      align-items: center;
+      gap: $space-sm;
+      color: $primary-blue;
+      text-decoration: none;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+
+      &:hover {
+        text-decoration: underline;
+        color: darken($primary-blue, 10%);
+      }
+
+      i {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: $font-weight-bold;
+    color: $text-dark;
+    margin-bottom: $space-sm;
+  }
+
+  .page-subtitle {
+    font-size: $font-size-lg;
+    color: $text-muted;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.cda-metadata {
+  @include card-base;
+  margin-bottom: $space-xl;
+
+  h3 {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    color: $text-dark;
+    margin-bottom: $space-lg;
+    border-bottom: 2px solid $neutral-lighter;
+    padding-bottom: $space-sm;
+  }
+
+  .metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: $space-lg;
+
+    .metadata-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: $space-md;
+      background: $neutral-lightest;
+      border-radius: $border-radius-md;
+      border-left: 4px solid $primary-blue;
+
+      .metadata-label {
+        font-weight: $font-weight-semibold;
+        color: $text-muted;
+        font-size: $font-size-sm;
+      }
+
+      .metadata-value {
+        font-weight: $font-weight-medium;
+        color: $text-dark;
+        font-size: $font-size-base;
+      }
+    }
+  }
+}
+
+.cda-viewer {
+  @include card-base;
+  margin-bottom: $space-xl;
+
+  .cda-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $space-lg;
+    background: $neutral-lightest;
+    border-bottom: 1px solid $neutral-lighter;
+    margin: (-$space-lg) (-$space-lg) $space-lg (-$space-lg);
+
+    .toolbar-left h3 {
+      margin: 0;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $text-dark;
+    }
+
+    .toolbar-right {
+      display: flex;
+      gap: $space-md;
+    }
+  }
+
+  .cda-content {
+    background: $neutral-dark;
+    border-radius: $border-radius-md;
+    overflow: hidden;
+
+    #xmlContent {
+      background: $neutral-dark;
+      color: $neutral-lightest;
+      padding: $space-lg;
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      font-size: $font-size-sm;
+      line-height: 1.4;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+
+      &.formatted {
+        .xml-tag {
+          color: #569cd6;
+        }
+
+        .xml-attribute {
+          color: #9cdcfe;
+        }
+
+        .xml-value {
+          color: #ce9178;
+        }
+
+        .xml-comment {
+          color: #6a9955;
+          font-style: italic;
+        }
+      }
+    }
+  }
+}
+
+.document-actions {
+  display: flex;
+  justify-content: center;
+  gap: $space-lg;
+  margin-top: $space-xl;
+
+  .action-button {
+    @include button-base;
+    display: inline-flex;
+    align-items: center;
+    gap: $space-sm;
+    padding: $space-md $space-lg;
+    text-decoration: none;
+    border-radius: $border-radius-md;
+    font-weight: $font-weight-medium;
+    transition: all 0.2s ease;
+
+    &.primary {
+      @include button-primary;
+    }
+
+    &.secondary {
+      @include button-secondary;
+    }
+
+    &.outline {
+      background: transparent;
+      border: 2px solid $primary-blue;
+      color: $primary-blue;
+
+      &:hover {
+        background: $primary-blue;
+        color: $white;
+      }
+    }
+
+    i {
+      font-size: 1rem;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: $breakpoint-md) {
+  .cda-document-container {
+    padding: $space-lg;
+  }
+
+  .page-header .page-title {
+    font-size: 2rem;
+  }
+
+  .metadata-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cda-toolbar {
+    flex-direction: column;
+    gap: $space-md;
+    text-align: center;
+
+    .toolbar-right {
+      justify-content: center;
+    }
+  }
+
+  .document-actions {
+    flex-direction: column;
+    align-items: center;
+
+    .action-button {
+      width: 100%;
+      max-width: 300px;
+      justify-content: center;
+    }
+  }
+}

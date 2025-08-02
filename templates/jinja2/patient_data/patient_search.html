@@ -2,280 +2,24 @@
 
 {% block title %}Patient Search - EU eHealth NCP{% endblock %}
 
-{% block extra_css %}
-<style>
-    .patient-search-container {
-        max-width: 800px;
-        margin: 2rem auto;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-    }
-
-    .search-header {
-        background: linear-gradient(135deg, #2c3e50, #3498db);
-        color: white;
-        padding: 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .search-header h1 {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 500;
-    }
-
-    .country-flag {
-        width: 32px;
-        height: 24px;
-        border-radius: 2px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 12px;
-    }
-
-    .search-content {
-        padding: 2rem;
-    }
-
-    .search-intro {
-        margin-bottom: 2rem;
-        font-size: 1.1rem;
-        color: #2c3e50;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .search-form {
-        display: grid;
-        gap: 1.5rem;
-    }
-
-    .form-group {
-        display: grid;
-        gap: 0.5rem;
-    }
-
-    .form-group label {
-        font-weight: 600;
-        color: #2c3e50;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .required {
-        color: #e74c3c;
-    }
-
-    .form-group input,
-    .form-group select {
-        padding: 0.75rem;
-        border: 2px solid #e0e0e0;
-        border-radius: 4px;
-        font-size: 1rem;
-        transition: border-color 0.3s ease;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-        outline: none;
-        border-color: #3498db;
-        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-    }
-
-    .date-helper {
-        font-size: 0.9rem;
-        color: #666;
-        font-style: italic;
-    }
-
-    .break-glass-section {
-        background: #fff5f5;
-        border: 2px solid #fed7d7;
-        border-radius: 6px;
-        padding: 1.5rem;
-        margin: 1rem 0;
-    }
-
-    .break-glass-checkbox {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-    }
-
-    .break-glass-checkbox input[type="checkbox"] {
-        margin-top: 0.25rem;
-        transform: scale(1.2);
-    }
-
-    .break-glass-label {
-        font-weight: 600;
-        color: #c53030;
-    }
-
-    .break-glass-explanation {
-        font-size: 0.9rem;
-        color: #666;
-        font-style: italic;
-        margin-top: 0.5rem;
-    }
-
-    .break-glass-reason {
-        margin-top: 1rem;
-        display: none;
-    }
-
-    .break-glass-reason.show {
-        display: block;
-    }
-
-    .break-glass-reason textarea {
-        width: 100%;
-        padding: 0.75rem;
-        border: 2px solid #e0e0e0;
-        border-radius: 4px;
-        resize: vertical;
-        min-height: 80px;
-    }
-
-    .search-button {
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        color: white;
-        border: none;
-        padding: 1rem 2rem;
-        border-radius: 6px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .search-button:hover {
-        background: linear-gradient(135deg, #2980b9, #1f618d);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-    }
-
-    .search-button:active {
-        transform: translateY(0);
-    }
-
-    .sidebar {
-        background: #f8f9fa;
-        padding: 1.5rem;
-        border-right: 1px solid #e0e0e0;
-    }
-
-    .sidebar h3 {
-        margin-top: 0;
-        color: #2c3e50;
-        border-bottom: 2px solid #3498db;
-        padding-bottom: 0.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .sidebar-menu {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .sidebar-menu li {
-        margin-bottom: 0.5rem;
-    }
-
-    .sidebar-menu a {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem;
-        color: #2c3e50;
-        text-decoration: none;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-    }
-
-    .sidebar-menu a:hover {
-        background-color: #e3f2fd;
-        color: #1976d2;
-    }
-
-    .sidebar-menu a.active {
-        background-color: #3498db;
-        color: white;
-    }
-
-    .main-container {
-        display: grid;
-        grid-template-columns: 250px 1fr;
-        min-height: calc(100vh - 120px);
-    }
-
-    .content-area {
-        padding: 2rem;
-    }
-
-    .alert {
-        padding: 1rem;
-        border-radius: 4px;
-        margin-bottom: 1rem;
-    }
-
-    .alert-error {
-        background: #fed7d7;
-        border: 1px solid #e53e3e;
-        color: #c53030;
-    }
-
-    .alert-success {
-        background: #c6f6d5;
-        border: 1px solid #38a169;
-        color: #2f855a;
-    }
-</style>
-{% endblock %}
 
 {% block content %}
-<div class="main-container">
-    <div class="sidebar">
-        <h3 style="margin-top: 0; color: #2c3e50;">Patients</h3>
-        <ul class="sidebar-menu">
-            <li>
-                <a href="{{ url('patient_data:patient_search') }}" class="active">
-                    <span>🔍</span> Search Patient
+<div class="patient-search-page">
+    <div class="country-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>
+                <span class="country-flag country-flag-de">DE</span>
+                Patient Search
+            </h1>
+            <div class="header-actions">
+                <a href="/" class="btn btn-light ms-2">
+                    ← Back to Home
                 </a>
-            </li>
-            <li>
-                <a href="#">
-                    <span>💊</span> Dispensations
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    <span>👁️</span> Dispensation viewer
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    <span>📋</span> Prescription viewer
-                </a>
-            </li>
-        </ul>
+            </div>
+        </div>
     </div>
 
-    <div class="content-area">
+    <div class="search-form">
         <!-- Display Django messages -->
         {% if messages %}
         {% for message in messages %}
@@ -285,102 +29,104 @@
         {% endfor %}
         {% endif %}
 
-        <div class="patient-search-container">
-            <div class="search-header">
-                <h1>Patients</h1>
-                <div class="country-flag" style="background: #000; color: #ff0000;">DE</div>
-            </div>
+        <div class="ism-info">
+            <h4>🇪🇺 EU Patient Search</h4>
+            <p class="mb-1">
+                <strong>Search for patient records across EU member states using the patient's credentials</strong>
+            </p>
+            <p class="mb-0">
+                <small>You can find the patient using the following criteria</small>
+            </p>
+        </div>
 
-            <div class="search-content">
-                <div class="search-intro">
-                    <span>🇪🇺</span>
-                    <span>You can find the patient using the following criteria</span>
+        <form method="post" id="patientSearchForm" novalidate>
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+            <div class="field-group">
+                <h5 class="field-group-title">Patient Information</h5>
+
+                <div class="form-group">
+                    <label for="member_state_id" class="form-label">
+                        Member State <span class="required">*</span>
+                    </label>
+                    <select name="member_state_id" id="member_state_id" class="form-control" required>
+                        <option value="">Select Member State</option>
+                        {% for state in member_states %}
+                        <option value="{{ state.id }}" {% if state.id|string==member_state_id|string %}selected{% endif
+                            %}>
+                            {{ state.country_name }} ({{ state.country_code }})
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
 
-                <form method="post" class="search-form" id="patientSearchForm">
-                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-
-                    <div class="form-group">
-                        <label for="member_state_id">
-                            Member State <span class="required">*</span>
-                        </label>
-                        <select name="member_state_id" id="member_state_id" required>
-                            <option value="">Select Member State</option>
-                            {% for state in member_states %}
-                            <option value="{{ state.id }}" {% if state.id|string==member_state_id|string %}selected{%
-                                endif %}>
-                                {{ state.country_name }} ({{ state.country_code }})
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <div
-                            style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: #f8f9fa; border-radius: 6px; border: 2px solid #e3f2fd;">
-                            <input type="checkbox" name="use_local_search" id="use_local_search" {% if use_local_search
-                                %}checked{% endif %} style="transform: scale(1.2); accent-color: #3498db;">
-                            <div>
-                                <label for="use_local_search"
-                                    style="font-weight: 600; color: #2c3e50; cursor: pointer;">
-                                    🏠 Search Local CDA Documents
-                                </label>
-                                <div style="font-size: 0.9rem; color: #666; font-style: italic; margin-top: 0.25rem;">
-                                    Search Patient Summary documents in local test data following PS Display Guidelines
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="national_person_id">
-                            National Person Identifier <span class="required">*</span>
-                        </label>
-                        <input type="text" name="national_person_id" id="national_person_id"
-                            value="{{ national_person_id or '' }}" placeholder="Enter patient's national identifier"
-                            required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="birthdate">
-                            Birthdate <span class="required">*</span>
-                        </label>
-                        <input type="text" name="birthdate" id="birthdate" value="{{ birthdate or '' }}"
-                            placeholder="yyyy/MM/dd" pattern="\d{4}/\d{2}/\d{2}" required>
-                        <div class="date-helper">(yyyy/MM/dd)</div>
-                    </div>
-
-                    <div class="break-glass-section">
-                        <div class="break-glass-checkbox">
-                            <input type="checkbox" name="break_glass" id="break_glass" {% if break_glass %}checked{%
-                                endif %} onchange="toggleBreakGlassReason()">
-                            <div>
-                                <label for="break_glass" class="break-glass-label">
-                                    Break the glass (*)
-                                </label>
-                                <div class="break-glass-explanation">
-                                    (*) Tick Break-the-glass if there is a medical emergency that prevents the patient
-                                    from giving consent.
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="break-glass-reason" id="breakGlassReason" {% if break_glass
-                            %}style="display: block;" {% endif %}>
-                            <label for="break_glass_reason_text">
-                                Emergency Reason <span class="required">*</span>
+                <!-- Local CDA Search Option -->
+                <div class="local-search-section">
+                    <div class="local-search-option">
+                        <input type="checkbox" name="use_local_search" id="use_local_search" {% if use_local_search
+                            %}checked{% endif %} class="local-search-checkbox">
+                        <div class="local-search-content">
+                            <label for="use_local_search" class="local-search-label">
+                                🏠 Search Local CDA Documents
                             </label>
-                            <textarea name="break_glass_reason" id="break_glass_reason_text"
-                                placeholder="Please describe the medical emergency that prevents patient consent...">{{ break_glass_reason or '' }}</textarea>
+                            <div class="local-search-description">
+                                Search Patient Summary documents in local test data following PS Display Guidelines
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <button type="submit" class="search-button">
-                        🔍 Search Patient
-                    </button>
-                </form>
+                <div class="form-group">
+                    <label for="national_person_id" class="form-label">
+                        National Person Identifier <span class="required">*</span>
+                    </label>
+                    <input type="text" name="national_person_id" id="national_person_id" class="form-control"
+                        value="{{ national_person_id or '' }}" placeholder="Enter patient's national identifier"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="birthdate" class="form-label">
+                        Birthdate <span class="required">*</span>
+                    </label>
+                    <input type="text" name="birthdate" id="birthdate" class="form-control"
+                        value="{{ birthdate or '' }}" placeholder="yyyy/MM/dd" pattern="\d{4}/\d{2}/\d{2}" required>
+                    <small class="form-text text-muted">(yyyy/MM/dd)</small>
+                </div>
             </div>
-        </div>
+
+            <!-- Break Glass Section -->
+            <div class="break-glass-section">
+                <h5 class="break-glass-title">🚨 Emergency Access</h5>
+                <div class="break-glass-checkbox">
+                    <input type="checkbox" name="break_glass" id="break_glass" {% if break_glass %}checked{% endif %}
+                        onchange="toggleBreakGlassReason()">
+                    <label for="break_glass" class="break-glass-label">
+                        Break the glass - Emergency access without patient consent
+                    </label>
+                </div>
+                <p class="break-glass-explanation">
+                    Check this box only in medical emergencies where patient consent cannot be obtained.
+                    This action will be logged and audited.
+                </p>
+
+                <div class="break-glass-reason" id="breakGlassReason" {% if not break_glass %}style="display: none;" {%
+                    endif %}>
+                    <label for="break_glass_reason_text" class="form-label">
+                        Emergency Reason <span class="required">*</span>
+                    </label>
+                    <textarea name="break_glass_reason" id="break_glass_reason_text" class="form-control" rows="3"
+                        placeholder="Please provide a detailed explanation of the medical emergency...">{{ break_glass_reason or '' }}</textarea>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    🔍 Search Patient
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
