@@ -15,7 +15,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      color: #007bff;
+      color: $primary-blue;
       text-decoration: none;
       font-size: 0.9rem;
 
@@ -28,7 +28,7 @@
   .page-title {
     font-size: 2rem;
     font-weight: 700;
-    color: #333;
+    color: $text-dark;
     margin-bottom: 0.5rem;
   }
 
@@ -80,9 +80,9 @@
   overflow: hidden;
 
   .card-header {
-    background: #f8f9fa;
+    background: $bg-light;
     padding: 1.5rem;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid $border-light;
 
     .card-title {
       display: flex;
@@ -90,14 +90,14 @@
       gap: 0.75rem;
       font-size: 1.25rem;
       font-weight: 600;
-      color: #333;
+      color: $text-dark;
       margin: 0;
     }
 
     .card-subtitle {
       margin-top: 0.5rem;
       font-size: 0.9rem;
-      color: #6c757d;
+      color: $text-muted;
     }
   }
 
@@ -119,14 +119,14 @@
     .info-label {
       font-size: 0.8rem;
       font-weight: 600;
-      color: #6c757d;
+      color: $text-muted;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .info-value {
       font-size: 1rem;
-      color: #333;
+      color: $text-dark;
       font-weight: 500;
     }
   }
@@ -157,31 +157,43 @@
     }
 
     &.primary {
-      background: #007bff;
+      background: $primary-blue;
       color: white;
 
       &:hover {
-        background: #0056b3;
+        background: darken($primary-blue, 10%);
       }
     }
 
     &.secondary {
-      background: #f8f9fa;
-      color: #333;
-      border: 1px solid #dee2e6;
+      background: $bg-light;
+      color: $text-dark;
+      border: 1px solid $border-light;
 
       &:hover {
-        background: #e9ecef;
+        background: darken($bg-light, 5%);
+      }
+    }
+
+    &.accent {
+      background: linear-gradient(135deg, $accent-blue, $primary-green);
+      color: white;
+      border: none;
+
+      &:hover {
+        background: linear-gradient(135deg, darken($accent-blue, 10%), darken($primary-green, 10%));
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       }
     }
 
     &.outline {
       background: transparent;
-      color: #007bff;
-      border: 1px solid #007bff;
+      color: $primary-blue;
+      border: 1px solid $primary-blue;
 
       &:hover {
-        background: #007bff;
+        background: $primary-blue;
         color: white;
       }
     }
@@ -196,8 +208,8 @@
     gap: 0.5rem;
     padding: 0.5rem 0;
     font-size: 0.9rem;
-    color: #6c757d;
-    border-bottom: 1px solid #dee2e6;
+    color: $text-muted;
+    border-bottom: 1px solid $border-light;
 
     &:last-child {
       border-bottom: none;
@@ -211,25 +223,25 @@
 
   > i {
     font-size: 3rem;
-    color: #6c757d;
+    color: $text-muted;
     margin-bottom: 1rem;
     display: block;
   }
 
   h3 {
     font-size: 1.5rem;
-    color: #333;
+    color: $text-dark;
     margin-bottom: 1rem;
   }
 
   p {
-    color: #6c757d;
+    color: $text-muted;
     margin-bottom: 2rem;
     line-height: 1.6;
   }
 
   .search-suggestions {
-    background: #f8f9fa;
+    background: $bg-light;
     padding: 1.5rem;
     border-radius: 6px;
     margin-bottom: 2rem;
@@ -237,7 +249,7 @@
 
     h4 {
       font-size: 1rem;
-      color: #333;
+      color: $text-dark;
       margin-bottom: 1rem;
     }
 
@@ -246,7 +258,7 @@
       padding-left: 1.5rem;
 
       li {
-        color: #6c757d;
+        color: $text-muted;
         margin-bottom: 0.5rem;
       }
     }
@@ -266,12 +278,12 @@
   .page-title {
     font-size: 2rem;
     font-weight: 700;
-    color: #333;
+    color: $text-dark;
     margin-bottom: 0.5rem;
   }
 
   .page-subtitle {
-    color: #6c757d;
+    color: $text-muted;
     font-size: 1rem;
   }
 }
@@ -282,7 +294,7 @@
   justify-content: center;
   margin-top: 2rem;
   padding-top: 2rem;
-  border-top: 1px solid #dee2e6;
+  border-top: 1px solid $border-light;
 
   @media (max-width: 768px) {
     flex-direction: column;

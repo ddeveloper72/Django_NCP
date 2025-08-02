@@ -140,10 +140,16 @@
 
             <div class="card-content">
                 <div class="action-buttons">
-                    <a href="{{ url('patient_data:patient_cda', patient_data.id) }}" class="action-button primary">
+                    <a href="{{ url('patient_data:patient_cda_view', patient_data.id) }}" class="action-button primary">
                         <i class="icon-eye"></i>
                         View CDA Document
                         <span class="button-subtitle">L3 Browser View</span>
+                    </a>
+
+                    <a href="{{ url('patient_data:patient_cda_translated_view', patient_data.id) }}" class="action-button accent">
+                        <i class="icon-globe"></i>
+                        View Translated
+                        <span class="button-subtitle">Multi-language Support</span>
                     </a>
 
                     <a href="{{ url('patient_data:download_cda_pdf', patient_data.id) }}"

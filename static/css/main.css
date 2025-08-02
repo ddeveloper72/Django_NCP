@@ -5593,6 +5593,18 @@ div.page-header img.country-flag {
 .action-buttons .action-button.secondary:hover {
   background: rgb(228.4545454545, 238.4090909091, 245.0454545455);
 }
+.action-buttons .action-button.accent {
+  background: linear-gradient(135deg, #3d70ab, #2d5a27);
+  color: white;
+  border: none;
+}
+.action-buttons .action-button.accent:hover {
+  background: linear-gradient(135deg, rgb(47.5905172414, 87.3793103448, 133.4094827586), rgb(27.2093023256, 54.4186046512, 23.5813953488));
+  -webkit-transform: translateY(-1px);
+          transform: translateY(-1px);
+  -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
 .action-buttons .action-button.outline {
   background: transparent;
   color: #1976d2;

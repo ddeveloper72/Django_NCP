@@ -1,0 +1,292 @@
+// Patient Form Page Styles
+.patient-form-container {
+  padding: $space-xl;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: $space-xxl;
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: $font-weight-bold;
+    color: $text-dark;
+    margin-bottom: $space-sm;
+  }
+
+  .page-subtitle {
+    font-size: $font-size-lg;
+    color: $text-muted;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+}
+
+.messages-container {
+  margin-bottom: $space-xl;
+
+  .alert {
+    @include card-base;
+    display: flex;
+    align-items: center;
+    gap: $space-md;
+    padding: $space-lg;
+    margin-bottom: $space-md;
+    border-left: 4px solid;
+
+    &.alert-error {
+      background: lighten($error-red, 45%);
+      border-left-color: $error-red;
+      color: darken($error-red, 10%);
+    }
+
+    &.alert-warning {
+      background: lighten($warning-orange, 40%);
+      border-left-color: $warning-orange;
+      color: darken($warning-orange, 15%);
+    }
+
+    &.alert-success {
+      background: lighten($success-green, 45%);
+      border-left-color: $success-green;
+      color: darken($success-green, 10%);
+    }
+
+    &.alert-info {
+      background: lighten($primary-blue, 45%);
+      border-left-color: $primary-blue;
+      color: darken($primary-blue, 10%);
+    }
+
+    i {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.patient-form-wrapper {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: $space-xxl;
+
+  @media (max-width: $breakpoint-lg) {
+    grid-template-columns: 1fr;
+    gap: $space-xl;
+  }
+}
+
+.form-card {
+  @include card-base;
+
+  .card-header {
+    padding: $space-xl $space-xl $space-lg $space-xl;
+    border-bottom: 1px solid $neutral-lighter;
+    margin: (-$space-lg) (-$space-lg) $space-xl (-$space-lg);
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: $space-md;
+      font-size: $font-size-xl;
+      font-weight: $font-weight-semibold;
+      color: $text-dark;
+      margin-bottom: $space-sm;
+
+      i {
+        color: $primary-blue;
+        font-size: 1.5rem;
+      }
+    }
+
+    .card-description {
+      color: $text-muted;
+      font-size: $font-size-base;
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+
+  .card-content {
+    padding: 0;
+  }
+}
+
+.patient-search-form {
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-lg;
+
+    @media (max-width: $breakpoint-md) {
+      grid-template-columns: 1fr;
+    }
+
+    .form-group {
+      &:nth-child(3), // Date of birth
+      &:nth-child(6) {
+        // Patient ID
+        grid-column: 1 / -1;
+      }
+    }
+  }
+
+  .form-group {
+    margin-bottom: $space-lg;
+
+    .form-label {
+      display: block;
+      margin-bottom: $space-sm;
+      font-weight: $font-weight-semibold;
+      color: $text-dark;
+      font-size: $font-size-sm;
+
+      &.required::after {
+        content: ' *';
+        color: $error-red;
+      }
+    }
+
+    input,
+    select {
+      @include input-base;
+      width: 100%;
+    }
+
+    .field-errors {
+      margin-top: $space-xs;
+
+      .error-message {
+        display: block;
+        color: $error-red;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: $space-lg;
+    justify-content: center;
+    margin-top: $space-xxl;
+    padding-top: $space-xl;
+    border-top: 1px solid $neutral-lighter;
+
+    @media (max-width: $breakpoint-sm) {
+      flex-direction: column;
+      align-items: center;
+
+      .btn {
+        width: 100%;
+        max-width: 250px;
+      }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: $space-sm;
+      padding: $space-md $space-xl;
+
+      &.btn-large {
+        padding: $space-lg $space-xxl;
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
+      }
+
+      i {
+        font-size: 1.1rem;
+      }
+    }
+  }
+}
+
+.search-info-card {
+  @include card-base;
+
+  .card-header {
+    padding: $space-lg $space-lg $space-md $space-lg;
+    border-bottom: 1px solid $neutral-lighter;
+    margin: (-$space-lg) (-$space-lg) $space-lg (-$space-lg);
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: $space-sm;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $text-dark;
+      margin: 0;
+
+      i {
+        color: $primary-blue;
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  .card-content {
+    padding: 0;
+
+    .info-section {
+      margin-bottom: $space-xl;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      h4 {
+        font-size: $font-size-base;
+        font-weight: $font-weight-semibold;
+        color: $text-dark;
+        margin-bottom: $space-md;
+      }
+
+      ol {
+        padding-left: $space-lg;
+        color: $text-muted;
+        line-height: 1.6;
+
+        li {
+          margin-bottom: $space-xs;
+        }
+      }
+
+      p {
+        color: $text-muted;
+        line-height: 1.6;
+        margin: 0;
+      }
+    }
+
+    .country-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $space-sm;
+
+      .country-badge {
+        background: $neutral-lightest;
+        color: $text-dark;
+        padding: $space-xs $space-sm;
+        border-radius: $border-radius-md;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        border: 1px solid $neutral-lighter;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: $breakpoint-md) {
+  .patient-form-container {
+    padding: $space-lg;
+  }
+
+  .form-header .page-title {
+    font-size: 2rem;
+  }
+}

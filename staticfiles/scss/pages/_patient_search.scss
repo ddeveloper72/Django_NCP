@@ -53,6 +53,16 @@
       vertical-align: middle;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       border: 2px solid rgba($white, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 12px;
+
+      &.country-flag-de {
+        background: #000;
+        color: #ff0000;
+      }
 
       @media (max-width: $breakpoint-sm) {
         margin-right: 0;
@@ -854,7 +864,7 @@
     gap: $space-md;
     margin-bottom: $space-md;
 
-    input[type="checkbox"] {
+    input[type='checkbox'] {
       transform: scale(1.3);
       accent-color: #c53030;
     }
