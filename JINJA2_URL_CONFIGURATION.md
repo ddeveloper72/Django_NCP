@@ -11,6 +11,7 @@ ImproperlyConfigured: The included URLconf '<parameter_value>' does not appear t
 ```
 
 **Example Error:**
+
 ```
 ImproperlyConfigured: The included URLconf '21' does not appear to have any patterns in it.
 ```
@@ -27,9 +28,11 @@ env.globals.update({
 ```
 
 When templates call `{{ url('app:view_name', parameter) }}`, Django's `reverse` function signature expects:
+
 - `reverse(viewname, urlconf=None, args=None, kwargs=None, current_app=None)`
 
 But the template is calling it like:
+
 - `reverse('app:view_name', parameter_value)`
 
 This causes Django to interpret `parameter_value` as the `urlconf` parameter instead of as a URL argument.
@@ -81,9 +84,11 @@ def environment(**options):
 ## File Location and Setup
 
 ### Primary Configuration File
+
 **File:** `eu_ncp_server/jinja2.py`
 
 This file is referenced in Django settings:
+
 ```python
 # settings.py
 TEMPLATES = [
@@ -170,11 +175,13 @@ urlpatterns = [
 ## Troubleshooting
 
 ### Symptoms of the Problem
+
 - Error message contains "The included URLconf '<number>' does not appear to have any patterns"
 - Error occurs when rendering templates with URL parameters
 - Direct URL access works, but template rendering fails
 
 ### Quick Fix Checklist
+
 1. ✅ Check `jinja2.py` has the `url_helper` function
 2. ✅ Verify `environment()` function uses `"url": url_helper`
 3. ✅ Ensure templates use correct syntax: `{{ url('app:view', param) }}`
@@ -199,24 +206,28 @@ html = render_to_string('test_template.html', {'patient_id': 21}, using='jinja2'
 ## Prevention Strategy
 
 ### For New Pages/Templates
+
 1. Always use the established `url_helper` function
 2. Test URL generation in templates immediately after creation
 3. Use the provided template examples as reference
 4. Verify URL patterns work with both args and kwargs
 
 ### Code Review Checklist
+
 - [ ] Jinja2 environment uses `url_helper` not `reverse`
 - [ ] Template URL calls use correct syntax
 - [ ] URL patterns are properly defined with parameter types
 - [ ] Tests include template rendering with URL generation
 
 ## Related Files
+
 - `eu_ncp_server/jinja2.py` - Main configuration
 - `eu_ncp_server/settings.py` - Template backend configuration
 - `templates/jinja2/` - Template directory
 - Individual app `urls.py` files - URL pattern definitions
 
 ## References
+
 - [Django Jinja2 Documentation](https://docs.djangoproject.com/en/stable/topics/templates/#django.template.backends.jinja2.Jinja2)
 - [Django URL Reversing](https://docs.djangoproject.com/en/stable/topics/http/urls/#reverse-resolution-of-urls)
 - [Jinja2 Template Documentation](https://jinja.palletsprojects.com/)

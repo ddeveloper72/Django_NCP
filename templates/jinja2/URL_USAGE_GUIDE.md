@@ -3,6 +3,7 @@
 ## Quick Reference for Template URL Calls
 
 ### ✅ Correct Usage
+
 ```html
 <!-- No parameters -->
 <a href="{{ url('app:view_name') }}">Link</a>
@@ -18,6 +19,7 @@
 ```
 
 ### ❌ Common Mistakes
+
 ```html
 <!-- Don't use Django template syntax in Jinja2 -->
 <a href="{% url 'app:view_name' object.id %}">Wrong</a>
@@ -27,6 +29,7 @@
 ```
 
 ### Working Examples from This Project
+
 ```html
 <!-- Patient data URLs -->
 <a href="{{ url('patient_data:patient_data_form') }}">Back to Search</a>
@@ -40,6 +43,7 @@
 ```
 
 ## If You Get URL Errors
+
 1. Check that `eu_ncp_server/jinja2.py` uses `url_helper` function
 2. Verify template syntax matches examples above
 3. See `JINJA2_URL_CONFIGURATION.md` for detailed troubleshooting

@@ -26,33 +26,33 @@ from jinja2 import Environment
 def url_helper(viewname, *args, **kwargs):
     """
     Helper function for URL reversal in Jinja2 templates.
-    
+
     CRITICAL: This function fixes a common Django Jinja2 URL configuration issue.
-    
+
     Problem Solved:
     ===============
     Without this helper, using Django's reverse function directly in Jinja2
     causes ImproperlyConfigured errors when templates call {{ url('app:view', param) }}
     because reverse() interprets the parameter as urlconf instead of args.
-    
+
     This function properly handles arguments for Django's reverse function
     in Jinja2 templates, converting positional arguments to the args parameter.
-    
+
     Template Usage Examples:
     ========================
     {{ url('app:view_name') }}                    # No parameters
-    {{ url('app:view_name', param1) }}            # Single parameter  
+    {{ url('app:view_name', param1) }}            # Single parameter
     {{ url('app:view_name', param1, param2) }}    # Multiple parameters
     {{ url('app:view_name', id=123) }}            # Keyword arguments
-    
+
     Args:
         viewname (str): Django URL pattern name (e.g., 'patient_data:patient_details')
         *args: Positional arguments for URL parameters
         **kwargs: Keyword arguments for URL parameters
-        
+
     Returns:
         str: Reversed URL path
-        
+
     DO NOT REPLACE THIS WITH: "url": reverse
     """
     if args:
