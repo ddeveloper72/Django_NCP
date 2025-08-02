@@ -10,6 +10,21 @@ from django.urls import reverse
 from jinja2 import Environment
 
 
+def url_helper(viewname, *args, **kwargs):
+    """
+    Helper function for URL reversal in Jinja2 templates.
+
+    This function properly handles arguments for Django's reverse function
+    in Jinja2 templates, converting positional arguments to the args parameter.
+    """
+    if args:
+        return reverse(viewname, args=args)
+    elif kwargs:
+        return reverse(viewname, kwargs=kwargs)
+    else:
+        return reverse(viewname)
+
+
 def environment(**options):
     """
     Create and configure Jinja2 environment for Django integration.
@@ -23,7 +38,7 @@ def environment(**options):
     env.globals.update(
         {
             "static": staticfiles_storage.url,
-            "url": reverse,
+            "url": url_helper,
         }
     )
 
