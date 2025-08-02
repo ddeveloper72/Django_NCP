@@ -57,7 +57,21 @@
             </div>
 
             <!-- PDF Viewer -->
-            <div class="pdf-viewer">
+            <div class="pdf-viewer" id="pdfViewer">
+                {% if orcd_available %}
+                <!-- Actual PDF Viewer using PDF.js -->
+                <div class="pdf-viewer-container">
+                    <iframe 
+                        id="pdfFrame"
+                        src="{{ url('patient_data:view_orcd_pdf', patient_data.id) }}"
+                        width="100%" 
+                        height="600px"
+                        frameborder="0"
+                        title="ORCD PDF Viewer">
+                    </iframe>
+                </div>
+                {% else %}
+                <!-- Fallback placeholder when PDF not available -->
                 <div class="pdf-placeholder">
                     <div class="placeholder-content">
                         <i class="icon-file-text"></i>
@@ -93,13 +107,13 @@
                             </div>
                         </div>
 
-                        <button class="btn btn-primary mt-3" {% if orcd_available %}onclick="downloadORCD()" {% else
-                            %}disabled{% endif %}>
+                        <button class="btn btn-primary mt-3" disabled>
                             <i class="icon-download"></i>
-                            {% if orcd_available %}Download Original PDF{% else %}PDF Not Available{% endif %}
+                            PDF Not Available
                         </button>
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
 
@@ -159,6 +173,51 @@
                     <i class="icon-download"></i>
                     Download HTML Version
                 </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Fullscreen PDF Modal -->
+<div id="fullscreenModal" class="fullscreen-modal" style="display: none;">
+    <div class="fullscreen-header">
+        <div class="fullscreen-title">
+            <h2>{{ patient_data.given_name }} {{ patient_data.family_name }} - ORCD Full Screen</h2>
+        </div>
+        <div class="fullscreen-controls">
+            {% if orcd_available %}
+            <button id="downloadBtn" class="btn btn-secondary" onclick="downloadORCD()">
+                <i class="icon-download"></i>
+                Download PDF
+            </button>
+            {% endif %}
+            <button id="closeFullscreenBtn" class="btn btn-outline-secondary" onclick="closeFullscreen()">
+                <i class="icon-minimize"></i>
+                Exit Fullscreen
+            </button>
+        </div>
+    </div>
+    <div class="fullscreen-content">
+        {% if orcd_available %}
+        <iframe 
+            id="fullscreenPdfFrame"
+            src=""
+            width="100%" 
+            height="100%"
+            frameborder="0"
+            title="ORCD PDF Fullscreen Viewer">
+        </iframe>
+        {% else %}
+        <div class="fullscreen-placeholder">
+            <div class="placeholder-content">
+                <i class="icon-file-text"></i>
+                <h3>ORCD PDF Not Available</h3>
+                <p>This document doesn't contain an embedded PDF or the PDF couldn't be extracted.</p>
+                <button class="btn btn-primary" onclick="closeFullscreen()">
+                    <i class="icon-arrow-left"></i>
+                    Return to Document View
+                </button>
             </div>
         </div>
         {% endif %}
@@ -297,6 +356,127 @@
         margin: 0 10px 10px 0;
     }
 
+    /* Fullscreen Modal Styles */
+    .fullscreen-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #1a1a1a;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .fullscreen-header {
+        background: #2c3e50;
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #34495e;
+        flex-shrink: 0;
+    }
+
+    .fullscreen-title h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .fullscreen-controls {
+        display: flex;
+        gap: 10px;
+    }
+
+    .fullscreen-controls .btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+
+    .fullscreen-content {
+        flex: 1;
+        position: relative;
+        background: #f8f9fa;
+    }
+
+    .fullscreen-content iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: white;
+    }
+
+    .fullscreen-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background: #f8f9fa;
+    }
+
+    .fullscreen-placeholder .placeholder-content {
+        text-align: center;
+        padding: 40px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+    }
+
+    .fullscreen-placeholder .placeholder-content i {
+        font-size: 4rem;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+
+    .fullscreen-placeholder .placeholder-content h3 {
+        color: #495057;
+        margin-bottom: 15px;
+    }
+
+    .fullscreen-placeholder .placeholder-content p {
+        color: #6c757d;
+        margin-bottom: 25px;
+        line-height: 1.6;
+    }
+
+    /* Animation for smooth transitions */
+    .fullscreen-modal {
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .fullscreen-modal.show {
+        opacity: 1;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .fullscreen-header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch;
+            padding: 15px;
+        }
+
+        .fullscreen-title h2 {
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .fullscreen-controls {
+            justify-content: center;
+        }
+
+        .fullscreen-placeholder .placeholder-content {
+            margin: 20px;
+            padding: 30px 20px;
+        }
+    }
+
     @media (max-width: 768px) {
         .pdf-toolbar {
             flex-direction: column;
@@ -329,8 +509,68 @@
     }
 
     function openFullscreen() {
-        // This would open the PDF in fullscreen mode
-        alert('Fullscreen PDF viewer would be implemented here.');
+        {% if orcd_available %}
+        const modal = document.getElementById('fullscreenModal');
+        const iframe = document.getElementById('fullscreenPdfFrame');
+        
+        // Set the PDF source URL
+        iframe.src = "{{ url('patient_data:view_orcd_pdf', patient_data.id) }}";
+        
+        // Show the modal with animation
+        modal.style.display = 'flex';
+        
+        // Trigger animation after display is set
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+        
+        // Add escape key listener
+        document.addEventListener('keydown', handleEscapeKey);
+        
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+        {% else %}
+        alert('PDF is not available for fullscreen viewing. This could be because the source document is L3 CDA only (no embedded PDF).');
+        {% endif %}
     }
+
+    function closeFullscreen() {
+        const modal = document.getElementById('fullscreenModal');
+        const iframe = document.getElementById('fullscreenPdfFrame');
+        
+        // Start close animation
+        modal.classList.remove('show');
+        
+        // Hide modal after animation
+        setTimeout(() => {
+            modal.style.display = 'none';
+            // Clear iframe source to stop loading
+            iframe.src = '';
+        }, 300);
+        
+        // Remove escape key listener
+        document.removeEventListener('keydown', handleEscapeKey);
+        
+        // Restore body scroll
+        document.body.style.overflow = '';
+    }
+
+    function handleEscapeKey(event) {
+        if (event.key === 'Escape') {
+            closeFullscreen();
+        }
+    }
+
+    // Close fullscreen when clicking outside the content
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('fullscreenModal');
+        
+        modal.addEventListener('click', function(event) {
+            // Only close if clicking the modal background, not the content
+            if (event.target === modal) {
+                closeFullscreen();
+            }
+        });
+    });
 </script>
 {% endblock %}

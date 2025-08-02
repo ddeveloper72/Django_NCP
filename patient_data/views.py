@@ -413,6 +413,75 @@ def download_orcd_pdf(request, patient_id, attachment_index=0):
         return redirect("patient_data:patient_data_form")
 
 
+def view_orcd_pdf(request, patient_id, attachment_index=0):
+    """View ORCD PDF inline for fullscreen preview"""
+
+    try:
+        patient_data = PatientData.objects.get(id=patient_id)
+        match_data = request.session.get(f"patient_match_{patient_id}")
+
+        if not match_data:
+            return HttpResponse(
+                "<html><body><h1>No CDA document found</h1><p>Please return to the patient details page.</p></body></html>",
+                status=404
+            )
+
+        # Initialize PDF service and extract PDFs
+        pdf_service = ClinicalDocumentPDFService()
+
+        # For ORCD viewing, prefer L1 CDA
+        l1_cda_content = match_data.get("l1_cda_content")
+        l3_cda_content = match_data.get("l3_cda_content")
+        orcd_cda_content = (
+            l1_cda_content or l3_cda_content or match_data.get("cda_content", "")
+        )
+        cda_type_used = (
+            "L1" if l1_cda_content else ("L3" if l3_cda_content else "Unknown")
+        )
+
+        if not orcd_cda_content:
+            return HttpResponse(
+                "<html><body><h1>No CDA content available</h1><p>No document content could be retrieved.</p></body></html>",
+                status=404
+            )
+
+        try:
+            pdf_attachments = pdf_service.extract_pdfs_from_xml(orcd_cda_content)
+
+            if not pdf_attachments or attachment_index >= len(pdf_attachments):
+                return HttpResponse(
+                    f"<html><body><h1>PDF not found</h1><p>PDF attachment not found in {cda_type_used} CDA.</p></body></html>",
+                    status=404
+                )
+
+            # Get the requested PDF attachment
+            pdf_attachment = pdf_attachments[attachment_index]
+            pdf_data = pdf_attachment["data"]
+            filename = f"{patient_data.given_name}_{patient_data.family_name}_ORCD_{cda_type_used}.pdf"
+
+            logger.info(
+                f"Viewing ORCD PDF inline from {cda_type_used} CDA for patient {patient_id}"
+            )
+
+            # Return PDF response for inline viewing
+            return pdf_service.get_pdf_response(
+                pdf_data, filename, disposition="inline"
+            )
+
+        except Exception as e:
+            logger.error(f"Error viewing PDF: {e}")
+            return HttpResponse(
+                f"<html><body><h1>Error loading PDF</h1><p>Error extracting PDF from document: {e}</p></body></html>",
+                status=500
+            )
+
+    except PatientData.DoesNotExist:
+        return HttpResponse(
+            "<html><body><h1>Patient not found</h1><p>Patient data not found.</p></body></html>",
+            status=404
+        )
+
+
 # ========================================
 # Legacy Views (Minimal Implementation)
 # ========================================
