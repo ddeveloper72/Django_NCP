@@ -7,6 +7,7 @@ URL patterns for patient search, data retrieval, and document request functional
 from django.urls import path
 from . import views
 from .views import enhanced_cda_translation_views
+from .views.enhanced_cda_view import EnhancedCDADocumentView, toggle_translation_view, get_section_translation, export_translated_cda
 
 app_name = "patient_data"
 
@@ -20,6 +21,26 @@ urlpatterns = [
     path("download/<int:patient_id>/", views.download_cda_pdf, name="download_cda_pdf"),
     
     # Enhanced CDA Translation Views
+    path(
+        "cda/enhanced/<int:patient_id>/", 
+        EnhancedCDADocumentView.as_view(), 
+        name="enhanced_cda_view"
+    ),
+    path(
+        "cda/translate-toggle/<int:patient_id>/", 
+        toggle_translation_view, 
+        name="toggle_translation_view"
+    ),
+    path(
+        "cda/section/<int:patient_id>/<str:section_id>/", 
+        get_section_translation, 
+        name="get_section_translation"
+    ),
+    path(
+        "cda/export/<int:patient_id>/", 
+        export_translated_cda, 
+        name="export_translated_cda"
+    ),
     path(
         "cda/translated/<int:patient_id>/", 
         enhanced_cda_translation_views.patient_cda_translated_view, 
