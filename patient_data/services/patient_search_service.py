@@ -108,12 +108,37 @@ class EUPatientSearchService:
 
         if credentials.patient_id:
             # Direct patient ID match
-            # Simulate finding both L1 and L3 CDA documents
-            l1_file_path = f"test_data/eu_member_states/{credentials.country_code.lower()}/l1_cda_sample.xml"
-            l3_file_path = f"test_data/eu_member_states/{credentials.country_code.lower()}/l3_cda_sample.xml"
+            # Load real CDA documents from test data
+            import os
+            from django.conf import settings
 
-            # Mock CDA content for both types
-            l1_mock_content = """<?xml version="1.0" encoding="UTF-8"?>
+            # Try to load the real L1 CDA document for this patient
+            test_data_path = os.path.join(
+                settings.BASE_DIR,
+                "test_data",
+                "eu_member_states",
+                credentials.country_code.upper(),
+            )
+            l1_cda_content = None
+            l1_file_path = None
+
+            # Look for the specific patient file
+            if credentials.patient_id == "3843082788":  # CELESTINA DOE-CALLA
+                celestina_file = os.path.join(
+                    test_data_path, "CELESTINA_DOE-CALLA_38430827.xml"
+                )
+                if os.path.exists(celestina_file):
+                    with open(celestina_file, "r", encoding="utf-8") as f:
+                        l1_cda_content = f.read()
+                    l1_file_path = celestina_file
+                    logger.info(
+                        f"Loaded real L1 CDA for patient {credentials.patient_id} from {celestina_file}"
+                    )
+
+            # If no real L1 found, use mock L1 content
+            if not l1_cda_content:
+                l1_file_path = f"test_data/eu_member_states/{credentials.country_code.lower()}/l1_cda_sample.xml"
+                l1_cda_content = """<?xml version="1.0" encoding="UTF-8"?>
 <ClinicalDocument xmlns="urn:hl7-org:v3">
     <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1" extension="L1"/>
@@ -127,7 +152,9 @@ class EUPatientSearchService:
     </component>
 </ClinicalDocument>"""
 
-            l3_mock_content = """<?xml version="1.0" encoding="UTF-8"?>
+            # Mock L3 CDA with structured clinical content
+            l3_file_path = f"test_data/eu_member_states/{credentials.country_code.lower()}/l3_cda_sample.xml"
+            l3_cda_content = """<?xml version="1.0" encoding="UTF-8"?>
 <ClinicalDocument xmlns="urn:hl7-org:v3">
     <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1" extension="L3"/>
@@ -166,8 +193,8 @@ class EUPatientSearchService:
                 confidence_score=1.0,
                 l1_cda_path=l1_file_path,
                 l3_cda_path=l3_file_path,
-                l1_cda_content=l1_mock_content,
-                l3_cda_content=l3_mock_content,
+                l1_cda_content=l1_cda_content,
+                l3_cda_content=l3_cda_content,
                 patient_data={
                     "id": credentials.patient_id,
                     "name": f"{credentials.given_name} {credentials.family_name}",

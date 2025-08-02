@@ -5,3 +5,5 @@ from .patient_search_service import (
     PatientCredentials,
     PatientMatch,
 )
+
+from .clinical_pdf_service import ClinicalDocumentPDFService

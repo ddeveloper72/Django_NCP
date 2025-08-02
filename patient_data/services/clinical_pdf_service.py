@@ -36,15 +36,26 @@ class ClinicalDocumentPDFService:
 
         pdf_attachments = []
 
+        # HL7 CDA namespace
+        ns = {'hl7': 'urn:hl7-org:v3'}
+
         # Define common patterns for base64 content in clinical documents
+        # Both with and without namespaces for compatibility
         base64_patterns = [
-            # CDA observationMedia
+            # CDA observationMedia (with namespace)
+            './/hl7:observationMedia/hl7:value[@mediaType="application/pdf"]',
+            ".//hl7:observationMedia/hl7:value",
+            # CDA nonXMLBody (with namespace) - L1 CDA ORCD
+            './/hl7:nonXMLBody/hl7:text[@mediaType="application/pdf"]',
+            ".//hl7:nonXMLBody/hl7:text",
+            # Generic content patterns (with namespace)
+            './/hl7:content[@mediaType="application/pdf"]',
+            './/hl7:attachment[@mediaType="application/pdf"]',
+            # Fallback patterns without namespace
             './/observationMedia/value[@mediaType="application/pdf"]',
             ".//observationMedia/value",
-            # CDA nonXMLBody
             './/nonXMLBody/text[@mediaType="application/pdf"]',
             ".//nonXMLBody/text",
-            # Generic content patterns
             './/content[@mediaType="application/pdf"]',
             './/attachment[@mediaType="application/pdf"]',
             # Text content that might contain base64
@@ -54,7 +65,13 @@ class ClinicalDocumentPDFService:
         attachment_index = 0
 
         for pattern in base64_patterns:
-            elements = root.findall(pattern)
+            try:
+                if pattern.startswith('.//hl7:'):
+                    elements = root.findall(pattern, ns)
+                else:
+                    elements = root.findall(pattern)
+            except Exception as e:
+                continue  # Skip invalid patterns
 
             for element in elements:
                 pdf_data = self._extract_pdf_from_element(element)
