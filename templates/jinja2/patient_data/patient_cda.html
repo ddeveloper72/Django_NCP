@@ -31,11 +31,41 @@
                 <div class="stat-label">Medical Terms</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">{{ source_language|upper }} → {{ target_language|upper }}</div>
-                <div class="stat-label">Translation Pair</div>
+                <div class="stat-value">{{ coded_sections_count }}</div>
+                <div class="stat-label">Coded Sections</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ coded_sections_percentage }}%</div>
+                <div class="stat-label">Standards Compliance</div>
             </div>
         </div>
     </div>
+
+    <!-- Translation Quality Notice -->
+    {% if uses_coded_sections %}
+    <div class="data-section">
+        <div class="section-header">
+            <i class="fas fa-check-circle me-2"></i>
+            HL7 Standards Compliance
+        </div>
+        <div class="section-content">
+            <p class="mb-2">
+                <strong>{{ coded_sections_count }}</strong> of <strong>{{ sections_count }}</strong> clinical sections
+                use standardized HL7 Patient Summary codes for enhanced translation accuracy.
+            </p>
+            <div class="compliance-indicators">
+                <span class="indicator coded">
+                    <i class="fas fa-code me-1"></i>
+                    Coded Sections: Professional medical terminology
+                </span>
+                <span class="indicator free-text">
+                    <i class="fas fa-text-width me-1"></i>
+                    Free Text: Machine translated content
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Patient Information Section -->
     <div class="wrap-collapsible">
@@ -89,40 +119,54 @@
         </label>
         <div class="collapsible-content-main">
             <div class="content-inner-main">
-                
+
                 {% if translation_result.sections %}
                 {% for section in translation_result.sections %}
                 <div class="wrap-collapsible">
-                    <input id="collapsible-section-{{ section.section_id }}" class="toggle" type="checkbox" checked="true">
+                    <input id="collapsible-section-{{ section.section_id }}" class="toggle" type="checkbox"
+                        checked="true">
                     <label for="collapsible-section-{{ section.section_id }}" class="lbl-toggle-title">
                         <i class="fas fa-clipboard-list me-2"></i>
-                        {{ section.title.translated }}
+                        {{ section.title.coded if section.is_coded_section else section.title.translated }}
+                        {% if section.is_coded_section %}
+                        <span class="section-type-badge coded">
+                            <i class="fas fa-code me-1"></i>HL7 Coded
+                        </span>
+                        {% else %}
+                        <span class="section-type-badge free-text">
+                            <i class="fas fa-text-width me-1"></i>Free Text
+                        </span>
+                        {% endif %}
                         {% if section.content.medical_terms > 0 %}
                         <span class="medical-terms-badge">{{ section.content.medical_terms }} terms</span>
+                        {% endif %}
+                        {% if section.section_code %}
+                        <span class="section-code-badge">{{ section.section_code }}</span>
                         {% endif %}
                     </label>
                     <div class="collapsible-content-title">
                         <div class="content-inner-title">
-                            
+
                             <!-- Mobile View with Toggle Buttons -->
                             <div class="mobile-view">
                                 <div class="toggle-container">
-                                    <button class="toggle-button-translated active" 
-                                            onclick="toggleSectionContent('section-{{ section.section_id }}', 'translated')" 
-                                            data-option="translated">
+                                    <button class="toggle-button-translated active"
+                                        onclick="toggleSectionContent('section-{{ section.section_id }}', 'translated')"
+                                        data-option="translated">
                                         <i class="fas fa-language me-1"></i>
                                         Translated
                                     </button>
-                                    <button class="toggle-button-original" 
-                                            onclick="toggleSectionContent('section-{{ section.section_id }}', 'original')" 
-                                            data-option="original">
+                                    <button class="toggle-button-original"
+                                        onclick="toggleSectionContent('section-{{ section.section_id }}', 'original')"
+                                        data-option="original">
                                         <i class="fas fa-flag me-1"></i>
                                         Original
                                     </button>
                                 </div>
-                                
+
                                 <!-- Mobile Content Panels -->
-                                <div class="mobile-content" id="content-translated-{{ section.section_id }}" style="display: block;">
+                                <div class="mobile-content" id="content-translated-{{ section.section_id }}"
+                                    style="display: block;">
                                     <div class="content-inner">
                                         <div class="content-label">
                                             <i class="fas fa-flag-usa me-1"></i>
@@ -133,8 +177,9 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div class="mobile-content" id="content-original-{{ section.section_id }}" style="display: none;">
+
+                                <div class="mobile-content" id="content-original-{{ section.section_id }}"
+                                    style="display: none;">
                                     <div class="content-inner">
                                         <div class="content-label">
                                             <i class="fas fa-flag me-1"></i>
@@ -150,7 +195,8 @@
                             <!-- Desktop View with Collapsible Panels -->
                             <div class="web-view">
                                 <div class="wrap-collapsible">
-                                    <input id="collapsible-{{ section.section_id }}-original" class="toggle" type="checkbox">
+                                    <input id="collapsible-{{ section.section_id }}-original" class="toggle"
+                                        type="checkbox">
                                     <label for="collapsible-{{ section.section_id }}-original" class="lbl-toggle">
                                         <i class="fas fa-flag me-1"></i>
                                         Original ({{ source_language|upper }})
@@ -165,7 +211,8 @@
                                 </div>
 
                                 <div class="wrap-collapsible">
-                                    <input id="collapsible-{{ section.section_id }}-translated" class="toggle" type="checkbox" checked="true">
+                                    <input id="collapsible-{{ section.section_id }}-translated" class="toggle"
+                                        type="checkbox" checked="true">
                                     <label for="collapsible-{{ section.section_id }}-translated" class="lbl-toggle">
                                         <i class="fas fa-language me-1"></i>
                                         English Translation
@@ -185,7 +232,9 @@
                                                     {% for row in section.content.table_data %}
                                                     <tr>
                                                         {% for cell in row %}
-                                                        <td data-label="{{ section.content.table_headers[loop.index0] }}">{{ cell }}</td>
+                                                        <td
+                                                            data-label="{{ section.content.table_headers[loop.index0] }}">
+                                                            {{ cell }}</td>
                                                         {% endfor %}
                                                     </tr>
                                                     {% endfor %}

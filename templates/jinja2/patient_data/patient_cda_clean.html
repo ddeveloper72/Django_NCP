@@ -89,11 +89,12 @@
         </label>
         <div class="collapsible-content-main">
             <div class="content-inner-main">
-                
+
                 {% if translation_result.sections %}
                 {% for section in translation_result.sections %}
                 <div class="wrap-collapsible">
-                    <input id="collapsible-section-{{ section.section_id }}" class="toggle" type="checkbox" checked="true">
+                    <input id="collapsible-section-{{ section.section_id }}" class="toggle" type="checkbox"
+                        checked="true">
                     <label for="collapsible-section-{{ section.section_id }}" class="lbl-toggle-title">
                         <i class="fas fa-clipboard-list me-2"></i>
                         {{ section.title.translated }}
@@ -103,26 +104,27 @@
                     </label>
                     <div class="collapsible-content-title">
                         <div class="content-inner-title">
-                            
+
                             <!-- Mobile View with Toggle Buttons -->
                             <div class="mobile-view">
                                 <div class="toggle-container">
-                                    <button class="toggle-button-translated active" 
-                                            onclick="toggleSectionContent('section-{{ section.section_id }}', 'translated')" 
-                                            data-option="translated">
+                                    <button class="toggle-button-translated active"
+                                        onclick="toggleSectionContent('section-{{ section.section_id }}', 'translated')"
+                                        data-option="translated">
                                         <i class="fas fa-language me-1"></i>
                                         Translated
                                     </button>
-                                    <button class="toggle-button-original" 
-                                            onclick="toggleSectionContent('section-{{ section.section_id }}', 'original')" 
-                                            data-option="original">
+                                    <button class="toggle-button-original"
+                                        onclick="toggleSectionContent('section-{{ section.section_id }}', 'original')"
+                                        data-option="original">
                                         <i class="fas fa-flag me-1"></i>
                                         Original
                                     </button>
                                 </div>
-                                
+
                                 <!-- Mobile Content Panels -->
-                                <div class="mobile-content" id="content-translated-{{ section.section_id }}" style="display: block;">
+                                <div class="mobile-content" id="content-translated-{{ section.section_id }}"
+                                    style="display: block;">
                                     <div class="content-inner">
                                         <div class="content-label">
                                             <i class="fas fa-flag-usa me-1"></i>
@@ -133,8 +135,9 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div class="mobile-content" id="content-original-{{ section.section_id }}" style="display: none;">
+
+                                <div class="mobile-content" id="content-original-{{ section.section_id }}"
+                                    style="display: none;">
                                     <div class="content-inner">
                                         <div class="content-label">
                                             <i class="fas fa-flag me-1"></i>
@@ -150,7 +153,8 @@
                             <!-- Desktop View with Collapsible Panels -->
                             <div class="web-view">
                                 <div class="wrap-collapsible">
-                                    <input id="collapsible-{{ section.section_id }}-original" class="toggle" type="checkbox">
+                                    <input id="collapsible-{{ section.section_id }}-original" class="toggle"
+                                        type="checkbox">
                                     <label for="collapsible-{{ section.section_id }}-original" class="lbl-toggle">
                                         <i class="fas fa-flag me-1"></i>
                                         Original ({{ source_language|upper }})
@@ -165,7 +169,8 @@
                                 </div>
 
                                 <div class="wrap-collapsible">
-                                    <input id="collapsible-{{ section.section_id }}-translated" class="toggle" type="checkbox" checked="true">
+                                    <input id="collapsible-{{ section.section_id }}-translated" class="toggle"
+                                        type="checkbox" checked="true">
                                     <label for="collapsible-{{ section.section_id }}-translated" class="lbl-toggle">
                                         <i class="fas fa-language me-1"></i>
                                         English Translation
@@ -185,7 +190,9 @@
                                                     {% for row in section.content.table_data %}
                                                     <tr>
                                                         {% for cell in row %}
-                                                        <td data-label="{{ section.content.table_headers[loop.index0] }}">{{ cell }}</td>
+                                                        <td
+                                                            data-label="{{ section.content.table_headers[loop.index0] }}">
+                                                            {{ cell }}</td>
                                                         {% endfor %}
                                                     </tr>
                                                     {% endfor %}

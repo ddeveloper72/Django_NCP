@@ -394,6 +394,11 @@ def patient_cda_view(request, patient_id):
         else:
             translation_cda_content = rendering_cda_content
 
+        # Initialize coded section translator for enhanced section titles
+        from .services.cda_coded_section_translator import CDACodedSectionTranslator
+
+        coded_translator = CDACodedSectionTranslator(target_language=target_language)
+
         # Translate the CDA document with proper parameters
         translation_result_obj = translation_service.translate_cda_document(
             html_content=translation_cda_content,
@@ -412,14 +417,35 @@ def patient_cda_view(request, patient_id):
             "sections": [],
         }
 
-        # Convert sections to template format
+        # Convert sections to template format with coded section enhancement
         for section in translation_result_obj.sections:
+            # Try to get coded section information
+            section_code = None
+            coded_title = None
+            is_coded_section = False
+
+            # Look for section codes in the original content or extract from CDA structure
+            import re
+
+            code_match = re.search(r'code="([^"]+)"', section.original_content)
+            if code_match:
+                section_code = code_match.group(1)
+                coded_translation = coded_translator.translate_section_code(
+                    section_code, section.translated_title
+                )
+                coded_title = coded_translation["translated_title"]
+                is_coded_section = coded_translation["is_coded"]
+
             section_dict = {
                 "section_id": section.section_id,
                 "title": {
                     "original": section.french_title,
                     "translated": section.translated_title,
+                    "coded": coded_title if coded_title else section.translated_title,
                 },
+                "section_code": section_code,
+                "is_coded_section": is_coded_section,
+                "translation_source": "coded" if is_coded_section else "free_text",
                 "content": {
                     "original": section.original_content,
                     "translated": section.translated_content,
@@ -449,6 +475,17 @@ def patient_cda_view(request, patient_id):
         # Extract data from the dictionary result
         doc_info = translation_result.get("document_info", {})
 
+        # Calculate coded sections statistics
+        coded_sections_count = sum(
+            1
+            for section in translation_result["sections"]
+            if section.get("is_coded_section", False)
+        )
+        total_sections = len(translation_result["sections"])
+        coded_sections_percentage = (
+            (coded_sections_count / total_sections * 100) if total_sections > 0 else 0
+        )
+
         context = {
             "patient_data": patient_data,
             "cda_content": rendering_cda_content,
@@ -466,6 +503,10 @@ def patient_cda_view(request, patient_id):
             "translation_quality": doc_info.get("translation_quality", "0%"),
             "medical_terms_count": doc_info.get("medical_terms_translated", 0),
             "sections_count": len(translation_result.get("sections", [])),
+            # Coded sections statistics
+            "coded_sections_count": coded_sections_count,
+            "coded_sections_percentage": round(coded_sections_percentage, 1),
+            "uses_coded_sections": coded_sections_count > 0,
         }
 
         return render(request, "patient_data/patient_cda.html", context, using="jinja2")
