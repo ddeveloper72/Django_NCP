@@ -1,0 +1,43 @@
+Luxembourg CDA Translation Demo
+==================================================
+Document loaded: 41,656 characters
+Sections found: 6
+
+Section 1: Historique de la prise médicamenteuse
+   English hint: History of Medication use Narrative. translation: Traitements
+   Translated: history de la intake medication
+   Original: Code Nom commercial Principe actif et dosage Forme pharmaceutique Route Posologie Date de début Date de fin Notes 2009050307 RETROVIR zidovudine 10.0mg/ml sol buv orale 300 mg par 12 Heure 01/08/2022 ...
+   Translated: Code Nom commercial Principe actif et dosage Forme pharmaceutique Route Posologie Date de début Date de fin Notes 2009050307 RETROVIR zidovudine 10.0mg/ml sol buv orale 300 mg par 12 Heure 01/08/2022 ...
+
+Section 2: Allergies, effets indésirables, alertes
+   English hint: Allergies and adverse reactions Document. translation: Allergies et hypersensibilités
+   Translated: allergys, effects adverse, alerts
+   Original: Code (SNOMED-CT) Type Agent Symptôme Gravité Date de début Date de fin Notes 416098002 Allergie médicamenteuse abacavir sulfate Anaphylaxie Sévère 01/08/2022 note
+   Translated: Code (SNOMED-CT) Type Agent Symptôme Gravité Date de début Date de fin Notes 416098002 allergy medication abacavir sulfate Anaphylaxie Sévère 01/08/2022 note
+
+Section 3: Vaccinations
+   English hint: History of Immunization Narrative. translation: Vaccinations
+   Translated: vaccinations
+   Original: Nom commercial Type Date d'administration Producteur Numéro de lot Date d'expiration Site Voie Status Quantité Vaccinateur Réaction Note Protocole BOOSTRIX-POLIO Vaccin ant diphtérique 01/08/2022 GSK ...
+   Translated: Nom commercial Type Date d'administration Producteur Numéro de lot Date d'expiration Site Voie Status Quantité Vaccinateur Réaction Note Protocole BOOSTRIX-POLIO Vaccin ant diphtérique 01/08/2022 GSK ...
+
+Section 4: Liste des problèmes
+   English hint: Problem list - Reported. translation: Liste des problèmes
+   Translated: Liste des problems
+   Original: Code (ICD-10CM) Type Description Date d'apparition présumée Date d'fin présumée Prise en charge A06.6 abcès amibien de l'encéphale abc 01/08/2022 Dr. Laurent Vandenhove B20 immunodéficience humaine vi...
+   Translated: Code (ICD-10CM) Type Description Date d'apparition présumée Date d'fin présumée intake en charge A06.6 abcès amibien de l'encéphale abc 01/08/2022 Dr. Laurent Vandenhove B20 immunodéficience humaine v...
+
+Section 5: Antécédents chirurgicaux
+   English hint: History of Procedures Document. translation: Historique des actes ({Fournisseur})
+   Translated: Antécédents chirurgicaux
+   Original: Code (SNOMED-CT) Procédure Date de début Date de fin Note 118950002 Intervention sur la tête et/ou le cou 03/08/2022 03/08/2022 abcès amibien de l'encéphale
+   Translated: Code (SNOMED-CT) Procédure Date de début Date de fin Note 118950002 Intervention sur la tête et/ou le cou 03/08/2022 03/08/2022 abcès amibien de l'encéphale
+
+Section 6: Liste des dispositifs médicaux
+   English hint: History of medical device use. translation: Antécédents d'utilisation de dispositifs médicaux ({Fournisseurs})
+   Translated: Liste des devices médicaux
+   Original: Code (FHL MEDDEV) Nom commercial Type Date d'implant Date de retrait Date d'expiration Numéro de série Notes 71231130 GENOU ADAPTATEUR LEGION Implant Chrome-Cobalt décalé +2mm B/1 stér IMPLANT GENOU A...
+   Translated: Code (FHL MEDDEV) Nom commercial Type Date d'implant Date de retrait Date d'expiration Numéro de série Notes 71231130 GENOU ADAPTATEUR LEGION implant Chrome-Cobalt décalé +2mm B/1 stér implant GENOU A...
+
+Demo completed - 6 medical sections processed
+Ready for Django integration!

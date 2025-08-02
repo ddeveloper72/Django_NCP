@@ -181,7 +181,11 @@
       border: none;
 
       &:hover {
-        background: linear-gradient(135deg, darken($accent-blue, 10%), darken($primary-green, 10%));
+        background: linear-gradient(
+          135deg,
+          darken($accent-blue, 10%),
+          darken($primary-green, 10%)
+        );
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       }

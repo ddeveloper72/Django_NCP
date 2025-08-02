@@ -4,9 +4,31 @@
 endblock %}
 
 {% block extra_head %}
+<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700" rel="stylesheet">
 <style>
+    /* Professional CDA Document Styling - Matching Work Template */
+    body {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 12px;
+        line-height: 1.6;
+        background: #fff;
+        color: #4A4A4A;
+    }
+
+    .h1center {
+        font-size: 1.5em;
+        font-weight: bold;
+        text-align: center;
+        background-color: #085a9f;
+        color: #FFF;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        border-radius: 4px;
+    }
+
+    /* Professional Dashboard */
     .cda-translation-dashboard {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #085a9f 0%, #009fd1 100%);
         color: white;
         padding: 1.5rem;
         border-radius: 10px;
@@ -27,6 +49,7 @@ endblock %}
         border-radius: 8px;
         text-align: center;
         backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .stat-value {
@@ -40,91 +63,282 @@ endblock %}
         opacity: 0.9;
     }
 
-    .section-container {
+    /* Modern Container System */
+    .container {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: start;
+        column-gap: 10px;
+        row-gap: 10px;
+    }
+
+    /* Professional Section Headers */
+    .wrap-collapsible {
+        margin-bottom: 1.2rem;
+        width: 100%;
         background: white;
         border-radius: 10px;
-        margin-bottom: 1.5rem;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         overflow: hidden;
     }
 
-    .section-header {
-        background: linear-gradient(135deg, #2c3e50, #34495e);
-        color: white;
+    input[type='checkbox'] {
+        display: none;
+    }
+
+    /* Main Section Toggle */
+    .lbl-toggle-main {
+        display: block;
+        font-weight: bold;
+        color: #085a9f;
+        font-size: 15px;
+        text-align: left;
         padding: 1rem 1.5rem;
-        border-bottom: 3px solid #3498db;
-    }
-
-    .section-title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        margin: 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .language-toggle {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: white;
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
+        border: 2px solid #085a9f;
+        background: #FFF;
         cursor: pointer;
-        transition: all 0.3s ease;
+        border-radius: 10px 10px 0 0;
+        transition: all 0.25s ease-out;
+        margin: 0;
     }
 
-    .language-toggle:hover {
-        background: rgba(255, 255, 255, 0.2);
+    .lbl-toggle-main:hover {
+        color: #009fd1;
+        background: #f8f9fa;
     }
 
-    .section-content {
+    .lbl-toggle-main::before {
+        content: ' ';
+        display: inline-block;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 5px solid currentColor;
+        vertical-align: middle;
+        margin-right: 0.7rem;
+        transform: translateY(-2px);
+        transition: transform 0.2s ease-out;
+    }
+
+    .toggle:checked+.lbl-toggle-main::before {
+        transform: rotate(90deg) translateX(-3px);
+    }
+
+    /* Title Section Toggle */
+    .lbl-toggle-title {
+        display: block;
+        font-weight: bold;
+        color: #FFF;
+        font-size: 15px;
+        text-align: left;
+        padding: 1rem 1.5rem;
+        border: 2px solid #085a9f;
+        background: #085a9f;
+        cursor: pointer;
+        border-radius: 3px;
+        transition: all 0.25s ease-out;
+        margin: 0;
+    }
+
+    .lbl-toggle-title:hover {
+        color: #009fd1;
+    }
+
+    .lbl-toggle-title::before {
+        content: ' ';
+        display: inline-block;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 5px solid currentColor;
+        vertical-align: middle;
+        margin-right: 0.7rem;
+        transform: translateY(-2px);
+        transition: transform 0.2s ease-out;
+    }
+
+    .toggle:checked+.lbl-toggle-title::before {
+        transform: rotate(90deg) translateX(-3px);
+    }
+
+    /* Sub-section Toggle */
+    .lbl-toggle {
+        display: block;
+        color: #009fd1;
+        font-weight: bold;
+        font-size: 13px;
+        text-align: left;
+        padding: 0.8rem 1.5rem;
+        border: 2px solid #009fd1;
+        background: #FFF;
+        cursor: pointer;
+        border-radius: 3px;
+        transition: all 0.25s ease-out;
+        margin: 0.5rem 0;
+    }
+
+    .lbl-toggle:hover {
+        background: #f8f9fa;
+    }
+
+    .lbl-toggle::before {
+        content: ' ';
+        display: inline-block;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 5px solid currentColor;
+        vertical-align: middle;
+        margin-right: 0.7rem;
+        transform: translateY(-2px);
+        transition: transform 0.2s ease-out;
+    }
+
+    .toggle:checked+.lbl-toggle::before {
+        transform: rotate(90deg) translateX(-3px);
+    }
+
+    /* Collapsible Content */
+    .collapsible-content-main,
+    .collapsible-content-title,
+    .collapsible-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.25s ease-in-out;
+    }
+
+    .toggle:checked+.lbl-toggle-main+.collapsible-content-main,
+    .toggle:checked+.lbl-toggle-title+.collapsible-content-title,
+    .toggle:checked+.lbl-toggle+.collapsible-content {
+        max-height: none;
+        overflow: visible;
+    }
+
+    .content-inner-main,
+    .content-inner-title,
+    .content-inner {
+        background: white;
+        border-bottom: 2px solid #085a9f;
+        border-left: 2px solid #085a9f;
+        border-right: 2px solid #085a9f;
+        border-bottom-left-radius: 7px;
+        border-bottom-right-radius: 7px;
         padding: 1.5rem;
     }
 
-    .content-panel {
-        background: #f8f9fa;
-        border-left: 4px solid #3498db;
-        padding: 1rem;
+    /* Professional Tables */
+    .translation_table,
+    .medication_summary_table,
+    .extended_header_table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
         margin-bottom: 1rem;
-        border-radius: 0 8px 8px 0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    .content-panel.translated {
-        border-left-color: #27ae60;
-        background: #f0f9f0;
+    .translation_table th {
+        background: #E6F2FF;
+        color: #4A4A4A;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 12px;
+        vertical-align: top;
+        text-align: left;
+        border-bottom: 1px solid #009fd1;
     }
 
-    .content-label {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+    .translation_table th.subtitle {
+        background: #009fd1;
+        color: #FFFFFF;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 12px;
+        vertical-align: top;
+        text-align: left;
+        border-bottom: 1px solid #009fd1;
     }
 
-    .content-text {
-        line-height: 1.6;
-        color: #34495e;
+    .translation_table td {
+        font-size: 12px;
+        padding: 12px;
+        vertical-align: top;
+        text-align: left;
+        border-bottom: 1px solid #ecf0f1;
     }
 
-    .medical-terms-badge {
-        background: #e74c3c;
-        color: white;
-        padding: 0.2rem 0.6rem;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        margin-left: 0.5rem;
+    .translation_table tr:nth-child(even) {
+        background: #FFFFFF;
     }
 
+    .translation_table tr:nth-child(odd) {
+        background: #E6F2FF;
+    }
+
+    /* Mobile-First Design */
+    .mobile-view {
+        display: none;
+    }
+
+    .web-view {
+        display: block;
+    }
+
+    .toggle-container {
+        display: flex;
+        justify-content: space-between;
+        margin: 15px;
+        gap: 2px;
+    }
+
+    .toggle-button-translated,
+    .toggle-button-original {
+        padding: 12px 20px;
+        flex-grow: 1;
+        text-align: center;
+        background-color: #fff;
+        color: #085a9f;
+        border: 2px solid #085a9f;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 13px;
+    }
+
+    .toggle-button-translated {
+        border-bottom-left-radius: 8px;
+        border-top-left-radius: 8px;
+        border-right: 1px solid #085a9f;
+    }
+
+    .toggle-button-original {
+        border-bottom-right-radius: 8px;
+        border-top-right-radius: 8px;
+        border-left: 1px solid #085a9f;
+    }
+
+    .toggle-button-translated.active,
+    .toggle-button-original.active {
+        background-color: #085a9f;
+        color: #fff;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .toggle-button-translated:hover:not(.active),
+    .toggle-button-original:hover:not(.active) {
+        background-color: #f8f9fa;
+        color: #009fd1;
+    }
+
+    /* Document Info Grid */
     .document-info {
         background: white;
         border-radius: 10px;
         padding: 1.5rem;
         margin-bottom: 2rem;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e6f2ff;
     }
 
     .info-grid {
@@ -136,31 +350,37 @@ endblock %}
     .info-item {
         display: flex;
         justify-content: space-between;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #ecf0f1;
+        padding: 0.8rem;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border-left: 4px solid #009fd1;
     }
 
     .info-label {
         font-weight: 600;
-        color: #7f8c8d;
+        color: #085a9f;
+        font-size: 12px;
     }
 
     .info-value {
-        color: #2c3e50;
+        color: #4A4A4A;
         font-weight: 500;
+        font-size: 12px;
     }
 
-    .no-sections {
-        text-align: center;
-        padding: 3rem;
-        color: #7f8c8d;
-        background: #f8f9fa;
-        border-radius: 10px;
-        margin: 2rem 0;
+    /* Badges and Indicators */
+    .medical-terms-badge {
+        background: #e74c3c;
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.7rem;
+        margin-left: 0.5rem;
+        font-weight: 600;
     }
 
     .cda-type-badge {
-        background: #3498db;
+        background: #085a9f;
         color: white;
         padding: 0.3rem 0.8rem;
         border-radius: 15px;
@@ -177,38 +397,112 @@ endblock %}
         font-weight: 600;
     }
 
-    .quality-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
+    /* Responsive Design */
+    @media screen and (max-width: 800px) {
+        .web-view {
+            display: none;
+        }
+
+        .mobile-view {
+            display: block;
+        }
+
+        .container {
+            grid-template-columns: 1fr;
+        }
+
+        .translation-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+        }
+
+        .toggle-container {
+            margin: 10px;
+        }
+
+        .toggle-button-translated,
+        .toggle-button-original {
+            padding: 10px 15px;
+            font-size: 12px;
+        }
     }
 
-    .quality-bar {
-        width: 100px;
-        height: 8px;
-        background: #ecf0f1;
-        border-radius: 4px;
-        overflow: hidden;
+    /* Content Styling */
+    .content-label {
+        font-weight: 600;
+        color: #085a9f;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .quality-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #e74c3c, #f39c12, #27ae60);
-        transition: width 0.3s ease;
+    .content-text {
+        line-height: 1.6;
+        color: #4A4A4A;
+        font-size: 12px;
+    }
+
+    /* No sections message */
+    .no-sections {
+        text-align: center;
+        padding: 3rem;
+        color: #7f8c8d;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin: 2rem 0;
+        border: 2px dashed #009fd1;
+    }
+
+    /* Professional animations */
+    .wrap-collapsible {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Raw content styling */
+    .raw-content {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        padding: 1rem;
+        font-family: 'Courier New', monospace;
+        font-size: 11px;
+        max-height: 400px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
+    <!-- Professional Header -->
+    <h1 class="h1center">Clinical Document Architecture - Translation Dashboard</h1>
+
     <!-- Translation Dashboard -->
     <div class="cda-translation-dashboard">
         <h2 class="mb-0">
             <i class="fas fa-language me-2"></i>
-            Clinical Document Translation Dashboard
+            Bilingual Medical Document Viewer
         </h2>
         <p class="mb-3 opacity-75">
-            Bilingual medical document viewer with real-time translation capabilities
+            Enhanced CDA translation with {{ medical_terms_count }} medical terms from {{ source_country }}
         </p>
 
         <div class="translation-stats">
@@ -231,168 +525,238 @@ endblock %}
         </div>
     </div>
 
-    <!-- Patient Information -->
-    <div class="document-info">
-        <h4 class="mb-3">
+    <!-- Patient Information Section -->
+    <div class="wrap-collapsible">
+        <input id="collapsible-patient-header" class="toggle" type="checkbox" checked="true">
+        <label for="collapsible-patient-header" class="lbl-toggle-main">
             <i class="fas fa-user-md me-2"></i>
             Patient Information & Document Details
-        </h4>
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Patient Name:</span>
-                <span class="info-value">{{ patient_data.family_name }}, {{ patient_data.given_name }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Date of Birth:</span>
-                <span class="info-value">{{ patient_data.date_of_birth }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Source Country:</span>
-                <span class="info-value">{{ source_country }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Document Type:</span>
-                <span class="info-value">
-                    <span class="cda-type-badge">{{ cda_type }} CDA</span>
-                </span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Confidence Score:</span>
-                <span class="info-value">
-                    <span class="confidence-badge">{{ confidence }}%</span>
-                </span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">File Name:</span>
-                <span class="info-value">{{ file_name }}</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Medical Sections with Translations -->
-    {% if translation_result.sections %}
-    <h3 class="mb-4">
-        <i class="fas fa-stethoscope me-2"></i>
-        Bilingual Medical Sections
-    </h3>
-
-    {% for section in translation_result.sections %}
-    <div class="section-container" id="section-{{ section.section_id }}">
-        <div class="section-header">
-            <h5 class="section-title">
-                <span>
-                    <i class="fas fa-clipboard-list me-2"></i>
-                    {{ section.title.translated }}
-                    <small class="text-light">/ {{ section.title.original }}</small>
-                    {% if section.content.medical_terms > 0 %}
-                    <span class="medical-terms-badge">{{ section.content.medical_terms }} medical terms</span>
-                    {% endif %}
-                </span>
-                <button class="language-toggle" onclick="toggleLanguage('section-{{ section.section_id }}')">
-                    <i class="fas fa-language me-1"></i>
-                    Switch View
-                </button>
-            </h5>
-        </div>
-
-        <div class="section-content">
-            <!-- English Translation (Default View) -->
-            <div class="content-panel translated translation-view" data-lang="en">
-                <div class="content-label">
-                    <i class="fas fa-flag-usa me-1"></i>
-                    English Translation
-                </div>
-                <div class="content-text">
-                    {{ section.content.translated|safe }}
-                </div>
-            </div>
-
-            <!-- Original Language -->
-            <div class="content-panel original-view" data-lang="original" style="display: none;">
-                <div class="content-label">
-                    <i class="fas fa-flag me-1"></i>
-                    Original ({{ source_language|upper }})
-                </div>
-                <div class="content-text">
-                    {{ section.content.original|safe }}
+        </label>
+        <div class="collapsible-content-main">
+            <div class="content-inner-main">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Patient Name:</span>
+                        <span class="info-value">{{ patient_data.family_name }}, {{ patient_data.given_name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Date of Birth:</span>
+                        <span class="info-value">{{ patient_data.date_of_birth }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Source Country:</span>
+                        <span class="info-value">{{ source_country }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Document Type:</span>
+                        <span class="info-value">
+                            <span class="cda-type-badge">{{ cda_type }} CDA</span>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Confidence Score:</span>
+                        <span class="info-value">
+                            <span class="confidence-badge">{{ confidence }}%</span>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">File Name:</span>
+                        <span class="info-value">{{ file_name }}</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    {% endfor %}
 
-    {% else %}
-    <div class="no-sections">
-        <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
-        <h4>No Medical Sections Available</h4>
-        <p>This document does not contain structured medical sections for translation.</p>
-        <p>Raw CDA content may be available in the document source.</p>
-    </div>
-    {% endif %}
+    <!-- Clinical Sections -->
+    <div class="wrap-collapsible">
+        <input id="collapsible-clinical-sections" class="toggle" type="checkbox" checked="true">
+        <label for="collapsible-clinical-sections" class="lbl-toggle-main">
+            <i class="fas fa-stethoscope me-2"></i>
+            Clinical Sections
+        </label>
+        <div class="collapsible-content-main">
+            <div class="content-inner-main">
 
-    <!-- Raw CDA Content (Collapsible) -->
-    <div class="section-container">
-        <div class="section-header">
-            <h5 class="section-title">
-                <span>
-                    <i class="fas fa-code me-2"></i>
-                    Raw CDA Document
-                </span>
-                <button class="language-toggle" onclick="toggleRawCDA()">
-                    <i class="fas fa-eye me-1"></i>
-                    Show/Hide
-                </button>
-            </h5>
+                {% if translation_result.sections %}
+                {% for section in translation_result.sections %}
+                <div class="wrap-collapsible">
+                    <input id="collapsible-section-{{ section.section_id }}" class="toggle" type="checkbox"
+                        checked="true">
+                    <label for="collapsible-section-{{ section.section_id }}" class="lbl-toggle-title">
+                        <i class="fas fa-clipboard-list me-2"></i>
+                        {{ section.title.translated }}
+                        {% if section.content.medical_terms > 0 %}
+                        <span class="medical-terms-badge">{{ section.content.medical_terms }} terms</span>
+                        {% endif %}
+                    </label>
+                    <div class="collapsible-content-title">
+                        <div class="content-inner-title">
+
+                            <!-- Mobile View with Toggle Buttons -->
+                            <div class="mobile-view">
+                                <div class="toggle-container">
+                                    <button class="toggle-button-translated active"
+                                        onclick="toggleSectionContent('section-{{ section.section_id }}', 'translated')"
+                                        data-option="translated">
+                                        <i class="fas fa-language me-1"></i>
+                                        Translated
+                                    </button>
+                                    <button class="toggle-button-original"
+                                        onclick="toggleSectionContent('section-{{ section.section_id }}', 'original')"
+                                        data-option="original">
+                                        <i class="fas fa-flag me-1"></i>
+                                        Original
+                                    </button>
+                                </div>
+
+                                <!-- Mobile Content Panels -->
+                                <div class="mobile-content" id="content-translated-{{ section.section_id }}"
+                                    style="display: block;">
+                                    <div class="content-inner">
+                                        <div class="content-label">
+                                            <i class="fas fa-flag-usa me-1"></i>
+                                            English Translation
+                                        </div>
+                                        <div class="content-text">
+                                            {{ section.content.translated|safe }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mobile-content" id="content-original-{{ section.section_id }}"
+                                    style="display: none;">
+                                    <div class="content-inner">
+                                        <div class="content-label">
+                                            <i class="fas fa-flag me-1"></i>
+                                            Original ({{ source_language|upper }})
+                                        </div>
+                                        <div class="content-text">
+                                            {{ section.content.original|safe }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Desktop View with Collapsible Panels -->
+                            <div class="web-view">
+                                <div class="wrap-collapsible">
+                                    <input id="collapsible-{{ section.section_id }}-original" class="toggle"
+                                        type="checkbox">
+                                    <label for="collapsible-{{ section.section_id }}-original" class="lbl-toggle">
+                                        <i class="fas fa-flag me-1"></i>
+                                        Original ({{ source_language|upper }})
+                                    </label>
+                                    <div class="collapsible-content">
+                                        <div class="content-inner">
+                                            <div class="content-text">
+                                                {{ section.content.original|safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="wrap-collapsible">
+                                    <input id="collapsible-{{ section.section_id }}-translated" class="toggle"
+                                        type="checkbox" checked="true">
+                                    <label for="collapsible-{{ section.section_id }}-translated" class="lbl-toggle">
+                                        <i class="fas fa-language me-1"></i>
+                                        English Translation
+                                    </label>
+                                    <div class="collapsible-content">
+                                        <div class="content-inner">
+                                            {% if section.content.table_data %}
+                                            <table class="translation_table">
+                                                <thead>
+                                                    <tr>
+                                                        {% for header in section.content.table_headers %}
+                                                        <th>{{ header }}</th>
+                                                        {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for row in section.content.table_data %}
+                                                    <tr>
+                                                        {% for cell in row %}
+                                                        <td
+                                                            data-label="{{ section.content.table_headers[loop.index0] }}">
+                                                            {{ cell }}</td>
+                                                        {% endfor %}
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                            {% else %}
+                                            <div class="content-text">
+                                                {{ section.content.translated|safe }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                {% else %}
+                <div class="no-sections">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3" style="color: #009fd1;"></i>
+                    <h4>No Medical Sections Available</h4>
+                    <p>This document does not contain structured medical sections for translation.</p>
+                    <p>Raw CDA content may be available below.</p>
+                </div>
+                {% endif %}
+
+            </div>
         </div>
+    </div>
 
-        <div class="section-content" id="raw-cda-content" style="display: none;">
-            <div class="content-panel">
+    <!-- Raw CDA Content -->
+    <div class="wrap-collapsible">
+        <input id="collapsible-raw-cda" class="toggle" type="checkbox">
+        <label for="collapsible-raw-cda" class="lbl-toggle-main">
+            <i class="fas fa-code me-2"></i>
+            Raw CDA Document
+        </label>
+        <div class="collapsible-content-main">
+            <div class="content-inner-main">
                 <div class="content-label">
                     <i class="fas fa-file-code me-1"></i>
                     XML Content
                 </div>
-                <pre class="content-text"
-                    style="background: #f8f9fa; padding: 1rem; border-radius: 5px; overflow-x: auto; max-height: 400px;"><code>{{ cda_content }}</code></pre>
+                <div class="raw-content">{{ cda_content }}</div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    function toggleLanguage(sectionId) {
-        const section = document.getElementById(sectionId);
-        const englishView = section.querySelector('[data-lang="en"]');
-        const originalView = section.querySelector('[data-lang="original"]');
+    // Mobile toggle functionality
+    function toggleSectionContent(sectionId, viewType) {
+        const translatedContent = document.getElementById('content-translated-' + sectionId.replace('section-', ''));
+        const originalContent = document.getElementById('content-original-' + sectionId.replace('section-', ''));
+        const translatedBtn = document.querySelector(`[data-option="translated"][onclick*="${sectionId}"]`);
+        const originalBtn = document.querySelector(`[data-option="original"][onclick*="${sectionId}"]`);
 
-        if (englishView.style.display === 'none') {
-            englishView.style.display = 'block';
-            originalView.style.display = 'none';
+        if (viewType === 'translated') {
+            translatedContent.style.display = 'block';
+            originalContent.style.display = 'none';
+            translatedBtn.classList.add('active');
+            originalBtn.classList.remove('active');
         } else {
-            englishView.style.display = 'none';
-            originalView.style.display = 'block';
+            translatedContent.style.display = 'none';
+            originalContent.style.display = 'block';
+            translatedBtn.classList.remove('active');
+            originalBtn.classList.add('active');
         }
     }
 
-    function toggleRawCDA() {
-        const rawContent = document.getElementById('raw-cda-content');
-        if (rawContent.style.display === 'none') {
-            rawContent.style.display = 'block';
-        } else {
-            rawContent.style.display = 'none';
-        }
-    }
-
-    // Initialize quality bars on page load
+    // Initialize page animations
     document.addEventListener('DOMContentLoaded', function () {
-        const qualityText = '{{ translation_quality }}';
-        const qualityValue = parseInt(qualityText.replace('%', ''));
-
-        const qualityBars = document.querySelectorAll('.quality-fill');
-        qualityBars.forEach(bar => {
-            bar.style.width = qualityValue + '%';
-        });
-
-        // Add animation to stats on page load
+        // Animate stats on page load
         const statValues = document.querySelectorAll('.stat-value');
         statValues.forEach((stat, index) => {
             stat.style.opacity = '0';
@@ -402,6 +766,12 @@ endblock %}
                 stat.style.opacity = '1';
                 stat.style.transform = 'translateY(0)';
             }, index * 100);
+        });
+
+        // Add stagger animation to sections
+        const sections = document.querySelectorAll('.wrap-collapsible');
+        sections.forEach((section, index) => {
+            section.style.animationDelay = `${index * 0.1}s`;
         });
     });
 </script>
