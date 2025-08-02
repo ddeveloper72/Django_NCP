@@ -32,6 +32,11 @@ urlpatterns = [
     ),
     path("cda/<int:patient_id>/", main_views.patient_cda_view, name="patient_cda_view"),
     path(
+        "cda/translation-toggle/<int:patient_id>/",
+        main_views.cda_translation_toggle,
+        name="cda_translation_toggle",
+    ),
+    path(
         "download/<int:patient_id>/",
         main_views.download_cda_pdf,
         name="download_cda_pdf",
