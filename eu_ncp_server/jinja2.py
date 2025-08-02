@@ -3,6 +3,19 @@ Jinja2 Environment Configuration for EU NCP Server
 
 This module sets up the Jinja2 template environment with custom functions
 and filters needed for the EU eHealth portal templates.
+
+IMPORTANT: URL Configuration Fix
+==============================
+
+This file contains a critical fix for Django Jinja2 URL reversal.
+DO NOT replace the url_helper function with Django's reverse function directly.
+
+Problem: Using "url": reverse directly causes this error:
+    ImproperlyConfigured: The included URLconf '<parameter>' does not appear to have any patterns
+
+Solution: Use the url_helper function which properly handles URL arguments.
+
+For complete documentation, see: JINJA2_URL_CONFIGURATION.md
 """
 
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -13,9 +26,34 @@ from jinja2 import Environment
 def url_helper(viewname, *args, **kwargs):
     """
     Helper function for URL reversal in Jinja2 templates.
-
+    
+    CRITICAL: This function fixes a common Django Jinja2 URL configuration issue.
+    
+    Problem Solved:
+    ===============
+    Without this helper, using Django's reverse function directly in Jinja2
+    causes ImproperlyConfigured errors when templates call {{ url('app:view', param) }}
+    because reverse() interprets the parameter as urlconf instead of args.
+    
     This function properly handles arguments for Django's reverse function
     in Jinja2 templates, converting positional arguments to the args parameter.
+    
+    Template Usage Examples:
+    ========================
+    {{ url('app:view_name') }}                    # No parameters
+    {{ url('app:view_name', param1) }}            # Single parameter  
+    {{ url('app:view_name', param1, param2) }}    # Multiple parameters
+    {{ url('app:view_name', id=123) }}            # Keyword arguments
+    
+    Args:
+        viewname (str): Django URL pattern name (e.g., 'patient_data:patient_details')
+        *args: Positional arguments for URL parameters
+        **kwargs: Keyword arguments for URL parameters
+        
+    Returns:
+        str: Reversed URL path
+        
+    DO NOT REPLACE THIS WITH: "url": reverse
     """
     if args:
         return reverse(viewname, args=args)
@@ -35,10 +73,12 @@ def environment(**options):
     env = Environment(**options)
 
     # Django integration functions
+    # CRITICAL: Use url_helper, NOT reverse directly
+    # See JINJA2_URL_CONFIGURATION.md for full explanation
     env.globals.update(
         {
             "static": staticfiles_storage.url,
-            "url": url_helper,
+            "url": url_helper,  # DO NOT change to: "url": reverse
         }
     )
 
