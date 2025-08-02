@@ -47,6 +47,16 @@ urlpatterns = [
         main_views.patient_orcd_view,
         name="patient_orcd_view",
     ),
+    path(
+        "orcd/<int:patient_id>/download/",
+        main_views.download_orcd_pdf,
+        name="download_orcd_pdf",
+    ),
+    path(
+        "orcd/<int:patient_id>/download/<int:attachment_index>/",
+        main_views.download_orcd_pdf,
+        name="download_orcd_pdf_indexed",
+    ),
     # Enhanced CDA Translation Views
     path(
         "cda/enhanced/<int:patient_id>/",

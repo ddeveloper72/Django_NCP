@@ -12,7 +12,7 @@
         </div>
 
         <h1 class="page-title">Original Clinical Document (ORCD)</h1>
-        
+
         <div class="document-info">
             <div class="info-badge">
                 <i class="icon-file-text"></i>
@@ -38,10 +38,17 @@
                     <h2>{{ patient_data.given_name }} {{ patient_data.family_name }} - Clinical Document</h2>
                 </div>
                 <div class="toolbar-right">
-                    <button class="btn btn-secondary" onclick="downloadORCD()">
+                    {% if orcd_available %}
+                    <a href="{{ url('patient_data:download_orcd_pdf', patient_data.id) }}" class="btn btn-secondary">
                         <i class="icon-download"></i>
                         Download PDF
+                    </a>
+                    {% else %}
+                    <button class="btn btn-secondary" disabled>
+                        <i class="icon-download"></i>
+                        PDF Not Available
                     </button>
+                    {% endif %}
                     <button class="btn btn-outline-secondary" onclick="openFullscreen()">
                         <i class="icon-maximize"></i>
                         Fullscreen
@@ -55,9 +62,11 @@
                     <div class="placeholder-content">
                         <i class="icon-file-text"></i>
                         <h3>ORCD PDF Preview</h3>
-                        <p>This would display the original clinical document (ORCD) extracted from the L1 CDA as a PDF.</p>
-                        <p><strong>Implementation Note:</strong> The PDF content would be extracted from the base64 encoded section of the L1 CDA document.</p>
-                        
+                        <p>This would display the original clinical document (ORCD) extracted from the L1 CDA as a PDF.
+                        </p>
+                        <p><strong>Implementation Note:</strong> The PDF content would be extracted from the base64
+                            encoded section of the L1 CDA document.</p>
+
                         <div class="pdf-info">
                             <div class="info-item">
                                 <strong>Patient:</strong> {{ patient_data.given_name }} {{ patient_data.family_name }}
@@ -70,9 +79,9 @@
                             </div>
                         </div>
 
-                        <button class="btn btn-primary mt-3" onclick="downloadORCD()">
+                        <button class="btn btn-primary mt-3" {% if orcd_available %}onclick="downloadORCD()"{% else %}disabled{% endif %}>
                             <i class="icon-download"></i>
-                            Download Original PDF
+                            {% if orcd_available %}Download Original PDF{% else %}PDF Not Available{% endif %}
                         </button>
                     </div>
                 </div>
@@ -89,7 +98,8 @@
                 </div>
                 <div class="metadata-item">
                     <label>Date of Birth:</label>
-                    <span>{{ patient_data.birth_date|date:"d F Y" }}</span>
+                    <span>{{ patient_data.birth_date.strftime('%d %B %Y') if patient_data.birth_date else 'Not
+                        available' }}</span>
                 </div>
                 <div class="metadata-item">
                     <label>Source Country:</label>
@@ -141,163 +151,166 @@
 </div>
 
 <style>
-.orcd-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.orcd-header {
-    margin-bottom: 30px;
-}
-
-.document-info {
-    display: flex;
-    gap: 15px;
-    margin-top: 15px;
-    flex-wrap: wrap;
-}
-
-.info-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 8px 12px;
-    background: var(--neutral-lighter);
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.info-badge.success {
-    background: var(--success-lighter);
-    color: var(--success-darker);
-}
-
-.pdf-preview-container {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin-bottom: 30px;
-}
-
-.pdf-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--neutral-lighter);
-    background: var(--neutral-lightest);
-    border-radius: 8px 8px 0 0;
-}
-
-.toolbar-right {
-    display: flex;
-    gap: 10px;
-}
-
-.pdf-viewer {
-    min-height: 600px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f8f9fa;
-}
-
-.pdf-placeholder {
-    text-align: center;
-    padding: 60px 40px;
-    max-width: 500px;
-}
-
-.pdf-placeholder .icon-file-text {
-    font-size: 4rem;
-    color: var(--primary-blue);
-    margin-bottom: 20px;
-}
-
-.pdf-info {
-    background: white;
-    border-radius: 6px;
-    padding: 20px;
-    margin: 20px 0;
-    text-align: left;
-}
-
-.pdf-info .info-item {
-    margin-bottom: 10px;
-}
-
-.document-metadata-panel {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.metadata-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.metadata-item {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.metadata-item label {
-    font-weight: 600;
-    color: var(--text-secondary);
-    font-size: 14px;
-}
-
-.metadata-item span {
-    font-size: 16px;
-    color: var(--text-primary);
-}
-
-.no-orcd-container {
-    text-align: center;
-    padding: 60px 40px;
-}
-
-.alternative-actions {
-    margin-top: 30px;
-}
-
-.alternative-actions .btn {
-    margin: 0 10px 10px 0;
-}
-
-@media (max-width: 768px) {
-    .pdf-toolbar {
-        flex-direction: column;
-        gap: 15px;
-        align-items: stretch;
+    .orcd-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
     }
-    
-    .toolbar-right {
-        justify-content: center;
+
+    .orcd-header {
+        margin-bottom: 30px;
     }
-    
+
     .document-info {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .info-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 12px;
+        background: var(--neutral-lighter);
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .info-badge.success {
+        background: var(--success-lighter);
+        color: var(--success-darker);
+    }
+
+    .pdf-preview-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+
+    .pdf-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--neutral-lighter);
+        background: var(--neutral-lightest);
+        border-radius: 8px 8px 0 0;
+    }
+
+    .toolbar-right {
+        display: flex;
+        gap: 10px;
+    }
+
+    .pdf-viewer {
+        min-height: 600px;
+        display: flex;
+        align-items: center;
         justify-content: center;
+        background: #f8f9fa;
     }
-    
+
+    .pdf-placeholder {
+        text-align: center;
+        padding: 60px 40px;
+        max-width: 500px;
+    }
+
+    .pdf-placeholder .icon-file-text {
+        font-size: 4rem;
+        color: var(--primary-blue);
+        margin-bottom: 20px;
+    }
+
+    .pdf-info {
+        background: white;
+        border-radius: 6px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: left;
+    }
+
+    .pdf-info .info-item {
+        margin-bottom: 10px;
+    }
+
+    .document-metadata-panel {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
     .metadata-grid {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
     }
-}
+
+    .metadata-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .metadata-item label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 14px;
+    }
+
+    .metadata-item span {
+        font-size: 16px;
+        color: var(--text-primary);
+    }
+
+    .no-orcd-container {
+        text-align: center;
+        padding: 60px 40px;
+    }
+
+    .alternative-actions {
+        margin-top: 30px;
+    }
+
+    .alternative-actions .btn {
+        margin: 0 10px 10px 0;
+    }
+
+    @media (max-width: 768px) {
+        .pdf-toolbar {
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch;
+        }
+
+        .toolbar-right {
+            justify-content: center;
+        }
+
+        .document-info {
+            justify-content: center;
+        }
+
+        .metadata-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
 <script>
 function downloadORCD() {
-    // This would implement the actual PDF download functionality
-    // For now, show a placeholder message
-    alert('PDF download would be implemented here. This would extract and download the base64 PDF from the L1 CDA document.');
+    {% if orcd_available %}
+    // Use the actual download URL
+    window.location.href = "{{ url('patient_data:download_orcd_pdf', patient_data.id) }}";
+    {% else %}
+    alert('PDF is not available for this document. This could be because the source document is L3 CDA only (no embedded PDF).');
+    {% endif %}
 }
 
 function openFullscreen() {

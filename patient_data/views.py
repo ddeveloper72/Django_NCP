@@ -10,8 +10,12 @@ from django.contrib.auth.decorators import login_required
 from .forms import PatientDataForm
 from .models import PatientData
 from .services import EUPatientSearchService, PatientCredentials
+from .services.clinical_pdf_service import ClinicalDocumentPDFService
 import logging
 import os
+import base64
+
+logger = logging.getLogger(__name__)
 
 logger = logging.getLogger(__name__)
 
@@ -234,9 +238,7 @@ def download_cda_html(request, patient_id):
 
         # Return the HTML content for download
         # The CDA content should already be in HTML format from the L3 transformation
-        response = HttpResponse(
-            match_data["cda_content"], content_type="text/html"
-        )
+        response = HttpResponse(match_data["cda_content"], content_type="text/html")
         response["Content-Disposition"] = (
             f'attachment; filename="patient_cda_{patient_id}.html"'
         )
@@ -259,17 +261,79 @@ def patient_orcd_view(request, patient_id):
             messages.error(request, "No CDA document found for this patient.")
             return redirect("patient_data:patient_details", patient_id=patient_id)
 
-        # For now, we'll create a placeholder ORCD view
-        # In a real implementation, this would extract the base64 PDF from L1 CDA
+        # Initialize PDF service
+        pdf_service = ClinicalDocumentPDFService()
+
+        # Extract PDF attachments from CDA content
+        cda_content = match_data.get("cda_content", "")
+        pdf_attachments = []
+        orcd_available = False
+
+        if cda_content:
+            try:
+                pdf_attachments = pdf_service.extract_pdfs_from_xml(cda_content)
+                orcd_available = len(pdf_attachments) > 0
+            except Exception as e:
+                logger.error(f"Error extracting PDFs from CDA: {e}")
+
         context = {
             "patient_data": patient_data,
             "source_country": match_data["country_code"],
             "confidence": round(match_data["confidence_score"] * 100, 1),
             "file_name": os.path.basename(match_data["file_path"]),
-            "orcd_available": True,  # This would be determined by checking L1 CDA for base64 PDF
+            "orcd_available": orcd_available,
+            "pdf_attachments": pdf_attachments,
         }
 
-        return render(request, "patient_data/patient_orcd.html", context, using="jinja2")
+        return render(
+            request, "patient_data/patient_orcd.html", context, using="jinja2"
+        )
+
+    except PatientData.DoesNotExist:
+        messages.error(request, "Patient data not found.")
+        return redirect("patient_data:patient_data_form")
+
+
+def download_orcd_pdf(request, patient_id, attachment_index=0):
+    """Download ORCD PDF attachment"""
+
+    try:
+        patient_data = PatientData.objects.get(id=patient_id)
+        match_data = request.session.get(f"patient_match_{patient_id}")
+
+        if not match_data:
+            messages.error(request, "No CDA document found for this patient.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+        # Initialize PDF service and extract PDFs
+        pdf_service = ClinicalDocumentPDFService()
+        cda_content = match_data.get("cda_content", "")
+
+        if not cda_content:
+            messages.error(request, "No CDA content available.")
+            return redirect("patient_data:patient_orcd_view", patient_id=patient_id)
+
+        try:
+            pdf_attachments = pdf_service.extract_pdfs_from_xml(cda_content)
+
+            if not pdf_attachments or attachment_index >= len(pdf_attachments):
+                messages.error(request, "PDF attachment not found.")
+                return redirect("patient_data:patient_orcd_view", patient_id=patient_id)
+
+            # Get the requested PDF attachment
+            pdf_attachment = pdf_attachments[attachment_index]
+            pdf_data = pdf_attachment["data"]
+            filename = f"{patient_data.given_name}_{patient_data.family_name}_ORCD.pdf"
+
+            # Return PDF response
+            return pdf_service.get_pdf_response(
+                pdf_data, filename, disposition="attachment"
+            )
+
+        except Exception as e:
+            logger.error(f"Error downloading PDF: {e}")
+            messages.error(request, "Error extracting PDF from document.")
+            return redirect("patient_data:patient_orcd_view", patient_id=patient_id)
 
     except PatientData.DoesNotExist:
         messages.error(request, "Patient data not found.")
