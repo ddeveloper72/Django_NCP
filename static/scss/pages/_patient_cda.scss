@@ -26,18 +26,22 @@ $ps-light-gray: #f8f9fa;
 
 // PS Display Guidelines - Header Section
 .ps-header {
-  background: linear-gradient(135deg, $ps-primary-blue 0%, $ps-secondary-blue 100%);
+  background: linear-gradient(
+    135deg,
+    $ps-primary-blue 0%,
+    $ps-secondary-blue 100%
+  );
   color: $ps-white;
   padding: 2rem;
   text-align: center;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  
+
   .ps-title {
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
   }
-  
+
   .ps-subtitle {
     font-size: 1.1rem;
     opacity: 0.9;
@@ -56,19 +60,19 @@ $ps-light-gray: #f8f9fa;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  
+
   .patient-identity-left {
     .patient-name {
       font-size: 1.5rem;
       color: $ps-primary-blue;
       margin-bottom: 0.5rem;
     }
-    
+
     .patient-details {
       display: flex;
       gap: 1rem;
       flex-wrap: wrap;
-      
+
       span {
         background: $ps-white;
         padding: 0.25rem 0.75rem;
@@ -79,15 +83,15 @@ $ps-light-gray: #f8f9fa;
       }
     }
   }
-  
+
   .patient-identity-right {
     text-align: right;
-    
+
     .document-meta {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
-      
+
       div {
         background: $ps-white;
         padding: 0.5rem 1rem;
@@ -107,29 +111,30 @@ $ps-light-gray: #f8f9fa;
   margin: 1rem 0 2rem 0;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-  
+
   .alert-header {
     font-size: 1.3rem;
     font-weight: 700;
     margin-bottom: 1rem;
     text-align: center;
-    
+
     i {
       font-size: 1.5rem;
       animation: pulse 2s infinite;
     }
   }
-  
-  .allergy-alerts, .medical-alerts {
+
+  .allergy-alerts,
+  .medical-alerts {
     margin-bottom: 1rem;
-    
+
     h4 {
       font-size: 1.1rem;
       margin-bottom: 0.75rem;
       border-bottom: 2px solid rgba(255, 255, 255, 0.3);
       padding-bottom: 0.5rem;
     }
-    
+
     .alert-item {
       background: rgba(255, 255, 255, 0.15);
       padding: 0.75rem;
@@ -137,15 +142,15 @@ $ps-light-gray: #f8f9fa;
       border-radius: 8px;
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.2);
-      
+
       &.allergy {
         display: flex;
         justify-content: space-between;
-        
+
         .alert-substance {
           font-weight: 600;
         }
-        
+
         .alert-reaction {
           font-style: italic;
         }
@@ -156,19 +161,23 @@ $ps-light-gray: #f8f9fa;
 
 // Enhanced Translation Dashboard
 .cda-translation-dashboard {
-  background: linear-gradient(135deg, $ps-primary-blue 0%, $ps-secondary-blue 100%);
+  background: linear-gradient(
+    135deg,
+    $ps-primary-blue 0%,
+    $ps-secondary-blue 100%
+  );
   color: white;
   padding: 2rem;
   border-radius: 15px;
   margin-bottom: 2rem;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-  
+
   .dashboard-title {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
     font-weight: 600;
   }
-  
+
   .dashboard-subtitle {
     opacity: 0.9;
     margin-bottom: 1.5rem;
@@ -193,39 +202,39 @@ $ps-light-gray: #f8f9fa;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  
+
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
     border-color: rgba(255, 255, 255, 0.4);
   }
-  
+
   &.quality {
     border-left: 5px solid $ps-success-green;
   }
-  
+
   &.sections {
     border-left: 5px solid $ps-secondary-blue;
   }
-  
+
   &.medical-terms {
     border-left: 5px solid $ps-warning-orange;
   }
-  
+
   &.coded {
     border-left: 5px solid #6f42c1;
   }
-  
+
   &.compliance {
     border-left: 5px solid $ps-success-green;
   }
-  
+
   .stat-icon {
     font-size: 2rem;
     margin-bottom: 1rem;
     opacity: 0.8;
   }
-  
+
   .stat-content {
     .stat-value {
       font-size: 2.2rem;
@@ -233,7 +242,7 @@ $ps-light-gray: #f8f9fa;
       margin-bottom: 0.5rem;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    
+
     .stat-label {
       font-size: 0.9rem;
       opacity: 0.9;
@@ -647,11 +656,11 @@ input[type='checkbox'] {
     border: 3px solid $ps-white;
     background: rgba(255, 255, 255, 0.3);
   }
-  
+
   .patient-identity-banner {
     border-width: 4px;
   }
-  
+
   .safety-alerts-section {
     border: 3px solid $ps-white;
   }
@@ -758,5 +767,192 @@ input[type='checkbox'] {
     .toolbar-right {
       justify-content: center;
     }
+  }
+}
+
+// PS Display Guidelines - Structured Tables
+.ps-table-container {
+  margin: 1.5rem 0;
+  background: $ps-white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.ps-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: $ps-white;
+  font-size: 0.9rem;
+
+  .ps-th {
+    background: linear-gradient(
+      135deg,
+      $ps-primary-blue 0%,
+      $ps-secondary-blue 100%
+    );
+    color: $ps-white;
+    font-weight: 600;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    border: none;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ps-td {
+    padding: 0.875rem 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .ps-tr:hover {
+    background-color: $ps-light-blue;
+    transition: background-color 0.2s ease;
+  }
+
+  .ps-row-even {
+    background-color: $ps-white;
+  }
+
+  .ps-row-odd {
+    background-color: #f8f9fa;
+  }
+}
+
+// Section-specific table styling
+.ps-table-medications {
+  .ps-th:nth-child(1) {
+    width: 20%;
+  } // Medication
+  .ps-th:nth-child(2) {
+    width: 15%;
+  } // Active Ingredient
+  .ps-th:nth-child(3) {
+    width: 12%;
+  } // Dosage
+  .ps-th:nth-child(4) {
+    width: 8%;
+  } // Route
+  .ps-th:nth-child(5) {
+    width: 12%;
+  } // Frequency
+  .ps-th:nth-child(6) {
+    width: 10%;
+  } // Start Date
+  .ps-th:nth-child(7) {
+    width: 10%;
+  } // End Date
+  .ps-th:nth-child(8) {
+    width: 13%;
+  } // Notes
+}
+
+.ps-table-allergies {
+  .ps-th:nth-child(1) {
+    width: 20%;
+  } // Allergy Type
+  .ps-th:nth-child(2) {
+    width: 25%;
+  } // Causative Agent
+  .ps-th:nth-child(3) {
+    width: 20%;
+  } // Manifestation
+  .ps-th:nth-child(4) {
+    width: 15%;
+  } // Severity
+  .ps-th:nth-child(5) {
+    width: 20%;
+  } // Status
+}
+
+.ps-table-problems {
+  .ps-th:nth-child(1) {
+    width: 30%;
+  } // Problem/Diagnosis
+  .ps-th:nth-child(2) {
+    width: 15%;
+  } // Status
+  .ps-th:nth-child(3) {
+    width: 15%;
+  } // Onset Date
+  .ps-th:nth-child(4) {
+    width: 40%;
+  } // Notes
+}
+
+.ps-table-procedures {
+  .ps-th:nth-child(1) {
+    width: 25%;
+  } // Procedure
+  .ps-th:nth-child(2) {
+    width: 15%;
+  } // Date
+  .ps-th:nth-child(3) {
+    width: 20%;
+  } // Performer
+  .ps-th:nth-child(4) {
+    width: 15%;
+  } // Location
+  .ps-th:nth-child(5) {
+    width: 25%;
+  } // Notes
+}
+
+.ps-table-results {
+  .ps-th:nth-child(1) {
+    width: 25%;
+  } // Test/Result
+  .ps-th:nth-child(2) {
+    width: 15%;
+  } // Value
+  .ps-th:nth-child(3) {
+    width: 20%;
+  } // Reference Range
+  .ps-th:nth-child(4) {
+    width: 15%;
+  } // Date
+  .ps-th:nth-child(5) {
+    width: 25%;
+  } // Status
+}
+
+// Mobile responsiveness for PS tables
+@media (max-width: 768px) {
+  .ps-table {
+    .ps-th,
+    .ps-td {
+      padding: 0.5rem;
+      font-size: 0.8rem;
+    }
+  }
+
+  .ps-table-container {
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+}
+
+// Print styles for PDF generation
+@media print {
+  .ps-table {
+    break-inside: avoid;
+
+    .ps-th {
+      background: #f0f0f0 !important;
+      color: #000 !important;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .ps-tr:hover {
+      background-color: transparent !important;
+    }
+  }
+
+  .ps-table-container {
+    box-shadow: none;
+    margin: 0.5rem 0;
   }
 }

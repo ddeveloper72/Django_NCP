@@ -155,6 +155,8 @@ urlpatterns = [
     path("api/cda/available/", available_cda_files, name="cda_available"),
     # Enhanced Patient Search with CDA Links
     path("search/enhanced/", patient_search_with_cda, name="patient_search_enhanced"),
+    # PS Display Guidelines Table Rendering Test
+    path("test/ps-tables/", main_views.test_ps_table_rendering, name="test_ps_tables"),
     # Patient data display (if function exists)
     # path("patient/<str:patient_id>/", views.patient_data_view, name="patient_data"),
     # Demo and testing (comment out until views exist)

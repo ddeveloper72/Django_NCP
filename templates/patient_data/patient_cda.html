@@ -276,6 +276,174 @@ endblock %}
         background: #E6F2FF;
     }
 
+    /* PS Display Guidelines Table Styles */
+    .ps-guidelines-label {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+        color: white !important;
+        border: 2px solid #28a745 !important;
+        font-weight: 600;
+    }
+
+    .ps-guidelines-label:hover {
+        background: linear-gradient(135deg, #218838 0%, #1ba085 100%) !important;
+    }
+
+    .ps-compliance-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        margin-left: 8px;
+        font-weight: 500;
+    }
+
+    .section-code-badge {
+        background: rgba(255, 255, 255, 0.3);
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-size: 9px;
+        margin-left: 4px;
+        font-family: monospace;
+    }
+
+    .ps-guidelines-container {
+        background: #f8fff9;
+        border: 2px solid #28a745;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+    }
+
+    .compliance-note {
+        background: #d4edda;
+        color: #155724;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 12px;
+        border-left: 4px solid #28a745;
+    }
+
+    .ps-table-wrapper {
+        overflow-x: auto;
+        border-radius: 6px;
+        border: 1px solid #dee2e6;
+    }
+
+    /* PS Guidelines Table Specific Styles */
+    .ps-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 13px;
+        background: white;
+        margin: 0;
+    }
+
+    .ps-thead {
+        background: linear-gradient(135deg, #085a9f 0%, #009fd1 100%);
+        color: white;
+    }
+
+    .ps-th {
+        padding: 12px 10px;
+        text-align: left;
+        font-weight: 600;
+        border: 1px solid #dee2e6;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .ps-tbody .ps-tr {
+        border-bottom: 1px solid #dee2e6;
+        transition: background-color 0.2s ease;
+    }
+
+    .ps-td {
+        padding: 10px;
+        border: 1px solid #dee2e6;
+        vertical-align: top;
+        word-wrap: break-word;
+    }
+
+    .ps-row-even {
+        background: #ffffff;
+    }
+
+    .ps-row-odd {
+        background: #f8f9fa;
+    }
+
+    .ps-tr:hover {
+        background: #e3f2fd !important;
+        cursor: pointer;
+    }
+
+    /* Original Tables Comparison Styles */
+    .original-tables-container {
+        background: #fff9f0;
+        border: 2px solid #fd7e14;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+    }
+
+    .comparison-note {
+        background: #fff3cd;
+        color: #856404;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 12px;
+        border-left: 4px solid #fd7e14;
+    }
+
+    .original-table {
+        margin-bottom: 15px;
+        font-size: 12px;
+    }
+
+    /* Coded Translation Styles */
+    .coded-translation-container {
+        background: #f0f8ff;
+        border: 2px solid #007bff;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+    }
+
+    .coded-title {
+        background: #e3f2fd;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        font-size: 12px;
+        border-left: 4px solid #007bff;
+    }
+
+    /* Responsive Design for Tables */
+    @media (max-width: 768px) {
+        .ps-table {
+            font-size: 11px;
+        }
+
+        .ps-th,
+        .ps-td {
+            padding: 6px 4px;
+        }
+
+        .ps-table-wrapper {
+            margin: 0 -15px;
+        }
+
+        .compliance-note,
+        .comparison-note,
+        .coded-title {
+            font-size: 11px;
+        }
+    }
+
     /* Mobile-First Design */
     .mobile-view {
         display: none;
@@ -640,6 +808,96 @@ endblock %}
 
                             <!-- Desktop View with Collapsible Panels -->
                             <div class="web-view">
+                                {% if section.has_subsections %}
+                                <!-- Dynamic PS Guidelines Subsections -->
+                                {% for subsection in section.subsections %}
+                                <div class="wrap-collapsible">
+                                    <input id="collapsible-{{ section.section_id }}-{{ subsection.type }}"
+                                        class="toggle" type="checkbox" {% if subsection.priority <=1 %}checked="true" {%
+                                        endif %}>
+                                    <label for="collapsible-{{ section.section_id }}-{{ subsection.type }}"
+                                        class="lbl-toggle
+                                        {% if subsection.type == 'ps_guidelines_table' %}ps-guidelines-label{% endif %}">
+                                        <i class="{{ subsection.icon }} me-1"></i>
+                                        {{ subsection.title }}
+                                        {% if subsection.type == 'ps_guidelines_table' %}
+                                        <span class="ps-compliance-badge">PS Guidelines Compliant</span>
+                                        {% endif %}
+                                        {% if subsection.section_code %}
+                                        <span class="section-code-badge">{{ subsection.section_code }}</span>
+                                        {% endif %}
+                                    </label>
+                                    <div class="collapsible-content">
+                                        <div class="content-inner">
+                                            {% if subsection.type == 'ps_guidelines_table' %}
+                                            <!-- PS Guidelines Standardized Table -->
+                                            <div class="ps-guidelines-container">
+                                                {% if subsection.compliance_note %}
+                                                <div class="compliance-note">
+                                                    <i class="fas fa-check-circle me-1"></i>
+                                                    {{ subsection.compliance_note }}
+                                                </div>
+                                                {% endif %}
+                                                <div class="ps-table-wrapper">
+                                                    {{ subsection.content|safe }}
+                                                </div>
+                                            </div>
+
+                                            {% elif subsection.type == 'original_tables' %}
+                                            <!-- Original Document Tables for Comparison -->
+                                            <div class="original-tables-container">
+                                                {% if subsection.note %}
+                                                <div class="comparison-note">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    {{ subsection.note }}
+                                                </div>
+                                                {% endif %}
+                                                {% for table in subsection.content %}
+                                                <table class="original-table table table-striped">
+                                                    <thead class="table-dark">
+                                                        <tr>
+                                                            {% for header in table.headers %}
+                                                            <th>{{ header }}</th>
+                                                            {% endfor %}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for row in table.rows %}
+                                                        <tr>
+                                                            {% for cell in row %}
+                                                            <td>{{ cell }}</td>
+                                                            {% endfor %}
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                                {% endfor %}
+                                            </div>
+
+                                            {% elif subsection.type == 'coded_translation' %}
+                                            <!-- Code-based Medical Translation -->
+                                            <div class="coded-translation-container">
+                                                <div class="coded-title">
+                                                    <strong>Coded Title:</strong> {{ subsection.coded_title }}
+                                                </div>
+                                                <div class="content-text">
+                                                    {{ subsection.content|safe }}
+                                                </div>
+                                            </div>
+
+                                            {% else %}
+                                            <!-- Standard Content Display -->
+                                            <div class="content-text">
+                                                {{ subsection.content|safe }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+
+                                {% else %}
+                                <!-- Fallback: Original structure for sections without subsections -->
                                 <div class="wrap-collapsible">
                                     <input id="collapsible-{{ section.section_id }}-original" class="toggle"
                                         type="checkbox">
@@ -665,35 +923,13 @@ endblock %}
                                     </label>
                                     <div class="collapsible-content">
                                         <div class="content-inner">
-                                            {% if section.content.table_data %}
-                                            <table class="translation_table">
-                                                <thead>
-                                                    <tr>
-                                                        {% for header in section.content.table_headers %}
-                                                        <th>{{ header }}</th>
-                                                        {% endfor %}
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for row in section.content.table_data %}
-                                                    <tr>
-                                                        {% for cell in row %}
-                                                        <td
-                                                            data-label="{{ section.content.table_headers[loop.index0] }}">
-                                                            {{ cell }}</td>
-                                                        {% endfor %}
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                                            {% else %}
                                             <div class="content-text">
                                                 {{ section.content.translated|safe }}
                                             </div>
-                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
+                                {% endif %}
                             </div>
 
                         </div>

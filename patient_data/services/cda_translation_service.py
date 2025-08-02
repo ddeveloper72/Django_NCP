@@ -194,6 +194,9 @@ class CDATranslationService:
 
     def __init__(self):
         self.translator = MedicalTerminologyTranslator()
+        from .ps_table_renderer import PSTableRenderer
+
+        self.table_renderer = PSTableRenderer()
 
     def parse_cda_html(self, html_content: str) -> Dict:
         """Parse CDA HTML document and extract structured data"""
@@ -259,20 +262,61 @@ class CDATranslationService:
         """Extract medical sections from CDA HTML"""
         sections = []
 
-        # Find all section divs
-        section_divs = soup.find_all("div", class_="section")
+        # Try to find sections in both formats:
+        # 1. HTML div format: <div class="section">
+        # 2. CDA XML format: <section>
+        section_elements = soup.find_all("div", class_="section")
+        if not section_elements:
+            section_elements = soup.find_all("section")
 
-        for section_div in section_divs:
+        for section_element in section_elements:
             section_data = {}
 
-            # Extract section title
-            title_h3 = section_div.find("h3")
+            # Extract section title and ID/code for HTML div format
+            title_h3 = section_element.find("h3")
             if title_h3:
                 section_data["title"] = title_h3.get_text(strip=True)
                 section_data["section_id"] = title_h3.get("id", "")
 
+                # Try to extract LOINC code from various attributes or text
+                section_code = ""
+                if "data-code" in title_h3.attrs:
+                    section_code = title_h3["data-code"]
+                elif "id" in title_h3.attrs and "-" in title_h3["id"]:
+                    # Check if ID contains LOINC-like code
+                    potential_code = title_h3["id"].split("-")[0]
+                    if potential_code.replace(".", "").isdigit():
+                        section_code = potential_code
+
+                # Look for code in text content (format: "Title (LOINC-CODE)")
+                title_text = title_h3.get_text(strip=True)
+                import re
+
+                code_match = re.search(r"\(([0-9\-]+)\)", title_text)
+                if code_match:
+                    section_code = code_match.group(1)
+
+                section_data["section_code"] = section_code
+
+            # Extract section title for CDA XML format
+            title_element = section_element.find("title")
+            if title_element and not section_data.get("title"):
+                section_data["title"] = title_element.get_text(strip=True)
+                section_data["section_id"] = f"section-{len(sections) + 1}"
+
+                # Extract code from code element
+                code_element = section_element.find("code")
+                if code_element and code_element.get("code"):
+                    section_data["section_code"] = code_element.get("code")
+                else:
+                    section_data["section_code"] = ""
+
             # Extract section content
-            content_div = section_div.find("div", class_="section-content")
+            content_div = section_element.find("div", class_="section-content")
+            if not content_div:
+                # For CDA XML format, look for text element
+                content_div = section_element.find("text")
+
             if content_div:
                 # Extract tables
                 tables = content_div.find_all("table")
@@ -285,8 +329,12 @@ class CDATranslationService:
 
                 # Extract other content
                 section_data["content"] = content_div.get_text(strip=True)
+            else:
+                # Fallback: extract all text content from section
+                section_data["content"] = section_element.get_text(strip=True)
+                section_data["tables"] = []
 
-            if section_data:
+            if section_data and section_data.get("title"):
                 sections.append(section_data)
 
         return sections
@@ -331,11 +379,18 @@ class CDATranslationService:
                 "key_translated": translated_key,
             }
 
-        # Translate sections
+        # Translate sections and render as PS Display Guidelines tables
         translated_sections = []
-        for section in cda_data["sections"]:
+
+        # First, render sections with PSTableRenderer
+        rendered_sections = self.table_renderer.render_section_tables(
+            cda_data["sections"]
+        )
+
+        for section, rendered_section in zip(cda_data["sections"], rendered_sections):
             translated_section = {
                 "section_id": section.get("section_id", ""),
+                "section_code": section.get("section_code", ""),
                 "title_original": section.get("title", ""),
                 "title_translated": self.translator.translate_term(
                     section.get("title", ""), source_lang
@@ -345,9 +400,12 @@ class CDATranslationService:
                     section.get("content", ""), source_lang
                 ),
                 "tables": [],
+                "ps_table_html": rendered_section.get(
+                    "table_html", ""
+                ),  # PS Guidelines table
             }
 
-            # Translate tables
+            # Translate original tables
             for table in section.get("tables", []):
                 translated_table = {
                     "headers_original": table["headers"],

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Patient Summary - {{ patient_data.family_name }}, {{ patient_data.given_name }}{% endblock %}
+{% block title %}Patient Summary - {{ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
 
 {% block content %}
 <div class="cda-document-container">
@@ -19,12 +19,12 @@
     <div class="patient-identity-banner">
         <div class="patient-identity-left">
             <div class="patient-name">
-                <strong>{{ patient_data.family_name }}, {{ patient_data.given_name }}</strong>
+                <strong>{{ patient_identity.family_name }}, {{ patient_identity.given_name }}</strong>
             </div>
             <div class="patient-details">
-                <span class="patient-birth">Born: {{ patient_data.birth_date|default:'Unknown' }}</span>
-                <span class="patient-gender">{{ patient_data.gender|default:'Unknown' }}</span>
-                <span class="patient-id">ID: {{ patient_data.patient_id|default:'Unknown' }}</span>
+                <span class="patient-birth">Born: {{ patient_identity.birth_date }}</span>
+                <span class="patient-gender">{{ patient_identity.gender }}</span>
+                <span class="patient-id">ID: {{ patient_identity.patient_id }}</span>
             </div>
         </div>
         <div class="patient-identity-right">
@@ -34,7 +34,7 @@
                     {{ source_country|upper }}
                 </div>
                 <div class="document-date">
-                    {{ document_date|default:'Date Unknown' }}
+                    {{ document_date|default('Date Unknown') }}
                 </div>
                 <div class="document-language">
                     Original: {{ source_language|upper }} → English
@@ -171,11 +171,12 @@
                 <div class="info-grid">
                     <div class="info-item">
                         <span class="info-label">Patient Name:</span>
-                        <span class="info-value">{{ patient_data.family_name }}, {{ patient_data.given_name }}</span>
+                        <span class="info-value">{{ patient_identity.family_name }}, {{ patient_identity.given_name
+                            }}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Date of Birth:</span>
-                        <span class="info-value">{{ patient_data.date_of_birth }}</span>
+                        <span class="info-value">{{ patient_identity.birth_date }}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Source Country:</span>
@@ -265,7 +266,37 @@
                                             English Translation
                                         </div>
                                         <div class="content-text">
+                                            {% if section.has_table and section.table_data %}
+                                            <!-- PS Guidelines Structured Table -->
+                                            <div class="ps-table-container">
+                                                <table class="ps-table ps-table-{{ section.section_type }}">
+                                                    {% if section.table_data.headers %}
+                                                    <thead>
+                                                        <tr>
+                                                            {% for header in section.table_data.headers %}
+                                                            <th class="ps-th">{{ header }}</th>
+                                                            {% endfor %}
+                                                        </tr>
+                                                    </thead>
+                                                    {% endif %}
+                                                    {% if section.table_data.rows %}
+                                                    <tbody>
+                                                        {% for row in section.table_data.rows %}
+                                                        <tr
+                                                            class="ps-tr {{ 'ps-row-even' if loop.index0 % 2 == 0 else 'ps-row-odd' }}">
+                                                            {% for cell in row %}
+                                                            <td class="ps-td">{{ cell }}</td>
+                                                            {% endfor %}
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                    {% endif %}
+                                                </table>
+                                            </div>
+                                            {% else %}
+                                            <!-- Fallback to original content -->
                                             {{ section.content.translated|safe }}
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -278,7 +309,13 @@
                                             Original ({{ source_language|upper }})
                                         </div>
                                         <div class="content-text">
+                                            {% if section.has_table and section.table_data %}
+                                            <!-- Original structured data -->
+                                            {{ section.table_data.original_html|safe if section.table_data.original_html
+                                            else section.content.original|safe }}
+                                            {% else %}
                                             {{ section.content.original|safe }}
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -296,7 +333,12 @@
                                     <div class="collapsible-content">
                                         <div class="content-inner">
                                             <div class="content-text">
+                                                {% if section.has_table and section.table_data %}
+                                                {{ section.table_data.original_html|safe if
+                                                section.table_data.original_html else section.content.original|safe }}
+                                                {% else %}
                                                 {{ section.content.original|safe }}
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
@@ -311,27 +353,35 @@
                                     </label>
                                     <div class="collapsible-content">
                                         <div class="content-inner">
-                                            {% if section.content.table_data %}
-                                            <table class="translation_table">
-                                                <thead>
-                                                    <tr>
-                                                        {% for header in section.content.table_headers %}
-                                                        <th>{{ header }}</th>
+                                            {% if section.has_table and section.table_data %}
+                                            <!-- PS Guidelines Structured Table -->
+                                            <div class="ps-table-container">
+                                                <table class="ps-table ps-table-{{ section.section_type }}">
+                                                    {% if section.table_data.headers %}
+                                                    <thead>
+                                                        <tr>
+                                                            {% for header in section.table_data.headers %}
+                                                            <th class="ps-th">{{ header }}</th>
+                                                            {% endfor %}
+                                                        </tr>
+                                                    </thead>
+                                                    {% endif %}
+                                                    {% if section.table_data.rows %}
+                                                    <tbody>
+                                                        {% for row in section.table_data.rows %}
+                                                        <tr
+                                                            class="ps-tr {{ 'ps-row-even' if loop.index0 % 2 == 0 else 'ps-row-odd' }}">
+                                                            {% for cell in row %}
+                                                            <td class="ps-td"
+                                                                data-label="{{ section.table_data.headers[loop.index0] if section.table_data.headers }}">
+                                                                {{ cell }}</td>
+                                                            {% endfor %}
+                                                        </tr>
                                                         {% endfor %}
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for row in section.content.table_data %}
-                                                    <tr>
-                                                        {% for cell in row %}
-                                                        <td
-                                                            data-label="{{ section.content.table_headers[loop.index0] }}">
-                                                            {{ cell }}</td>
-                                                        {% endfor %}
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
+                                                    </tbody>
+                                                    {% endif %}
+                                                </table>
+                                            </div>
                                             {% else %}
                                             <div class="content-text">
                                                 {{ section.content.translated|safe }}
