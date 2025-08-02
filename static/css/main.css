@@ -5734,16 +5734,32 @@ div.page-header img.country-flag {
   }
 }
 .cda-document-container {
-  padding: 2rem;
+  padding: 0;
   max-width: 1400px;
   margin: 0 auto;
 }
 
 .page-header {
+  background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+  color: #ffffff;
+  padding: 2rem 2rem 1.5rem;
   margin-bottom: 2rem;
+  position: relative;
+}
+.page-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  pointer-events: none;
 }
 .page-header .breadcrumb-nav {
   margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 .page-header .breadcrumb-nav .breadcrumb-link {
   display: -webkit-inline-box;
@@ -5753,14 +5769,24 @@ div.page-header img.country-flag {
       -ms-flex-align: center;
           align-items: center;
   gap: 0.5rem;
-  color: #1976d2;
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s ease;
 }
 .page-header .breadcrumb-nav .breadcrumb-link:hover {
-  text-decoration: underline;
-  color: rgb(19.5744680851, 92.3914893617, 164.4255319149);
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  -webkit-transform: translateY(-1px);
+          transform: translateY(-1px);
+  -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 .page-header .breadcrumb-nav .breadcrumb-link i {
   font-size: 1rem;
@@ -5768,13 +5794,27 @@ div.page-header img.country-flag {
 .page-header .page-title {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #2d3748;
+  color: #ffffff;
   margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 .page-header .page-subtitle {
   font-size: 1.25rem;
-  color: #718096;
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  backdrop-filter: blur(10px);
+  display: inline-block;
+}
+
+.cda-content-wrapper {
+  padding: 0 2rem 2rem;
 }
 
 .cda-metadata {
