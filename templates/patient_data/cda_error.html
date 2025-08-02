@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}CDA Translation Error{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">CDA Document Error</h4>
+        <p>{{ error }}</p>
+        <hr>
+        <p class="mb-0">
+            <strong>Country:</strong> {{ country_code }}
+            {% if patient_id %}
+            | <strong>Patient ID:</strong> {{ patient_id }}
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Troubleshooting Steps</h5>
+        </div>
+        <div class="card-body">
+            <ol>
+                <li>Verify that the country code "{{ country_code }}" exists in the test data directory</li>
+                <li>Check that the CDA file is present at the expected location</li>
+                <li>Ensure the file is a valid HTML CDA document</li>
+                <li>Try accessing the available CDA files list:
+                    <a href="{% url 'patient_data:cda_available' %}" class="btn btn-sm btn-outline-primary">View
+                        Available Files</a>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{% url 'patient_data:patient_search_enhanced' %}" class="btn btn-primary">← Back to Patient Search</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary">← Back to Home</a>
+    </div>
+</div>
+{% endblock %}

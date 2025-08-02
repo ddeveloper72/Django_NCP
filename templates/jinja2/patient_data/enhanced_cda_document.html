@@ -6,132 +6,148 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/main.css' %}">
 <style>
-.translation-controls {
-    background: var(--neutral-lightest);
-    padding: var(--space-lg);
-    border-radius: var(--border-radius-md);
-    margin-bottom: var(--space-xl);
-    border-left: 4px solid var(--primary-blue);
-}
+    .translation-controls {
+        background: var(--neutral-lightest);
+        padding: var(--space-lg);
+        border-radius: var(--border-radius-md);
+        margin-bottom: var(--space-xl);
+        border-left: 4px solid var(--primary-blue);
+    }
 
-.section-container {
-    margin-bottom: var(--space-xl);
-    border: 1px solid var(--neutral-lighter);
-    border-radius: var(--border-radius-md);
-    overflow: hidden;
-}
+    .section-container {
+        margin-bottom: var(--space-xl);
+        border: 1px solid var(--neutral-lighter);
+        border-radius: var(--border-radius-md);
+        overflow: hidden;
+    }
 
-.section-header {
-    background: var(--primary-blue);
-    color: var(--white);
-    padding: var(--space-md) var(--space-lg);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    .section-header {
+        background: var(--primary-blue);
+        color: var(--white);
+        padding: var(--space-md) var(--space-lg);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-.section-content {
-    padding: var(--space-lg);
-}
+    .section-content {
+        padding: var(--space-lg);
+    }
 
-.translation-toggle {
-    display: flex;
-    gap: var(--space-sm);
-}
+    .translation-toggle {
+        display: flex;
+        gap: var(--space-sm);
+    }
 
-.side-by-side-view {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-lg);
-}
+    .side-by-side-view {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-lg);
+    }
 
-.original-content, .translated-content {
-    padding: var(--space-md);
-    border-radius: var(--border-radius-sm);
-}
+    .original-content,
+    .translated-content {
+        padding: var(--space-md);
+        border-radius: var(--border-radius-sm);
+    }
 
-.original-content {
-    background: var(--neutral-lightest);
-    border-left: 4px solid var(--warning);
-}
+    .original-content {
+        background: var(--neutral-lightest);
+        border-left: 4px solid var(--warning);
+    }
 
-.translated-content {
-    background: var(--light-green);
-    border-left: 4px solid var(--success);
-}
+    .translated-content {
+        background: var(--light-green);
+        border-left: 4px solid var(--success);
+    }
 
-.quality-indicator {
-    display: inline-block;
-    padding: var(--space-xs) var(--space-sm);
-    border-radius: var(--border-radius-sm);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-}
+    .quality-indicator {
+        display: inline-block;
+        padding: var(--space-xs) var(--space-sm);
+        border-radius: var(--border-radius-sm);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-medium);
+    }
 
-.quality-excellent { background: var(--success-lighter); color: var(--success-dark); }
-.quality-good { background: var(--info-lighter); color: var(--info-dark); }
-.quality-fair { background: var(--warning-lighter); color: var(--warning-dark); }
-.quality-poor { background: var(--error-lighter); color: var(--error-dark); }
+    .quality-excellent {
+        background: var(--success-lighter);
+        color: var(--success-dark);
+    }
 
-.terminology-popup {
-    position: relative;
-    display: inline-block;
-    cursor: help;
-    text-decoration: underline;
-    text-decoration-style: dotted;
-}
+    .quality-good {
+        background: var(--info-lighter);
+        color: var(--info-dark);
+    }
 
-.terminology-popup:hover .popup-content {
-    display: block;
-}
+    .quality-fair {
+        background: var(--warning-lighter);
+        color: var(--warning-dark);
+    }
 
-.popup-content {
-    display: none;
-    position: absolute;
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--neutral-dark);
-    color: var(--white);
-    padding: var(--space-sm);
-    border-radius: var(--border-radius-sm);
-    white-space: nowrap;
-    z-index: 1000;
-    font-size: var(--font-size-sm);
-}
+    .quality-poor {
+        background: var(--error-lighter);
+        color: var(--error-dark);
+    }
 
-.translation-summary {
-    background: var(--bg-light);
-    padding: var(--space-lg);
-    border-radius: var(--border-radius-md);
-    margin-bottom: var(--space-xl);
-}
+    .terminology-popup {
+        position: relative;
+        display: inline-block;
+        cursor: help;
+        text-decoration: underline;
+        text-decoration-style: dotted;
+    }
 
-.summary-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-md);
-}
+    .terminology-popup:hover .popup-content {
+        display: block;
+    }
 
-.summary-stat {
-    text-align: center;
-    padding: var(--space-md);
-    background: var(--white);
-    border-radius: var(--border-radius-sm);
-    border: 1px solid var(--neutral-lighter);
-}
+    .popup-content {
+        display: none;
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--neutral-dark);
+        color: var(--white);
+        padding: var(--space-sm);
+        border-radius: var(--border-radius-sm);
+        white-space: nowrap;
+        z-index: 1000;
+        font-size: var(--font-size-sm);
+    }
 
-.stat-number {
-    font-size: var(--font-size-xxl);
-    font-weight: var(--font-weight-bold);
-    color: var(--primary-blue);
-}
+    .translation-summary {
+        background: var(--bg-light);
+        padding: var(--space-lg);
+        border-radius: var(--border-radius-md);
+        margin-bottom: var(--space-xl);
+    }
 
-.stat-label {
-    font-size: var(--font-size-sm);
-    color: var(--text-muted);
-    margin-top: var(--space-xs);
-}
+    .summary-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--space-md);
+    }
+
+    .summary-stat {
+        text-align: center;
+        padding: var(--space-md);
+        background: var(--white);
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--neutral-lighter);
+    }
+
+    .stat-number {
+        font-size: var(--font-size-xxl);
+        font-weight: var(--font-weight-bold);
+        color: var(--primary-blue);
+    }
+
+    .stat-label {
+        font-size: var(--font-size-sm);
+        color: var(--text-muted);
+        margin-top: var(--space-xs);
+    }
 </style>
 {% endblock %}
 
@@ -145,7 +161,7 @@
                 Patient Search
             </a>
         </div>
-        
+
         <h1 class="page-title">Enhanced CDA Document</h1>
         <div class="page-subtitle">
             Patient: {{ patient_data.given_name }} {{ patient_data.family_name }} |
@@ -158,35 +174,37 @@
         <!-- Translation Controls -->
         <div class="translation-controls">
             <h3><i class="fas fa-language"></i> Translation Settings</h3>
-            
+
             <div class="row">
                 <div class="col-md-3">
                     <label for="target-language">Target Language:</label>
                     <select id="target-language" class="form-control">
                         {% for lang_code in available_languages %}
-                        <option value="{{ lang_code }}" {% if lang_code == target_language %}selected{% endif %}>
+                        <option value="{{ lang_code }}" {% if lang_code==target_language %}selected{% endif %}>
                             {{ lang_code|upper }}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
-                
+
                 <div class="col-md-3">
                     <label for="view-mode">View Mode:</label>
                     <select id="view-mode" class="form-control">
-                        <option value="side-by-side" {% if view_mode == 'side-by-side' %}selected{% endif %}>Side by Side</option>
-                        <option value="toggle" {% if view_mode == 'toggle' %}selected{% endif %}>Toggle View</option>
-                        <option value="translated-only" {% if view_mode == 'translated-only' %}selected{% endif %}>Translated Only</option>
+                        <option value="side-by-side" {% if view_mode=='side-by-side' %}selected{% endif %}>Side by Side
+                        </option>
+                        <option value="toggle" {% if view_mode=='toggle' %}selected{% endif %}>Toggle View</option>
+                        <option value="translated-only" {% if view_mode=='translated-only' %}selected{% endif %}>
+                            Translated Only</option>
                     </select>
                 </div>
-                
+
                 <div class="col-md-3">
                     <label>
                         <input type="checkbox" id="show-original" {% if show_original %}checked{% endif %}>
                         Show Original Text
                     </label>
                 </div>
-                
+
                 <div class="col-md-3">
                     <button class="btn btn-primary" onclick="applyTranslationSettings()">
                         <i class="fas fa-sync-alt"></i> Apply Settings
@@ -199,7 +217,7 @@
         {% if translation_enabled %}
         <div class="translation-summary">
             <h3><i class="fas fa-chart-line"></i> Translation Summary</h3>
-            
+
             <div class="summary-stats">
                 <div class="summary-stat">
                     <div class="stat-number">{{ translated_document.translation_summary.total_sections }}</div>
@@ -214,11 +232,13 @@
                     <div class="stat-label">Partially Translated</div>
                 </div>
                 <div class="summary-stat">
-                    <div class="stat-number">{{ translated_document.translation_summary.terminology_translations }}</div>
+                    <div class="stat-number">{{ translated_document.translation_summary.terminology_translations }}
+                    </div>
                     <div class="stat-label">Term Translations</div>
                 </div>
                 <div class="summary-stat">
-                    <div class="stat-number">{{ translated_document.translation_summary.translation_coverage|floatformat:1 }}%</div>
+                    <div class="stat-number">{{
+                        translated_document.translation_summary.translation_coverage|floatformat:1 }}%</div>
                     <div class="stat-label">Coverage</div>
                 </div>
             </div>
@@ -232,9 +252,9 @@
                 <div>
                     <h3>
                         {% if translation_enabled and section.title != section.original_title %}
-                            {{ section.title }}
+                        {{ section.title }}
                         {% else %}
-                            {{ section.original_title }}
+                        {{ section.original_title }}
                         {% endif %}
                     </h3>
                     {% if translation_enabled %}
@@ -243,7 +263,7 @@
                     </span>
                     {% endif %}
                 </div>
-                
+
                 <div class="translation-toggle">
                     {% if translation_enabled %}
                     <button class="btn btn-sm btn-light" onclick="toggleSectionView('{{ section.section_id }}')">
@@ -252,14 +272,14 @@
                     {% endif %}
                 </div>
             </div>
-            
+
             <div class="section-content">
                 {% if view_mode == 'side-by-side' and translation_enabled %}
                 <div class="side-by-side-view">
                     <div class="original-content">
                         <h4><i class="fas fa-file-alt"></i> Original ({{ source_language|upper }})</h4>
                         <div class="section-text">{{ section.original_content|linebreaks }}</div>
-                        
+
                         {% if section.codes %}
                         <div class="terminology-section">
                             <h5>Medical Terms:</h5>
@@ -275,11 +295,11 @@
                         </div>
                         {% endif %}
                     </div>
-                    
+
                     <div class="translated-content">
                         <h4><i class="fas fa-language"></i> Translated ({{ target_language|upper }})</h4>
                         <div class="section-text">{{ section.content|linebreaks }}</div>
-                        
+
                         {% if section.translated_codes %}
                         <div class="terminology-section">
                             <h5>Translated Terms:</h5>
@@ -300,11 +320,11 @@
                         {% endif %}
                     </div>
                 </div>
-                
+
                 {% elif view_mode == 'translated-only' and translation_enabled %}
                 <div class="translated-only-view">
                     <div class="section-text">{{ section.content|linebreaks }}</div>
-                    
+
                     {% if section.translated_codes %}
                     <div class="terminology-section">
                         <h5>Medical Terms:</h5>
@@ -324,12 +344,12 @@
                     </div>
                     {% endif %}
                 </div>
-                
+
                 {% else %}
                 <!-- Original view or toggle view -->
                 <div class="original-view">
                     <div class="section-text">{{ section.original_content|linebreaks }}</div>
-                    
+
                     {% if section.codes %}
                     <div class="terminology-section">
                         <h5>Medical Terms:</h5>
@@ -352,20 +372,19 @@
 
         <!-- Export Options -->
         <div class="document-actions">
-            <a href="{{ url_helper('patient_data:export_translated_cda', patient_data.id) }}?format=html&lang={{ target_language }}" 
-               class="action-button primary">
+            <a href="{{ url_helper('patient_data:export_translated_cda', patient_data.id) }}?format=html&lang={{ target_language }}"
+                class="action-button primary">
                 <i class="fas fa-download"></i>
                 Export HTML
             </a>
-            
-            <a href="{{ url_helper('patient_data:export_translated_cda', patient_data.id) }}?format=xml&lang={{ target_language }}" 
-               class="action-button secondary">
+
+            <a href="{{ url_helper('patient_data:export_translated_cda', patient_data.id) }}?format=xml&lang={{ target_language }}"
+                class="action-button secondary">
                 <i class="fas fa-code"></i>
                 Export XML
             </a>
-            
-            <a href="{{ url_helper('patient_data:patient_details', patient_data.id) }}" 
-               class="action-button outline">
+
+            <a href="{{ url_helper('patient_data:patient_details', patient_data.id) }}" class="action-button outline">
                 <i class="fas fa-arrow-left"></i>
                 Back to Patient Details
             </a>
@@ -376,50 +395,50 @@
 
 {% block extra_js %}
 <script>
-function applyTranslationSettings() {
-    const targetLanguage = document.getElementById('target-language').value;
-    const viewMode = document.getElementById('view-mode').value;
-    const showOriginal = document.getElementById('show-original').checked;
-    
-    // Update URL with new parameters
-    const url = new URL(window.location.href);
-    url.searchParams.set('lang', targetLanguage);
-    url.searchParams.set('view', viewMode);
-    url.searchParams.set('show_original', showOriginal);
-    
-    window.location.href = url.toString();
-}
+    function applyTranslationSettings() {
+        const targetLanguage = document.getElementById('target-language').value;
+        const viewMode = document.getElementById('view-mode').value;
+        const showOriginal = document.getElementById('show-original').checked;
 
-function toggleSectionView(sectionId) {
-    // Toggle between original and translated view for a specific section
-    // This would involve AJAX calls to get section-specific translations
-    console.log('Toggling section:', sectionId);
-}
+        // Update URL with new parameters
+        const url = new URL(window.location.href);
+        url.searchParams.set('lang', targetLanguage);
+        url.searchParams.set('view', viewMode);
+        url.searchParams.set('show_original', showOriginal);
 
-// Auto-save translation preferences
-document.addEventListener('DOMContentLoaded', function() {
-    const controls = ['target-language', 'view-mode', 'show-original'];
-    
-    controls.forEach(controlId => {
-        const element = document.getElementById(controlId);
-        if (element) {
-            element.addEventListener('change', function() {
-                // Save preferences to session via AJAX
-                fetch(`{{ url_helper('patient_data:toggle_translation_view', patient_data.id) }}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: new URLSearchParams({
-                        'view_mode': document.getElementById('view-mode').value,
-                        'show_original': document.getElementById('show-original').checked,
-                        'target_language': document.getElementById('target-language').value
-                    })
+        window.location.href = url.toString();
+    }
+
+    function toggleSectionView(sectionId) {
+        // Toggle between original and translated view for a specific section
+        // This would involve AJAX calls to get section-specific translations
+        console.log('Toggling section:', sectionId);
+    }
+
+    // Auto-save translation preferences
+    document.addEventListener('DOMContentLoaded', function () {
+        const controls = ['target-language', 'view-mode', 'show-original'];
+
+        controls.forEach(controlId => {
+            const element = document.getElementById(controlId);
+            if (element) {
+                element.addEventListener('change', function () {
+                    // Save preferences to session via AJAX
+                    fetch(`{{ url_helper('patient_data:toggle_translation_view', patient_data.id) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: new URLSearchParams({
+                            'view_mode': document.getElementById('view-mode').value,
+                            'show_original': document.getElementById('show-original').checked,
+                            'target_language': document.getElementById('target-language').value
+                        })
+                    });
                 });
-            });
-        }
+            }
+        });
     });
-});
 </script>
 {% endblock %}

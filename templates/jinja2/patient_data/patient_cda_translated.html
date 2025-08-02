@@ -4,234 +4,249 @@
 
 {% block extra_css %}
 <style>
-/* Enhanced translation-specific styles */
-.translation-controls {
-    background: linear-gradient(135deg, var(--accent-blue), var(--primary-blue));
-    color: white;
-    padding: var(--space-lg);
-    border-radius: var(--border-radius-md);
-    margin-bottom: var(--space-xl);
-}
-
-.translation-selector {
-    display: flex;
-    gap: var(--space-md);
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.translation-selector select {
-    padding: var(--space-sm) var(--space-md);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: var(--border-radius-sm);
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    backdrop-filter: blur(10px);
-}
-
-.translation-selector select option {
-    background: var(--primary-blue);
-    color: white;
-}
-
-.translation-summary {
-    background: var(--neutral-lightest);
-    border-left: 4px solid var(--success);
-    padding: var(--space-md);
-    border-radius: var(--border-radius-sm);
-    margin-bottom: var(--space-lg);
-}
-
-.translation-quality {
-    display: inline-block;
-    padding: var(--space-xs) var(--space-sm);
-    border-radius: var(--border-radius-full);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
-    text-transform: uppercase;
-}
-
-.quality-excellent { background: var(--success-lighter); color: var(--success-dark); }
-.quality-good { background: var(--info-lighter); color: var(--info-dark); }
-.quality-fair { background: var(--warning-lighter); color: var(--warning-dark); }
-.quality-poor { background: var(--error-lighter); color: var(--error-dark); }
-
-.cda-section {
-    background: white;
-    border: 1px solid var(--neutral-lighter);
-    border-radius: var(--border-radius-md);
-    margin-bottom: var(--space-lg);
-    overflow: hidden;
-}
-
-.cda-section-header {
-    background: var(--neutral-lightest);
-    padding: var(--space-md) var(--space-lg);
-    border-bottom: 1px solid var(--neutral-lighter);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.cda-section-title {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-dark);
-    margin: 0;
-}
-
-.section-translation-status {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-}
-
-.translation-toggle {
-    display: flex;
-    gap: var(--space-sm);
-}
-
-.toggle-btn {
-    padding: var(--space-xs) var(--space-sm);
-    border: 1px solid var(--primary-blue);
-    background: transparent;
-    color: var(--primary-blue);
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    font-size: var(--font-size-sm);
-    transition: all 0.2s ease;
-}
-
-.toggle-btn.active {
-    background: var(--primary-blue);
-    color: white;
-}
-
-.toggle-btn:hover:not(.active) {
-    background: rgba(var(--primary-blue-rgb), 0.1);
-}
-
-.cda-section-content {
-    padding: var(--space-lg);
-}
-
-.content-view {
-    display: none;
-}
-
-.content-view.active {
-    display: block;
-}
-
-.content-comparison {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-lg);
-}
-
-.content-column {
-    padding: var(--space-md);
-    border-radius: var(--border-radius-sm);
-}
-
-.original-content {
-    background: var(--neutral-lightest);
-    border-left: 4px solid var(--neutral-light);
-}
-
-.translated-content {
-    background: var(--light-blue);
-    border-left: 4px solid var(--primary-blue);
-}
-
-.content-column h4 {
-    margin: 0 0 var(--space-md) 0;
-    font-size: var(--font-size-md);
-    font-weight: var(--font-weight-semibold);
-}
-
-.narrative-text {
-    line-height: 1.6;
-    color: var(--text-dark);
-}
-
-.terminology-codes {
-    margin-top: var(--space-md);
-}
-
-.code-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--space-sm);
-    background: white;
-    border: 1px solid var(--neutral-lighter);
-    border-radius: var(--border-radius-sm);
-    margin-bottom: var(--space-sm);
-}
-
-.code-info {
-    flex: 1;
-}
-
-.code-display {
-    font-weight: var(--font-weight-medium);
-    color: var(--text-dark);
-}
-
-.code-system {
-    font-size: var(--font-size-sm);
-    color: var(--text-muted);
-}
-
-.code-translation {
-    font-style: italic;
-    color: var(--primary-blue);
-    margin-left: var(--space-md);
-}
-
-.translation-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-md);
-    margin-bottom: var(--space-lg);
-}
-
-.stat-card {
-    background: white;
-    padding: var(--space-md);
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--neutral-lighter);
-    text-align: center;
-}
-
-.stat-number {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--primary-blue);
-    display: block;
-}
-
-.stat-label {
-    font-size: var(--font-size-sm);
-    color: var(--text-muted);
-    margin-top: var(--space-xs);
-}
-
-@media (max-width: var(--breakpoint-md)) {
-    .content-comparison {
-        grid-template-columns: 1fr;
+    /* Enhanced translation-specific styles */
+    .translation-controls {
+        background: linear-gradient(135deg, var(--accent-blue), var(--primary-blue));
+        color: white;
+        padding: var(--space-lg);
+        border-radius: var(--border-radius-md);
+        margin-bottom: var(--space-xl);
     }
-    
+
     .translation-selector {
-        flex-direction: column;
-        align-items: stretch;
+        display: flex;
+        gap: var(--space-md);
+        align-items: center;
+        flex-wrap: wrap;
     }
-    
+
+    .translation-selector select {
+        padding: var(--space-sm) var(--space-md);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: var(--border-radius-sm);
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        backdrop-filter: blur(10px);
+    }
+
+    .translation-selector select option {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .translation-summary {
+        background: var(--neutral-lightest);
+        border-left: 4px solid var(--success);
+        padding: var(--space-md);
+        border-radius: var(--border-radius-sm);
+        margin-bottom: var(--space-lg);
+    }
+
+    .translation-quality {
+        display: inline-block;
+        padding: var(--space-xs) var(--space-sm);
+        border-radius: var(--border-radius-full);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-semibold);
+        text-transform: uppercase;
+    }
+
+    .quality-excellent {
+        background: var(--success-lighter);
+        color: var(--success-dark);
+    }
+
+    .quality-good {
+        background: var(--info-lighter);
+        color: var(--info-dark);
+    }
+
+    .quality-fair {
+        background: var(--warning-lighter);
+        color: var(--warning-dark);
+    }
+
+    .quality-poor {
+        background: var(--error-lighter);
+        color: var(--error-dark);
+    }
+
+    .cda-section {
+        background: white;
+        border: 1px solid var(--neutral-lighter);
+        border-radius: var(--border-radius-md);
+        margin-bottom: var(--space-lg);
+        overflow: hidden;
+    }
+
+    .cda-section-header {
+        background: var(--neutral-lightest);
+        padding: var(--space-md) var(--space-lg);
+        border-bottom: 1px solid var(--neutral-lighter);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .cda-section-title {
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-semibold);
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    .section-translation-status {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+    }
+
+    .translation-toggle {
+        display: flex;
+        gap: var(--space-sm);
+    }
+
+    .toggle-btn {
+        padding: var(--space-xs) var(--space-sm);
+        border: 1px solid var(--primary-blue);
+        background: transparent;
+        color: var(--primary-blue);
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        font-size: var(--font-size-sm);
+        transition: all 0.2s ease;
+    }
+
+    .toggle-btn.active {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .toggle-btn:hover:not(.active) {
+        background: rgba(var(--primary-blue-rgb), 0.1);
+    }
+
+    .cda-section-content {
+        padding: var(--space-lg);
+    }
+
+    .content-view {
+        display: none;
+    }
+
+    .content-view.active {
+        display: block;
+    }
+
+    .content-comparison {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-lg);
+    }
+
+    .content-column {
+        padding: var(--space-md);
+        border-radius: var(--border-radius-sm);
+    }
+
+    .original-content {
+        background: var(--neutral-lightest);
+        border-left: 4px solid var(--neutral-light);
+    }
+
+    .translated-content {
+        background: var(--light-blue);
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .content-column h4 {
+        margin: 0 0 var(--space-md) 0;
+        font-size: var(--font-size-md);
+        font-weight: var(--font-weight-semibold);
+    }
+
+    .narrative-text {
+        line-height: 1.6;
+        color: var(--text-dark);
+    }
+
+    .terminology-codes {
+        margin-top: var(--space-md);
+    }
+
+    .code-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--space-sm);
+        background: white;
+        border: 1px solid var(--neutral-lighter);
+        border-radius: var(--border-radius-sm);
+        margin-bottom: var(--space-sm);
+    }
+
+    .code-info {
+        flex: 1;
+    }
+
+    .code-display {
+        font-weight: var(--font-weight-medium);
+        color: var(--text-dark);
+    }
+
+    .code-system {
+        font-size: var(--font-size-sm);
+        color: var(--text-muted);
+    }
+
+    .code-translation {
+        font-style: italic;
+        color: var(--primary-blue);
+        margin-left: var(--space-md);
+    }
+
     .translation-stats {
-        grid-template-columns: repeat(2, 1fr);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--space-md);
+        margin-bottom: var(--space-lg);
     }
-}
+
+    .stat-card {
+        background: white;
+        padding: var(--space-md);
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--neutral-lighter);
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: var(--font-size-xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--primary-blue);
+        display: block;
+    }
+
+    .stat-label {
+        font-size: var(--font-size-sm);
+        color: var(--text-muted);
+        margin-top: var(--space-xs);
+    }
+
+    @media (max-width: var(--breakpoint-md)) {
+        .content-comparison {
+            grid-template-columns: 1fr;
+        }
+
+        .translation-selector {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .translation-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
 </style>
 {% endblock %}
 
@@ -248,7 +263,9 @@
         <div class="page-subtitle">
             Patient: {{ patient_data.given_name }} {{ patient_data.family_name }} |
             Source: {{ source_country }} |
-            Translation Quality: <span class="translation-quality quality-{{ translated_document.translation_quality }}">{{ translated_document.translation_quality }}</span>
+            Translation Quality: <span
+                class="translation-quality quality-{{ translated_document.translation_quality }}">{{
+                translated_document.translation_quality }}</span>
         </div>
     </div>
 
@@ -260,21 +277,21 @@
                 <div>
                     <label for="source_language">Source Language:</label>
                     <select name="source_language" id="source_language">
-                        <option value="fr" {% if current_source_language == 'fr' %}selected{% endif %}>French</option>
-                        <option value="de" {% if current_source_language == 'de' %}selected{% endif %}>German</option>
-                        <option value="es" {% if current_source_language == 'es' %}selected{% endif %}>Spanish</option>
-                        <option value="it" {% if current_source_language == 'it' %}selected{% endif %}>Italian</option>
+                        <option value="fr" {% if current_source_language=='fr' %}selected{% endif %}>French</option>
+                        <option value="de" {% if current_source_language=='de' %}selected{% endif %}>German</option>
+                        <option value="es" {% if current_source_language=='es' %}selected{% endif %}>Spanish</option>
+                        <option value="it" {% if current_source_language=='it' %}selected{% endif %}>Italian</option>
                     </select>
                 </div>
-                
+
                 <div>
                     <label for="target_language">Target Language:</label>
                     <select name="target_language" id="target_language">
-                        <option value="en" {% if current_target_language == 'en' %}selected{% endif %}>English</option>
-                        <option value="fr" {% if current_target_language == 'fr' %}selected{% endif %}>French</option>
-                        <option value="de" {% if current_target_language == 'de' %}selected{% endif %}>German</option>
-                        <option value="es" {% if current_target_language == 'es' %}selected{% endif %}>Spanish</option>
-                        <option value="it" {% if current_target_language == 'it' %}selected{% endif %}>Italian</option>
+                        <option value="en" {% if current_target_language=='en' %}selected{% endif %}>English</option>
+                        <option value="fr" {% if current_target_language=='fr' %}selected{% endif %}>French</option>
+                        <option value="de" {% if current_target_language=='de' %}selected{% endif %}>German</option>
+                        <option value="es" {% if current_target_language=='es' %}selected{% endif %}>Spanish</option>
+                        <option value="it" {% if current_target_language=='it' %}selected{% endif %}>Italian</option>
                     </select>
                 </div>
 
@@ -297,11 +314,13 @@
                     <span class="stat-label">Fully Translated</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-number">{{ translated_document.translation_summary.terminology_translations }}</span>
+                    <span class="stat-number">{{ translated_document.translation_summary.terminology_translations
+                        }}</span>
                     <span class="stat-label">Terminology Translations</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-number">{{ (translated_document.translation_summary.translation_coverage * 100)|round(1) }}%</span>
+                    <span class="stat-number">{{ (translated_document.translation_summary.translation_coverage *
+                        100)|round(1) }}%</span>
                     <span class="stat-label">Coverage</span>
                 </div>
             </div>
@@ -335,14 +354,15 @@
         <div class="cda-section" id="section-{{ section.section_id }}">
             <div class="cda-section-header">
                 <h3 class="cda-section-title">{{ section.title }}</h3>
-                
+
                 <div class="section-translation-status">
                     <span class="translation-quality quality-{{ section.translation_status }}">
                         {{ section.translation_status }}
                     </span>
-                    
+
                     <div class="translation-toggle">
-                        <button class="toggle-btn active" data-view="translated" data-section="{{ section.section_id }}">
+                        <button class="toggle-btn active" data-view="translated"
+                            data-section="{{ section.section_id }}">
                             Translated
                         </button>
                         <button class="toggle-btn" data-view="original" data-section="{{ section.section_id }}">
@@ -361,7 +381,7 @@
                     <div class="narrative-text">
                         {{ section.content|linebreaks }}
                     </div>
-                    
+
                     {% if section.translated_codes %}
                     <div class="terminology-codes">
                         <h4>Translated Terminology</h4>
@@ -387,7 +407,7 @@
                     <div class="narrative-text">
                         {{ section.original_content|linebreaks }}
                     </div>
-                    
+
                     {% if section.codes %}
                     <div class="terminology-codes">
                         <h4>Original Terminology</h4>
@@ -412,7 +432,7 @@
                                 {{ section.original_content|linebreaks }}
                             </div>
                         </div>
-                        
+
                         <div class="content-column translated-content">
                             <h4>Translated ({{ current_target_language|upper }})</h4>
                             <div class="narrative-text">
@@ -446,51 +466,52 @@
 </div>
 
 <script>
-// Translation interface functionality
-document.addEventListener('DOMContentLoaded', function() {
-    // Handle view toggle buttons
-    document.querySelectorAll('.toggle-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const sectionId = this.dataset.section;
-            const viewType = this.dataset.view;
-            
-            // Update button states
-            document.querySelectorAll(`[data-section="${sectionId}"]`).forEach(b => {
-                b.classList.remove('active');
+    // Translation interface functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        // Handle view toggle buttons
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const sectionId = this.dataset.section;
+                const viewType = this.dataset.view;
+
+                // Update button states
+                document.querySelectorAll(`[data-section="${sectionId}"]`).forEach(b => {
+                    b.classList.remove('active');
+                });
+                this.classList.add('active');
+
+                // Show/hide content views
+                document.querySelectorAll(`#translated-${sectionId}, #original-${sectionId}, #comparison-${sectionId}`).forEach(view => {
+                    view.classList.remove('active');
+                });
+                document.getElementById(`${viewType}-${sectionId}`).classList.add('active');
             });
-            this.classList.add('active');
-            
-            // Show/hide content views
-            document.querySelectorAll(`#translated-${sectionId}, #original-${sectionId}, #comparison-${sectionId}`).forEach(view => {
-                view.classList.remove('active');
-            });
-            document.getElementById(`${viewType}-${sectionId}`).classList.add('active');
+        });
+
+        // Handle language changes
+        document.getElementById('target_language').addEventListener('change', function () {
+            if (this.value !== '{{ current_target_language }}') {
+                document.querySelector('.translation-selector').submit();
+            }
+        });
+
+        document.getElementById('source_language').addEventListener('change', function () {
+            if (this.value !== '{{ current_source_language }}') {
+                document.querySelector('.translation-selector').submit();
+            }
         });
     });
-    
-    // Handle language changes
-    document.getElementById('target_language').addEventListener('change', function() {
-        if (this.value !== '{{ current_target_language }}') {
-            document.querySelector('.translation-selector').submit();
-        }
-    });
-    
-    document.getElementById('source_language').addEventListener('change', function() {
-        if (this.value !== '{{ current_source_language }}') {
-            document.querySelector('.translation-selector').submit();
-        }
-    });
-});
 
-function downloadTranslatedDocument() {
-    // Create downloadable content
-    const documentData = {
-        patient: '{{ translated_document.patient_info.name }}',
-        sections: [],
-        translation_summary: {{ translated_document.translation_summary|tojson }},
-        timestamp: new Date().toISOString()
+    function downloadTranslatedDocument() {
+        // Create downloadable content
+        const documentData = {
+            patient: '{{ translated_document.patient_info.name }}',
+            sections: [],
+            translation_summary: {{ translated_document.translation_summary| tojson
+    }},
+    timestamp: new Date().toISOString()
     };
-    
+
     // Collect section data
     {% for section in translated_document.sections %}
     documentData.sections.push({
@@ -501,7 +522,7 @@ function downloadTranslatedDocument() {
         translation_status: '{{ section.translation_status }}'
     });
     {% endfor %}
-    
+
     // Create and download file
     const blob = new Blob([JSON.stringify(documentData, null, 2)], {
         type: 'application/json'
