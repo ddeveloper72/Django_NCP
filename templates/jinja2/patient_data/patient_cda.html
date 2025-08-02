@@ -1,202 +1,596 @@
 {% extends "base.html" %}
 
-{% block title %}Patient CDA Document - EU NCP Portal{% endblock %}
+{% block title %}CDA Translation Dashboard - {{ patient_data.family_name }}, {{ patient_data.given_name }}{% endblock %}
 
 {% block content %}
 <div class="cda-document-container">
-    <div class="page-header">
-        <div class="breadcrumb-nav">
-            <a href="{{ url('patient_data:patient_details', patient_data.id) }}" class="breadcrumb-link">
-                <i class="icon-arrow-left"></i> Back to Patient Details
-            </a>
-        </div>
+    <!-- Professional Header -->
+    <div class="h1center">Clinical Document Architecture - Translation Dashboard</div>
 
-        <h1 class="page-title">CDA Document Viewer</h1>
-        <div class="page-subtitle">
-            Patient: {{ patient_data.given_name }} {{ patient_data.family_name }} |
-            Source: {{ source_country }} |
-            Confidence: {{ confidence }}%
+    <!-- Translation Dashboard -->
+    <div class="cda-translation-dashboard">
+        <h2 class="mb-0">
+            <i class="fas fa-language me-2"></i>
+            Bilingual Medical Document Viewer
+        </h2>
+        <p class="mb-3 opacity-75">
+            Enhanced CDA translation with {{ medical_terms_count }} medical terms from {{ source_country }}
+        </p>
+
+        <div class="translation-stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ translation_quality }}</div>
+                <div class="stat-label">Translation Quality</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ sections_count }}</div>
+                <div class="stat-label">Medical Sections</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ medical_terms_count }}</div>
+                <div class="stat-label">Medical Terms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ source_language|upper }} → {{ target_language|upper }}</div>
+                <div class="stat-label">Translation Pair</div>
+            </div>
         </div>
     </div>
 
-    <div class="cda-content-wrapper">
-        <!-- Document Metadata -->
-        <div class="cda-metadata">
-            <h3>Document Information</h3>
-            <div class="metadata-grid">
-                <div class="metadata-item">
-                    <span class="metadata-label">File Name:</span>
-                    <span class="metadata-value">{{ file_name }}</span>
-                </div>
-                <div class="metadata-item">
-                    <span class="metadata-label">Source Country:</span>
-                    <span class="metadata-value">{{ source_country }}</span>
-                </div>
-                <div class="metadata-item">
-                    <span class="metadata-label">Match Confidence:</span>
-                    <span class="metadata-value">{{ confidence }}%</span>
-                </div>
-                <div class="metadata-item">
-                    <span class="metadata-label">Document Type:</span>
-                    <span class="metadata-value">{{ cda_type }} CDA Patient Summary</span>
-                </div>
-                <div class="metadata-item">
-                    <span class="metadata-label">Rendering:</span>
-                    <span class="metadata-value">
-                        {% if is_l3_rendering %}
-                        L3 CDA (Structured Clinical Content)
-                        {% else %}
-                        L1 CDA (Original Document Headers)
-                        {% endif %}
-                    </span>
-                </div>
-                <div class="metadata-item">
-                    <span class="metadata-label">Available Types:</span>
-                    <span class="metadata-value">
-                        {% if l1_available %}L1 CDA{% endif %}
-                        {% if l1_available and l3_available %}, {% endif %}
-                        {% if l3_available %}L3 CDA{% endif %}
-                    </span>
+    <!-- Patient Information Section -->
+    <div class="wrap-collapsible">
+        <input id="collapsible-patient-header" class="toggle" type="checkbox" checked="true">
+        <label for="collapsible-patient-header" class="lbl-toggle-main">
+            <i class="fas fa-user-md me-2"></i>
+            Patient Information & Document Details
+        </label>
+        <div class="collapsible-content-main">
+            <div class="content-inner-main">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Patient Name:</span>
+                        <span class="info-value">{{ patient_data.family_name }}, {{ patient_data.given_name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Date of Birth:</span>
+                        <span class="info-value">{{ patient_data.date_of_birth }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Source Country:</span>
+                        <span class="info-value">{{ source_country }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Document Type:</span>
+                        <span class="info-value">
+                            <span class="cda-type-badge">{{ cda_type }} CDA</span>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Confidence Score:</span>
+                        <span class="info-value">
+                            <span class="confidence-badge">{{ confidence }}%</span>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">File Name:</span>
+                        <span class="info-value">{{ file_name }}</span>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- CDA Document Viewer -->
-        <div class="cda-viewer">
-            <div class="cda-toolbar">
-                <div class="toolbar-left">
-                    <h3>Clinical Document Architecture ({{ cda_type }} CDA)</h3>
-                    {% if is_l3_rendering %}
-                    <span class="cda-type-badge l3">L3 - Structured Clinical Content</span>
-                    {% else %}
-                    <span class="cda-type-badge l1">L1 - Original Document Headers</span>
-                    {% endif %}
-                </div>
-                <div class="toolbar-right">
-                    {% if translation_available %}
-                    <!-- Translation Controls -->
-                    <div class="translation-controls">
-                        <div class="language-selector">
-                            <label for="sourceLanguage">Source:</label>
-                            <select id="sourceLanguage" class="form-control form-control-sm">
-                                <option value="fr" {% if source_language=='fr' %}selected{% endif %}>🇫🇷 French
-                                </option>
-                                <option value="de" {% if source_language=='de' %}selected{% endif %}>🇩🇪 German
-                                </option>
-                                <option value="es" {% if source_language=='es' %}selected{% endif %}>🇪🇸 Spanish
-                                </option>
-                                <option value="it" {% if source_language=='it' %}selected{% endif %}>🇮🇹 Italian
-                                </option>
-                            </select>
+    <!-- Clinical Sections -->
+    <div class="wrap-collapsible">
+        <input id="collapsible-clinical-sections" class="toggle" type="checkbox" checked="true">
+        <label for="collapsible-clinical-sections" class="lbl-toggle-main">
+            <i class="fas fa-stethoscope me-2"></i>
+            Clinical Sections
+        </label>
+        <div class="collapsible-content-main">
+            <div class="content-inner-main">
+
+                {% if translation_result.sections %}
+                {% for section in translation_result.sections %}
+                <div class="wrap-collapsible">
+                    <input id="collapsible-section-{{ section.section_id }}" class="toggle" type="checkbox"
+                        checked="true">
+                    <label for="collapsible-section-{{ section.section_id }}" class="lbl-toggle-title">
+                        <i class="fas fa-clipboard-list me-2"></i>
+                        {{ section.title.translated }}
+                        {% if section.content.medical_terms > 0 %}
+                        <span class="medical-terms-badge">{{ section.content.medical_terms }} terms</span>
+                        {% endif %}
+                    </label>
+                    <div class="collapsible-content-title">
+                        <div class="content-inner-title">
+
+                            <!-- Mobile View with Toggle Buttons -->
+                            <div class="mobile-view">
+                                <div class="toggle-container">
+                                    <button class="toggle-button-translated active"
+                                        onclick="toggleSectionContent('section-{{ section.section_id }}', 'translated')"
+                                        data-option="translated">
+                                        <i class="fas fa-language me-1"></i>
+                                        Translated
+                                    </button>
+                                    <button class="toggle-button-original"
+                                        onclick="toggleSectionContent('section-{{ section.section_id }}', 'original')"
+                                        data-option="original">
+                                        <i class="fas fa-flag me-1"></i>
+                                        Original
+                                    </button>
+                                </div>
+
+                                <!-- Mobile Content Panels -->
+                                <div class="mobile-content" id="content-translated-{{ section.section_id }}"
+                                    style="display: block;">
+                                    <div class="content-inner">
+                                        <div class="content-label">
+                                            <i class="fas fa-flag-usa me-1"></i>
+                                            English Translation
+                                        </div>
+                                        <div class="content-text">
+                                            {{ section.content.translated|safe }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mobile-content" id="content-original-{{ section.section_id }}"
+                                    style="display: none;">
+                                    <div class="content-inner">
+                                        <div class="content-label">
+                                            <i class="fas fa-flag me-1"></i>
+                                            Original ({{ source_language|upper }})
+                                        </div>
+                                        <div class="content-text">
+                                            {{ section.content.original|safe }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Desktop View with Collapsible Panels -->
+                            <div class="web-view">
+                                <div class="wrap-collapsible">
+                                    <input id="collapsible-{{ section.section_id }}-original" class="toggle"
+                                        type="checkbox">
+                                    <label for="collapsible-{{ section.section_id }}-original" class="lbl-toggle">
+                                        <i class="fas fa-flag me-1"></i>
+                                        Original ({{ source_language|upper }})
+                                    </label>
+                                    <div class="collapsible-content">
+                                        <div class="content-inner">
+                                            <div class="content-text">
+                                                {{ section.content.original|safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="wrap-collapsible">
+                                    <input id="collapsible-{{ section.section_id }}-translated" class="toggle"
+                                        type="checkbox" checked="true">
+                                    <label for="collapsible-{{ section.section_id }}-translated" class="lbl-toggle">
+                                        <i class="fas fa-language me-1"></i>
+                                        English Translation
+                                    </label>
+                                    <div class="collapsible-content">
+                                        <div class="content-inner">
+                                            {% if section.content.table_data %}
+                                            <table class="translation_table">
+                                                <thead>
+                                                    <tr>
+                                                        {% for header in section.content.table_headers %}
+                                                        <th>{{ header }}</th>
+                                                        {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for row in section.content.table_data %}
+                                                    <tr>
+                                                        {% for cell in row %}
+                                                        <td
+                                                            data-label="{{ section.content.table_headers[loop.index0] }}">
+                                                            {{ cell }}</td>
+                                                        {% endfor %}
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                            {% else %}
+                                            <div class="content-text">
+                                                {{ section.content.translated|safe }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
-                        <div class="language-selector">
-                            <label for="targetLanguage">Target:</label>
-                            <select id="targetLanguage" class="form-control form-control-sm">
-                                <option value="en" {% if target_language=='en' %}selected{% endif %}>🇬🇧 English
-                                </option>
-                                <option value="fr" {% if target_language=='fr' %}selected{% endif %}>🇫🇷 French
-                                </option>
-                                <option value="de" {% if target_language=='de' %}selected{% endif %}>🇩🇪 German
-                                </option>
-                                <option value="es" {% if target_language=='es' %}selected{% endif %}>🇪🇸 Spanish
-                                </option>
-                                <option value="it" {% if target_language=='it' %}selected{% endif %}>🇮🇹 Italian
-                                </option>
-                            </select>
-                        </div>
-                        <button class="btn btn-info btn-sm" onclick="toggleTranslationMode()" id="translationToggle">
-                            <i class="icon-globe"></i> <span id="translationToggleText">Show Translation</span>
-                        </button>
                     </div>
-                    {% endif %}
+                </div>
+                {% endfor %}
 
-                    <button class="btn btn-secondary" onclick="toggleView()">
-                        <i class="icon-code"></i> Toggle Source View
-                    </button>
-                    <a href="{{ url('patient_data:download_cda_html', patient_data.id) }}" class="btn btn-primary"
-                        download>
-                        <i class="icon-download"></i> Download HTML
-                    </a>
+                {% else %}
+                <div class="no-sections">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3" style="color: #009fd1;"></i>
+                    <h4>No Medical Sections Available</h4>
+                    <p>This document does not contain structured medical sections for translation.</p>
+                    <p>Raw CDA content may be available below.</p>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw CDA Content -->
+    <div class="wrap-collapsible">
+        <input id="collapsible-raw-cda" class="toggle" type="checkbox">
+        <label for="collapsible-raw-cda" class="lbl-toggle-main">
+            <i class="fas fa-code me-2"></i>
+            Raw CDA Document
+        </label>
+        <div class="collapsible-content-main">
+            <div class="content-inner-main">
+                <div class="content-label">
+                    <i class="fas fa-file-code me-1"></i>
+                    XML Content
+                </div>
+                <div class="raw-content">{{ cda_content }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mobile toggle functionality
+    function toggleSectionContent(sectionId, viewType) {
+        const translatedContent = document.getElementById('content-translated-' + sectionId.replace('section-', ''));
+        const originalContent = document.getElementById('content-original-' + sectionId.replace('section-', ''));
+        const translatedBtn = document.querySelector(`[data-option="translated"][onclick*="${sectionId}"]`);
+        const originalBtn = document.querySelector(`[data-option="original"][onclick*="${sectionId}"]`);
+
+        if (viewType === 'translated') {
+            translatedContent.style.display = 'block';
+            originalContent.style.display = 'none';
+            translatedBtn.classList.add('active');
+            originalBtn.classList.remove('active');
+        } else {
+            translatedContent.style.display = 'none';
+            originalContent.style.display = 'block';
+            translatedBtn.classList.remove('active');
+            originalBtn.classList.add('active');
+        }
+    }
+
+    // Initialize page animations
+    document.addEventListener('DOMContentLoaded', function () {
+        // Animate stats on page load
+        const statValues = document.querySelectorAll('.stat-value');
+        statValues.forEach((stat, index) => {
+            stat.style.opacity = '0';
+            stat.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                stat.style.transition = 'all 0.5s ease';
+                stat.style.opacity = '1';
+                stat.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // Add stagger animation to sections
+        const sections = document.querySelectorAll('.wrap-collapsible');
+        sections.forEach((section, index) => {
+            section.style.animationDelay = `${index * 0.1}s`;
+        });
+    });
+</script>
+{% endblock %}
+</span>
+</div>
+<div class="metadata-item">
+    <span class="metadata-label">Available Types:</span>
+    <span class="metadata-value">
+        {% if l1_available %}L1 CDA{% endif %}
+        {% if l1_available and l3_available %}, {% endif %}
+        {% if l3_available %}L3 CDA{% endif %}
+    </span>
+</div>
+</div>
+</div>
+
+<!-- CDA Document Viewer -->
+<div class="cda-viewer">
+    <div class="cda-toolbar">
+        <div class="toolbar-left">
+            <h3>Clinical Document Architecture ({{ cda_type }} CDA)</h3>
+            {% if is_l3_rendering %}
+            <span class="cda-type-badge l3">L3 - Structured Clinical Content</span>
+            {% else %}
+            <span class="cda-type-badge l1">L1 - Original Document Headers</span>
+            {% endif %}
+        </div>
+        <div class="toolbar-right">
+            {% if translation_available %}
+            <!-- Translation Controls -->
+            <div class="translation-controls">
+                <div class="language-selector">
+                    <label for="sourceLanguage">Source:</label>
+                    <select id="sourceLanguage" class="form-control form-control-sm">
+                        <option value="fr" {% if source_language=='fr' %}selected{% endif %}>🇫🇷 French
+                        </option>
+                        <option value="de" {% if source_language=='de' %}selected{% endif %}>🇩🇪 German
+                        </option>
+                        <option value="es" {% if source_language=='es' %}selected{% endif %}>🇪🇸 Spanish
+                        </option>
+                        <option value="it" {% if source_language=='it' %}selected{% endif %}>🇮🇹 Italian
+                        </option>
+                    </select>
+                </div>
+                <div class="language-selector">
+                    <label for="targetLanguage">Target:</label>
+                    <select id="targetLanguage" class="form-control form-control-sm">
+                        <option value="en" {% if target_language=='en' %}selected{% endif %}>🇬🇧 English
+                        </option>
+                        <option value="fr" {% if target_language=='fr' %}selected{% endif %}>🇫🇷 French
+                        </option>
+                        <option value="de" {% if target_language=='de' %}selected{% endif %}>🇩🇪 German
+                        </option>
+                        <option value="es" {% if target_language=='es' %}selected{% endif %}>🇪🇸 Spanish
+                        </option>
+                        <option value="it" {% if target_language=='it' %}selected{% endif %}>🇮🇹 Italian
+                        </option>
+                    </select>
+                </div>
+                <button class="btn btn-info btn-sm" onclick="toggleTranslationMode()" id="translationToggle">
+                    <i class="icon-globe"></i> <span id="translationToggleText">Show Translation</span>
+                </button>
+            </div>
+            {% endif %}
+
+            <button class="btn btn-secondary" onclick="toggleView()">
+                <i class="icon-code"></i> Toggle Source View
+            </button>
+            <a href="{{ url('patient_data:download_cda_html', patient_data.id) }}" class="btn btn-primary" download>
+                <i class="icon-download"></i> Download HTML
+            </a>
+        </div>
+    </div>
+
+    <!-- Enhanced Rendered HTML View with Translation Support -->
+    <div class="cda-rendered-view" id="renderedView">
+        {% if translation_result %}
+        <!-- Enhanced Translation Results from EnhancedCDATranslationService -->
+        <div class="enhanced-translation-view">
+            <h3 class="translation-section-header">🌐 Enhanced CDA Translation Results</h3>
+
+            <!-- Translation Summary Stats -->
+            <div class="translation-summary-enhanced">
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="summary-value">{{ sections_count }}</span>
+                        <span class="summary-label">Sections</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-value">{{ medical_terms_count }}</span>
+                        <span class="summary-label">Medical Terms</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-value">{{ translation_quality }}</span>
+                        <span class="summary-label">Quality</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-value">{{ source_language|upper }} → {{ target_language|upper
+                            }}</span>
+                        <span class="summary-label">Languages</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Enhanced Rendered HTML View with Translation Support -->
-            <div class="cda-rendered-view" id="renderedView">
-                {% if translation_result %}
-                <!-- Enhanced Translation Results from EnhancedCDATranslationService -->
-                <div class="enhanced-translation-view">
-                    <h3 class="translation-section-header">🌐 Enhanced CDA Translation Results</h3>
-
-                    <!-- Translation Summary Stats -->
-                    <div class="translation-summary-enhanced">
-                        <div class="summary-grid">
-                            <div class="summary-item">
-                                <span class="summary-value">{{ sections_count }}</span>
-                                <span class="summary-label">Sections</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-value">{{ medical_terms_count }}</span>
-                                <span class="summary-label">Medical Terms</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-value">{{ translation_quality }}</span>
-                                <span class="summary-label">Quality</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-value">{{ source_language|upper }} → {{ target_language|upper
-                                    }}</span>
-                                <span class="summary-label">Languages</span>
-                            </div>
+            <!-- Clinical Sections with Enhanced Translation -->
+            <div class="enhanced-clinical-sections">
+                {% for section in translation_result.sections %}
+                <div class="enhanced-clinical-section" data-section="{{ section.section_id }}">
+                    <div class="enhanced-section-header" onclick="toggleEnhancedSection('{{ section.section_id }}')">
+                        <h4 class="enhanced-section-title">
+                            <i class="icon-chevron-right expand-icon" id="enhanced-icon-{{ section.section_id }}"></i>
+                            {{ section.title.original }}
+                            {% if section.title.translated and section.title.translated !=
+                            section.title.original %}
+                            <span class="enhanced-translated-title">({{ section.title.translated }})</span>
+                            {% endif %}
+                        </h4>
+                        <div class="enhanced-section-meta">
+                            <span class="enhanced-medical-terms-count">{{ section.content.medical_terms }}
+                                terms</span>
+                            <span class="enhanced-translation-confidence">{{ translation_quality }}</span>
                         </div>
                     </div>
-
-                    <!-- Clinical Sections with Enhanced Translation -->
-                    <div class="enhanced-clinical-sections">
-                        {% for section in translation_result.sections %}
-                        <div class="enhanced-clinical-section" data-section="{{ section.section_id }}">
-                            <div class="enhanced-section-header"
-                                onclick="toggleEnhancedSection('{{ section.section_id }}')">
-                                <h4 class="enhanced-section-title">
-                                    <i class="icon-chevron-right expand-icon"
-                                        id="enhanced-icon-{{ section.section_id }}"></i>
-                                    {{ section.title.original }}
-                                    {% if section.title.translated and section.title.translated !=
-                                    section.title.original %}
-                                    <span class="enhanced-translated-title">({{ section.title.translated }})</span>
-                                    {% endif %}
-                                </h4>
-                                <div class="enhanced-section-meta">
-                                    <span class="enhanced-medical-terms-count">{{ section.content.medical_terms }}
-                                        terms</span>
-                                    <span class="enhanced-translation-confidence">{{ translation_quality }}</span>
-                                </div>
+                    <div class="enhanced-section-content" id="enhanced-content-{{ section.section_id }}"
+                        style="display: none;">
+                        <div class="enhanced-bilingual-display">
+                            <div class="enhanced-original-content">
+                                <h5 class="enhanced-content-label">🇫🇷 Original (French)</h5>
+                                <div class="enhanced-content-text">{{ section.content.original|safe }}</div>
                             </div>
-                            <div class="enhanced-section-content" id="enhanced-content-{{ section.section_id }}"
-                                style="display: none;">
-                                <div class="enhanced-bilingual-display">
-                                    <div class="enhanced-original-content">
-                                        <h5 class="enhanced-content-label">🇫🇷 Original (French)</h5>
-                                        <div class="enhanced-content-text">{{ section.content.original|safe }}</div>
-                                    </div>
-                                    <div class="enhanced-translated-content">
-                                        <h5 class="enhanced-content-label">🇬🇧 Translation (English)</h5>
-                                        <div class="enhanced-content-text">{{ section.content.translated|safe }}</div>
+                            <div class="enhanced-translated-content">
+                                <h5 class="enhanced-content-label">🇬🇧 Translation (English)</h5>
+                                <div class="enhanced-content-text">{{ section.content.translated|safe }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Enhanced Medical Terms Glossary -->
+                        {% if section.medical_terms_found %}
+                        <div class="enhanced-medical-terms-section">
+                            <h6 class="enhanced-terms-header">📚 Medical Terms in this Section</h6>
+                            <div class="enhanced-medical-terms-grid">
+                                {% for term in section.medical_terms_found %}
+                                <div class="enhanced-medical-term-item">
+                                    <span class="enhanced-term-original">{{ term.original }}</span>
+                                    <span class="enhanced-term-arrow">→</span>
+                                    <span class="enhanced-term-translated">{{ term.translated }}</span>
+                                    {% if term.category %}
+                                    <span class="enhanced-term-category">({{ term.category }})</span>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% elif translation_available and translation_data.success %}
+        <!-- Translation-Enhanced View -->
+        <div class="translation-enhanced-view">
+            {% if translation_data.content_type == 'html' %}
+            <!-- HTML CDA with Section Translation Controls -->
+            <div class="clinical-sections-container">
+                {% for section in translation_data.clinical_sections %}
+                <div class="clinical-section" data-section-id="{{ section.id }}">
+                    <div class="section-header">
+                        <h4>{{ section.title }}</h4>
+                        <div class="section-controls">
+                            {% if section.translated_content %}
+                            <button class="btn btn-sm btn-outline-primary translation-section-toggle"
+                                data-section="{{ section.id }}" onclick="toggleSectionTranslation('{{ section.id }}')">
+                                <i class="icon-globe"></i>
+                                <span class="toggle-text">Show Translation</span>
+                            </button>
+                            <span class="quality-indicator quality-{{ section.translation_quality }}">
+                                {{ section.translation_quality|title }} Quality
+                            </span>
+                            {% endif %}
+
+                            {% if section.coded_elements or section.translated_codes %}
+                            <button class="btn btn-sm btn-outline-info codes-toggle-btn"
+                                onclick="toggleCodedElements('{{ section.id }}')">
+                                <i class="icon-code"></i>
+                                <span class="toggle-codes-text">Medical Codes</span>
+                                <span class="codes-count-badge">
+                                    {{ (section.coded_elements|length) + (section.translated_codes|length) }}
+                                </span>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <!-- Original Content (always visible initially) -->
+                        <div class="original-content" id="original-{{ section.id }}">
+                            {{ section.original_content|safe }}
+                        </div>
+
+                        <!-- Translated Content (hidden by default) -->
+                        {% if section.translated_content %}
+                        <div class="translated-content" id="translated-{{ section.id }}" style="display: none;">
+                            <div class="translation-banner">
+                                <i class="icon-globe"></i>
+                                Translated to {{ target_language|upper }}
+                                {% if section.terminology_mappings %}
+                                <span class="terminology-count">({{ section.terminology_mappings|length }}
+                                    medical terms)</span>
+                                {% endif %}
+                            </div>
+                            <div class="translated-text">
+                                {{ section.translated_content|safe }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Medical Coding Elements (if available) -->
+                        {% if section.coded_elements or section.translated_codes %}
+                        <div class="coded-elements-section" id="codes-{{ section.id }}" style="display: none;">
+                            <div class="codes-header">
+                                <h4><i class="icon-code"></i> Medical Terminology & Codes</h4>
+                                <button class="btn btn-sm btn-secondary"
+                                    onclick="toggleCodedElements('{{ section.id }}')">
+                                    <span class="toggle-codes-text">Show Codes</span>
+                                </button>
+                            </div>
+
+                            <div class="codes-content" id="codes-content-{{ section.id }}" style="display: none;">
+                                {% if section.coded_elements %}
+                                <div class="original-codes">
+                                    <h5>Original Coded Elements</h5>
+                                    <div class="codes-grid">
+                                        {% for coded_elem in section.coded_elements %}
+                                        <div class="code-item original-code">
+                                            <div class="code-header">
+                                                <span class="code-system-badge {{ coded_elem.codeSystem|lower }}">
+                                                    {{ coded_elem.codeSystem }}
+                                                </span>
+                                                <span class="code-value">{{ coded_elem.code }}</span>
+                                            </div>
+                                            <div class="code-display">{{ coded_elem.displayName }}</div>
+                                            <div class="code-context">{{ coded_elem.context }}</div>
+                                        </div>
+                                        {% endfor %}
                                     </div>
                                 </div>
+                                {% endif %}
 
-                                <!-- Enhanced Medical Terms Glossary -->
-                                {% if section.medical_terms_found %}
-                                <div class="enhanced-medical-terms-section">
-                                    <h6 class="enhanced-terms-header">📚 Medical Terms in this Section</h6>
-                                    <div class="enhanced-medical-terms-grid">
-                                        {% for term in section.medical_terms_found %}
-                                        <div class="enhanced-medical-term-item">
-                                            <span class="enhanced-term-original">{{ term.original }}</span>
-                                            <span class="enhanced-term-arrow">→</span>
-                                            <span class="enhanced-term-translated">{{ term.translated }}</span>
-                                            {% if term.category %}
-                                            <span class="enhanced-term-category">({{ term.category }})</span>
+                                {% if section.translated_codes %}
+                                <div class="translated-codes">
+                                    <h5>Translated Medical Terminology</h5>
+                                    <div class="codes-grid">
+                                        {% for trans_code in section.translated_codes %}
+                                        <div class="code-item translated-code">
+                                            <div class="code-header">
+                                                <span class="code-system-badge {{ trans_code.codeSystem|lower }}">
+                                                    {{ trans_code.codeSystem }}
+                                                </span>
+                                                <span class="code-value">{{ trans_code.code }}</span>
+                                                <span
+                                                    class="confidence-indicator confidence-{{ trans_code.translation_confidence }}">
+                                                    {{ trans_code.translation_confidence|title }}
+                                                </span>
+                                            </div>
+                                            <div class="code-display-comparison">
+                                                <div class="original-display">
+                                                    <label>Original:</label>
+                                                    <span>{{ trans_code.originalDisplay }}</span>
+                                                </div>
+                                                <div class="translated-display">
+                                                    <label>English:</label>
+                                                    <span>{{ trans_code.translatedDisplay }}</span>
+                                                </div>
+                                            </div>
+                                            {% if trans_code.terminology_mapping %}
+                                            <div class="mapping-details">
+                                                <small>
+                                                    <strong>Mapping Source:</strong>
+                                                    {{
+                                                    trans_code.terminology_mapping.mapping_source|default("Manual
+                                                    Translation") }}
+                                                </small>
+                                            </div>
                                             {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Cross-references between narrative and codes -->
+                                {% if section.terminology_mappings.cross_references %}
+                                <div class="cross-references">
+                                    <h5>Terminology Cross-References</h5>
+                                    <div class="cross-ref-grid">
+                                        {% for cross_ref in section.terminology_mappings.cross_references %}
+                                        <div class="cross-ref-item">
+                                            <div class="cross-ref-code">
+                                                <span class="code-system-badge {{ cross_ref.codeSystem|lower }}">
+                                                    {{ cross_ref.codeSystem }}
+                                                </span>
+                                                <span class="code-value">{{ cross_ref.code }}</span>
+                                            </div>
+                                            <div class="cross-ref-context">
+                                                <small>{{ cross_ref.narrative_context }}</small>
+                                            </div>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -204,922 +598,759 @@
                                 {% endif %}
                             </div>
                         </div>
-                        {% endfor %}
+                        {% endif %}
                     </div>
                 </div>
-                {% elif translation_available and translation_data.success %}
-                <!-- Translation-Enhanced View -->
-                <div class="translation-enhanced-view">
-                    {% if translation_data.content_type == 'html' %}
-                    <!-- HTML CDA with Section Translation Controls -->
-                    <div class="clinical-sections-container">
-                        {% for section in translation_data.clinical_sections %}
-                        <div class="clinical-section" data-section-id="{{ section.id }}">
-                            <div class="section-header">
-                                <h4>{{ section.title }}</h4>
-                                <div class="section-controls">
-                                    {% if section.translated_content %}
-                                    <button class="btn btn-sm btn-outline-primary translation-section-toggle"
-                                        data-section="{{ section.id }}"
-                                        onclick="toggleSectionTranslation('{{ section.id }}')">
-                                        <i class="icon-globe"></i>
-                                        <span class="toggle-text">Show Translation</span>
-                                    </button>
-                                    <span class="quality-indicator quality-{{ section.translation_quality }}">
-                                        {{ section.translation_quality|title }} Quality
-                                    </span>
-                                    {% endif %}
-
-                                    {% if section.coded_elements or section.translated_codes %}
-                                    <button class="btn btn-sm btn-outline-info codes-toggle-btn"
-                                        onclick="toggleCodedElements('{{ section.id }}')">
-                                        <i class="icon-code"></i>
-                                        <span class="toggle-codes-text">Medical Codes</span>
-                                        <span class="codes-count-badge">
-                                            {{ (section.coded_elements|length) + (section.translated_codes|length) }}
-                                        </span>
-                                    </button>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="section-content">
-                                <!-- Original Content (always visible initially) -->
-                                <div class="original-content" id="original-{{ section.id }}">
-                                    {{ section.original_content|safe }}
-                                </div>
-
-                                <!-- Translated Content (hidden by default) -->
-                                {% if section.translated_content %}
-                                <div class="translated-content" id="translated-{{ section.id }}" style="display: none;">
-                                    <div class="translation-banner">
-                                        <i class="icon-globe"></i>
-                                        Translated to {{ target_language|upper }}
-                                        {% if section.terminology_mappings %}
-                                        <span class="terminology-count">({{ section.terminology_mappings|length }}
-                                            medical terms)</span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="translated-text">
-                                        {{ section.translated_content|safe }}
-                                    </div>
-                                </div>
-                                {% endif %}
-
-                                <!-- Medical Coding Elements (if available) -->
-                                {% if section.coded_elements or section.translated_codes %}
-                                <div class="coded-elements-section" id="codes-{{ section.id }}" style="display: none;">
-                                    <div class="codes-header">
-                                        <h4><i class="icon-code"></i> Medical Terminology & Codes</h4>
-                                        <button class="btn btn-sm btn-secondary"
-                                            onclick="toggleCodedElements('{{ section.id }}')">
-                                            <span class="toggle-codes-text">Show Codes</span>
-                                        </button>
-                                    </div>
-
-                                    <div class="codes-content" id="codes-content-{{ section.id }}"
-                                        style="display: none;">
-                                        {% if section.coded_elements %}
-                                        <div class="original-codes">
-                                            <h5>Original Coded Elements</h5>
-                                            <div class="codes-grid">
-                                                {% for coded_elem in section.coded_elements %}
-                                                <div class="code-item original-code">
-                                                    <div class="code-header">
-                                                        <span
-                                                            class="code-system-badge {{ coded_elem.codeSystem|lower }}">
-                                                            {{ coded_elem.codeSystem }}
-                                                        </span>
-                                                        <span class="code-value">{{ coded_elem.code }}</span>
-                                                    </div>
-                                                    <div class="code-display">{{ coded_elem.displayName }}</div>
-                                                    <div class="code-context">{{ coded_elem.context }}</div>
-                                                </div>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        {% endif %}
-
-                                        {% if section.translated_codes %}
-                                        <div class="translated-codes">
-                                            <h5>Translated Medical Terminology</h5>
-                                            <div class="codes-grid">
-                                                {% for trans_code in section.translated_codes %}
-                                                <div class="code-item translated-code">
-                                                    <div class="code-header">
-                                                        <span
-                                                            class="code-system-badge {{ trans_code.codeSystem|lower }}">
-                                                            {{ trans_code.codeSystem }}
-                                                        </span>
-                                                        <span class="code-value">{{ trans_code.code }}</span>
-                                                        <span
-                                                            class="confidence-indicator confidence-{{ trans_code.translation_confidence }}">
-                                                            {{ trans_code.translation_confidence|title }}
-                                                        </span>
-                                                    </div>
-                                                    <div class="code-display-comparison">
-                                                        <div class="original-display">
-                                                            <label>Original:</label>
-                                                            <span>{{ trans_code.originalDisplay }}</span>
-                                                        </div>
-                                                        <div class="translated-display">
-                                                            <label>English:</label>
-                                                            <span>{{ trans_code.translatedDisplay }}</span>
-                                                        </div>
-                                                    </div>
-                                                    {% if trans_code.terminology_mapping %}
-                                                    <div class="mapping-details">
-                                                        <small>
-                                                            <strong>Mapping Source:</strong>
-                                                            {{
-                                                            trans_code.terminology_mapping.mapping_source|default("Manual
-                                                            Translation") }}
-                                                        </small>
-                                                    </div>
-                                                    {% endif %}
-                                                </div>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        {% endif %}
-
-                                        <!-- Cross-references between narrative and codes -->
-                                        {% if section.terminology_mappings.cross_references %}
-                                        <div class="cross-references">
-                                            <h5>Terminology Cross-References</h5>
-                                            <div class="cross-ref-grid">
-                                                {% for cross_ref in section.terminology_mappings.cross_references %}
-                                                <div class="cross-ref-item">
-                                                    <div class="cross-ref-code">
-                                                        <span
-                                                            class="code-system-badge {{ cross_ref.codeSystem|lower }}">
-                                                            {{ cross_ref.codeSystem }}
-                                                        </span>
-                                                        <span class="code-value">{{ cross_ref.code }}</span>
-                                                    </div>
-                                                    <div class="cross-ref-context">
-                                                        <small>{{ cross_ref.narrative_context }}</small>
-                                                    </div>
-                                                </div>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Fallback: Show original iframe if no sections extracted -->
-                    {% if not translation_data.clinical_sections %}
-                    <div class="cda-iframe-container">
-                        <iframe id="cdaFrame" srcdoc="{{ cda_content|escape }}"
-                            style="width: 100%; height: 700px; border: none; background: white;">
-                        </iframe>
-                    </div>
-                    {% endif %}
-                    {% else %}
-                    <!-- XML CDA Translation Display -->
-                    <div class="xml-translation-view">
-                        <div class="translation-tabs">
-                            <button class="tab-button active" onclick="showTab('original')">Original</button>
-                            <button class="tab-button" onclick="showTab('translated')">Translated</button>
-                        </div>
-                        <div class="tab-content">
-                            <div id="original-tab" class="tab-pane active">
-                                <pre>{{ cda_content|escape }}</pre>
-                            </div>
-                            <div id="translated-tab" class="tab-pane">
-                                <pre>{{ translation_data.translated_document.translated_xml|escape }}</pre>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-                {% else %}
-                <!-- Standard CDA iframe view -->
-                <div class="cda-iframe-container">
-                    <iframe id="cdaFrame" srcdoc="{{ cda_content|escape }}"
-                        style="width: 100%; height: 700px; border: none; background: white;">
-                    </iframe>
-                </div>
-                {% endif %}
+                {% endfor %}
             </div>
 
-            <!-- Source XML View (hidden by default) -->
-            <div class="cda-source-view" id="sourceView" style="display: none;">
-                <div class="cda-content">
-                    <pre id="xmlContent">{{ cda_content|escape }}</pre>
+            <!-- Fallback: Show original iframe if no sections extracted -->
+            {% if not translation_data.clinical_sections %}
+            <div class="cda-iframe-container">
+                <iframe id="cdaFrame" srcdoc="{{ cda_content|escape }}"
+                    style="width: 100%; height: 700px; border: none; background: white;">
+                </iframe>
+            </div>
+            {% endif %}
+            {% else %}
+            <!-- XML CDA Translation Display -->
+            <div class="xml-translation-view">
+                <div class="translation-tabs">
+                    <button class="tab-button active" onclick="showTab('original')">Original</button>
+                    <button class="tab-button" onclick="showTab('translated')">Translated</button>
+                </div>
+                <div class="tab-content">
+                    <div id="original-tab" class="tab-pane active">
+                        <pre>{{ cda_content|escape }}</pre>
+                    </div>
+                    <div id="translated-tab" class="tab-pane">
+                        <pre>{{ translation_data.translated_document.translated_xml|escape }}</pre>
+                    </div>
                 </div>
             </div>
+            {% endif %}
         </div>
-
-        <!-- Navigation Actions -->
-        <div class="document-actions">
-            <a href="{{ url('patient_data:patient_details', patient_data.id) }}" class="action-button secondary">
-                <i class="icon-arrow-left"></i>
-                Back to Patient Details
-            </a>
-
-            <a href="{{ url('patient_data:download_cda_html', patient_data.id) }}" class="action-button primary"
-                download>
-                <i class="icon-download"></i>
-                Download HTML Document
-            </a>
-
-            <a href="{{ url('patient_data:patient_orcd_view', patient_data.id) }}" class="action-button accent">
-                <i class="icon-file-text"></i>
-                View ORCD
-            </a>
-
-            <a href="{{ url('patient_data:patient_data_form') }}" class="action-button outline">
-                <i class="icon-search"></i>
-                New Search
-            </a>
+        {% else %}
+        <!-- Standard CDA iframe view -->
+        <div class="cda-iframe-container">
+            <iframe id="cdaFrame" srcdoc="{{ cda_content|escape }}"
+                style="width: 100%; height: 700px; border: none; background: white;">
+            </iframe>
         </div>
+        {% endif %}
     </div>
 
-    <style>
-        /* CDA Type Badge Styling */
-        .cda-type-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-left: 10px;
+    <!-- Source XML View (hidden by default) -->
+    <div class="cda-source-view" id="sourceView" style="display: none;">
+        <div class="cda-content">
+            <pre id="xmlContent">{{ cda_content|escape }}</pre>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation Actions -->
+<div class="document-actions">
+    <a href="{{ url('patient_data:patient_details', patient_data.id) }}" class="action-button secondary">
+        <i class="icon-arrow-left"></i>
+        Back to Patient Details
+    </a>
+
+    <a href="{{ url('patient_data:download_cda_html', patient_data.id) }}" class="action-button primary" download>
+        <i class="icon-download"></i>
+        Download HTML Document
+    </a>
+
+    <a href="{{ url('patient_data:patient_orcd_view', patient_data.id) }}" class="action-button accent">
+        <i class="icon-file-text"></i>
+        View ORCD
+    </a>
+
+    <a href="{{ url('patient_data:patient_data_form') }}" class="action-button outline">
+        <i class="icon-search"></i>
+        New Search
+    </a>
+</div>
+</div>
+
+<style>
+    /* CDA Type Badge Styling */
+    .cda-type-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-left: 10px;
+    }
+
+    .cda-type-badge.l3 {
+        background: #e6f3ff;
+        color: #0066cc;
+        border: 1px solid #99ccff;
+    }
+
+    .cda-type-badge.l1 {
+        background: #fff3e6;
+        color: #cc6600;
+        border: 1px solid #ffcc99;
+    }
+
+    .toolbar-left {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .toolbar-left h3 {
+        margin: 0;
+    }
+
+    .cda-iframe-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .cda-rendered-view {
+        margin-top: 20px;
+    }
+
+    .cda-source-view {
+        margin-top: 20px;
+    }
+
+    .action-button.accent {
+        background: var(--accent-color, #6f42c1);
+        color: white;
+    }
+
+    .action-button.accent:hover {
+        background: var(--accent-color-dark, #5a32a3);
+    }
+
+    /* Coded Elements Styling */
+    .coded-elements-section {
+        margin-top: 1rem;
+        border: 1px solid var(--info);
+        border-radius: 0.5rem;
+        background: #f8f9fa;
+    }
+
+    .codes-header {
+        background: var(--info);
+        color: white;
+        padding: 0.75rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 0.5rem 0.5rem 0 0;
+    }
+
+    .codes-header h4 {
+        margin: 0;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .codes-content {
+        padding: 1rem;
+    }
+
+    .codes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .code-item {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+        background: white;
+    }
+
+    .original-code {
+        border-left: 4px solid var(--warning);
+    }
+
+    .translated-code {
+        border-left: 4px solid var(--success);
+    }
+
+    .code-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .code-system-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .code-system-badge.snomed_ct {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .code-system-badge.icd10 {
+        background: #fff3e0;
+        color: #ef6c00;
+    }
+
+    .code-system-badge.loinc {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+
+    .code-system-badge.atc {
+        background: #fce4ec;
+        color: #c2185b;
+    }
+
+    .code-system-badge.unknown {
+        background: #f5f5f5;
+        color: #757575;
+    }
+
+    .code-value {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .confidence-indicator {
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+        font-size: 0.675rem;
+        font-weight: 500;
+        margin-left: auto;
+    }
+
+    .confidence-high {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .confidence-medium {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .confidence-low {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .confidence-exact_match {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .code-display {
+        font-size: 0.875rem;
+        color: #495057;
+        margin-bottom: 0.25rem;
+    }
+
+    .code-display-comparison {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .original-display,
+    .translated-display {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .original-display label,
+    .translated-display label {
+        font-weight: 600;
+        font-size: 0.75rem;
+        min-width: 60px;
+        color: #6c757d;
+    }
+
+    .code-context {
+        font-size: 0.75rem;
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    .mapping-details {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid #e9ecef;
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+
+    .cross-references {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .cross-ref-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .cross-ref-item {
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 0.25rem;
+        border-left: 3px solid var(--info);
+    }
+
+    .cross-ref-code {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .cross-ref-context {
+        font-size: 0.75rem;
+        color: #6c757d;
+        line-height: 1.4;
+    }
+
+    /* Section Controls Enhancement */
+    .codes-toggle-btn {
+        position: relative;
+    }
+
+    .codes-count-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: var(--danger);
+        color: white;
+        border-radius: 50%;
+        padding: 0.125rem 0.375rem;
+        font-size: 0.625rem;
+        font-weight: 600;
+        min-width: 18px;
+        text-align: center;
+    }
+</style>
+
+<script>
+    let showingSource = false;
+
+    function toggleView() {
+        const renderedView = document.getElementById('renderedView');
+        const sourceView = document.getElementById('sourceView');
+        const toggleButton = document.querySelector('.btn-secondary');
+
+        if (showingSource) {
+            // Show rendered view
+            renderedView.style.display = 'block';
+            sourceView.style.display = 'none';
+            toggleButton.innerHTML = '<i class="icon-code"></i> Toggle Source View';
+            showingSource = false;
+        } else {
+            // Show source view
+            renderedView.style.display = 'none';
+            sourceView.style.display = 'block';
+            toggleButton.innerHTML = '<i class="icon-eye"></i> Toggle Rendered View';
+            formatXML();
+            showingSource = true;
         }
+    }
 
-        .cda-type-badge.l3 {
-            background: #e6f3ff;
-            color: #0066cc;
-            border: 1px solid #99ccff;
+    function formatXML() {
+        const xmlContent = document.getElementById('xmlContent');
+        if (xmlContent && !xmlContent.classList.contains('formatted')) {
+            const content = xmlContent.textContent;
+
+            // Add basic XML syntax highlighting
+            let formatted = content
+                .replace(/(&lt;[^&]*&gt;)/g, '<span class="xml-tag">$1</span>')
+                .replace(/(\w+)=&quot;([^&]*)&quot;/g, '<span class="xml-attribute">$1</span>=<span class="xml-value">&quot;$2&quot;</span>')
+                .replace(/(&lt;!--.*?--&gt;)/gs, '<span class="xml-comment">$1</span>');
+
+            xmlContent.innerHTML = formatted;
+            xmlContent.classList.add('formatted');
         }
+    }
 
-        .cda-type-badge.l1 {
-            background: #fff3e6;
-            color: #cc6600;
-            border: 1px solid #ffcc99;
-        }
+    // Translation functionality
+    let translationMode = false;
 
-        .toolbar-left {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+    function toggleTranslationMode() {
+        translationMode = !translationMode;
+        const toggleButton = document.getElementById('translationToggle');
+        const toggleText = document.getElementById('translationToggleText');
 
-        .toolbar-left h3 {
-            margin: 0;
-        }
-
-        .cda-iframe-container {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .cda-rendered-view {
-            margin-top: 20px;
-        }
-
-        .cda-source-view {
-            margin-top: 20px;
-        }
-
-        .action-button.accent {
-            background: var(--accent-color, #6f42c1);
-            color: white;
-        }
-
-        .action-button.accent:hover {
-            background: var(--accent-color-dark, #5a32a3);
-        }
-
-        /* Coded Elements Styling */
-        .coded-elements-section {
-            margin-top: 1rem;
-            border: 1px solid var(--info);
-            border-radius: 0.5rem;
-            background: #f8f9fa;
-        }
-
-        .codes-header {
-            background: var(--info);
-            color: white;
-            padding: 0.75rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 0.5rem 0.5rem 0 0;
-        }
-
-        .codes-header h4 {
-            margin: 0;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .codes-content {
-            padding: 1rem;
-        }
-
-        .codes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1rem;
-            margin-top: 0.5rem;
-        }
-
-        .code-item {
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            padding: 0.75rem;
-            background: white;
-        }
-
-        .original-code {
-            border-left: 4px solid var(--warning);
-        }
-
-        .translated-code {
-            border-left: 4px solid var(--success);
-        }
-
-        .code-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .code-system-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .code-system-badge.snomed_ct {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-
-        .code-system-badge.icd10 {
-            background: #fff3e0;
-            color: #ef6c00;
-        }
-
-        .code-system-badge.loinc {
-            background: #e8f5e8;
-            color: #2e7d32;
-        }
-
-        .code-system-badge.atc {
-            background: #fce4ec;
-            color: #c2185b;
-        }
-
-        .code-system-badge.unknown {
-            background: #f5f5f5;
-            color: #757575;
-        }
-
-        .code-value {
-            font-family: 'Courier New', monospace;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .confidence-indicator {
-            padding: 0.125rem 0.375rem;
-            border-radius: 0.25rem;
-            font-size: 0.675rem;
-            font-weight: 500;
-            margin-left: auto;
-        }
-
-        .confidence-high {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .confidence-medium {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .confidence-low {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .confidence-exact_match {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .code-display {
-            font-size: 0.875rem;
-            color: #495057;
-            margin-bottom: 0.25rem;
-        }
-
-        .code-display-comparison {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .original-display,
-        .translated-display {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .original-display label,
-        .translated-display label {
-            font-weight: 600;
-            font-size: 0.75rem;
-            min-width: 60px;
-            color: #6c757d;
-        }
-
-        .code-context {
-            font-size: 0.75rem;
-            color: #6c757d;
-            font-style: italic;
-        }
-
-        .mapping-details {
-            margin-top: 0.5rem;
-            padding-top: 0.5rem;
-            border-top: 1px solid #e9ecef;
-            font-size: 0.75rem;
-            color: #6c757d;
-        }
-
-        .cross-references {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #e9ecef;
-        }
-
-        .cross-ref-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .cross-ref-item {
-            padding: 0.5rem;
-            background: #f8f9fa;
-            border-radius: 0.25rem;
-            border-left: 3px solid var(--info);
-        }
-
-        .cross-ref-code {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .cross-ref-context {
-            font-size: 0.75rem;
-            color: #6c757d;
-            line-height: 1.4;
-        }
-
-        /* Section Controls Enhancement */
-        .codes-toggle-btn {
-            position: relative;
-        }
-
-        .codes-count-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--danger);
-            color: white;
-            border-radius: 50%;
-            padding: 0.125rem 0.375rem;
-            font-size: 0.625rem;
-            font-weight: 600;
-            min-width: 18px;
-            text-align: center;
-        }
-    </style>
-
-    <script>
-        let showingSource = false;
-
-        function toggleView() {
-            const renderedView = document.getElementById('renderedView');
-            const sourceView = document.getElementById('sourceView');
-            const toggleButton = document.querySelector('.btn-secondary');
-
-            if (showingSource) {
-                // Show rendered view
-                renderedView.style.display = 'block';
-                sourceView.style.display = 'none';
-                toggleButton.innerHTML = '<i class="icon-code"></i> Toggle Source View';
-                showingSource = false;
-            } else {
-                // Show source view
-                renderedView.style.display = 'none';
-                sourceView.style.display = 'block';
-                toggleButton.innerHTML = '<i class="icon-eye"></i> Toggle Rendered View';
-                formatXML();
-                showingSource = true;
-            }
-        }
-
-        function formatXML() {
-            const xmlContent = document.getElementById('xmlContent');
-            if (xmlContent && !xmlContent.classList.contains('formatted')) {
-                const content = xmlContent.textContent;
-
-                // Add basic XML syntax highlighting
-                let formatted = content
-                    .replace(/(&lt;[^&]*&gt;)/g, '<span class="xml-tag">$1</span>')
-                    .replace(/(\w+)=&quot;([^&]*)&quot;/g, '<span class="xml-attribute">$1</span>=<span class="xml-value">&quot;$2&quot;</span>')
-                    .replace(/(&lt;!--.*?--&gt;)/gs, '<span class="xml-comment">$1</span>');
-
-                xmlContent.innerHTML = formatted;
-                xmlContent.classList.add('formatted');
-            }
-        }
-
-        // Translation functionality
-        let translationMode = false;
-
-        function toggleTranslationMode() {
-            translationMode = !translationMode;
-            const toggleButton = document.getElementById('translationToggle');
-            const toggleText = document.getElementById('translationToggleText');
-
-            if (translationMode) {
-                // Show all translations
-                document.querySelectorAll('.translated-content').forEach(el => {
-                    el.style.display = 'block';
-                });
-                document.querySelectorAll('.original-content').forEach(el => {
-                    el.style.display = 'none';
-                });
-                toggleText.textContent = 'Show Original';
-                toggleButton.classList.remove('btn-info');
-                toggleButton.classList.add('btn-success');
-            } else {
-                // Show all originals
-                document.querySelectorAll('.translated-content').forEach(el => {
-                    el.style.display = 'none';
-                });
-                document.querySelectorAll('.original-content').forEach(el => {
-                    el.style.display = 'block';
-                });
-                toggleText.textContent = 'Show Translation';
-                toggleButton.classList.remove('btn-success');
-                toggleButton.classList.add('btn-info');
-            }
-        }
-
-        function toggleSectionTranslation(sectionId) {
-            const originalDiv = document.getElementById(`original-${sectionId}`);
-            const translatedDiv = document.getElementById(`translated-${sectionId}`);
-            const button = document.querySelector(`[data-section="${sectionId}"]`);
-            const toggleText = button.querySelector('.toggle-text');
-
-            if (translatedDiv.style.display === 'none') {
-                // Show translation
-                originalDiv.style.display = 'none';
-                translatedDiv.style.display = 'block';
-                toggleText.textContent = 'Show Original';
-                button.classList.remove('btn-outline-primary');
-                button.classList.add('btn-outline-success');
-            } else {
-                // Show original
-                originalDiv.style.display = 'block';
-                translatedDiv.style.display = 'none';
-                toggleText.textContent = 'Show Translation';
-                button.classList.remove('btn-outline-success');
-                button.classList.add('btn-outline-primary');
-            }
-        }
-
-        function toggleCodedElements(sectionId) {
-            const codesContent = document.getElementById(`codes-content-${sectionId}`);
-            const toggleButton = document.querySelector(`[onclick="toggleCodedElements('${sectionId}')"]`);
-            const toggleText = toggleButton.querySelector('.toggle-codes-text');
-
-            if (codesContent.style.display === 'none') {
-                // Show coded elements
-                codesContent.style.display = 'block';
-                toggleText.textContent = 'Hide Codes';
-                toggleButton.classList.remove('btn-secondary');
-                toggleButton.classList.add('btn-info');
-            } else {
-                // Hide coded elements
-                codesContent.style.display = 'none';
-                toggleText.textContent = 'Show Codes';
-                toggleButton.classList.remove('btn-info');
-                toggleButton.classList.add('btn-secondary');
-            }
-        }
-
-        function showTab(tabName) {
-            // Hide all tab panes
-            document.querySelectorAll('.tab-pane').forEach(pane => {
-                pane.classList.remove('active');
+        if (translationMode) {
+            // Show all translations
+            document.querySelectorAll('.translated-content').forEach(el => {
+                el.style.display = 'block';
             });
-
-            // Remove active class from all tab buttons
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
+            document.querySelectorAll('.original-content').forEach(el => {
+                el.style.display = 'none';
             });
-
-            // Show selected tab
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-            event.target.classList.add('active');
+            toggleText.textContent = 'Show Original';
+            toggleButton.classList.remove('btn-info');
+            toggleButton.classList.add('btn-success');
+        } else {
+            // Show all originals
+            document.querySelectorAll('.translated-content').forEach(el => {
+                el.style.display = 'none';
+            });
+            document.querySelectorAll('.original-content').forEach(el => {
+                el.style.display = 'block';
+            });
+            toggleText.textContent = 'Show Translation';
+            toggleButton.classList.remove('btn-success');
+            toggleButton.classList.add('btn-info');
         }
+    }
 
-        // Language selector change handlers
-        document.addEventListener('DOMContentLoaded', function () {
-            const sourceSelector = document.getElementById('sourceLanguage');
-            const targetSelector = document.getElementById('targetLanguage');
+    function toggleSectionTranslation(sectionId) {
+        const originalDiv = document.getElementById(`original-${sectionId}`);
+        const translatedDiv = document.getElementById(`translated-${sectionId}`);
+        const button = document.querySelector(`[data-section="${sectionId}"]`);
+        const toggleText = button.querySelector('.toggle-text');
 
-            if (sourceSelector) {
-                sourceSelector.addEventListener('change', function () {
-                    updateTranslationLanguage();
-                });
-            }
+        if (translatedDiv.style.display === 'none') {
+            // Show translation
+            originalDiv.style.display = 'none';
+            translatedDiv.style.display = 'block';
+            toggleText.textContent = 'Show Original';
+            button.classList.remove('btn-outline-primary');
+            button.classList.add('btn-outline-success');
+        } else {
+            // Show original
+            originalDiv.style.display = 'block';
+            translatedDiv.style.display = 'none';
+            toggleText.textContent = 'Show Translation';
+            button.classList.remove('btn-outline-success');
+            button.classList.add('btn-outline-primary');
+        }
+    }
 
-            if (targetSelector) {
-                targetSelector.addEventListener('change', function () {
-                    updateTranslationLanguage();
-                });
-            }
+    function toggleCodedElements(sectionId) {
+        const codesContent = document.getElementById(`codes-content-${sectionId}`);
+        const toggleButton = document.querySelector(`[onclick="toggleCodedElements('${sectionId}')"]`);
+        const toggleText = toggleButton.querySelector('.toggle-codes-text');
+
+        if (codesContent.style.display === 'none') {
+            // Show coded elements
+            codesContent.style.display = 'block';
+            toggleText.textContent = 'Hide Codes';
+            toggleButton.classList.remove('btn-secondary');
+            toggleButton.classList.add('btn-info');
+        } else {
+            // Hide coded elements
+            codesContent.style.display = 'none';
+            toggleText.textContent = 'Show Codes';
+            toggleButton.classList.remove('btn-info');
+            toggleButton.classList.add('btn-secondary');
+        }
+    }
+
+    function showTab(tabName) {
+        // Hide all tab panes
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.remove('active');
         });
 
-        function updateTranslationLanguage() {
-            const sourceLanguage = document.getElementById('sourceLanguage').value;
-            const targetLanguage = document.getElementById('targetLanguage').value;
+        // Remove active class from all tab buttons
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active');
+        });
 
-            // Reload page with new language parameters
-            const url = new URL(window.location);
-            url.searchParams.set('source_lang', sourceLanguage);
-            url.searchParams.set('lang', targetLanguage);
-            window.location.href = url.toString();
+        // Show selected tab
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // Language selector change handlers
+    document.addEventListener('DOMContentLoaded', function () {
+        const sourceSelector = document.getElementById('sourceLanguage');
+        const targetSelector = document.getElementById('targetLanguage');
+
+        if (sourceSelector) {
+            sourceSelector.addEventListener('change', function () {
+                updateTranslationLanguage();
+            });
         }
-    </script>
 
-    <style>
-        /* Translation Controls Styling */
+        if (targetSelector) {
+            targetSelector.addEventListener('change', function () {
+                updateTranslationLanguage();
+            });
+        }
+    });
+
+    function updateTranslationLanguage() {
+        const sourceLanguage = document.getElementById('sourceLanguage').value;
+        const targetLanguage = document.getElementById('targetLanguage').value;
+
+        // Reload page with new language parameters
+        const url = new URL(window.location);
+        url.searchParams.set('source_lang', sourceLanguage);
+        url.searchParams.set('lang', targetLanguage);
+        window.location.href = url.toString();
+    }
+</script>
+
+<style>
+    /* Translation Controls Styling */
+    .translation-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-right: 1rem;
+        padding: 0.5rem;
+        background: var(--neutral-lightest);
+        border-radius: 0.375rem;
+        border: 1px solid var(--neutral-lighter);
+    }
+
+    .language-selector {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .language-selector label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .language-selector select {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--neutral-lighter);
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+    }
+
+    /* Clinical Sections Styling */
+    .clinical-sections-container {
+        max-height: 700px;
+        overflow-y: auto;
+        padding: 1rem;
+        background: white;
+    }
+
+    .clinical-section {
+        margin-bottom: 2rem;
+        border: 1px solid var(--neutral-lighter);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .section-header {
+        background: var(--primary-blue);
+        color: white;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-header h4 {
+        margin: 0;
+        font-size: 1.125rem;
+    }
+
+    .section-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .section-content {
+        padding: 1rem;
+    }
+
+    .original-content {
+        background: var(--neutral-lightest);
+        padding: 1rem;
+        border-radius: 0.375rem;
+        border-left: 4px solid var(--warning);
+    }
+
+    .translated-content {
+        background: var(--light-green);
+        padding: 1rem;
+        border-radius: 0.375rem;
+        border-left: 4px solid var(--success);
+    }
+
+    .translation-banner {
+        background: var(--success);
+        color: white;
+        padding: 0.5rem 1rem;
+        margin: -1rem -1rem 1rem -1rem;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .terminology-count {
+        opacity: 0.8;
+        font-size: 0.75rem;
+    }
+
+    .quality-indicator {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .quality-excellent {
+        background: var(--success-lighter);
+        color: var(--success-dark);
+    }
+
+    .quality-good {
+        background: var(--info-lighter);
+        color: var(--info-dark);
+    }
+
+    .quality-fair {
+        background: var(--warning-lighter);
+        color: var(--warning-dark);
+    }
+
+    .quality-poor {
+        background: var(--error-lighter);
+        color: var(--error-dark);
+    }
+
+    .quality-none {
+        background: var(--neutral-lighter);
+        color: var(--neutral-dark);
+    }
+
+    /* Tab styling for XML translation view */
+    .translation-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--neutral-lighter);
+        background: var(--neutral-lightest);
+    }
+
+    .tab-button {
+        padding: 1rem 2rem;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .tab-button:hover {
+        background: var(--neutral-lighter);
+    }
+
+    .tab-button.active {
+        background: white;
+        border-bottom: 2px solid var(--primary-blue);
+        color: var(--primary-blue);
+    }
+
+    .tab-content {
+        background: white;
+    }
+
+    .tab-pane {
+        display: none;
+        padding: 1rem;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
         .translation-controls {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-right: 1rem;
-            padding: 0.5rem;
-            background: var(--neutral-lightest);
-            border-radius: 0.375rem;
-            border: 1px solid var(--neutral-lighter);
-        }
-
-        .language-selector {
-            display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 0.5rem;
-        }
-
-        .language-selector label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin: 0;
-        }
-
-        .language-selector select {
-            padding: 0.25rem 0.5rem;
-            border: 1px solid var(--neutral-lighter);
-            border-radius: 0.25rem;
-            font-size: 0.875rem;
-        }
-
-        /* Clinical Sections Styling */
-        .clinical-sections-container {
-            max-height: 700px;
-            overflow-y: auto;
-            padding: 1rem;
-            background: white;
-        }
-
-        .clinical-section {
-            margin-bottom: 2rem;
-            border: 1px solid var(--neutral-lighter);
-            border-radius: 0.5rem;
-            overflow: hidden;
+            align-items: stretch;
         }
 
         .section-header {
-            background: var(--primary-blue);
-            color: white;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .section-header h4 {
-            margin: 0;
-            font-size: 1.125rem;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
         }
 
         .section-controls {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+            justify-content: center;
         }
+    }
+</style>
 
-        .section-content {
-            padding: 1rem;
+<script>
+    // Enhanced CDA Translation Interface JavaScript
+
+    function toggleEnhancedSection(sectionId) {
+        const content = document.getElementById(`enhanced-content-${sectionId}`);
+        const icon = document.getElementById(`enhanced-icon-${sectionId}`);
+
+        if (content.style.display === 'none' || content.style.display === '') {
+            content.style.display = 'block';
+            content.classList.add('active');
+            icon.classList.add('expanded');
+        } else {
+            content.style.display = 'none';
+            content.classList.remove('active');
+            icon.classList.remove('expanded');
         }
+    }
 
-        .original-content {
-            background: var(--neutral-lightest);
-            padding: 1rem;
-            border-radius: 0.375rem;
-            border-left: 4px solid var(--warning);
-        }
-
-        .translated-content {
-            background: var(--light-green);
-            padding: 1rem;
-            border-radius: 0.375rem;
-            border-left: 4px solid var(--success);
-        }
-
-        .translation-banner {
-            background: var(--success);
-            color: white;
-            padding: 0.5rem 1rem;
-            margin: -1rem -1rem 1rem -1rem;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .terminology-count {
-            opacity: 0.8;
-            font-size: 0.75rem;
-        }
-
-        .quality-indicator {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .quality-excellent {
-            background: var(--success-lighter);
-            color: var(--success-dark);
-        }
-
-        .quality-good {
-            background: var(--info-lighter);
-            color: var(--info-dark);
-        }
-
-        .quality-fair {
-            background: var(--warning-lighter);
-            color: var(--warning-dark);
-        }
-
-        .quality-poor {
-            background: var(--error-lighter);
-            color: var(--error-dark);
-        }
-
-        .quality-none {
-            background: var(--neutral-lighter);
-            color: var(--neutral-dark);
-        }
-
-        /* Tab styling for XML translation view */
-        .translation-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--neutral-lighter);
-            background: var(--neutral-lightest);
-        }
-
-        .tab-button {
-            padding: 1rem 2rem;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .tab-button:hover {
-            background: var(--neutral-lighter);
-        }
-
-        .tab-button.active {
-            background: white;
-            border-bottom: 2px solid var(--primary-blue);
-            color: var(--primary-blue);
-        }
-
-        .tab-content {
-            background: white;
-        }
-
-        .tab-pane {
-            display: none;
-            padding: 1rem;
-        }
-
-        .tab-pane.active {
-            display: block;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .translation-controls {
-                flex-direction: column;
-                gap: 0.5rem;
-                align-items: stretch;
-            }
-
-            .section-header {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: stretch;
-            }
-
-            .section-controls {
-                justify-content: center;
+    // Auto-expand first enhanced section on load
+    document.addEventListener('DOMContentLoaded', function () {
+        const firstEnhancedSection = document.querySelector('.enhanced-clinical-section');
+        if (firstEnhancedSection) {
+            const sectionId = firstEnhancedSection.dataset.section;
+            if (sectionId) {
+                toggleEnhancedSection(sectionId);
             }
         }
-    </style>
 
-    <script>
-        // Enhanced CDA Translation Interface JavaScript
+        console.log('🏥 Enhanced CDA Translation Interface Loaded');
+    });
 
-        function toggleEnhancedSection(sectionId) {
-            const content = document.getElementById(`enhanced-content-${sectionId}`);
-            const icon = document.getElementById(`enhanced-icon-${sectionId}`);
+    // Keep existing toggle functions for compatibility
+    function toggleSection(sectionId) {
+        // Existing toggle function
+        const content = document.getElementById(`content-${sectionId}`);
+        const icon = document.getElementById(`icon-${sectionId}`);
 
+        if (content && icon) {
             if (content.style.display === 'none' || content.style.display === '') {
                 content.style.display = 'block';
-                content.classList.add('active');
                 icon.classList.add('expanded');
             } else {
                 content.style.display = 'none';
-                content.classList.remove('active');
                 icon.classList.remove('expanded');
             }
         }
-
-        // Auto-expand first enhanced section on load
-        document.addEventListener('DOMContentLoaded', function () {
-            const firstEnhancedSection = document.querySelector('.enhanced-clinical-section');
-            if (firstEnhancedSection) {
-                const sectionId = firstEnhancedSection.dataset.section;
-                if (sectionId) {
-                    toggleEnhancedSection(sectionId);
-                }
-            }
-
-            console.log('🏥 Enhanced CDA Translation Interface Loaded');
-        });
-
-        // Keep existing toggle functions for compatibility
-        function toggleSection(sectionId) {
-            // Existing toggle function
-            const content = document.getElementById(`content-${sectionId}`);
-            const icon = document.getElementById(`icon-${sectionId}`);
-
-            if (content && icon) {
-                if (content.style.display === 'none' || content.style.display === '') {
-                    content.style.display = 'block';
-                    icon.classList.add('expanded');
-                } else {
-                    content.style.display = 'none';
-                    icon.classList.remove('expanded');
-                }
-            }
-        }
-    </script>
-    {% endblock %}
+    }
+</script>
+{% endblock %}
