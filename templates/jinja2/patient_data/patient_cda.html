@@ -6,7 +6,7 @@
 <div class="cda-document-container">
     <div class="page-header">
         <div class="breadcrumb-nav">
-            <a href="{% url 'patient_data:patient_details' patient_data.id %}" class="breadcrumb-link">
+            <a href="{{ url('patient_data:patient_details', patient_data.id) }}" class="breadcrumb-link">
                 <i class="icon-arrow-left"></i> Back to Patient Details
             </a>
         </div>
@@ -52,7 +52,7 @@
                 <button class="btn btn-secondary" onclick="toggleFormatting()">
                     <i class="icon-code"></i> Toggle Formatting
                 </button>
-                <a href="{% url 'patient_data:download_cda_pdf' patient_data.id %}" class="btn btn-primary" download>
+                <a href="{{ url('patient_data:download_cda_pdf', patient_data.id) }}" class="btn btn-primary" download>
                     <i class="icon-download"></i> Download
                 </a>
             </div>
@@ -65,17 +65,17 @@
 
     <!-- Navigation Actions -->
     <div class="document-actions">
-        <a href="{% url 'patient_data:patient_details' patient_data.id %}" class="action-button secondary">
+        <a href="{{ url('patient_data:patient_details', patient_data.id) }}" class="action-button secondary">
             <i class="icon-arrow-left"></i>
             Back to Patient Details
         </a>
 
-        <a href="{% url 'patient_data:download_cda_pdf' patient_data.id %}" class="action-button primary" download>
+        <a href="{{ url('patient_data:download_cda_pdf', patient_data.id) }}" class="action-button primary" download>
             <i class="icon-download"></i>
             Download CDA Document
         </a>
 
-        <a href="{% url 'patient_data:patient_data_form' %}" class="action-button outline">
+        <a href="{{ url('patient_data:patient_data_form') }}" class="action-button outline">
             <i class="icon-search"></i>
             New Search
         </a>
