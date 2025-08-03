@@ -425,6 +425,22 @@
 
     // Initialize page animations
     document.addEventListener('DOMContentLoaded', function () {
+        // Code System Toggle functionality
+        const toggle = document.getElementById('codeSystemToggle');
+        const badges = document.querySelectorAll('.code-system-badge');
+
+        if (toggle) {
+            toggle.addEventListener('change', function () {
+                badges.forEach(badge => {
+                    if (this.checked) {
+                        badge.classList.add('show');
+                    } else {
+                        badge.classList.remove('show');
+                    }
+                });
+            });
+        }
+
         // Animate stats on page load
         const statValues = document.querySelectorAll('.stat-value');
         statValues.forEach((stat, index) => {
@@ -485,6 +501,108 @@
         gap: 0.5rem;
     }
 
+    /* Code System Toggle Styles */
+    .code-system-toggle {
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.85em;
+    }
+
+    .toggle-switch {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .toggle-switch input[type="checkbox"] {
+        display: none;
+    }
+
+    .toggle-slider {
+        position: relative;
+        width: 34px;
+        height: 18px;
+        background-color: #ccc;
+        border-radius: 18px;
+        margin-right: 8px;
+        transition: background-color 0.3s;
+    }
+
+    .toggle-slider:before {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 14px;
+        height: 14px;
+        background-color: white;
+        border-radius: 50%;
+        transition: transform 0.3s;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background-color: #0d6efd;
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(16px);
+    }
+
+    .toggle-label {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    /* Code System Badge Styles */
+    .code-system-badge {
+        display: none;
+        margin-left: 0.5rem;
+        padding: 2px 6px;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        border-radius: 10px;
+        font-size: 0.7em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .code-system-badge.show {
+        display: inline-block;
+        animation: fadeInScale 0.3s ease-out;
+    }
+
+    .code-system-badge.loinc {
+        background: linear-gradient(135deg, #6f42c1, #8B5CF6);
+    }
+
+    .code-system-badge.snomed {
+        background: linear-gradient(135deg, #dc3545, #F87171);
+    }
+
+    .code-system-badge.icd10 {
+        background: linear-gradient(135deg, #fd7e14, #FBBF24);
+    }
+
+    .code-system-badge.atc {
+        background: linear-gradient(135deg, #0dcaf0, #06B6D4);
+    }
+
+    @keyframes fadeInScale {
+        0% {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
     /* Make badges stack vertically on smaller screens */
     @media (max-width: 768px) {
         .lbl-toggle-title {
@@ -496,127 +614,7 @@
             font-size: 0.7em;
             word-break: break-all;
         }
-
-        /* Code System Toggle Styles */
-        .code-system-toggle {
-            margin-top: 0.5rem;
-            display: flex;
-            align-items: center;
-            font-size: 0.85em;
-        }
-
-        .toggle-switch {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .toggle-switch input[type="checkbox"] {
-            display: none;
-        }
-
-        .toggle-slider {
-            position: relative;
-            width: 34px;
-            height: 18px;
-            background-color: #ccc;
-            border-radius: 18px;
-            margin-right: 8px;
-            transition: background-color 0.3s;
-        }
-
-        .toggle-slider:before {
-            content: "";
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 14px;
-            height: 14px;
-            background-color: white;
-            border-radius: 50%;
-            transition: transform 0.3s;
-        }
-
-        .toggle-switch input:checked + .toggle-slider {
-            background-color: #0d6efd;
-        }
-
-        .toggle-switch input:checked + .toggle-slider:before {
-            transform: translateX(16px);
-        }
-
-        .toggle-label {
-            font-weight: 500;
-            color: #495057;
-        }
-
-        /* Code System Badge Styles */
-        .code-system-badge {
-            display: none;
-            margin-left: 0.5rem;
-            padding: 2px 6px;
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            border-radius: 10px;
-            font-size: 0.7em;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        .code-system-badge.show {
-            display: inline-block;
-            animation: fadeInScale 0.3s ease-out;
-        }
-
-        .code-system-badge.loinc {
-            background: linear-gradient(135deg, #6f42c1, #8B5CF6);
-        }
-
-        .code-system-badge.snomed {
-            background: linear-gradient(135deg, #dc3545, #F87171);
-        }
-
-        .code-system-badge.icd10 {
-            background: linear-gradient(135deg, #fd7e14, #FBBF24);
-        }
-
-        .code-system-badge.atc {
-            background: linear-gradient(135deg, #0dcaf0, #06B6D4);
-        }
-
-        @keyframes fadeInScale {
-            0% {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
     }
 </style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const toggle = document.getElementById('codeSystemToggle');
-    const badges = document.querySelectorAll('.code-system-badge');
-    
-    // Toggle code system badges visibility
-    toggle.addEventListener('change', function() {
-        badges.forEach(badge => {
-            if (this.checked) {
-                badge.classList.add('show');
-            } else {
-                badge.classList.remove('show');
-            }
-        });
-    });
-});
-</script>
 
 {% endblock %}
