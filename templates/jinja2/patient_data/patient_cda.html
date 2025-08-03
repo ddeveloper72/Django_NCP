@@ -276,32 +276,10 @@
                                             English Translation
                                         </div>
                                         <div class="content-text">
-                                            {% if section.has_table and section.table_data %}
+                                            {% if section.has_ps_table and section.ps_table_html %}
                                             <!-- PS Guidelines Structured Table -->
                                             <div class="ps-table-container">
-                                                <table class="ps-table ps-table-{{ section.section_type }}">
-                                                    {% if section.table_data.headers %}
-                                                    <thead>
-                                                        <tr>
-                                                            {% for header in section.table_data.headers %}
-                                                            <th class="ps-th">{{ header }}</th>
-                                                            {% endfor %}
-                                                        </tr>
-                                                    </thead>
-                                                    {% endif %}
-                                                    {% if section.table_data.rows %}
-                                                    <tbody>
-                                                        {% for row in section.table_data.rows %}
-                                                        <tr
-                                                            class="ps-tr {{ 'ps-row-even' if loop.index0 % 2 == 0 else 'ps-row-odd' }}">
-                                                            {% for cell in row %}
-                                                            <td class="ps-td">{{ cell }}</td>
-                                                            {% endfor %}
-                                                        </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                    {% endif %}
-                                                </table>
+                                                {{ section.ps_table_html|safe }}
                                             </div>
                                             {% else %}
                                             <!-- Fallback to original content -->
@@ -319,10 +297,9 @@
                                             Original ({{ source_language|upper }})
                                         </div>
                                         <div class="content-text">
-                                            {% if section.has_table and section.table_data %}
+                                            {% if section.has_ps_table and section.ps_table_html_original %}
                                             <!-- Original structured data -->
-                                            {{ section.table_data.original_html|safe if section.table_data.original_html
-                                            else section.content.original|safe }}
+                                            {{ section.ps_table_html_original|safe }}
                                             {% else %}
                                             {{ section.content.original|safe }}
                                             {% endif %}
@@ -343,9 +320,8 @@
                                     <div class="collapsible-content">
                                         <div class="content-inner">
                                             <div class="content-text">
-                                                {% if section.has_table and section.table_data %}
-                                                {{ section.table_data.original_html|safe if
-                                                section.table_data.original_html else section.content.original|safe }}
+                                                {% if section.has_ps_table and section.ps_table_html_original %}
+                                                {{ section.ps_table_html_original|safe }}
                                                 {% else %}
                                                 {{ section.content.original|safe }}
                                                 {% endif %}
@@ -363,34 +339,10 @@
                                     </label>
                                     <div class="collapsible-content">
                                         <div class="content-inner">
-                                            {% if section.has_table and section.table_data %}
+                                            {% if section.has_ps_table and section.ps_table_html %}
                                             <!-- PS Guidelines Structured Table -->
                                             <div class="ps-table-container">
-                                                <table class="ps-table ps-table-{{ section.section_type }}">
-                                                    {% if section.table_data.headers %}
-                                                    <thead>
-                                                        <tr>
-                                                            {% for header in section.table_data.headers %}
-                                                            <th class="ps-th">{{ header }}</th>
-                                                            {% endfor %}
-                                                        </tr>
-                                                    </thead>
-                                                    {% endif %}
-                                                    {% if section.table_data.rows %}
-                                                    <tbody>
-                                                        {% for row in section.table_data.rows %}
-                                                        <tr
-                                                            class="ps-tr {{ 'ps-row-even' if loop.index0 % 2 == 0 else 'ps-row-odd' }}">
-                                                            {% for cell in row %}
-                                                            <td class="ps-td"
-                                                                data-label="{{ section.table_data.headers[loop.index0] if section.table_data.headers }}">
-                                                                {{ cell }}</td>
-                                                            {% endfor %}
-                                                        </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                    {% endif %}
-                                                </table>
+                                                {{ section.ps_table_html|safe }}
                                             </div>
                                             {% else %}
                                             <div class="content-text">

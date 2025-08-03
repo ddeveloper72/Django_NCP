@@ -64,6 +64,11 @@ class MedicalTerminologyTranslator:
                 "sol buv": "oral solution",
                 "par Jour": "per Day",
                 "par Heure": "per Hour",
+                # Additional header translations
+                "CODE": "Code",
+                "Code": "Code",
+                "DATE DE DEBUT": "Start Date",
+                "DEBUT": "Start",
                 # Common medical terms
                 "mg": "mg",
                 "ml": "ml",
@@ -74,6 +79,38 @@ class MedicalTerminologyTranslator:
                 "problème": "problem",
                 "chirurgie": "surgery",
                 "dispositif": "device",
+                # Vaccine specific terms
+                "Vaccin contre la grippe saisonnière": "Seasonal Flu Vaccine",
+                "Vaccin COVID-19": "COVID-19 Vaccine",
+                "Vaccin": "Vaccine",
+                "grippe": "flu",
+                "saisonnière": "seasonal",
+                "contre": "against",
+                "Pfizer-BioNTech": "Pfizer-BioNTech",
+                "Administré": "Administered",
+                "Rappel administré": "Booster Administered",
+                # Allergy specific terms
+                "Allergie médicamenteuse": "Drug Allergy",
+                "Allergie alimentaire": "Food Allergy",
+                "Type d'allergie": "Allergy Type",
+                "Agent causant": "Causative Agent",
+                "Manifestation": "Manifestation",
+                "Sévérité": "Severity",
+                "Statut": "Status",
+                "Pénicilline": "Penicillin",
+                "Fruits de mer": "Seafood",
+                "Éruption cutanée": "Skin Rash",
+                "Anaphylaxie": "Anaphylaxis",
+                "Modérée": "Moderate",
+                "Sévère": "Severe",
+                "Confirmée": "Confirmed",
+                # Medication specific terms
+                "zidovudine": "zidovudine",
+                "ténofovir disoproxil fumarate": "tenofovir disoproxil fumarate",
+                "névirapine": "nevirapine",
+                "RETROVIR": "RETROVIR",
+                "VIREAD": "VIREAD",
+                "VIRAMUNE": "VIRAMUNE",
             },
             # German medical terms
             "de": {
@@ -374,6 +411,38 @@ class CDATranslationService:
 
         return table_data if table_data["headers"] or table_data["rows"] else None
 
+    def _create_translated_table_html(
+        self, rendered_section: Dict, source_lang: str
+    ) -> str:
+        """Create translated version of table HTML with English headers and content"""
+        original_table_html = rendered_section.get("table_html", "")
+        if not original_table_html:
+            return ""
+
+        # Parse the original table HTML
+        from bs4 import BeautifulSoup
+
+        soup = BeautifulSoup(original_table_html, "html.parser")
+
+        # Translate table headers
+        header_cells = soup.find_all("th", class_="ps-th")
+        for th in header_cells:
+            original_text = th.get_text(strip=True)
+            translated_text = self.translator.translate_term(original_text, source_lang)
+            th.string = translated_text
+
+        # Translate table cell content
+        data_cells = soup.find_all("td", class_="ps-td")
+        for td in data_cells:
+            original_text = td.get_text(strip=True)
+            if original_text:  # Only translate non-empty cells
+                translated_text = self.translator.translate_text_block(
+                    original_text, source_lang
+                )
+                td.string = translated_text
+
+        return str(soup)
+
     def create_bilingual_document(self, cda_data: Dict) -> Dict:
         """Create bilingual version with original + English translation"""
         source_lang = cda_data["language"]
@@ -393,12 +462,17 @@ class CDATranslationService:
         # Translate sections and render as PS Display Guidelines tables
         translated_sections = []
 
-        # First, render sections with PSTableRenderer
+        # First, render sections with PSTableRenderer to get the base table structure
         rendered_sections = self.table_renderer.render_section_tables(
             cda_data["sections"]
         )
 
         for section, rendered_section in zip(cda_data["sections"], rendered_sections):
+            # Create translated version of the table
+            translated_table_html = self._create_translated_table_html(
+                rendered_section, source_lang
+            )
+
             translated_section = {
                 "section_id": section.get("section_id", ""),
                 "section_code": section.get("section_code", ""),
@@ -417,9 +491,10 @@ class CDATranslationService:
                     "content", ""
                 ),  # HTML structure for table parsing
                 "tables": [],
-                "ps_table_html": rendered_section.get(
+                "ps_table_html": translated_table_html,  # Translated PS Guidelines table
+                "ps_table_html_original": rendered_section.get(
                     "table_html", ""
-                ),  # PS Guidelines table
+                ),  # Original PS Guidelines table
             }
 
             # Translate original tables

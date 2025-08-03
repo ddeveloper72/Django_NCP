@@ -476,8 +476,11 @@ def patient_cda_view(request, patient_id):
                         else section.get("content_translated", "")
                     ),
                 },
-                # Add PS Guidelines table HTML
-                "ps_table_html": section.get("ps_table_html", ""),
+                # Add PS Guidelines table HTML - separate versions for original and translated
+                "ps_table_html": section.get("ps_table_html", ""),  # Translated version
+                "ps_table_html_original": section.get(
+                    "ps_table_html_original", ""
+                ),  # Original version
                 "has_ps_table": bool(section.get("ps_table_html", "")),
                 # Include original tables for comparison
                 "original_tables": section.get("tables", []),

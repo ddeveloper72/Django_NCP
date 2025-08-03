@@ -7,7 +7,7 @@ import re
 import logging
 from typing import Dict, List, Any, Optional
 from bs4 import BeautifulSoup
-from translation_services.terminology_translator import TerminologyTranslator
+from .cda_translation_service import MedicalTerminologyTranslator
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,8 @@ class PSTableRenderer:
         Args:
             target_language: Target language for terminology translations (default: English)
         """
-        self.terminology_translator = TerminologyTranslator(target_language)
+        self.terminology_translator = MedicalTerminologyTranslator()
+        self.target_language = target_language
         self.section_renderers = {
             # Core PS Display Guidelines sections
             "10160-0": self._render_medication_table,  # History of Medication use
@@ -67,6 +68,20 @@ class PSTableRenderer:
             "physical": self._render_physical_findings_table,
             "vitals": self._render_vital_signs_table,
         }
+
+    def _translate_table_content(self, content: str, source_lang: str = "fr") -> str:
+        """Helper method to translate table cell content using MedicalTerminologyTranslator"""
+        if not content or not isinstance(content, str):
+            return content
+        return self.terminology_translator.translate_text_block(content, source_lang)
+
+    def _translate_headers(
+        self, headers: List[str], source_lang: str = "fr"
+    ) -> List[str]:
+        """Helper method to translate table headers"""
+        return [
+            self._translate_table_content(header, source_lang) for header in headers
+        ]
 
     def render_section(self, section: Dict) -> Dict:
         """
@@ -1666,15 +1681,18 @@ class PSTableRenderer:
         """
         Get display name for LOINC code from database (with fallback to hardcoded values)
         """
-        # Try database lookup first
-        translation = self.terminology_translator._translate_term(
-            code=loinc_code,
-            system="2.16.840.1.113883.6.1",  # LOINC OID
-            original_display=None,
-        )
+        # Try simple term lookup with fallback
+        # For now, use hardcoded LOINC mappings since MedicalTerminologyTranslator doesn't handle codes
+        loinc_mappings = {
+            "10160-0": "History of Medication Use",
+            "48765-2": "Allergies and Adverse Reactions",
+            "11369-6": "Immunization History",
+            "10157-6": "Medical History",
+            "8716-3": "Vital Signs",
+        }
 
-        if translation and translation.get("display"):
-            return translation["display"]
+        if loinc_code in loinc_mappings:
+            return loinc_mappings[loinc_code]
 
         # Fallback to hardcoded values for PS Display Guidelines LOINC codes
         loinc_names = {
@@ -1716,13 +1734,18 @@ class PSTableRenderer:
         if not code:
             return original_display or "Unknown Code"
 
-        # Try database lookup
-        translation = self.terminology_translator._translate_term(
-            code=code, system=code_system, original_display=original_display
-        )
+        # Try simple code mapping with fallback
+        # For now, use basic mappings since MedicalTerminologyTranslator doesn't handle code systems
+        code_mappings = {
+            "10160-0": "History of Medication Use",
+            "48765-2": "Allergies and Adverse Reactions",
+            "11369-6": "Immunization History",
+            "10157-6": "Medical History",
+            "8716-3": "Vital Signs",
+        }
 
-        if translation and translation.get("display"):
-            return translation["display"]
+        if code in code_mappings:
+            return code_mappings[code]
 
         # Map common code system OIDs to readable names for fallback
         system_names = {
