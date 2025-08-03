@@ -306,15 +306,16 @@ class CDATranslationService:
 
             # Extract section title for CDA XML format
             title_element = section_element.find("title")
-            if title_element and not section_data.get("title"):
-                section_data["title"] = title_element.get_text(strip=True)
-                section_data["section_id"] = f"section-{len(sections) + 1}"
+            if title_element:
+                if not section_data.get("title"):
+                    section_data["title"] = title_element.get_text(strip=True)
+                    section_data["section_id"] = f"section-{len(sections) + 1}"
 
-                # Extract code from code element
+                # Always extract code from code element for CDA XML format
                 code_element = section_element.find("code")
                 if code_element and code_element.get("code"):
                     section_data["section_code"] = code_element.get("code")
-                else:
+                elif not section_data.get("section_code"):
                     section_data["section_code"] = ""
 
             # Extract section content
@@ -335,7 +336,9 @@ class CDATranslationService:
 
                 # Extract content - preserve HTML for table rendering
                 section_data["content"] = str(content_div)  # Keep HTML structure
-                section_data["content_text"] = content_div.get_text(strip=True)  # Text only for display
+                section_data["content_text"] = content_div.get_text(
+                    strip=True
+                )  # Text only for display
             else:
                 # Fallback: extract all text content from section
                 section_data["content"] = section_element.get_text(strip=True)
@@ -403,12 +406,16 @@ class CDATranslationService:
                 "title_translated": self.translator.translate_term(
                     section.get("title", ""), source_lang
                 ),
-                "content_original": section.get("content_text", ""),  # Use text version for translation
+                "content_original": section.get(
+                    "content_text", ""
+                ),  # Use text version for translation
                 "content_translated": self.translator.translate_text_block(
                     section.get("content_text", ""), source_lang
                 ),
                 # Preserve structure for PSTableRenderer
-                "content": section.get("content", ""),  # HTML structure for table parsing
+                "content": section.get(
+                    "content", ""
+                ),  # HTML structure for table parsing
                 "tables": [],
                 "ps_table_html": rendered_section.get(
                     "table_html", ""

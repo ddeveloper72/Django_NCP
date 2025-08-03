@@ -327,6 +327,9 @@ def patient_cda_view(request, patient_id):
                 </text>
             </section>
             <section>
+                <code code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Allergies and adverse reactions Document">
+                    <translation code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Allergies et intolérances"/>
+                </code>
                 <title>Allergies et intolérances</title>
                 <text>
                     <table>
@@ -359,6 +362,9 @@ def patient_cda_view(request, patient_id):
                 </text>
             </section>
             <section>
+                <code code="11369-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Immunization Narrative">
+                    <translation code="11369-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Vaccinations"/>
+                </code>
                 <title>Vaccinations</title>
                 <text>
                     <table>

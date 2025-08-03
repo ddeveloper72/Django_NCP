@@ -1243,7 +1243,7 @@ class PSTableRenderer:
         else:
             # Fallback: extract from HTML content
             content_html = section.get("content", {})
-            
+
             # Handle different content structures
             if isinstance(content_html, dict):
                 # Structure: {"original": "...", "translated": "..."}
