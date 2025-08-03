@@ -83,6 +83,78 @@ class PSTableRenderer:
             self._translate_table_content(header, source_lang) for header in headers
         ]
 
+    def _add_code_system_badge(self, text: str, code_system: str = None, code: str = None) -> str:
+        """
+        Add code system badge to translated text for NCP developer verification.
+        
+        Args:
+            text: The translated text
+            code_system: The code system (LOINC, SNOMED, ICD10, ATC, etc.)
+            code: The specific code value
+            
+        Returns:
+            Text with code system badge HTML appended
+        """
+        if not text or not code_system:
+            return text
+            
+        # Determine badge class based on code system
+        system_class = code_system.lower().replace("-", "").replace(" ", "")
+        badge_text = f"{code_system.upper()}"
+        if code:
+            badge_text += f": {code}"
+            
+        badge_html = f'<span class="code-system-badge {system_class}">{badge_text}</span>'
+        return f"{text}{badge_html}"
+
+    def _detect_code_system(self, term: str) -> tuple:
+        """
+        Detect the code system and code for a given medical term.
+        
+        Args:
+            term: Medical term to analyze
+            
+        Returns:
+            Tuple of (code_system, code) or (None, None) if not found
+        """
+        # Common medication patterns
+        medication_patterns = {
+            'retrovir': ('ATC', 'J05AF01'),  # Zidovudine
+            'viread': ('ATC', 'J05AF07'),    # Tenofovir disoproxil
+            'viramune': ('ATC', 'J05AG01'),  # Nevirapine
+            'aspirin': ('ATC', 'N02BA01'),   # Acetylsalicylic acid
+            'paracetamol': ('ATC', 'N02BE01'), # Paracetamol
+            'ibuprofen': ('ATC', 'M01AE01'), # Ibuprofen
+        }
+        
+        # Common allergy patterns
+        allergy_patterns = {
+            'penicillin': ('SNOMED', '387207008'),
+            'peanut': ('SNOMED', '91935009'),
+            'latex': ('SNOMED', '1003755004'),
+        }
+        
+        # Check for medication codes
+        term_lower = term.lower().strip()
+        for pattern, (system, code) in medication_patterns.items():
+            if pattern in term_lower:
+                return (system, code)
+                
+        # Check for allergy codes
+        for pattern, (system, code) in allergy_patterns.items():
+            if pattern in term_lower:
+                return (system, code)
+                
+        # Default to LOINC for section headers or general clinical terms
+        if any(word in term_lower for word in ['medication', 'drug', 'medicine']):
+            return ('LOINC', '10160-0')  # History of Medication use
+        elif any(word in term_lower for word in ['allergy', 'allergies', 'adverse']):
+            return ('LOINC', '48765-2')  # Allergies and adverse reactions
+        elif any(word in term_lower for word in ['problem', 'diagnosis']):
+            return ('LOINC', '11369-6')  # Active problems
+            
+        return (None, None)
+
     def render_section(self, section: Dict) -> Dict:
         """
         Main entry point for rendering any clinical section.
@@ -1240,13 +1312,23 @@ class PSTableRenderer:
             for row in rows:
                 if len(row) >= 3:  # Minimum data needed
                     # Extract medication info based on typical Luxembourg CDA structure
+                    med_name = row[1] if len(row) > 1 else ""
+                    active_ingredient = self._extract_active_ingredient(
+                        row[2] if len(row) > 2 else ""
+                    )
+                    
+                    # Add code system badges for translated content
+                    code_system, code = self._detect_code_system(med_name)
+                    med_name_with_badge = self._add_code_system_badge(med_name, code_system, code)
+                    
+                    # Also add badge to active ingredient if different
+                    if active_ingredient and active_ingredient != med_name:
+                        ing_code_system, ing_code = self._detect_code_system(active_ingredient)
+                        active_ingredient = self._add_code_system_badge(active_ingredient, ing_code_system, ing_code)
+                    
                     medication = [
-                        (
-                            row[1] if len(row) > 1 else ""
-                        ),  # Medication name (Nom commercial)
-                        self._extract_active_ingredient(
-                            row[2] if len(row) > 2 else ""
-                        ),  # Active ingredient
+                        med_name_with_badge,  # Medication name with code badge
+                        active_ingredient,  # Active ingredient with code badge
                         self._extract_dosage(row[2] if len(row) > 2 else ""),  # Dosage
                         row[4] if len(row) > 4 else "",  # Route
                         row[5] if len(row) > 5 else "",  # Frequency (Posologie)
@@ -1355,9 +1437,16 @@ class PSTableRenderer:
             # Map the existing data to our standardized format
             for row in rows:
                 if len(row) >= 2:  # Minimum data needed for allergies
+                    allergy_type = row[0] if len(row) > 0 else "Unknown"
+                    causative_agent = row[1] if len(row) > 1 else "Unknown"
+                    
+                    # Add code system badges for translated allergy content
+                    agent_code_system, agent_code = self._detect_code_system(causative_agent)
+                    causative_agent_with_badge = self._add_code_system_badge(causative_agent, agent_code_system, agent_code)
+                    
                     allergy = [
-                        row[0] if len(row) > 0 else "Unknown",  # Allergy Type
-                        row[1] if len(row) > 1 else "Unknown",  # Causative Agent
+                        allergy_type,  # Allergy Type
+                        causative_agent_with_badge,  # Causative Agent with code badge
                         row[2] if len(row) > 2 else "Unknown",  # Manifestation
                         row[3] if len(row) > 3 else "Unknown",  # Severity
                         row[4] if len(row) > 4 else "Active",  # Status
@@ -1374,17 +1463,24 @@ class PSTableRenderer:
                     for row in rows[1:]:  # Skip header
                         cells = row.find_all(["td", "th"])
                         if len(cells) >= 4:  # Minimum expected columns for allergies
+                            allergy_type = (
+                                cells[0].get_text().strip()
+                                if len(cells) > 0
+                                else "Unknown"
+                            )
+                            causative_agent = (
+                                cells[1].get_text().strip()
+                                if len(cells) > 1
+                                else "Unknown"
+                            )
+                            
+                            # Add code system badges for allergies
+                            agent_code_system, agent_code = self._detect_code_system(causative_agent)
+                            causative_agent_with_badge = self._add_code_system_badge(causative_agent, agent_code_system, agent_code)
+                            
                             allergy = [
-                                (
-                                    cells[0].get_text().strip()
-                                    if len(cells) > 0
-                                    else "Unknown"
-                                ),  # Type
-                                (
-                                    cells[1].get_text().strip()
-                                    if len(cells) > 1
-                                    else "Unknown"
-                                ),  # Agent
+                                allergy_type,  # Type
+                                causative_agent_with_badge,  # Agent with code badge
                                 (
                                     cells[2].get_text().strip()
                                     if len(cells) > 2
@@ -1574,6 +1670,29 @@ class PSTableRenderer:
         enhanced_section["table_data"] = table_data
         enhanced_section["has_table"] = True
         enhanced_section["section_type"] = section_type
+
+        # Add code system badge to section title for NCP developer verification
+        title = enhanced_section.get("title", "")
+        if isinstance(title, dict):
+            # Handle translated title structure
+            original_title = title.get("original", "")
+            translated_title = title.get("translated", "")
+            
+            # Add badge to translated title based on section code
+            section_code = section.get("section_code", "")
+            if section_code and translated_title:
+                clean_code = section_code.split()[0] if section_code else ""
+                badge_title = self._add_code_system_badge(translated_title, "LOINC", clean_code)
+                enhanced_section["title"] = {
+                    "original": original_title,
+                    "translated": badge_title
+                }
+        elif isinstance(title, str):
+            # Handle simple string title
+            section_code = section.get("section_code", "")
+            if section_code:
+                clean_code = section_code.split()[0] if section_code else ""
+                enhanced_section["title"] = self._add_code_system_badge(title, "LOINC", clean_code)
 
         # Generate PS Guidelines compliant HTML
         enhanced_section["table_html"] = self.generate_table_html(
