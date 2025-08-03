@@ -607,19 +607,19 @@ input[type='checkbox'] {
 
 // Code System Badge - compact design for table cells
 .code-system-badge {
-  display: inline-block;
-  padding: 0.0625rem 0.1875rem; // Very small padding (1px 3px)
-  border-radius: 3px; // Tiny border radius
-  font-size: 0.5rem; // Much smaller font (8px)
-  font-weight: 400;
-  font-family: 'Courier New', monospace;
+  display: inline-block !important;
+  padding: 0.0625rem 0.1875rem !important; // Very small padding (1px 3px)
+  border-radius: 3px !important; // Tiny border radius
+  font-size: 0.5rem !important; // Much smaller font (8px)
+  font-weight: 400 !important;
+  font-family: 'Courier New', monospace !important;
   background: #f8f9fa;
   color: #495057;
   border: 1px solid #dee2e6;
-  margin: 0.0625rem 0.125rem 0 0; // Minimal margins (1px 2px 0 0)
+  margin: 0.0625rem 0.125rem 0 0 !important; // Minimal margins (1px 2px 0 0)
   white-space: nowrap;
-  max-height: 0.875rem; // Very constrained height (14px)
-  line-height: 1;
+  max-height: 0.875rem !important; // Very constrained height (14px)
+  line-height: 1 !important;
   vertical-align: baseline;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -750,7 +750,7 @@ input[type='checkbox'] {
     padding: 0.03125rem 0.125rem; // Minimal padding (0.5px 2px)
     margin: 0.03125rem 0.0625rem 0 0; // Tiny margins
   }
-  
+
   .badge-container {
     gap: 0.03125rem; // Minimal gaps on mobile
   }
