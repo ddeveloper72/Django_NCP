@@ -136,6 +136,11 @@ class PSTableRenderer:
         rendered_sections = []
 
         for section in sections:
+            # Debug logging to see what data we're receiving
+            logger.info(f"Processing section: {section.get('title', 'No title')}")
+            logger.info(f"Section keys: {list(section.keys())}")
+            logger.info(f"Section content preview: {str(section.get('content', 'No content'))[:200]}")
+            
             section_code = section.get("section_code", "")
 
             # Handle title that might be a string or dictionary
@@ -152,13 +157,16 @@ class PSTableRenderer:
 
             # Clean section code (remove system info if present)
             clean_code = section_code.split()[0] if section_code else ""
+            logger.info(f"Section code: {section_code}, Clean code: {clean_code}")
 
             # First try exact LOINC code match
             if clean_code in self.section_renderers:
                 renderer = self.section_renderers[clean_code]
+                logger.info(f"Using LOINC renderer for code: {clean_code}")
                 rendered_section = renderer(section)
             else:
                 # Try pattern matching on section titles for non-coded sections
+                logger.info(f"Using title matching for: {section_title}")
                 rendered_section = self._match_section_by_title(section, section_title)
 
             rendered_sections.append(rendered_section)
@@ -205,22 +213,31 @@ class PSTableRenderer:
     def _render_medication_table(self, section: Dict) -> Dict:
         """Render medication history as standardized table"""
         try:
+            logger.info(f"Rendering medication table for section: {section.get('title', 'No title')}")
+            
             # Handle both simple string content and nested content structure
             content_html = section.get("content", "")
             if isinstance(content_html, dict):
                 content_html = content_html.get("original", "")
+            
+            logger.info(f"Content HTML preview: {str(content_html)[:300]}")
 
             soup = BeautifulSoup(content_html, "html.parser")
 
             # Look for existing table structure in the section
             existing_tables = section.get("tables", [])
+            logger.info(f"Existing tables found: {len(existing_tables)}")
             if existing_tables:
+                logger.info(f"Table data preview: {existing_tables[0]}")
                 return self._enhance_existing_table(
                     section, existing_tables[0], "medications"
                 )
 
             # Create table from text content if no table exists
-            return self._create_medication_table_from_text(section)
+            logger.info("Creating medication table from text content")
+            result = self._create_medication_table_from_text(section)
+            logger.info(f"Created table with {len(result.get('table_data', {}).get('rows', []))} rows")
+            return result
 
         except Exception as e:
             logger.error(f"Error rendering medication table: {e}")
@@ -1219,62 +1236,52 @@ class PSTableRenderer:
                     medications.append(medication)
         else:
             # Fallback: extract from HTML content
-            content_html = section.get("content", {}).get("original", "")
-            if isinstance(content_html, str):
+            content_html = section.get("content", {})
+            if isinstance(content_html, dict):
+                content_html = content_html.get("original", "")
+            elif not isinstance(content_html, str):
+                content_html = str(content_html)
+                
+            logger.info(f"Parsing content HTML: {content_html[:500]}")
+            
+            if isinstance(content_html, str) and content_html.strip():
                 soup = BeautifulSoup(content_html, "html.parser")
-                rows = soup.find_all("tr")
-
-                if len(rows) > 1:  # Has header row
-                    for row in rows[1:]:  # Skip header
-                        cells = row.find_all(["td", "th"])
-                        if len(cells) >= 7:  # Minimum expected columns
-                            medication = [
-                                (
-                                    cells[1].get_text().strip()
-                                    if len(cells) > 1
-                                    else ""
-                                ),  # Nom commercial
-                                self._extract_active_ingredient(
-                                    cells[2].get_text().strip()
-                                    if len(cells) > 2
-                                    else ""
-                                ),
-                                self._extract_dosage(
-                                    cells[2].get_text().strip()
-                                    if len(cells) > 2
-                                    else ""
-                                ),
-                                (
-                                    cells[4].get_text().strip()
-                                    if len(cells) > 4
-                                    else ""
-                                ),  # Route
-                                (
-                                    cells[5].get_text().strip()
-                                    if len(cells) > 5
-                                    else ""
-                                ),  # Posologie
-                                self._format_date(
-                                    cells[6].get_text().strip()
-                                    if len(cells) > 6
-                                    else ""
-                                ),
-                                self._format_date(
-                                    cells[7].get_text().strip()
-                                    if len(cells) > 7
-                                    else ""
-                                ),
-                                (
-                                    cells[8].get_text().strip()
-                                    if len(cells) > 8
-                                    else ""
-                                ),  # Notes
-                            ]
-                            medications.append(medication)
+                
+                # Look for table elements in the content
+                tables = soup.find_all("table")
+                if tables:
+                    logger.info(f"Found {len(tables)} table(s) in content")
+                    for table in tables:
+                        rows = table.find_all("tr")
+                        if len(rows) > 1:  # Has header row
+                            logger.info(f"Processing table with {len(rows)} rows")
+                            for row in rows[1:]:  # Skip header
+                                cells = row.find_all(["td", "th"])
+                                if len(cells) >= 1:  # At least medication name
+                                    # Extract data based on the sample CDA structure
+                                    medication_name = cells[0].get_text().strip() if len(cells) > 0 else ""
+                                    dosage = cells[1].get_text().strip() if len(cells) > 1 else ""
+                                    frequency = cells[2].get_text().strip() if len(cells) > 2 else ""
+                                    
+                                    # Create standardized medication entry
+                                    medication = [
+                                        medication_name,  # Medication
+                                        "",  # Active Ingredient (not in sample)
+                                        dosage,  # Dosage
+                                        "",  # Route (not in sample)
+                                        frequency,  # Frequency
+                                        "",  # Start Date (not in sample)
+                                        "",  # End Date (not in sample)
+                                        "",  # Notes
+                                    ]
+                                    medications.append(medication)
+                                    logger.info(f"Added medication: {medication}")
                 else:
                     # Try parsing concatenated text format for medications
+                    logger.info("No table found, trying text parsing")
                     medications = self._parse_concatenated_medication_text(content_html)
 
+        logger.info(f"Final medications list: {medications}")
         table_data = {
             "headers": [
                 "Medication",
