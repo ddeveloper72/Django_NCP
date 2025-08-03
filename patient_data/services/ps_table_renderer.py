@@ -7,6 +7,7 @@ import re
 import logging
 from typing import Dict, List, Any, Optional
 from bs4 import BeautifulSoup
+from translation_services.terminology_translator import TerminologyTranslator
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,14 @@ class PSTableRenderer:
     Renders CDA L3 sections as structured tables according to PS Display Guidelines
     """
 
-    def __init__(self):
+    def __init__(self, target_language: str = "en"):
+        """
+        Initialize PS Table Renderer with terminology translation support
+
+        Args:
+            target_language: Target language for terminology translations (default: English)
+        """
+        self.terminology_translator = TerminologyTranslator(target_language)
         self.section_renderers = {
             # Core PS Display Guidelines sections
             "10160-0": self._render_medication_table,  # History of Medication use
@@ -1539,30 +1547,31 @@ class PSTableRenderer:
             "icd10_codes": [],
             "snomed_codes": [],
             "other_codes": [],
-            "formatted_display": ""
+            "formatted_display": "",
         }
-        
+
         # Extract section code (usually LOINC)
         section_code = section.get("section_code", "")
         if section_code:
             # Clean up section code if it has system info
             clean_code = section_code.split()[0] if section_code else ""
-            
+
             # Check if it's a LOINC code (format: numbers-numbers)
             import re
-            if re.match(r'^\d+-\d+$', clean_code):
-                codes["loinc_codes"].append({
-                    "code": clean_code,
-                    "display": self._get_loinc_display_name(clean_code),
-                    "system": "LOINC"
-                })
+
+            if re.match(r"^\d+-\d+$", clean_code):
+                codes["loinc_codes"].append(
+                    {
+                        "code": clean_code,
+                        "display": self._get_loinc_display_name(clean_code),
+                        "system": "LOINC",
+                    }
+                )
             else:
-                codes["other_codes"].append({
-                    "code": clean_code,
-                    "display": section_code,
-                    "system": "Unknown"
-                })
-        
+                codes["other_codes"].append(
+                    {"code": clean_code, "display": section_code, "system": "Unknown"}
+                )
+
         # Look for codes in entries
         entries = section.get("entries", [])
         if isinstance(entries, list):
@@ -1570,7 +1579,7 @@ class PSTableRenderer:
                 if isinstance(entry, dict):
                     # Look for various code fields
                     self._extract_codes_from_entry(entry, codes)
-        
+
         # Look for codes in content
         content = section.get("content", {})
         if isinstance(content, dict):
@@ -1579,32 +1588,60 @@ class PSTableRenderer:
             if isinstance(original_content, str):
                 # Look for embedded codes in the content
                 self._extract_codes_from_content(original_content, codes)
-        
+
         # Create formatted display string
         display_parts = []
         if codes["loinc_codes"]:
-            loinc_displays = [f"LOINC:{code['code']} ({code['display']})" for code in codes["loinc_codes"]]
+            loinc_displays = [
+                f"LOINC:{code['code']} ({code['display']})"
+                for code in codes["loinc_codes"]
+            ]
             display_parts.extend(loinc_displays)
-        
+
         if codes["icd10_codes"]:
-            icd10_displays = [f"ICD10:{code['code']} ({code['display']})" for code in codes["icd10_codes"]]
+            icd10_displays = [
+                f"ICD10:{code['code']} ({code['display']})"
+                for code in codes["icd10_codes"]
+            ]
             display_parts.extend(icd10_displays)
-        
+
         if codes["snomed_codes"]:
-            snomed_displays = [f"SNOMED:{code['code']} ({code['display']})" for code in codes["snomed_codes"]]
+            snomed_displays = [
+                f"SNOMED:{code['code']} ({code['display']})"
+                for code in codes["snomed_codes"]
+            ]
             display_parts.extend(snomed_displays)
-        
+
         if codes["other_codes"]:
-            other_displays = [f"{code['system']}:{code['code']}" for code in codes["other_codes"]]
+            other_displays = [
+                f"{code['system']}:{code['code']}" for code in codes["other_codes"]
+            ]
             display_parts.extend(other_displays)
-        
-        codes["formatted_display"] = " | ".join(display_parts) if display_parts else "No clinical codes found"
-        
+
+        codes["formatted_display"] = (
+            " | ".join(display_parts) if display_parts else "No clinical codes found"
+        )
+
+        # Enhance codes with database translations
+        codes = self._enhance_clinical_codes_with_translations(codes)
+
         return codes
 
     def _get_loinc_display_name(self, loinc_code: str) -> str:
-        """Get display name for LOINC code"""
-        # Common PS Display Guidelines LOINC codes
+        """
+        Get display name for LOINC code from database (with fallback to hardcoded values)
+        """
+        # Try database lookup first
+        translation = self.terminology_translator._translate_term(
+            code=loinc_code,
+            system="2.16.840.1.113883.6.1",  # LOINC OID
+            original_display=None,
+        )
+
+        if translation and translation.get("display"):
+            return translation["display"]
+
+        # Fallback to hardcoded values for PS Display Guidelines LOINC codes
         loinc_names = {
             "10160-0": "History of Medication use",
             "48765-2": "Allergies and adverse reactions",
@@ -1623,9 +1660,124 @@ class PSTableRenderer:
             "8648-8": "Hospital course narrative",
             "46240-8": "History of hospitalizations+History of outpatient visits narrative",
             "10187-3": "Review of systems narrative",
-            "42348-3": "Advance directives"
+            "42348-3": "Advance directives",
         }
         return loinc_names.get(loinc_code, f"LOINC Code {loinc_code}")
+
+    def _get_terminology_display_name(
+        self, code: str, code_system: str, original_display: str = None
+    ) -> str:
+        """
+        Get display name for any terminology code using database lookup
+
+        Args:
+            code: The terminology code
+            code_system: The code system OID or identifier
+            original_display: Original display name from CDA (fallback)
+
+        Returns:
+            English display name from database or fallback text
+        """
+        if not code:
+            return original_display or "Unknown Code"
+
+        # Try database lookup
+        translation = self.terminology_translator._translate_term(
+            code=code, system=code_system, original_display=original_display
+        )
+
+        if translation and translation.get("display"):
+            return translation["display"]
+
+        # Map common code system OIDs to readable names for fallback
+        system_names = {
+            "2.16.840.1.113883.6.1": "LOINC",
+            "2.16.840.1.113883.6.96": "SNOMED CT",
+            "2.16.840.1.113883.6.90": "ICD-10-CM",
+            "2.16.840.1.113883.6.3": "ICD-10",
+            "2.16.840.1.113883.6.4": "ICD-9-CM",
+            "2.16.840.1.113883.6.88": "RxNorm",
+            "2.16.840.1.113883.6.69": "NDC",
+            "2.16.840.1.113883.5.1": "HL7 Administrative Gender",
+            "2.16.840.1.113883.5.83": "HL7 Observation Interpretation",
+            "2.16.840.1.113883.5.1008": "HL7 Null Flavor",
+        }
+
+        system_name = system_names.get(code_system, code_system)
+
+        # Use original display if available, otherwise format with system name
+        if original_display:
+            return f"{original_display} ({system_name}:{code})"
+        else:
+            return f"{system_name} Code {code}"
+
+    def _enhance_clinical_codes_with_translations(self, codes: Dict) -> Dict:
+        """
+        Enhance extracted clinical codes with database translations
+
+        Args:
+            codes: Dictionary of categorized codes
+
+        Returns:
+            Enhanced codes dictionary with translated display names
+        """
+        # Enhance LOINC codes
+        for loinc_code in codes.get("loinc_codes", []):
+            if (
+                "display" not in loinc_code
+                or not loinc_code["display"]
+                or loinc_code["display"].startswith("LOINC Code")
+            ):
+                enhanced_display = self._get_terminology_display_name(
+                    loinc_code["code"],
+                    loinc_code.get("system_oid", "2.16.840.1.113883.6.1"),
+                    loinc_code.get("original_display"),
+                )
+                loinc_code["display"] = enhanced_display
+
+        # Enhance SNOMED codes
+        for snomed_code in codes.get("snomed_codes", []):
+            if (
+                "display" not in snomed_code
+                or not snomed_code["display"]
+                or snomed_code["display"].startswith("SNOMED")
+            ):
+                enhanced_display = self._get_terminology_display_name(
+                    snomed_code["code"],
+                    snomed_code.get("system_oid", "2.16.840.1.113883.6.96"),
+                    snomed_code.get("original_display"),
+                )
+                snomed_code["display"] = enhanced_display
+
+        # Enhance ICD-10 codes
+        for icd10_code in codes.get("icd10_codes", []):
+            if (
+                "display" not in icd10_code
+                or not icd10_code["display"]
+                or icd10_code["display"].startswith("ICD")
+            ):
+                enhanced_display = self._get_terminology_display_name(
+                    icd10_code["code"],
+                    icd10_code.get("system_oid", "2.16.840.1.113883.6.3"),
+                    icd10_code.get("original_display"),
+                )
+                icd10_code["display"] = enhanced_display
+
+        # Enhance other codes
+        for other_code in codes.get("other_codes", []):
+            if (
+                "display" not in other_code
+                or not other_code["display"]
+                or "Code" in other_code["display"]
+            ):
+                enhanced_display = self._get_terminology_display_name(
+                    other_code["code"],
+                    other_code.get("system_oid", other_code.get("system", "")),
+                    other_code.get("original_display"),
+                )
+                other_code["display"] = enhanced_display
+
+        return codes
 
     def _extract_codes_from_entry(self, entry: Dict, codes: Dict) -> None:
         """Extract codes from individual entries"""
@@ -1636,10 +1788,10 @@ class PSTableRenderer:
                 code_value = code_info.get("code", "")
                 code_system = code_info.get("codeSystem", "")
                 display_name = code_info.get("displayName", "")
-                
+
                 if code_value:
                     self._categorize_code(code_value, code_system, display_name, codes)
-        
+
         # Look for observation codes
         if "observation" in entry:
             obs = entry["observation"]
@@ -1649,53 +1801,286 @@ class PSTableRenderer:
                     code_value = code_info.get("code", "")
                     code_system = code_info.get("codeSystem", "")
                     display_name = code_info.get("displayName", "")
-                    
+
                     if code_value:
-                        self._categorize_code(code_value, code_system, display_name, codes)
+                        self._categorize_code(
+                            code_value, code_system, display_name, codes
+                        )
+
+        # Look for substanceAdministration codes (medications)
+        if "substanceAdministration" in entry:
+            subst_admin = entry["substanceAdministration"]
+            if isinstance(subst_admin, dict):
+                # Look for classCode, moodCode
+                for attr in ["classCode", "moodCode"]:
+                    if attr in subst_admin:
+                        code_value = subst_admin[attr]
+                        self._categorize_code(
+                            code_value,
+                            "HL7 ActClass/Mood",
+                            f"{attr}: {code_value}",
+                            codes,
+                        )
+
+                # Look for templateId codes
+                template_ids = subst_admin.get("templateId", [])
+                if isinstance(template_ids, list):
+                    for template in template_ids:
+                        if isinstance(template, dict) and "root" in template:
+                            root_value = template["root"]
+                            extension = template.get("extension", "")
+                            display = f"Template: {root_value}"
+                            if extension:
+                                display += f" v{extension}"
+                            self._categorize_code(
+                                root_value, "HL7 Template", display, codes
+                            )
+
+                # Look for statusCode
+                if "statusCode" in subst_admin:
+                    status_code = subst_admin["statusCode"]
+                    if isinstance(status_code, dict) and "code" in status_code:
+                        code_value = status_code["code"]
+                        self._categorize_code(
+                            code_value, "HL7 Status", f"Status: {code_value}", codes
+                        )
+
+                # Look for routeCode (medication route)
+                if "routeCode" in subst_admin:
+                    route_code = subst_admin["routeCode"]
+                    if isinstance(route_code, dict):
+                        code_value = route_code.get("code", "")
+                        code_system = route_code.get("codeSystem", "")
+                        display_name = route_code.get("displayName", "")
+                        if code_value:
+                            self._categorize_code(
+                                code_value,
+                                code_system or "Route Code",
+                                display_name or f"Route: {code_value}",
+                                codes,
+                            )
+
+                # Look for doseQuantity units
+                if "doseQuantity" in subst_admin:
+                    dose_qty = subst_admin["doseQuantity"]
+                    if isinstance(dose_qty, dict):
+                        unit = dose_qty.get("unit", "")
+                        value = dose_qty.get("value", "")
+                        if unit:
+                            self._categorize_code(
+                                unit,
+                                "UCUM Units",
+                                f"Unit: {unit} (value: {value})",
+                                codes,
+                            )
+
+                # Look for consumable/manufacturedProduct codes
+                if "consumable" in subst_admin:
+                    consumable = subst_admin["consumable"]
+                    if isinstance(consumable, dict):
+                        self._extract_codes_from_consumable(consumable, codes)
+
+        # Look for other act types (procedures, observations, etc.)
+        for act_type in ["act", "procedure", "encounter", "organizer"]:
+            if act_type in entry:
+                act_data = entry[act_type]
+                if isinstance(act_data, dict):
+                    self._extract_codes_from_act(act_data, codes, act_type)
+
+        # Recursively look in nested entries
+        if "entry" in entry:
+            nested_entries = entry["entry"]
+            if isinstance(nested_entries, list):
+                for nested_entry in nested_entries:
+                    if isinstance(nested_entry, dict):
+                        self._extract_codes_from_entry(nested_entry, codes)
+            elif isinstance(nested_entries, dict):
+                self._extract_codes_from_entry(nested_entries, codes)
+
+    def _extract_codes_from_consumable(self, consumable: Dict, codes: Dict) -> None:
+        """Extract codes from medication consumable/manufacturedProduct"""
+        if "manufacturedProduct" in consumable:
+            manuf_product = consumable["manufacturedProduct"]
+            if isinstance(manuf_product, dict):
+                # Look for classCode
+                if "classCode" in manuf_product:
+                    class_code = manuf_product["classCode"]
+                    self._categorize_code(
+                        class_code,
+                        "HL7 ActClass",
+                        f"Product Class: {class_code}",
+                        codes,
+                    )
+
+                # Look for manufacturedMaterial
+                if "manufacturedMaterial" in manuf_product:
+                    manuf_material = manuf_product["manufacturedMaterial"]
+                    if isinstance(manuf_material, dict):
+                        # Look for classCode and determinerCode
+                        for attr in ["classCode", "determinerCode"]:
+                            if attr in manuf_material:
+                                code_value = manuf_material[attr]
+                                self._categorize_code(
+                                    code_value,
+                                    "HL7 Material",
+                                    f"{attr}: {code_value}",
+                                    codes,
+                                )
+
+                        # Look for medication codes
+                        if "code" in manuf_material:
+                            med_code = manuf_material["code"]
+                            if isinstance(med_code, dict):
+                                code_value = med_code.get("code", "")
+                                code_system = med_code.get("codeSystem", "")
+                                display_name = med_code.get("displayName", "")
+                                if code_value:
+                                    self._categorize_code(
+                                        code_value,
+                                        code_system or "Medication Code",
+                                        display_name or f"Medication: {code_value}",
+                                        codes,
+                                    )
+
+    def _extract_codes_from_act(
+        self, act_data: Dict, codes: Dict, act_type: str
+    ) -> None:
+        """Extract codes from various act types (procedures, observations, etc.)"""
+        # Look for classCode, moodCode
+        for attr in ["classCode", "moodCode"]:
+            if attr in act_data:
+                code_value = act_data[attr]
+                self._categorize_code(
+                    code_value,
+                    f"HL7 {act_type.title()}",
+                    f"{attr}: {code_value}",
+                    codes,
+                )
+
+        # Look for templateId codes
+        template_ids = act_data.get("templateId", [])
+        if isinstance(template_ids, list):
+            for template in template_ids:
+                if isinstance(template, dict) and "root" in template:
+                    root_value = template["root"]
+                    extension = template.get("extension", "")
+                    display = f"{act_type.title()} Template: {root_value}"
+                    if extension:
+                        display += f" v{extension}"
+                    self._categorize_code(root_value, "HL7 Template", display, codes)
+
+        # Look for code element
+        if "code" in act_data:
+            code_info = act_data["code"]
+            if isinstance(code_info, dict):
+                code_value = code_info.get("code", "")
+                code_system = code_info.get("codeSystem", "")
+                display_name = code_info.get("displayName", "")
+                if code_value:
+                    self._categorize_code(
+                        code_value,
+                        code_system or f"{act_type.title()} Code",
+                        display_name or f"{act_type}: {code_value}",
+                        codes,
+                    )
+
+        # Look for statusCode
+        if "statusCode" in act_data:
+            status_code = act_data["statusCode"]
+            if isinstance(status_code, dict) and "code" in status_code:
+                code_value = status_code["code"]
+                self._categorize_code(
+                    code_value,
+                    "HL7 Status",
+                    f"{act_type.title()} Status: {code_value}",
+                    codes,
+                )
+
+        # Look for value codes (observations)
+        if "value" in act_data:
+            value_data = act_data["value"]
+            if isinstance(value_data, dict):
+                # Look for value codes
+                for attr in ["code", "unit"]:
+                    if attr in value_data:
+                        code_value = value_data[attr]
+                        code_system = value_data.get("codeSystem", "")
+                        display_name = value_data.get("displayName", "")
+                        if code_value:
+                            self._categorize_code(
+                                code_value,
+                                code_system or f"Observation {attr.title()}",
+                                display_name or f"{attr}: {code_value}",
+                                codes,
+                            )
 
     def _extract_codes_from_content(self, content: str, codes: Dict) -> None:
         """Extract codes embedded in content text"""
         import re
-        
-        # Look for LOINC patterns (digits-digits)
-        loinc_matches = re.findall(r'\b(\d{4,5}-\d)\b', content)
-        for match in loinc_matches:
-            codes["loinc_codes"].append({
-                "code": match,
-                "display": self._get_loinc_display_name(match),
-                "system": "LOINC"
-            })
-        
-        # Look for ICD-10 patterns (letter followed by digits and dots)
-        icd10_matches = re.findall(r'\b([A-Z]\d{2}\.?\d*)\b', content)
-        for match in icd10_matches:
-            codes["icd10_codes"].append({
-                "code": match,
-                "display": f"ICD-10 Code {match}",
-                "system": "ICD-10"
-            })
 
-    def _categorize_code(self, code_value: str, code_system: str, display_name: str, codes: Dict) -> None:
-        """Categorize a code based on its system"""
+        # Look for LOINC patterns (digits-digits)
+        loinc_matches = re.findall(r"\b(\d{4,5}-\d)\b", content)
+        for match in loinc_matches:
+            codes["loinc_codes"].append(
+                {
+                    "code": match,
+                    "display": self._get_loinc_display_name(match),
+                    "system": "LOINC",
+                }
+            )
+
+        # Look for ICD-10 patterns (letter followed by digits and dots)
+        icd10_matches = re.findall(r"\b([A-Z]\d{2}\.?\d*)\b", content)
+        for match in icd10_matches:
+            codes["icd10_codes"].append(
+                {"code": match, "display": f"ICD-10 Code {match}", "system": "ICD-10"}
+            )
+
+    def _categorize_code(
+        self, code_value: str, code_system: str, display_name: str, codes: Dict
+    ) -> None:
+        """Categorize a code based on its system and store for database lookup"""
         import re
-        
-        # Determine code system if not explicitly provided
-        if not code_system:
-            if re.match(r'^\d+-\d+$', code_value):
+
+        # Store original values for database lookup
+        original_system = code_system
+        original_display = display_name
+
+        # Map common OIDs to system names for categorization
+        oid_to_system = {
+            "2.16.840.1.113883.6.1": "LOINC",
+            "2.16.840.1.113883.6.96": "SNOMED CT",
+            "2.16.840.1.113883.6.90": "ICD-10-CM",
+            "2.16.840.1.113883.6.3": "ICD-10",
+            "2.16.840.1.113883.6.4": "ICD-9-CM",
+            "2.16.840.1.113883.6.88": "RxNorm",
+            "2.16.840.1.113883.6.69": "NDC",
+        }
+
+        # Determine code system if not explicitly provided or map OID to readable name
+        if original_system in oid_to_system:
+            code_system = oid_to_system[original_system]
+        elif not code_system:
+            if re.match(r"^\d+-\d+$", code_value):
                 code_system = "LOINC"
-            elif re.match(r'^[A-Z]\d{2}', code_value):
+                original_system = "2.16.840.1.113883.6.1"
+            elif re.match(r"^[A-Z]\d{2}", code_value):
                 code_system = "ICD-10"
+                original_system = "2.16.840.1.113883.6.3"
             elif code_value.isdigit() and len(code_value) >= 6:
                 code_system = "SNOMED CT"
+                original_system = "2.16.840.1.113883.6.96"
             else:
                 code_system = "Unknown"
-        
+
         code_entry = {
             "code": code_value,
             "display": display_name or f"{code_system} Code {code_value}",
-            "system": code_system
+            "system": code_system,
+            "original_display": original_display,
+            "system_oid": original_system,  # Store for database lookup
         }
-        
+
         # Categorize based on system
         if "loinc" in code_system.lower():
             codes["loinc_codes"].append(code_entry)

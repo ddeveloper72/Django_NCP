@@ -192,11 +192,17 @@ class MedicalTerminologyTranslator:
 class CDATranslationService:
     """Service for translating CDA documents and creating bilingual displays"""
 
-    def __init__(self):
+    def __init__(self, target_language: str = "en"):
+        """
+        Initialize CDA Translation Service with terminology support
+
+        Args:
+            target_language: Target language for terminology translations (default: English)
+        """
         self.translator = MedicalTerminologyTranslator()
         from .ps_table_renderer import PSTableRenderer
 
-        self.table_renderer = PSTableRenderer()
+        self.table_renderer = PSTableRenderer(target_language=target_language)
 
     def parse_cda_html(self, html_content: str) -> Dict:
         """Parse CDA HTML document and extract structured data"""

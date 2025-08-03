@@ -251,7 +251,7 @@ def patient_cda_view(request, patient_id):
         target_language = request.GET.get("lang", "en")
 
         # Create new translation service with PS Guidelines table rendering
-        translation_service = CDATranslationService()
+        translation_service = CDATranslationService(target_language=target_language)
 
         # Debug: Log what CDA content we're getting
         logger.info(f"CDA content length: {len(rendering_cda_content)}")
@@ -490,8 +490,11 @@ def patient_cda_view(request, patient_id):
 
         # Process sections with PS Table Renderer for standardized display
         from .services.ps_table_renderer import PSTableRenderer
+        from django.utils import translation
 
-        table_renderer = PSTableRenderer()
+        # Get user's language preference or default to English
+        user_language = translation.get_language() or "en"
+        table_renderer = PSTableRenderer(target_language=user_language)
 
         # Enhance sections with structured table data
         enhanced_sections = table_renderer.render_section_tables(
@@ -1287,7 +1290,9 @@ def test_ps_table_rendering(request):
     """
 
     # Create translation service and parse the CDA
-    service = CDATranslationService()
+    service = CDATranslationService(
+        target_language="en"
+    )  # Default to English for debug view
     cda_data = service.parse_cda_html(sample_cda_html)
 
     # Create bilingual document with PS Display Guidelines tables
