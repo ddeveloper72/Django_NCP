@@ -497,6 +497,15 @@ def patient_cda_view(request, patient_id):
         )
         logger.info(f"Translation result structure: {list(translation_result.keys())}")
 
+        # Debug: Check ps_table_html content
+        for i, section in enumerate(translation_result.get("sections", [])):
+            ps_html = section.get("ps_table_html", "")
+            if ps_html:
+                print(f"DEBUG: Section {i} ps_table_html (first 200 chars):")
+                print(f"  Content: {ps_html[:200]}...")
+                print(f"  Contains badges: {'code-system-badge' in ps_html}")
+                print(f"  HTML escaped: {'&lt;' in ps_html or '&gt;' in ps_html}")
+
         # PS Table rendering is already done in CDATranslationService.create_bilingual_document()
         # No need to call PSTableRenderer again here
 
@@ -1222,6 +1231,7 @@ def patient_search_results(request):
 
 def test_ps_table_rendering(request):
     """Test view for PS Display Guidelines table rendering"""
+    print("DEBUG: test_ps_table_rendering function called!")
     from .services.cda_translation_service import CDATranslationService
 
     # Sample CDA HTML content with medication section
@@ -1292,6 +1302,16 @@ def test_ps_table_rendering(request):
 
     # Create bilingual document with PS Display Guidelines tables
     bilingual_data = service.create_bilingual_document(cda_data)
+
+    # Debug: Check if badges were created
+    print("DEBUG TEST: Checking bilingual data for badges...")
+    for i, section in enumerate(bilingual_data.get("sections", [])):
+        ps_html = section.get("ps_table_html", "")
+        if ps_html:
+            print(f"DEBUG TEST: Section {i} ps_table_html (first 200 chars):")
+            print(f"  Content: {ps_html[:200]}...")
+            print(f"  Contains badges: {'code-system-badge' in ps_html}")
+            print(f"  HTML escaped: {'&lt;' in ps_html or '&gt;' in ps_html}")
 
     context = {
         "original_sections": cda_data["sections"],

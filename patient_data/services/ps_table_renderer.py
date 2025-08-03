@@ -2496,51 +2496,8 @@ class PSTableRenderer:
         if not clean_text:
             return str(cell_content)
 
-        # Skip if content is already enhanced with badges
-        if "code-system-badge" in str(cell_content):
-            return str(cell_content)
-
-        enhanced_content = str(cell_content)
-
-        # Remove debug badges now that we know the enhancement is working
-        # Focus on real code system detection only
-
-        # Medications table enhancement - add badges to ALL columns
-        if section_type == "medications":
-            # Apply badges to every column that has meaningful content
-            code_system, code = self._detect_code_system(clean_text)
-            if code_system:
-                badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
-                enhanced_content = f"{enhanced_content}{badge}"
-
-        # Allergies table enhancement - add badges to ALL columns
-        elif section_type == "allergies":
-            code_system, code = self._detect_code_system(clean_text)
-            if code_system:
-                badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
-                enhanced_content = f"{enhanced_content}{badge}"
-
-        # Problems/Diagnoses table enhancement - add badges to ALL columns
-        elif section_type in ["problems", "active_problems"]:
-            code_system, code = self._detect_code_system(clean_text)
-            if code_system:
-                badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
-                enhanced_content = f"{enhanced_content}{badge}"
-
-            # Special handling for medical conditions
-            if column_index == 0:  # Problem/diagnosis name column
-                # Default to ICD-10 for medical problems if no specific code detected
-                if (
-                    any(
-                        word in clean_text.lower()
-                        for word in ["diabetes", "hypertension", "asthma", "copd"]
-                    )
-                    and code_system is None
-                ):
-                    badge = f'<span class="code-system-badge icd10">ICD-10: E11.9</span>'  # Example code
-                    enhanced_content = f"{enhanced_content}{badge}"
-
-        return enhanced_content
+        # Skip badge enhancement in PS renderer - let CDA translation service handle it
+        return str(cell_content)
 
     def _extract_active_ingredient(self, principe_actif_text: str) -> str:
         """Extract active ingredient from principle actif text"""

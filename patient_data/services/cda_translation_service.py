@@ -442,6 +442,22 @@ class CDATranslationService:
         data_cells = soup.find_all("td", class_="ps-td")
         table_rows = soup.find_all("tr", class_="ps-tr")
 
+        print(f"DEBUG: Found {len(table_rows)} rows with class 'ps-tr'")
+        print(f"DEBUG: Found {len(data_cells)} cells with class 'ps-td'")
+
+        # If no structured rows found, try without class
+        if not table_rows:
+            table_rows = soup.find_all("tr")
+            print(
+                f"DEBUG: Fallback - Found {len(table_rows)} rows without class restriction"
+            )
+
+        if not data_cells:
+            all_cells = soup.find_all("td")
+            print(
+                f"DEBUG: Fallback - Found {len(all_cells)} cells without class restriction"
+            )
+
         # Determine section type from rendered_section for badge placement
         section_title = rendered_section.get("title", {})
         if isinstance(section_title, dict):
@@ -474,36 +490,119 @@ class CDATranslationService:
         # Process each row
         for row_index, row in enumerate(table_rows):
             cells_in_row = row.find_all("td", class_="ps-td")
+            # If no structured cells found, try without class
+            if not cells_in_row:
+                cells_in_row = row.find_all("td")
+
             for col_index, td in enumerate(cells_in_row):
-                original_text = td.get_text(strip=True)
-                if original_text:  # Only translate non-empty cells
-                    translated_text = self.translator.translate_text_block(
-                        original_text, source_lang
-                    )
+                # Check if cell already has badges (preserve existing enhancement)
+                existing_badges = td.find_all("span", class_="code-system-badge")
+                has_existing_badges = len(existing_badges) > 0
 
-                    # Enhance translated text with code system badges
-                    enhanced_text = ps_renderer._enhance_cell_with_badges(
-                        translated_text, section_type, col_index, []
-                    )
+                print(
+                    f"DEBUG: Processing cell [{row_index},{col_index}], has existing badges: {has_existing_badges}"
+                )
 
-                    # Set the enhanced content (HTML with badges) - use .string for simple text, innerHTML for complex HTML
-                    if '<span class="code-system-badge"' in enhanced_text:
-                        # Complex HTML with badges - use innerHTML approach
+                if has_existing_badges:
+                    # Cell already has badges from PS renderer - just translate text parts
+                    # Extract text content without the badge HTML
+                    text_parts = []
+                    for content in td.contents:
+                        if (
+                            hasattr(content, "name")
+                            and content.name == "span"
+                            and "code-system-badge" in content.get("class", [])
+                        ):
+                            # Keep the badge as-is
+                            continue
+                        else:
+                            # Translate the text part
+                            text_content = str(content).strip()
+                            if text_content:
+                                text_parts.append(text_content)
+
+                    if text_parts:
+                        original_text = "".join(text_parts)
+                        translated_text = self.translator.translate_text_block(
+                            original_text, source_lang
+                        )
+
+                        # Rebuild cell with translated text and existing badges
                         td.clear()
-                        # Create a temporary element to parse the HTML properly
-                        temp_html = f"<div>{enhanced_text}</div>"
-                        temp_soup = BeautifulSoup(temp_html, "html.parser")
-                        # Move all contents from the temp div to the td
-                        for element in temp_soup.div.contents:
-                            if hasattr(element, 'name'):  # Tag elements
-                                td.append(element)
-                            else:  # Text nodes
-                                td.append(element)
-                    else:
-                        # Simple text without badges
-                        td.string = enhanced_text
+                        td.append(translated_text)
+                        for badge in existing_badges:
+                            td.append(badge)
 
-        return str(soup)
+                        print(
+                            f"DEBUG: Preserved badges for: '{original_text}' -> '{translated_text}'"
+                        )
+                else:
+                    # No existing badges - process normally
+                    original_text = td.get_text(strip=True)
+                    print(f"DEBUG: Processing cell without badges: '{original_text}'")
+
+                    if original_text:  # Only translate non-empty cells
+                        translated_text = self.translator.translate_text_block(
+                            original_text, source_lang
+                        )
+
+                        print(f"DEBUG: Enhancing cell with badges")
+                        # Enhance translated text with code system badges directly here
+                        code_system, code = ps_renderer._detect_code_system(
+                            translated_text
+                        )
+                        if code_system:
+                            badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
+                            # Structure content for proper badge positioning
+                            enhanced_text = f'<div class="cell-content">{translated_text}</div><div class="badge-container">{badge}</div>'
+                            # Add CSS class to table cell to indicate it contains badges
+                            existing_classes = td.get('class', [])
+                            if 'table-cell-with-badges' not in existing_classes:
+                                existing_classes.append('table-cell-with-badges')
+                                td['class'] = existing_classes
+                            print(
+                                f"DEBUG: Enhanced '{translated_text}' -> '{enhanced_text}'"
+                            )
+                        else:
+                            enhanced_text = translated_text
+                            print(
+                                f"DEBUG: No code system found for '{translated_text}'"
+                            )
+
+                        # Handle HTML content properly
+                        if '<span class="code-system-badge"' in enhanced_text:
+                            # Use a more direct approach - set the innerHTML equivalent
+                            td.clear()
+                            # Parse just the content and set it as the cell's innerHTML
+                            from bs4 import NavigableString
+
+                            fragment_soup = BeautifulSoup(enhanced_text, "html.parser")
+
+                            # Add content directly without creating extra wrappers
+                            for item in fragment_soup.contents:
+                                if isinstance(item, NavigableString):
+                                    td.append(item)
+                                else:
+                                    # Clone the tag properly
+                                    td.append(item)
+                        else:
+                            # Simple text without badges
+                            td.string = enhanced_text
+
+        # Convert back to string with HTML formatting preserved
+        html_output = str(soup)
+
+        # Fix any remaining HTML escaping issues
+        html_output = (
+            html_output.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
+        )
+
+        print(f"DEBUG: Final HTML output (first 200 chars): {html_output[:200]}...")
+        print(
+            f"DEBUG: Contains unescaped badges: {'<span class=\"code-system-badge\"' in html_output}"
+        )
+
+        return html_output
 
     def create_bilingual_document(self, cda_data: Dict) -> Dict:
         """Create bilingual version with original + English translation"""
