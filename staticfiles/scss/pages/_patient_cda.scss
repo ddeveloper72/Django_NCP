@@ -856,3 +856,190 @@ input[type='checkbox'] {
     }
   }
 }
+
+// PS Display Guidelines - Structured Tables
+.ps-table-container {
+  margin: 1.5rem 0;
+  background: $ps-white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.ps-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: $ps-white;
+  font-size: 0.9rem;
+
+  .ps-th {
+    background: linear-gradient(
+      135deg,
+      $ps-primary-blue 0%,
+      $ps-secondary-blue 100%
+    );
+    color: $ps-white;
+    font-weight: 600;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    border: none;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ps-td {
+    padding: 0.875rem 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .ps-tr:hover {
+    background-color: $ps-light-blue;
+    transition: background-color 0.2s ease;
+  }
+
+  .ps-row-even {
+    background-color: $ps-white;
+  }
+
+  .ps-row-odd {
+    background-color: #f8f9fa;
+  }
+}
+
+// Section-specific table styling
+.ps-table-medications {
+  .ps-th:nth-child(1) {
+    width: 20%;
+  } // Medication
+  .ps-th:nth-child(2) {
+    width: 15%;
+  } // Active Ingredient
+  .ps-th:nth-child(3) {
+    width: 12%;
+  } // Dosage
+  .ps-th:nth-child(4) {
+    width: 8%;
+  } // Route
+  .ps-th:nth-child(5) {
+    width: 12%;
+  } // Frequency
+  .ps-th:nth-child(6) {
+    width: 10%;
+  } // Start Date
+  .ps-th:nth-child(7) {
+    width: 10%;
+  } // End Date
+  .ps-th:nth-child(8) {
+    width: 13%;
+  } // Notes
+}
+
+.ps-table-allergies {
+  .ps-th:nth-child(1) {
+    width: 20%;
+  } // Allergy Type
+  .ps-th:nth-child(2) {
+    width: 25%;
+  } // Causative Agent
+  .ps-th:nth-child(3) {
+    width: 20%;
+  } // Manifestation
+  .ps-th:nth-child(4) {
+    width: 15%;
+  } // Severity
+  .ps-th:nth-child(5) {
+    width: 20%;
+  } // Status
+}
+
+.ps-table-problems {
+  .ps-th:nth-child(1) {
+    width: 30%;
+  } // Problem/Diagnosis
+  .ps-th:nth-child(2) {
+    width: 15%;
+  } // Status
+  .ps-th:nth-child(3) {
+    width: 15%;
+  } // Onset Date
+  .ps-th:nth-child(4) {
+    width: 40%;
+  } // Notes
+}
+
+.ps-table-procedures {
+  .ps-th:nth-child(1) {
+    width: 25%;
+  } // Procedure
+  .ps-th:nth-child(2) {
+    width: 15%;
+  } // Date
+  .ps-th:nth-child(3) {
+    width: 20%;
+  } // Performer
+  .ps-th:nth-child(4) {
+    width: 15%;
+  } // Location
+  .ps-th:nth-child(5) {
+    width: 25%;
+  } // Notes
+}
+
+.ps-table-results {
+  .ps-th:nth-child(1) {
+    width: 25%;
+  } // Test/Result
+  .ps-th:nth-child(2) {
+    width: 15%;
+  } // Value
+  .ps-th:nth-child(3) {
+    width: 20%;
+  } // Reference Range
+  .ps-th:nth-child(4) {
+    width: 15%;
+  } // Date
+  .ps-th:nth-child(5) {
+    width: 25%;
+  } // Status
+}
+
+// Mobile responsiveness for PS tables
+@media (max-width: 768px) {
+  .ps-table {
+    .ps-th,
+    .ps-td {
+      padding: 0.5rem;
+      font-size: 0.8rem;
+    }
+  }
+
+  .ps-table-container {
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+}
+
+// Print styles for PDF generation
+@media print {
+  .ps-table {
+    break-inside: avoid;
+
+    .ps-th {
+      background: #f0f0f0 !important;
+      color: #000 !important;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .ps-tr:hover {
+      background-color: transparent !important;
+    }
+  }
+
+  .ps-table-container {
+    box-shadow: none;
+    margin: 0.5rem 0;
+  }
+}

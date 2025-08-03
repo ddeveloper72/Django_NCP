@@ -2,6 +2,10 @@
 
 {% block title %}Patient Summary - {{ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
 
+{% block extra_css %}
+<link href="{{ static('css/patient_cda_ps_guidelines.css') }}?v=20250804_2" rel="stylesheet" media="screen">
+{% endblock %}
+
 {% block content %}
 <div class="cda-document-container">
     <!-- PS Display Header - Guideline Compliant -->
@@ -597,21 +601,21 @@
         color: #495057;
     }
 
-    /* Code System Badge Styles - Force hidden by default */
+    /* Code System Badge Styles - Larger, more readable badges */
     .code-system-badge,
     span.code-system-badge,
     td .code-system-badge,
     .ps-td .code-system-badge {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
         margin-left: 0.5rem;
-        padding: 4px 8px;
+        padding: 0.25rem 0.5rem;
         background: linear-gradient(135deg, #28a745, #20c997);
         color: white;
-        border-radius: 12px;
-        font-size: 0.8em;
-        font-weight: 700;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
