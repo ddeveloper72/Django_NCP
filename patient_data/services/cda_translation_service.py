@@ -486,13 +486,22 @@ class CDATranslationService:
                         translated_text, section_type, col_index, []
                     )
 
-                    # Set the enhanced content (HTML with badges)
-                    td.clear()
-                    from bs4 import BeautifulSoup as BS
-
-                    enhanced_soup = BS(enhanced_text, "html.parser")
-                    for content in enhanced_soup.contents:
-                        td.append(content)
+                    # Set the enhanced content (HTML with badges) - use .string for simple text, innerHTML for complex HTML
+                    if '<span class="code-system-badge"' in enhanced_text:
+                        # Complex HTML with badges - use innerHTML approach
+                        td.clear()
+                        # Create a temporary element to parse the HTML properly
+                        temp_html = f"<div>{enhanced_text}</div>"
+                        temp_soup = BeautifulSoup(temp_html, "html.parser")
+                        # Move all contents from the temp div to the td
+                        for element in temp_soup.div.contents:
+                            if hasattr(element, 'name'):  # Tag elements
+                                td.append(element)
+                            else:  # Text nodes
+                                td.append(element)
+                    else:
+                        # Simple text without badges
+                        td.string = enhanced_text
 
         return str(soup)
 

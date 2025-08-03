@@ -122,7 +122,7 @@ class PSTableRenderer:
             Tuple of (code_system, code) or (None, None) if not found
         """
         term_lower = term.lower().strip()
-        
+
         # Common medication brand names and active ingredients
         medication_patterns = {
             "retrovir": ("ATC", "J05AF01"),  # Zidovudine
@@ -251,7 +251,8 @@ class PSTableRenderer:
 
         # Check dosage units (look for dosage patterns like "10mg", "5ml")
         import re
-        dosage_match = re.search(r'\d+[\.,]?\d*\s*(mg|g|ml|l|mcg|µg|iu|ui)', term_lower)
+
+        dosage_match = re.search(r"\d+[\.,]?\d*\s*(mg|g|ml|l|mcg|µg|iu|ui)", term_lower)
         if dosage_match:
             unit = dosage_match.group(1)
             if unit in dosage_unit_patterns:
@@ -274,11 +275,11 @@ class PSTableRenderer:
                 return (system, code)
 
         # Check for numeric codes that might be medication identifiers
-        if re.match(r'^\d{8,}$', term.strip()):  # 8+ digit numbers (drug codes)
+        if re.match(r"^\d{8,}$", term.strip()):  # 8+ digit numbers (drug codes)
             return ("NDC", term.strip())
 
         # Check for date patterns
-        if re.match(r'\d{1,2}[/-]\d{1,2}[/-]\d{4}', term.strip()):
+        if re.match(r"\d{1,2}[/-]\d{1,2}[/-]\d{4}", term.strip()):
             return ("DATE", "Clinical Date")
 
         # Default patterns for section types
@@ -2512,7 +2513,7 @@ class PSTableRenderer:
                 badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
                 enhanced_content = f"{enhanced_content}{badge}"
 
-        # Allergies table enhancement - add badges to ALL columns  
+        # Allergies table enhancement - add badges to ALL columns
         elif section_type == "allergies":
             code_system, code = self._detect_code_system(clean_text)
             if code_system:
@@ -2525,14 +2526,17 @@ class PSTableRenderer:
             if code_system:
                 badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
                 enhanced_content = f"{enhanced_content}{badge}"
-            
+
             # Special handling for medical conditions
             if column_index == 0:  # Problem/diagnosis name column
                 # Default to ICD-10 for medical problems if no specific code detected
-                if any(
-                    word in clean_text.lower()
-                    for word in ["diabetes", "hypertension", "asthma", "copd"]
-                ) and code_system is None:
+                if (
+                    any(
+                        word in clean_text.lower()
+                        for word in ["diabetes", "hypertension", "asthma", "copd"]
+                    )
+                    and code_system is None
+                ):
                     badge = f'<span class="code-system-badge icd10">ICD-10: E11.9</span>'  # Example code
                     enhanced_content = f"{enhanced_content}{badge}"
 
