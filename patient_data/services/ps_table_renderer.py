@@ -139,8 +139,10 @@ class PSTableRenderer:
             # Debug logging to see what data we're receiving
             logger.info(f"Processing section: {section.get('title', 'No title')}")
             logger.info(f"Section keys: {list(section.keys())}")
-            logger.info(f"Section content preview: {str(section.get('content', 'No content'))[:200]}")
-            
+            logger.info(
+                f"Section content preview: {str(section.get('content', 'No content'))[:200]}"
+            )
+
             section_code = section.get("section_code", "")
 
             # Handle title that might be a string or dictionary
@@ -213,13 +215,15 @@ class PSTableRenderer:
     def _render_medication_table(self, section: Dict) -> Dict:
         """Render medication history as standardized table"""
         try:
-            logger.info(f"Rendering medication table for section: {section.get('title', 'No title')}")
-            
+            logger.info(
+                f"Rendering medication table for section: {section.get('title', 'No title')}"
+            )
+
             # Handle both simple string content and nested content structure
             content_html = section.get("content", "")
             if isinstance(content_html, dict):
                 content_html = content_html.get("original", "")
-            
+
             logger.info(f"Content HTML preview: {str(content_html)[:300]}")
 
             soup = BeautifulSoup(content_html, "html.parser")
@@ -236,7 +240,9 @@ class PSTableRenderer:
             # Create table from text content if no table exists
             logger.info("Creating medication table from text content")
             result = self._create_medication_table_from_text(section)
-            logger.info(f"Created table with {len(result.get('table_data', {}).get('rows', []))} rows")
+            logger.info(
+                f"Created table with {len(result.get('table_data', {}).get('rows', []))} rows"
+            )
             return result
 
         except Exception as e:
@@ -1237,16 +1243,26 @@ class PSTableRenderer:
         else:
             # Fallback: extract from HTML content
             content_html = section.get("content", {})
-            if isinstance(content_html, dict):
-                content_html = content_html.get("original", "")
-            elif not isinstance(content_html, str):
-                content_html = str(content_html)
-                
-            logger.info(f"Parsing content HTML: {content_html[:500]}")
             
+            # Handle different content structures
+            if isinstance(content_html, dict):
+                # Structure: {"original": "...", "translated": "..."}
+                content_html = content_html.get("original", "")
+            elif isinstance(content_html, str):
+                # Structure: "content string"
+                content_html = content_html
+            else:
+                content_html = str(content_html)
+
+            # Also check for content_original field (from CDATranslationService)
+            if not content_html:
+                content_html = section.get("content_original", "")
+
+            logger.info(f"Parsing content HTML: {content_html[:500]}")
+
             if isinstance(content_html, str) and content_html.strip():
                 soup = BeautifulSoup(content_html, "html.parser")
-                
+
                 # Look for table elements in the content
                 tables = soup.find_all("table")
                 if tables:
@@ -1259,10 +1275,22 @@ class PSTableRenderer:
                                 cells = row.find_all(["td", "th"])
                                 if len(cells) >= 1:  # At least medication name
                                     # Extract data based on the sample CDA structure
-                                    medication_name = cells[0].get_text().strip() if len(cells) > 0 else ""
-                                    dosage = cells[1].get_text().strip() if len(cells) > 1 else ""
-                                    frequency = cells[2].get_text().strip() if len(cells) > 2 else ""
-                                    
+                                    medication_name = (
+                                        cells[0].get_text().strip()
+                                        if len(cells) > 0
+                                        else ""
+                                    )
+                                    dosage = (
+                                        cells[1].get_text().strip()
+                                        if len(cells) > 1
+                                        else ""
+                                    )
+                                    frequency = (
+                                        cells[2].get_text().strip()
+                                        if len(cells) > 2
+                                        else ""
+                                    )
+
                                     # Create standardized medication entry
                                     medication = [
                                         medication_name,  # Medication

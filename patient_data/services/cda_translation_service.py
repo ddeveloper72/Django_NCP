@@ -333,11 +333,13 @@ class CDATranslationService:
                     if table_data:
                         section_data["tables"].append(table_data)
 
-                # Extract other content
-                section_data["content"] = content_div.get_text(strip=True)
+                # Extract content - preserve HTML for table rendering
+                section_data["content"] = str(content_div)  # Keep HTML structure
+                section_data["content_text"] = content_div.get_text(strip=True)  # Text only for display
             else:
                 # Fallback: extract all text content from section
                 section_data["content"] = section_element.get_text(strip=True)
+                section_data["content_text"] = section_element.get_text(strip=True)
                 section_data["tables"] = []
 
             if section_data and section_data.get("title"):
@@ -401,10 +403,12 @@ class CDATranslationService:
                 "title_translated": self.translator.translate_term(
                     section.get("title", ""), source_lang
                 ),
-                "content_original": section.get("content", ""),
+                "content_original": section.get("content_text", ""),  # Use text version for translation
                 "content_translated": self.translator.translate_text_block(
-                    section.get("content", ""), source_lang
+                    section.get("content_text", ""), source_lang
                 ),
+                # Preserve structure for PSTableRenderer
+                "content": section.get("content", ""),  # HTML structure for table parsing
                 "tables": [],
                 "ps_table_html": rendered_section.get(
                     "table_html", ""
