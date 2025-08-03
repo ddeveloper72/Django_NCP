@@ -220,7 +220,17 @@
                         checked="true">
                     <label for="collapsible-section-{{ section.section_id }}" class="lbl-toggle-title">
                         <i class="fas fa-clipboard-list me-2"></i>
-                        {{ section.title.coded if section.is_coded_section else section.title.translated }}
+                        <div class="section-title-container">
+                            <div class="section-title-main">
+                                {{ section.title.coded if section.is_coded_section else section.title.translated }}
+                            </div>
+                            {% if section.clinical_codes and section.clinical_codes.formatted_display %}
+                            <div class="section-codes-subtext">
+                                <i class="fas fa-barcode me-1"></i>
+                                {{ section.clinical_codes.formatted_display }}
+                            </div>
+                            {% endif %}
+                        </div>
                         {% if section.is_coded_section %}
                         <span class="section-type-badge coded">
                             <i class="fas fa-code me-1"></i>HL7 Coded
@@ -471,4 +481,59 @@
         });
     });
 </script>
+
+<style>
+    /* Clinical Codes Sub-text Styling */
+    .section-title-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        flex: 1;
+    }
+    
+    .section-title-main {
+        font-weight: 600;
+        font-size: 1.1em;
+        margin-bottom: 0.25rem;
+    }
+    
+    .section-codes-subtext {
+        font-size: 0.75em;
+        color: #6c757d;
+        font-weight: 400;
+        background: rgba(108, 117, 125, 0.1);
+        padding: 0.2rem 0.5rem;
+        border-radius: 0.25rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        border-left: 3px solid #17a2b8;
+    }
+    
+    .section-codes-subtext i {
+        color: #17a2b8;
+    }
+    
+    /* Adjust label layout to accommodate the new structure */
+    .lbl-toggle-title {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    /* Make badges stack vertically on smaller screens */
+    @media (max-width: 768px) {
+        .lbl-toggle-title {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .section-codes-subtext {
+            font-size: 0.7em;
+            word-break: break-all;
+        }
+    }
+</style>
+
 {% endblock %}

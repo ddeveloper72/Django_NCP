@@ -1487,17 +1487,17 @@ class PSTableRenderer:
     def _parse_concatenated_medication_text(self, text: str) -> List[List[str]]:
         """Parse concatenated medication text into structured table rows"""
         medications = []
-        
+
         if not text:
             return medications
-            
+
         # Clean up the text
         text = text.strip()
-        
+
         # For now, return empty list since we don't have a clear medication text example
         # This can be enhanced when we see the actual medication text format
         # The allergy parsing shows the pattern, but medications might be different
-        
+
         return medications
 
     def _extract_problems_from_content(self, content_html: str) -> List[Dict]:
@@ -1526,7 +1526,185 @@ class PSTableRenderer:
         enhanced_section["ps_compliant"] = True
         enhanced_section["table_style"] = f"ps-table-{section_type}"
 
+        # Add detailed clinical codes for debugging/verification
+        enhanced_section["clinical_codes"] = self._extract_clinical_codes(section)
+
         return enhanced_section
+
+    def _extract_clinical_codes(self, section: Dict) -> Dict:
+        """Extract and format clinical codes from section for display"""
+        codes = {
+            "section_code": section.get("section_code", ""),
+            "loinc_codes": [],
+            "icd10_codes": [],
+            "snomed_codes": [],
+            "other_codes": [],
+            "formatted_display": ""
+        }
+        
+        # Extract section code (usually LOINC)
+        section_code = section.get("section_code", "")
+        if section_code:
+            # Clean up section code if it has system info
+            clean_code = section_code.split()[0] if section_code else ""
+            
+            # Check if it's a LOINC code (format: numbers-numbers)
+            import re
+            if re.match(r'^\d+-\d+$', clean_code):
+                codes["loinc_codes"].append({
+                    "code": clean_code,
+                    "display": self._get_loinc_display_name(clean_code),
+                    "system": "LOINC"
+                })
+            else:
+                codes["other_codes"].append({
+                    "code": clean_code,
+                    "display": section_code,
+                    "system": "Unknown"
+                })
+        
+        # Look for codes in entries
+        entries = section.get("entries", [])
+        if isinstance(entries, list):
+            for entry in entries:
+                if isinstance(entry, dict):
+                    # Look for various code fields
+                    self._extract_codes_from_entry(entry, codes)
+        
+        # Look for codes in content
+        content = section.get("content", {})
+        if isinstance(content, dict):
+            # Check if content has coding information
+            original_content = content.get("original", "")
+            if isinstance(original_content, str):
+                # Look for embedded codes in the content
+                self._extract_codes_from_content(original_content, codes)
+        
+        # Create formatted display string
+        display_parts = []
+        if codes["loinc_codes"]:
+            loinc_displays = [f"LOINC:{code['code']} ({code['display']})" for code in codes["loinc_codes"]]
+            display_parts.extend(loinc_displays)
+        
+        if codes["icd10_codes"]:
+            icd10_displays = [f"ICD10:{code['code']} ({code['display']})" for code in codes["icd10_codes"]]
+            display_parts.extend(icd10_displays)
+        
+        if codes["snomed_codes"]:
+            snomed_displays = [f"SNOMED:{code['code']} ({code['display']})" for code in codes["snomed_codes"]]
+            display_parts.extend(snomed_displays)
+        
+        if codes["other_codes"]:
+            other_displays = [f"{code['system']}:{code['code']}" for code in codes["other_codes"]]
+            display_parts.extend(other_displays)
+        
+        codes["formatted_display"] = " | ".join(display_parts) if display_parts else "No clinical codes found"
+        
+        return codes
+
+    def _get_loinc_display_name(self, loinc_code: str) -> str:
+        """Get display name for LOINC code"""
+        # Common PS Display Guidelines LOINC codes
+        loinc_names = {
+            "10160-0": "History of Medication use",
+            "48765-2": "Allergies and adverse reactions",
+            "11450-4": "Problem list",
+            "47519-4": "History of Procedures",
+            "30954-2": "Relevant diagnostic tests/laboratory data",
+            "10157-6": "History of immunization",
+            "18776-5": "Plan of care",
+            "48766-0": "Information source",
+            "10183-2": "Hospital discharge medications",
+            "46264-8": "History of medical device use",
+            "10164-2": "History of present illness narrative",
+            "29762-2": "Social history narrative",
+            "10162-6": "History of pregnancies narrative",
+            "29545-1": "Physical findings narrative",
+            "8648-8": "Hospital course narrative",
+            "46240-8": "History of hospitalizations+History of outpatient visits narrative",
+            "10187-3": "Review of systems narrative",
+            "42348-3": "Advance directives"
+        }
+        return loinc_names.get(loinc_code, f"LOINC Code {loinc_code}")
+
+    def _extract_codes_from_entry(self, entry: Dict, codes: Dict) -> None:
+        """Extract codes from individual entries"""
+        # Look for code fields in entry
+        if "code" in entry:
+            code_info = entry["code"]
+            if isinstance(code_info, dict):
+                code_value = code_info.get("code", "")
+                code_system = code_info.get("codeSystem", "")
+                display_name = code_info.get("displayName", "")
+                
+                if code_value:
+                    self._categorize_code(code_value, code_system, display_name, codes)
+        
+        # Look for observation codes
+        if "observation" in entry:
+            obs = entry["observation"]
+            if isinstance(obs, dict) and "code" in obs:
+                code_info = obs["code"]
+                if isinstance(code_info, dict):
+                    code_value = code_info.get("code", "")
+                    code_system = code_info.get("codeSystem", "")
+                    display_name = code_info.get("displayName", "")
+                    
+                    if code_value:
+                        self._categorize_code(code_value, code_system, display_name, codes)
+
+    def _extract_codes_from_content(self, content: str, codes: Dict) -> None:
+        """Extract codes embedded in content text"""
+        import re
+        
+        # Look for LOINC patterns (digits-digits)
+        loinc_matches = re.findall(r'\b(\d{4,5}-\d)\b', content)
+        for match in loinc_matches:
+            codes["loinc_codes"].append({
+                "code": match,
+                "display": self._get_loinc_display_name(match),
+                "system": "LOINC"
+            })
+        
+        # Look for ICD-10 patterns (letter followed by digits and dots)
+        icd10_matches = re.findall(r'\b([A-Z]\d{2}\.?\d*)\b', content)
+        for match in icd10_matches:
+            codes["icd10_codes"].append({
+                "code": match,
+                "display": f"ICD-10 Code {match}",
+                "system": "ICD-10"
+            })
+
+    def _categorize_code(self, code_value: str, code_system: str, display_name: str, codes: Dict) -> None:
+        """Categorize a code based on its system"""
+        import re
+        
+        # Determine code system if not explicitly provided
+        if not code_system:
+            if re.match(r'^\d+-\d+$', code_value):
+                code_system = "LOINC"
+            elif re.match(r'^[A-Z]\d{2}', code_value):
+                code_system = "ICD-10"
+            elif code_value.isdigit() and len(code_value) >= 6:
+                code_system = "SNOMED CT"
+            else:
+                code_system = "Unknown"
+        
+        code_entry = {
+            "code": code_value,
+            "display": display_name or f"{code_system} Code {code_value}",
+            "system": code_system
+        }
+        
+        # Categorize based on system
+        if "loinc" in code_system.lower():
+            codes["loinc_codes"].append(code_entry)
+        elif "icd" in code_system.lower():
+            codes["icd10_codes"].append(code_entry)
+        elif "snomed" in code_system.lower():
+            codes["snomed_codes"].append(code_entry)
+        else:
+            codes["other_codes"].append(code_entry)
 
     def generate_table_html(self, table_data: Dict, section_type: str) -> str:
         """Generate PS Guidelines compliant HTML table"""
