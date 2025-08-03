@@ -415,10 +415,15 @@ class CDATranslationService:
         self, rendered_section: Dict, source_lang: str
     ) -> str:
         """Create translated version of table HTML with English headers and content"""
+        print(f"DEBUG: _create_translated_table_html called with section: {rendered_section.get('title', 'Unknown')}")
+        
         original_table_html = rendered_section.get("table_html", "")
         if not original_table_html:
+            print("DEBUG: No table_html found in rendered_section")
             return ""
 
+        print(f"DEBUG: Processing table HTML of length: {len(original_table_html)}")
+        
         # Parse the original table HTML
         from bs4 import BeautifulSoup
 
@@ -431,15 +436,53 @@ class CDATranslationService:
             translated_text = self.translator.translate_term(original_text, source_lang)
             th.string = translated_text
 
-        # Translate table cell content
+        # Translate table cell content and add code system badges
         data_cells = soup.find_all("td", class_="ps-td")
-        for td in data_cells:
-            original_text = td.get_text(strip=True)
-            if original_text:  # Only translate non-empty cells
-                translated_text = self.translator.translate_text_block(
-                    original_text, source_lang
-                )
-                td.string = translated_text
+        table_rows = soup.find_all("tr", class_="ps-tr")
+        
+        # Determine section type from rendered_section for badge placement
+        section_title = rendered_section.get("title", {})
+        if isinstance(section_title, dict):
+            title_text = section_title.get("original", section_title.get("translated", "")).lower()
+        else:
+            title_text = str(section_title).lower()
+            
+        # Determine section type for badge enhancement
+        section_type = "generic"
+        if any(word in title_text for word in ["medication", "médicament", "medicamento"]):
+            section_type = "medications"
+        elif any(word in title_text for word in ["allerg", "adverse"]):
+            section_type = "allergies"
+        elif any(word in title_text for word in ["problem", "diagnosis", "diagnostic"]):
+            section_type = "problems"
+            
+        print(f"DEBUG: Table section type detected: '{section_type}' from title: '{title_text}'")
+        
+        # Import badge enhancement from PSTableRenderer
+        from .ps_table_renderer import PSTableRenderer
+        ps_renderer = PSTableRenderer()
+        
+        # Process each row
+        for row_index, row in enumerate(table_rows):
+            cells_in_row = row.find_all("td", class_="ps-td")
+            for col_index, td in enumerate(cells_in_row):
+                original_text = td.get_text(strip=True)
+                if original_text:  # Only translate non-empty cells
+                    translated_text = self.translator.translate_text_block(
+                        original_text, source_lang
+                    )
+                    
+                    # Enhance translated text with code system badges
+                    enhanced_text = ps_renderer._enhance_cell_with_badges(
+                        translated_text, section_type, col_index, []
+                    )
+                    
+                    # Set the enhanced content (HTML with badges)
+                    td.clear()
+                    from bs4 import BeautifulSoup as BS
+                    enhanced_soup = BS(enhanced_text, "html.parser")
+                    for content in enhanced_soup.contents:
+                        td.append(content)
 
         return str(soup)
 

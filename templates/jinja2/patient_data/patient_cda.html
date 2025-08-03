@@ -238,7 +238,8 @@
                                 {{ section.title.coded if section.is_coded_section else section.title.translated }}
                                 <!-- Test code system badge for section titles -->
                                 {% if section.section_code %}
-                                <span class="code-system-badge loinc">LOINC: {{ section.section_code.split()[0] if ' ' in section.section_code else section.section_code }}</span>
+                                <span class="code-system-badge loinc">LOINC: {{ section.section_code.split()[0] if ' '
+                                    in section.section_code else section.section_code }}</span>
                                 {% endif %}
                             </div>
                             {% if section.clinical_codes and section.clinical_codes.formatted_display %}
@@ -433,31 +434,53 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Code System Toggle functionality
         const toggle = document.getElementById('codeSystemToggle');
-        const badges = document.querySelectorAll('.code-system-badge');
 
-        console.log('Code System Toggle Debug:');
-        console.log('Toggle element:', toggle);
-        console.log('Found badges:', badges.length);
-        badges.forEach((badge, index) => {
-            console.log(`Badge ${index}:`, badge.textContent, badge.classList.toString());
-        });
-
-        if (toggle) {
+        function findAndToggleBadges(show) {
+            // Use a more comprehensive selector to find all badges including those in tables
+            const badges = document.querySelectorAll('.code-system-badge');
+            
+            console.log('=== CODE SYSTEM TOGGLE DEBUG ===');
+            console.log('Toggle element:', toggle);
+            console.log('Found badges:', badges.length);
+            console.log('Toggle state (show):', show);
+            
+            if (badges.length === 0) {
+                console.log('NO BADGES FOUND! Searching more specifically...');
+                // Try different selectors
+                const allSpans = document.querySelectorAll('span');
+                console.log('Total spans on page:', allSpans.length);
+                const badgeSpans = Array.from(allSpans).filter(span => span.className.includes('code-system-badge'));
+                console.log('Spans with code-system-badge class:', badgeSpans.length);
+                badgeSpans.forEach((span, i) => console.log(`Badge span ${i}:`, span.outerHTML));
+            }
+            
+            badges.forEach((badge, index) => {
+                console.log(`Badge ${index}:`, badge.textContent, badge.classList.toString());
+                console.log(`Badge ${index} parent:`, badge.parentElement ? badge.parentElement.tagName : 'NO PARENT');
+                console.log(`Badge ${index} HTML:`, badge.outerHTML);
+                
+                if (show) {
+                    badge.classList.add('show');
+                    console.log(`Showing badge ${index}:`, badge.textContent);
+                    console.log(`Badge ${index} classes after show:`, badge.classList.toString());
+                    console.log(`Badge ${index} computed display:`, window.getComputedStyle(badge).display);
+                    console.log(`Badge ${index} computed visibility:`, window.getComputedStyle(badge).visibility);
+                } else {
+                    badge.classList.remove('show');
+                    console.log(`Hiding badge ${index}:`, badge.textContent);
+                }
+            });
+            console.log('=== END TOGGLE DEBUG ===');
+        }        if (toggle) {
             toggle.addEventListener('change', function () {
                 console.log('Toggle changed:', this.checked);
-                badges.forEach((badge, index) => {
-                    if (this.checked) {
-                        badge.classList.add('show');
-                        console.log(`Showing badge ${index}:`, badge.textContent);
-                        console.log(`Badge ${index} classes:`, badge.classList.toString());
-                        console.log(`Badge ${index} computed display:`, window.getComputedStyle(badge).display);
-                        console.log(`Badge ${index} computed visibility:`, window.getComputedStyle(badge).visibility);
-                    } else {
-                        badge.classList.remove('show');
-                        console.log(`Hiding badge ${index}:`, badge.textContent);
-                    }
-                });
+                findAndToggleBadges(this.checked);
             });
+
+            // Also run once on page load to initialize
+            setTimeout(() => {
+                findAndToggleBadges(toggle.checked);
+            }, 100);
         }
 
         // Animate stats on page load
@@ -574,9 +597,14 @@
         color: #495057;
     }
 
-    /* Code System Badge Styles */
-    .code-system-badge {
+    /* Code System Badge Styles - Force hidden by default */
+    .code-system-badge,
+    span.code-system-badge,
+    td .code-system-badge,
+    .ps-td .code-system-badge {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
         margin-left: 0.5rem;
         padding: 4px 8px;
         background: linear-gradient(135deg, #28a745, #20c997);
@@ -593,11 +621,14 @@
         position: relative;
     }
 
-    .code-system-badge.show {
+    .code-system-badge.show,
+    span.code-system-badge.show,
+    td .code-system-badge.show,
+    .ps-td .code-system-badge.show {
         display: inline-block !important;
-        animation: fadeInScale 0.3s ease-out;
         visibility: visible !important;
         opacity: 1 !important;
+        animation: fadeInScale 0.3s ease-out;
     }
 
     .code-system-badge.loinc {
