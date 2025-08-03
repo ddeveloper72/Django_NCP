@@ -445,13 +445,16 @@
         if (toggle) {
             toggle.addEventListener('change', function () {
                 console.log('Toggle changed:', this.checked);
-                badges.forEach(badge => {
+                badges.forEach((badge, index) => {
                     if (this.checked) {
                         badge.classList.add('show');
-                        console.log('Showing badge:', badge.textContent);
+                        console.log(`Showing badge ${index}:`, badge.textContent);
+                        console.log(`Badge ${index} classes:`, badge.classList.toString());
+                        console.log(`Badge ${index} computed display:`, window.getComputedStyle(badge).display);
+                        console.log(`Badge ${index} computed visibility:`, window.getComputedStyle(badge).visibility);
                     } else {
                         badge.classList.remove('show');
-                        console.log('Hiding badge:', badge.textContent);
+                        console.log(`Hiding badge ${index}:`, badge.textContent);
                     }
                 });
             });
@@ -573,39 +576,50 @@
 
     /* Code System Badge Styles */
     .code-system-badge {
-        display: none;
+        display: none !important;
         margin-left: 0.5rem;
-        padding: 2px 6px;
+        padding: 4px 8px;
         background: linear-gradient(135deg, #28a745, #20c997);
         color: white;
-        border-radius: 10px;
-        font-size: 0.7em;
-        font-weight: 600;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        white-space: nowrap;
+        z-index: 1000;
+        position: relative;
     }
 
     .code-system-badge.show {
-        display: inline-block;
+        display: inline-block !important;
         animation: fadeInScale 0.3s ease-out;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 
     .code-system-badge.loinc {
         background: linear-gradient(135deg, #6f42c1, #8B5CF6);
+        border: 2px solid #ffffff;
     }
 
     .code-system-badge.snomed {
         background: linear-gradient(135deg, #dc3545, #F87171);
+        border: 2px solid #ffffff;
     }
 
     .code-system-badge.icd10 {
         background: linear-gradient(135deg, #fd7e14, #FBBF24);
+        border: 2px solid #ffffff;
+        color: #000000;
     }
 
     .code-system-badge.atc {
         background: linear-gradient(135deg, #0dcaf0, #06B6D4);
+        border: 2px solid #ffffff;
+        color: #000000;
     }
 
     @keyframes fadeInScale {

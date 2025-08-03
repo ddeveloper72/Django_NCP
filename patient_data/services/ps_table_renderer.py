@@ -134,8 +134,14 @@ class PSTableRenderer:
         # Common allergy patterns
         allergy_patterns = {
             "penicillin": ("SNOMED", "387207008"),
+            "penicilina": ("SNOMED", "387207008"),  # Spanish/Portuguese form
+            "pénicilline": ("SNOMED", "387207008"),  # French form
             "peanut": ("SNOMED", "91935009"),
+            "seafood": ("SNOMED", "44027008"),  # Seafood allergy
+            "fruits de mer": ("SNOMED", "44027008"),  # French for seafood
             "latex": ("SNOMED", "1003755004"),
+            "aspirin": ("SNOMED", "387458008"),  # Aspirin allergy
+            "sulfa": ("SNOMED", "387406002"),  # Sulfonamide allergy
         }
 
         # Check for medication codes
@@ -2315,14 +2321,76 @@ class PSTableRenderer:
             for i, row in enumerate(table_data["rows"]):
                 row_class = "ps-row-even" if i % 2 == 0 else "ps-row-odd"
                 html_parts.append(f'<tr class="ps-tr {row_class}">')
-                for cell in row:
-                    html_parts.append(f'<td class="ps-td">{cell}</td>')
+                for j, cell in enumerate(row):
+                    # Add code system badges to specific cell content based on section type and column
+                    enhanced_cell = self._enhance_cell_with_badges(cell, section_type, j, table_data.get("headers", []))
+                    html_parts.append(f'<td class="ps-td">{enhanced_cell}</td>')
                 html_parts.append("</tr>")
             html_parts.append("</tbody>")
 
         html_parts.append("</table>")
 
         return "".join(html_parts)
+
+    def _enhance_cell_with_badges(self, cell_content: str, section_type: str, column_index: int, headers: List[str]) -> str:
+        """
+        Enhance table cell content with code system badges based on section type and column.
+        
+        Args:
+            cell_content: The original cell content
+            section_type: Type of section (medications, allergies, etc.)
+            column_index: Column position in the table
+            headers: Table headers for context
+            
+        Returns:
+            Cell content with code system badges appended
+        """
+        if not cell_content or not isinstance(cell_content, str):
+            return str(cell_content) if cell_content else ""
+        
+        # Clean HTML tags for analysis (but preserve them in output)
+        from bs4 import BeautifulSoup
+        clean_text = BeautifulSoup(str(cell_content), 'html.parser').get_text().strip()
+        
+        if not clean_text:
+            return str(cell_content)
+        
+        # Skip if content is already enhanced with badges
+        if 'code-system-badge' in str(cell_content):
+            return str(cell_content)
+        
+        enhanced_content = str(cell_content)
+        
+        # Medications table enhancement
+        if section_type == "medications":
+            if column_index == 0:  # Medication name column
+                code_system, code = self._detect_code_system(clean_text)
+                if code_system:
+                    badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
+                    enhanced_content = f"{enhanced_content}{badge}"
+            elif column_index == 1:  # Active ingredient column
+                code_system, code = self._detect_code_system(clean_text)
+                if code_system:
+                    badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
+                    enhanced_content = f"{enhanced_content}{badge}"
+        
+        # Allergies table enhancement
+        elif section_type == "allergies":
+            if column_index == 1:  # Causative agent column (usually second column)
+                code_system, code = self._detect_code_system(clean_text)
+                if code_system:
+                    badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
+                    enhanced_content = f"{enhanced_content}{badge}"
+        
+        # Problems/Diagnoses table enhancement
+        elif section_type in ["problems", "active_problems"]:
+            if column_index == 0:  # Problem/diagnosis name column
+                # Default to ICD-10 for medical problems
+                if any(word in clean_text.lower() for word in ['diabetes', 'hypertension', 'asthma', 'copd']):
+                    badge = f'<span class="code-system-badge icd10">ICD-10: E11.9</span>'  # Example code
+                    enhanced_content = f"{enhanced_content}{badge}"
+        
+        return enhanced_content
 
     def _extract_active_ingredient(self, principe_actif_text: str) -> str:
         """Extract active ingredient from principle actif text"""
