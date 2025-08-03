@@ -74,7 +74,17 @@ class PSTableRenderer:
             return self._render_generic_table(section or {})
 
         # Try to match section by code first, then by title
-        section_info = self._match_section_by_title(section, section.get("title", ""))
+        # Handle title that might be a string or dictionary
+        title = section.get("title", "")
+        if isinstance(title, dict):
+            # If title is a dictionary, try to get the original or translated value
+            title_str = title.get("original", title.get("translated", ""))
+        elif isinstance(title, str):
+            title_str = title
+        else:
+            title_str = str(title) if title else ""
+            
+        section_info = self._match_section_by_title(section, title_str)
         section_type = section_info.get("section_type", "generic")
 
         # Get the appropriate renderer
@@ -119,7 +129,16 @@ class PSTableRenderer:
 
         for section in sections:
             section_code = section.get("section_code", "")
-            section_title = section.get("title", "").lower()
+            
+            # Handle title that might be a string or dictionary
+            title = section.get("title", "")
+            if isinstance(title, dict):
+                # If title is a dictionary, try to get the original or translated value
+                section_title = title.get("original", title.get("translated", "")).lower()
+            elif isinstance(title, str):
+                section_title = title.lower()
+            else:
+                section_title = str(title).lower() if title else ""
 
             # Clean section code (remove system info if present)
             clean_code = section_code.split()[0] if section_code else ""
