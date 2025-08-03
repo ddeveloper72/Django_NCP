@@ -494,22 +494,8 @@ def patient_cda_view(request, patient_id):
         )
         logger.info(f"Translation result structure: {list(translation_result.keys())}")
 
-        # Process sections with PS Table Renderer for standardized display
-        from .services.ps_table_renderer import PSTableRenderer
-        from django.utils import translation
-
-        # Get user's language preference or default to English
-        user_language = translation.get_language() or "en"
-        table_renderer = PSTableRenderer(target_language=user_language)
-
-        # Enhance sections with structured table data
-        enhanced_sections = table_renderer.render_section_tables(
-            translation_result.get("sections", [])
-        )
-
-        # Update translation result with enhanced sections
-        translation_result["sections"] = enhanced_sections
-        translation_result["has_structured_tables"] = True
+        # PS Table rendering is already done in CDATranslationService.create_bilingual_document()
+        # No need to call PSTableRenderer again here
 
         # Extract data from the dictionary result
         doc_info = translation_result.get("document_info", {})
