@@ -438,12 +438,12 @@
         function findAndToggleBadges(show) {
             // Use a more comprehensive selector to find all badges including those in tables
             const badges = document.querySelectorAll('.code-system-badge');
-            
+
             console.log('=== CODE SYSTEM TOGGLE DEBUG ===');
             console.log('Toggle element:', toggle);
             console.log('Found badges:', badges.length);
             console.log('Toggle state (show):', show);
-            
+
             if (badges.length === 0) {
                 console.log('NO BADGES FOUND! Searching more specifically...');
                 // Try different selectors
@@ -453,12 +453,12 @@
                 console.log('Spans with code-system-badge class:', badgeSpans.length);
                 badgeSpans.forEach((span, i) => console.log(`Badge span ${i}:`, span.outerHTML));
             }
-            
+
             badges.forEach((badge, index) => {
                 console.log(`Badge ${index}:`, badge.textContent, badge.classList.toString());
                 console.log(`Badge ${index} parent:`, badge.parentElement ? badge.parentElement.tagName : 'NO PARENT');
                 console.log(`Badge ${index} HTML:`, badge.outerHTML);
-                
+
                 if (show) {
                     badge.classList.add('show');
                     console.log(`Showing badge ${index}:`, badge.textContent);
@@ -471,7 +471,7 @@
                 }
             });
             console.log('=== END TOGGLE DEBUG ===');
-        }        if (toggle) {
+        } if (toggle) {
             toggle.addEventListener('change', function () {
                 console.log('Toggle changed:', this.checked);
                 findAndToggleBadges(this.checked);
@@ -651,6 +651,24 @@
         background: linear-gradient(135deg, #0dcaf0, #06B6D4);
         border: 2px solid #ffffff;
         color: #000000;
+    }
+
+    .code-system-badge.ucum {
+        background: linear-gradient(135deg, #198754, #10B981);
+        border: 2px solid #ffffff;
+        color: #ffffff;
+    }
+
+    .code-system-badge.ndc {
+        background: linear-gradient(135deg, #6610f2, #8B5CF6);
+        border: 2px solid #ffffff;
+        color: #ffffff;
+    }
+
+    .code-system-badge.date {
+        background: linear-gradient(135deg, #495057, #6C757D);
+        border: 2px solid #ffffff;
+        color: #ffffff;
     }
 
     @keyframes fadeInScale {

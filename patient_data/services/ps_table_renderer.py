@@ -121,7 +121,9 @@ class PSTableRenderer:
         Returns:
             Tuple of (code_system, code) or (None, None) if not found
         """
-        # Common medication patterns
+        term_lower = term.lower().strip()
+        
+        # Common medication brand names and active ingredients
         medication_patterns = {
             "retrovir": ("ATC", "J05AF01"),  # Zidovudine
             "viread": ("ATC", "J05AF07"),  # Tenofovir disoproxil
@@ -129,9 +131,66 @@ class PSTableRenderer:
             "aspirin": ("ATC", "N02BA01"),  # Acetylsalicylic acid
             "paracetamol": ("ATC", "N02BE01"),  # Paracetamol
             "ibuprofen": ("ATC", "M01AE01"),  # Ibuprofen
+            "zidovudine": ("ATC", "J05AF01"),  # Active ingredient
+            "tenofovir": ("ATC", "J05AF07"),  # Active ingredient
+            "nevirapine": ("ATC", "J05AG01"),  # Active ingredient
         }
 
-        # Common allergy patterns
+        # Routes of administration
+        route_patterns = {
+            "oral": ("SNOMED", "26643006"),  # Oral route
+            "orale": ("SNOMED", "26643006"),  # French form
+            "per os": ("SNOMED", "26643006"),  # Latin form
+            "po": ("SNOMED", "26643006"),  # Abbreviation
+            "intravenous": ("SNOMED", "47625008"),  # IV route
+            "iv": ("SNOMED", "47625008"),  # IV abbreviation
+            "intramuscular": ("SNOMED", "78421000"),  # IM route
+            "im": ("SNOMED", "78421000"),  # IM abbreviation
+            "subcutaneous": ("SNOMED", "34206005"),  # SC route
+            "sc": ("SNOMED", "34206005"),  # SC abbreviation
+            "topical": ("SNOMED", "6064005"),  # Topical route
+            "inhaled": ("SNOMED", "447694001"),  # Inhalation route
+            "rectal": ("SNOMED", "37161004"),  # Rectal route
+        }
+
+        # Pharmaceutical forms/dosage forms
+        dosage_form_patterns = {
+            "tablet": ("SNOMED", "385055001"),  # Tablet
+            "comprimé": ("SNOMED", "385055001"),  # French tablet
+            "cp": ("SNOMED", "385055001"),  # Tablet abbreviation
+            "capsule": ("SNOMED", "385049006"),  # Capsule
+            "gélule": ("SNOMED", "385049006"),  # French capsule
+            "injection": ("SNOMED", "385219001"),  # Injection
+            "solution": ("SNOMED", "385024007"),  # Solution
+            "sol": ("SNOMED", "385024007"),  # Solution abbreviation
+            "cream": ("SNOMED", "385099005"),  # Cream
+            "ointment": ("SNOMED", "385101009"),  # Ointment
+            "drops": ("SNOMED", "385023001"),  # Drops
+            "spray": ("SNOMED", "421720008"),  # Spray
+            "patch": ("SNOMED", "182832007"),  # Patch
+            "gel": ("SNOMED", "385100000"),  # Gel
+            "suppository": ("SNOMED", "421079001"),  # Suppository
+        }
+
+        # Dosage units and measurements
+        dosage_unit_patterns = {
+            "mg": ("UCUM", "mg"),  # Milligram
+            "milligram": ("UCUM", "mg"),
+            "g": ("UCUM", "g"),  # Gram
+            "gram": ("UCUM", "g"),
+            "ml": ("UCUM", "ml"),  # Milliliter
+            "milliliter": ("UCUM", "ml"),
+            "l": ("UCUM", "l"),  # Liter
+            "liter": ("UCUM", "l"),
+            "mcg": ("UCUM", "ug"),  # Microgram
+            "µg": ("UCUM", "ug"),  # Microgram
+            "microgram": ("UCUM", "ug"),
+            "iu": ("UCUM", "[IU]"),  # International Unit
+            "ui": ("UCUM", "[IU]"),  # International Unit (French)
+            "international unit": ("UCUM", "[IU]"),
+        }
+
+        # Common allergy patterns (expanded)
         allergy_patterns = {
             "penicillin": ("SNOMED", "387207008"),
             "penicilina": ("SNOMED", "387207008"),  # Spanish/Portuguese form
@@ -142,20 +201,87 @@ class PSTableRenderer:
             "latex": ("SNOMED", "1003755004"),
             "aspirin": ("SNOMED", "387458008"),  # Aspirin allergy
             "sulfa": ("SNOMED", "387406002"),  # Sulfonamide allergy
+            "shellfish": ("SNOMED", "300913006"),  # Shellfish allergy
+            "nuts": ("SNOMED", "91934008"),  # Tree nut allergy
+            "dairy": ("SNOMED", "425525006"),  # Dairy allergy
+            "milk": ("SNOMED", "425525006"),  # Milk allergy
         }
 
-        # Check for medication codes
-        term_lower = term.lower().strip()
+        # Medical conditions/problems
+        condition_patterns = {
+            "diabetes": ("ICD-10", "E11.9"),  # Type 2 diabetes
+            "hypertension": ("ICD-10", "I10"),  # Essential hypertension
+            "asthma": ("ICD-10", "J45.9"),  # Asthma
+            "copd": ("ICD-10", "J44.1"),  # COPD
+            "depression": ("ICD-10", "F32.9"),  # Depression
+            "anxiety": ("ICD-10", "F41.9"),  # Anxiety
+            "migraine": ("ICD-10", "G43.9"),  # Migraine
+            "arthritis": ("ICD-10", "M13.9"),  # Arthritis
+        }
+
+        # Frequency/timing patterns
+        frequency_patterns = {
+            "daily": ("SNOMED", "229797004"),  # Once daily
+            "quotidien": ("SNOMED", "229797004"),  # French daily
+            "qd": ("SNOMED", "229797004"),  # Once daily abbreviation
+            "bid": ("SNOMED", "229799001"),  # Twice daily
+            "twice daily": ("SNOMED", "229799001"),
+            "tid": ("SNOMED", "229798009"),  # Three times daily
+            "three times daily": ("SNOMED", "229798009"),
+            "qid": ("SNOMED", "307439001"),  # Four times daily
+            "four times daily": ("SNOMED", "307439001"),
+            "prn": ("SNOMED", "394707008"),  # As needed
+            "as needed": ("SNOMED", "394707008"),
+        }
+
+        # Check medication brand names and active ingredients
         for pattern, (system, code) in medication_patterns.items():
             if pattern in term_lower:
                 return (system, code)
 
-        # Check for allergy codes
+        # Check routes of administration
+        for pattern, (system, code) in route_patterns.items():
+            if pattern in term_lower:
+                return (system, code)
+
+        # Check pharmaceutical forms
+        for pattern, (system, code) in dosage_form_patterns.items():
+            if pattern in term_lower:
+                return (system, code)
+
+        # Check dosage units (look for dosage patterns like "10mg", "5ml")
+        import re
+        dosage_match = re.search(r'\d+[\.,]?\d*\s*(mg|g|ml|l|mcg|µg|iu|ui)', term_lower)
+        if dosage_match:
+            unit = dosage_match.group(1)
+            if unit in dosage_unit_patterns:
+                system, code = dosage_unit_patterns[unit]
+                return (system, f"{dosage_match.group(0).strip()}")
+
+        # Check allergy patterns
         for pattern, (system, code) in allergy_patterns.items():
             if pattern in term_lower:
                 return (system, code)
 
-        # Default to LOINC for section headers or general clinical terms
+        # Check medical conditions
+        for pattern, (system, code) in condition_patterns.items():
+            if pattern in term_lower:
+                return (system, code)
+
+        # Check frequency patterns
+        for pattern, (system, code) in frequency_patterns.items():
+            if pattern in term_lower:
+                return (system, code)
+
+        # Check for numeric codes that might be medication identifiers
+        if re.match(r'^\d{8,}$', term.strip()):  # 8+ digit numbers (drug codes)
+            return ("NDC", term.strip())
+
+        # Check for date patterns
+        if re.match(r'\d{1,2}[/-]\d{1,2}[/-]\d{4}', term.strip()):
+            return ("DATE", "Clinical Date")
+
+        # Default patterns for section types
         if any(word in term_lower for word in ["medication", "drug", "medicine"]):
             return ("LOINC", "10160-0")  # History of Medication use
         elif any(word in term_lower for word in ["allergy", "allergies", "adverse"]):
@@ -2378,35 +2504,35 @@ class PSTableRenderer:
         # Remove debug badges now that we know the enhancement is working
         # Focus on real code system detection only
 
-        # Medications table enhancement
+        # Medications table enhancement - add badges to ALL columns
         if section_type == "medications":
-            if column_index == 0:  # Medication name column
-                code_system, code = self._detect_code_system(clean_text)
-                if code_system:
-                    badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
-                    enhanced_content = f"{enhanced_content}{badge}"
-            elif column_index == 1:  # Active ingredient column
-                code_system, code = self._detect_code_system(clean_text)
-                if code_system:
-                    badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
-                    enhanced_content = f"{enhanced_content}{badge}"
+            # Apply badges to every column that has meaningful content
+            code_system, code = self._detect_code_system(clean_text)
+            if code_system:
+                badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
+                enhanced_content = f"{enhanced_content}{badge}"
 
-        # Allergies table enhancement
+        # Allergies table enhancement - add badges to ALL columns  
         elif section_type == "allergies":
-            if column_index == 1:  # Causative agent column (usually second column)
-                code_system, code = self._detect_code_system(clean_text)
-                if code_system:
-                    badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
-                    enhanced_content = f"{enhanced_content}{badge}"
+            code_system, code = self._detect_code_system(clean_text)
+            if code_system:
+                badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
+                enhanced_content = f"{enhanced_content}{badge}"
 
-        # Problems/Diagnoses table enhancement
+        # Problems/Diagnoses table enhancement - add badges to ALL columns
         elif section_type in ["problems", "active_problems"]:
+            code_system, code = self._detect_code_system(clean_text)
+            if code_system:
+                badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
+                enhanced_content = f"{enhanced_content}{badge}"
+            
+            # Special handling for medical conditions
             if column_index == 0:  # Problem/diagnosis name column
-                # Default to ICD-10 for medical problems
+                # Default to ICD-10 for medical problems if no specific code detected
                 if any(
                     word in clean_text.lower()
                     for word in ["diabetes", "hypertension", "asthma", "copd"]
-                ):
+                ) and code_system is None:
                     badge = f'<span class="code-system-badge icd10">ICD-10: E11.9</span>'  # Example code
                     enhanced_content = f"{enhanced_content}{badge}"
 
