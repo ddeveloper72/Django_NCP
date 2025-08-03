@@ -62,6 +62,8 @@
         </h3>
         <p class="dashboard-subtitle">
             Enhanced medical translation with {{ medical_terms_count }} verified medical terms
+            <span class="code-system-badge snomed">TEST: SNOMED-CT</span>
+            <span class="code-system-badge atc">TEST: ATC</span>
         </p>
 
         <div class="translation-stats">
@@ -234,6 +236,10 @@
                         <div class="section-title-container">
                             <div class="section-title-main">
                                 {{ section.title.coded if section.is_coded_section else section.title.translated }}
+                                <!-- Test code system badge for section titles -->
+                                {% if section.section_code %}
+                                <span class="code-system-badge loinc">LOINC: {{ section.section_code.split()[0] if ' ' in section.section_code else section.section_code }}</span>
+                                {% endif %}
                             </div>
                             {% if section.clinical_codes and section.clinical_codes.formatted_display %}
                             <div class="section-codes-subtext">
@@ -429,13 +435,23 @@
         const toggle = document.getElementById('codeSystemToggle');
         const badges = document.querySelectorAll('.code-system-badge');
 
+        console.log('Code System Toggle Debug:');
+        console.log('Toggle element:', toggle);
+        console.log('Found badges:', badges.length);
+        badges.forEach((badge, index) => {
+            console.log(`Badge ${index}:`, badge.textContent, badge.classList.toString());
+        });
+
         if (toggle) {
             toggle.addEventListener('change', function () {
+                console.log('Toggle changed:', this.checked);
                 badges.forEach(badge => {
                     if (this.checked) {
                         badge.classList.add('show');
+                        console.log('Showing badge:', badge.textContent);
                     } else {
                         badge.classList.remove('show');
+                        console.log('Hiding badge:', badge.textContent);
                     }
                 });
             });
@@ -542,11 +558,11 @@
         transition: transform 0.3s;
     }
 
-    .toggle-switch input:checked + .toggle-slider {
+    .toggle-switch input:checked+.toggle-slider {
         background-color: #0d6efd;
     }
 
-    .toggle-switch input:checked + .toggle-slider:before {
+    .toggle-switch input:checked+.toggle-slider:before {
         transform: translateX(16px);
     }
 
@@ -567,8 +583,8 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        border: 1px solid rgba(255,255,255,0.3);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     .code-system-badge.show {
@@ -597,6 +613,7 @@
             opacity: 0;
             transform: scale(0.8);
         }
+
         100% {
             opacity: 1;
             transform: scale(1);
