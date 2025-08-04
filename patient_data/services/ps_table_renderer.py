@@ -87,7 +87,7 @@ class PSTableRenderer:
         self, text: str, code_system: str = None, code: str = None
     ) -> str:
         """
-        Add minimal code system notation to translated text as a simple inline badge.
+        Add code system badges using enhanced sub-row structure for better table layout.
 
         Args:
             text: The translated text
@@ -95,7 +95,7 @@ class PSTableRenderer:
             code: The specific code value
 
         Returns:
-            Text with minimal code system notation appended
+            Text wrapped in enhanced table cell structure with sub-row badges
         """
         if not text or not code_system:
             return text
@@ -103,19 +103,26 @@ class PSTableRenderer:
         # Determine badge class based on code system
         system_class = code_system.lower().replace("-", "").replace(" ", "")
 
-        # Create a very minimal badge - just the essential info
+        # Create badge content
         if code:
             badge_text = f"{code_system}:{code}"
         else:
             badge_text = code_system
 
-        # Simple inline badge that doesn't break table layout
-        badge_html = (
-            f'<small class="code-system-badge {system_class}">{badge_text}</small>'
-        )
+        # Create badge HTML
+        badge_html = f'<span class="code-system-badge {system_class}">{badge_text}</span>'
 
-        # Just append to the text - no complex wrappers
-        return f"{text} {badge_html}"
+        # Wrap in enhanced table cell structure with sub-row for badges
+        enhanced_cell = f'''
+        <div class="table-cell-enhanced">
+            <div class="primary-content">{text}</div>
+            <div class="badge-row">
+                {badge_html}
+            </div>
+        </div>
+        '''.strip()
+
+        return enhanced_cell
 
     def _detect_code_system(self, term: str) -> tuple:
         """

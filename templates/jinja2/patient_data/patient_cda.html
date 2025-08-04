@@ -440,41 +440,43 @@
         const toggle = document.getElementById('codeSystemToggle');
 
         function findAndToggleBadges(show) {
-            // Use a more comprehensive selector to find all badges including those in tables
+            // Handle both individual badges and enhanced table cell structure
             const badges = document.querySelectorAll('.code-system-badge');
+            const badgeRows = document.querySelectorAll('.badge-row');
 
-            console.log('=== CODE SYSTEM TOGGLE DEBUG ===');
+            console.log('=== CODE SYSTEM TOGGLE DEBUG (Enhanced) ===');
             console.log('Toggle element:', toggle);
-            console.log('Found badges:', badges.length);
+            console.log('Found individual badges:', badges.length);
+            console.log('Found badge rows:', badgeRows.length);
             console.log('Toggle state (show):', show);
 
-            if (badges.length === 0) {
-                console.log('NO BADGES FOUND! Searching more specifically...');
-                // Try different selectors
-                const allSpans = document.querySelectorAll('span');
-                console.log('Total spans on page:', allSpans.length);
-                const badgeSpans = Array.from(allSpans).filter(span => span.className.includes('code-system-badge'));
-                console.log('Spans with code-system-badge class:', badgeSpans.length);
-                badgeSpans.forEach((span, i) => console.log(`Badge span ${i}:`, span.outerHTML));
-            }
-
+            // Toggle individual badges (for inline badges)
             badges.forEach((badge, index) => {
                 console.log(`Badge ${index}:`, badge.textContent, badge.classList.toString());
-                console.log(`Badge ${index} parent:`, badge.parentElement ? badge.parentElement.tagName : 'NO PARENT');
-                console.log(`Badge ${index} HTML:`, badge.outerHTML);
-
+                
                 if (show) {
                     badge.classList.add('show');
                     console.log(`Showing badge ${index}:`, badge.textContent);
-                    console.log(`Badge ${index} classes after show:`, badge.classList.toString());
-                    console.log(`Badge ${index} computed display:`, window.getComputedStyle(badge).display);
-                    console.log(`Badge ${index} computed visibility:`, window.getComputedStyle(badge).visibility);
                 } else {
                     badge.classList.remove('show');
                     console.log(`Hiding badge ${index}:`, badge.textContent);
                 }
             });
-            console.log('=== END TOGGLE DEBUG ===');
+
+            // Toggle badge rows (for enhanced table cells)
+            badgeRows.forEach((row, index) => {
+                console.log(`Badge row ${index}:`, row.innerHTML.substring(0, 50) + '...');
+                
+                if (show) {
+                    row.classList.add('show');
+                    console.log(`Showing badge row ${index}`);
+                } else {
+                    row.classList.remove('show');
+                    console.log(`Hiding badge row ${index}`);
+                }
+            });
+
+            console.log('=== END ENHANCED TOGGLE DEBUG ===');
         } if (toggle) {
             toggle.addEventListener('change', function () {
                 console.log('Toggle changed:', this.checked);
