@@ -21,6 +21,7 @@ For complete documentation, see: JINJA2_URL_CONFIGURATION.md
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import reverse
 from jinja2 import Environment
+import os
 
 
 def url_helper(viewname, *args, **kwargs):
@@ -96,6 +97,7 @@ def environment(**options):
         {
             "currency": currency_filter,
             "date_format": date_format_filter,
+            "basename": lambda x: os.path.basename(x) if x else "",
         }
     )
 

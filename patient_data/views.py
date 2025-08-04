@@ -8,14 +8,19 @@ from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+from django.utils import timezone
 from .forms import PatientDataForm
 from .models import PatientData
 from .services import EUPatientSearchService, PatientCredentials
 from .services.clinical_pdf_service import ClinicalDocumentPDFService
+from xhtml2pdf import pisa
+from io import BytesIO
 import logging
 import os
 import base64
 import json
+import re
+import xml.etree.ElementTree as ET
 
 logger = logging.getLogger(__name__)
 
@@ -115,44 +120,86 @@ def patient_details_view(request, patient_id):
         }
 
         if match_data:
-            # Get patient summary from search service
-            search_service = EUPatientSearchService()
+            # Build patient summary directly from match data
 
-            # Reconstruct match object for summary
-            from .services import PatientMatch
+            # Check if patient identifiers are missing from session data (backwards compatibility)
+            patient_data_dict = match_data["patient_data"]
+            if not patient_data_dict.get(
+                "primary_patient_id"
+            ) and not patient_data_dict.get("secondary_patient_id"):
+                logger.info(
+                    "Patient identifiers missing from session data, re-extracting..."
+                )
+                try:
+                    # Re-extract patient identifiers from CDA content
+                    import xml.etree.ElementTree as ET
 
-            # Extract required fields from patient_data or use defaults
-            patient_info = match_data.get("patient_data", {})
-            patient_name_parts = patient_info.get("name", "Unknown Unknown").split(
-                " ", 1
-            )
-            given_name = (
-                patient_name_parts[0] if len(patient_name_parts) > 0 else "Unknown"
-            )
-            family_name = (
-                patient_name_parts[1] if len(patient_name_parts) > 1 else "Unknown"
-            )
+                    root = ET.fromstring(match_data["cda_content"])
+                    namespaces = {
+                        "hl7": "urn:hl7-org:v3",
+                        "ext": "urn:hl7-EE-DL-Ext:v1",
+                    }
 
-            match = PatientMatch(
-                patient_id=patient_info.get("id", "unknown"),
-                given_name=given_name,
-                family_name=family_name,
-                birth_date=patient_info.get("birth_date", "unknown"),
-                gender=patient_info.get("gender", "unknown"),
-                country_code=match_data["country_code"],
-                confidence_score=match_data["confidence_score"],
-                file_path=match_data["file_path"],
-                patient_data=match_data["patient_data"],
-                cda_content=match_data["cda_content"],
-                # Include L1/L3 CDA data
-                l1_cda_content=match_data.get("l1_cda_content"),
-                l3_cda_content=match_data.get("l3_cda_content"),
-                l1_cda_path=match_data.get("l1_cda_path"),
-                l3_cda_path=match_data.get("l3_cda_path"),
-                preferred_cda_type=match_data.get("preferred_cda_type", "L3"),
-            )
+                    # Find patient role
+                    patient_role = root.find(".//hl7:patientRole", namespaces)
+                    if patient_role is not None:
+                        # Extract patient IDs
+                        id_elements = patient_role.findall("hl7:id", namespaces)
+                        primary_patient_id = ""
+                        secondary_patient_id = ""
+                        patient_identifiers = []
 
-            patient_summary = search_service.get_patient_summary(match)
+                        for idx, id_elem in enumerate(id_elements):
+                            extension = id_elem.get("extension", "")
+                            root_attr = id_elem.get("root", "")
+
+                            if extension:
+                                identifier_info = {
+                                    "extension": extension,
+                                    "root": root_attr,
+                                    "type": "primary" if idx == 0 else "secondary",
+                                }
+                                patient_identifiers.append(identifier_info)
+
+                                if idx == 0:
+                                    primary_patient_id = extension
+                                elif idx == 1:
+                                    secondary_patient_id = extension
+
+                        # Update the patient data with extracted identifiers
+                        patient_data_dict["primary_patient_id"] = primary_patient_id
+                        patient_data_dict["secondary_patient_id"] = secondary_patient_id
+                        patient_data_dict["patient_identifiers"] = patient_identifiers
+
+                        # Update the session data
+                        match_data["patient_data"] = patient_data_dict
+
+                        logger.info(
+                            f"Re-extracted identifiers: primary={primary_patient_id}, secondary={secondary_patient_id}"
+                        )
+                except Exception as e:
+                    logger.error(f"Error re-extracting patient identifiers: {e}")
+
+            # Build patient summary directly from match data instead of using service
+            patient_summary = {
+                "patient_name": match_data["patient_data"].get("name", "Unknown"),
+                "birth_date": match_data["patient_data"].get("birth_date", "Unknown"),
+                "gender": match_data["patient_data"].get("gender", "Unknown"),
+                "primary_patient_id": match_data["patient_data"].get(
+                    "primary_patient_id", ""
+                ),
+                "secondary_patient_id": match_data["patient_data"].get(
+                    "secondary_patient_id", ""
+                ),
+                "patient_identifiers": match_data["patient_data"].get(
+                    "patient_identifiers", []
+                ),
+                "address": match_data["patient_data"].get("address", {}),
+                "contact_info": match_data["patient_data"].get("contact_info", {}),
+                "cda_type": match_data.get("preferred_cda_type", "L3"),
+                "file_path": match_data["file_path"],
+                "confidence_score": match_data["confidence_score"],
+            }
 
             # Get country display name
             from .forms import COUNTRY_CHOICES
@@ -269,6 +316,14 @@ def patient_cda_view(request, patient_id):
             # Use actual Luxembourg patient CDA data with structured medication history and administrative data
             sample_cda_content = """
             <ClinicalDocument xmlns="urn:hl7-org:v3">
+                <id extension="DOC-001" root="2.16.442.1.99999999.1"/>
+                <code code="60591-5" codeSystem="2.16.840.1.113883.6.1" displayName="Patient summary Document"/>
+                <title>Patient Summary</title>
+                <effectiveTime value="20230925141338+0200"/>
+                <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25"/>
+                <languageCode code="fr-LU"/>
+                <setId extension="SET-001" root="2.16.442.1.99999999.2"/>
+                <versionNumber value="1"/>
                 <recordTarget>
                     <patientRole>
                         <addr use="HP">
@@ -810,6 +865,220 @@ def download_cda_html(request, patient_id):
         )
 
         return response
+
+    except PatientData.DoesNotExist:
+        messages.error(request, "Patient data not found.")
+        return redirect("patient_data:patient_data_form")
+
+
+def download_patient_summary_pdf(request, patient_id):
+    """Download Patient Summary as PDF generated from structured patient summary data"""
+
+    try:
+        patient_data = PatientData.objects.get(id=patient_id)
+        match_data = request.session.get(f"patient_match_{patient_id}")
+
+        if not match_data:
+            messages.error(request, "No CDA document found for this patient.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+        # Get patient summary using the same logic as the details view
+        search_service = EUPatientSearchService()
+
+        # Reconstruct match object for summary
+        # Define result class directly to avoid import conflicts
+        from dataclasses import dataclass
+        from typing import Dict
+
+        @dataclass
+        class SimplePatientResult:
+            """Simple patient result for views"""
+
+            file_path: str
+            country_code: str
+            confidence_score: float
+            patient_data: Dict
+            cda_content: str
+
+        # Extract required fields from patient_data or use defaults
+        patient_info = match_data.get("patient_data", {})
+        patient_name_parts = patient_info.get("name", "Unknown Unknown").split(" ", 1)
+        given_name = patient_name_parts[0] if len(patient_name_parts) > 0 else "Unknown"
+        family_name = (
+            patient_name_parts[1] if len(patient_name_parts) > 1 else "Unknown"
+        )
+
+        match = SimplePatientResult(
+            file_path=match_data["file_path"],
+            country_code=match_data["country_code"],
+            confidence_score=match_data["confidence_score"],
+            patient_data=match_data["patient_data"],
+            cda_content=match_data["cda_content"],
+        )
+
+        patient_summary = search_service.get_patient_summary(match)
+
+        if not patient_summary:
+            messages.error(request, "No patient summary content available.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+        try:
+            # Get the CDA content from patient summary
+            cda_content = patient_summary.get("cda_content", "")
+
+            # If we have L3 content (HTML), prefer that
+            l3_cda_content = match_data.get("l3_cda_content")
+            if l3_cda_content:
+                cda_content = l3_cda_content
+
+            # Clean up and structure the content for PDF
+            sections_html = ""
+            if cda_content:
+                # Clean up the CDA content for better PDF display
+                import re
+                from html import unescape
+
+                # Remove XML declaration and root elements if present
+                clean_content = re.sub(r"<\?xml[^>]*\?>", "", cda_content)
+                clean_content = re.sub(r"<ClinicalDocument[^>]*>", "", clean_content)
+                clean_content = re.sub(r"</ClinicalDocument>", "", clean_content)
+                clean_content = re.sub(r"<component[^>]*>", "", clean_content)
+                clean_content = re.sub(r"</component>", "", clean_content)
+                clean_content = re.sub(r"<structuredBody[^>]*>", "", clean_content)
+                clean_content = re.sub(r"</structuredBody>", "", clean_content)
+
+                # Unescape HTML entities
+                clean_content = unescape(clean_content)
+
+                # If it's mostly tables and structured content, use it as-is
+                sections_html = f"""
+                <div class="section">
+                    <h2>Patient Summary Content</h2>
+                    <div class="content">
+                        {clean_content}
+                    </div>
+                </div>
+                """
+            else:
+                sections_html = """
+                <div class="section">
+                    <p>No detailed patient summary content available.</p>
+                </div>
+                """  # Prepare HTML content with proper structure and inline CSS
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Patient Summary - {patient_data.given_name} {patient_data.family_name}</title>
+                <style>
+                    @page {{
+                        size: A4;
+                        margin: 2cm;
+                    }}
+                    
+                    body {{
+                        font-family: Arial, sans-serif;
+                        font-size: 10pt;
+                        line-height: 1.4;
+                        color: #333;
+                        margin: 0;
+                        padding: 0;
+                    }}
+                    
+                    h1, h2, h3, h4, h5, h6 {{
+                        color: #2c3e50;
+                        margin-top: 1.5em;
+                        margin-bottom: 0.5em;
+                    }}
+                    
+                    h1 {{ font-size: 16pt; }}
+                    h2 {{ font-size: 14pt; }}
+                    h3 {{ font-size: 12pt; }}
+                    
+                    table {{
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 1em 0;
+                    }}
+                    
+                    th, td {{
+                        border: 1px solid #ddd;
+                        padding: 8px;
+                        text-align: left;
+                        vertical-align: top;
+                    }}
+                    
+                    th {{
+                        background-color: #f8f9fa;
+                        font-weight: bold;
+                        color: #2c3e50;
+                    }}
+                    
+                    .patient-header {{
+                        background-color: #e8f4f8;
+                        padding: 15px;
+                        border-radius: 5px;
+                        margin-bottom: 20px;
+                    }}
+                    
+                    .section {{
+                        margin-bottom: 20px;
+                    }}
+
+                    ul {{
+                        padding-left: 20px;
+                    }}
+
+                    li {{
+                        margin-bottom: 5px;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="patient-header">
+                    <h1>Patient Summary</h1>
+                    <p><strong>Patient:</strong> {patient_summary.get('patient_name', 'Unknown')}</p>
+                    <p><strong>Date of Birth:</strong> {patient_summary.get('birth_date', 'Not specified')}</p>
+                    <p><strong>Gender:</strong> {patient_summary.get('gender', 'Not specified')}</p>
+                    <p><strong>Primary Patient ID:</strong> {patient_summary.get('primary_patient_id', 'Not specified')}</p>
+                    {f'<p><strong>Secondary Patient ID:</strong> {patient_summary.get("secondary_patient_id")}</p>' if patient_summary.get('secondary_patient_id') else ''}
+                    <p><strong>Generated:</strong> {timezone.now().strftime('%Y-%m-%d %H:%M')}</p>
+                </div>
+                
+                <div class="content">
+                    {sections_html}
+                </div>
+            </body>
+            </html>
+            """
+
+            # Generate PDF using xhtml2pdf
+            result = BytesIO()
+            pdf = pisa.pisaDocument(BytesIO(html_content.encode("UTF-8")), result)
+
+            if not pdf.err:
+                pdf_bytes = result.getvalue()
+                result.close()
+
+                # Create filename
+                filename = f"{patient_data.given_name}_{patient_data.family_name}_Patient_Summary.pdf"
+
+                # Return PDF response
+                response = HttpResponse(pdf_bytes, content_type="application/pdf")
+                response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+                logger.info(f"Generated patient summary PDF for patient {patient_id}")
+                return response
+            else:
+                logger.error(f"Error generating PDF: {pdf.err}")
+                messages.error(request, "Error generating PDF document.")
+                return redirect("patient_data:patient_details", patient_id=patient_id)
+
+        except Exception as e:
+            logger.error(f"Error generating patient summary PDF: {e}")
+            messages.error(request, "Error generating PDF document.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
 
     except PatientData.DoesNotExist:
         messages.error(request, "Patient data not found.")

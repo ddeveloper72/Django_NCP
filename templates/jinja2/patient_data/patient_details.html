@@ -101,33 +101,39 @@
                 <div class="info-grid">
                     <div class="info-item">
                         <label class="info-label">Patient Name:</label>
-                        <span class="info-value">{{ patient_summary.patient_info.name }}</span>
+                        <span class="info-value">{{ patient_summary.patient_name|default("Unknown") }}</span>
                     </div>
 
                     <div class="info-item">
                         <label class="info-label">Date of Birth:</label>
-                        <span class="info-value">{{ patient_summary.patient_info.birth_date }}</span>
+                        <span class="info-value">{{ patient_summary.birth_date|default("Not provided") }}</span>
                     </div>
 
                     <div class="info-item">
                         <label class="info-label">Gender:</label>
-                        <span class="info-value">{{ patient_summary.patient_info.gender }}</span>
+                        <span class="info-value">{{ patient_summary.gender|default("Not provided") }}</span>
                     </div>
 
                     <div class="info-item">
-                        <label class="info-label">Patient ID:</label>
-                        <span class="info-value">{{ patient_summary.patient_info.patient_id|default("Not provided")
-                            }}</span>
+                        <label class="info-label">Primary Patient ID:</label>
+                        <span class="info-value">{{ patient_summary.primary_patient_id|default("Not provided") }}</span>
                     </div>
+
+                    {% if patient_summary.secondary_patient_id %}
+                    <div class="info-item">
+                        <label class="info-label">Secondary Patient ID:</label>
+                        <span class="info-value">{{ patient_summary.secondary_patient_id }}</span>
+                    </div>
+                    {% endif %}
 
                     <div class="info-item">
                         <label class="info-label">Document Title:</label>
-                        <span class="info-value">{{ patient_summary.document_info.title }}</span>
+                        <span class="info-value">Patient Summary ({{ patient_summary.cda_type|default("L3") }})</span>
                     </div>
 
                     <div class="info-item">
-                        <label class="info-label">Document Date:</label>
-                        <span class="info-value">{{ patient_summary.document_info.date }}</span>
+                        <label class="info-label">Source File:</label>
+                        <span class="info-value">{{ (patient_summary.file_path|basename) or "Unknown" }}</span>
                     </div>
                 </div>
             </div>
@@ -157,6 +163,14 @@
                         <i class="icon-download"></i>
                         CDA Download
                         <span class="button-subtitle">HTML Document</span>
+                    </a>
+
+                    <!-- Patient Summary PDF Download -->
+                    <a href="{{ url('patient_data:download_patient_summary_pdf', patient_data.id) }}"
+                        class="action-button pdf-download" download>
+                        <i class="icon-file-pdf"></i>
+                        Patient Summary PDF
+                        <span class="button-subtitle">Healthcare Professional</span>
                     </a>
 
                     <!-- ORCD - PDF Preview and Download -->
