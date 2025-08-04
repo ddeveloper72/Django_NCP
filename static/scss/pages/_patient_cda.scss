@@ -1032,6 +1032,235 @@ input[type='checkbox'] {
   }
 }
 
+// Administrative Information Section - PS Display Guidelines Compliant
+.administrative-section {
+  margin-bottom: 2rem;
+  background: $ps-white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
+  .admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+}
+
+.admin-contact-card {
+  background: $ps-light-blue;
+  border: 2px solid $ps-secondary-blue;
+  border-radius: 8px;
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 159, 209, 0.2);
+  }
+
+  .admin-card-header {
+    background: $ps-secondary-blue;
+    color: $ps-white;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    margin: -1.25rem -1.25rem 1rem -1.25rem;
+    border-radius: 6px 6px 0 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    .fa,
+    .fas {
+      margin-right: 0.5rem;
+      opacity: 0.9;
+    }
+  }
+
+  .admin-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(8, 90, 159, 0.1);
+
+    &:last-child {
+      margin-bottom: 0;
+      border-bottom: none;
+    }
+
+    .admin-label {
+      font-weight: 600;
+      color: $ps-primary-blue;
+      font-size: 0.85rem;
+      min-width: 80px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .admin-value {
+      color: $ps-dark-gray;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      text-align: right;
+      flex: 1;
+      margin-left: 1rem;
+
+      &.organization-name {
+        font-weight: 600;
+        color: $ps-primary-blue;
+      }
+
+      &.person-name {
+        font-weight: 600;
+        color: $ps-dark-gray;
+      }
+
+      &.contact-info {
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+        background: rgba(255, 255, 255, 0.7);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        border: 1px solid rgba(8, 90, 159, 0.2);
+      }
+
+      .contact-item {
+        display: block;
+        margin-bottom: 0.25rem;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .contact-type {
+          font-weight: 500;
+          color: $ps-secondary-blue;
+          margin-right: 0.5rem;
+          text-transform: capitalize;
+        }
+
+        .contact-address {
+          color: $ps-dark-gray;
+          line-height: 1.3;
+        }
+      }
+    }
+  }
+
+  // Contact type specific styling
+  &.patient-contact {
+    border-color: $ps-success-green;
+    background: lighten($ps-success-green, 45%);
+
+    .admin-card-header {
+      background: $ps-success-green;
+    }
+  }
+
+  &.author-hcp {
+    border-color: $ps-primary-blue;
+
+    .admin-card-header {
+      background: $ps-primary-blue;
+    }
+  }
+
+  &.legal-authenticator {
+    border-color: $ps-warning-orange;
+    background: lighten($ps-warning-orange, 40%);
+
+    .admin-card-header {
+      background: $ps-warning-orange;
+      color: $ps-dark-gray;
+    }
+  }
+
+  &.custodian {
+    border-color: #6f42c1;
+    background: lighten(#6f42c1, 45%);
+
+    .admin-card-header {
+      background: #6f42c1;
+    }
+  }
+
+  &.guardian {
+    border-color: $ps-danger-red;
+    background: lighten($ps-danger-red, 45%);
+
+    .admin-card-header {
+      background: $ps-danger-red;
+    }
+  }
+
+  &.cabinet-medicale {
+    border-color: #17a2b8;
+    background: lighten(#17a2b8, 45%);
+
+    .admin-card-header {
+      background: #17a2b8;
+    }
+  }
+}
+
+// Empty state for administrative data
+.admin-empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  font-style: italic;
+
+  .fa,
+  .fas {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+}
+
+// Responsive design for administrative section
+@media (max-width: 768px) {
+  .administrative-section {
+    .admin-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+  }
+
+  .admin-contact-card {
+    padding: 1rem;
+
+    .admin-card-header {
+      margin: -1rem -1rem 0.75rem -1rem;
+      font-size: 0.8rem;
+    }
+
+    .admin-info-row {
+      flex-direction: column;
+      gap: 0.25rem;
+
+      .admin-label {
+        min-width: auto;
+        margin-bottom: 0.25rem;
+      }
+
+      .admin-value {
+        text-align: left;
+        margin-left: 0;
+      }
+    }
+  }
+}
+
 // Print styles for PDF generation
 @media print {
   .ps-table {
@@ -1041,6 +1270,7 @@ input[type='checkbox'] {
       background: #f0f0f0 !important;
       color: #000 !important;
       -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     .ps-tr:hover {
@@ -1051,5 +1281,28 @@ input[type='checkbox'] {
   .ps-table-container {
     box-shadow: none;
     margin: 0.5rem 0;
+  }
+
+  .administrative-section {
+    break-inside: avoid;
+    box-shadow: none;
+
+    .admin-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .admin-contact-card {
+      break-inside: avoid;
+      box-shadow: none;
+      border: 1px solid #ddd;
+
+      .admin-card-header {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
   }
 }

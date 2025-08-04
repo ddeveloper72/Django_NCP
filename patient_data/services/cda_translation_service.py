@@ -9,6 +9,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from translation_services.terminology_translator import TerminologyTranslatorCompat
+from .cda_administrative_extractor import CDAAdministrativeExtractor, AdministrativeData
 
 
 @dataclass
@@ -39,6 +40,9 @@ class CDATranslationService:
         from .ps_table_renderer import PSTableRenderer
 
         self.table_renderer = PSTableRenderer(target_language=target_language)
+
+        # Initialize administrative data extractor
+        self.admin_extractor = CDAAdministrativeExtractor()
 
     def _translate_text_compatibility(
         self, text: str, source_lang: str = "auto"
@@ -530,6 +534,18 @@ class CDATranslationService:
             "sections": translated_sections,
             "document_info": cda_data["document_info"],
         }
+
+    def extract_administrative_data(self, cda_content: str) -> AdministrativeData:
+        """
+        Extract comprehensive administrative data from CDA document
+
+        Args:
+            cda_content: Raw CDA content (XML or HTML)
+
+        Returns:
+            AdministrativeData object containing all administrative information
+        """
+        return self.admin_extractor.extract_administrative_data(cda_content)
 
 
 def process_cda_file(file_path: str) -> Dict:

@@ -410,6 +410,11 @@ def patient_cda_view(request, patient_id):
         # Create bilingual document with PS Display Guidelines tables
         bilingual_data = translation_service.create_bilingual_document(cda_data)
 
+        # Extract comprehensive administrative data from the CDA document
+        administrative_data = translation_service.extract_administrative_data(
+            translation_cda_content
+        )
+
         # Create template-friendly format
         translation_result = {
             "document_info": {
@@ -615,6 +620,14 @@ def patient_cda_view(request, patient_id):
             "safety_alerts": safety_alerts,
             "allergy_alerts": allergy_alerts,
             "has_safety_alerts": len(safety_alerts) > 0 or len(allergy_alerts) > 0,
+            # Administrative data from CDA document
+            "administrative_data": administrative_data,
+            "has_administrative_data": bool(
+                administrative_data.patient_contact_info.addresses
+                or administrative_data.author_hcp.family_name
+                or administrative_data.legal_authenticator.family_name
+                or administrative_data.custodian_organization.name
+            ),
         }
 
         return render(request, "patient_data/patient_cda.html", context, using="jinja2")

@@ -220,129 +220,394 @@
         </div>
     </div>
 
-    <!-- Clinical Sections -->
+    <!-- Administrative Information Section -->
+    {% if has_administrative_data %}
     <div class="wrap-collapsible">
-        <input id="collapsible-clinical-sections" class="toggle" type="checkbox" checked="true">
-        <label for="collapsible-clinical-sections" class="lbl-toggle-main">
-            <i class="fas fa-stethoscope me-2"></i>
-            Clinical Sections
+        <input id="collapsible-administrative" class="toggle" type="checkbox">
+        <label for="collapsible-administrative" class="lbl-toggle-main">
+            <i class="fas fa-address-book me-2"></i>
+            Administrative Information
         </label>
         <div class="collapsible-content-main">
             <div class="content-inner-main">
+                <div class="administrative-section">
+                    <div class="admin-grid">
 
-                {% if translation_result.sections %}
-                {% for section in translation_result.sections %}
-                <div class="wrap-collapsible">
-                    <input id="collapsible-section-{{ section.section_id }}" class="toggle" type="checkbox"
-                        checked="true">
-                    <label for="collapsible-section-{{ section.section_id }}" class="lbl-toggle-title">
-                        <i class="fas fa-clipboard-list me-2"></i>
-                        <div class="section-title-container">
-                            <div class="section-title-main">
-                                {{ section.title.coded if section.is_coded_section else section.title.translated }}
-                                <!-- Test code system badge for section titles -->
-                                {% if section.section_code %}
-                                <span class="code-system-badge loinc">LOINC: {{ section.section_code.split()[0] if ' '
-                                    in section.section_code else section.section_code }}</span>
+                        {% if administrative_data.patient_contact_info.addresses or
+                        administrative_data.patient_contact_info.telecoms %}
+                        <!-- Patient Contact Information -->
+                        <div class="admin-contact-card patient-contact">
+                            <div class="admin-card-header">
+                                <i class="fas fa-user me-2"></i>
+                                Patient Contact Information
+                            </div>
+                            <div class="admin-info-row">
+                                {% if administrative_data.patient_contact_info.addresses %}
+                                <div class="admin-label">Address</div>
+                                <div class="admin-value">
+                                    {% for address in administrative_data.patient_contact_info.addresses %}
+                                    <div class="contact-item">
+                                        <div class="contact-address">
+                                            {% if address.street %}{{ address.street }}<br>{% endif %}
+                                            {% if address.city %}{{ address.city }}{% endif %}
+                                            {% if address.postalCode %}, {{ address.postalCode }}{% endif %}
+                                            {% if address.country %}<br>{{ address.country }}{% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
                                 {% endif %}
                             </div>
-                            {% if section.clinical_codes and section.clinical_codes.formatted_display %}
-                            <div class="section-codes-subtext">
-                                <i class="fas fa-barcode me-1"></i>
-                                {{ section.clinical_codes.formatted_display }}
+                            {% if administrative_data.patient_contact_info.telecoms %}
+                            <div class="admin-info-row">
+                                <div class="admin-label">Contact</div>
+                                <div class="admin-value contact-info">
+                                    {% for telecom in administrative_data.patient_contact_info.telecoms %}
+                                    <div class="contact-item">
+                                        <span class="contact-type">{{ telecom.type|title }}:</span>
+                                        {{ telecom.display_value }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
                             </div>
                             {% endif %}
                         </div>
-                        {% if section.is_coded_section %}
-                        <span class="section-type-badge coded">
-                            <i class="fas fa-code me-1"></i>HL7 Coded
-                        </span>
-                        {% else %}
-                        <span class="section-type-badge free-text">
-                            <i class="fas fa-text-width me-1"></i>Free Text
-                        </span>
                         {% endif %}
-                        {% if section.content.medical_terms > 0 %}
-                        <span class="medical-terms-badge">{{ section.content.medical_terms }} terms</span>
-                        {% endif %}
-                        {% if section.section_code %}
-                        <span class="section-code-badge">{{ section.section_code }}</span>
-                        {% endif %}
-                    </label>
-                    <div class="collapsible-content-title">
-                        <div class="content-inner-title">
 
-                            <!-- Mobile View with Toggle Buttons -->
-                            <div class="mobile-view">
-                                <div class="toggle-container">
-                                    <button class="toggle-button-translated active"
-                                        onclick="toggleSectionContent('section-{{ section.section_id }}', 'translated')"
-                                        data-option="translated">
-                                        <i class="fas fa-language me-1"></i>
-                                        Translated
-                                    </button>
-                                    <button class="toggle-button-original"
-                                        onclick="toggleSectionContent('section-{{ section.section_id }}', 'original')"
-                                        data-option="original">
-                                        <i class="fas fa-flag me-1"></i>
-                                        Original
-                                    </button>
-                                </div>
-
-                                <!-- Mobile Content Panels -->
-                                <div class="mobile-content" id="content-translated-{{ section.section_id }}"
-                                    style="display: block;">
-                                    <div class="content-inner">
-                                        <div class="content-label">
-                                            <i class="fas fa-flag-usa me-1"></i>
-                                            English Translation
-                                        </div>
-                                        <div class="content-text">
-                                            {% if section.has_ps_table and section.ps_table_html %}
-                                            <!-- PS Guidelines Structured Table -->
-                                            <div class="ps-table-container">
-                                                {{ section.ps_table_html|safe }}
-                                            </div>
-                                            {% else %}
-                                            <!-- Fallback to original content -->
-                                            {{ section.content.translated|safe }}
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mobile-content" id="content-original-{{ section.section_id }}"
-                                    style="display: none;">
-                                    <div class="content-inner">
-                                        <div class="content-label">
-                                            <i class="fas fa-flag me-1"></i>
-                                            Original ({{ source_language|upper }})
-                                        </div>
-                                        <div class="content-text">
-                                            {% if section.has_ps_table and section.ps_table_html_original %}
-                                            <!-- Original structured data -->
-                                            {{ section.ps_table_html_original|safe }}
-                                            {% else %}
-                                            {{ section.content.original|safe }}
-                                            {% endif %}
-                                        </div>
-                                    </div>
+                        {% if administrative_data.author_hcp.family_name or
+                        administrative_data.author_hcp.organization.name %}
+                        <!-- Author (HCP) Information -->
+                        <div class="admin-contact-card author-hcp">
+                            <div class="admin-card-header">
+                                <i class="fas fa-user-md me-2"></i>
+                                Author (HCP)
+                            </div>
+                            {% if administrative_data.author_hcp.family_name %}
+                            <div class="admin-info-row">
+                                <div class="admin-label">Name</div>
+                                <div class="admin-value person-name">
+                                    {{ administrative_data.author_hcp.title }} {{
+                                    administrative_data.author_hcp.given_name }} {{
+                                    administrative_data.author_hcp.family_name }}
                                 </div>
                             </div>
+                            {% endif %}
+                            {% if administrative_data.author_hcp.organization.name %}
+                            <div class="admin-info-row">
+                                <div class="admin-label">Organization</div>
+                                <div class="admin-value organization-name">
+                                    {{ administrative_data.author_hcp.organization.name }}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if administrative_data.author_hcp.organization.addresses %}
+                            <div class="admin-info-row">
+                                <div class="admin-label">Address</div>
+                                <div class="admin-value">
+                                    {% for address in administrative_data.author_hcp.organization.addresses %}
+                                    <div class="contact-item">
+                                        <div class="contact-address">
+                                            {% if address.street %}{{ address.street }}<br>{% endif %}
+                                            {% if address.city %}{{ address.city }}{% endif %}
+                                            {% if address.postalCode %}, {{ address.postalCode }}{% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if administrative_data.author_hcp.organization.telecoms %}
+                            <div class="admin-info-row">
+                                <div class="admin-label">Contact</div>
+                                <div class="admin-value contact-info">
+                                    {% for telecom in administrative_data.author_hcp.organization.telecoms %}
+                                    <div class="contact-item">
+                                        <span class="contact-type">{{ telecom.type|title }}:</span>
+                                        {{ telecom.display_value }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
 
-                            <!-- Desktop View with Collapsible Panels -->
-                            <div class="web-view">
-                                <div class="wrap-collapsible">
-                                    <input id="collapsible-{{ section.section_id }}-original" class="toggle"
-                                        type="checkbox">
-                                    <label for="collapsible-{{ section.section_id }}-original" class="lbl-toggle">
-                                        <i class="fas fa-flag me-1"></i>
-                                        Original ({{ source_language|upper }})
-                                    </label>
-                                    <div class="collapsible-content">
+                        {% if administrative_data.legal_authenticator.family_name or
+                        administrative_data.legal_authenticator.organization.name %}
+                        <!-- Legal Authenticator -->
+                        <div class="admin-section legal-authenticator">
+                            <h4 class="admin-section-title">
+                                <i class="fas fa-certificate me-2"></i>
+                                Legal Authenticator
+                            </h4>
+                            <div class="contact-info-grid">
+                                <div class="contact-info-item">
+                                    <h5>{{ administrative_data.legal_authenticator.title }} {{
+                                        administrative_data.legal_authenticator.given_name }} {{
+                                        administrative_data.legal_authenticator.family_name }}</h5>
+                                    {% if administrative_data.legal_authenticator.organization.name %}
+                                    <div class="organization-info">
+                                        <strong>{{ administrative_data.legal_authenticator.organization.name }}</strong>
+                                        {% if administrative_data.legal_authenticator.organization.addresses %}
+                                        {% for address in administrative_data.legal_authenticator.organization.addresses
+                                        %}
+                                        <div class="address-item">
+                                            {% if address.street %}{{ address.street }}<br>{% endif %}
+                                            {% if address.city %}{{ address.city }}{% endif %}
+                                            {% if address.postalCode %}, {{ address.postalCode }}{% endif %}
+                                        </div>
+                                        {% endfor %}
+                                        {% endif %}
+                                        {% if administrative_data.legal_authenticator.organization.telecoms %}
+                                        {% for telecom in administrative_data.legal_authenticator.organization.telecoms
+                                        %}
+                                        <div class="telecom-item">
+                                            {{ telecom.type|title }}: {{ telecom.display_value }}
+                                        </div>
+                                        {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if administrative_data.custodian_organization.name %}
+                        <!-- Custodian Organization -->
+                        <div class="admin-section custodian">
+                            <h4 class="admin-section-title">
+                                <i class="fas fa-building me-2"></i>
+                                Custodian
+                            </h4>
+                            <div class="contact-info-grid">
+                                <div class="contact-info-item">
+                                    <h5>{{ administrative_data.custodian_organization.name }}</h5>
+                                    {% if administrative_data.custodian_organization.addresses %}
+                                    {% for address in administrative_data.custodian_organization.addresses %}
+                                    <div class="address-item">
+                                        {% if address.street %}{{ address.street }}<br>{% endif %}
+                                        {% if address.city %}{{ address.city }}{% endif %}
+                                        {% if address.postalCode %}, {{ address.postalCode }}{% endif %}
+                                    </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                    {% if administrative_data.custodian_organization.telecoms %}
+                                    {% for telecom in administrative_data.custodian_organization.telecoms %}
+                                    <div class="telecom-item">
+                                        {{ telecom.type|title }}: {{ telecom.display_value }}
+                                    </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if administrative_data.preferred_hcp.name %}
+                        <!-- Cabinet Medicale (Preferred HCP) -->
+                        <div class="admin-section cabinet-medicale">
+                            <h4 class="admin-section-title">
+                                <i class="fas fa-clinic-medical me-2"></i>
+                                Cabinet Medicale
+                            </h4>
+                            <div class="contact-info-grid">
+                                <div class="contact-info-item">
+                                    <h5>{{ administrative_data.preferred_hcp.name }}</h5>
+                                    {% if administrative_data.preferred_hcp.addresses %}
+                                    {% for address in administrative_data.preferred_hcp.addresses %}
+                                    <div class="address-item">
+                                        {% if address.street %}{{ address.street }}<br>{% endif %}
+                                        {% if address.city %}{{ address.city }}{% endif %}
+                                        {% if address.postalCode %}, {{ address.postalCode }}{% endif %}
+                                    </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                    {% if administrative_data.preferred_hcp.telecoms %}
+                                    {% for telecom in administrative_data.preferred_hcp.telecoms %}
+                                    <div class="telecom-item">
+                                        {{ telecom.type|title }}: {{ telecom.display_value }}
+                                    </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if administrative_data.guardian.family_name %}
+                        <!-- Guardian Information -->
+                        <div class="admin-section guardian">
+                            <h4 class="admin-section-title">
+                                <i class="fas fa-user-shield me-2"></i>
+                                Guardian
+                            </h4>
+                            <div class="contact-info-grid">
+                                <div class="contact-info-item">
+                                    <h5>{{ administrative_data.guardian.given_name }} {{
+                                        administrative_data.guardian.family_name }}</h5>
+                                    {% if administrative_data.guardian.contact_info.addresses %}
+                                    {% for address in administrative_data.guardian.contact_info.addresses %}
+                                    <div class="address-item">
+                                        {% if address.street %}{{ address.street }}<br>{% endif %}
+                                        {% if address.city %}{{ address.city }}{% endif %}
+                                        {% if address.postalCode %}, {{ address.postalCode }}{% endif %}
+                                    </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                    {% if administrative_data.guardian.contact_info.telecoms %}
+                                    {% for telecom in administrative_data.guardian.contact_info.telecoms %}
+                                    <div class="telecom-item">
+                                        {{ telecom.type|title }}: {{ telecom.display_value }}
+                                    </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if administrative_data.other_contacts %}
+                        <!-- Other Contacts -->
+                        <div class="admin-section other-contacts">
+                            <h4 class="admin-section-title">
+                                <i class="fas fa-users me-2"></i>
+                                Other Contacts
+                            </h4>
+                            <div class="contact-info-grid">
+                                {% for contact in administrative_data.other_contacts %}
+                                <div class="contact-info-item">
+                                    <h5>{{ contact.role }}: {{ contact.given_name }} {{ contact.family_name }}</h5>
+                                    {% if contact.contact_info.addresses %}
+                                    {% for address in contact.contact_info.addresses %}
+                                    <div class="address-item">
+                                        {% if address.street %}{{ address.street }}<br>{% endif %}
+                                        {% if address.city %}{{ address.city }}{% endif %}
+                                        {% if address.postalCode %}, {{ address.postalCode }}{% endif %}
+                                    </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                    {% if contact.contact_info.telecoms %}
+                                    {% for telecom in contact.contact_info.telecoms %}
+                                    <div class="telecom-item">
+                                        {{ telecom.type|title }}: {{ telecom.display_value }}
+                                    </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Clinical Sections -->
+        <div class="wrap-collapsible">
+            <input id="collapsible-clinical-sections" class="toggle" type="checkbox" checked="true">
+            <label for="collapsible-clinical-sections" class="lbl-toggle-main">
+                <i class="fas fa-stethoscope me-2"></i>
+                Clinical Sections
+            </label>
+            <div class="collapsible-content-main">
+                <div class="content-inner-main">
+
+                    {% if translation_result.sections %}
+                    {% for section in translation_result.sections %}
+                    <div class="wrap-collapsible">
+                        <input id="collapsible-section-{{ section.section_id }}" class="toggle" type="checkbox"
+                            checked="true">
+                        <label for="collapsible-section-{{ section.section_id }}" class="lbl-toggle-title">
+                            <i class="fas fa-clipboard-list me-2"></i>
+                            <div class="section-title-container">
+                                <div class="section-title-main">
+                                    {{ section.title.coded if section.is_coded_section else section.title.translated }}
+                                    <!-- Test code system badge for section titles -->
+                                    {% if section.section_code %}
+                                    <span class="code-system-badge loinc">LOINC: {{ section.section_code.split()[0] if '
+                                        '
+                                        in section.section_code else section.section_code }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if section.clinical_codes and section.clinical_codes.formatted_display %}
+                                <div class="section-codes-subtext">
+                                    <i class="fas fa-barcode me-1"></i>
+                                    {{ section.clinical_codes.formatted_display }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% if section.is_coded_section %}
+                            <span class="section-type-badge coded">
+                                <i class="fas fa-code me-1"></i>HL7 Coded
+                            </span>
+                            {% else %}
+                            <span class="section-type-badge free-text">
+                                <i class="fas fa-text-width me-1"></i>Free Text
+                            </span>
+                            {% endif %}
+                            {% if section.content.medical_terms > 0 %}
+                            <span class="medical-terms-badge">{{ section.content.medical_terms }} terms</span>
+                            {% endif %}
+                            {% if section.section_code %}
+                            <span class="section-code-badge">{{ section.section_code }}</span>
+                            {% endif %}
+                        </label>
+                        <div class="collapsible-content-title">
+                            <div class="content-inner-title">
+
+                                <!-- Mobile View with Toggle Buttons -->
+                                <div class="mobile-view">
+                                    <div class="toggle-container">
+                                        <button class="toggle-button-translated active"
+                                            onclick="toggleSectionContent('section-{{ section.section_id }}', 'translated')"
+                                            data-option="translated">
+                                            <i class="fas fa-language me-1"></i>
+                                            Translated
+                                        </button>
+                                        <button class="toggle-button-original"
+                                            onclick="toggleSectionContent('section-{{ section.section_id }}', 'original')"
+                                            data-option="original">
+                                            <i class="fas fa-flag me-1"></i>
+                                            Original
+                                        </button>
+                                    </div>
+
+                                    <!-- Mobile Content Panels -->
+                                    <div class="mobile-content" id="content-translated-{{ section.section_id }}"
+                                        style="display: block;">
                                         <div class="content-inner">
+                                            <div class="content-label">
+                                                <i class="fas fa-flag-usa me-1"></i>
+                                                English Translation
+                                            </div>
+                                            <div class="content-text">
+                                                {% if section.has_ps_table and section.ps_table_html %}
+                                                <!-- PS Guidelines Structured Table -->
+                                                <div class="ps-table-container">
+                                                    {{ section.ps_table_html|safe }}
+                                                </div>
+                                                {% else %}
+                                                <!-- Fallback to original content -->
+                                                {{ section.content.translated|safe }}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mobile-content" id="content-original-{{ section.section_id }}"
+                                        style="display: none;">
+                                        <div class="content-inner">
+                                            <div class="content-label">
+                                                <i class="fas fa-flag me-1"></i>
+                                                Original ({{ source_language|upper }})
+                                            </div>
                                             <div class="content-text">
                                                 {% if section.has_ps_table and section.ps_table_html_original %}
+                                                <!-- Original structured data -->
                                                 {{ section.ps_table_html_original|safe }}
                                                 {% else %}
                                                 {{ section.content.original|safe }}
@@ -352,356 +617,378 @@
                                     </div>
                                 </div>
 
-                                <div class="wrap-collapsible">
-                                    <input id="collapsible-{{ section.section_id }}-translated" class="toggle"
-                                        type="checkbox" checked="true">
-                                    <label for="collapsible-{{ section.section_id }}-translated" class="lbl-toggle">
-                                        <i class="fas fa-language me-1"></i>
-                                        English Translation
-                                    </label>
-                                    <div class="collapsible-content">
-                                        <div class="content-inner">
-                                            {% if section.has_ps_table and section.ps_table_html %}
-                                            <!-- PS Guidelines Structured Table -->
-                                            <div class="ps-table-container">
-                                                {{ section.ps_table_html|safe }}
+                                <!-- Desktop View with Collapsible Panels -->
+                                <div class="web-view">
+                                    <div class="wrap-collapsible">
+                                        <input id="collapsible-{{ section.section_id }}-original" class="toggle"
+                                            type="checkbox">
+                                        <label for="collapsible-{{ section.section_id }}-original" class="lbl-toggle">
+                                            <i class="fas fa-flag me-1"></i>
+                                            Original ({{ source_language|upper }})
+                                        </label>
+                                        <div class="collapsible-content">
+                                            <div class="content-inner">
+                                                <div class="content-text">
+                                                    {% if section.has_ps_table and section.ps_table_html_original %}
+                                                    {{ section.ps_table_html_original|safe }}
+                                                    {% else %}
+                                                    {{ section.content.original|safe }}
+                                                    {% endif %}
+                                                </div>
                                             </div>
-                                            {% else %}
-                                            <div class="content-text">
-                                                {{ section.content.translated|safe }}
+                                        </div>
+                                    </div>
+
+                                    <div class="wrap-collapsible">
+                                        <input id="collapsible-{{ section.section_id }}-translated" class="toggle"
+                                            type="checkbox" checked="true">
+                                        <label for="collapsible-{{ section.section_id }}-translated" class="lbl-toggle">
+                                            <i class="fas fa-language me-1"></i>
+                                            English Translation
+                                        </label>
+                                        <div class="collapsible-content">
+                                            <div class="content-inner">
+                                                {% if section.has_ps_table and section.ps_table_html %}
+                                                <!-- PS Guidelines Structured Table -->
+                                                <div class="ps-table-container">
+                                                    {{ section.ps_table_html|safe }}
+                                                </div>
+                                                {% else %}
+                                                <div class="content-text">
+                                                    {{ section.content.translated|safe }}
+                                                </div>
+                                                {% endif %}
                                             </div>
-                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
+                            </div>
                         </div>
                     </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
 
-                {% else %}
-                <div class="no-sections">
-                    <i class="fas fa-exclamation-triangle fa-3x mb-3" style="color: #009fd1;"></i>
-                    <h4>No Medical Sections Available</h4>
-                    <p>This document does not contain structured medical sections for translation.</p>
-                    <p>Raw CDA content may be available below.</p>
-                </div>
-                {% endif %}
+                    {% else %}
+                    <div class="no-sections">
+                        <i class="fas fa-exclamation-triangle fa-3x mb-3" style="color: #009fd1;"></i>
+                        <h4>No Medical Sections Available</h4>
+                        <p>This document does not contain structured medical sections for translation.</p>
+                        <p>Raw CDA content may be available below.</p>
+                    </div>
+                    {% endif %}
 
+                </div>
+            </div>
+        </div>
+
+        <!-- Raw CDA Content -->
+        <div class="wrap-collapsible">
+            <input id="collapsible-raw-cda" class="toggle" type="checkbox">
+            <label for="collapsible-raw-cda" class="lbl-toggle-main">
+                <i class="fas fa-code me-2"></i>
+                Raw CDA Document
+            </label>
+            <div class="collapsible-content-main">
+                <div class="content-inner-main">
+                    <div class="content-label">
+                        <i class="fas fa-file-code me-1"></i>
+                        XML Content
+                    </div>
+                    <div class="raw-content">{{ cda_content }}</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Raw CDA Content -->
-    <div class="wrap-collapsible">
-        <input id="collapsible-raw-cda" class="toggle" type="checkbox">
-        <label for="collapsible-raw-cda" class="lbl-toggle-main">
-            <i class="fas fa-code me-2"></i>
-            Raw CDA Document
-        </label>
-        <div class="collapsible-content-main">
-            <div class="content-inner-main">
-                <div class="content-label">
-                    <i class="fas fa-file-code me-1"></i>
-                    XML Content
-                </div>
-                <div class="raw-content">{{ cda_content }}</div>
-            </div>
-        </div>
-    </div>
-</div>
+    <script>
+        // Mobile toggle functionality
+        function toggleSectionContent(sectionId, viewType) {
+            const translatedContent = document.getElementById('content-translated-' + sectionId.replace('section-', ''));
+            const originalContent = document.getElementById('content-original-' + sectionId.replace('section-', ''));
+            const translatedBtn = document.querySelector(`[data-option="translated"][onclick*="${sectionId}"]`);
+            const originalBtn = document.querySelector(`[data-option="original"][onclick*="${sectionId}"]`);
 
-<script>
-    // Mobile toggle functionality
-    function toggleSectionContent(sectionId, viewType) {
-        const translatedContent = document.getElementById('content-translated-' + sectionId.replace('section-', ''));
-        const originalContent = document.getElementById('content-original-' + sectionId.replace('section-', ''));
-        const translatedBtn = document.querySelector(`[data-option="translated"][onclick*="${sectionId}"]`);
-        const originalBtn = document.querySelector(`[data-option="original"][onclick*="${sectionId}"]`);
-
-        if (viewType === 'translated') {
-            translatedContent.style.display = 'block';
-            originalContent.style.display = 'none';
-            translatedBtn.classList.add('active');
-            originalBtn.classList.remove('active');
-        } else {
-            translatedContent.style.display = 'none';
-            originalContent.style.display = 'block';
-            translatedBtn.classList.remove('active');
-            originalBtn.classList.add('active');
-        }
-    }
-
-    // Initialize page animations
-    document.addEventListener('DOMContentLoaded', function () {
-        // Code System Toggle functionality
-        const toggle = document.getElementById('codeSystemToggle');
-
-        function findAndToggleBadges(show) {
-            // Handle both individual badges and enhanced table cell structure
-            const badges = document.querySelectorAll('.code-system-badge');
-            const badgeRows = document.querySelectorAll('.badge-row');
-
-            console.log('=== CODE SYSTEM TOGGLE DEBUG (Enhanced) ===');
-            console.log('Toggle element:', toggle);
-            console.log('Found individual badges:', badges.length);
-            console.log('Found badge rows:', badgeRows.length);
-            console.log('Toggle state (show):', show);
-
-            // Toggle individual badges (for inline badges)
-            badges.forEach((badge, index) => {
-                console.log(`Badge ${index}:`, badge.textContent, badge.classList.toString());
-
-                if (show) {
-                    badge.classList.add('show');
-                    console.log(`Showing badge ${index}:`, badge.textContent);
-                } else {
-                    badge.classList.remove('show');
-                    console.log(`Hiding badge ${index}:`, badge.textContent);
-                }
-            });
-
-            // Toggle badge rows (for enhanced table cells)
-            badgeRows.forEach((row, index) => {
-                console.log(`Badge row ${index}:`, row.innerHTML.substring(0, 50) + '...');
-
-                if (show) {
-                    row.classList.add('show');
-                    console.log(`Showing badge row ${index}`);
-                } else {
-                    row.classList.remove('show');
-                    console.log(`Hiding badge row ${index}`);
-                }
-            });
-
-            console.log('=== END ENHANCED TOGGLE DEBUG ===');
-        } if (toggle) {
-            toggle.addEventListener('change', function () {
-                console.log('Toggle changed:', this.checked);
-                findAndToggleBadges(this.checked);
-            });
-
-            // Also run once on page load to initialize
-            setTimeout(() => {
-                findAndToggleBadges(toggle.checked);
-            }, 100);
+            if (viewType === 'translated') {
+                translatedContent.style.display = 'block';
+                originalContent.style.display = 'none';
+                translatedBtn.classList.add('active');
+                originalBtn.classList.remove('active');
+            } else {
+                translatedContent.style.display = 'none';
+                originalContent.style.display = 'block';
+                translatedBtn.classList.remove('active');
+                originalBtn.classList.add('active');
+            }
         }
 
-        // Animate stats on page load
-        const statValues = document.querySelectorAll('.stat-value');
-        statValues.forEach((stat, index) => {
-            stat.style.opacity = '0';
-            stat.style.transform = 'translateY(20px)';
-            setTimeout(() => {
-                stat.style.transition = 'all 0.5s ease';
-                stat.style.opacity = '1';
-                stat.style.transform = 'translateY(0)';
-            }, index * 100);
+        // Initialize page animations
+        document.addEventListener('DOMContentLoaded', function () {
+            // Code System Toggle functionality
+            const toggle = document.getElementById('codeSystemToggle');
+
+            function findAndToggleBadges(show) {
+                // Handle both individual badges and enhanced table cell structure
+                const badges = document.querySelectorAll('.code-system-badge');
+                const badgeRows = document.querySelectorAll('.badge-row');
+
+                console.log('=== CODE SYSTEM TOGGLE DEBUG (Enhanced) ===');
+                console.log('Toggle element:', toggle);
+                console.log('Found individual badges:', badges.length);
+                console.log('Found badge rows:', badgeRows.length);
+                console.log('Toggle state (show):', show);
+
+                // Toggle individual badges (for inline badges)
+                badges.forEach((badge, index) => {
+                    console.log(`Badge ${index}:`, badge.textContent, badge.classList.toString());
+
+                    if (show) {
+                        badge.classList.add('show');
+                        console.log(`Showing badge ${index}:`, badge.textContent);
+                    } else {
+                        badge.classList.remove('show');
+                        console.log(`Hiding badge ${index}:`, badge.textContent);
+                    }
+                });
+
+                // Toggle badge rows (for enhanced table cells)
+                badgeRows.forEach((row, index) => {
+                    console.log(`Badge row ${index}:`, row.innerHTML.substring(0, 50) + '...');
+
+                    if (show) {
+                        row.classList.add('show');
+                        console.log(`Showing badge row ${index}`);
+                    } else {
+                        row.classList.remove('show');
+                        console.log(`Hiding badge row ${index}`);
+                    }
+                });
+
+                console.log('=== END ENHANCED TOGGLE DEBUG ===');
+            } if (toggle) {
+                toggle.addEventListener('change', function () {
+                    console.log('Toggle changed:', this.checked);
+                    findAndToggleBadges(this.checked);
+                });
+
+                // Also run once on page load to initialize
+                setTimeout(() => {
+                    findAndToggleBadges(toggle.checked);
+                }, 100);
+            }
+
+            // Animate stats on page load
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues.forEach((stat, index) => {
+                stat.style.opacity = '0';
+                stat.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    stat.style.transition = 'all 0.5s ease';
+                    stat.style.opacity = '1';
+                    stat.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // Add stagger animation to sections
+            const sections = document.querySelectorAll('.wrap-collapsible');
+            sections.forEach((section, index) => {
+                section.style.animationDelay = `${index * 0.1}s`;
+            });
         });
+    </script>
 
-        // Add stagger animation to sections
-        const sections = document.querySelectorAll('.wrap-collapsible');
-        sections.forEach((section, index) => {
-            section.style.animationDelay = `${index * 0.1}s`;
-        });
-    });
-</script>
-
-<style>
-    /* Clinical Codes Sub-text Styling */
-    .section-title-container {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        flex: 1;
-    }
-
-    .section-title-main {
-        font-weight: 600;
-        font-size: 1.1em;
-        margin-bottom: 0.25rem;
-    }
-
-    .section-codes-subtext {
-        font-size: 0.75em;
-        color: #6c757d;
-        font-weight: 400;
-        background: rgba(108, 117, 125, 0.1);
-        padding: 0.2rem 0.5rem;
-        border-radius: 0.25rem;
-        margin-top: 0.25rem;
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-        border-left: 3px solid #17a2b8;
-    }
-
-    .section-codes-subtext i {
-        color: #17a2b8;
-    }
-
-    /* Adjust label layout to accommodate the new structure */
-    .lbl-toggle-title {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-
-    /* Code System Toggle Styles */
-    .code-system-toggle {
-        margin-top: 0.5rem;
-        display: flex;
-        align-items: center;
-        font-size: 0.85em;
-    }
-
-    .toggle-switch {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        user-select: none;
-    }
-
-    .toggle-switch input[type="checkbox"] {
-        display: none;
-    }
-
-    .toggle-slider {
-        position: relative;
-        width: 34px;
-        height: 18px;
-        background-color: #ccc;
-        border-radius: 18px;
-        margin-right: 8px;
-        transition: background-color 0.3s;
-    }
-
-    .toggle-slider:before {
-        content: "";
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 14px;
-        height: 14px;
-        background-color: white;
-        border-radius: 50%;
-        transition: transform 0.3s;
-    }
-
-    .toggle-switch input:checked+.toggle-slider {
-        background-color: #0d6efd;
-    }
-
-    .toggle-switch input:checked+.toggle-slider:before {
-        transform: translateX(16px);
-    }
-
-    .toggle-label {
-        font-weight: 500;
-        color: #495057;
-    }
-
-    /* Code System Badge Styles - Hidden by default, shown only when toggle is checked */
-    .code-system-badge,
-    span.code-system-badge,
-    td .code-system-badge,
-    .ps-td .code-system-badge {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        margin-left: 0.5rem;
-        padding: 0.25rem 0.5rem;
-        background: linear-gradient(135deg, #28a745, #20c997);
-        color: white;
-        border-radius: 8px;
-        font-size: 0.7rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        border: 2px solid rgba(255, 255, 255, 0.4);
-        white-space: nowrap;
-        z-index: 1000;
-        position: relative;
-    }
-
-    /* Show badges only when the show class is added */
-    .code-system-badge.show,
-    span.code-system-badge.show,
-    td .code-system-badge.show,
-    .ps-td .code-system-badge.show {
-        display: inline-block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        animation: fadeInScale 0.3s ease-out;
-    }
-
-    .code-system-badge.loinc {
-        background: linear-gradient(135deg, #6f42c1, #8B5CF6);
-        border: 2px solid #ffffff;
-    }
-
-    .code-system-badge.snomed {
-        background: linear-gradient(135deg, #dc3545, #F87171);
-        border: 2px solid #ffffff;
-    }
-
-    .code-system-badge.icd10 {
-        background: linear-gradient(135deg, #fd7e14, #FBBF24);
-        border: 2px solid #ffffff;
-        color: #000000;
-    }
-
-    .code-system-badge.atc {
-        background: linear-gradient(135deg, #0dcaf0, #06B6D4);
-        border: 2px solid #ffffff;
-        color: #000000;
-    }
-
-    .code-system-badge.ucum {
-        background: linear-gradient(135deg, #198754, #10B981);
-        border: 2px solid #ffffff;
-        color: #ffffff;
-    }
-
-    .code-system-badge.ndc {
-        background: linear-gradient(135deg, #6610f2, #8B5CF6);
-        border: 2px solid #ffffff;
-        color: #ffffff;
-    }
-
-    .code-system-badge.date {
-        background: linear-gradient(135deg, #495057, #6C757D);
-        border: 2px solid #ffffff;
-        color: #ffffff;
-    }
-
-    @keyframes fadeInScale {
-        0% {
-            opacity: 0;
-            transform: scale(0.8);
-        }
-
-        100% {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
-
-    /* Make badges stack vertically on smaller screens */
-    @media (max-width: 768px) {
-        .lbl-toggle-title {
+    <style>
+        /* Clinical Codes Sub-text Styling */
+        .section-title-container {
+            display: flex;
             flex-direction: column;
             align-items: flex-start;
+            flex: 1;
+        }
+
+        .section-title-main {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 0.25rem;
         }
 
         .section-codes-subtext {
-            font-size: 0.7em;
-            word-break: break-all;
+            font-size: 0.75em;
+            color: #6c757d;
+            font-weight: 400;
+            background: rgba(108, 117, 125, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            border-left: 3px solid #17a2b8;
         }
-    }
-</style>
 
-{% endblock %}
+        .section-codes-subtext i {
+            color: #17a2b8;
+        }
+
+        /* Adjust label layout to accommodate the new structure */
+        .lbl-toggle-title {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        /* Code System Toggle Styles */
+        .code-system-toggle {
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            font-size: 0.85em;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle-switch input[type="checkbox"] {
+            display: none;
+        }
+
+        .toggle-slider {
+            position: relative;
+            width: 34px;
+            height: 18px;
+            background-color: #ccc;
+            border-radius: 18px;
+            margin-right: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-slider:before {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 14px;
+            height: 14px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background-color: #0d6efd;
+        }
+
+        .toggle-switch input:checked+.toggle-slider:before {
+            transform: translateX(16px);
+        }
+
+        .toggle-label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        /* Code System Badge Styles - Hidden by default, shown only when toggle is checked */
+        .code-system-badge,
+        span.code-system-badge,
+        td .code-system-badge,
+        .ps-td .code-system-badge {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            margin-left: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            white-space: nowrap;
+            z-index: 1000;
+            position: relative;
+        }
+
+        /* Show badges only when the show class is added */
+        .code-system-badge.show,
+        span.code-system-badge.show,
+        td .code-system-badge.show,
+        .ps-td .code-system-badge.show {
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            animation: fadeInScale 0.3s ease-out;
+        }
+
+        .code-system-badge.loinc {
+            background: linear-gradient(135deg, #6f42c1, #8B5CF6);
+            border: 2px solid #ffffff;
+        }
+
+        .code-system-badge.snomed {
+            background: linear-gradient(135deg, #dc3545, #F87171);
+            border: 2px solid #ffffff;
+        }
+
+        .code-system-badge.icd10 {
+            background: linear-gradient(135deg, #fd7e14, #FBBF24);
+            border: 2px solid #ffffff;
+            color: #000000;
+        }
+
+        .code-system-badge.atc {
+            background: linear-gradient(135deg, #0dcaf0, #06B6D4);
+            border: 2px solid #ffffff;
+            color: #000000;
+        }
+
+        .code-system-badge.ucum {
+            background: linear-gradient(135deg, #198754, #10B981);
+            border: 2px solid #ffffff;
+            color: #ffffff;
+        }
+
+        .code-system-badge.ndc {
+            background: linear-gradient(135deg, #6610f2, #8B5CF6);
+            border: 2px solid #ffffff;
+            color: #ffffff;
+        }
+
+        .code-system-badge.date {
+            background: linear-gradient(135deg, #495057, #6C757D);
+            border: 2px solid #ffffff;
+            color: #ffffff;
+        }
+
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Make badges stack vertically on smaller screens */
+        @media (max-width: 768px) {
+            .lbl-toggle-title {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .section-codes-subtext {
+                font-size: 0.7em;
+                word-break: break-all;
+            }
+        }
+    </style>
+
+    {% endblock %}
