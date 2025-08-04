@@ -47,7 +47,13 @@
                 {% for identifier in patient_identity.patient_identifiers %}
                 {% if identifier.extension and identifier.extension not in [patient_identity.primary_patient_id,
                 patient_identity.secondary_patient_id] %}
-                <span class="patient-id-additional">ID: {{ identifier.extension }}</span>
+                <span class="patient-id-additional">
+                    {% if identifier.assigningAuthorityName %}
+                    {{ identifier.assigningAuthorityName }}: {{ identifier.extension }}
+                    {% else %}
+                    ID: {{ identifier.extension }}
+                    {% endif %}
+                </span>
                 {% endif %}
                 {% endfor %}
                 {% endif %}
@@ -253,7 +259,7 @@
                     {% if identifier.extension and identifier.extension not in [patient_identity.primary_patient_id,
                     patient_identity.secondary_patient_id] %}
                     <div class="info-item">
-                        <span class="info-label">Patient ID{% if identifier.root %} ({{ identifier.root|truncate(20,
+                        <span class="info-label">Patient ID{% if identifier.assigningAuthorityName %} ({{ identifier.assigningAuthorityName }}){% elif identifier.root %} ({{ identifier.root|truncate(20,
                             True) }}){% endif %}:</span>
                         <span class="info-value">{{ identifier.extension }}</span>
                     </div>

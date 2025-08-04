@@ -101,8 +101,7 @@
                     {% if has_cda_match and patient_summary.patient_identifiers %}
                     {% for identifier in patient_summary.patient_identifiers %}
                     <div class="info-item">
-                        <label class="info-label">Patient ID{% if identifier.root %} ({{ identifier.root }}){% endif
-                            %}:</label>
+                        <label class="info-label">Patient ID{% if identifier.assigningAuthorityName %} ({{ identifier.assigningAuthorityName }}){% elif identifier.root %} ({{ identifier.root }}){% endif %}:</label>
                         <span class="info-value">{{ identifier.extension }}</span>
                     </div>
                     {% endfor %}
