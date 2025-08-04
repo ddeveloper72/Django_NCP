@@ -5409,6 +5409,10 @@ div.page-header img.country-flag {
 }
 .patient-details-header .breadcrumb-nav {
   margin-bottom: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
 }
 .patient-details-header .breadcrumb-nav .breadcrumb-link {
   display: -webkit-inline-box;
@@ -5420,10 +5424,21 @@ div.page-header img.country-flag {
   gap: 0.5rem;
   color: #1976d2;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 .patient-details-header .breadcrumb-nav .breadcrumb-link:hover {
-  text-decoration: underline;
+  background: #1976d2;
+  color: #ffffff;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
 }
 .patient-details-header .page-title {
   font-size: 2rem;

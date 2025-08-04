@@ -28,6 +28,41 @@
   font-weight: 400;
 }
 
+/* Navigation breadcrumb styling */
+.cda-navigation {
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+  padding: 1rem 2rem;
+}
+.cda-navigation .breadcrumb-nav {
+  margin: 0;
+}
+.cda-navigation .breadcrumb-nav .breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #085a9f;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.cda-navigation .breadcrumb-nav .breadcrumb-link:hover {
+  background: #085a9f;
+  color: #ffffff;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(8, 90, 159, 0.3);
+}
+.cda-navigation .breadcrumb-nav .breadcrumb-link i {
+  font-size: 0.9rem;
+}
+
 .patient-identity-banner {
   background: #e6f2ff;
   border: 3px solid #085a9f;
