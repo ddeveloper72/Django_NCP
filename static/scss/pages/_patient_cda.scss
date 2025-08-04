@@ -90,14 +90,84 @@ $ps-light-gray: #f8f9fa;
     .document-meta {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.3rem;
 
       div {
         background: $ps-white;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
         font-weight: 500;
         border: 1px solid $ps-secondary-blue;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        font-size: 0.85rem;
+
+        i {
+          margin-right: 0.4rem;
+          opacity: 0.8;
+        }
+      }
+
+      .document-country {
+        background: linear-gradient(
+          135deg,
+          $ps-primary-blue,
+          $ps-secondary-blue
+        );
+        color: $ps-white;
+        border-color: $ps-primary-blue;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .document-creation-date {
+        background: linear-gradient(135deg, #e8f5e8, #d4edda);
+        border-color: #28a745;
+
+        i {
+          color: #28a745;
+        }
+      }
+
+      .document-update-date {
+        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        border-color: #ffc107;
+
+        i {
+          color: #e67e22;
+        }
+
+        &.critical-info {
+          background: linear-gradient(135deg, #fff3cd, #f39c12);
+          border-color: #e67e22;
+          border-width: 2px;
+          font-weight: 600;
+          animation: subtle-pulse 3s ease-in-out infinite;
+
+          i {
+            color: #d35400;
+            font-weight: bold;
+          }
+        }
+      }
+
+      .document-version {
+        background: linear-gradient(135deg, #e2f3f8, #d1ecf1);
+        border-color: #17a2b8;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.8rem;
+
+        i {
+          color: #17a2b8;
+        }
+      }
+
+      .document-language {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-color: #6c757d;
+        opacity: 0.9;
+        font-size: 0.8rem;
       }
     }
   }
@@ -731,6 +801,21 @@ input[type='checkbox'] {
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@keyframes subtle-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
