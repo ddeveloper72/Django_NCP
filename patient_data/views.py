@@ -266,8 +266,69 @@ def patient_cda_view(request, patient_id):
             logger.info(
                 "Using enhanced Luxembourg CDA data for translation demonstration"
             )
-            # Use actual Luxembourg patient CDA data with structured medication history
+            # Use actual Luxembourg patient CDA data with structured medication history and administrative data
             sample_cda_content = """
+            <ClinicalDocument xmlns="urn:hl7-org:v3">
+                <recordTarget>
+                    <patientRole>
+                        <addr use="HP">
+                            <streetAddressLine>123 Rue de la Paix</streetAddressLine>
+                            <city>Luxembourg</city>
+                            <postalCode>1234</postalCode>
+                            <country>LU</country>
+                        </addr>
+                        <telecom value="tel:+352123456789" use="HP"/>
+                        <telecom value="mailto:patient@example.lu" use="HP"/>
+                    </patientRole>
+                </recordTarget>
+                <author>
+                    <assignedAuthor>
+                        <assignedPerson>
+                            <name>
+                                <prefix>Dr.</prefix>
+                                <given>Marie</given>
+                                <family>Dubois</family>
+                            </name>
+                        </assignedPerson>
+                        <representedOrganization>
+                            <name>Centre Hospitalier de Luxembourg</name>
+                            <addr>
+                                <streetAddressLine>4 Rue Nicolas Ernest Barblé</streetAddressLine>
+                                <city>Luxembourg</city>
+                                <postalCode>1210</postalCode>
+                                <country>LU</country>
+                            </addr>
+                            <telecom value="tel:+35244111" use="WP"/>
+                        </representedOrganization>
+                    </assignedAuthor>
+                </author>
+                <custodian>
+                    <assignedCustodian>
+                        <representedCustodianOrganization>
+                            <name>Direction de la Santé - Luxembourg</name>
+                            <addr>
+                                <streetAddressLine>Villa Louvigny, Allée Marconi</streetAddressLine>
+                                <city>Luxembourg</city>
+                                <postalCode>2120</postalCode>
+                                <country>LU</country>
+                            </addr>
+                        </representedCustodianOrganization>
+                    </assignedCustodian>
+                </custodian>
+                <legalAuthenticator>
+                    <assignedEntity>
+                        <assignedPerson>
+                            <name>
+                                <prefix>Dr.</prefix>
+                                <given>Jean</given>
+                                <family>Mueller</family>
+                            </name>
+                        </assignedPerson>
+                    </assignedEntity>
+                </legalAuthenticator>
+                <component>
+                    <structuredBody>
+                        <component>
             <section>
                 <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Medication use Narrative">
                     <translation code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Medication use Narrative"/>
@@ -393,6 +454,10 @@ def patient_cda_view(request, patient_id):
                     </table>
                 </text>
             </section>
+                        </component>
+                    </structuredBody>
+                </component>
+            </ClinicalDocument>
             """
             translation_cda_content = sample_cda_content
         else:
