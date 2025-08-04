@@ -602,42 +602,31 @@ input[type='checkbox'] {
   margin-left: 0.5rem;
 }
 
-// Code System Badge - sub-row enhancement for tables
+// Code System Badge - enhanced visibility as plain text
 .code-system-badge {
   display: none; // Hidden by default
-  font-size: 0.55rem;
-  font-weight: 300;
+  font-size: 0.65rem; // Slightly larger for better readability
+  font-weight: 500; // Medium weight for better visibility
   font-family: 'Courier New', monospace;
-  color: #999;
+  color: #555; // Darker color for better contrast
   margin-left: 0.25rem;
-  padding: 0;
+  margin-right: 0.5rem;
+  padding: 0.1rem 0.25rem; // Small padding for better spacing
   border: none;
-  background: none;
+  background: rgba(0, 0, 0, 0.03); // Very subtle background
+  border-radius: 3px; // Subtle rounding
   white-space: nowrap;
-  font-style: italic;
+  font-style: normal; // Remove italic for better readability
 
   // Show badges only when toggle is checked
   &.show {
     display: inline;
-    opacity: 0.7;
+    opacity: 0.85; // Higher opacity for better visibility
   }
 
-  // Color coding for different systems
-  &.loinc {
-    color: #6b8e6b;
-  }
-
-  &.snomed,
-  &.snomedct {
-    color: #a0895a;
-  }
-
-  &.icd10 {
-    color: #6b85a0;
-  }
-
-  &.atc {
-    color: #8e6b8e;
+  // Add slight spacing between multiple badges
+  &:not(:last-child) {
+    margin-right: 0.75rem;
   }
 }
 
@@ -648,25 +637,31 @@ input[type='checkbox'] {
     line-height: 1.3;
     margin-bottom: 0.125rem;
   }
-  
+
   .badge-row {
     display: none; // Hidden by default
-    margin-top: 0.25rem;
-    padding-top: 0.125rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    font-size: 0.55rem;
-    line-height: 1.1;
-    opacity: 0.7;
-    
+    margin-top: 0.375rem; // Slightly more space
+    padding-top: 0.25rem; // More padding for better separation
+    border-top: 1px solid rgba(0, 0, 0, 0.08); // Slightly more visible border
+    font-size: 0.65rem; // Match badge font size
+    line-height: 1.2; // Better line height
+    opacity: 0.9; // Higher opacity for better visibility
+    background: rgba(
+      0,
+      0,
+      0,
+      0.01
+    ); // Very subtle background for the badge area
+
     // Show when badges are enabled
     &.show {
       display: block;
     }
-    
+
     .code-system-badge {
       display: inline;
-      margin-right: 0.5rem;
-      
+      margin-right: 0.75rem; // More space between badges
+
       &:last-child {
         margin-right: 0;
       }

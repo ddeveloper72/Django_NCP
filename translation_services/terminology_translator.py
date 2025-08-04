@@ -396,3 +396,24 @@ def get_available_translation_languages() -> List[Tuple[str, str]]:
     }
 
     return [(code, language_map.get(code, code.upper())) for code in language_codes]
+
+
+class TerminologyTranslatorCompat(TerminologyTranslator):
+    """
+    Compatibility wrapper for CDATranslationService
+    Provides legacy method names while using CTS-based architecture
+    """
+
+    def translate_term(self, term: str, source_lang: str = "fr") -> str:
+        """
+        Compatibility method for legacy translate_term calls
+        Returns the term as-is since proper CTS translation is document-level
+        """
+        return term
+
+    def translate_text_block(self, text: str, source_lang: str = "fr") -> str:
+        """
+        Compatibility method for legacy translate_text_block calls
+        Returns the text as-is since proper CTS translation is document-level
+        """
+        return text

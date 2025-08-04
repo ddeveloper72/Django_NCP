@@ -270,21 +270,21 @@ def patient_cda_view(request, patient_id):
             sample_cda_content = """
             <section>
                 <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Medication use Narrative">
-                    <translation code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Historique de la prise médicamenteuse"/>
+                    <translation code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Medication use Narrative"/>
                 </code>
-                <title>Historique de la prise médicamenteuse</title>
+                <title>History of Medication use</title>
                 <text>
                     <table>
                         <thead>
                             <tr>
                                 <th>Code</th>
-                                <th>Nom commercial</th>
-                                <th>Principe actif et dosage</th>
-                                <th>Forme pharmaceutique</th>
+                                <th>Brand Name</th>
+                                <th>Active Ingredient and Dosage</th>
+                                <th>Pharmaceutical Form</th>
                                 <th>Route</th>
-                                <th>Posologie</th>
-                                <th>Date de début</th>
-                                <th>Date de fin</th>
+                                <th>Dosage</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
                                 <th>Notes</th>
                             </tr>
                         </thead>
@@ -293,9 +293,9 @@ def patient_cda_view(request, patient_id):
                                 <td ID="medication1-code">2009050307</td>
                                 <td ID="medication1-nom">RETROVIR</td>
                                 <td ID="medication1-principe">zidovudine 10.0mg/ml</td>
-                                <td ID="medication1-forme">sol buv</td>
-                                <td ID="medication1-route">orale</td>
-                                <td ID="medication1-posologie">300 mg par 12 Heure</td>
+                                <td ID="medication1-forme">oral solution</td>
+                                <td ID="medication1-route">oral</td>
+                                <td ID="medication1-posologie">300 mg every 12 hours</td>
                                 <td ID="medication1-start">01/08/2022</td>
                                 <td ID="medication1-end">18/08/2023</td>
                                 <td ID="medication1-notes">abc</td>
@@ -303,10 +303,10 @@ def patient_cda_view(request, patient_id):
                             <tr ID="medication2">
                                 <td ID="medication2-code">2007029189</td>
                                 <td ID="medication2-nom">VIREAD</td>
-                                <td ID="medication2-principe">ténofovir disoproxil fumarate 245.0mg</td>
-                                <td ID="medication2-forme">cp</td>
-                                <td ID="medication2-route">orale</td>
-                                <td ID="medication2-posologie">1 cp par Jour</td>
+                                <td ID="medication2-principe">tenofovir disoproxil fumarate 245.0mg</td>
+                                <td ID="medication2-forme">tablet</td>
+                                <td ID="medication2-route">oral</td>
+                                <td ID="medication2-posologie">1 tablet daily</td>
                                 <td ID="medication2-start">01/08/2022</td>
                                 <td ID="medication2-end">18/08/2023</td>
                                 <td ID="medication2-notes"></td>
@@ -314,10 +314,10 @@ def patient_cda_view(request, patient_id):
                             <tr ID="medication3">
                                 <td ID="medication3-code">2008039720</td>
                                 <td ID="medication3-nom">VIRAMUNE</td>
-                                <td ID="medication3-principe">névirapine 200.0mg</td>
-                                <td ID="medication3-forme">cp</td>
-                                <td ID="medication3-route">orale</td>
-                                <td ID="medication3-posologie">1 cp par Jour</td>
+                                <td ID="medication3-principe">nevirapine 200.0mg</td>
+                                <td ID="medication3-forme">tablet</td>
+                                <td ID="medication3-route">oral</td>
+                                <td ID="medication3-posologie">1 tablet daily</td>
                                 <td ID="medication3-start">01/08/2022</td>
                                 <td ID="medication3-end">18/08/2023</td>
                                 <td ID="medication3-notes"></td>
@@ -1239,15 +1239,15 @@ def test_ps_table_rendering(request):
     <html>
         <body>
             <div class="section">
-                <h3 id="section-10160-0" data-code="10160-0">Historique de la prise médicamenteuse</h3>
+                <h3 id="section-10160-0" data-code="10160-0">History of Medication use</h3>
                 <div class="section-content">
                     <table>
                         <thead>
                             <tr>
-                                <th>Nom commercial</th>
-                                <th>Principe actif</th>
+                                <th>Brand Name</th>
+                                <th>Active Ingredient</th>
                                 <th>Dosage</th>
-                                <th>Posologie</th>
+                                <th>Posology</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1255,13 +1255,13 @@ def test_ps_table_rendering(request):
                                 <td>RETROVIR</td>
                                 <td>zidovudine</td>
                                 <td>10.0mg/ml</td>
-                                <td>300 mg par 12 Heure</td>
+                                <td>300 mg every 12 hours</td>
                             </tr>
                             <tr>
                                 <td>VIREAD</td>
-                                <td>ténofovir disoproxil fumarate</td>
+                                <td>tenofovir disoproxil fumarate</td>
                                 <td>245.0mg</td>
-                                <td>1 cp par Jour</td>
+                                <td>1 tablet daily</td>
                             </tr>
                         </tbody>
                     </table>

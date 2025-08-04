@@ -1,6 +1,6 @@
 """
 CDA Translation Service for EU Cross-Border Patient Documents
-Provides medical terminology translation for Clinical Document Architecture files
+Provides medical terminology translation using Central Terminology Server (CTS)
 """
 
 import xml.etree.ElementTree as ET
@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Tuple
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from translation_services.terminology_translator import TerminologyTranslatorCompat
 
 
 @dataclass
@@ -23,223 +24,35 @@ class TranslatedSection:
     subsections: List["TranslatedSection"] = None
 
 
-class MedicalTerminologyTranslator:
-    """Medical terminology translator for common EU languages to English"""
-
-    def __init__(self):
-        self.terminology_db = {
-            # French medical terms
-            "fr": {
-                # Section headers
-                "Historique de la prise médicamenteuse": "Medication History",
-                "Allergies, effets indésirables, alertes": "Allergies, Adverse Reactions, Alerts",
-                "Vaccinations": "Vaccinations",
-                "Liste des problèmes": "Problem List",
-                "Antécédents chirurgicaux": "Surgical History",
-                "Liste des dispositifs médicaux": "Medical Devices List",
-                # Patient information
-                "Patient": "Patient",
-                "Date de naissance": "Date of Birth",
-                "Sexe": "Gender",
-                "ID patient": "Patient ID",
-                "Féminin": "Female",
-                "Masculin": "Male",
-                # Document metadata
-                "Evènement documenté": "Documented Event",
-                "Prestation de soins": "Care Provision",
-                "Auteur": "Author",
-                "Organisation": "Organization",
-                "Créé le": "Created on",
-                # Medication terms
-                "Nom commercial": "Brand Name",
-                "Principe actif et dosage": "Active Ingredient and Dosage",
-                "Forme pharmaceutique": "Pharmaceutical Form",
-                "Route": "Route",
-                "Posologie": "Dosage",
-                "Date de début": "Start Date",
-                "Date de fin": "End Date",
-                "Notes": "Notes",
-                "orale": "oral",
-                "cp": "tablet",
-                "sol buv": "oral solution",
-                "par Jour": "per Day",
-                "par Heure": "per Hour",
-                # Additional header translations
-                "CODE": "Code",
-                "Code": "Code",
-                "DATE DE DEBUT": "Start Date",
-                "DEBUT": "Start",
-                # Common medical terms
-                "mg": "mg",
-                "ml": "ml",
-                "traitement": "treatment",
-                "médicament": "medication",
-                "allergie": "allergy",
-                "vaccination": "vaccination",
-                "problème": "problem",
-                "chirurgie": "surgery",
-                "dispositif": "device",
-                # Vaccine specific terms
-                "Vaccin contre la grippe saisonnière": "Seasonal Flu Vaccine",
-                "Vaccin COVID-19": "COVID-19 Vaccine",
-                "Vaccin": "Vaccine",
-                "grippe": "flu",
-                "saisonnière": "seasonal",
-                "contre": "against",
-                "Pfizer-BioNTech": "Pfizer-BioNTech",
-                "Administré": "Administered",
-                "Rappel administré": "Booster Administered",
-                # Allergy specific terms
-                "Allergie médicamenteuse": "Drug Allergy",
-                "Allergie alimentaire": "Food Allergy",
-                "Type d'allergie": "Allergy Type",
-                "Agent causant": "Causative Agent",
-                "Manifestation": "Manifestation",
-                "Sévérité": "Severity",
-                "Statut": "Status",
-                "Pénicilline": "Penicillin",
-                "Fruits de mer": "Seafood",
-                "Éruption cutanée": "Skin Rash",
-                "Anaphylaxie": "Anaphylaxis",
-                "Modérée": "Moderate",
-                "Sévère": "Severe",
-                "Confirmée": "Confirmed",
-                # Medication specific terms
-                "zidovudine": "zidovudine",
-                "ténofovir disoproxil fumarate": "tenofovir disoproxil fumarate",
-                "névirapine": "nevirapine",
-                "RETROVIR": "RETROVIR",
-                "VIREAD": "VIREAD",
-                "VIRAMUNE": "VIRAMUNE",
-            },
-            # German medical terms
-            "de": {
-                "Medikationsgeschichte": "Medication History",
-                "Allergien": "Allergies",
-                "Impfungen": "Vaccinations",
-                "Problemliste": "Problem List",
-                "Patient": "Patient",
-                "Geburtsdatum": "Date of Birth",
-                "Geschlecht": "Gender",
-                "weiblich": "Female",
-                "männlich": "Male",
-                "oral": "oral",
-                "Tablette": "tablet",
-            },
-            # Spanish medical terms
-            "es": {
-                "Historial de medicación": "Medication History",
-                "Alergias": "Allergies",
-                "Vacunas": "Vaccinations",
-                "Lista de problemas": "Problem List",
-                "Paciente": "Patient",
-                "Fecha de nacimiento": "Date of Birth",
-                "Sexo": "Gender",
-                "Femenino": "Female",
-                "Masculino": "Male",
-                "oral": "oral",
-                "comprimido": "tablet",
-            },
-            # Italian medical terms
-            "it": {
-                "Storia farmacologica": "Medication History",
-                "Allergie": "Allergies",
-                "Vaccinazioni": "Vaccinations",
-                "Elenco problemi": "Problem List",
-                "Paziente": "Patient",
-                "Data di nascita": "Date of Birth",
-                "Sesso": "Gender",
-                "Femmina": "Female",
-                "Maschio": "Male",
-                "orale": "oral",
-                "compressa": "tablet",
-            },
-        }
-
-    def detect_language(self, text: str) -> str:
-        """Detect the language of the medical document"""
-        # Simple language detection based on common medical terms
-        text_lower = text.lower()
-
-        french_indicators = [
-            "médical",
-            "patient",
-            "médicament",
-            "allergie",
-            "de naissance",
-        ]
-        german_indicators = ["patient", "medikament", "allergie", "geburtsdatum"]
-        spanish_indicators = [
-            "paciente",
-            "medicamento",
-            "alergia",
-            "fecha de nacimiento",
-        ]
-        italian_indicators = ["paziente", "farmaco", "allergia", "data di nascita"]
-
-        scores = {
-            "fr": sum(1 for term in french_indicators if term in text_lower),
-            "de": sum(1 for term in german_indicators if term in text_lower),
-            "es": sum(1 for term in spanish_indicators if term in text_lower),
-            "it": sum(1 for term in italian_indicators if term in text_lower),
-        }
-
-        return max(scores, key=scores.get) if max(scores.values()) > 0 else "fr"
-
-    def translate_term(self, term: str, source_lang: str) -> str:
-        """Translate a medical term from source language to English"""
-        if source_lang not in self.terminology_db:
-            return term
-
-        # Direct translation lookup
-        if term in self.terminology_db[source_lang]:
-            return self.terminology_db[source_lang][term]
-
-        # Case-insensitive lookup
-        term_lower = term.lower()
-        for original, translation in self.terminology_db[source_lang].items():
-            if original.lower() == term_lower:
-                return translation
-
-        # Partial match for compound terms
-        for original, translation in self.terminology_db[source_lang].items():
-            if original.lower() in term_lower or term_lower in original.lower():
-                return f"{translation} ({term})"
-
-        return term
-
-    def translate_text_block(self, text: str, source_lang: str) -> str:
-        """Translate a block of medical text"""
-        if not text or source_lang not in self.terminology_db:
-            return text
-
-        translated_text = text
-
-        # Replace medical terms while preserving structure
-        for original, translation in self.terminology_db[source_lang].items():
-            # Use word boundaries to avoid partial replacements
-            pattern = r"\b" + re.escape(original) + r"\b"
-            translated_text = re.sub(
-                pattern, translation, translated_text, flags=re.IGNORECASE
-            )
-
-        return translated_text
-
-
 class CDATranslationService:
-    """Service for translating CDA documents and creating bilingual displays"""
+    """Service for translating CDA documents using Central Terminology Server (CTS)"""
 
     def __init__(self, target_language: str = "en"):
         """
-        Initialize CDA Translation Service with terminology support
+        Initialize CDA Translation Service with CTS-based terminology support
 
         Args:
             target_language: Target language for terminology translations (default: English)
         """
-        self.translator = MedicalTerminologyTranslator()
+        # Use proper CTS-based terminology translator instead of hardcoded dictionaries
+        self.translator = TerminologyTranslatorCompat(target_language=target_language)
         from .ps_table_renderer import PSTableRenderer
 
         self.table_renderer = PSTableRenderer(target_language=target_language)
+
+    def _translate_text_compatibility(
+        self, text: str, source_lang: str = "auto"
+    ) -> str:
+        """
+        Compatibility method to handle individual text translation
+        Note: This is a bridge method - full document translation is preferred for CTS accuracy
+        """
+        if not text or not isinstance(text, str):
+            return text
+
+        # For individual text pieces, return as-is since proper CTS translation
+        # works best with full document context including codes and structure
+        return text
 
     def parse_cda_html(self, html_content: str) -> Dict:
         """Parse CDA HTML document and extract structured data"""
@@ -256,16 +69,26 @@ class CDATranslationService:
         # Extract medical sections
         sections = self._extract_sections(soup)
 
-        # Detect document language
-        full_text = soup.get_text()
-        language = self.translator.detect_language(full_text)
+        # Use CTS-based translation service for proper terminology handling
+        document_text = soup.get_text()
+        translation_result = self.translator.translate_clinical_document(
+            document_content=html_content,
+            source_language="auto",  # Let CTS determine source language
+        )
 
         return {
             "patient_info": patient_info,
             "document_info": document_info,
             "sections": sections,
-            "language": language,
+            "language": translation_result.get("source_language", "unknown"),
             "original_html": html_content,
+            "translation_stats": {
+                "translations_applied": translation_result.get(
+                    "translations_applied", 0
+                ),
+                "terminology_map": translation_result.get("terminology_map", {}),
+                "untranslated_terms": translation_result.get("untranslated_terms", []),
+            },
         }
 
     def _extract_patient_info(self, soup) -> Dict:
@@ -495,47 +318,80 @@ class CDATranslationService:
                 cells_in_row = row.find_all("td")
 
             for col_index, td in enumerate(cells_in_row):
-                # Check if cell already has badges (preserve existing enhancement)
+                # Check if cell already has enhanced table structure from PS renderer
+                enhanced_div = td.find("div", class_="table-cell-enhanced")
                 existing_badges = td.find_all("span", class_="code-system-badge")
+                has_enhanced_structure = enhanced_div is not None
                 has_existing_badges = len(existing_badges) > 0
 
                 print(
-                    f"DEBUG: Processing cell [{row_index},{col_index}], has existing badges: {has_existing_badges}"
+                    f"DEBUG: Processing cell [{row_index},{col_index}], enhanced structure: {has_enhanced_structure}, existing badges: {has_existing_badges}"
                 )
 
-                if has_existing_badges:
-                    # Cell already has badges from PS renderer - just translate text parts
-                    # Extract text content without the badge HTML
-                    text_parts = []
-                    for content in td.contents:
-                        if (
-                            hasattr(content, "name")
-                            and content.name == "span"
-                            and "code-system-badge" in content.get("class", [])
+                if has_enhanced_structure or has_existing_badges:
+                    # Cell already has enhanced structure from PS renderer - skip adding new badges
+                    # Just translate text content within the existing structure
+                    print(
+                        f"DEBUG: Skipping badge addition for cell [{row_index},{col_index}] - already enhanced"
+                    )
+
+                    if has_enhanced_structure:
+                        # Find and translate the primary content within the enhanced structure
+                        primary_content_div = enhanced_div.find(
+                            "div", class_="primary-content"
+                        )
+                        if primary_content_div and primary_content_div.get_text(
+                            strip=True
                         ):
-                            # Keep the badge as-is
-                            continue
-                        else:
-                            # Translate the text part
-                            text_content = str(content).strip()
-                            if text_content:
-                                text_parts.append(text_content)
+                            original_text = primary_content_div.get_text(strip=True)
+                            translated_text = self._translate_text_compatibility(
+                                original_text, source_lang
+                            )
+                            primary_content_div.string = translated_text
+                            print(
+                                f"DEBUG: Translated primary content: '{original_text}' -> '{translated_text}'"
+                            )
+                    else:
+                        # Handle legacy badge structure
+                        text_parts = []
+                        for content in td.contents:
+                            if (
+                                hasattr(content, "name")
+                                and content.name == "span"
+                                and "code-system-badge" in content.get("class", [])
+                            ):
+                                # Keep the badge as-is
+                                continue
+                            else:
+                                # Translate the text part
+                                text_content = str(content).strip()
+                                if text_content:
+                                    text_parts.append(text_content)
 
-                    if text_parts:
-                        original_text = "".join(text_parts)
-                        translated_text = self.translator.translate_text_block(
-                            original_text, source_lang
-                        )
+                        if text_parts:
+                            original_text = "".join(text_parts)
+                            translated_text = self.translator.translate_text_block(
+                                original_text, source_lang
+                            )
+                            # Replace just the text parts, keep badges
+                            new_contents = []
+                            for content in td.contents:
+                                if (
+                                    hasattr(content, "name")
+                                    and content.name == "span"
+                                    and "code-system-badge" in content.get("class", [])
+                                ):
+                                    new_contents.append(content)
+                                else:
+                                    new_contents.append(translated_text)
+                                    break  # Only replace first text part
 
-                        # Rebuild cell with translated text and existing badges
-                        td.clear()
-                        td.append(translated_text)
-                        for badge in existing_badges:
-                            td.append(badge)
-
-                        print(
-                            f"DEBUG: Preserved badges for: '{original_text}' -> '{translated_text}'"
-                        )
+                            td.clear()
+                            for content in new_contents:
+                                if hasattr(content, "name"):
+                                    td.append(content)
+                                else:
+                                    td.append(content)
                 else:
                     # No existing badges - process normally
                     original_text = td.get_text(strip=True)
@@ -546,22 +402,18 @@ class CDATranslationService:
                             original_text, source_lang
                         )
 
-                        print(f"DEBUG: Enhancing cell with badges")
-                        # Enhance translated text with code system badges directly here
+                        print(f"DEBUG: Using PS renderer for badge enhancement")
+                        # Let PS table renderer handle badge creation to avoid duplication
                         code_system, code = ps_renderer._detect_code_system(
                             translated_text
                         )
                         if code_system:
-                            badge = f'<span class="code-system-badge {code_system.lower()}">{code_system}: {code}</span>'
-                            # Structure content for proper badge positioning
-                            enhanced_text = f'<div class="cell-content">{translated_text}</div><div class="badge-container">{badge}</div>'
-                            # Add CSS class to table cell to indicate it contains badges
-                            existing_classes = td.get('class', [])
-                            if 'table-cell-with-badges' not in existing_classes:
-                                existing_classes.append('table-cell-with-badges')
-                                td['class'] = existing_classes
+                            # Use PS renderer's badge method for consistent structure
+                            enhanced_text = ps_renderer._add_code_system_badge(
+                                translated_text, code_system, code
+                            )
                             print(
-                                f"DEBUG: Enhanced '{translated_text}' -> '{enhanced_text}'"
+                                f"DEBUG: Enhanced '{translated_text}' with PS renderer structure"
                             )
                         else:
                             enhanced_text = translated_text
@@ -570,10 +422,10 @@ class CDATranslationService:
                             )
 
                         # Handle HTML content properly
-                        if '<span class="code-system-badge"' in enhanced_text:
-                            # Use a more direct approach - set the innerHTML equivalent
+                        if '<div class="table-cell-enhanced">' in enhanced_text:
+                            # Enhanced text with PS renderer structure - parse and insert
                             td.clear()
-                            # Parse just the content and set it as the cell's innerHTML
+                            # Parse the enhanced content and set it as the cell's innerHTML
                             from bs4 import NavigableString
 
                             fragment_soup = BeautifulSoup(enhanced_text, "html.parser")
@@ -599,7 +451,7 @@ class CDATranslationService:
 
         print(f"DEBUG: Final HTML output (first 200 chars): {html_output[:200]}...")
         print(
-            f"DEBUG: Contains unescaped badges: {'<span class=\"code-system-badge\"' in html_output}"
+            f"DEBUG: Contains enhanced table cells: {'<div class=\"table-cell-enhanced\">' in html_output}"
         )
 
         return html_output

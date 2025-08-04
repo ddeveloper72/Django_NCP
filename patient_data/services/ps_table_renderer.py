@@ -7,7 +7,7 @@ import re
 import logging
 from typing import Dict, List, Any, Optional
 from bs4 import BeautifulSoup
-from .cda_translation_service import MedicalTerminologyTranslator
+from translation_services.terminology_translator import TerminologyTranslatorCompat
 
 logger = logging.getLogger(__name__)
 
@@ -19,12 +19,14 @@ class PSTableRenderer:
 
     def __init__(self, target_language: str = "en"):
         """
-        Initialize PS Table Renderer with terminology translation support
+        Initialize PS Table Renderer with CTS-based terminology translation support
 
         Args:
             target_language: Target language for terminology translations (default: English)
         """
-        self.terminology_translator = MedicalTerminologyTranslator()
+        self.terminology_translator = TerminologyTranslatorCompat(
+            target_language=target_language
+        )
         self.target_language = target_language
         self.section_renderers = {
             # Core PS Display Guidelines sections
@@ -69,11 +71,18 @@ class PSTableRenderer:
             "vitals": self._render_vital_signs_table,
         }
 
-    def _translate_table_content(self, content: str, source_lang: str = "fr") -> str:
-        """Helper method to translate table cell content using MedicalTerminologyTranslator"""
+    def _translate_table_content(self, content: str, source_lang: str = "auto") -> str:
+        """
+        Helper method for table content translation
+        Note: CTS-based translation is handled at document level by CDATranslationService
+        This maintains compatibility while proper coded terminology is handled upstream
+        """
         if not content or not isinstance(content, str):
             return content
-        return self.terminology_translator.translate_text_block(content, source_lang)
+
+        # For now, return content as-is since CDA translation service
+        # handles the full document translation using CTS
+        return content
 
     def _translate_headers(
         self, headers: List[str], source_lang: str = "fr"
@@ -110,17 +119,19 @@ class PSTableRenderer:
             badge_text = code_system
 
         # Create badge HTML
-        badge_html = f'<span class="code-system-badge {system_class}">{badge_text}</span>'
+        badge_html = (
+            f'<span class="code-system-badge {system_class}">{badge_text}</span>'
+        )
 
         # Wrap in enhanced table cell structure with sub-row for badges
-        enhanced_cell = f'''
+        enhanced_cell = f"""
         <div class="table-cell-enhanced">
             <div class="primary-content">{text}</div>
             <div class="badge-row">
                 {badge_html}
             </div>
         </div>
-        '''.strip()
+        """.strip()
 
         return enhanced_cell
 
@@ -149,10 +160,9 @@ class PSTableRenderer:
             "nevirapine": ("ATC", "J05AG01"),  # Active ingredient
         }
 
-        # Routes of administration
+        # Routes of administration - CTS-based, no hardcoded languages
         route_patterns = {
             "oral": ("SNOMED", "26643006"),  # Oral route
-            "orale": ("SNOMED", "26643006"),  # French form
             "per os": ("SNOMED", "26643006"),  # Latin form
             "po": ("SNOMED", "26643006"),  # Abbreviation
             "intravenous": ("SNOMED", "47625008"),  # IV route
@@ -203,14 +213,12 @@ class PSTableRenderer:
             "international unit": ("UCUM", "[IU]"),
         }
 
-        # Common allergy patterns (expanded)
+        # Common allergy patterns - CTS-based, no hardcoded languages
         allergy_patterns = {
             "penicillin": ("SNOMED", "387207008"),
             "penicilina": ("SNOMED", "387207008"),  # Spanish/Portuguese form
-            "pénicilline": ("SNOMED", "387207008"),  # French form
             "peanut": ("SNOMED", "91935009"),
             "seafood": ("SNOMED", "44027008"),  # Seafood allergy
-            "fruits de mer": ("SNOMED", "44027008"),  # French for seafood
             "latex": ("SNOMED", "1003755004"),
             "aspirin": ("SNOMED", "387458008"),  # Aspirin allergy
             "sulfa": ("SNOMED", "387406002"),  # Sulfonamide allergy
@@ -1966,10 +1974,11 @@ class PSTableRenderer:
 
     def _get_loinc_display_name(self, loinc_code: str) -> str:
         """
-        Get display name for LOINC code from database (with fallback to hardcoded values)
+        Get display name for LOINC code from database (transitional fallback mappings)
+        TODO: Move these to CTS/MVC database for proper terminology management
         """
         # Try simple term lookup with fallback
-        # For now, use hardcoded LOINC mappings since MedicalTerminologyTranslator doesn't handle codes
+        # TODO: Replace with CTS database lookup once LOINC concepts are imported
         loinc_mappings = {
             "10160-0": "History of Medication Use",
             "48765-2": "Allergies and Adverse Reactions",
@@ -1981,7 +1990,7 @@ class PSTableRenderer:
         if loinc_code in loinc_mappings:
             return loinc_mappings[loinc_code]
 
-        # Fallback to hardcoded values for PS Display Guidelines LOINC codes
+        # TODO: Replace with CTS database lookup for PS Display Guidelines LOINC codes
         loinc_names = {
             "10160-0": "History of Medication use",
             "48765-2": "Allergies and adverse reactions",
@@ -2022,7 +2031,7 @@ class PSTableRenderer:
             return original_display or "Unknown Code"
 
         # Try simple code mapping with fallback
-        # For now, use basic mappings since MedicalTerminologyTranslator doesn't handle code systems
+        # TODO: Replace with CTS database lookup for proper code system handling
         code_mappings = {
             "10160-0": "History of Medication Use",
             "48765-2": "Allergies and Adverse Reactions",

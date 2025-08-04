@@ -453,7 +453,7 @@
             // Toggle individual badges (for inline badges)
             badges.forEach((badge, index) => {
                 console.log(`Badge ${index}:`, badge.textContent, badge.classList.toString());
-                
+
                 if (show) {
                     badge.classList.add('show');
                     console.log(`Showing badge ${index}:`, badge.textContent);
@@ -466,7 +466,7 @@
             // Toggle badge rows (for enhanced table cells)
             badgeRows.forEach((row, index) => {
                 console.log(`Badge row ${index}:`, row.innerHTML.substring(0, 50) + '...');
-                
+
                 if (show) {
                     row.classList.add('show');
                     console.log(`Showing badge row ${index}`);
