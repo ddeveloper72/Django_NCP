@@ -87,7 +87,7 @@ class PSTableRenderer:
         self, text: str, code_system: str = None, code: str = None
     ) -> str:
         """
-        Add code system badge to translated text for NCP developer verification.
+        Add minimal code system notation to translated text as a simple inline badge.
 
         Args:
             text: The translated text
@@ -95,21 +95,27 @@ class PSTableRenderer:
             code: The specific code value
 
         Returns:
-            Text with code system badge HTML appended
+            Text with minimal code system notation appended
         """
         if not text or not code_system:
             return text
 
         # Determine badge class based on code system
         system_class = code_system.lower().replace("-", "").replace(" ", "")
-        badge_text = f"{code_system.upper()}"
-        if code:
-            badge_text += f": {code}"
 
+        # Create a very minimal badge - just the essential info
+        if code:
+            badge_text = f"{code_system}:{code}"
+        else:
+            badge_text = code_system
+
+        # Simple inline badge that doesn't break table layout
         badge_html = (
-            f'<span class="code-system-badge {system_class}">{badge_text}</span>'
+            f'<small class="code-system-badge {system_class}">{badge_text}</small>'
         )
-        return f"{text}{badge_html}"
+
+        # Just append to the text - no complex wrappers
+        return f"{text} {badge_html}"
 
     def _detect_code_system(self, term: str) -> tuple:
         """
@@ -2496,7 +2502,12 @@ class PSTableRenderer:
         if not clean_text:
             return str(cell_content)
 
-        # Skip badge enhancement in PS renderer - let CDA translation service handle it
+        # Add badge enhancement for medical terminology
+        code_system, code = self._detect_code_system(clean_text)
+        if code_system and code:
+            badge_html = self._add_code_system_badge(clean_text, code_system, code)
+            return badge_html
+
         return str(cell_content)
 
     def _extract_active_ingredient(self, principe_actif_text: str) -> str:

@@ -601,14 +601,14 @@
         color: #495057;
     }
 
-    /* Code System Badge Styles - Larger, more readable badges */
+    /* Code System Badge Styles - Hidden by default, shown only when toggle is checked */
     .code-system-badge,
     span.code-system-badge,
     td .code-system-badge,
     .ps-td .code-system-badge {
-        display: inline-block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
         margin-left: 0.5rem;
         padding: 0.25rem 0.5rem;
         background: linear-gradient(135deg, #28a745, #20c997);
@@ -625,6 +625,7 @@
         position: relative;
     }
 
+    /* Show badges only when the show class is added */
     .code-system-badge.show,
     span.code-system-badge.show,
     td .code-system-badge.show,
