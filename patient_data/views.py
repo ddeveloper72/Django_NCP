@@ -162,7 +162,9 @@ def patient_details_view(request, patient_id):
                         for idx, id_elem in enumerate(id_elements):
                             extension = id_elem.get("extension", "")
                             root_attr = id_elem.get("root", "")
-                            assigning_authority = id_elem.get("assigningAuthorityName", "")
+                            assigning_authority = id_elem.get(
+                                "assigningAuthorityName", ""
+                            )
                             displayable = id_elem.get("displayable", "")
 
                             if extension:
