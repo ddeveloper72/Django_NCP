@@ -747,6 +747,9 @@ def patient_cda_view(request, patient_id):
             "secondary_patient_id": match_data["patient_data"].get(
                 "secondary_patient_id", ""
             ),
+            "patient_identifiers": match_data["patient_data"].get(
+                "patient_identifiers", []
+            ),
         }
 
         context = {

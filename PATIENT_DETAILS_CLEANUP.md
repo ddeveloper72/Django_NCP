@@ -3,27 +3,32 @@
 ## Changes Made
 
 ### 1. **Consolidated Patient Information**
+
 - Merged "Submitted Patient Information" and "Found Patient Record" cards into a single "Patient Information" card
 - Added patient IDs from the found record to the main card
 - Distinguished between Primary Patient ID, Secondary Patient ID, and Internal ID
 
 ### 2. **Updated Card Header**
-- Changed title from "Submitted Patient Information" to "Patient Information" 
+
+- Changed title from "Submitted Patient Information" to "Patient Information"
 - Added match indicator badge showing confidence percentage when CDA match is found
 - Added subtitle showing source country and document type when available
 
 ### 3. **Removed Duplication**
+
 - Eliminated the separate "Found Patient Record" card entirely
 - Consolidated all patient information into one comprehensive card
 - Added source file information to the main card when available
 
 ### 4. **Updated Layout**
+
 - Changed grid layout from 3-column (1fr 1fr 1fr) to 2-column (2fr 1fr)
 - Patient information card now takes 2/3 of the available width
 - Document actions card takes 1/3 of the available width
 - Maintains responsive design for mobile devices
 
 ### 5. **Enhanced Styling**
+
 - Added CSS for match indicator badge with green styling
 - Updated card title layout to accommodate match indicator
 - Maintained clean, functional design without being glamorous
@@ -64,6 +69,7 @@
 ## CSS Updates
 
 ### Grid Layout
+
 ```css
 .patient-details-grid {
   grid-template-columns: 2fr 1fr; /* Patient info gets more space */
@@ -71,6 +77,7 @@
 ```
 
 ### Match Indicator Styling
+
 ```css
 .match-indicator {
   background: #d4edda;

@@ -63,7 +63,8 @@
                 </h2>
                 {% if has_cda_match %}
                 <div class="card-subtitle">
-                    Source: {{ source_country }} • Document: Patient Summary ({{ patient_summary.cda_type|default("L3") }})
+                    Source: {{ source_country }} • Document: Patient Summary ({{ patient_summary.cda_type|default("L3")
+                    }})
                 </div>
                 {% endif %}
             </div>
@@ -97,18 +98,14 @@
                             %}Not specified{% endif %}</span>
                     </div>
 
-                    {% if has_cda_match and patient_summary.primary_patient_id %}
+                    {% if has_cda_match and patient_summary.patient_identifiers %}
+                    {% for identifier in patient_summary.patient_identifiers %}
                     <div class="info-item">
-                        <label class="info-label">Primary Patient ID:</label>
-                        <span class="info-value">{{ patient_summary.primary_patient_id }}</span>
+                        <label class="info-label">Patient ID{% if identifier.root %} ({{ identifier.root }}){% endif
+                            %}:</label>
+                        <span class="info-value">{{ identifier.extension }}</span>
                     </div>
-                    {% endif %}
-
-                    {% if has_cda_match and patient_summary.secondary_patient_id %}
-                    <div class="info-item">
-                        <label class="info-label">Secondary Patient ID:</label>
-                        <span class="info-value">{{ patient_summary.secondary_patient_id }}</span>
-                    </div>
+                    {% endfor %}
                     {% endif %}
 
                     {% if patient_data.patient_id %}

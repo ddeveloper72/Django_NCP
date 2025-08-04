@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <realmCode code="EU"/>
+    <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.1.3"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1"/>
+    
+    <id extension="12345" root="1.2.3.4.5.6.7.8.9"/>
+    <code code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Patient Summary"/>
+    <title>Patient Summary Document</title>
+    <effectiveTime value="20240101120000"/>
+    <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25"/>
+    <languageCode code="en-US"/>
+    
+    <recordTarget>
+        <patientRole>
+            <id extension="2544557646" root="1.3.6.1.4.1.12559.11.10.1.3.1.1.3"/>
+            <id extension="DEMO123" root="2.16.840.1.113883.2.4.6.3"/>
+            <addr use="HP">
+                <streetAddressLine>123 Main Street</streetAddressLine>
+                <city>Berlin</city>
+                <postalCode>10115</postalCode>
+                <country>Germany</country>
+            </addr>
+            <telecom value="tel:+49-30-12345678" use="HP"/>
+            <telecom value="mailto:demo.patient@example.de" use="HP"/>
+            <patient>
+                <name use="L">
+                    <given>Demo</given>
+                    <family>Patient</family>
+                </name>
+                <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" displayName="Male"/>
+                <birthTime value="19850315"/>
+                <maritalStatusCode code="M" codeSystem="2.16.840.1.113883.5.2" displayName="Married"/>
+            </patient>
+        </patientRole>
+    </recordTarget>
+    
+    <author>
+        <time value="20240101120000"/>
+        <assignedAuthor>
+            <id extension="DOC001" root="1.2.3.4.5.6.7.8.9"/>
+            <code code="309343006" codeSystem="2.16.840.1.113883.6.96" displayName="Physician"/>
+            <addr use="WP">
+                <streetAddressLine>Hospital Main Street 1</streetAddressLine>
+                <city>Berlin</city>
+                <postalCode>10117</postalCode>
+                <country>Germany</country>
+            </addr>
+            <telecom value="tel:+49-30-98765432" use="WP"/>
+            <assignedPerson>
+                <name>
+                    <given>Dr. Maria</given>
+                    <family>Schmidt</family>
+                </name>
+            </assignedPerson>
+        </assignedAuthor>
+    </author>
+    
+    <custodian>
+        <assignedCustodian>
+            <representedCustodianOrganization>
+                <id extension="HOSP001" root="1.2.3.4.5.6.7.8.9"/>
+                <name>Berlin Medical Center</name>
+                <telecom value="tel:+49-30-11111111" use="WP"/>
+                <addr use="WP">
+                    <streetAddressLine>Hospital Main Street 1</streetAddressLine>
+                    <city>Berlin</city>
+                    <postalCode>10117</postalCode>
+                    <country>Germany</country>
+                </addr>
+            </representedCustodianOrganization>
+        </assignedCustodian>
+    </custodian>
+    
+    <component>
+        <structuredBody>
+            <component>
+                <section>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.13"/>
+                    <code code="48765-2" codeSystem="2.16.840.1.113883.6.1" displayName="Allergies"/>
+                    <title>Allergies and Adverse Reactions</title>
+                    <text>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Allergen</th>
+                                    <th>Reaction</th>
+                                    <th>Severity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Penicillin</td>
+                                    <td>Rash</td>
+                                    <td>Moderate</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </text>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>

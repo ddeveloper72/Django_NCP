@@ -113,6 +113,16 @@
   color: #006b96;
   font-weight: 600;
 }
+
+.patient-identity-banner
+  .patient-identity-left
+  .patient-details
+  .patient-id-additional {
+  background: #f8f9fa;
+  border: 1px solid #6c757d;
+  color: #495057;
+  font-weight: 600;
+}
 .patient-identity-banner .patient-identity-right {
   text-align: right;
 }
