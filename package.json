@@ -1,0 +1,18 @@
+{
+  "name": "django_ncp",
+  "version": "1.0.0",
+  "description": "A Django-based implementation of an EU eHealth National Contact Point (NCP) server, designed for cross-border healthcare data exchange.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "sass": "^1.89.2"
+  }
+}

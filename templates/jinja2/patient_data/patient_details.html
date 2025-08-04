@@ -30,6 +30,23 @@
         {% endif %}
     </div>
 
+    {% if session_error %}
+    <div class="alert alert-warning session-error-alert">
+        <div class="session-error-content">
+            <i class="fas fa-exclamation-triangle session-error-icon"></i>
+            <div class="session-error-text">
+                <strong>Session Expired</strong>
+                <p class="session-error-message">{{ session_error }}</p>
+                <p class="session-error-action">
+                    <a href="{{ url('patient_data:patient_data_form') }}" class="session-error-link">
+                        <i class="fas fa-search"></i> Search Again
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="patient-details-grid">
         <!-- Submitted Patient Information -->
         <div class="patient-info-card">

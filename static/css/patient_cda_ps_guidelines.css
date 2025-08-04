@@ -709,4 +709,48 @@ input[type='checkbox'] {
   }
 }
 
+/* Session Error Alert Styles */
+.session-error-alert {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  color: #856404;
+}
+
+.session-error-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-error-icon {
+  color: #f39c12;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.session-error-text {
+  flex: 1;
+}
+
+.session-error-message {
+  margin: 5px 0 0 0;
+}
+
+.session-error-action {
+  margin: 5px 0 0 0;
+}
+
+.session-error-link {
+  color: #856404;
+  text-decoration: underline;
+}
+
+.session-error-link:hover {
+  color: #533c01;
+  text-decoration: none;
+}
+
 /*# sourceMappingURL=patient_cda_ps_guidelines.css.map */

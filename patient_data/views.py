@@ -111,8 +111,18 @@ def patient_details_view(request, patient_id):
     try:
         patient_data = PatientData.objects.get(id=patient_id)
 
+        # Debug session data
+        session_key = f"patient_match_{patient_id}"
+        logger.info("Looking for session data with key: %s", session_key)
+        logger.info("Available session keys: %s", list(request.session.keys()))
+
         # Get CDA match from session
-        match_data = request.session.get(f"patient_match_{patient_id}")
+        match_data = request.session.get(session_key)
+
+        if match_data:
+            logger.info("Found session data for patient %s", patient_id)
+        else:
+            logger.warning("No session data found for patient %s", patient_id)
 
         context = {
             "patient_data": patient_data,
@@ -224,6 +234,26 @@ def patient_details_view(request, patient_id):
                     "l1_available": match_data.get("has_l1", False),
                     "l3_available": match_data.get("has_l3", False),
                     "preferred_cda_type": match_data.get("preferred_cda_type", "L3"),
+                }
+            )
+        else:
+            # Session data is missing - provide fallback with clear message
+            logger.warning(
+                "Session data lost for patient %s, showing basic patient info only", patient_id
+            )
+
+            # Add a helpful message to the user
+            messages.warning(
+                request,
+                "Patient search data has expired. Please search again to view CDA documents and detailed information.",
+            )
+
+            # Provide basic context without CDA match data
+            context.update(
+                {
+                    "session_expired": True,
+                    "show_search_again_message": True,
+                    "session_error": "Patient search data has expired. Please search again to view CDA documents and detailed information.",
                 }
             )
 
@@ -709,7 +739,7 @@ def patient_cda_view(request, patient_id):
                 else "Unknown"
             ),
             "gender": getattr(patient_data, "gender", "Unknown"),
-            "patient_id": getattr(patient_data, "patient_identifier_id", "Unknown"),
+            "patient_id": patient_data.id,  # Use the correct primary key for navigation
         }
 
         context = {
