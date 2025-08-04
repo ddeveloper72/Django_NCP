@@ -1,6 +1,6 @@
-@import url("https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700");
+@import url('https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700');
 .cda-document-container {
-  font-family: "Montserrat", sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 14px;
   line-height: 1.6;
   background: #ffffff;
@@ -126,16 +126,19 @@
   font-size: 1.5rem;
   animation: pulse 2s infinite;
 }
-.safety-alerts-section .allergy-alerts, .safety-alerts-section .medical-alerts {
+.safety-alerts-section .allergy-alerts,
+.safety-alerts-section .medical-alerts {
   margin-bottom: 1rem;
 }
-.safety-alerts-section .allergy-alerts h4, .safety-alerts-section .medical-alerts h4 {
+.safety-alerts-section .allergy-alerts h4,
+.safety-alerts-section .medical-alerts h4 {
   font-size: 1.1rem;
   margin-bottom: 0.75rem;
   border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   padding-bottom: 0.5rem;
 }
-.safety-alerts-section .allergy-alerts .alert-item, .safety-alerts-section .medical-alerts .alert-item {
+.safety-alerts-section .allergy-alerts .alert-item,
+.safety-alerts-section .medical-alerts .alert-item {
   background: rgba(255, 255, 255, 0.15);
   padding: 0.75rem;
   margin-bottom: 0.5rem;
@@ -143,14 +146,17 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
-.safety-alerts-section .allergy-alerts .alert-item.allergy, .safety-alerts-section .medical-alerts .alert-item.allergy {
+.safety-alerts-section .allergy-alerts .alert-item.allergy,
+.safety-alerts-section .medical-alerts .alert-item.allergy {
   display: flex;
   justify-content: space-between;
 }
-.safety-alerts-section .allergy-alerts .alert-item.allergy .alert-substance, .safety-alerts-section .medical-alerts .alert-item.allergy .alert-substance {
+.safety-alerts-section .allergy-alerts .alert-item.allergy .alert-substance,
+.safety-alerts-section .medical-alerts .alert-item.allergy .alert-substance {
   font-weight: 600;
 }
-.safety-alerts-section .allergy-alerts .alert-item.allergy .alert-reaction, .safety-alerts-section .medical-alerts .alert-item.allergy .alert-reaction {
+.safety-alerts-section .allergy-alerts .alert-item.allergy .alert-reaction,
+.safety-alerts-section .medical-alerts .alert-item.allergy .alert-reaction {
   font-style: italic;
 }
 
@@ -248,7 +254,7 @@
   animation: fadeInUp 0.5s ease-out;
 }
 
-input[type=checkbox] {
+input[type='checkbox'] {
   display: none;
 }
 
@@ -271,7 +277,7 @@ input[type=checkbox] {
   background: #f8f9fa;
 }
 .lbl-toggle-main::before {
-  content: " ";
+  content: ' ';
   display: inline-block;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
@@ -304,7 +310,7 @@ input[type=checkbox] {
   color: #009fd1;
 }
 .lbl-toggle-title::before {
-  content: " ";
+  content: ' ';
   display: inline-block;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
@@ -337,7 +343,7 @@ input[type=checkbox] {
   background: #f8f9fa;
 }
 .lbl-toggle::before {
-  content: " ";
+  content: ' ';
   display: inline-block;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
@@ -541,7 +547,7 @@ input[type=checkbox] {
   border-radius: 8px;
   font-size: 0.7rem;
   font-weight: 500;
-  font-family: "Courier New", monospace;
+  font-family: 'Courier New', monospace;
   background: #f8f9fa;
   color: #6c757d;
   border: 1px solid #dee2e6;
@@ -657,7 +663,7 @@ input[type=checkbox] {
   color: #f7fafc;
   padding: 1.5rem;
   margin: 0;
-  font-family: "Courier New", monospace;
+  font-family: 'Courier New', monospace;
   font-size: 12px;
   line-height: 1.4;
   overflow-x: auto;
