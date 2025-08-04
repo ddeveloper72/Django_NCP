@@ -239,7 +239,8 @@ def patient_details_view(request, patient_id):
         else:
             # Session data is missing - provide fallback with clear message
             logger.warning(
-                "Session data lost for patient %s, showing basic patient info only", patient_id
+                "Session data lost for patient %s, showing basic patient info only",
+                patient_id,
             )
 
             # Add a helpful message to the user
