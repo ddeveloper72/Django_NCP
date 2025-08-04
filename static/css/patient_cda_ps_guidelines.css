@@ -94,14 +94,20 @@
 }
 
 /* Specific styling for patient identifiers */
-.patient-identity-banner .patient-identity-left .patient-details .patient-id-primary {
+.patient-identity-banner
+  .patient-identity-left
+  .patient-details
+  .patient-id-primary {
   background: #e8f4f8;
   border: 1px solid #085a9f;
   color: #085a9f;
   font-weight: 600;
 }
 
-.patient-identity-banner .patient-identity-left .patient-details .patient-id-secondary {
+.patient-identity-banner
+  .patient-identity-left
+  .patient-details
+  .patient-id-secondary {
   background: #f0f8ff;
   border: 1px solid #009fd1;
   color: #006b96;

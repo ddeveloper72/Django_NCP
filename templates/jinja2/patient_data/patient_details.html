@@ -48,13 +48,24 @@
     {% endif %}
 
     <div class="patient-details-grid">
-        <!-- Submitted Patient Information -->
+        <!-- Patient Information -->
         <div class="patient-info-card">
             <div class="card-header">
                 <h2 class="card-title">
                     <i class="icon-user"></i>
-                    Submitted Patient Information
+                    Patient Information
+                    {% if has_cda_match %}
+                    <span class="match-indicator">
+                        <i class="icon-check-circle"></i>
+                        {{ match_confidence }}% Match
+                    </span>
+                    {% endif %}
                 </h2>
+                {% if has_cda_match %}
+                <div class="card-subtitle">
+                    Source: {{ source_country }} • Document: Patient Summary ({{ patient_summary.cda_type|default("L3") }})
+                </div>
+                {% endif %}
             </div>
 
             <div class="card-content">
@@ -86,9 +97,23 @@
                             %}Not specified{% endif %}</span>
                     </div>
 
+                    {% if has_cda_match and patient_summary.primary_patient_id %}
+                    <div class="info-item">
+                        <label class="info-label">Primary Patient ID:</label>
+                        <span class="info-value">{{ patient_summary.primary_patient_id }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if has_cda_match and patient_summary.secondary_patient_id %}
+                    <div class="info-item">
+                        <label class="info-label">Secondary Patient ID:</label>
+                        <span class="info-value">{{ patient_summary.secondary_patient_id }}</span>
+                    </div>
+                    {% endif %}
+
                     {% if patient_data.patient_id %}
                     <div class="info-item">
-                        <label class="info-label">Patient ID:</label>
+                        <label class="info-label">Internal ID:</label>
                         <span class="info-value">{{ patient_data.patient_id }}</span>
                     </div>
                     {% endif %}
@@ -97,65 +122,18 @@
                         <label class="info-label">Submitted:</label>
                         <span class="info-value">{{ patient_data.created_at|date_format("%d %B %Y %H:%M") }}</span>
                     </div>
+
+                    {% if has_cda_match and patient_summary.file_path %}
+                    <div class="info-item">
+                        <label class="info-label">Source File:</label>
+                        <span class="info-value">{{ (patient_summary.file_path|basename) or "Unknown" }}</span>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
         {% if has_cda_match %}
-        <!-- Found Patient Summary -->
-        <div class="patient-summary-card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="icon-file-text"></i>
-                    Found Patient Record
-                </h2>
-                <div class="card-subtitle">
-                    Source: {{ source_country }} • Confidence: {{ match_confidence }}%
-                </div>
-            </div>
-
-            <div class="card-content">
-                <div class="info-grid">
-                    <div class="info-item">
-                        <label class="info-label">Patient Name:</label>
-                        <span class="info-value">{{ patient_summary.patient_name|default("Unknown") }}</span>
-                    </div>
-
-                    <div class="info-item">
-                        <label class="info-label">Date of Birth:</label>
-                        <span class="info-value">{{ patient_summary.birth_date|default("Not provided") }}</span>
-                    </div>
-
-                    <div class="info-item">
-                        <label class="info-label">Gender:</label>
-                        <span class="info-value">{{ patient_summary.gender|default("Not provided") }}</span>
-                    </div>
-
-                    <div class="info-item">
-                        <label class="info-label">Primary Patient ID:</label>
-                        <span class="info-value">{{ patient_summary.primary_patient_id|default("Not provided") }}</span>
-                    </div>
-
-                    {% if patient_summary.secondary_patient_id %}
-                    <div class="info-item">
-                        <label class="info-label">Secondary Patient ID:</label>
-                        <span class="info-value">{{ patient_summary.secondary_patient_id }}</span>
-                    </div>
-                    {% endif %}
-
-                    <div class="info-item">
-                        <label class="info-label">Document Title:</label>
-                        <span class="info-value">Patient Summary ({{ patient_summary.cda_type|default("L3") }})</span>
-                    </div>
-
-                    <div class="info-item">
-                        <label class="info-label">Source File:</label>
-                        <span class="info-value">{{ (patient_summary.file_path|basename) or "Unknown" }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Document Actions -->
         <div class="document-actions-card">
             <div class="card-header">

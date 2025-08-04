@@ -5593,12 +5593,12 @@ div.page-header img.country-flag {
 }
 @media (min-width: 768px) {
   .patient-details-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
   }
 }
 @media (min-width: 1024px) {
   .patient-details-grid {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
   }
 }
 
@@ -5635,6 +5635,24 @@ div.page-header img.country-flag {
   font-weight: 600;
   color: #2d3748;
   margin: 0;
+  justify-content: space-between;
+}
+
+.patient-info-card .card-header .card-title .match-indicator {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 0.5rem;
+  background: #d4edda;
+  color: #155724;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid #c3e6cb;
 }
 .patient-info-card .card-header .card-subtitle,
 .patient-summary-card .card-header .card-subtitle,
