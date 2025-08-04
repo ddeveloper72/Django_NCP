@@ -37,12 +37,27 @@
                     <i class="fas fa-flag me-1"></i>
                     {{ source_country|upper }}
                 </div>
-                <div class="document-date">
-                    {{ document_date|default('Date Unknown') }}
+                {% if administrative_data.document_creation_date %}
+                <div class="document-creation-date">
+                    <i class="fas fa-calendar-plus me-1"></i>
+                    Creation Date: {{ administrative_data.document_creation_date }}
                 </div>
+                {% endif %}
+                {% if administrative_data.document_last_update_date %}
+                <div class="document-update-date critical-info">
+                    <i class="fas fa-calendar-check me-1"></i>
+                    Last Update: {{ administrative_data.document_last_update_date }}
+                </div>
+                {% endif %}
                 <div class="document-language">
                     Original: {{ source_language|upper }} → English
                 </div>
+                {% if administrative_data.document_version_number %}
+                <div class="document-version">
+                    <i class="fas fa-code-branch me-1"></i>
+                    Version: {{ administrative_data.document_version_number }}
+                </div>
+                {% endif %}
                 <!-- Code System Toggle -->
                 <div class="code-system-toggle">
                     <label class="toggle-switch">
@@ -673,28 +688,9 @@
                         <i class="fas fa-exclamation-triangle fa-3x mb-3" style="color: #009fd1;"></i>
                         <h4>No Medical Sections Available</h4>
                         <p>This document does not contain structured medical sections for translation.</p>
-                        <p>Raw CDA content may be available below.</p>
                     </div>
                     {% endif %}
 
-                </div>
-            </div>
-        </div>
-
-        <!-- Raw CDA Content -->
-        <div class="wrap-collapsible">
-            <input id="collapsible-raw-cda" class="toggle" type="checkbox">
-            <label for="collapsible-raw-cda" class="lbl-toggle-main">
-                <i class="fas fa-code me-2"></i>
-                Raw CDA Document
-            </label>
-            <div class="collapsible-content-main">
-                <div class="content-inner-main">
-                    <div class="content-label">
-                        <i class="fas fa-file-code me-1"></i>
-                        XML Content
-                    </div>
-                    <div class="raw-content">{{ cda_content }}</div>
                 </div>
             </div>
         </div>

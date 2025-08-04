@@ -14,6 +14,18 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# Define result class at top level to avoid any execution issues
+@dataclass
+class SimplePatientResult:
+    """Simple patient result for views - avoiding import conflicts"""
+
+    file_path: str
+    country_code: str
+    confidence_score: float
+    patient_data: Dict
+    cda_content: str
+
+
 @dataclass
 class PatientCredentials:
     """Patient search credentials from form submission"""
@@ -40,17 +52,6 @@ class PatientCredentials:
         return ""
 
 
-@dataclass
-class PatientMatch:
-    """Result of patient search"""
-
-    file_path: str
-    country_code: str
-    confidence_score: float
-    patient_data: Dict
-    cda_content: str
-
-
 class EUPatientSearchService:
     """Service for searching EU member state patient data"""
 
@@ -62,7 +63,9 @@ class EUPatientSearchService:
         self.test_data_path = test_data_path
         self.namespaces = {"hl7": "urn:hl7-org:v3", "ext": "urn:hl7-EE-DL-Ext:v1"}
 
-    def search_patient(self, credentials: PatientCredentials) -> Optional[PatientMatch]:
+    def search_patient(
+        self, credentials: PatientCredentials
+    ) -> Optional[SimplePatientResult]:
         """
         Smart search for patient across EU member states
         Returns the best matching CDA document
@@ -102,7 +105,7 @@ class EUPatientSearchService:
 
     def _search_country(
         self, credentials: PatientCredentials, country_code: str
-    ) -> List[PatientMatch]:
+    ) -> List[SimplePatientResult]:
         """Search for patient within a specific country's data"""
         matches = []
         country_path = os.path.join(self.test_data_path, country_code)
@@ -128,7 +131,7 @@ class EUPatientSearchService:
 
     def _analyze_cda_file(
         self, credentials: PatientCredentials, file_path: str, country_code: str
-    ) -> Optional[PatientMatch]:
+    ) -> Optional[SimplePatientResult]:
         """Analyze a single CDA file for patient match"""
         try:
             tree = ET.parse(file_path)
@@ -145,7 +148,7 @@ class EUPatientSearchService:
                 with open(file_path, "r", encoding="utf-8") as f:
                     cda_content = f.read()
 
-                return PatientMatch(
+                return SimplePatientResult(
                     file_path=file_path,
                     country_code=country_code,
                     confidence_score=confidence,
@@ -196,10 +199,36 @@ class EUPatientSearchService:
                     if gender is not None:
                         patient_data["gender"] = gender.get("code", "")
 
-                # Extract patient ID
-                id_elem = patient_role.find("hl7:id", self.namespaces)
-                if id_elem is not None:
-                    patient_data["patient_id"] = id_elem.get("extension", "")
+                # Extract patient IDs (can have multiple)
+                id_elements = patient_role.findall("hl7:id", self.namespaces)
+                patient_identifiers = []
+                primary_patient_id = ""
+                secondary_patient_id = ""
+
+                for idx, id_elem in enumerate(id_elements):
+                    extension = id_elem.get("extension", "")
+                    root_attr = id_elem.get("root", "")
+
+                    if extension:
+                        identifier_info = {
+                            "extension": extension,
+                            "root": root_attr,
+                            "type": "primary" if idx == 0 else "secondary",
+                        }
+                        patient_identifiers.append(identifier_info)
+
+                        # Store primary and secondary separately for easy access
+                        if idx == 0:
+                            primary_patient_id = extension
+                        elif idx == 1:
+                            secondary_patient_id = extension
+
+                patient_data["patient_id"] = (
+                    primary_patient_id  # Keep for backward compatibility
+                )
+                patient_data["primary_patient_id"] = primary_patient_id
+                patient_data["secondary_patient_id"] = secondary_patient_id
+                patient_data["patient_identifiers"] = patient_identifiers
 
                 # Extract address/country
                 addr = patient_role.find("hl7:addr", self.namespaces)
@@ -299,7 +328,7 @@ class EUPatientSearchService:
 
         return False
 
-    def get_patient_summary(self, match: PatientMatch) -> Dict:
+    def get_patient_summary(self, match: SimplePatientResult) -> Dict:
         """Extract structured patient summary from CDA match"""
         summary = {
             "patient_info": {
@@ -309,6 +338,13 @@ class EUPatientSearchService:
                 ),
                 "gender": self._format_gender(match.patient_data.get("gender", "")),
                 "patient_id": match.patient_data.get("patient_id", ""),
+                "primary_patient_id": match.patient_data.get("primary_patient_id", ""),
+                "secondary_patient_id": match.patient_data.get(
+                    "secondary_patient_id", ""
+                ),
+                "patient_identifiers": match.patient_data.get(
+                    "patient_identifiers", []
+                ),
                 "country": match.patient_data.get("country", match.country_code),
             },
             "document_info": {

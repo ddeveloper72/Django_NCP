@@ -71,6 +71,12 @@ class AdministrativeData:
     other_contacts: List[PersonInfo] = None
     preferred_hcp: OrganizationInfo = None  # Cabinet Medicale
 
+    # Document metadata
+    document_creation_date: str = ""
+    document_last_update_date: str = ""
+    document_version_number: str = ""
+    document_set_id: str = ""
+
     def __post_init__(self):
         if self.patient_contact_info is None:
             self.patient_contact_info = ContactInfo()
@@ -125,6 +131,14 @@ class CDAAdministrativeExtractor:
     def _extract_from_xml(self, root: ET.Element) -> AdministrativeData:
         """Extract administrative data from CDA XML"""
         admin_data = AdministrativeData()
+
+        # Extract document metadata first
+        admin_data.document_creation_date = self._extract_document_creation_date(root)
+        admin_data.document_last_update_date = self._extract_document_last_update_date(
+            root
+        )
+        admin_data.document_version_number = self._extract_document_version_number(root)
+        admin_data.document_set_id = self._extract_document_set_id(root)
 
         # Extract patient contact information
         admin_data.patient_contact_info = self._extract_patient_contact_info(root)
@@ -416,6 +430,108 @@ class CDAAdministrativeExtractor:
         if part_elem is not None and part_elem.text:
             return part_elem.text.strip()
         return ""
+
+    def _extract_document_creation_date(self, root: ET.Element) -> str:
+        """Extract document creation date from CDA header"""
+        # Look for effectiveTime in the CDA header
+        effective_time = root.find(".//effectiveTime[@value]", self.namespaces)
+        if effective_time is not None and effective_time.get("value"):
+            return self._format_cda_datetime(effective_time.get("value"))
+
+        # Alternative path: look for creationTime
+        creation_time = root.find(".//creationTime[@value]", self.namespaces)
+        if creation_time is not None and creation_time.get("value"):
+            return self._format_cda_datetime(creation_time.get("value"))
+
+        return ""
+
+    def _extract_document_last_update_date(self, root: ET.Element) -> str:
+        """
+        Extract document last update date from CDA header.
+        This is critical for healthcare professionals to understand data currency.
+        """
+        # Priority 1: Look for explicit update/revision time in document header
+        update_time = root.find(
+            ".//documentationOf/serviceEvent/effectiveTime/high[@value]",
+            self.namespaces,
+        )
+        if update_time is not None and update_time.get("value"):
+            return self._format_cda_datetime(update_time.get("value"))
+
+        # Priority 2: Look for revision history or version-specific time
+        version_elem = root.find(".//versionNumber", self.namespaces)
+        if version_elem is not None:
+            # Look for associated time element in same parent
+            time_elem = version_elem.find("../effectiveTime[@value]", self.namespaces)
+            if time_elem is not None and time_elem.get("value"):
+                return self._format_cda_datetime(time_elem.get("value"))
+
+        # Priority 3: Look for any modification/update timestamp
+        modification_time = root.find(".//lastModified[@value]", self.namespaces)
+        if modification_time is not None and modification_time.get("value"):
+            return self._format_cda_datetime(modification_time.get("value"))
+
+        # Priority 4: Look for participant time (author time can indicate updates)
+        participant_time = root.find(".//participant/time[@value]", self.namespaces)
+        if participant_time is not None and participant_time.get("value"):
+            return self._format_cda_datetime(participant_time.get("value"))
+
+        # Fallback: Use creation date (indicates no updates since creation)
+        creation_date = self._extract_document_creation_date(root)
+        return creation_date if creation_date else "Unknown"
+
+    def _extract_document_version_number(self, root: ET.Element) -> str:
+        """Extract document version number from CDA header"""
+        version_elem = root.find(".//versionNumber[@value]", self.namespaces)
+        if version_elem is not None and version_elem.get("value"):
+            return version_elem.get("value")
+        return ""
+
+    def _extract_document_set_id(self, root: ET.Element) -> str:
+        """Extract document set ID from CDA header"""
+        set_id_elem = root.find(".//setId[@root]", self.namespaces)
+        if set_id_elem is not None and set_id_elem.get("root"):
+            extension = set_id_elem.get("extension", "")
+            root_id = set_id_elem.get("root")
+            return f"{root_id}" + (f".{extension}" if extension else "")
+        return ""
+
+    def _format_cda_datetime(self, cda_datetime: str) -> str:
+        """Format CDA datetime string to human-readable format"""
+        if not cda_datetime:
+            return ""
+
+        try:
+            # CDA datetime format is usually YYYYMMDDHHMMSS[+/-ZZZZ]
+            # Parse and format to: YYYY-MM-DD HH:MM:SS (TZ)
+            if len(cda_datetime) >= 14:
+                year = cda_datetime[:4]
+                month = cda_datetime[4:6]
+                day = cda_datetime[6:8]
+                hour = cda_datetime[8:10]
+                minute = cda_datetime[10:12]
+                second = cda_datetime[12:14]
+
+                formatted = f"{year}-{month}-{day} {hour}:{minute}:{second}"
+
+                # Add timezone if present
+                if len(cda_datetime) > 14 and (
+                    "+" in cda_datetime[14:] or "-" in cda_datetime[14:]
+                ):
+                    tz_part = cda_datetime[14:]
+                    formatted += f" ({tz_part})"
+
+                return formatted
+            elif len(cda_datetime) >= 8:
+                # Date only format
+                year = cda_datetime[:4]
+                month = cda_datetime[4:6]
+                day = cda_datetime[6:8]
+                return f"{year}-{month}-{day}"
+        except (ValueError, IndexError):
+            pass
+
+        return cda_datetime  # Return as-is if parsing fails
 
     def _extract_from_html(self, html_content: str) -> AdministrativeData:
         """Extract what administrative data we can from HTML format"""
