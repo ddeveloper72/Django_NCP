@@ -37,7 +37,15 @@
             <div class="patient-details">
                 <span class="patient-birth">Born: {{ patient_identity.birth_date }}</span>
                 <span class="patient-gender">{{ patient_identity.gender }}</span>
+                {% if patient_identity.primary_patient_id %}
+                <span class="patient-id-primary">Primary ID: {{ patient_identity.primary_patient_id }}</span>
+                {% endif %}
+                {% if patient_identity.secondary_patient_id %}
+                <span class="patient-id-secondary">Secondary ID: {{ patient_identity.secondary_patient_id }}</span>
+                {% endif %}
+                {% if not patient_identity.primary_patient_id and not patient_identity.secondary_patient_id %}
                 <span class="patient-id">ID: {{ patient_identity.patient_id }}</span>
+                {% endif %}
             </div>
         </div>
         <div class="patient-identity-right">
@@ -219,6 +227,18 @@
                         <span class="info-label">Date of Birth:</span>
                         <span class="info-value">{{ patient_identity.birth_date }}</span>
                     </div>
+                    {% if patient_identity.primary_patient_id %}
+                    <div class="info-item">
+                        <span class="info-label">Primary Patient ID:</span>
+                        <span class="info-value">{{ patient_identity.primary_patient_id }}</span>
+                    </div>
+                    {% endif %}
+                    {% if patient_identity.secondary_patient_id %}
+                    <div class="info-item">
+                        <span class="info-label">Secondary Patient ID:</span>
+                        <span class="info-value">{{ patient_identity.secondary_patient_id }}</span>
+                    </div>
+                    {% endif %}
                     <div class="info-item">
                         <span class="info-label">Source Country:</span>
                         <span class="info-value">{{ source_country }}</span>

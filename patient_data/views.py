@@ -741,6 +741,8 @@ def patient_cda_view(request, patient_id):
             ),
             "gender": getattr(patient_data, "gender", "Unknown"),
             "patient_id": patient_data.id,  # Use the correct primary key for navigation
+            "primary_patient_id": match_data["patient_data"].get("primary_patient_id", ""),
+            "secondary_patient_id": match_data["patient_data"].get("secondary_patient_id", ""),
         }
 
         context = {
