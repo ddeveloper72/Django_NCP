@@ -161,6 +161,10 @@ class CDAAdministrativeExtractor:
         # Extract other contacts
         admin_data.other_contacts = self._extract_other_contacts(root)
 
+        # Extract participant information (emergency contacts, next of kin, dependencies)
+        participants = self._extract_participants(root)
+        admin_data.other_contacts.extend(participants)
+
         return admin_data
 
     def _extract_patient_contact_info(self, root: ET.Element) -> ContactInfo:
@@ -200,6 +204,16 @@ class CDAAdministrativeExtractor:
                 person_info.family_name = self._get_name_part(person_name, "family")
                 person_info.given_name = self._get_name_part(person_name, "given")
                 person_info.title = self._get_name_part(person_name, "prefix")
+            else:
+                # Check for authoring device (system author instead of person)
+                device = author.find(".//assignedAuthoringDevice", self.namespaces)
+                if device is not None:
+                    software_name = device.find("softwareName", self.namespaces)
+                    if software_name is not None and software_name.text:
+                        # Use software name as author identifier
+                        person_info.family_name = "System"
+                        person_info.given_name = software_name.text.strip()
+                        person_info.role = "Authoring System"
 
             # Extract organization
             org = author.find(".//representedOrganization", self.namespaces)
@@ -544,3 +558,108 @@ class CDAAdministrativeExtractor:
         # For now, return empty structure
 
         return admin_data
+
+    def _extract_participants(self, root: ET.Element) -> List[PersonInfo]:
+        """Extract participant information including emergency contacts, next of kin, dependencies"""
+        participants = []
+
+        # Find all participant elements
+        participant_elements = root.findall(".//participant", self.namespaces)
+
+        for participant in participant_elements:
+            person_info = self._extract_participant_info(participant)
+            if person_info and (
+                person_info.family_name or person_info.given_name or person_info.role
+            ):
+                participants.append(person_info)
+
+        return participants
+
+    def _extract_participant_info(
+        self, participant_element: ET.Element
+    ) -> Optional[PersonInfo]:
+        """Extract information from a single participant element"""
+        person_info = PersonInfo()
+
+        # Get participant type code for context
+        type_code = participant_element.get("typeCode", "")
+
+        # Extract associated entity
+        associated_entity = participant_element.find(
+            ".//associatedEntity", self.namespaces
+        )
+        if associated_entity is None:
+            return None
+
+        # Get class code to determine type
+        class_code = associated_entity.get("classCode", "")
+
+        # Determine role based on function code and class code
+        function_code_elem = participant_element.find(
+            ".//functionCode", self.namespaces
+        )
+        if function_code_elem is not None:
+            function_code = function_code_elem.get("code", "")
+            if function_code == "PCP":
+                person_info.role = "Primary Care Provider"
+            else:
+                person_info.role = function_code
+        elif class_code == "ECON":
+            # Emergency contact
+            person_info.role = "Emergency Contact"
+
+            # Check for specific relationship code
+            code_elem = associated_entity.find(".//code", self.namespaces)
+            if code_elem is not None:
+                relationship_code = code_elem.get("displayName", "")
+                if relationship_code:
+                    person_info.role = f"Emergency Contact ({relationship_code})"
+        else:
+            person_info.role = f"Contact ({type_code})"
+
+        # Extract person name
+        person_name = associated_entity.find(
+            ".//associatedPerson/name", self.namespaces
+        )
+        if person_name is not None:
+            person_info.family_name = self._get_name_part(person_name, "family")
+            person_info.given_name = self._get_name_part(person_name, "given")
+
+        # Extract contact information
+        person_info.contact_info = self._extract_contact_from_element(associated_entity)
+
+        # Extract time period if available
+        time_elem = participant_element.find(".//time", self.namespaces)
+        if time_elem is not None:
+            # Extract effective date range
+            low_elem = time_elem.find(".//low", self.namespaces)
+            if low_elem is not None and low_elem.get("value"):
+                person_info.specialty = (
+                    f"From: {self._format_cda_datetime(low_elem.get('value'))}"
+                )
+
+            high_elem = time_elem.find(".//high", self.namespaces)
+            if high_elem is not None and high_elem.get("value"):
+                if person_info.specialty:
+                    person_info.specialty += (
+                        f" To: {self._format_cda_datetime(high_elem.get('value'))}"
+                    )
+                else:
+                    person_info.specialty = (
+                        f"To: {self._format_cda_datetime(high_elem.get('value'))}"
+                    )
+
+        # Extract organization information if available
+        scoping_org = associated_entity.find(".//scopingOrganization", self.namespaces)
+        if scoping_org is not None:
+            org_name = scoping_org.find(".//name", self.namespaces)
+            if org_name is not None and org_name.text:
+                person_info.organization.name = org_name.text.strip()
+                person_info.organization.organization_type = person_info.role
+
+                # Extract organization contact info
+                org_contact = self._extract_contact_from_element(scoping_org)
+                person_info.organization.addresses = org_contact.addresses
+                person_info.organization.telecoms = org_contact.telecoms
+
+        return person_info

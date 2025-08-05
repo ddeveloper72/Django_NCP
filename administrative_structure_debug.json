@@ -1,0 +1,67 @@
+{
+  "other_contacts_count": 5,
+  "sample_contact": {
+    "family_name": "Kozlovska",
+    "given_name": "L\u012bga",
+    "full_name": "L\u012bga Kozlovska",
+    "role": "Primary Care Provider",
+    "specialty": "From: 2023-05-17 21:00:00 (+0000)",
+    "organization": {
+      "name": "",
+      "addresses": [],
+      "telecoms": []
+    },
+    "contact_info": {
+      "addresses": [
+        {
+          "street": "B\u0113rzpils iela 14 - 16/17",
+          "postalCode": "4501",
+          "country": "LV"
+        }
+      ],
+      "telecoms": [
+        {
+          "value": "tel:+37164521071",
+          "type": "phone",
+          "display_value": "+37164521071"
+        }
+      ]
+    }
+  },
+  "all_keys": [
+    "document_creation_date",
+    "document_creation_date_raw",
+    "document_title",
+    "document_type",
+    "document_id",
+    "custodian_name",
+    "patient_contact_info",
+    "author_information",
+    "custodian_organization",
+    "legal_authenticator",
+    "author_hcp",
+    "document_last_update_date",
+    "document_version_number",
+    "preferred_hcp",
+    "guardian",
+    "other_contacts"
+  ],
+  "sample_structure": {
+    "document_creation_date": "str",
+    "document_creation_date_raw": "str",
+    "document_title": "str",
+    "document_type": "str",
+    "document_id": "str",
+    "custodian_name": "str",
+    "patient_contact_info": "DotDict",
+    "author_information": "list",
+    "custodian_organization": "DotDict",
+    "legal_authenticator": "DotDict",
+    "author_hcp": "DotDict",
+    "document_last_update_date": "str",
+    "document_version_number": "str",
+    "preferred_hcp": "DotDict",
+    "guardian": "DotDict",
+    "other_contacts": "list"
+  }
+}

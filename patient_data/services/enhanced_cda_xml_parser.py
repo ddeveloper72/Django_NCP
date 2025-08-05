@@ -9,6 +9,30 @@ import logging
 import re
 from dataclasses import dataclass, field
 
+
+class DotDict(dict):
+    """Dictionary that supports dot notation access for template compatibility"""
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(
+                f"'{type(self).__name__}' object has no attribute '{key}'"
+            )
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+    def __delattr__(self, key):
+        try:
+            del self[key]
+        except KeyError:
+            raise AttributeError(
+                f"'{type(self).__name__}' object has no attribute '{key}'"
+            )
+
+
 # Import our date formatter for consistent date display
 try:
     from patient_data.utils.date_formatter import default_formatter
@@ -18,12 +42,12 @@ except ImportError:
 
 # Import enhanced administrative extractor
 try:
-    from patient_data.utils.administrative_extractor import (
-        EnhancedAdministrativeExtractor,
+    from patient_data.services.cda_administrative_extractor import (
+        CDAAdministrativeExtractor,
     )
 except ImportError:
     # Fallback if administrative extractor not available
-    EnhancedAdministrativeExtractor = None
+    CDAAdministrativeExtractor = None
 
 logger = logging.getLogger(__name__)
 
@@ -134,8 +158,8 @@ class EnhancedCDAXMLParser:
     def __init__(self):
         self.namespaces = {"cda": "urn:hl7-org:v3", "pharm": "urn:ihe:pharm:medication"}
         # Initialize administrative extractor with date formatter
-        if EnhancedAdministrativeExtractor:
-            self.admin_extractor = EnhancedAdministrativeExtractor(default_formatter)
+        if CDAAdministrativeExtractor:
+            self.admin_extractor = CDAAdministrativeExtractor()
         else:
             self.admin_extractor = None
 
@@ -438,7 +462,7 @@ class EnhancedCDAXMLParser:
             return ""
 
     def _extract_patient_info(self, root: ET.Element) -> Dict[str, Any]:
-        """Extract basic patient information with proper namespace handling"""
+        """Extract comprehensive patient information with enhanced administrative data integration"""
         try:
             # Find patient role with proper namespace
             patient_role = root.find(
@@ -506,8 +530,50 @@ class EnhancedCDAXMLParser:
                         "displayName", gender_elem.get("code", "Unknown")
                     )
 
+            # Extract enhanced contact information using administrative extractor if available
+            patient_contact_data = DotDict()
+            if self.admin_extractor:
+                try:
+                    # Extract patient contact info using enhanced extractor
+                    admin_data = self.admin_extractor.extract_administrative_data(
+                        ET.tostring(root, encoding="unicode")
+                    )
+                    if admin_data and admin_data.patient_contact_info:
+                        contact_info = admin_data.patient_contact_info
+                        patient_contact_data = DotDict(
+                            {
+                                "addresses": (
+                                    contact_info.addresses
+                                    if contact_info.addresses
+                                    else []
+                                ),
+                                "telecoms": (
+                                    contact_info.telecoms
+                                    if contact_info.telecoms
+                                    else []
+                                ),
+                                "has_enhanced_contact_data": True,
+                            }
+                        )
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to extract enhanced patient contact info: {str(e)}"
+                    )
+                    patient_contact_data = DotDict({"has_enhanced_contact_data": False})
+            else:
+                # Fallback to basic contact extraction
+                addresses = self._extract_basic_patient_addresses(patient_role)
+                telecoms = self._extract_basic_patient_telecoms(patient_role)
+                patient_contact_data = DotDict(
+                    {
+                        "addresses": addresses,
+                        "telecoms": telecoms,
+                        "has_enhanced_contact_data": False,
+                    }
+                )
+
             logger.info(
-                f"Extracted patient info: {given_name} {family_name}, ID: {patient_id}"
+                f"Extracted patient info: {given_name} {family_name}, ID: {patient_id}, Enhanced Contact: {patient_contact_data.get('has_enhanced_contact_data', False)}"
             )
 
             return {
@@ -518,6 +584,8 @@ class EnhancedCDAXMLParser:
                 "birth_date_raw": birth_date_raw,  # Keep raw format for calculations
                 "gender": gender,
                 "patient_identifiers": patient_identifiers,
+                "contact_info": patient_contact_data,
+                "full_name": f"{given_name} {family_name}".strip(),
             }
         except Exception as e:
             logger.warning(f"Failed to extract patient info: {str(e)}")
@@ -538,9 +606,18 @@ class EnhancedCDAXMLParser:
 
     def _extract_enhanced_administrative_data(self, root: ET.Element) -> Dict[str, Any]:
         """Extract administrative data using enhanced extractor"""
-        # Extract document creation date
+        # Use the enhanced administrative extractor to get comprehensive data
+        admin_data = self.admin_extractor.extract_administrative_data(
+            ET.tostring(root, encoding="unicode")
+        )
+
+        # Extract document creation date with fallback
         effective_time = root.find(".//{urn:hl7-org:v3}effectiveTime")
-        creation_date = "Unknown"
+        creation_date = (
+            admin_data.document_creation_date
+            if admin_data.document_creation_date
+            else "Unknown"
+        )
         creation_date_raw = "Unknown"
         if effective_time is not None:
             creation_date_raw = effective_time.get("value", "Unknown")
@@ -549,16 +626,16 @@ class EnhancedCDAXMLParser:
                 creation_date = default_formatter.format_document_date(
                     creation_date_raw
                 )
-            else:
+            elif not admin_data.document_creation_date:
                 creation_date = creation_date_raw
 
-        # Extract document title
+        # Extract document title with fallback
         title_elem = root.find(".//{urn:hl7-org:v3}title")
         document_title = (
             title_elem.text if title_elem is not None and title_elem.text else "Unknown"
         )
 
-        # Extract document type
+        # Extract document type with fallback
         code_elem = root.find(".//{urn:hl7-org:v3}code")
         document_type = "Unknown"
         if code_elem is not None:
@@ -566,28 +643,166 @@ class EnhancedCDAXMLParser:
                 "displayName", code_elem.get("code", "Unknown")
             )
 
-        # Extract document ID
+        # Extract document ID with fallback
         doc_id_elem = root.find(".//{urn:hl7-org:v3}id")
         document_id = (
-            doc_id_elem.get("extension", "Unknown")
-            if doc_id_elem is not None
-            else "Unknown"
+            admin_data.document_set_id
+            if admin_data.document_set_id
+            else (
+                doc_id_elem.get("extension", "Unknown")
+                if doc_id_elem is not None
+                else "Unknown"
+            )
         )
 
-        # Extract enhanced contact and organizational information
-        patient_contact_info = self.admin_extractor.extract_patient_contact_info(root)
-        author_information = self.admin_extractor.extract_author_information(root)
-        custodian_info = self.admin_extractor.extract_custodian_information(root)
-        legal_authenticator = self.admin_extractor.extract_legal_authenticator(root)
+        # Convert enhanced administrative data to expected format with template compatibility
+        # Patient contact information
+        patient_contact_info = DotDict(
+            {
+                "addresses": (
+                    admin_data.patient_contact_info.addresses
+                    if admin_data.patient_contact_info
+                    else []
+                ),
+                "telecoms": (
+                    admin_data.patient_contact_info.telecoms
+                    if admin_data.patient_contact_info
+                    else []
+                ),
+            }
+        )
+
+        # Author information with organization details
+        author_information = []
+        if admin_data.author_hcp:
+            # Get organization from author or look for related organizations
+            author_org = DotDict({"name": "", "addresses": [], "telecoms": []})
+
+            # If the author has organization info embedded or look for first organization
+            if (
+                hasattr(admin_data.author_hcp, "organization")
+                and admin_data.author_hcp.organization
+            ):
+                author_org["name"] = admin_data.author_hcp.organization.name or ""
+                author_org["addresses"] = getattr(
+                    admin_data.author_hcp.organization, "addresses", []
+                )
+                author_org["telecoms"] = getattr(
+                    admin_data.author_hcp.organization, "telecoms", []
+                )
+            elif admin_data.custodian_organization:
+                # Fallback to custodian organization for authors
+                author_org["name"] = admin_data.custodian_organization.name or ""
+                author_org["addresses"] = (
+                    admin_data.custodian_organization.addresses or []
+                )
+                author_org["telecoms"] = (
+                    admin_data.custodian_organization.telecoms or []
+                )
+
+            author_info = DotDict(
+                {
+                    "person": DotDict(
+                        {
+                            "family_name": admin_data.author_hcp.family_name,
+                            "given_name": admin_data.author_hcp.given_name,
+                            "full_name": f"{admin_data.author_hcp.given_name} {admin_data.author_hcp.family_name}".strip(),
+                            "title": admin_data.author_hcp.title,
+                            "role": admin_data.author_hcp.role,
+                        }
+                    ),
+                    "organization": author_org,
+                }
+            )
+            author_information.append(author_info)
+
+        # Custodian organization
+        custodian_organization = DotDict(
+            {
+                "name": (
+                    admin_data.custodian_organization.name
+                    if admin_data.custodian_organization
+                    else ""
+                ),
+                "addresses": (
+                    admin_data.custodian_organization.addresses
+                    if admin_data.custodian_organization
+                    else []
+                ),
+                "telecoms": (
+                    admin_data.custodian_organization.telecoms
+                    if admin_data.custodian_organization
+                    else []
+                ),
+            }
+        )
+
+        # Legal authenticator with organization details
+        legal_auth_org = DotDict({"name": "", "addresses": [], "telecoms": []})
+
+        if admin_data.legal_authenticator:
+            # Look for organization associated with legal authenticator
+            if (
+                hasattr(admin_data.legal_authenticator, "organization")
+                and admin_data.legal_authenticator.organization
+            ):
+                legal_auth_org["name"] = (
+                    admin_data.legal_authenticator.organization.name or ""
+                )
+                legal_auth_org["addresses"] = getattr(
+                    admin_data.legal_authenticator.organization, "addresses", []
+                )
+                legal_auth_org["telecoms"] = getattr(
+                    admin_data.legal_authenticator.organization, "telecoms", []
+                )
+            elif admin_data.custodian_organization:
+                # Fallback to custodian organization for legal authenticator
+                legal_auth_org["name"] = admin_data.custodian_organization.name or ""
+                legal_auth_org["addresses"] = (
+                    admin_data.custodian_organization.addresses or []
+                )
+                legal_auth_org["telecoms"] = (
+                    admin_data.custodian_organization.telecoms or []
+                )
+
+        legal_authenticator = DotDict(
+            {
+                "family_name": (
+                    admin_data.legal_authenticator.family_name
+                    if admin_data.legal_authenticator
+                    else ""
+                ),
+                "given_name": (
+                    admin_data.legal_authenticator.given_name
+                    if admin_data.legal_authenticator
+                    else ""
+                ),
+                "full_name": (
+                    f"{admin_data.legal_authenticator.given_name} {admin_data.legal_authenticator.family_name}".strip()
+                    if admin_data.legal_authenticator
+                    else ""
+                ),
+                "title": (
+                    admin_data.legal_authenticator.title
+                    if admin_data.legal_authenticator
+                    else ""
+                ),
+                "organization": legal_auth_org,
+            }
+        )
 
         # Get primary author for backward compatibility
         primary_author = (
             author_information[0]
             if author_information
-            else {
-                "person": {"family_name": None, "given_name": None, "full_name": None},
-                "organization": {"name": None},
-            }
+            else DotDict(
+                {
+                    "person": DotDict(
+                        {"family_name": None, "given_name": None, "full_name": None}
+                    ),
+                    "organization": DotDict({"name": None}),
+                }
+            )
         )
 
         logger.info(
@@ -604,25 +819,94 @@ class EnhancedCDAXMLParser:
             "document_type": document_type,
             "document_id": document_id,
             # Legacy custodian name for backward compatibility
-            "custodian_name": custodian_info["organization"]["name"],
+            "custodian_name": custodian_organization["name"],
             # Enhanced contact and organizational information
             "patient_contact_info": patient_contact_info,
             "author_information": author_information,
-            "custodian_organization": custodian_info["organization"],
+            "custodian_organization": custodian_organization,
             "legal_authenticator": legal_authenticator,
-            # Backward compatibility fields
-            "author_hcp": {
-                "family_name": primary_author["person"]["family_name"],
-                "given_name": primary_author["person"]["given_name"],
-                "full_name": primary_author["person"]["full_name"],
-                "organization": primary_author["organization"],
-            },
-            # Additional fields
-            "document_last_update_date": None,
-            "document_version_number": None,
-            "preferred_hcp": {"name": None},
-            "guardian": {"family_name": None},
-            "other_contacts": [],
+            # Backward compatibility fields with enhanced organization data
+            "author_hcp": DotDict(
+                {
+                    "family_name": primary_author.person.family_name,
+                    "given_name": primary_author.person.given_name,
+                    "full_name": primary_author.person.full_name,
+                    "title": (
+                        primary_author.person.title
+                        if hasattr(primary_author.person, "title")
+                        else ""
+                    ),
+                    "organization": primary_author.organization,
+                }
+            ),
+            # Additional fields from enhanced extractor
+            "document_last_update_date": admin_data.document_last_update_date,
+            "document_version_number": admin_data.document_version_number,
+            "preferred_hcp": DotDict(
+                {
+                    "name": (
+                        admin_data.preferred_hcp.name
+                        if admin_data.preferred_hcp
+                        else None
+                    )
+                }
+            ),
+            "guardian": DotDict(
+                {
+                    "family_name": (
+                        admin_data.guardian.family_name if admin_data.guardian else None
+                    )
+                }
+            ),
+            "other_contacts": (
+                [
+                    DotDict(
+                        {
+                            "family_name": contact.family_name,
+                            "given_name": contact.given_name,
+                            "full_name": f"{contact.given_name} {contact.family_name}".strip(),
+                            "role": contact.role,
+                            "specialty": contact.specialty,
+                            "organization": DotDict(
+                                {
+                                    "name": (
+                                        contact.organization.name
+                                        if contact.organization
+                                        else ""
+                                    ),
+                                    "addresses": (
+                                        contact.organization.addresses
+                                        if contact.organization
+                                        else []
+                                    ),
+                                    "telecoms": (
+                                        contact.organization.telecoms
+                                        if contact.organization
+                                        else []
+                                    ),
+                                }
+                            ),
+                            "contact_info": DotDict(
+                                {
+                                    "addresses": (
+                                        contact.contact_info.addresses
+                                        if contact.contact_info
+                                        else []
+                                    ),
+                                    "telecoms": (
+                                        contact.contact_info.telecoms
+                                        if contact.contact_info
+                                        else []
+                                    ),
+                                }
+                            ),
+                        }
+                    )
+                    for contact in admin_data.other_contacts
+                ]
+                if admin_data.other_contacts
+                else []
+            ),
         }
 
     def _extract_basic_administrative_data(self, root: ET.Element) -> Dict[str, Any]:
@@ -687,15 +971,19 @@ class EnhancedCDAXMLParser:
             "custodian_name": custodian_name,
             "document_last_update_date": None,
             "document_version_number": None,
-            "patient_contact_info": {"addresses": [], "telecoms": []},
-            "author_hcp": {"family_name": None, "organization": {"name": None}},
-            "legal_authenticator": {
-                "family_name": None,
-                "organization": {"name": None},
-            },
-            "custodian_organization": {"name": custodian_name},
-            "preferred_hcp": {"name": None},
-            "guardian": {"family_name": None},
+            "patient_contact_info": DotDict({"addresses": [], "telecoms": []}),
+            "author_hcp": DotDict(
+                {"family_name": None, "organization": DotDict({"name": None})}
+            ),
+            "legal_authenticator": DotDict(
+                {
+                    "family_name": None,
+                    "organization": DotDict({"name": None}),
+                }
+            ),
+            "custodian_organization": DotDict({"name": custodian_name}),
+            "preferred_hcp": DotDict({"name": None}),
+            "guardian": DotDict({"family_name": None}),
             "other_contacts": [],
         }
 
@@ -710,28 +998,38 @@ class EnhancedCDAXMLParser:
             "custodian_name": "Unknown",
             "document_last_update_date": None,
             "document_version_number": None,
-            "patient_contact_info": {
-                "addresses": [],
-                "telecoms": [],
-                "primary_address": None,
-                "primary_phone": None,
-                "primary_email": None,
-            },
+            "patient_contact_info": DotDict(
+                {
+                    "addresses": [],
+                    "telecoms": [],
+                    "primary_address": None,
+                    "primary_phone": None,
+                    "primary_email": None,
+                }
+            ),
             "author_information": [],
-            "custodian_organization": {
-                "name": "Unknown",
-                "id": None,
-                "address": {},
-                "telecoms": [],
-            },
-            "legal_authenticator": {
-                "time": None,
-                "person": {"family_name": None, "given_name": None, "full_name": None},
-                "organization": {"name": None},
-            },
-            "author_hcp": {"family_name": None, "organization": {"name": None}},
-            "preferred_hcp": {"name": None},
-            "guardian": {"family_name": None},
+            "custodian_organization": DotDict(
+                {
+                    "name": "Unknown",
+                    "id": None,
+                    "address": {},
+                    "telecoms": [],
+                }
+            ),
+            "legal_authenticator": DotDict(
+                {
+                    "time": None,
+                    "person": DotDict(
+                        {"family_name": None, "given_name": None, "full_name": None}
+                    ),
+                    "organization": DotDict({"name": None}),
+                }
+            ),
+            "author_hcp": DotDict(
+                {"family_name": None, "organization": DotDict({"name": None})}
+            ),
+            "preferred_hcp": DotDict({"name": None}),
+            "guardian": DotDict({"family_name": None}),
             "other_contacts": [],
         }
 
@@ -744,7 +1042,90 @@ class EnhancedCDAXMLParser:
             "birth_date": "Unknown",
             "gender": "Unknown",
             "patient_identifiers": [],
+            "contact_info": DotDict(
+                {"has_enhanced_contact_data": False, "addresses": [], "telecoms": []}
+            ),
+            "full_name": "Unknown Patient",
         }
+
+    def _extract_basic_patient_addresses(self, patient_role: ET.Element) -> List[Dict]:
+        """Extract basic patient addresses as fallback"""
+        addresses = []
+        try:
+            addr_elements = patient_role.findall("{urn:hl7-org:v3}addr")
+            for addr in addr_elements:
+                address_data = {
+                    "street": "",
+                    "city": "",
+                    "postal_code": "",
+                    "country": "",
+                    "use": addr.get("use", ""),
+                }
+
+                # Extract address components
+                street_elem = addr.find("{urn:hl7-org:v3}streetAddressLine")
+                if street_elem is not None and street_elem.text:
+                    address_data["street"] = street_elem.text
+
+                city_elem = addr.find("{urn:hl7-org:v3}city")
+                if city_elem is not None and city_elem.text:
+                    address_data["city"] = city_elem.text
+
+                postal_elem = addr.find("{urn:hl7-org:v3}postalCode")
+                if postal_elem is not None and postal_elem.text:
+                    address_data["postal_code"] = postal_elem.text
+
+                country_elem = addr.find("{urn:hl7-org:v3}country")
+                if country_elem is not None and country_elem.text:
+                    address_data["country"] = country_elem.text
+
+                # Only add if we have some address data
+                if any(
+                    address_data[key]
+                    for key in ["street", "city", "postal_code", "country"]
+                ):
+                    addresses.append(address_data)
+
+        except Exception as e:
+            logger.warning(f"Failed to extract basic patient addresses: {str(e)}")
+
+        return addresses
+
+    def _extract_basic_patient_telecoms(self, patient_role: ET.Element) -> List[Dict]:
+        """Extract basic patient telecoms as fallback"""
+        telecoms = []
+        try:
+            telecom_elements = patient_role.findall("{urn:hl7-org:v3}telecom")
+            for telecom in telecom_elements:
+                telecom_data = {
+                    "value": telecom.get("value", ""),
+                    "use": telecom.get("use", ""),
+                    "type": "unknown",
+                }
+
+                # Determine type from value prefix
+                if telecom_data["value"]:
+                    if telecom_data["value"].startswith("tel:"):
+                        telecom_data["type"] = "phone"
+                        telecom_data["value"] = telecom_data["value"].replace(
+                            "tel:", ""
+                        )
+                    elif telecom_data["value"].startswith("mailto:"):
+                        telecom_data["type"] = "email"
+                        telecom_data["value"] = telecom_data["value"].replace(
+                            "mailto:", ""
+                        )
+                    elif "@" in telecom_data["value"]:
+                        telecom_data["type"] = "email"
+
+                # Only add if we have a value
+                if telecom_data["value"]:
+                    telecoms.append(telecom_data)
+
+        except Exception as e:
+            logger.warning(f"Failed to extract basic patient telecoms: {str(e)}")
+
+        return telecoms
 
     def _create_fallback_result(self) -> Dict[str, Any]:
         """Create fallback result when parsing fails"""
