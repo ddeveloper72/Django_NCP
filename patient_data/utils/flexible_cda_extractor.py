@@ -93,17 +93,23 @@ class FlexibleCDAExtractor:
         # Strategy 1: Try with known namespace variations
         for namespace in self.namespace_variations:
             try:
-                parts = element_path.split("/")
-                ns_parts = []
-                for part in parts:
-                    if part.startswith("."):
-                        ns_parts.append(part)
-                    else:
-                        ns_parts.append(f"{{{namespace}}}{part}")
-
                 if element_path.startswith(".//"):
-                    ns_path = f".//{'/'.join(ns_parts[1:])}"
+                    # Handle descendant search (.//element)
+                    element_name = element_path[3:]  # Remove './/'
+                    ns_path = f".//{{{namespace}}}{element_name}"
+                elif element_path.startswith("./"):
+                    # Handle child search (./element)
+                    element_name = element_path[2:]  # Remove './'
+                    ns_path = f"./{{{namespace}}}{element_name}"
                 else:
+                    # Handle direct element name or complex path
+                    parts = element_path.split("/")
+                    ns_parts = []
+                    for part in parts:
+                        if part in [".", ".."]:
+                            ns_parts.append(part)
+                        else:
+                            ns_parts.append(f"{{{namespace}}}{part}")
                     ns_path = "/".join(ns_parts)
 
                 found_elements = root.findall(ns_path)
@@ -111,6 +117,15 @@ class FlexibleCDAExtractor:
                     elements.extend(found_elements)
             except Exception:
                 continue
+
+        # Strategy 2: Try without namespace (fallback)
+        if not elements:
+            try:
+                found_elements = root.findall(element_path)
+                if found_elements:
+                    elements.extend(found_elements)
+            except Exception:
+                pass
 
         # Remove duplicates while preserving order
         unique_elements = []

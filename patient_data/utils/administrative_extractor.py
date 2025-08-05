@@ -183,14 +183,31 @@ class EnhancedAdministrativeExtractor:
             ".//{urn:hl7-org:v3}recordTarget/{urn:hl7-org:v3}patientRole"
         )
 
+        default_patient = {
+            "addresses": [],
+            "telecoms": [],
+            "primary_address": None,
+            "primary_phone": None,
+            "primary_email": None,
+            "full_name": None,
+            "given_name": None,
+            "family_name": None,
+            "patient_id": None,
+            "id_authority": None,
+            "id_root": None,
+            "birth_date": None,
+            "gender": None,
+        }
+
         if patient_role is None:
-            return {
-                "addresses": [],
-                "telecoms": [],
-                "primary_address": None,
-                "primary_phone": None,
-                "primary_email": None,
-            }
+            return default_patient
+
+        # Extract patient ID
+        id_elem = patient_role.find("{urn:hl7-org:v3}id")
+        if id_elem is not None:
+            default_patient["patient_id"] = id_elem.get("extension")
+            default_patient["id_authority"] = id_elem.get("assigningAuthorityName")
+            default_patient["id_root"] = id_elem.get("root")
 
         # Extract addresses
         addresses = []
@@ -207,6 +224,50 @@ class EnhancedAdministrativeExtractor:
             telecom = CDAContactExtractor.extract_telecom(tel_elem)
             if telecom:
                 telecoms.append(telecom)
+
+        # Extract patient details
+        patient_elem = patient_role.find("{urn:hl7-org:v3}patient")
+        if patient_elem is not None:
+            # Extract name
+            name_elem = patient_elem.find("{urn:hl7-org:v3}name")
+            if name_elem is not None:
+                given_elem = name_elem.find("{urn:hl7-org:v3}given")
+                family_elem = name_elem.find("{urn:hl7-org:v3}family")
+
+                given_name = (
+                    given_elem.text.strip()
+                    if given_elem is not None and given_elem.text
+                    else None
+                )
+                family_name = (
+                    family_elem.text.strip()
+                    if family_elem is not None and family_elem.text
+                    else None
+                )
+                full_name = f"{given_name or ''} {family_name or ''}".strip() or None
+
+                default_patient["given_name"] = given_name
+                default_patient["family_name"] = family_name
+                default_patient["name"] = full_name  # Add this for compatibility
+                default_patient["full_name"] = full_name
+
+            # Extract birth date
+            birth_elem = patient_elem.find("{urn:hl7-org:v3}birthTime")
+            if birth_elem is not None:
+                birth_date = birth_elem.get("value")
+                if birth_date and self.date_formatter:
+                    default_patient["birth_date"] = (
+                        self.date_formatter.format_document_date(birth_date)
+                    )
+                else:
+                    default_patient["birth_date"] = birth_date
+
+            # Extract gender
+            gender_elem = patient_elem.find("{urn:hl7-org:v3}administrativeGenderCode")
+            if gender_elem is not None:
+                default_patient["gender"] = gender_elem.get(
+                    "displayName", gender_elem.get("code")
+                )
 
         # Identify primary contacts
         primary_address = None
@@ -227,13 +288,18 @@ class EnhancedAdministrativeExtractor:
             elif tel.get("type") == "email" and primary_email is None:
                 primary_email = tel
 
-        return {
-            "addresses": addresses,
-            "telecoms": telecoms,
-            "primary_address": primary_address,
-            "primary_phone": primary_phone,
-            "primary_email": primary_email,
-        }
+        # Update with extracted data
+        default_patient.update(
+            {
+                "addresses": addresses,
+                "telecoms": telecoms,
+                "primary_address": primary_address,
+                "primary_phone": primary_phone,
+                "primary_email": primary_email,
+            }
+        )
+
+        return default_patient
 
     def extract_author_information(self, root: ET.Element) -> List[Dict[str, Any]]:
         """Extract comprehensive author information with flexible namespace handling"""
@@ -299,3 +365,29 @@ class EnhancedAdministrativeExtractor:
             f"Legal authenticator extracted: {auth_info.get('full_name') or 'Unknown'}"
         )
         return auth_info
+
+    def extract_administrative_section(self, root: ET.Element) -> Dict[str, Any]:
+        """Extract complete administrative section including all contact information"""
+        try:
+            # Extract all administrative components
+            patient_info = self.extract_patient_contact_info(root)
+            authors = self.extract_author_information(root)
+            custodian = self.extract_custodian_information(root)
+            legal_auth = self.extract_legal_authenticator(root)
+
+            return {
+                "patient": patient_info,
+                "authors": authors,
+                "custodians": [custodian] if custodian.get("organization") else [],
+                "legal_authenticators": (
+                    [legal_auth] if legal_auth.get("full_name") else []
+                ),
+            }
+        except Exception as e:
+            logger.error(f"Error extracting administrative section: {str(e)}")
+            return {
+                "patient": {},
+                "authors": [],
+                "custodians": [],
+                "legal_authenticators": [],
+            }
