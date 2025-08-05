@@ -85,6 +85,14 @@ class TemplateTranslationService:
             "details": self.ui_translations.get_translation(
                 "details", self.target_language
             ),
+            # Administrative and medical section labels
+            "administrative_information": _("Administrative Information"),
+            "legal_authenticator": _("Legal Authenticator"),
+            "cabinet_medicale": _("Cabinet Medicale"),
+            "free_text": _("Free Text"),
+            "coded_sections": _("Coded Sections"),
+            "english_translation": _("English Translation"),
+            "technical_error": _("Technical Error"),
         }
 
         return translations

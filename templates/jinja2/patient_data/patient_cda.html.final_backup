@@ -306,8 +306,9 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
     <div class="wrap-collapsible">
         <input id="collapsible-administrative" class="toggle" type="checkbox">
         <label for="collapsible-administrative" class="lbl-toggle-main">
-            <i class="fas fa-address-book me-2"></i>{{ template_translations.administrative_information if
-            template_translations else "Administrative Information" }}</label>
+            <i class="fas fa-address-book me-2"></i>
+            Administrative Information
+        </label>
         <div class="collapsible-content-main">
             <div class="content-inner-main">
                 <div class="administrative-section">
@@ -341,8 +342,7 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                             </div>
                             {% if administrative_data.patient_contact_info.telecoms %}
                             <div class="admin-info-row">
-                                <div class="admin-label">{{ template_translations.contact if template_translations else
-                                    "Contact" }}</div>
+                                <div class="admin-label">{{ template_translations.contact if template_translations else "Contact" }}</div>
                                 <div class="admin-value contact-info">
                                     {% for telecom in administrative_data.patient_contact_info.telecoms %}
                                     <div class="contact-item">
@@ -366,8 +366,7 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                             </div>
                             {% if administrative_data.author_hcp.family_name %}
                             <div class="admin-info-row">
-                                <div class="admin-label">{{ template_translations.name if template_translations else
-                                    "Name" }}</div>
+                                <div class="admin-label">{{ template_translations.name if template_translations else "Name" }}</div>
                                 <div class="admin-value person-name">
                                     {{ administrative_data.author_hcp.title }} {{
                                     administrative_data.author_hcp.given_name }} {{
@@ -377,8 +376,7 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                             {% endif %}
                             {% if administrative_data.author_hcp.organization.name %}
                             <div class="admin-info-row">
-                                <div class="admin-label">{{ template_translations.organization if template_translations
-                                    else "Organization" }}</div>
+                                <div class="admin-label">{{ template_translations.organization if template_translations else "Organization" }}</div>
                                 <div class="admin-value organization-name">
                                     {{ administrative_data.author_hcp.organization.name }}
                                 </div>
@@ -386,8 +384,7 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                             {% endif %}
                             {% if administrative_data.author_hcp.organization.addresses %}
                             <div class="admin-info-row">
-                                <div class="admin-label">{{ template_translations.address if template_translations else
-                                    "Address" }}</div>
+                                <div class="admin-label">{{ template_translations.address if template_translations else "Address" }}</div>
                                 <div class="admin-value">
                                     {% for address in administrative_data.author_hcp.organization.addresses %}
                                     <div class="contact-item">
@@ -403,8 +400,7 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                             {% endif %}
                             {% if administrative_data.author_hcp.organization.telecoms %}
                             <div class="admin-info-row">
-                                <div class="admin-label">{{ template_translations.contact if template_translations else
-                                    "Contact" }}</div>
+                                <div class="admin-label">{{ template_translations.contact if template_translations else "Contact" }}</div>
                                 <div class="admin-value contact-info">
                                     {% for telecom in administrative_data.author_hcp.organization.telecoms %}
                                     <div class="contact-item">
@@ -423,8 +419,7 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                         <!-- Legal Authenticator -->
                         <div class="admin-contact-card legal-authenticator">
                             <div class="admin-card-header">
-                                <i class="fas fa-certificate"></i>{{ template_translations.legal_authenticator if
-                                template_translations else "Legal Authenticator" }}
+                                <i class="fas fa-certificate"></i> Legal Authenticator
                             </div>
                             {% if administrative_data.legal_authenticator.title or
                             administrative_data.legal_authenticator.given_name or
@@ -469,11 +464,9 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                             <div class="admin-info-row">
                                 <div class="admin-label">
                                     {% if telecom.type == 'email' %}
-                                    <i class="fas fa-envelope"></i> {{ template_translations.email if
-                                    template_translations else "Email" }}:
+                                    <i class="fas fa-envelope"></i> {{ template_translations.email if template_translations else "Email" }}:
                                     {% elif telecom.type == 'phone' %}
-                                    <i class="fas fa-phone"></i> {{ template_translations.phone if template_translations
-                                    else "Phone" }}:
+                                    <i class="fas fa-phone"></i> {{ template_translations.phone if template_translations else "Phone" }}:
                                     {% else %}
                                     <i class="fas fa-info-circle"></i> {{ telecom.type|title }}:
                                     {% endif %}
@@ -520,11 +513,9 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                             <div class="admin-info-row">
                                 <div class="admin-label">
                                     {% if telecom.type == 'email' %}
-                                    <i class="fas fa-envelope"></i> {{ template_translations.email if
-                                    template_translations else "Email" }}:
+                                    <i class="fas fa-envelope"></i> {{ template_translations.email if template_translations else "Email" }}:
                                     {% elif telecom.type == 'phone' %}
-                                    <i class="fas fa-phone"></i> {{ template_translations.phone if template_translations
-                                    else "Phone" }}:
+                                    <i class="fas fa-phone"></i> {{ template_translations.phone if template_translations else "Phone" }}:
                                     {% else %}
                                     <i class="fas fa-info-circle"></i> {{ telecom.type|title }}:
                                     {% endif %}
@@ -542,8 +533,8 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                         <!-- Cabinet Medicale (Preferred HCP) -->
                         <div class="admin-section cabinet-medicale">
                             <h4 class="admin-section-title">
-                                <i class="fas fa-clinic-medical me-2"></i>{{ template_translations.cabinet_medicale if
-                                template_translations else "Cabinet Medicale" }}
+                                <i class="fas fa-clinic-medical me-2"></i>
+                                Cabinet Medicale
                             </h4>
                             <div class="contact-info-grid">
                                 <div class="contact-info-item">
@@ -644,11 +635,9 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                                     <div class="admin-info-row">
                                         <div class="admin-label">
                                             {% if telecom.type == 'email' %}
-                                            <i class="fas fa-envelope"></i> {{ template_translations.email if
-                                            template_translations else "Email" }}:
+                                            <i class="fas fa-envelope"></i> {{ template_translations.email if template_translations else "Email" }}:
                                             {% elif telecom.type == 'phone' %}
-                                            <i class="fas fa-phone"></i> {{ template_translations.phone if
-                                            template_translations else "Phone" }}:
+                                            <i class="fas fa-phone"></i> {{ template_translations.phone if template_translations else "Phone" }}:
                                             {% else %}
                                             <i class="fas fa-info-circle"></i> {{ telecom.type|title }}:
                                             {% endif %}
@@ -711,8 +700,8 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                             </span>
                             {% else %}
                             <span class="section-type-badge free-text">
-                                <i class="fas fa-text-width me-1"></i>{{ template_translations.free_text if
-                                template_translations else "Free Text" }}</span>
+                                <i class="fas fa-text-width me-1"></i>Free Text
+                            </span>
                             {% endif %}
                             {% if section.content.medical_terms > 0 %}
                             <span class="medical-terms-badge">{{ section.content.medical_terms }} terms</span>
@@ -746,9 +735,8 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                                         style="display: block;">
                                         <div class="content-inner">
                                             <div class="content-label">
-                                                <i class="fas fa-flag-usa me-1"></i>{{
-                                                template_translations.english_translation if template_translations else
-                                                "English Translation" }}
+                                                <i class="fas fa-flag-usa me-1"></i>
+                                                English Translation
                                             </div>
                                             <div class="content-text">
                                                 {% if section.has_ps_table and section.ps_table_html %}
@@ -809,9 +797,9 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                                         <input id="collapsible-{{ section.section_id }}-translated" class="toggle"
                                             type="checkbox" checked="true">
                                         <label for="collapsible-{{ section.section_id }}-translated" class="lbl-toggle">
-                                            <i class="fas fa-language me-1"></i>{{
-                                            template_translations.english_translation if template_translations else
-                                            "English Translation" }}</label>
+                                            <i class="fas fa-language me-1"></i>
+                                            English Translation
+                                        </label>
                                         <div class="collapsible-content">
                                             <div class="content-inner">
                                                 {% if section.has_ps_table and section.ps_table_html %}
@@ -839,8 +827,7 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                     <!-- Error Information -->
                     <div class="error-info-section">
                         <div class="alert alert-danger">
-                            <h4><i class="fas fa-exclamation-triangle me-2"></i>{{ template_translations.technical_error
-                                if template_translations else "Technical Error" }}</h4>
+                            <h4><i class="fas fa-exclamation-triangle me-2"></i>Technical Error</h4>
                             <p><strong>Error:</strong> {{ error_message }}</p>
                             {% if error_traceback %}
                             <details>
