@@ -14,6 +14,7 @@ from .european_smp_client import european_smp_client
 import logging
 import json
 import requests
+import os
 from datetime import datetime
 
 logger = logging.getLogger("ehealth")
@@ -671,6 +672,18 @@ def perform_patient_search(country, search_fields, user):
                     "FI-BOOTCAMP-123",
                 ]
             )
+        elif country.code == "PT":  # Portugal
+            # Add Portuguese test patient IDs including Wave 7 data
+            test_ids.extend(
+                [
+                    "2-1234-W7",  # Portuguese Wave 7 test document
+                    "PT-TEST-001",
+                    "12345",  # Common test ID
+                    "Ferreira",  # Family name from Wave 7
+                    "Diana",  # Given name from Wave 7
+                    "PT-BOOTCAMP-123",
+                ]
+            )
 
         found_patient = False
 
@@ -695,6 +708,20 @@ def perform_patient_search(country, search_fields, user):
                 else:
                     patient_name = "Aoife Kelly"  # Default Irish name
                     birth_date = "1985-11-08"
+            elif country.code == "PT":  # Portugal
+                if (
+                    "2-1234-W7" in str(patient_id)
+                    or "Ferreira" in str(search_fields.values())
+                    or "Diana" in str(search_fields.values())
+                ):
+                    patient_name = "Diana Ferreira"  # From Portuguese Wave 7 test data
+                    birth_date = "1985-08-15"
+                elif "12345" in str(patient_id):
+                    patient_name = "João Silva"
+                    birth_date = "1978-12-03"
+                else:
+                    patient_name = "Maria Santos"  # Default Portuguese name
+                    birth_date = "1983-04-20"
             else:
                 # Default patient data
                 patient_name = f"{search_fields.get('first_name', search_fields.get('given_name', 'John'))} {search_fields.get('last_name', search_fields.get('surname', search_fields.get('family_name', 'Doe')))}"
@@ -709,7 +736,11 @@ def perform_patient_search(country, search_fields, user):
                 "country": country.code,
                 "last_updated": timezone.now().isoformat(),
                 "gender": (
-                    "M" if "Murphy" in patient_name or "Seán" in patient_name else "F"
+                    "M"
+                    if "Murphy" in patient_name
+                    or "Seán" in patient_name
+                    or "João" in patient_name
+                    else "F"
                 ),
                 "address": f"Test Address, {country.name}",
             }
@@ -840,24 +871,138 @@ def patient_data(request, country_code, patient_id):
 @login_required
 def document_viewer(request, country_code, patient_id, document_type):
     """
-    View specific document (CDA or FHIR)
+    View specific document (CDA or FHIR) with Enhanced CDA Processing
     """
-    # Mock document retrieval
+    # Default language to English, but can be changed based on user preference
+    target_language = request.GET.get("lang", "en")
+
+    # Initialize document data
     document_data = {
         "type": document_type,
         "patient_id": patient_id,
         "format": "CDA" if document_type == "PS" else "FHIR",
         "content": "Document content would be displayed here...",
+        "sections": [],
+        "processing_success": False,
+        "error_message": None,
     }
+
+    # If this is a CDA document (Patient Summary), process with Enhanced CDA Processor
+    if document_type == "PS":
+        try:
+            # Try to load real CDA data from test files or patient data
+            cda_content = None
+
+            # Check for Wave 7 test data first
+            test_cda_path = (
+                f"test_data/eu_member_states/{country_code.upper()}/2-1234-W7.xml"
+            )
+            if os.path.exists(test_cda_path):
+                with open(test_cda_path, "r", encoding="utf-8") as file:
+                    cda_content = file.read()
+                logger.info(
+                    f"Loaded test CDA data for {country_code}: {len(cda_content)} characters"
+                )
+
+            # If we have CDA content, process it with Enhanced CDA Processor
+            if cda_content:
+                from patient_data.services.enhanced_cda_processor import (
+                    EnhancedCDAProcessor,
+                )
+
+                processor = EnhancedCDAProcessor(target_language=target_language)
+                result = processor.process_clinical_sections(
+                    cda_content=cda_content,
+                    source_language="en",  # Most test documents are in English
+                )
+
+                if result.get("success"):
+                    document_data.update(
+                        {
+                            "sections": result.get("sections", []),
+                            "processing_success": True,
+                            "content": f"Processed {len(result.get('sections', []))} clinical sections with Enhanced CDA Processor",
+                        }
+                    )
+                    logger.info(
+                        f"Enhanced CDA processing successful: {len(result.get('sections', []))} sections"
+                    )
+                else:
+                    document_data["error_message"] = result.get(
+                        "error", "Unknown processing error"
+                    )
+                    logger.error(
+                        f"Enhanced CDA processing failed: {document_data['error_message']}"
+                    )
+            else:
+                # No real CDA data available, use mock data
+                document_data["content"] = (
+                    "No CDA test data available for this country/patient combination"
+                )
+                logger.warning(f"No CDA data found for {country_code}/{patient_id}")
+
+        except Exception as e:
+            document_data["error_message"] = f"CDA processing error: {str(e)}"
+            logger.error(f"Enhanced CDA Processor error: {e}")
 
     context = {
         "document": document_data,
         "patient_id": patient_id,
         "country_code": country_code,
         "page_title": f"Document Viewer - {document_type}",
+        "target_language": target_language,
+        "available_languages": ["en", "de", "fr", "es", "it", "pt", "nl", "pl", "cs"],
     }
 
     return render(request, "ehealth_portal/document_viewer.html", context)
+
+
+@login_required
+def process_cda_ajax(request):
+    """
+    AJAX endpoint for Enhanced CDA Processing
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST method required"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        cda_content = data.get("cda_content")
+        target_language = data.get("target_language", "en")
+        source_language = data.get("source_language", "en")
+
+        if not cda_content:
+            return JsonResponse({"error": "CDA content required"}, status=400)
+
+        # Process with Enhanced CDA Processor
+        from patient_data.services.enhanced_cda_processor import EnhancedCDAProcessor
+
+        processor = EnhancedCDAProcessor(target_language=target_language)
+        result = processor.process_clinical_sections(
+            cda_content=cda_content, source_language=source_language
+        )
+
+        if result.get("success"):
+            return JsonResponse(
+                {
+                    "success": True,
+                    "sections": result.get("sections", []),
+                    "message": f"Processed {len(result.get('sections', []))} clinical sections",
+                }
+            )
+        else:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": result.get("error", "Unknown processing error"),
+                }
+            )
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
+    except Exception as e:
+        logger.error(f"CDA AJAX processing error: {e}")
+        return JsonResponse({"error": f"Processing error: {str(e)}"}, status=500)
 
 
 @login_required

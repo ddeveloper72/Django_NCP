@@ -224,6 +224,14 @@ class EnhancedCDAProcessor:
                 "has_ps_table": has_ps_table,
                 "ps_table_html": ps_table_html,
                 "ps_table_html_original": ps_table_html_original,
+                "structured_data": table_data,  # Include structured data for debugging and table generation
+                "table_rows": (
+                    self._generate_table_rows(
+                        table_data, section_code, self.target_language
+                    )
+                    if table_data
+                    else []
+                ),
             }
 
         except Exception as e:
@@ -658,19 +666,25 @@ class EnhancedCDAProcessor:
                 # Extract substance administration (medications)
                 sub_admin = entry.find(".//hl7:substanceAdministration", namespaces)
                 if sub_admin is not None:
-                    entry_data["data"] = self._extract_medication_data(sub_admin, namespaces)
+                    entry_data["data"] = self._extract_medication_data(
+                        sub_admin, namespaces
+                    )
                     entry_data["section_type"] = "medication"
-                
+
                 # Extract observation (allergies, lab results, etc.)
                 obs_elem = entry.find(".//hl7:observation", namespaces)
                 if obs_elem is not None:
-                    entry_data["data"] = self._extract_observation_data(obs_elem, namespaces)
+                    entry_data["data"] = self._extract_observation_data(
+                        obs_elem, namespaces
+                    )
                     entry_data["section_type"] = "observation"
-                
+
                 # Extract procedure data
                 procedure = entry.find(".//hl7:procedure", namespaces)
                 if procedure is not None:
-                    entry_data["data"] = self._extract_procedure_data(procedure, namespaces)
+                    entry_data["data"] = self._extract_procedure_data(
+                        procedure, namespaces
+                    )
                     entry_data["section_type"] = "procedure"
 
                 # Extract act (general activities)
@@ -696,24 +710,35 @@ class EnhancedCDAProcessor:
     def _extract_medication_data(self, sub_admin, namespaces) -> Dict[str, Any]:
         """Extract medication data from substanceAdministration element"""
         data = {}
-        
+
         try:
             # Get medication code and display name
-            consumable = sub_admin.find(".//hl7:consumable/hl7:manufacturedProduct/hl7:manufacturedMaterial", namespaces)
+            consumable = sub_admin.find(
+                ".//hl7:consumable/hl7:manufacturedProduct/hl7:manufacturedMaterial",
+                namespaces,
+            )
             if consumable is not None:
                 code_elem = consumable.find("hl7:code", namespaces)
                 if code_elem is not None:
                     data["medication_code"] = code_elem.get("code", "")
-                    data["medication_display"] = code_elem.get("displayName", "Unknown Medication")
-                    data["code_system"] = self._get_code_system_name(code_elem.get("codeSystem", ""))
-                
+                    data["medication_display"] = code_elem.get(
+                        "displayName", "Unknown Medication"
+                    )
+                    data["code_system"] = self._get_code_system_name(
+                        code_elem.get("codeSystem", "")
+                    )
+
                 # Extract ingredient information
-                ingredient = consumable.find(".//hl7:ingredient/hl7:ingredientSubstance", namespaces)
+                ingredient = consumable.find(
+                    ".//hl7:ingredient/hl7:ingredientSubstance", namespaces
+                )
                 if ingredient is not None:
                     ing_code = ingredient.find("hl7:code", namespaces)
                     if ing_code is not None:
                         data["ingredient_code"] = ing_code.get("code", "")
-                        data["ingredient_display"] = ing_code.get("displayName", "Unknown Ingredient")
+                        data["ingredient_display"] = ing_code.get(
+                            "displayName", "Unknown Ingredient"
+                        )
 
             # Extract dosage information
             dose_quantity = sub_admin.find(".//hl7:doseQuantity", namespaces)
@@ -723,13 +748,17 @@ class EnhancedCDAProcessor:
                 data["dosage"] = f"{value} {unit}".strip() if value else "Not specified"
 
             # Extract posology/frequency
-            effectiveTime = sub_admin.find(".//hl7:effectiveTime[@xsi:type='PIVL_TS']", namespaces)
+            effectiveTime = sub_admin.find(
+                ".//hl7:effectiveTime[@xsi:type='PIVL_TS']", namespaces
+            )
             if effectiveTime is not None:
                 period = effectiveTime.find("hl7:period", namespaces)
                 if period is not None:
                     value = period.get("value", "")
                     unit = period.get("unit", "")
-                    data["posology"] = f"Every {value} {unit}" if value else "As directed"
+                    data["posology"] = (
+                        f"Every {value} {unit}" if value else "As directed"
+                    )
 
             # Extract status
             status_code = sub_admin.find("hl7:statusCode", namespaces)
@@ -742,54 +771,104 @@ class EnhancedCDAProcessor:
         return data
 
     def _extract_observation_data(self, obs_elem, namespaces) -> Dict[str, Any]:
-        """Extract observation data (allergies, lab results, etc.)"""
+        """Extract observation data (allergies, lab results, problems, etc.)"""
         data = {}
-        
+
         try:
             # Get observation code
             code_elem = obs_elem.find("hl7:code", namespaces)
             if code_elem is not None:
                 data["code"] = code_elem.get("code", "")
                 data["display"] = code_elem.get("displayName", "Unknown Observation")
-                data["code_system"] = self._get_code_system_name(code_elem.get("codeSystem", ""))
+                data["code_system"] = self._get_code_system_name(
+                    code_elem.get("codeSystem", "")
+                )
 
-            # Extract value
+            # Extract value - this is usually the main clinical content
             value_elem = obs_elem.find("hl7:value", namespaces)
             if value_elem is not None:
-                data["value"] = value_elem.get("displayName", value_elem.get("value", ""))
-                
-                # For allergies, extract agent information
-                if value_elem.get("xsi:type") == "CD":
+                # Main value
+                data["value"] = value_elem.get(
+                    "displayName", value_elem.get("value", "")
+                )
+
+                # Check xsi:type with proper namespace handling
+                xsi_type = value_elem.get(
+                    "{http://www.w3.org/2001/XMLSchema-instance}type"
+                )
+
+                # For problem observations, map value fields to condition fields
+                if xsi_type == "CD" or value_elem.get("xsi:type") == "CD":
+                    data["condition_code"] = value_elem.get("code", "")
+                    data["condition_display"] = value_elem.get(
+                        "displayName", "Unknown Condition"
+                    )
+                    data["condition_system"] = self._get_code_system_name(
+                        value_elem.get("codeSystem", "")
+                    )
+
+                    # For allergies, also extract agent information
                     data["agent_code"] = value_elem.get("code", "")
-                    data["agent_display"] = value_elem.get("displayName", "Unknown Agent")
+                    data["agent_display"] = value_elem.get(
+                        "displayName", "Unknown Agent"
+                    )
 
             # Extract participant (for allergies - causative agent)
-            participant = obs_elem.find(".//hl7:participant/hl7:participantRole/hl7:playingEntity", namespaces)
+            participant = obs_elem.find(
+                ".//hl7:participant/hl7:participantRole/hl7:playingEntity", namespaces
+            )
             if participant is not None:
                 agent_code = participant.find("hl7:code", namespaces)
                 if agent_code is not None:
                     data["agent_code"] = agent_code.get("code", "")
-                    data["agent_display"] = agent_code.get("displayName", "Unknown Agent")
+                    data["agent_display"] = agent_code.get(
+                        "displayName", "Unknown Agent"
+                    )
 
-            # Extract severity (for allergies)
-            entryRelationship = obs_elem.find(".//hl7:entryRelationship[@typeCode='SUBJ']/hl7:observation", namespaces)
+            # Extract severity (for allergies and problems)
+            entryRelationship = obs_elem.find(
+                ".//hl7:entryRelationship[@typeCode='SUBJ']/hl7:observation", namespaces
+            )
             if entryRelationship is not None:
-                severity_code = entryRelationship.find("hl7:code[@code='SEV']", namespaces)
+                severity_code = entryRelationship.find(
+                    "hl7:code[@code='SEV']", namespaces
+                )
                 if severity_code is not None:
                     severity_value = entryRelationship.find("hl7:value", namespaces)
                     if severity_value is not None:
-                        data["severity"] = severity_value.get("code", "unknown")
+                        data["severity"] = severity_value.get(
+                            "displayName", severity_value.get("code", "unknown")
+                        )
 
             # Extract manifestation (for allergies)
-            manifestation = obs_elem.find(".//hl7:entryRelationship[@typeCode='MFST']/hl7:observation/hl7:value", namespaces)
+            manifestation = obs_elem.find(
+                ".//hl7:entryRelationship[@typeCode='MFST']/hl7:observation/hl7:value",
+                namespaces,
+            )
             if manifestation is not None:
                 data["manifestation_code"] = manifestation.get("code", "")
-                data["manifestation_display"] = manifestation.get("displayName", "Unknown Reaction")
+                data["manifestation_display"] = manifestation.get(
+                    "displayName", "Unknown Reaction"
+                )
 
             # Extract status
             status_code = obs_elem.find("hl7:statusCode", namespaces)
             if status_code is not None:
                 data["status"] = status_code.get("code", "active")
+
+            # Extract onset date from effectiveTime
+            effective_time = obs_elem.find("hl7:effectiveTime/hl7:low", namespaces)
+            if effective_time is not None:
+                onset_value = effective_time.get("value", "")
+                if onset_value:
+                    # Format HL7 date (YYYYMMDD) to readable format
+                    if len(onset_value) >= 8:
+                        year = onset_value[:4]
+                        month = onset_value[4:6]
+                        day = onset_value[6:8]
+                        data["onset_date"] = f"{year}-{month}-{day}"
+                    else:
+                        data["onset_date"] = onset_value
 
         except Exception as e:
             logger.error(f"Error extracting observation data: {e}")
@@ -799,14 +878,18 @@ class EnhancedCDAProcessor:
     def _extract_procedure_data(self, procedure, namespaces) -> Dict[str, Any]:
         """Extract procedure data"""
         data = {}
-        
+
         try:
             # Get procedure code
             code_elem = procedure.find("hl7:code", namespaces)
             if code_elem is not None:
                 data["procedure_code"] = code_elem.get("code", "")
-                data["procedure_display"] = code_elem.get("displayName", "Unknown Procedure")
-                data["code_system"] = self._get_code_system_name(code_elem.get("codeSystem", ""))
+                data["procedure_display"] = code_elem.get(
+                    "displayName", "Unknown Procedure"
+                )
+                data["code_system"] = self._get_code_system_name(
+                    code_elem.get("codeSystem", "")
+                )
 
             # Extract effective time (date)
             effectiveTime = procedure.find("hl7:effectiveTime", namespaces)
@@ -814,7 +897,10 @@ class EnhancedCDAProcessor:
                 data["date"] = effectiveTime.get("value", "Not specified")
 
             # Extract performer
-            performer = procedure.find(".//hl7:performer/hl7:assignedEntity/hl7:assignedPerson/hl7:name", namespaces)
+            performer = procedure.find(
+                ".//hl7:performer/hl7:assignedEntity/hl7:assignedPerson/hl7:name",
+                namespaces,
+            )
             if performer is not None:
                 data["performer"] = performer.text or "Not specified"
 
@@ -831,14 +917,16 @@ class EnhancedCDAProcessor:
     def _extract_act_data(self, act_elem, namespaces) -> Dict[str, Any]:
         """Extract general act data"""
         data = {}
-        
+
         try:
             # Get act code
             code_elem = act_elem.find("hl7:code", namespaces)
             if code_elem is not None:
                 data["code"] = code_elem.get("code", "")
                 data["display"] = code_elem.get("displayName", "Unknown Activity")
-                data["code_system"] = self._get_code_system_name(code_elem.get("codeSystem", ""))
+                data["code_system"] = self._get_code_system_name(
+                    code_elem.get("codeSystem", "")
+                )
 
             # Extract text/description
             text_elem = act_elem.find("hl7:text", namespaces)
@@ -858,37 +946,47 @@ class EnhancedCDAProcessor:
     def _extract_from_html_tables(self, entries, namespaces) -> List[Dict[str, Any]]:
         """Extract data from HTML tables if no structured CDA data is available"""
         structured_data = []
-        
+
         try:
             # Look for HTML table content in the text elements
             for entry in entries:
                 text_elem = entry.find(".//hl7:text", namespaces)
                 if text_elem is not None:
                     # Parse HTML table content
-                    html_content = ET.tostring(text_elem, encoding='unicode')
-                    soup = BeautifulSoup(html_content, 'html.parser')
-                    
-                    tables = soup.find_all('table')
+                    html_content = ET.tostring(text_elem, encoding="unicode")
+                    soup = BeautifulSoup(html_content, "html.parser")
+
+                    tables = soup.find_all("table")
                     for table in tables:
-                        rows = table.find_all('tr')
+                        rows = table.find_all("tr")
                         headers = []
-                        
+
                         # Get headers
                         if rows:
                             header_row = rows[0]
-                            headers = [th.get_text(strip=True) for th in header_row.find_all(['th', 'td'])]
-                        
+                            headers = [
+                                th.get_text(strip=True)
+                                for th in header_row.find_all(["th", "td"])
+                            ]
+
                         # Process data rows
                         for row in rows[1:]:
-                            cells = [td.get_text(strip=True) for td in row.find_all(['td', 'th'])]
+                            cells = [
+                                td.get_text(strip=True)
+                                for td in row.find_all(["td", "th"])
+                            ]
                             if len(cells) >= len(headers):
                                 row_data = dict(zip(headers, cells))
-                                structured_data.append({
-                                    "type": "html_table_row",
-                                    "data": self._normalize_html_table_data(row_data),
-                                    "section_type": "table"
-                                })
-        
+                                structured_data.append(
+                                    {
+                                        "type": "html_table_row",
+                                        "data": self._normalize_html_table_data(
+                                            row_data
+                                        ),
+                                        "section_type": "table",
+                                    }
+                                )
+
         except Exception as e:
             logger.error(f"Error extracting from HTML tables: {e}")
 
@@ -897,37 +995,37 @@ class EnhancedCDAProcessor:
     def _normalize_html_table_data(self, row_data: Dict[str, str]) -> Dict[str, str]:
         """Normalize HTML table data to standard format"""
         normalized = {}
-        
+
         # Map common table headers to standard fields
         header_mappings = {
             # Medications
             "brand name": "medication_display",
-            "medication": "medication_display", 
+            "medication": "medication_display",
             "active ingredient": "ingredient_display",
             "ingredient": "ingredient_display",
             "dosage": "dosage",
             "dose": "dosage",
             "posology": "posology",
             "frequency": "posology",
-            
             # Allergies
             "allergy type": "type_display",
-            "causative agent": "agent_display", 
+            "causative agent": "agent_display",
             "agent": "agent_display",
             "manifestation": "manifestation_display",
             "reaction": "manifestation_display",
             "severity": "severity",
-            
             # General
             "status": "status",
             "date": "date",
-            "code": "code"
+            "code": "code",
         }
-        
+
         for original_key, value in row_data.items():
-            normalized_key = header_mappings.get(original_key.lower(), original_key.lower().replace(" ", "_"))
+            normalized_key = header_mappings.get(
+                original_key.lower(), original_key.lower().replace(" ", "_")
+            )
             normalized[normalized_key] = value
-            
+
         return normalized
 
     def _get_code_system_name(self, oid: str) -> str:
@@ -937,7 +1035,7 @@ class EnhancedCDAProcessor:
             "2.16.840.1.113883.6.96": "SNOMED",
             "2.16.840.1.113883.6.3": "ICD-10",
             "2.16.840.1.113883.6.73": "ATC",
-            "2.16.840.1.113883.6.88": "RxNorm"
+            "2.16.840.1.113883.6.88": "RxNorm",
         }
         return oid_mappings.get(oid, "Unknown")
 
@@ -951,12 +1049,20 @@ class EnhancedCDAProcessor:
         """Generate PS-compliant tables with actual coded medical data"""
 
         # Define column headers based on section type
-        column_headers = self._get_section_column_headers(section_code, target_language=self.target_language)
-        source_headers = self._get_section_column_headers(section_code, target_language=source_language)
-        
+        column_headers = self._get_section_column_headers(
+            section_code, target_language=self.target_language
+        )
+        source_headers = self._get_section_column_headers(
+            section_code, target_language=source_language
+        )
+
         # Generate table rows with coded medical data
-        enhanced_rows = self._generate_table_rows(table_data, section_code, target_language=self.target_language)
-        original_rows = self._generate_table_rows(table_data, section_code, target_language=source_language)
+        enhanced_rows = self._generate_table_rows(
+            table_data, section_code, target_language=self.target_language
+        )
+        original_rows = self._generate_table_rows(
+            table_data, section_code, target_language=source_language
+        )
 
         # Build enhanced table (target language)
         table_html = f"""
@@ -1014,64 +1120,182 @@ class EnhancedCDAProcessor:
 
         return table_html, table_html_original
 
-    def _get_section_column_headers(self, section_code: str, target_language: str = "en") -> List[str]:
+    def _get_section_column_headers(
+        self, section_code: str, target_language: str = "en"
+    ) -> List[str]:
         """Get appropriate column headers for different clinical sections"""
-        
+
         headers_map = {
             "en": {
-                "10160-0": ["Medication", "Active Ingredient", "Dosage", "Posology", "Status"],  # Medication History
-                "48765-2": ["Allergy Type", "Causative Agent", "Manifestation", "Severity", "Status"],  # Allergies
-                "11450-4": ["Condition", "Status", "Onset Date", "Severity", "Priority"],  # Problem List
-                "47519-4": ["Procedure", "Date", "Performer", "Status", "Location"],  # Procedures
-                "30954-2": ["Test", "Result", "Reference Range", "Date", "Status"],  # Laboratory Results
-                "10157-6": ["Vaccine", "Date", "Dose", "Route", "Status"],  # Immunizations
-                "18776-5": ["Treatment", "Instructions", "Duration", "Frequency", "Status"],  # Treatment Plan
-                "default": ["Item", "Description", "Value", "Date", "Status"]
+                "10160-0": [
+                    "Medication",
+                    "Active Ingredient",
+                    "Dosage",
+                    "Posology",
+                    "Status",
+                ],  # Medication History
+                "48765-2": [
+                    "Allergy Type",
+                    "Causative Agent",
+                    "Manifestation",
+                    "Severity",
+                    "Status",
+                ],  # Allergies
+                "11450-4": [
+                    "Condition",
+                    "Status",
+                    "Onset Date",
+                    "Severity",
+                    "Priority",
+                ],  # Problem List
+                "47519-4": [
+                    "Procedure",
+                    "Date",
+                    "Performer",
+                    "Status",
+                    "Location",
+                ],  # Procedures
+                "30954-2": [
+                    "Test",
+                    "Result",
+                    "Reference Range",
+                    "Date",
+                    "Status",
+                ],  # Laboratory Results
+                "10157-6": [
+                    "Vaccine",
+                    "Date",
+                    "Dose",
+                    "Route",
+                    "Status",
+                ],  # Immunizations
+                "18776-5": [
+                    "Treatment",
+                    "Instructions",
+                    "Duration",
+                    "Frequency",
+                    "Status",
+                ],  # Treatment Plan
+                "default": ["Item", "Description", "Value", "Date", "Status"],
             },
             "fr": {
-                "10160-0": ["Médicament", "Principe actif", "Dosage", "Posologie", "Statut"],
-                "48765-2": ["Type d'allergie", "Agent causant", "Manifestation", "Sévérité", "Statut"],
-                "11450-4": ["Condition", "Statut", "Date d'apparition", "Sévérité", "Priorité"],
+                "10160-0": [
+                    "Médicament",
+                    "Principe actif",
+                    "Dosage",
+                    "Posologie",
+                    "Statut",
+                ],
+                "48765-2": [
+                    "Type d'allergie",
+                    "Agent causant",
+                    "Manifestation",
+                    "Sévérité",
+                    "Statut",
+                ],
+                "11450-4": [
+                    "Condition",
+                    "Statut",
+                    "Date d'apparition",
+                    "Sévérité",
+                    "Priorité",
+                ],
                 "47519-4": ["Procédure", "Date", "Exécutant", "Statut", "Lieu"],
                 "30954-2": ["Test", "Résultat", "Plage de référence", "Date", "Statut"],
                 "10157-6": ["Vaccin", "Date", "Dose", "Voie", "Statut"],
-                "18776-5": ["Traitement", "Instructions", "Durée", "Fréquence", "Statut"],
-                "default": ["Élément", "Description", "Valeur", "Date", "Statut"]
+                "18776-5": [
+                    "Traitement",
+                    "Instructions",
+                    "Durée",
+                    "Fréquence",
+                    "Statut",
+                ],
+                "default": ["Élément", "Description", "Valeur", "Date", "Statut"],
             },
             "de": {
-                "10160-0": ["Medikament", "Wirkstoff", "Dosierung", "Anwendung", "Status"],
-                "48765-2": ["Allergie-Typ", "Auslöser", "Manifestation", "Schweregrad", "Status"],
-                "11450-4": ["Erkrankung", "Status", "Beginn", "Schweregrad", "Priorität"],
+                "10160-0": [
+                    "Medikament",
+                    "Wirkstoff",
+                    "Dosierung",
+                    "Anwendung",
+                    "Status",
+                ],
+                "48765-2": [
+                    "Allergie-Typ",
+                    "Auslöser",
+                    "Manifestation",
+                    "Schweregrad",
+                    "Status",
+                ],
+                "11450-4": [
+                    "Erkrankung",
+                    "Status",
+                    "Beginn",
+                    "Schweregrad",
+                    "Priorität",
+                ],
                 "47519-4": ["Eingriff", "Datum", "Durchführer", "Status", "Ort"],
                 "30954-2": ["Test", "Ergebnis", "Referenzbereich", "Datum", "Status"],
                 "10157-6": ["Impfstoff", "Datum", "Dosis", "Verabreichung", "Status"],
-                "18776-5": ["Behandlung", "Anweisungen", "Dauer", "Häufigkeit", "Status"],
-                "default": ["Element", "Beschreibung", "Wert", "Datum", "Status"]
+                "18776-5": [
+                    "Behandlung",
+                    "Anweisungen",
+                    "Dauer",
+                    "Häufigkeit",
+                    "Status",
+                ],
+                "default": ["Element", "Beschreibung", "Wert", "Datum", "Status"],
             },
             "it": {
-                "10160-0": ["Farmaco", "Principio attivo", "Dosaggio", "Posologia", "Stato"],
-                "48765-2": ["Tipo allergia", "Agente causale", "Manifestazione", "Gravità", "Stato"],
-                "11450-4": ["Condizione", "Stato", "Data insorgenza", "Gravità", "Priorità"],
+                "10160-0": [
+                    "Farmaco",
+                    "Principio attivo",
+                    "Dosaggio",
+                    "Posologia",
+                    "Stato",
+                ],
+                "48765-2": [
+                    "Tipo allergia",
+                    "Agente causale",
+                    "Manifestazione",
+                    "Gravità",
+                    "Stato",
+                ],
+                "11450-4": [
+                    "Condizione",
+                    "Stato",
+                    "Data insorgenza",
+                    "Gravità",
+                    "Priorità",
+                ],
                 "47519-4": ["Procedura", "Data", "Esecutore", "Stato", "Luogo"],
                 "30954-2": ["Test", "Risultato", "Range riferimento", "Data", "Stato"],
                 "10157-6": ["Vaccino", "Data", "Dose", "Via", "Stato"],
-                "18776-5": ["Trattamento", "Istruzioni", "Durata", "Frequenza", "Stato"],
-                "default": ["Elemento", "Descrizione", "Valore", "Data", "Stato"]
-            }
+                "18776-5": [
+                    "Trattamento",
+                    "Istruzioni",
+                    "Durata",
+                    "Frequenza",
+                    "Stato",
+                ],
+                "default": ["Elemento", "Descrizione", "Valore", "Data", "Stato"],
+            },
         }
-        
+
         # Get headers for target language, fallback to English, then default
         lang_headers = headers_map.get(target_language, headers_map["en"])
         return lang_headers.get(section_code, lang_headers["default"])
 
-    def _generate_table_rows(self, table_data: List[Dict], section_code: str, target_language: str = "en") -> str:
+    def _generate_table_rows(
+        self, table_data: List[Dict], section_code: str, target_language: str = "en"
+    ) -> str:
         """Generate HTML table rows with coded medical data"""
-        
+
         if not table_data:
             return ""
-            
+
         rows_html = []
-        
+
         for item in table_data:
             try:
                 # Extract coded data based on section type
@@ -1090,45 +1314,44 @@ class EnhancedCDAProcessor:
                 else:
                     # Generic row for unknown section types
                     row_html = self._generate_generic_row(item, target_language)
-                    
+
                 if row_html:
                     rows_html.append(row_html)
-                    
+
             except Exception as e:
                 logger.error(f"Error generating table row: {e}")
                 continue
-                
+
         return "\n".join(rows_html)
 
     def _generate_medication_row(self, item: Dict, target_language: str) -> str:
         """Generate medication table row with coded medical data"""
-        
+
         # Extract medication data from item
         data = item.get("data", {})
-        
+
         # Use terminology service to translate coded values
         medication_name = self._translate_coded_value(
-            data.get("medication_code", ""), 
+            data.get("medication_code", ""),
             data.get("medication_display", "Unknown Medication"),
-            target_language
+            target_language,
         )
-        
+
         active_ingredient = self._translate_coded_value(
             data.get("ingredient_code", ""),
-            data.get("ingredient_display", "Unknown Ingredient"), 
-            target_language
+            data.get("ingredient_display", "Unknown Ingredient"),
+            target_language,
         )
-        
+
         dosage = data.get("dosage", "Not specified")
         posology = data.get("posology", "As directed")
         status = self._translate_status(data.get("status", "active"), target_language)
-        
+
         # Generate code badge
         code_badge = self._generate_code_badge(
-            data.get("medication_code", ""), 
-            data.get("code_system", "")
+            data.get("medication_code", ""), data.get("code_system", "")
         )
-        
+
         return f"""
         <tr>
             <td><strong>{medication_name}</strong></td>
@@ -1144,35 +1367,36 @@ class EnhancedCDAProcessor:
 
     def _generate_allergy_row(self, item: Dict, target_language: str) -> str:
         """Generate allergy table row with coded medical data"""
-        
+
         data = item.get("data", {})
-        
+
         allergy_type = self._translate_coded_value(
             data.get("type_code", ""),
             data.get("type_display", "Unknown Type"),
-            target_language
+            target_language,
         )
-        
+
         causative_agent = self._translate_coded_value(
             data.get("agent_code", ""),
             data.get("agent_display", "Unknown Agent"),
-            target_language
+            target_language,
         )
-        
+
         manifestation = self._translate_coded_value(
             data.get("manifestation_code", ""),
             data.get("manifestation_display", "Unknown Reaction"),
-            target_language
+            target_language,
         )
-        
-        severity = self._translate_severity(data.get("severity", "unknown"), target_language)
+
+        severity = self._translate_severity(
+            data.get("severity", "unknown"), target_language
+        )
         status = self._translate_status(data.get("status", "active"), target_language)
-        
+
         code_badge = self._generate_code_badge(
-            data.get("agent_code", ""),
-            data.get("code_system", "")
+            data.get("agent_code", ""), data.get("code_system", "")
         )
-        
+
         return f"""
         <tr>
             <td>{allergy_type}</td>
@@ -1190,26 +1414,23 @@ class EnhancedCDAProcessor:
 
     def _generate_generic_row(self, item: Dict, target_language: str) -> str:
         """Generate generic table row for unknown section types"""
-        
+
         data = item.get("data", {})
-        
+
         # Extract basic information
         display_name = self._translate_coded_value(
-            data.get("code", ""),
-            data.get("display", "Unknown Item"),
-            target_language
+            data.get("code", ""), data.get("display", "Unknown Item"), target_language
         )
-        
+
         description = data.get("description", "No description available")
         value = data.get("value", "Not specified")
         date = data.get("date", "Not specified")
         status = self._translate_status(data.get("status", "unknown"), target_language)
-        
+
         code_badge = self._generate_code_badge(
-            data.get("code", ""),
-            data.get("code_system", "")
+            data.get("code", ""), data.get("code_system", "")
         )
-        
+
         return f"""
         <tr>
             <td><strong>{display_name}</strong></td>
@@ -1223,25 +1444,26 @@ class EnhancedCDAProcessor:
         </tr>
         """
 
-    def _translate_coded_value(self, code: str, display: str, target_language: str) -> str:
+    def _translate_coded_value(
+        self, code: str, display: str, target_language: str
+    ) -> str:
         """Translate a coded medical value using the terminology service"""
-        
+
         if not code or not display:
             return display or "Unknown"
-            
+
         try:
-            # Use the terminology service to translate
-            translated = self.terminology_service.translate_concept(
-                code=code,
-                display_name=display,
-                target_language=target_language
+            # Use the terminology service to translate with SNOMED CT system as default
+            # Most clinical codes in CDA are SNOMED CT (2.16.840.1.113883.6.96)
+            translated = self.terminology_service._translate_term(
+                code=code, system="2.16.840.1.113883.6.96", original_display=display
             )
-            
-            if translated and translated.get("success"):
-                return translated.get("translated_display", display)
+
+            if translated and translated.get("display"):
+                return translated.get("display", display)
             else:
                 return display
-                
+
         except Exception as e:
             logger.error(f"Error translating coded value {code}: {e}")
             return display
@@ -1251,34 +1473,34 @@ class EnhancedCDAProcessor:
         status_translations = {
             "en": {
                 "active": "Active",
-                "inactive": "Inactive", 
+                "inactive": "Inactive",
                 "completed": "Completed",
                 "cancelled": "Cancelled",
-                "unknown": "Unknown"
+                "unknown": "Unknown",
             },
             "fr": {
                 "active": "Actif",
                 "inactive": "Inactif",
-                "completed": "Terminé", 
+                "completed": "Terminé",
                 "cancelled": "Annulé",
-                "unknown": "Inconnu"
+                "unknown": "Inconnu",
             },
             "de": {
                 "active": "Aktiv",
                 "inactive": "Inaktiv",
                 "completed": "Abgeschlossen",
-                "cancelled": "Abgebrochen", 
-                "unknown": "Unbekannt"
+                "cancelled": "Abgebrochen",
+                "unknown": "Unbekannt",
             },
             "it": {
                 "active": "Attivo",
                 "inactive": "Inattivo",
                 "completed": "Completato",
                 "cancelled": "Annullato",
-                "unknown": "Sconosciuto"
-            }
+                "unknown": "Sconosciuto",
+            },
         }
-        
+
         lang_map = status_translations.get(target_language, status_translations["en"])
         return lang_map.get(status.lower(), status.title())
 
@@ -1289,53 +1511,55 @@ class EnhancedCDAProcessor:
                 "mild": "Mild",
                 "moderate": "Moderate",
                 "severe": "Severe",
-                "unknown": "Unknown"
+                "unknown": "Unknown",
             },
             "fr": {
                 "mild": "Léger",
-                "moderate": "Modéré", 
+                "moderate": "Modéré",
                 "severe": "Sévère",
-                "unknown": "Inconnu"
+                "unknown": "Inconnu",
             },
             "de": {
                 "mild": "Leicht",
                 "moderate": "Mäßig",
                 "severe": "Schwer",
-                "unknown": "Unbekannt"
+                "unknown": "Unbekannt",
             },
             "it": {
                 "mild": "Lieve",
                 "moderate": "Moderato",
-                "severe": "Grave", 
-                "unknown": "Sconosciuto"
-            }
+                "severe": "Grave",
+                "unknown": "Sconosciuto",
+            },
         }
-        
-        lang_map = severity_translations.get(target_language, severity_translations["en"])
+
+        lang_map = severity_translations.get(
+            target_language, severity_translations["en"]
+        )
         return lang_map.get(severity.lower(), severity.title())
 
     def _generate_code_badge(self, code: str, code_system: str) -> str:
         """Generate a visual badge for medical codes"""
-        
+
         if not code:
             return '<span class="badge bg-light text-dark">No Code</span>'
-            
+
         # Determine code system color
         system_colors = {
             "LOINC": "primary",
-            "SNOMED": "success", 
+            "SNOMED": "success",
             "ICD-10": "info",
             "ATC": "warning",
-            "RxNorm": "secondary"
+            "RxNorm": "secondary",
         }
-        
+
         color = system_colors.get(code_system, "dark")
-        
-        return f'''
+
+        return f"""
         <span class="badge bg-{color}" title="{code_system}: {code}">
             <i class="fas fa-code"></i> {code}
         </span>
-        '''
+        """
 
     def _get_status_color(self, status: str) -> str:
         """Get Bootstrap color class for status"""
@@ -1344,7 +1568,7 @@ class EnhancedCDAProcessor:
             "inactive": "secondary",
             "completed": "primary",
             "cancelled": "danger",
-            "unknown": "warning"
+            "unknown": "warning",
         }
         return color_map.get(status.lower(), "secondary")
 
@@ -1354,53 +1578,61 @@ class EnhancedCDAProcessor:
             "mild": "success",
             "moderate": "warning",
             "severe": "danger",
-            "unknown": "secondary"
+            "unknown": "secondary",
         }
         return color_map.get(severity.lower(), "secondary")
 
     def _get_no_data_row(self, colspan: int, language: str) -> str:
         """Generate a 'no data' row in the appropriate language"""
-        
+
         no_data_text = {
             "en": "No clinical data available for this section",
             "fr": "Aucune donnée clinique disponible pour cette section",
             "de": "Keine klinischen Daten für diesen Abschnitt verfügbar",
             "it": "Nessun dato clinico disponibile per questa sezione",
             "es": "No hay datos clínicos disponibles para esta sección",
-            "pt": "Nenhum dado clínico disponível para esta seção"
+            "pt": "Nenhum dado clínico disponível para esta seção",
         }
-        
+
         text = no_data_text.get(language, no_data_text["en"])
-        
-        return f'''
+
+        return f"""
         <tr>
             <td colspan="{colspan}" class="text-center text-muted">
                 <em><i class="fas fa-info-circle"></i> {text}</em>
             </td>
         </tr>
-        '''
+        """
 
     def _generate_problem_row(self, item: Dict, target_language: str) -> str:
         """Generate problem/condition table row with coded medical data"""
-        
+
         data = item.get("data", {})
-        
-        condition = self._translate_coded_value(
-            data.get("condition_code", ""),
-            data.get("condition_display", "Unknown Condition"),
-            target_language
+
+        # Use condition fields if available, fallback to generic fields
+        condition_code = data.get("condition_code", data.get("agent_code", ""))
+        condition_display = data.get(
+            "condition_display",
+            data.get("agent_display", data.get("value", "Unknown Condition")),
         )
-        
+
+        condition = self._translate_coded_value(
+            condition_code,
+            condition_display,
+            target_language,
+        )
+
         status = self._translate_status(data.get("status", "active"), target_language)
         onset_date = data.get("onset_date", "Not specified")
-        severity = self._translate_severity(data.get("severity", "unknown"), target_language)
-        priority = data.get("priority", "Normal")
-        
-        code_badge = self._generate_code_badge(
-            data.get("condition_code", ""),
-            data.get("code_system", "")
+        severity = self._translate_severity(
+            data.get("severity", "unknown"), target_language
         )
-        
+        priority = data.get("priority", "Normal")
+
+        code_badge = self._generate_code_badge(
+            condition_code, data.get("condition_system", data.get("code_system", ""))
+        )
+
         return f"""
         <tr>
             <td><strong>{condition}</strong></td>
@@ -1418,25 +1650,26 @@ class EnhancedCDAProcessor:
 
     def _generate_procedure_row(self, item: Dict, target_language: str) -> str:
         """Generate procedure table row with coded medical data"""
-        
+
         data = item.get("data", {})
-        
+
         procedure = self._translate_coded_value(
             data.get("procedure_code", ""),
             data.get("procedure_display", "Unknown Procedure"),
-            target_language
+            target_language,
         )
-        
+
         date = data.get("date", "Not specified")
         performer = data.get("performer", "Not specified")
-        status = self._translate_status(data.get("status", "completed"), target_language)
-        location = data.get("location", "Not specified")
-        
-        code_badge = self._generate_code_badge(
-            data.get("procedure_code", ""),
-            data.get("code_system", "")
+        status = self._translate_status(
+            data.get("status", "completed"), target_language
         )
-        
+        location = data.get("location", "Not specified")
+
+        code_badge = self._generate_code_badge(
+            data.get("procedure_code", ""), data.get("code_system", "")
+        )
+
         return f"""
         <tr>
             <td><strong>{procedure}</strong></td>
@@ -1452,25 +1685,24 @@ class EnhancedCDAProcessor:
 
     def _generate_lab_result_row(self, item: Dict, target_language: str) -> str:
         """Generate laboratory result table row with coded medical data"""
-        
+
         data = item.get("data", {})
-        
+
         test_name = self._translate_coded_value(
             data.get("test_code", ""),
             data.get("test_display", "Unknown Test"),
-            target_language
+            target_language,
         )
-        
+
         result = data.get("result", "Pending")
         reference_range = data.get("reference_range", "Not available")
         date = data.get("date", "Not specified")
         status = self._translate_status(data.get("status", "final"), target_language)
-        
+
         code_badge = self._generate_code_badge(
-            data.get("test_code", ""),
-            data.get("code_system", "LOINC")
+            data.get("test_code", ""), data.get("code_system", "LOINC")
         )
-        
+
         return f"""
         <tr>
             <td><strong>{test_name}</strong></td>
@@ -1486,25 +1718,26 @@ class EnhancedCDAProcessor:
 
     def _generate_immunization_row(self, item: Dict, target_language: str) -> str:
         """Generate immunization table row with coded medical data"""
-        
+
         data = item.get("data", {})
-        
+
         vaccine = self._translate_coded_value(
             data.get("vaccine_code", ""),
             data.get("vaccine_display", "Unknown Vaccine"),
-            target_language
+            target_language,
         )
-        
+
         date = data.get("date", "Not specified")
         dose = data.get("dose", "Not specified")
         route = data.get("route", "Not specified")
-        status = self._translate_status(data.get("status", "completed"), target_language)
-        
-        code_badge = self._generate_code_badge(
-            data.get("vaccine_code", ""),
-            data.get("code_system", "")
+        status = self._translate_status(
+            data.get("status", "completed"), target_language
         )
-        
+
+        code_badge = self._generate_code_badge(
+            data.get("vaccine_code", ""), data.get("code_system", "")
+        )
+
         return f"""
         <tr>
             <td><strong>{vaccine}</strong></td>

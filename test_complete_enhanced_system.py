@@ -10,14 +10,15 @@ import sys
 # Add the project directory to the Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+
 def test_complete_enhanced_cda_system():
     """Test the complete enhanced CDA system with table data population"""
-    
+
     print("🎯 Complete Enhanced CDA Display System Test")
     print("=" * 80)
-    
+
     # Sample CDA document with medication and allergy sections
-    sample_cda_xml = '''<?xml version="1.0" encoding="UTF-8"?>
+    sample_cda_xml = """<?xml version="1.0" encoding="UTF-8"?>
     <ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <languageCode code="en-US"/>
         <recordTarget>
@@ -128,48 +129,52 @@ def test_complete_enhanced_cda_system():
                 </entry>
             </section>
         </component>
-    </ClinicalDocument>'''
-    
+    </ClinicalDocument>"""
+
     try:
         print("📋 Testing Enhanced CDA Processing with Table Data...")
         print("-" * 60)
-        
+
         # Test different languages
         test_languages = [
             ("en", "English"),
-            ("fr", "French"), 
+            ("fr", "French"),
             ("de", "German"),
-            ("it", "Italian")
+            ("it", "Italian"),
         ]
-        
+
         for lang_code, lang_name in test_languages:
             print(f"\n🌍 Testing {lang_name} ({lang_code}):")
-            
+
             # Simulate the enhanced CDA processor
             result = simulate_enhanced_processing(sample_cda_xml, lang_code)
-            
+
             if result.get("success"):
                 sections = result.get("sections", [])
                 print(f"   ✅ Processing Success: {len(sections)} sections found")
-                
+
                 for i, section in enumerate(sections):
-                    title = section.get("enhanced_title", {}).get("target", "Unknown Section")
+                    title = section.get("enhanced_title", {}).get(
+                        "target", "Unknown Section"
+                    )
                     section_code = section.get("section_code", "")
-                    
+
                     print(f"   📄 Section {i+1}: {title} ({section_code})")
-                    
+
                     # Check for tables
                     if section.get("ps_table_html"):
                         print(f"      📊 PS Guidelines Table: Generated")
-                        
+
                     if section.get("ps_table_html_original"):
                         print(f"      📊 Original Language Table: Generated")
-                        
+
                     # Check for structured data
                     table_data = section.get("table_data", [])
                     if table_data:
                         print(f"      🔢 Structured Data: {len(table_data)} entries")
-                        for j, entry in enumerate(table_data[:2]):  # Show first 2 entries
+                        for j, entry in enumerate(
+                            table_data[:2]
+                        ):  # Show first 2 entries
                             data = entry.get("data", {})
                             if section_code == "10160-0":  # Medication
                                 med_name = data.get("medication_display", "Unknown")
@@ -178,10 +183,14 @@ def test_complete_enhanced_cda_system():
                             elif section_code == "48765-2":  # Allergy
                                 agent = data.get("agent_display", "Unknown")
                                 severity = data.get("severity", "Unknown")
-                                print(f"         Entry {j+1}: {agent} allergy - {severity}")
+                                print(
+                                    f"         Entry {j+1}: {agent} allergy - {severity}"
+                                )
             else:
-                print(f"   ❌ Processing Failed: {result.get('error', 'Unknown error')}")
-        
+                print(
+                    f"   ❌ Processing Failed: {result.get('error', 'Unknown error')}"
+                )
+
         print("\n" + "=" * 80)
         print("🎯 Complete Enhanced CDA System Test Results:")
         print("✅ Multi-language CDA processing working")
@@ -191,35 +200,41 @@ def test_complete_enhanced_cda_system():
         print("✅ Coded medical data processing working")
         print("✅ Bootstrap styling and responsive design working")
         print("✅ Medical code badges and status indicators working")
-        
+
         # Display capabilities summary
         print(f"\n🌟 Enhanced CDA Display System Capabilities:")
         print(f"   🌍 Languages Supported: 11 European languages")
-        print(f"   📊 Clinical Sections: Medications, Allergies, Problems, Procedures, Labs, Immunizations")
+        print(
+            f"   📊 Clinical Sections: Medications, Allergies, Problems, Procedures, Labs, Immunizations"
+        )
         print(f"   🔢 Data Sources: CDA structured entries + HTML tables")
         print(f"   🎨 Styling: Bootstrap + PS Guidelines compliance")
         print(f"   🏥 Medical Codes: LOINC, SNOMED, ICD-10, ATC, RxNorm")
-        print(f"   🔄 Real-time: Automatic language detection + coded value translation")
-        
+        print(
+            f"   🔄 Real-time: Automatic language detection + coded value translation"
+        )
+
     except Exception as e:
         print(f"❌ Test Error: {str(e)}")
         import traceback
+
         traceback.print_exc()
+
 
 def simulate_enhanced_processing(cda_content, language):
     """Simulate the enhanced CDA processing with table data population"""
-    
+
     # Mock sections data that would be extracted by the real processor
     sections = [
         {
             "section_code": "10160-0",
             "enhanced_title": {
                 "source": "History of Medication use",
-                "target": get_translated_title("10160-0", language)
+                "target": get_translated_title("10160-0", language),
             },
             "content": {
                 "original": "Patient medication history with active prescriptions",
-                "translated": get_translated_content("medication", language)
+                "translated": get_translated_content("medication", language),
             },
             "table_data": [
                 {
@@ -231,36 +246,36 @@ def simulate_enhanced_processing(cda_content, language):
                         "dosage": "100mg",
                         "posology": "Once daily",
                         "status": "active",
-                        "code_system": "SNOMED"
+                        "code_system": "SNOMED",
                     },
-                    "section_type": "medication"
+                    "section_type": "medication",
                 },
                 {
                     "type": "structured_entry",
                     "data": {
                         "medication_code": "6809",
                         "medication_display": "Metformin",
-                        "ingredient_display": "Metformin hydrochloride", 
+                        "ingredient_display": "Metformin hydrochloride",
                         "dosage": "500mg",
                         "posology": "Twice daily",
                         "status": "active",
-                        "code_system": "RxNorm"
+                        "code_system": "RxNorm",
                     },
-                    "section_type": "medication"
-                }
+                    "section_type": "medication",
+                },
             ],
             "ps_table_html": generate_mock_table("10160-0", language, "target"),
-            "ps_table_html_original": generate_mock_table("10160-0", "en", "source")
+            "ps_table_html_original": generate_mock_table("10160-0", "en", "source"),
         },
         {
             "section_code": "48765-2",
             "enhanced_title": {
                 "source": "Allergies and adverse reactions",
-                "target": get_translated_title("48765-2", language)
+                "target": get_translated_title("48765-2", language),
             },
             "content": {
                 "original": "Patient allergy information and adverse reactions",
-                "translated": get_translated_content("allergy", language)
+                "translated": get_translated_content("allergy", language),
             },
             "table_data": [
                 {
@@ -274,87 +289,90 @@ def simulate_enhanced_processing(cda_content, language):
                         "manifestation_display": "Skin rash",
                         "severity": "moderate",
                         "status": "active",
-                        "code_system": "SNOMED"
+                        "code_system": "SNOMED",
                     },
-                    "section_type": "observation"
+                    "section_type": "observation",
                 }
             ],
             "ps_table_html": generate_mock_table("48765-2", language, "target"),
-            "ps_table_html_original": generate_mock_table("48765-2", "en", "source")
-        }
+            "ps_table_html_original": generate_mock_table("48765-2", "en", "source"),
+        },
     ]
-    
+
     return {
         "success": True,
         "sections": sections,
         "sections_count": len(sections),
         "detected_source_language": "en",
         "target_language": language,
-        "processing_quality": "high"
+        "processing_quality": "high",
     }
+
 
 def get_translated_title(section_code, language):
     """Get translated section titles"""
     titles = {
         "en": {
             "10160-0": "History of Medication use",
-            "48765-2": "Allergies and adverse reactions"
+            "48765-2": "Allergies and adverse reactions",
         },
         "fr": {
             "10160-0": "Historique d'utilisation des médicaments",
-            "48765-2": "Allergies et réactions indésirables"
+            "48765-2": "Allergies et réactions indésirables",
         },
         "de": {
             "10160-0": "Medikamentenhistorie",
-            "48765-2": "Allergien und Nebenwirkungen"
+            "48765-2": "Allergien und Nebenwirkungen",
         },
         "it": {
             "10160-0": "Storia dell'uso di farmaci",
-            "48765-2": "Allergie e reazioni avverse"
-        }
+            "48765-2": "Allergie e reazioni avverse",
+        },
     }
-    
+
     lang_titles = titles.get(language, titles["en"])
     return lang_titles.get(section_code, "Unknown Section")
+
 
 def get_translated_content(content_type, language):
     """Get translated content"""
     content = {
         "en": {
             "medication": "Patient medication history with active prescriptions",
-            "allergy": "Patient allergy information and adverse reactions"
+            "allergy": "Patient allergy information and adverse reactions",
         },
         "fr": {
             "medication": "Historique des médicaments du patient avec prescriptions actives",
-            "allergy": "Informations sur les allergies du patient et réactions indésirables"
+            "allergy": "Informations sur les allergies du patient et réactions indésirables",
         },
         "de": {
             "medication": "Medikamentenhistorie des Patienten mit aktiven Verschreibungen",
-            "allergy": "Patientenallergien und Nebenwirkungen"
+            "allergy": "Patientenallergien und Nebenwirkungen",
         },
         "it": {
             "medication": "Storia dei farmaci del paziente con prescrizioni attive",
-            "allergy": "Informazioni sulle allergie del paziente e reazioni avverse"
-        }
+            "allergy": "Informazioni sulle allergie del paziente e reazioni avverse",
+        },
     }
-    
+
     lang_content = content.get(language, content["en"])
     return lang_content.get(content_type, "Content not available")
 
+
 def generate_mock_table(section_code, language, table_type):
     """Generate mock PS Guidelines compliant table"""
-    
+
     if section_code == "10160-0":  # Medication
         headers = {
             "en": ["Medication", "Active Ingredient", "Dosage", "Posology", "Status"],
             "fr": ["Médicament", "Principe actif", "Dosage", "Posologie", "Statut"],
             "de": ["Medikament", "Wirkstoff", "Dosierung", "Anwendung", "Status"],
-            "it": ["Farmaco", "Principio attivo", "Dosaggio", "Posologia", "Stato"]
+            "it": ["Farmaco", "Principio attivo", "Dosaggio", "Posologia", "Stato"],
         }
-        
+
         lang_headers = headers.get(language, headers["en"])
-        
-        rows = '''
+
+        rows = """
         <tr>
             <td><strong>Aspirin</strong></td>
             <td>Acetylsalicylic acid</td>
@@ -371,19 +389,43 @@ def generate_mock_table(section_code, language, table_type):
             <td><span class="badge bg-success">Active</span></td>
             <td><span class="badge bg-secondary"><i class="fas fa-code"></i> 6809</span></td>
         </tr>
-        '''
-        
+        """
+
     else:  # Allergy
         headers = {
-            "en": ["Allergy Type", "Causative Agent", "Manifestation", "Severity", "Status"],
-            "fr": ["Type d'allergie", "Agent causant", "Manifestation", "Sévérité", "Statut"],
-            "de": ["Allergie-Typ", "Auslöser", "Manifestation", "Schweregrad", "Status"],
-            "it": ["Tipo allergia", "Agente causale", "Manifestazione", "Gravità", "Stato"]
+            "en": [
+                "Allergy Type",
+                "Causative Agent",
+                "Manifestation",
+                "Severity",
+                "Status",
+            ],
+            "fr": [
+                "Type d'allergie",
+                "Agent causant",
+                "Manifestation",
+                "Sévérité",
+                "Statut",
+            ],
+            "de": [
+                "Allergie-Typ",
+                "Auslöser",
+                "Manifestation",
+                "Schweregrad",
+                "Status",
+            ],
+            "it": [
+                "Tipo allergia",
+                "Agente causale",
+                "Manifestazione",
+                "Gravità",
+                "Stato",
+            ],
         }
-        
+
         lang_headers = headers.get(language, headers["en"])
-        
-        rows = '''
+
+        rows = """
         <tr>
             <td>Drug allergy</td>
             <td><strong>Penicillin</strong></td>
@@ -392,9 +434,9 @@ def generate_mock_table(section_code, language, table_type):
             <td><span class="badge bg-success">Active</span></td>
             <td><span class="badge bg-primary"><i class="fas fa-code"></i> 387207008</span></td>
         </tr>
-        '''
-    
-    table_html = f'''
+        """
+
+    table_html = f"""
     <div class="ps-table-container">
         <div class="ps-table-header">
             <h4 class="ps-table-title">
@@ -418,9 +460,10 @@ def generate_mock_table(section_code, language, table_type):
             </tbody>
         </table>
     </div>
-    '''
-    
+    """
+
     return table_html
+
 
 if __name__ == "__main__":
     test_complete_enhanced_cda_system()
