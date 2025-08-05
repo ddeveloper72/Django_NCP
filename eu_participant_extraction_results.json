@@ -1,0 +1,142 @@
+{
+  "BE": {
+    "files_tested": 3,
+    "files_with_participants": 0,
+    "total_participants": 0,
+    "participant_types": {},
+    "contact_completeness": {
+      "phones": 0,
+      "emails": 0,
+      "addresses": 0
+    },
+    "errors": []
+  },
+  "EU": {
+    "files_tested": 4,
+    "files_with_participants": 4,
+    "total_participants": 8,
+    "participant_types": {
+      "Primary Care Provider": 4,
+      "Contact (IND)": 4
+    },
+    "contact_completeness": {
+      "phones": 8,
+      "emails": 4,
+      "addresses": 8
+    },
+    "errors": []
+  },
+  "GR": {
+    "files_tested": 1,
+    "files_with_participants": 0,
+    "total_participants": 0,
+    "participant_types": {},
+    "contact_completeness": {
+      "phones": 0,
+      "emails": 0,
+      "addresses": 0
+    },
+    "errors": []
+  },
+  "IE": {
+    "files_tested": 1,
+    "files_with_participants": 1,
+    "total_participants": 1,
+    "participant_types": {
+      "Contact (IND)": 1
+    },
+    "contact_completeness": {
+      "phones": 1,
+      "emails": 0,
+      "addresses": 1
+    },
+    "errors": []
+  },
+  "IT": {
+    "files_tested": 4,
+    "files_with_participants": 4,
+    "total_participants": 8,
+    "participant_types": {
+      "Primary Care Provider": 4,
+      "Contact (IND)": 4
+    },
+    "contact_completeness": {
+      "phones": 8,
+      "emails": 4,
+      "addresses": 8
+    },
+    "errors": []
+  },
+  "LU": {
+    "files_tested": 10,
+    "files_with_participants": 4,
+    "total_participants": 4,
+    "participant_types": {
+      "Primary Care Provider": 4
+    },
+    "contact_completeness": {
+      "phones": 4,
+      "emails": 0,
+      "addresses": 4
+    },
+    "errors": []
+  },
+  "LV": {
+    "files_tested": 4,
+    "files_with_participants": 4,
+    "total_participants": 20,
+    "participant_types": {
+      "Primary Care Provider": 8,
+      "Emergency Contact (Family Member)": 12
+    },
+    "contact_completeness": {
+      "phones": 16,
+      "emails": 8,
+      "addresses": 8
+    },
+    "errors": []
+  },
+  "MT": {
+    "files_tested": 8,
+    "files_with_participants": 8,
+    "total_participants": 8,
+    "participant_types": {
+      "Primary Care Provider": 8
+    },
+    "contact_completeness": {
+      "phones": 0,
+      "emails": 0,
+      "addresses": 0
+    },
+    "errors": []
+  },
+  "PT": {
+    "files_tested": 2,
+    "files_with_participants": 2,
+    "total_participants": 2,
+    "participant_types": {
+      "Contact (IND)": 2
+    },
+    "contact_completeness": {
+      "phones": 2,
+      "emails": 2,
+      "addresses": 2
+    },
+    "errors": []
+  },
+  "UNKNOWN": {
+    "files_tested": 4,
+    "files_with_participants": 4,
+    "total_participants": 20,
+    "participant_types": {
+      "Primary Care Provider": 8,
+      "Emergency Contact (Family Member)": 12
+    },
+    "contact_completeness": {
+      "phones": 16,
+      "emails": 8,
+      "addresses": 8
+    },
+    "errors": []
+  }
+}

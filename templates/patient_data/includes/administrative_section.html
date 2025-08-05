@@ -3,6 +3,8 @@ Administrative Information Section for CDA Patient Display
 Displays comprehensive administrative contacts including participants (emergency contacts, next of kin, PCPs)
 {% endcomment %}
 
+{% load static %}
+
 {% if administrative_data and has_administrative_data %}
 <div class="wrap-collapsible">
     <input id="collapsible-administrative" class="toggle" type="checkbox" checked>
@@ -127,7 +129,7 @@ Displays comprehensive administrative contacts including participants (emergency
                     <div class="contact-name">
                         <strong>{{ administrative_data.legal_authenticator.full_name }}</strong>
                         {% if administrative_data.legal_authenticator.title %}
-                        <span class="role-badge">{{ administrative_data.legal_authenticator.title }}</span>
+                        <span class="role-badge legal-authenticator">{{ administrative_data.legal_authenticator.title }}</span>
                         {% endif %}
                     </div>
 
@@ -285,149 +287,5 @@ Displays comprehensive administrative contacts including participants (emergency
         </div>
     </div>
 </div>
-
-<style>
-    /* Administrative Information Styling */
-    .admin-section {
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .admin-section:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-    }
-
-    .admin-section-title {
-        color: #085a9f;
-        font-size: 16px;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .contact-count {
-        font-size: 14px;
-        font-weight: normal;
-        color: #6c757d;
-    }
-
-    .contact-card {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
-    }
-
-    .contact-card:last-child {
-        margin-bottom: 0;
-    }
-
-    .contact-name {
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-
-    .contact-detail {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
-        font-size: 14px;
-        line-height: 1.4;
-    }
-
-    .contact-detail:last-child {
-        margin-bottom: 0;
-    }
-
-    .contact-detail i {
-        color: #085a9f;
-        width: 16px;
-        flex-shrink: 0;
-        margin-top: 2px;
-    }
-
-    .role-badge {
-        background: #085a9f;
-        color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .role-badge.emergency-contact-family-member {
-        background: #dc3545;
-    }
-
-    .role-badge.primary-care-provider {
-        background: #28a745;
-    }
-
-    .role-badge.author-hcp {
-        background: #007bff;
-    }
-
-    .role-badge.legal-authenticator {
-        background: #ffc107;
-        color: #212529;
-    }
-
-    /* Specific contact type styling */
-    .patient-contact {
-        border-left: 4px solid #17a2b8;
-    }
-
-    .author-contact {
-        border-left: 4px solid #007bff;
-    }
-
-    .legal-auth-contact {
-        border-left: 4px solid #ffc107;
-    }
-
-    .custodian-contact {
-        border-left: 4px solid #6f42c1;
-    }
-
-    .participant-contact {
-        border-left: 4px solid #28a745;
-    }
-
-    .indicator {
-        font-size: 12px;
-        color: rgba(8, 90, 159, 0.7);
-        font-weight: normal;
-        margin-left: auto;
-    }
-
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .contact-detail {
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .contact-detail i {
-            margin-top: 0;
-        }
-
-        .contact-name {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.25rem;
-        }
-    }
-</style>
 
 {% endif %}
