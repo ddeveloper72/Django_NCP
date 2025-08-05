@@ -1,0 +1,189 @@
+{% comment %}
+Example: Enhanced Patient CDA Template with Date Formatting
+Shows how to use the new patient date filters for consistent display
+{% endcomment %}
+
+{% extends "base.html" %}
+{% load patient_date_filters %}
+
+{% block title %}Enhanced CDA Document - {{ patient_identity.given_name }} {{ patient_identity.family_name }}{% endblock
+%}
+
+{% block content %}
+
+<!-- Patient Information Section with Enhanced Date Formatting -->
+<div class="wrap-collapsible">
+    <input id="collapsible-patient-header" class="toggle" type="checkbox" checked="true">
+    <label for="collapsible-patient-header" class="lbl-toggle-main">
+        <i class="fas fa-user-md me-2"></i>
+        Patient Information & Document Details
+    </label>
+    <div class="collapsible-content-main">
+        <div class="content-inner-main">
+            <div class="info-grid">
+
+                <!-- Patient Name -->
+                <div class="info-item">
+                    <span class="info-label">Patient Name:</span>
+                    <span class="info-value">{{ patient_identity.family_name }}, {{ patient_identity.given_name
+                        }}</span>
+                </div>
+
+                <!-- Enhanced Date of Birth with Age -->
+                <div class="info-item">
+                    <span class="info-label">Date of Birth:</span>
+                    <span class="info-value">
+                        {% comment %}
+                        BEFORE: {{ patient_identity.birth_date }}
+                        Output: "19700101" (raw CDA format)
+
+                        AFTER: Enhanced formatting with multiple options
+                        {% endcomment %}
+
+                        {# Option 1: Formatted date only #}
+                        {{ patient_identity.birth_date|patient_birth_date }}
+
+                        {# Option 2: Formatted date with age (recommended for healthcare) #}
+                        {# {{ patient_identity.birth_date|patient_birth_date_with_age }} #}
+
+                        {# Option 3: Age badge component #}
+                        <div class="patient-age-display">
+                            {% patient_age_badge patient_identity.birth_date %}
+                        </div>
+                    </span>
+                </div>
+
+                <!-- Patient Age (standalone) -->
+                <div class="info-item">
+                    <span class="info-label">Age:</span>
+                    <span class="info-value">
+                        <span class="age-badge">{{ patient_identity.birth_date|patient_age }} years old</span>
+                    </span>
+                </div>
+
+                <!-- Patient ID with Enhanced Display -->
+                {% if patient_identity.patient_identifiers %}
+                {% for identifier in patient_identity.patient_identifiers %}
+                <div class="info-item">
+                    <span class="info-label">Patient ID{% if identifier.assigningAuthorityName %} ({{
+                        identifier.assigningAuthorityName }}){% elif identifier.root %} ({{
+                        identifier.root|truncate:20:True }}){% endif %}:</span>
+                    <span class="info-value">{{ identifier.extension }}</span>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <!-- Source Country -->
+                <div class="info-item">
+                    <span class="info-label">Source Country:</span>
+                    <span class="info-value">{{ source_country }}</span>
+                </div>
+
+                <!-- Document Type -->
+                <div class="info-item">
+                    <span class="info-label">Document Type:</span>
+                    <span class="info-value">
+                        <span class="cda-type-badge">{{ cda_type }} CDA</span>
+                    </span>
+                </div>
+
+                <!-- Enhanced Document Creation Date -->
+                <div class="info-item">
+                    <span class="info-label">Document Created:</span>
+                    <span class="info-value">
+                        {% comment %}
+                        BEFORE: {{ administrative_data.document_creation_date }}
+                        Output: "20080728130000+0100" (raw CDA format)
+
+                        AFTER: Enhanced formatting with time
+                        {% endcomment %}
+                        {{ administrative_data.document_creation_date|document_date }}
+                    </span>
+                </div>
+
+                <!-- Confidence Score -->
+                <div class="info-item">
+                    <span class="info-label">Confidence Score:</span>
+                    <span class="info-value">
+                        <span class="confidence-badge">{{ confidence }}%</span>
+                    </span>
+                </div>
+
+                <!-- File Name -->
+                <div class="info-item">
+                    <span class="info-label">File Name:</span>
+                    <span class="info-value filename">{{ file_name|truncate:80 }}</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Administrative Information Section with Enhanced Dates -->
+<div class="wrap-collapsible">
+    <input id="collapsible-admin-info" class="toggle" type="checkbox">
+    <label for="collapsible-admin-info" class="lbl-toggle-main">
+        <i class="fas fa-clipboard-list me-2"></i>
+        Administrative Information
+    </label>
+    <div class="collapsible-content-main">
+        <div class="content-inner-main">
+
+            <!-- Custodian -->
+            {% if administrative_data.custodian_name %}
+            <div class="admin-section">
+                <h4>Custodian</h4>
+                <p>{{ administrative_data.custodian_name }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Document Timeline with Enhanced Dates -->
+            <div class="admin-section">
+                <h4>Document Timeline</h4>
+                <div class="timeline-item">
+                    <strong>Created:</strong> {{ administrative_data.document_creation_date|document_date }}
+                </div>
+                {% if last_updated_date %}
+                <div class="timeline-item">
+                    <strong>Last Updated:</strong> {{ last_updated_date|document_date }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Treatment Date Range Example -->
+            {% if treatment_start_date %}
+            <div class="admin-section">
+                <h4>Treatment Period</h4>
+                <div class="date-range">
+                    {% format_date_range treatment_start_date treatment_end_date %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% comment %}
+TEMPLATE BENEFITS WITH DATE FORMATTING:
+
+BEFORE:
+- Date of Birth: 19700101 (unclear, raw format)
+- Document Created: 20080728130000+0100 (technical format)
+- Age calculation required manual work
+
+AFTER:
+- Date of Birth: 01/01/1970 (54 years old) (clear, professional)
+- Document Created: 28/07/2008 13:00 (user-friendly with time)
+- Age automatically calculated and displayed
+
+HEALTHCARE IMPACT:
+✅ Healthcare professionals can quickly understand dates
+✅ Age is immediately visible for clinical decision-making
+✅ Consistent European date format (dd/mm/yyyy)
+✅ Document timestamps include time for audit trails
+✅ Professional appearance suitable for medical environments
+{% endcomment %}
+
+{% endblock %}

@@ -5,9 +5,9 @@
 {% block content %}
 <div class="patient-form-container">
     <div class="form-header">
-        <h1 class="page-title">EU Patient Data Search</h1>
+        <h1 class="page-title">EU NCP Patient Document Search</h1>
         <p class="page-subtitle">
-            Search for patient records across EU member states using the patient's credentials
+            Query patient medical records from EU member states using country and patient identifier
         </p>
     </div>
 
@@ -29,10 +29,10 @@
             <div class="card-header">
                 <h2 class="card-title">
                     <i class="icon-search"></i>
-                    Patient Search Form
+                    NCP Document Query
                 </h2>
                 <p class="card-description">
-                    Enter the patient's details to search for their medical records in EU member states
+                    Enter the patient's country and identifier to retrieve their Patient Summary (PS) documents
                 </p>
             </div>
 
@@ -41,71 +41,15 @@
                     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
                     <div class="form-grid">
-                        <!-- Patient Name Fields -->
+                        <!-- Country Selection -->
                         <div class="form-group">
-                            <label for="id_given_name" class="form-label required">
-                                {{ form.given_name.label }}
-                            </label>
-                            {{ form.given_name }}
-                            {% if form.given_name.errors %}
-                            <div class="field-errors">
-                                {% for error in form.given_name.errors %}
-                                <span class="error-message">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="form-group">
-                            <label for="id_family_name" class="form-label required">
-                                {{ form.family_name.label }}
-                            </label>
-                            {{ form.family_name }}
-                            {% if form.family_name.errors %}
-                            <div class="field-errors">
-                                {% for error in form.family_name.errors %}
-                                <span class="error-message">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Date of Birth -->
-                        <div class="form-group">
-                            <label for="id_birth_date" class="form-label">
-                                {{ form.birth_date.label }}
-                            </label>
-                            {{ form.birth_date }}
-                            {% if form.birth_date.errors %}
-                            <div class="field-errors">
-                                {% for error in form.birth_date.errors %}
-                                <span class="error-message">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Gender -->
-                        <div class="form-group">
-                            <label for="id_gender" class="form-label">
-                                {{ form.gender.label }}
-                            </label>
-                            {{ form.gender }}
-                            {% if form.gender.errors %}
-                            <div class="field-errors">
-                                {% for error in form.gender.errors %}
-                                <span class="error-message">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Country -->
-                        <div class="form-group">
-                            <label for="id_country_code" class="form-label">
+                            <label for="id_country_code" class="form-label required">
                                 {{ form.country_code.label }}
                             </label>
                             {{ form.country_code }}
+                            {% if form.country_code.help_text %}
+                            <div class="field-help">{{ form.country_code.help_text }}</div>
+                            {% endif %}
                             {% if form.country_code.errors %}
                             <div class="field-errors">
                                 {% for error in form.country_code.errors %}
@@ -117,10 +61,13 @@
 
                         <!-- Patient ID -->
                         <div class="form-group">
-                            <label for="id_patient_id" class="form-label">
+                            <label for="id_patient_id" class="form-label required">
                                 {{ form.patient_id.label }}
                             </label>
                             {{ form.patient_id }}
+                            {% if form.patient_id.help_text %}
+                            <div class="field-help">{{ form.patient_id.help_text }}</div>
+                            {% endif %}
                             {% if form.patient_id.errors %}
                             <div class="field-errors">
                                 {% for error in form.patient_id.errors %}
@@ -135,12 +82,18 @@
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary btn-large">
                             <i class="icon-search"></i>
-                            Search Patient Records
+                            Query Patient Documents
                         </button>
 
                         <button type="reset" class="btn btn-secondary">
                             <i class="icon-refresh"></i>
                             Clear Form
+                        </button>
+
+                        <a href="{{ url('patient_data:test_patients') }}" class="btn btn-info">
+                            <i class="fas fa-database"></i>
+                            View Test Patients
+                        </a>
                         </button>
                     </div>
                 </form>
@@ -188,4 +141,45 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Pre-populate form from URL parameters (for test patient links)
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const country = urlParams.get('country');
+        const patientId = urlParams.get('patient_id');
+
+        if (country) {
+            const countryField = document.getElementById('id_country_code');
+            if (countryField) {
+                countryField.value = country;
+            }
+        }
+
+        if (patientId) {
+            const patientIdField = document.getElementById('id_patient_id');
+            if (patientIdField) {
+                patientIdField.value = patientId;
+            }
+        }
+
+        // If both parameters are present, show a helpful message
+        if (country && patientId) {
+            const existingMessages = document.querySelector('.messages-container');
+            if (!existingMessages) {
+                const form = document.querySelector('.patient-form-wrapper');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'messages-container';
+                messageDiv.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Form pre-populated with test patient data. Click "Query Patient Documents" to proceed.
+                </div>
+            `;
+                form.insertBefore(messageDiv, form.firstChild);
+            }
+        }
+    });
+</script>
+
 {% endblock %}

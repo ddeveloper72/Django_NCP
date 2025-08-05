@@ -31,28 +31,21 @@ def patient_data_view(request):
     if request.method == "POST":
         form = PatientDataForm(request.POST)
         if form.is_valid():
-            # Save the patient data
-            patient_data = form.save()
+            # Extract the NCP query parameters
+            country_code = form.cleaned_data["country_code"]
+            patient_id = form.cleaned_data["patient_id"]
 
-            # Log the submission
+            # Log the NCP query
             logger.info(
-                "Patient data submitted: %s %s",
-                patient_data.given_name,
-                patient_data.family_name,
+                "NCP Document Query: Patient ID %s from %s",
+                patient_id,
+                country_code,
             )
 
-            # Create search credentials
+            # Create search credentials for NCP-to-NCP query
             credentials = PatientCredentials(
-                given_name=patient_data.given_name,
-                family_name=patient_data.family_name,
-                birth_date=(
-                    patient_data.birth_date.strftime("%Y%m%d")
-                    if patient_data.birth_date
-                    else ""
-                ),
-                gender=patient_data.gender,
-                country_code=form.cleaned_data.get("country_code", ""),
-                patient_id=form.cleaned_data.get("patient_id", ""),
+                country_code=country_code,
+                patient_id=patient_id,
             )
 
             # Search for matching CDA documents
@@ -63,8 +56,21 @@ def patient_data_view(request):
                 # Get the first (best) match
                 match = matches[0]
 
+                # Create a temporary PatientData record for session storage
+                # In real NCP workflow, this would be extracted from CDA response
+                from .models import PatientData
+
+                temp_patient = PatientData(
+                    given_name=match.given_name,
+                    family_name=match.family_name,
+                    birth_date=match.birth_date,
+                    gender=match.gender,
+                )
+                # Don't save to database - just use for ID generation
+                temp_patient.id = hash(f"{country_code}_{patient_id}") % 1000000
+
                 # Store the CDA match in session for later use with L1/L3 support
-                request.session[f"patient_match_{patient_data.id}"] = {
+                request.session[f"patient_match_{temp_patient.id}"] = {
                     "file_path": match.file_path,
                     "country_code": match.country_code,
                     "confidence_score": match.confidence_score,
@@ -83,22 +89,105 @@ def patient_data_view(request):
                 # Add success message
                 messages.success(
                     request,
-                    f"Patient found with {match.confidence_score*100:.1f}% confidence in {match.country_code} records!",
+                    f"Patient documents found with {match.confidence_score*100:.1f}% confidence in {match.country_code} NCP!",
+                )
+
+                # Redirect to patient details view
+                return redirect(
+                    "patient_data:patient_details", patient_id=temp_patient.id
                 )
             else:
                 # No match found
                 messages.warning(
                     request,
-                    "No matching patient records found in EU member states database.",
+                    f"No patient documents found for ID '{patient_id}' in {country_code} NCP.",
                 )
-
-            # Redirect to patient details view
-            return redirect("patient_data:patient_details", patient_id=patient_data.id)
         else:
             # Form has errors
             messages.error(request, "Please correct the errors below.")
     else:
-        form = PatientDataForm()
+        # GET request - check for URL parameters to pre-fill form
+        initial_data = {}
+
+        # Check for country and patient_id parameters from test patient links
+        country_param = request.GET.get("country")
+        patient_id_param = request.GET.get("patient_id")
+
+        if country_param and patient_id_param:
+            initial_data["country_code"] = country_param
+            initial_data["patient_id"] = patient_id_param
+            logger.info(
+                f"Pre-filling form with country={country_param}, patient_id={patient_id_param}"
+            )
+
+            # Auto-trigger search if both parameters are provided
+            # This makes "Test NCP Query" buttons work seamlessly
+            auto_search = request.GET.get("auto_search", "true")
+            if auto_search.lower() == "true":
+                # Create form with the data and validate it
+                form = PatientDataForm(initial_data)
+                if form.is_valid():
+                    # Create search credentials for NCP-to-NCP query
+                    credentials = PatientCredentials(
+                        country_code=country_param,
+                        patient_id=patient_id_param,
+                    )
+
+                    # Search for matching CDA documents
+                    search_service = EUPatientSearchService()
+                    matches = search_service.search_patient(credentials)
+
+                    if matches:
+                        # Get the first (best) match
+                        match = matches[0]
+
+                        # Create a temporary PatientData record for session storage
+                        from .models import PatientData
+
+                        temp_patient = PatientData(
+                            given_name=match.given_name,
+                            family_name=match.family_name,
+                            birth_date=match.birth_date,
+                            gender=match.gender,
+                        )
+                        # Don't save to database - just use for ID generation
+                        temp_patient.id = (
+                            hash(f"{country_param}_{patient_id_param}") % 1000000
+                        )
+
+                        # Store the match information in session for patient details view
+                        session_key = f"patient_match_{temp_patient.id}"
+                        request.session[session_key] = {
+                            "patient_data": match.patient_data,
+                            "match_score": match.match_score,
+                            "confidence_score": match.confidence_score,
+                            "l1_cda_content": match.l1_cda_content,
+                            "l3_cda_content": match.l3_cda_content,
+                            "l1_cda_path": match.l1_cda_path,
+                            "l3_cda_path": match.l3_cda_path,
+                            "available_documents": match.available_documents,
+                            "file_path": getattr(match, "file_path", ""),
+                        }
+
+                        # Success message with match information
+                        messages.success(
+                            request,
+                            f"Found patient: {match.given_name} {match.family_name} (ID: {match.patient_id}) "
+                            f"from {match.country_code} NCP. Confidence: {match.confidence_score:.1%}",
+                        )
+
+                        # Redirect to patient details
+                        return redirect(
+                            "patient_data:patient_details", patient_id=temp_patient.id
+                        )
+                    else:
+                        # No match found
+                        messages.warning(
+                            request,
+                            f"No patient documents found for ID '{patient_id_param}' in {country_param} NCP.",
+                        )
+
+        form = PatientDataForm(initial=initial_data)
 
     return render(
         request, "patient_data/patient_form.html", {"form": form}, using="jinja2"
@@ -108,645 +197,123 @@ def patient_data_view(request):
 def patient_details_view(request, patient_id):
     """View for displaying patient details and CDA documents"""
 
-    try:
-        patient_data = PatientData.objects.get(id=patient_id)
+    # Check if this is an NCP query result (session data exists but no DB record)
+    session_key = f"patient_match_{patient_id}"
+    match_data = request.session.get(session_key)
 
-        # Debug session data
-        session_key = f"patient_match_{patient_id}"
-        logger.info("Looking for session data with key: %s", session_key)
-        logger.info("Available session keys: %s", list(request.session.keys()))
+    if match_data and not PatientData.objects.filter(id=patient_id).exists():
+        # This is an NCP query result - create temp patient from session data
+        patient_info = match_data["patient_data"]
 
-        # Get CDA match from session
+        # Create a temporary patient object (not saved to DB)
+        patient_data = PatientData(
+            id=patient_id,
+            given_name=patient_info.get("given_name", "Unknown"),
+            family_name=patient_info.get("family_name", "Patient"),
+            birth_date=patient_info.get("birth_date") or None,
+            gender=patient_info.get("gender", ""),
+        )
+
+        logger.info(
+            f"Created temporary patient object for NCP query result: {patient_id}"
+        )
+    else:
+        # Standard database lookup
+        try:
+            patient_data = PatientData.objects.get(id=patient_id)
+        except PatientData.DoesNotExist:
+            messages.error(request, "Patient data not found.")
+            return redirect("patient_data:patient_data_form")
+
+    # Debug session data
+    logger.info("Looking for session data with key: %s", session_key)
+    logger.info("Available session keys: %s", list(request.session.keys()))
+
+    # Get CDA match from session
+    if not match_data:
         match_data = request.session.get(session_key)
 
-        if match_data:
-            logger.info("Found session data for patient %s", patient_id)
-        else:
-            logger.warning("No session data found for patient %s", patient_id)
+    if match_data:
+        logger.info("Found session data for patient %s", patient_id)
+    else:
+        logger.warning("No session data found for patient %s", patient_id)
 
-        context = {
-            "patient_data": patient_data,
-            "has_cda_match": match_data is not None,
-        }
+    context = {
+        "patient_data": patient_data,
+        "has_cda_match": match_data is not None,
+    }
 
-        if match_data:
-            # Build patient summary directly from match data
+    if match_data:
+        # Build patient summary directly from match data
 
-            # Check if patient identifiers are missing from session data (backwards compatibility)
-            patient_data_dict = match_data["patient_data"]
-            if not patient_data_dict.get(
-                "primary_patient_id"
-            ) and not patient_data_dict.get("secondary_patient_id"):
-                logger.info(
-                    "Patient identifiers missing from session data, re-extracting..."
-                )
-                try:
-                    # Re-extract patient identifiers from CDA content
-                    import xml.etree.ElementTree as ET
-
-                    root = ET.fromstring(match_data["cda_content"])
-                    namespaces = {
-                        "hl7": "urn:hl7-org:v3",
-                        "ext": "urn:hl7-EE-DL-Ext:v1",
-                    }
-
-                    # Find patient role
-                    patient_role = root.find(".//hl7:patientRole", namespaces)
-                    if patient_role is not None:
-                        # Extract patient IDs
-                        id_elements = patient_role.findall("hl7:id", namespaces)
-                        primary_patient_id = ""
-                        secondary_patient_id = ""
-                        patient_identifiers = []
-
-                        for idx, id_elem in enumerate(id_elements):
-                            extension = id_elem.get("extension", "")
-                            root_attr = id_elem.get("root", "")
-                            assigning_authority = id_elem.get(
-                                "assigningAuthorityName", ""
-                            )
-                            displayable = id_elem.get("displayable", "")
-
-                            if extension:
-                                identifier_info = {
-                                    "extension": extension,
-                                    "root": root_attr,
-                                    "assigningAuthorityName": assigning_authority,
-                                    "displayable": displayable,
-                                    "type": "primary" if idx == 0 else "secondary",
-                                }
-                                patient_identifiers.append(identifier_info)
-
-                                if idx == 0:
-                                    primary_patient_id = extension
-                                elif idx == 1:
-                                    secondary_patient_id = extension
-
-                        # Update the patient data with extracted identifiers
-                        patient_data_dict["primary_patient_id"] = primary_patient_id
-                        patient_data_dict["secondary_patient_id"] = secondary_patient_id
-                        patient_data_dict["patient_identifiers"] = patient_identifiers
-
-                        # Update the session data
-                        match_data["patient_data"] = patient_data_dict
-
-                        logger.info(
-                            f"Re-extracted identifiers: primary={primary_patient_id}, secondary={secondary_patient_id}"
-                        )
-                except Exception as e:
-                    logger.error(f"Error re-extracting patient identifiers: {e}")
-
-            # Build patient summary directly from match data instead of using service
-            patient_summary = {
-                "patient_name": match_data["patient_data"].get("name", "Unknown"),
-                "birth_date": match_data["patient_data"].get("birth_date", "Unknown"),
-                "gender": match_data["patient_data"].get("gender", "Unknown"),
-                "primary_patient_id": match_data["patient_data"].get(
-                    "primary_patient_id", ""
-                ),
-                "secondary_patient_id": match_data["patient_data"].get(
-                    "secondary_patient_id", ""
-                ),
-                "patient_identifiers": match_data["patient_data"].get(
-                    "patient_identifiers", []
-                ),
-                "address": match_data["patient_data"].get("address", {}),
-                "contact_info": match_data["patient_data"].get("contact_info", {}),
-                "cda_type": match_data.get("preferred_cda_type", "L3"),
-                "file_path": match_data["file_path"],
-                "confidence_score": match_data["confidence_score"],
-            }
-
-            # Get country display name
-            from .forms import COUNTRY_CHOICES
-
-            country_display = next(
-                (
-                    name
-                    for code, name in COUNTRY_CHOICES
-                    if code == match_data["country_code"]
-                ),
-                match_data["country_code"],
-            )
-
-            context.update(
-                {
-                    "patient_summary": patient_summary,
-                    "match_confidence": round(match_data["confidence_score"] * 100, 1),
-                    "source_country": match_data["country_code"],
-                    "source_country_display": country_display,
-                    "cda_file_name": os.path.basename(match_data["file_path"]),
-                    # L1/L3 CDA availability information
-                    "l1_available": match_data.get("has_l1", False),
-                    "l3_available": match_data.get("has_l3", False),
-                    "preferred_cda_type": match_data.get("preferred_cda_type", "L3"),
-                }
-            )
-        else:
-            # Session data is missing - provide fallback with clear message
-            logger.warning(
-                "Session data lost for patient %s, showing basic patient info only",
-                patient_id,
-            )
-
-            # Add a helpful message to the user
-            messages.warning(
-                request,
-                "Patient search data has expired. Please search again to view CDA documents and detailed information.",
-            )
-
-            # Provide basic context without CDA match data
-            context.update(
-                {
-                    "session_expired": True,
-                    "show_search_again_message": True,
-                    "session_error": "Patient search data has expired. Please search again to view CDA documents and detailed information.",
-                }
-            )
-
-        return render(
-            request, "patient_data/patient_details.html", context, using="jinja2"
-        )
-
-    except PatientData.DoesNotExist:
-        messages.error(request, "Patient data not found.")
-        return redirect("patient_data:patient_data_form")
-
-
-def patient_cda_view(request, patient_id):
-    """View for displaying CDA document in L3 browser format with enhanced translation"""
-
-    try:
-        patient_data = PatientData.objects.get(id=patient_id)
-
-        # Get CDA match from session
-        match_data = request.session.get(f"patient_match_{patient_id}")
-
-        if not match_data:
-            # Fallback: Create demonstration match data for direct URL access
-            messages.info(
-                request, "Using demonstration CDA data for translation showcase."
-            )
-
-            # Create fallback match data with sample content
-            match_data = {
-                "file_path": f"demo_data/{patient_data.patient_identifier.home_member_state.country_code}/sample_cda.xml",
-                "country_code": patient_data.patient_identifier.home_member_state.country_code,
-                "confidence_score": 0.95,  # High confidence for demo
-                "patient_data": {
-                    "family_name": patient_data.family_name,
-                    "given_name": patient_data.given_name,
-                    "date_of_birth": (
-                        patient_data.birth_date.strftime("%Y-%m-%d")
-                        if patient_data.birth_date
-                        else "1980-01-01"
-                    ),
-                },
-                "cda_content": "",  # Will trigger Luxembourg sample use
-                "l1_cda_content": "",
-                "l3_cda_content": "",
-                "l1_cda_path": "",
-                "l3_cda_path": "",
-                "preferred_cda_type": "L3",
-                "has_l1": False,
-                "has_l3": True,
-            }
-
-        # For rendering, prefer L3 CDA as it has structured clinical content
-        # Fall back to L1 CDA if L3 is not available
-        l3_cda_content = match_data.get("l3_cda_content")
-        l1_cda_content = match_data.get("l1_cda_content")
-
-        rendering_cda_content = (
-            l3_cda_content or l1_cda_content or match_data.get("cda_content", "")
-        )
-        rendering_cda_type = (
-            "L3" if l3_cda_content else ("L1" if l1_cda_content else "Unknown")
-        )
-        rendering_file_path = (
-            match_data.get("l3_cda_path")
-            if l3_cda_content
-            else (match_data.get("l1_cda_path") or match_data.get("file_path", ""))
-        )
-
-        # Initialize our new CDA translation service with PSTableRenderer
-        from .services.cda_translation_service import CDATranslationService
-
-        target_language = request.GET.get("lang", "en")
-
-        # Create new translation service with PS Guidelines table rendering
-        translation_service = CDATranslationService(target_language=target_language)
-
-        # Debug: Log what CDA content we're getting
-        logger.info(f"CDA content length: {len(rendering_cda_content)}")
-        logger.info(f"CDA content preview: {rendering_cda_content[:200]}...")
-
-        # Use real Luxembourg CDA data from the actual file when available
-        if (
-            len(rendering_cda_content.strip()) < 100
-            or "Aspirin" in rendering_cda_content
-        ):
-            # Use real Luxembourg CDA data from test_data for translation demonstration
+        # Check if patient identifiers are missing from session data (backwards compatibility)
+        patient_data_dict = match_data["patient_data"]
+        if not patient_data_dict.get(
+            "primary_patient_id"
+        ) and not patient_data_dict.get("secondary_patient_id"):
             logger.info(
-                "Using enhanced Luxembourg CDA data for translation demonstration"
+                "Patient identifiers missing from session data, re-extracting..."
             )
-            # Use actual Luxembourg patient CDA data with structured medication history and administrative data
-            sample_cda_content = """
-            <ClinicalDocument xmlns="urn:hl7-org:v3">
-                <id extension="DOC-001" root="2.16.442.1.99999999.1"/>
-                <code code="60591-5" codeSystem="2.16.840.1.113883.6.1" displayName="Patient summary Document"/>
-                <title>Patient Summary</title>
-                <effectiveTime value="20230925141338+0200"/>
-                <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25"/>
-                <languageCode code="fr-LU"/>
-                <setId extension="SET-001" root="2.16.442.1.99999999.2"/>
-                <versionNumber value="1"/>
-                <recordTarget>
-                    <patientRole>
-                        <addr use="HP">
-                            <streetAddressLine>123 Rue de la Paix</streetAddressLine>
-                            <city>Luxembourg</city>
-                            <postalCode>1234</postalCode>
-                            <country>LU</country>
-                        </addr>
-                        <telecom value="tel:+352123456789" use="HP"/>
-                        <telecom value="mailto:patient@example.lu" use="HP"/>
-                    </patientRole>
-                </recordTarget>
-                <author>
-                    <assignedAuthor>
-                        <assignedPerson>
-                            <name>
-                                <prefix>Dr.</prefix>
-                                <given>Marie</given>
-                                <family>Dubois</family>
-                            </name>
-                        </assignedPerson>
-                        <representedOrganization>
-                            <name>Centre Hospitalier de Luxembourg</name>
-                            <addr>
-                                <streetAddressLine>4 Rue Nicolas Ernest Barblé</streetAddressLine>
-                                <city>Luxembourg</city>
-                                <postalCode>1210</postalCode>
-                                <country>LU</country>
-                            </addr>
-                            <telecom value="tel:+35244111" use="WP"/>
-                        </representedOrganization>
-                    </assignedAuthor>
-                </author>
-                <custodian>
-                    <assignedCustodian>
-                        <representedCustodianOrganization>
-                            <name>Direction de la Santé - Luxembourg</name>
-                            <addr>
-                                <streetAddressLine>Villa Louvigny, Allée Marconi</streetAddressLine>
-                                <city>Luxembourg</city>
-                                <postalCode>2120</postalCode>
-                                <country>LU</country>
-                            </addr>
-                        </representedCustodianOrganization>
-                    </assignedCustodian>
-                </custodian>
-                <legalAuthenticator>
-                    <assignedEntity>
-                        <assignedPerson>
-                            <name>
-                                <prefix>Dr.</prefix>
-                                <given>Jean</given>
-                                <family>Mueller</family>
-                            </name>
-                        </assignedPerson>
-                    </assignedEntity>
-                </legalAuthenticator>
-                <component>
-                    <structuredBody>
-                        <component>
-            <section>
-                <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Medication use Narrative">
-                    <translation code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Medication use Narrative"/>
-                </code>
-                <title>History of Medication use</title>
-                <text>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Code</th>
-                                <th>Brand Name</th>
-                                <th>Active Ingredient and Dosage</th>
-                                <th>Pharmaceutical Form</th>
-                                <th>Route</th>
-                                <th>Dosage</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ID="medication1">
-                                <td ID="medication1-code">2009050307</td>
-                                <td ID="medication1-nom">RETROVIR</td>
-                                <td ID="medication1-principe">zidovudine 10.0mg/ml</td>
-                                <td ID="medication1-forme">oral solution</td>
-                                <td ID="medication1-route">oral</td>
-                                <td ID="medication1-posologie">300 mg every 12 hours</td>
-                                <td ID="medication1-start">01/08/2022</td>
-                                <td ID="medication1-end">18/08/2023</td>
-                                <td ID="medication1-notes">abc</td>
-                            </tr>
-                            <tr ID="medication2">
-                                <td ID="medication2-code">2007029189</td>
-                                <td ID="medication2-nom">VIREAD</td>
-                                <td ID="medication2-principe">tenofovir disoproxil fumarate 245.0mg</td>
-                                <td ID="medication2-forme">tablet</td>
-                                <td ID="medication2-route">oral</td>
-                                <td ID="medication2-posologie">1 tablet daily</td>
-                                <td ID="medication2-start">01/08/2022</td>
-                                <td ID="medication2-end">18/08/2023</td>
-                                <td ID="medication2-notes"></td>
-                            </tr>
-                            <tr ID="medication3">
-                                <td ID="medication3-code">2008039720</td>
-                                <td ID="medication3-nom">VIRAMUNE</td>
-                                <td ID="medication3-principe">nevirapine 200.0mg</td>
-                                <td ID="medication3-forme">tablet</td>
-                                <td ID="medication3-route">oral</td>
-                                <td ID="medication3-posologie">1 tablet daily</td>
-                                <td ID="medication3-start">01/08/2022</td>
-                                <td ID="medication3-end">18/08/2023</td>
-                                <td ID="medication3-notes"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </text>
-            </section>
-            <section>
-                <code code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Allergies and adverse reactions Document">
-                    <translation code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Allergies et intolérances"/>
-                </code>
-                <title>Allergies et intolérances</title>
-                <text>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Type d'allergie</th>
-                                <th>Agent causant</th>
-                                <th>Manifestation</th>
-                                <th>Sévérité</th>
-                                <th>Statut</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ID="allergy1">
-                                <td>Allergie médicamenteuse</td>
-                                <td>Pénicilline</td>
-                                <td>Éruption cutanée</td>
-                                <td>Modérée</td>
-                                <td>Confirmée</td>
-                            </tr>
-                            <tr ID="allergy2">
-                                <td>Allergie alimentaire</td>
-                                <td>Fruits de mer</td>
-                                <td>Anaphylaxie</td>
-                                <td>Sévère</td>
-                                <td>Confirmée</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </text>
-            </section>
-            <section>
-                <code code="11369-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Immunization Narrative">
-                    <translation code="11369-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Vaccinations"/>
-                </code>
-                <title>Vaccinations</title>
-                <text>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Vaccin</th>
-                                <th>Date d'administration</th>
-                                <th>Lot</th>
-                                <th>Statut</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ID="vacc1">
-                                <td>Vaccin contre la grippe saisonnière</td>
-                                <td>15/10/2023</td>
-                                <td>FL2023-001</td>
-                                <td>Administré</td>
-                            </tr>
-                            <tr ID="vacc2">
-                                <td>Vaccin COVID-19 (Pfizer-BioNTech)</td>
-                                <td>10/09/2023</td>
-                                <td>PF2023-456</td>
-                                <td>Rappel administré</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </text>
-            </section>
-                        </component>
-                    </structuredBody>
-                </component>
-            </ClinicalDocument>
-            """
-            translation_cda_content = sample_cda_content
-        else:
-            translation_cda_content = rendering_cda_content
+            try:
+                # Re-extract patient identifiers from CDA content
+                import xml.etree.ElementTree as ET
 
-        # Initialize coded section translator for enhanced section titles
-        from .services.cda_coded_section_translator import CDACodedSectionTranslator
+                root = ET.fromstring(match_data["cda_content"])
+                namespaces = {
+                    "hl7": "urn:hl7-org:v3",
+                    "ext": "urn:hl7-EE-DL-Ext:v1",
+                }
 
-        coded_translator = CDACodedSectionTranslator(target_language=target_language)
+                # Find patient role
+                patient_role = root.find(".//hl7:patientRole", namespaces)
+                if patient_role is not None:
+                    # Extract patient IDs
+                    id_elements = patient_role.findall("hl7:id", namespaces)
+                    primary_patient_id = ""
+                    secondary_patient_id = ""
+                    patient_identifiers = []
 
-        # Use our new CDA translation service with PS Guidelines table rendering
-        # Parse the CDA document
-        cda_data = translation_service.parse_cda_html(translation_cda_content)
+                    for idx, id_elem in enumerate(id_elements):
+                        extension = id_elem.get("extension", "")
+                        root_attr = id_elem.get("root", "")
+                        assigning_authority = id_elem.get("assigningAuthorityName", "")
+                        displayable = id_elem.get("displayable", "")
 
-        # Create bilingual document with PS Display Guidelines tables
-        bilingual_data = translation_service.create_bilingual_document(cda_data)
+                        if extension:
+                            identifier_info = {
+                                "extension": extension,
+                                "root": root_attr,
+                                "assigningAuthorityName": assigning_authority,
+                                "displayable": displayable,
+                                "type": "primary" if idx == 0 else "secondary",
+                            }
+                            patient_identifiers.append(identifier_info)
 
-        # Extract comprehensive administrative data from the CDA document
-        administrative_data = translation_service.extract_administrative_data(
-            translation_cda_content
-        )
+                            if idx == 0:
+                                primary_patient_id = extension
+                            elif idx == 1:
+                                secondary_patient_id = extension
 
-        # Create template-friendly format
-        translation_result = {
-            "document_info": {
-                "source_language": bilingual_data["source_language"],
-                "target_language": "en",  # Our service translates to English
-                "translation_quality": "95%",  # High quality medical terminology
-                "medical_terms_translated": len(bilingual_data["sections"]),
-                "total_sections": len(bilingual_data["sections"]),
-            },
-            "sections": [],
-        }
+                    # Update the patient data with extracted identifiers
+                    patient_data_dict["primary_patient_id"] = primary_patient_id
+                    patient_data_dict["secondary_patient_id"] = secondary_patient_id
+                    patient_data_dict["patient_identifiers"] = patient_identifiers
 
-        # Convert sections to template format with PS Guidelines tables
-        for section in bilingual_data["sections"]:
-            # Get section information
-            section_code = section.get("section_code", "")
+                    # Update the session data
+                    match_data["patient_data"] = patient_data_dict
+                    request.session[session_key] = match_data
 
-            # Try to get coded section information
-            coded_title = None
-            is_coded_section = False
-
-            if section_code:
-                try:
-                    coded_translation = coded_translator.translate_section_code(
-                        section_code, section.get("title_translated", "")
+                    logger.info(
+                        f"Re-extracted identifiers: primary={primary_patient_id}, secondary={secondary_patient_id}"
                     )
-                    coded_title = coded_translation["translated_title"]
-                    is_coded_section = coded_translation["is_coded"]
-                except Exception as e:
-                    logger.warning(
-                        f"Could not translate section code {section_code}: {e}"
-                    )
-                    coded_title = section.get("title_translated", "")
-                    is_coded_section = False
+            except Exception as e:
+                logger.error(f"Error re-extracting patient identifiers: {e}")
 
-            section_dict = {
-                "section_id": section.get("section_id", ""),
-                "title": {
-                    "original": section.get("title_original", ""),
-                    "translated": section.get("title_translated", ""),
-                    "coded": (
-                        coded_title
-                        if coded_title
-                        else section.get("title_translated", "")
-                    ),
-                },
-                "section_code": section_code,
-                "is_coded_section": is_coded_section,
-                "translation_source": "coded" if is_coded_section else "free_text",
-                "content": {
-                    "original": section.get("content_original", ""),
-                    "translated": section.get("content_translated", ""),
-                    "medical_terms": 0,  # Could be calculated if needed
-                },
-                "preview": {
-                    "original": (
-                        section.get("content_original", "")[:100] + "..."
-                        if len(section.get("content_original", "")) > 100
-                        else section.get("content_original", "")
-                    ),
-                    "translated": (
-                        section.get("content_translated", "")[:100] + "..."
-                        if len(section.get("content_translated", "")) > 100
-                        else section.get("content_translated", "")
-                    ),
-                },
-                # Add PS Guidelines table HTML - separate versions for original and translated
-                "ps_table_html": section.get("ps_table_html", ""),  # Translated version
-                "ps_table_html_original": section.get(
-                    "ps_table_html_original", ""
-                ),  # Original version
-                "has_ps_table": bool(section.get("ps_table_html", "")),
-                # Include original tables for comparison
-                "original_tables": section.get("tables", []),
-            }
-            translation_result["sections"].append(section_dict)
-
-        # Generate dynamic PS Guidelines sections using Python
-        enhanced_sections = generate_dynamic_ps_sections(translation_result["sections"])
-        translation_result["sections"] = enhanced_sections
-
-        # Debug: Log translation result
-        logger.info(
-            f"Translation result sections: {len(translation_result.get('sections', []))}"
-        )
-        logger.info(f"Translation result structure: {list(translation_result.keys())}")
-
-        # Debug: Check ps_table_html content
-        for i, section in enumerate(translation_result.get("sections", [])):
-            ps_html = section.get("ps_table_html", "")
-            if ps_html:
-                print(f"DEBUG: Section {i} ps_table_html (first 200 chars):")
-                print(f"  Content: {ps_html[:200]}...")
-                print(f"  Contains badges: {'code-system-badge' in ps_html}")
-                print(f"  HTML escaped: {'&lt;' in ps_html or '&gt;' in ps_html}")
-
-        # PS Table rendering is already done in CDATranslationService.create_bilingual_document()
-        # No need to call PSTableRenderer again here
-
-        # Extract data from the dictionary result
-        doc_info = translation_result.get("document_info", {})
-
-        # Calculate coded sections statistics
-        coded_sections_count = sum(
-            1
-            for section in translation_result["sections"]
-            if section.get("is_coded_section", False)
-        )
-        total_sections = len(translation_result["sections"])
-        coded_sections_percentage = (
-            (coded_sections_count / total_sections * 100) if total_sections > 0 else 0
-        )
-
-        # Extract safety information for PS Display Guidelines
-        safety_alerts = []
-        allergy_alerts = []
-
-        # Extract allergy information from translation result
-        for section in translation_result.get("sections", []):
-            section_title = section.get("title", {}).get("translated", "").lower()
-            if "allerg" in section_title or "adverse" in section_title:
-                # Extract allergy information from table data
-                if section.get("content", {}).get("table_data"):
-                    for row in section["content"]["table_data"]:
-                        if len(row) >= 2:  # Assuming substance and reaction columns
-                            allergy_alerts.append(
-                                {
-                                    "substance": row[0] if len(row) > 0 else "Unknown",
-                                    "reaction": (
-                                        row[1] if len(row) > 1 else "Unknown reaction"
-                                    ),
-                                }
-                            )
-
-            # Extract other safety alerts from problem lists or conditions
-            if (
-                "problem" in section_title
-                or "condition" in section_title
-                or "diagnosis" in section_title
-            ):
-                if section.get("content", {}).get("table_data"):
-                    for row in section["content"]["table_data"]:
-                        if row and len(row) > 0:
-                            problem_text = str(row[0])
-                            # Check for critical conditions
-                            critical_keywords = [
-                                "cancer",
-                                "tumor",
-                                "heart",
-                                "cardiac",
-                                "stroke",
-                                "diabetes",
-                                "hypertension",
-                            ]
-                            if any(
-                                keyword in problem_text.lower()
-                                for keyword in critical_keywords
-                            ):
-                                safety_alerts.append(problem_text)
-
-        # Extract document metadata for PS Guidelines
-        document_date = doc_info.get("document_date", "Date Unknown")
-        document_country = match_data["country_code"]
-
-        # Enhanced patient identity information
-        patient_identity = {
-            "family_name": patient_data.family_name,
-            "given_name": patient_data.given_name,
-            "birth_date": (
-                patient_data.birth_date.strftime("%d/%m/%Y")
-                if patient_data.birth_date
-                else "Unknown"
-            ),
-            "gender": getattr(patient_data, "gender", "Unknown"),
-            "patient_id": patient_data.id,  # Use the correct primary key for navigation
+        # Build patient summary directly from match data instead of using service
+        patient_summary = {
+            "patient_name": match_data["patient_data"].get("name", "Unknown"),
+            "birth_date": match_data["patient_data"].get("birth_date", "Unknown"),
+            "gender": match_data["patient_data"].get("gender", "Unknown"),
             "primary_patient_id": match_data["patient_data"].get(
                 "primary_patient_id", ""
             ),
@@ -756,51 +323,520 @@ def patient_cda_view(request, patient_id):
             "patient_identifiers": match_data["patient_data"].get(
                 "patient_identifiers", []
             ),
+            "address": match_data["patient_data"].get("address", {}),
+            "contact_info": match_data["patient_data"].get("contact_info", {}),
+            "cda_type": match_data.get("preferred_cda_type", "L3"),
+            "file_path": match_data["file_path"],
+            "confidence_score": match_data["confidence_score"],
         }
 
-        context = {
-            "patient_data": patient_data,
-            "cda_content": rendering_cda_content,
-            "source_country": match_data["country_code"],
-            "confidence": round(match_data["confidence_score"] * 100, 1),
-            "file_name": os.path.basename(rendering_file_path),
-            "cda_type": rendering_cda_type,
-            "l1_available": bool(l1_cda_content),
-            "l3_available": bool(l3_cda_content),
-            "is_l3_rendering": bool(l3_cda_content),
-            # Enhanced translation data from our working service
-            "translation_result": translation_result,
-            "source_language": doc_info.get("source_language", "fr"),
-            "target_language": doc_info.get("target_language", target_language),
-            "translation_quality": doc_info.get("translation_quality", "0%"),
-            "medical_terms_count": doc_info.get("medical_terms_translated", 0),
-            "sections_count": len(translation_result.get("sections", [])),
-            # Coded sections statistics
-            "coded_sections_count": coded_sections_count,
-            "coded_sections_percentage": round(coded_sections_percentage, 1),
-            "uses_coded_sections": coded_sections_count > 0,
-            # PS Display Guidelines requirements
-            "document_date": document_date,
-            "document_country": document_country,
-            "patient_identity": patient_identity,
-            "safety_alerts": safety_alerts,
-            "allergy_alerts": allergy_alerts,
-            "has_safety_alerts": len(safety_alerts) > 0 or len(allergy_alerts) > 0,
-            # Administrative data from CDA document
-            "administrative_data": administrative_data,
-            "has_administrative_data": bool(
-                administrative_data.patient_contact_info.addresses
-                or administrative_data.author_hcp.family_name
-                or administrative_data.legal_authenticator.family_name
-                or administrative_data.custodian_organization.name
+        # Get country display name
+        from .forms import COUNTRY_CHOICES
+
+        country_display = next(
+            (
+                name
+                for code, name in COUNTRY_CHOICES
+                if code == match_data["country_code"]
             ),
+            match_data["country_code"],
+        )
+
+        context.update(
+            {
+                "patient_summary": patient_summary,
+                "match_confidence": round(match_data["confidence_score"] * 100, 1),
+                "source_country": match_data["country_code"],
+                "source_country_display": country_display,
+                "cda_file_name": os.path.basename(match_data["file_path"]),
+                # L1/L3 CDA availability information
+                "l1_available": match_data.get("has_l1", False),
+                "l3_available": match_data.get("has_l3", False),
+                "preferred_cda_type": match_data.get("preferred_cda_type", "L3"),
+            }
+        )
+
+        return render(
+            request, "patient_data/patient_details.html", context, using="jinja2"
+        )
+    else:
+        # Session data is missing - provide fallback with clear message
+        logger.warning(
+            "Session data lost for patient %s, showing basic patient info only",
+            patient_id,
+        )
+
+        # Add a helpful message to the user
+        messages.warning(
+            request,
+            "Patient search data has expired. Please search again to view CDA documents and detailed information.",
+        )
+
+        # Provide basic context without CDA match data
+        context.update(
+            {
+                "session_expired": True,
+                "show_search_again_message": True,
+                "session_error": "Patient search data has expired. Please search again to view CDA documents and detailed information.",
+            }
+        )
+
+        return render(
+            request, "patient_data/patient_details.html", context, using="jinja2"
+        )
+
+
+def patient_cda_view(request, patient_id):
+    """View for displaying CDA document in L3 browser format with enhanced translation"""
+
+    logger.info(f"🔥 PATIENT_CDA_VIEW CALLED for patient_id: {patient_id}")
+    logger.info(f"🔥 Request method: {request.method}")
+    logger.info(f"🔥 Request path: {request.path}")
+    logger.info(f"🔥 User: {request.user}")
+    logger.info(f"🔥 User authenticated: {request.user.is_authenticated}")
+
+    try:
+        # Debug: Check what's in the session
+        session_key = f"patient_match_{patient_id}"
+        match_data = request.session.get(session_key)
+
+        logger.info(f"DEBUG: Looking for session key: {session_key}")
+        logger.info(f"DEBUG: Match data found: {match_data is not None}")
+        logger.info(f"DEBUG: All session keys: {list(request.session.keys())}")
+
+        # Check if this is an NCP query result (session data exists but no DB record)
+        if match_data and not PatientData.objects.filter(id=patient_id).exists():
+            # This is an NCP query result - create temp patient from session data
+            patient_info = match_data["patient_data"]
+
+            # Create a temporary patient object (not saved to DB)
+            patient_data = PatientData(
+                id=patient_id,
+                given_name=patient_info.get("given_name", "Unknown"),
+                family_name=patient_info.get("family_name", "Patient"),
+                birth_date=patient_info.get("birth_date") or None,
+                gender=patient_info.get("gender", ""),
+            )
+
+            logger.info(
+                f"Created temporary patient object for CDA display: {patient_id}"
+            )
+        else:
+            # Standard database lookup
+            try:
+                patient_data = PatientData.objects.get(id=patient_id)
+                logger.info(
+                    f"Found database patient: {patient_data.given_name} {patient_data.family_name}"
+                )
+            except PatientData.DoesNotExist:
+                logger.warning(f"Patient {patient_id} not found in database")
+                messages.error(request, "Patient data not found.")
+                return redirect("patient_data:patient_data_form")
+
+            # Get CDA match from session for database patients
+            if not match_data:
+                match_data = request.session.get(session_key)
+                logger.info(
+                    f"Session data for database patient: {match_data is not None}"
+                )
+
+                # If no session data exists for database patient, create minimal session data
+                # This allows viewing of database patients with basic info
+                if not match_data:
+                    logger.info(
+                        f"Creating minimal session data for database patient {patient_id}"
+                    )
+                    # Create minimal match data for database patients without session data
+                    match_data = {
+                        "file_path": f"database_patient_{patient_id}.xml",
+                        "country_code": "TEST",
+                        "confidence_score": 1.0,
+                        "patient_data": {
+                            "given_name": patient_data.given_name,
+                            "family_name": patient_data.family_name,
+                            "birth_date": (
+                                str(patient_data.birth_date)
+                                if patient_data.birth_date
+                                else ""
+                            ),
+                            "gender": patient_data.gender,
+                        },
+                        "cda_content": None,  # No CDA content for database-only patients
+                        "l1_cda_content": None,
+                        "l3_cda_content": None,
+                        "l1_cda_path": None,
+                        "l3_cda_path": None,
+                        "preferred_cda_type": "L3",
+                        "has_l1": False,
+                        "has_l3": False,
+                    }
+                    # Store in session for this request
+                    request.session[session_key] = match_data
+
+        if not match_data:
+            # Debug: Try to find any patient_match session data
+            logger.info("DEBUG: No direct match found, searching all session keys...")
+            for key, value in request.session.items():
+                if key.startswith("patient_match_"):
+                    logger.info(f"DEBUG: Found session key: {key}")
+                    if isinstance(value, dict) and "patient_data" in value:
+                        patient_data_info = value["patient_data"]
+                        logger.info(
+                            f"DEBUG: Patient data in session: {patient_data_info}"
+                        )
+                        # Try to match by patient info instead of exact ID
+                        # This is a fallback for when URLs don't match session keys exactly
+                        match_data = value
+                        logger.info(f"DEBUG: Using fallback match data from key: {key}")
+                        break
+
+        if not match_data:
+            # Final fallback: create empty session data for any valid patient
+            # This allows the CDA view to display even without search session data
+            logger.info(f"Creating fallback session data for patient {patient_id}")
+            match_data = {
+                "file_path": f"fallback_patient_{patient_id}.xml",
+                "country_code": "UNKNOWN",
+                "confidence_score": 0.5,
+                "patient_data": {
+                    "given_name": (
+                        patient_data.given_name
+                        if "patient_data" in locals()
+                        else "Unknown"
+                    ),
+                    "family_name": (
+                        patient_data.family_name
+                        if "patient_data" in locals()
+                        else "Patient"
+                    ),
+                    "birth_date": (
+                        str(patient_data.birth_date)
+                        if "patient_data" in locals() and patient_data.birth_date
+                        else ""
+                    ),
+                    "gender": patient_data.gender if "patient_data" in locals() else "",
+                },
+                "cda_content": "<!-- No CDA content available -->",
+                "l1_cda_content": None,
+                "l3_cda_content": None,
+                "l1_cda_path": None,
+                "l3_cda_path": None,
+                "preferred_cda_type": "L3",
+                "has_l1": False,
+                "has_l3": False,
+            }
+            # Store in session
+            request.session[session_key] = match_data
+
+            # Show warning message but continue to display page
+            messages.warning(
+                request,
+                f"No CDA document data available for patient {patient_id}. "
+                "Displaying basic patient information only.",
+            )
+
+        # Initialize CDA translation manager to process clinical sections
+        from .services.cda_translation_manager import CDATranslationManager
+        from .services.patient_search_service import PatientMatch
+
+        translation_manager = CDATranslationManager(target_language="en")
+
+        # Determine source language from country code
+        source_language = "fr"  # Default to French
+        country_code = match_data.get("country_code", "").upper()
+        if country_code == "DE":
+            source_language = "de"
+        elif country_code == "IT":
+            source_language = "it"
+        elif country_code == "ES":
+            source_language = "es"
+
+        # Reconstruct PatientMatch object from session data for translation service
+        # This provides the translation service with the proper search result context
+        patient_info = match_data.get("patient_data", {})
+        search_result = PatientMatch(
+            patient_id=patient_id,
+            given_name=patient_info.get("given_name", patient_data.given_name),
+            family_name=patient_info.get("family_name", patient_data.family_name),
+            birth_date=patient_info.get(
+                "birth_date",
+                str(patient_data.birth_date) if patient_data.birth_date else "",
+            ),
+            gender=patient_info.get("gender", patient_data.gender),
+            country_code=country_code,
+            confidence_score=match_data.get("confidence_score", 0.95),
+            file_path=match_data.get("file_path"),
+            l1_cda_content=match_data.get("l1_cda_content"),
+            l3_cda_content=match_data.get("l3_cda_content"),
+            l1_cda_path=match_data.get("l1_cda_path"),
+            l3_cda_path=match_data.get("l3_cda_path"),
+            cda_content=match_data.get("cda_content"),
+            patient_data=patient_info,
+            preferred_cda_type="L3",  # For clinical sections, prefer L3
+        )
+
+        # Process CDA content for clinical sections using the search result
+        translation_result = {"sections": []}
+        sections_count = 0
+        medical_terms_count = 0
+        coded_sections_count = 0
+        coded_sections_percentage = 0
+        uses_coded_sections = False
+        translation_quality = "Basic"
+
+        # Get the appropriate CDA content for processing
+        cda_content, cda_type = search_result.get_rendering_cda()
+
+        if (
+            cda_content
+            and cda_content.strip()
+            and "<!-- No CDA content available -->" not in cda_content
+        ):
+            try:
+                logger.info(
+                    f"Processing {cda_type} CDA content for clinical sections (length: {len(cda_content)}, search_id: {patient_id})"
+                )
+                # Pass the search result to the translation manager for proper context
+                cda_processing_result = translation_manager.process_cda_for_viewer(
+                    cda_content, source_language
+                )
+
+                if cda_processing_result.get("success"):
+                    # Handle enhanced XML parser results
+                    if cda_processing_result.get("content_type") == "xml_enhanced":
+                        # New enhanced XML parser format
+                        enhanced_translation_result = cda_processing_result.get(
+                            "translation_result", {}
+                        )
+                        # Preserve the enhanced sections data
+                        translation_result = enhanced_translation_result
+
+                        sections_count = enhanced_translation_result.get(
+                            "sections_count", 0
+                        )
+                        coded_sections_count = enhanced_translation_result.get(
+                            "coded_sections_count", 0
+                        )
+                        medical_terms_count = enhanced_translation_result.get(
+                            "medical_terms_count", 0
+                        )
+                        coded_sections_percentage = cda_processing_result.get(
+                            "coded_sections_percentage", 0
+                        )
+                        uses_coded_sections = enhanced_translation_result.get(
+                            "uses_coded_sections", False
+                        )
+                        translation_quality = enhanced_translation_result.get(
+                            "translation_quality", "Basic"
+                        )
+
+                        logger.info(
+                            f"Enhanced XML parser results: {sections_count} sections, "
+                            f"{coded_sections_count} coded, {medical_terms_count} clinical codes"
+                        )
+                    else:
+                        # Legacy HTML parser format
+                        clinical_sections = cda_processing_result.get(
+                            "clinical_sections", []
+                        )
+                        sections_count = len(clinical_sections)
+
+                        # Transform clinical sections to match template format
+                        processed_sections = []
+                        for section in clinical_sections:
+                            processed_section = {
+                                "section_id": section.get(
+                                    "id", f"section_{len(processed_sections)}"
+                                ),
+                                "title": {
+                                    "coded": section.get("title", "Unknown Section"),
+                                    "translated": section.get(
+                                        "translated_title",
+                                        section.get("title", "Unknown Section"),
+                                    ),
+                                },
+                                "is_coded_section": section.get(
+                                    "has_coded_elements", False
+                                ),
+                                "content": {
+                                    "original": section.get("original_content", ""),
+                                    "translated": section.get(
+                                        "translated_content",
+                                        section.get("original_content", ""),
+                                    ),
+                                    "medical_terms": section.get(
+                                        "medical_terms_count", 0
+                                    ),
+                                },
+                                "clinical_codes": section.get("coded_elements", {}),
+                                "section_code": section.get("section_code", ""),
+                                "has_ps_table": False,  # For now
+                                "ps_table_html": "",
+                                "ps_table_html_original": "",
+                            }
+                            processed_sections.append(processed_section)
+
+                            # Update counters
+                            if section.get("has_coded_elements"):
+                                coded_sections_count += 1
+                            medical_terms_count += section.get("medical_terms_count", 0)
+
+                        translation_result = {"sections": processed_sections}
+
+                        if sections_count > 0:
+                            coded_sections_percentage = int(
+                                (coded_sections_count / sections_count) * 100
+                            )
+                            uses_coded_sections = coded_sections_count > 0
+                            translation_quality = (
+                                "High" if coded_sections_percentage > 50 else "Medium"
+                            )
+
+                    logger.info(
+                        f"Successfully processed {sections_count} clinical sections from {cda_type} CDA"
+                    )
+                else:
+                    logger.warning(
+                        f"CDA processing failed: {cda_processing_result.get('error', 'Unknown error')}"
+                    )
+
+            except Exception as e:
+                logger.error(f"Error processing CDA content for clinical sections: {e}")
+                import traceback
+
+                logger.error(traceback.format_exc())
+        else:
+            logger.warning(
+                f"No CDA content available for patient {patient_id} - search result may be incomplete"
+            )
+
+        # Build complete context
+        context = {
+            "patient_identity": {
+                "patient_id": patient_id,
+                "given_name": patient_data.given_name,
+                "family_name": patient_data.family_name,
+                "birth_date": patient_data.birth_date,
+                "gender": patient_data.gender,
+                "patient_identifiers": [],
+                "primary_patient_id": patient_id,
+                "secondary_patient_id": None,
+            },
+            "source_country": match_data.get("country_code", "Unknown"),
+            "source_language": source_language,
+            "cda_type": (
+                cda_type
+                if "cda_type" in locals()
+                else ("L3" if match_data.get("l3_cda_content") else "L1")
+            ),
+            "confidence": int(match_data.get("confidence_score", 0.95) * 100),
+            "file_name": match_data.get("file_path", "unknown.xml"),
+            "translation_quality": translation_quality,
+            "sections_count": sections_count,
+            "medical_terms_count": medical_terms_count,
+            "coded_sections_count": coded_sections_count,
+            "coded_sections_percentage": coded_sections_percentage,
+            "uses_coded_sections": uses_coded_sections,
+            "translation_result": translation_result,
+            "safety_alerts": [],
+            "allergy_alerts": [],
+            "has_safety_alerts": False,
+            "administrative_data": {
+                "document_creation_date": None,
+                "document_last_update_date": None,
+                "document_version_number": None,
+                "patient_contact_info": {"addresses": [], "telecoms": []},
+                "author_hcp": {"family_name": None, "organization": {"name": None}},
+                "legal_authenticator": {
+                    "family_name": None,
+                    "organization": {"name": None},
+                },
+                "custodian_organization": {"name": None},
+                "preferred_hcp": {"name": None},
+                "guardian": {"family_name": None},
+                "other_contacts": [],
+            },
+            "has_administrative_data": False,
         }
+
+        # Override with enhanced parser data if available
+        if (
+            cda_processing_result
+            and cda_processing_result.get("content_type") == "xml_enhanced"
+        ):
+            enhanced_patient_identity = cda_processing_result.get(
+                "patient_identity", {}
+            )
+            enhanced_admin_data = cda_processing_result.get("administrative_data", {})
+
+            # Update patient identity if enhanced data is available
+            if enhanced_patient_identity:
+                # Preserve the original patient_id from the URL parameter
+                original_patient_id = context["patient_identity"]["patient_id"]
+                context["patient_identity"].update(enhanced_patient_identity)
+                context["patient_identity"]["patient_id"] = original_patient_id
+
+            # Update administrative data if enhanced data is available
+            if enhanced_admin_data:
+                context["administrative_data"] = enhanced_admin_data
+                context["has_administrative_data"] = cda_processing_result.get(
+                    "has_administrative_data", False
+                )
 
         return render(request, "patient_data/patient_cda.html", context, using="jinja2")
 
-    except PatientData.DoesNotExist:
-        messages.error(request, "Patient data not found.")
-        return redirect("patient_data:patient_data_form")
+    except Exception as e:
+        logger.error(
+            f"CRITICAL ERROR in patient_cda_view for patient {patient_id}: {e}"
+        )
+        import traceback
+
+        full_traceback = traceback.format_exc()
+        logger.error(f"Full traceback:\n{full_traceback}")
+
+        # Try to provide a more helpful error page instead of immediate redirect
+        try:
+            context = {
+                "patient_identity": {
+                    "patient_id": patient_id,
+                    "given_name": "Error",
+                    "family_name": "Loading Patient",
+                    "birth_date": "Unknown",
+                    "gender": "Unknown",
+                    "patient_identifiers": [],
+                    "primary_patient_id": patient_id,
+                },
+                "source_country": "ERROR",
+                "source_language": "en",
+                "cda_type": "ERROR",
+                "confidence": 0,
+                "file_name": "error.xml",
+                "translation_quality": "Failed",
+                "sections_count": 0,
+                "medical_terms_count": 0,
+                "coded_sections_count": 0,
+                "coded_sections_percentage": 0,
+                "uses_coded_sections": False,
+                "translation_result": {"sections": []},
+                "safety_alerts": [],
+                "allergy_alerts": [],
+                "has_safety_alerts": False,
+                "administrative_data": {},
+                "has_administrative_data": False,
+                "error_message": str(e),
+                "error_traceback": full_traceback,
+            }
+
+            messages.error(request, f"Technical error loading CDA document: {str(e)}")
+
+            return render(
+                request, "patient_data/patient_cda.html", context, using="jinja2"
+            )
+
+        except Exception as render_error:
+            logger.error(f"Even error rendering failed: {render_error}")
+            messages.error(request, f"Critical error loading CDA document: {str(e)}")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
 
 
 @login_required
@@ -1135,8 +1171,37 @@ def patient_orcd_view(request, patient_id):
     """View for displaying ORCD (Original Clinical Document) PDF preview"""
 
     try:
-        patient_data = PatientData.objects.get(id=patient_id)
-        match_data = request.session.get(f"patient_match_{patient_id}")
+        # Check if this is an NCP query result (session data exists but no DB record)
+        session_key = f"patient_match_{patient_id}"
+        match_data = request.session.get(session_key)
+
+        if match_data and not PatientData.objects.filter(id=patient_id).exists():
+            # This is an NCP query result - create temp patient from session data
+            patient_info = match_data["patient_data"]
+
+            # Create a temporary patient object (not saved to DB)
+            patient_data = PatientData(
+                id=patient_id,
+                given_name=patient_info.get("given_name", "Unknown"),
+                family_name=patient_info.get("family_name", "Patient"),
+                birth_date=patient_info.get("birth_date") or None,
+                gender=patient_info.get("gender", ""),
+            )
+
+            logger.info(
+                f"Created temporary patient object for ORCD display: {patient_id}"
+            )
+        else:
+            # Standard database lookup
+            try:
+                patient_data = PatientData.objects.get(id=patient_id)
+            except PatientData.DoesNotExist:
+                messages.error(request, "Patient data not found.")
+                return redirect("patient_data:patient_data_form")
+
+            # Get CDA match from session for database patients
+            if not match_data:
+                match_data = request.session.get(session_key)
 
         if not match_data:
             messages.error(request, "No CDA document found for this patient.")
@@ -1163,13 +1228,26 @@ def patient_orcd_view(request, patient_id):
 
         if orcd_cda_content:
             try:
+                logger.info(
+                    f"Attempting ORCD PDF extraction from {cda_type_used} CDA (content length: {len(orcd_cda_content)})"
+                )
                 pdf_attachments = pdf_service.extract_pdfs_from_xml(orcd_cda_content)
                 orcd_available = len(pdf_attachments) > 0
                 logger.info(
                     f"ORCD extraction from {cda_type_used} CDA: {len(pdf_attachments)} PDFs found"
                 )
+
+                # Log more details about the extracted PDFs
+                for i, pdf_info in enumerate(pdf_attachments):
+                    logger.info(
+                        f"PDF {i}: {pdf_info['filename']} ({pdf_info['size']} bytes, media_type: {pdf_info.get('media_type', 'unknown')})"
+                    )
+
             except Exception as e:
                 logger.error(f"Error extracting PDFs from {cda_type_used} CDA: {e}")
+                import traceback
+
+                logger.error(traceback.format_exc())
 
         context = {
             "patient_data": patient_data,
@@ -1198,8 +1276,37 @@ def download_orcd_pdf(request, patient_id, attachment_index=0):
     """Download ORCD PDF attachment"""
 
     try:
-        patient_data = PatientData.objects.get(id=patient_id)
-        match_data = request.session.get(f"patient_match_{patient_id}")
+        # Check if this is an NCP query result (session data exists but no DB record)
+        session_key = f"patient_match_{patient_id}"
+        match_data = request.session.get(session_key)
+
+        if match_data and not PatientData.objects.filter(id=patient_id).exists():
+            # This is an NCP query result - create temp patient from session data
+            patient_info = match_data["patient_data"]
+
+            # Create a temporary patient object (not saved to DB)
+            patient_data = PatientData(
+                id=patient_id,
+                given_name=patient_info.get("given_name", "Unknown"),
+                family_name=patient_info.get("family_name", "Patient"),
+                birth_date=patient_info.get("birth_date") or None,
+                gender=patient_info.get("gender", ""),
+            )
+
+            logger.info(
+                f"Created temporary patient object for ORCD download: {patient_id}"
+            )
+        else:
+            # Standard database lookup
+            try:
+                patient_data = PatientData.objects.get(id=patient_id)
+            except PatientData.DoesNotExist:
+                messages.error(request, "Patient data not found.")
+                return redirect("patient_data:patient_data_form")
+
+            # Get CDA match from session for database patients
+            if not match_data:
+                match_data = request.session.get(session_key)
 
         if not match_data:
             messages.error(request, "No CDA document found for this patient.")
@@ -1223,6 +1330,9 @@ def download_orcd_pdf(request, patient_id, attachment_index=0):
             return redirect("patient_data:patient_orcd_view", patient_id=patient_id)
 
         try:
+            logger.info(
+                f"Attempting ORCD PDF download from {cda_type_used} CDA (content length: {len(orcd_cda_content)})"
+            )
             pdf_attachments = pdf_service.extract_pdfs_from_xml(orcd_cda_content)
 
             if not pdf_attachments or attachment_index >= len(pdf_attachments):
@@ -1237,7 +1347,7 @@ def download_orcd_pdf(request, patient_id, attachment_index=0):
             filename = f"{patient_data.given_name}_{patient_data.family_name}_ORCD_{cda_type_used}.pdf"
 
             logger.info(
-                f"Downloaded ORCD PDF from {cda_type_used} CDA for patient {patient_id}"
+                f"Downloaded ORCD PDF from {cda_type_used} CDA for patient {patient_id} ({len(pdf_data)} bytes)"
             )
 
             # Return PDF response
@@ -1247,6 +1357,9 @@ def download_orcd_pdf(request, patient_id, attachment_index=0):
 
         except Exception as e:
             logger.error(f"Error downloading PDF: {e}")
+            import traceback
+
+            logger.error(traceback.format_exc())
             messages.error(request, "Error extracting PDF from document.")
             return redirect("patient_data:patient_orcd_view", patient_id=patient_id)
 
@@ -1259,8 +1372,39 @@ def view_orcd_pdf(request, patient_id, attachment_index=0):
     """View ORCD PDF inline for fullscreen preview"""
 
     try:
-        patient_data = PatientData.objects.get(id=patient_id)
-        match_data = request.session.get(f"patient_match_{patient_id}")
+        # Check if this is an NCP query result (session data exists but no DB record)
+        session_key = f"patient_match_{patient_id}"
+        match_data = request.session.get(session_key)
+
+        if match_data and not PatientData.objects.filter(id=patient_id).exists():
+            # This is an NCP query result - create temp patient from session data
+            patient_info = match_data["patient_data"]
+
+            # Create a temporary patient object (not saved to DB)
+            patient_data = PatientData(
+                id=patient_id,
+                given_name=patient_info.get("given_name", "Unknown"),
+                family_name=patient_info.get("family_name", "Patient"),
+                birth_date=patient_info.get("birth_date") or None,
+                gender=patient_info.get("gender", ""),
+            )
+
+            logger.info(
+                f"Created temporary patient object for ORCD inline view: {patient_id}"
+            )
+        else:
+            # Standard database lookup
+            try:
+                patient_data = PatientData.objects.get(id=patient_id)
+            except PatientData.DoesNotExist:
+                return HttpResponse(
+                    "<html><body><h1>Patient not found</h1><p>Please return to the patient data form.</p></body></html>",
+                    status=404,
+                )
+
+            # Get CDA match from session for database patients
+            if not match_data:
+                match_data = request.session.get(session_key)
 
         if not match_data:
             return HttpResponse(
@@ -1288,6 +1432,9 @@ def view_orcd_pdf(request, patient_id, attachment_index=0):
             )
 
         try:
+            logger.info(
+                f"Attempting ORCD PDF inline viewing from {cda_type_used} CDA (content length: {len(orcd_cda_content)})"
+            )
             pdf_attachments = pdf_service.extract_pdfs_from_xml(orcd_cda_content)
 
             if not pdf_attachments or attachment_index >= len(pdf_attachments):
@@ -1302,7 +1449,7 @@ def view_orcd_pdf(request, patient_id, attachment_index=0):
             filename = f"{patient_data.given_name}_{patient_data.family_name}_ORCD_{cda_type_used}.pdf"
 
             logger.info(
-                f"Viewing ORCD PDF inline from {cda_type_used} CDA for patient {patient_id}"
+                f"Viewing ORCD PDF inline from {cda_type_used} CDA for patient {patient_id} ({len(pdf_data)} bytes)"
             )
 
             # Return PDF response for inline viewing with enhanced headers

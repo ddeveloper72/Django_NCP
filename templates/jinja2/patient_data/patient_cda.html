@@ -39,7 +39,8 @@
                 <span class="patient-gender">{{ patient_identity.gender }}</span>
                 {% if patient_identity.patient_identifiers %}
                 {% for identifier in patient_identity.patient_identifiers %}
-                <span class="patient-id-{% if loop.index == 1 %}primary{% elif loop.index == 2 %}secondary{% else %}additional{% endif %}">
+                <span
+                    class="patient-id-{% if loop.index == 1 %}primary{% elif loop.index == 2 %}secondary{% else %}additional{% endif %}">
                     {% if identifier.assigningAuthorityName %}
                     {{ identifier.assigningAuthorityName }}: {{ identifier.extension }}
                     {% else %}
@@ -49,13 +50,13 @@
                 {% endfor %}
                 {% elif patient_identity.primary_patient_id or patient_identity.secondary_patient_id %}
                 {% if patient_identity.primary_patient_id %}
-                <span class="patient-id-primary">Primary ID: {{ patient_identity.primary_patient_id }}</span>
+                <span class="patient-id-primary">CDA ID: {{ patient_identity.primary_patient_id }}</span>
                 {% endif %}
                 {% if patient_identity.secondary_patient_id %}
-                <span class="patient-id-secondary">Secondary ID: {{ patient_identity.secondary_patient_id }}</span>
+                <span class="patient-id-secondary">CDA ID: {{ patient_identity.secondary_patient_id }}</span>
                 {% endif %}
                 {% else %}
-                <span class="patient-id">ID: {{ patient_identity.patient_id }}</span>
+                <span class="patient-id-fallback">No CDA identifiers available</span>
                 {% endif %}
             </div>
         </div>
@@ -735,11 +736,28 @@
                     {% endfor %}
 
                     {% else %}
+                    {% if error_message %}
+                    <!-- Error Information -->
+                    <div class="error-info-section">
+                        <div class="alert alert-danger">
+                            <h4><i class="fas fa-exclamation-triangle me-2"></i>Technical Error</h4>
+                            <p><strong>Error:</strong> {{ error_message }}</p>
+                            {% if error_traceback %}
+                            <details>
+                                <summary>Technical Details (for debugging)</summary>
+                                <pre
+                                    style="font-size: 0.8em; background: #f8f9fa; padding: 1rem; border-radius: 4px; max-height: 300px; overflow-y: auto;">{{ error_traceback }}</pre>
+                            </details>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% else %}
                     <div class="no-sections">
                         <i class="fas fa-exclamation-triangle fa-3x mb-3" style="color: #009fd1;"></i>
                         <h4>No Medical Sections Available</h4>
                         <p>This document does not contain structured medical sections for translation.</p>
                     </div>
+                    {% endif %}
                     {% endif %}
 
                 </div>

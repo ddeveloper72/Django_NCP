@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Test CDA Documents - Available Patients{% endblock %}
+
+{% block extra_css %}
+<style>
+    .patient-card {
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .patient-card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        border-color: #007bff;
+    }
+
+    .patient-name {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    .patient-id {
+        font-family: monospace;
+        background: #f8f9fa;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    .country-section {
+        margin-bottom: 2rem;
+    }
+
+    .country-header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .document-badges {
+        margin-top: 0.5rem;
+    }
+
+    .doc-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        margin-right: 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .doc-badge.l1 {
+        background: #28a745;
+        color: white;
+    }
+
+    .doc-badge.l3 {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .stats-card {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .refresh-btn {
+        margin-bottom: 1rem;
+    }
+
+    .test-query-btn {
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-database me-2"></i>
+                Test CDA Documents - Available Patients
+            </h1>
+
+            <div class="stats-card">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h3 class="text-primary">{{ total_patients }}</h3>
+                        <p class="mb-0">Total Patients</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="text-success">{{ total_countries }}</h3>
+                        <p class="mb-0">EU Member States</p>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="refreshIndexBtn" class="btn btn-warning">
+                            <i class="fas fa-sync-alt"></i> Refresh Index
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle me-2"></i>About Test Patient Data</h5>
+                <p class="mb-2">
+                    This system demonstrates realistic NCP-to-NCP patient queries using test CDA documents from EU
+                    member states.
+                    The following patients are available for testing cross-border healthcare document exchange.
+                </p>
+                <ul class="mb-0">
+                    <li><strong>L1 CDA:</strong> PDF-based documents with embedded clinical content</li>
+                    <li><strong>L3 CDA:</strong> Structured XML documents with coded clinical sections</li>
+                    <li><strong>No Data Storage:</strong> Patient data is extracted on-demand from CDA documents
+                        (realistic NCP workflow)</li>
+                </ul>
+            </div>
+
+            {% if patients_by_country %}
+            {% for country_code, patients in patients_by_country.items() %}
+            <div class="country-section">
+                <div class="country-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-flag me-2"></i>
+                        {{ country_code }} - {{ patients|length }} Patient{{ patients|length|pluralize }}
+                    </h3>
+                </div>
+
+                <div class="row">
+                    {% for patient in patients %}
+                    <div class="col-lg-6 col-xl-4">
+                        <div class="patient-card">
+                            <div class="patient-name">
+                                {{ patient.family_name }}, {{ patient.given_name }}
+                            </div>
+
+                            <div class="mb-2">
+                                <strong>Patient ID:</strong>
+                                <span class="patient-id">{{ patient.patient_id }}</span>
+                            </div>
+
+                            {% if patient.birth_date %}
+                            <div class="mb-2">
+                                <strong>Birth Date:</strong> {{ patient.birth_date }}
+                            </div>
+                            {% endif %}
+
+                            {% if patient.gender %}
+                            <div class="mb-2">
+                                <strong>Gender:</strong> {{ patient.gender }}
+                            </div>
+                            {% endif %}
+
+                            {% if patient.assigning_authority %}
+                            <div class="mb-2">
+                                <strong>Authority:</strong> {{ patient.assigning_authority }}
+                            </div>
+                            {% endif %}
+
+                            <div class="document-badges">
+                                {% for doc_type in patient.cda_types %}
+                                <span class="doc-badge {{ doc_type.lower() }}">{{ doc_type }} CDA</span>
+                                {% endfor %}
+                                <small class="text-muted">({{ patient.document_count }} document{{
+                                    patient.document_count|pluralize }})</small>
+                            </div>
+
+                            <div class="test-query-btn">
+                                <a href="{{ url('patient_data:patient_data_form') }}?country={{ country_code }}&patient_id={{ patient.patient_id }}"
+                                    class="btn btn-sm btn-primary">
+                                    <i class="fas fa-search me-1"></i>
+                                    Test NCP Query
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="alert alert-warning">
+                <h5><i class="fas fa-exclamation-triangle me-2"></i>No Test Patients Found</h5>
+                <p class="mb-2">
+                    No CDA documents were found in the test data directory. To add test patients:
+                </p>
+                <ol class="mb-3">
+                    <li>Place CDA XML files in <code>test_data/eu_member_states/[COUNTRY_CODE]/</code></li>
+                    <li>Ensure files contain valid HL7 CDA patient information</li>
+                    <li>Click "Refresh Index" to scan for new documents</li>
+                </ol>
+                <button id="refreshIndexBtn2" class="btn btn-warning">
+                    <i class="fas fa-sync-alt"></i> Refresh Index
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const refreshBtns = document.querySelectorAll('[id^="refreshIndexBtn"]');
+
+        refreshBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+                this.disabled = true;
+
+                fetch('{% url "patient_data:refresh_cda_index" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Index refreshed successfully!\\n' + data.message);
+                            location.reload();
+                        } else {
+                            alert('Error refreshing index: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error refreshing index. Check console for details.');
+                    })
+                    .finally(() => {
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    });
+            });
+        });
+    });
+</script>
+{% endblock %}

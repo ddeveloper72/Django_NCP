@@ -20,6 +20,7 @@ except ImportError:
     )
 
 from .enhanced_cda_translation_service import EnhancedCDATranslationService
+from .enhanced_cda_xml_parser import EnhancedCDAXMLParser
 from translation_services.terminology_translator import TerminologyTranslator
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ class CDATranslationManager:
         self.target_language = target_language
         self.translation_service = EnhancedCDATranslationService(target_language)
         self.terminology_translator = TerminologyTranslator(target_language)
+        self.xml_parser = EnhancedCDAXMLParser()
 
     def process_cda_for_viewer(
         self, cda_content: str, source_language: str = "fr"
@@ -667,16 +669,50 @@ class CDATranslationManager:
     def _process_xml_cda(
         self, xml_content: str, source_language: str
     ) -> Dict[str, Any]:
-        """Process raw XML CDA content using the enhanced translation service"""
+        """Process raw XML CDA content using the enhanced XML parser with clinical coding"""
         try:
-            translated_document = self.translation_service.translate_cda_document(
-                xml_content, source_language
+            logger.info(
+                f"Processing XML CDA content with enhanced parser (length: {len(xml_content)})"
+            )
+
+            # Use enhanced parser to extract sections and coded data
+            parsed_result = self.xml_parser.parse_cda_content(xml_content)
+
+            # Convert to format expected by the viewer
+            translation_result = {
+                "sections": parsed_result.get("sections", []),
+                "sections_count": parsed_result.get("sections_count", 0),
+                "coded_sections_count": parsed_result.get("coded_sections_count", 0),
+                "medical_terms_count": parsed_result.get("medical_terms_count", 0),
+                "uses_coded_sections": parsed_result.get("uses_coded_sections", False),
+                "translation_quality": parsed_result.get(
+                    "translation_quality", "Basic"
+                ),
+            }
+
+            logger.info(
+                f"Enhanced XML parsing complete: {translation_result['sections_count']} sections, "
+                f"{translation_result['coded_sections_count']} coded, "
+                f"{translation_result['medical_terms_count']} clinical codes extracted"
             )
 
             return {
                 "success": True,
-                "content_type": "xml",
-                "translated_document": translated_document,
+                "content_type": "xml_enhanced",
+                "translation_result": translation_result,
+                "patient_identity": parsed_result.get("patient_identity", {}),
+                "administrative_data": parsed_result.get("administrative_data", {}),
+                "has_administrative_data": parsed_result.get(
+                    "has_administrative_data", False
+                ),
+                "sections_count": translation_result["sections_count"],
+                "coded_sections_count": translation_result["coded_sections_count"],
+                "medical_terms_count": translation_result["medical_terms_count"],
+                "coded_sections_percentage": parsed_result.get(
+                    "coded_sections_percentage", 0
+                ),
+                "uses_coded_sections": translation_result["uses_coded_sections"],
+                "translation_quality": translation_result["translation_quality"],
                 "source_language": source_language,
                 "target_language": self.target_language,
                 "original_content": xml_content,
@@ -684,8 +720,8 @@ class CDATranslationManager:
             }
 
         except Exception as e:
-            logger.error(f"Error processing XML CDA: {e}")
-            return self._create_error_response(f"XML processing error: {e}")
+            logger.error(f"Error processing XML CDA with enhanced parser: {e}")
+            return self._create_error_response(f"Enhanced XML processing error: {e}")
 
     def _create_error_response(self, error_message: str) -> Dict[str, Any]:
         """Create error response structure"""

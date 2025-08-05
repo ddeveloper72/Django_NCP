@@ -6,18 +6,15 @@ Basic implementation for patient search and credential management
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
 import logging
+import xml.etree.ElementTree as ET
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class PatientCredentials:
-    """Patient credentials for search operations"""
+    """NCP-to-NCP patient query credentials"""
 
-    given_name: str
-    family_name: str
-    birth_date: str
-    gender: str
     country_code: str
     patient_id: str
 
@@ -89,121 +86,280 @@ class EUPatientSearchService:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
+    def extract_patient_info_from_cda(self, cda_content: str) -> Dict[str, str]:
+        """Extract patient information from CDA content"""
+        try:
+            root = ET.fromstring(cda_content)
+            namespaces = {
+                "hl7": "urn:hl7-org:v3",
+                "ext": "urn:hl7-EE-DL-Ext:v1",
+            }
+
+            # Find patient role
+            patient_role = root.find(".//hl7:patientRole", namespaces)
+            if patient_role is None:
+                # Return default values if patient info not found
+                return {
+                    "given_name": "Unknown",
+                    "family_name": "Patient",
+                    "birth_date": "",
+                    "gender": "",
+                }
+
+            # Extract patient name
+            patient = patient_role.find("hl7:patient", namespaces)
+            given_name = "Unknown"
+            family_name = "Patient"
+            birth_date = ""
+            gender = ""
+
+            if patient is not None:
+                # Extract name
+                name_elem = patient.find("hl7:name", namespaces)
+                if name_elem is not None:
+                    given_elem = name_elem.find("hl7:given", namespaces)
+                    family_elem = name_elem.find("hl7:family", namespaces)
+                    if given_elem is not None:
+                        given_name = given_elem.text or "Unknown"
+                    if family_elem is not None:
+                        family_name = family_elem.text or "Patient"
+
+                # Extract birth date
+                birth_elem = patient.find("hl7:birthTime", namespaces)
+                if birth_elem is not None:
+                    birth_value = birth_elem.get("value", "")
+                    # Convert YYYYMMDD to readable format
+                    if len(birth_value) >= 8:
+                        birth_date = (
+                            f"{birth_value[:4]}-{birth_value[4:6]}-{birth_value[6:8]}"
+                        )
+
+                # Extract gender
+                gender_elem = patient.find("hl7:administrativeGenderCode", namespaces)
+                if gender_elem is not None:
+                    gender_code = gender_elem.get("code", "")
+                    gender_map = {"M": "Male", "F": "Female", "U": "Unknown"}
+                    gender = gender_map.get(gender_code, gender_code)
+
+            return {
+                "given_name": given_name,
+                "family_name": family_name,
+                "birth_date": birth_date,
+                "gender": gender,
+            }
+
+        except Exception as e:
+            self.logger.error(f"Error extracting patient info from CDA: {e}")
+            return {
+                "given_name": "Unknown",
+                "family_name": "Patient",
+                "birth_date": "",
+                "gender": "",
+            }
+
     def search_patient(self, credentials: PatientCredentials) -> List[PatientMatch]:
         """
-        Search for patient across EU member states
+        Search for patient documents using NCP-to-NCP query
 
         Args:
-            credentials: Patient search credentials
+            credentials: Country code and patient identifier
 
         Returns:
-            List of patient matches
+            List of patient matches with CDA documents
         """
         self.logger.info(
-            f"Searching for patient: {credentials.given_name} {credentials.family_name}"
+            f"NCP Query - Patient ID: {credentials.patient_id} from {credentials.country_code}"
         )
 
-        # For now, return a mock result based on the search credentials
         matches = []
 
         if credentials.patient_id:
-            # Direct patient ID match
-            # Load real CDA documents from test data
-            import os
-            from django.conf import settings
+            # Use the new CDA indexing system to find documents
+            from .cda_document_index import get_cda_indexer
 
-            # Try to load the real L1 CDA document for this patient
-            test_data_path = os.path.join(
-                settings.BASE_DIR,
-                "test_data",
-                "eu_member_states",
-                credentials.country_code.upper(),
+            indexer = get_cda_indexer()
+            documents = indexer.find_patient_documents(
+                credentials.patient_id, credentials.country_code
             )
-            l1_cda_content = None
-            l1_file_path = None
 
-            # Look for the specific patient file
-            if credentials.patient_id == "3843082788":  # CELESTINA DOE-CALLA
-                celestina_file = os.path.join(
-                    test_data_path, "CELESTINA_DOE-CALLA_38430827.xml"
+            if documents:
+                # Group documents by type (L1, L3)
+                l1_docs = [doc for doc in documents if doc.cda_type == "L1"]
+                l3_docs = [doc for doc in documents if doc.cda_type == "L3"]
+
+                # Load CDA content
+                l1_cda_content = None
+                l3_cda_content = None
+                l1_file_path = None
+                l3_file_path = None
+
+                # Load L1 document if available
+                if l1_docs:
+                    l1_doc = l1_docs[0]  # Use first L1 document
+                    try:
+                        with open(l1_doc.file_path, "r", encoding="utf-8") as f:
+                            l1_cda_content = f.read()
+                        l1_file_path = l1_doc.file_path
+                        self.logger.info(
+                            f"Loaded L1 CDA from index: {l1_doc.file_path}"
+                        )
+                    except Exception as e:
+                        self.logger.error(
+                            f"Error loading L1 CDA {l1_doc.file_path}: {e}"
+                        )
+
+                # Load L3 document if available
+                if l3_docs:
+                    l3_doc = l3_docs[0]  # Use first L3 document
+                    try:
+                        with open(l3_doc.file_path, "r", encoding="utf-8") as f:
+                            l3_cda_content = f.read()
+                        l3_file_path = l3_doc.file_path
+                        self.logger.info(
+                            f"Loaded L3 CDA from index: {l3_doc.file_path}"
+                        )
+                    except Exception as e:
+                        self.logger.error(
+                            f"Error loading L3 CDA {l3_doc.file_path}: {e}"
+                        )
+
+                # Use patient info from index
+                first_doc = documents[0]
+                patient_info = {
+                    "given_name": first_doc.given_name,
+                    "family_name": first_doc.family_name,
+                    "birth_date": first_doc.birth_date,
+                    "gender": first_doc.gender,
+                }
+
+                self.logger.info(
+                    f"Found indexed patient: {patient_info['given_name']} {patient_info['family_name']} "
+                    f"with {len(l1_docs)} L1 and {len(l3_docs)} L3 documents"
                 )
-                if os.path.exists(celestina_file):
-                    with open(celestina_file, "r", encoding="utf-8") as f:
-                        l1_cda_content = f.read()
-                    l1_file_path = celestina_file
-                    logger.info(
-                        f"Loaded real L1 CDA for patient {credentials.patient_id} from {celestina_file}"
-                    )
 
-            # If no real L1 found, use mock L1 content
-            if not l1_cda_content:
-                l1_file_path = f"test_data/eu_member_states/{credentials.country_code.lower()}/l1_cda_sample.xml"
+                # Create PatientMatch from indexed data
+                match = PatientMatch(
+                    patient_id=credentials.patient_id,
+                    given_name=patient_info["given_name"],
+                    family_name=patient_info["family_name"],
+                    birth_date=patient_info["birth_date"],
+                    gender=patient_info["gender"],
+                    country_code=credentials.country_code,
+                    match_score=1.0,
+                    confidence_score=1.0,
+                    l1_cda_path=l1_file_path,
+                    l3_cda_path=l3_file_path,
+                    l1_cda_content=l1_cda_content,
+                    l3_cda_content=l3_cda_content,
+                    patient_data={
+                        "id": credentials.patient_id,
+                        "name": f"{patient_info['given_name']} {patient_info['family_name']}",
+                        "given_name": patient_info["given_name"],
+                        "family_name": patient_info["family_name"],
+                        "birth_date": patient_info["birth_date"],
+                        "gender": patient_info["gender"],
+                    },
+                    available_documents=["L1_CDA", "L3_CDA", "eDispensation", "ePS"],
+                )
+                matches.append(match)
+
+            else:
+                # Fallback to mock data if not found in index
+                self.logger.warning(
+                    f"Patient {credentials.patient_id} not found in index, using fallback"
+                )
+                patient_info = self.extract_patient_info_from_cda(
+                    ""
+                )  # Returns default values
+
+                # Create fallback mock CDA content
                 l1_cda_content = """<?xml version="1.0" encoding="UTF-8"?>
 <ClinicalDocument xmlns="urn:hl7-org:v3">
     <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1" extension="L1"/>
-    <!-- L1 CDA with embedded PDF in nonXMLBody -->
+    <recordTarget>
+        <patientRole>
+            <id assigningAuthorityName="Mock Authority" extension="{}" root="2.16.840.1.113883.2.9.4.3.2"/>
+            <patient>
+                <name>
+                    <family>Patient</family>
+                    <given>Mock</given>
+                </name>
+                <administrativeGenderCode code="U"/>
+                <birthTime value=""/>
+            </patient>
+        </patientRole>
+    </recordTarget>
     <component>
         <nonXMLBody>
             <text mediaType="application/pdf" representation="B64">
-                JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKPD4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQo+PgplbmRvYmoKeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDEzNiAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDQKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjIwNAolJUVPRgo=
+                Mock PDF content
             </text>
         </nonXMLBody>
     </component>
-</ClinicalDocument>"""
+</ClinicalDocument>""".format(
+                    credentials.patient_id
+                )
 
-            # Mock L3 CDA with structured clinical content
-            l3_file_path = f"test_data/eu_member_states/{credentials.country_code.lower()}/l3_cda_sample.xml"
-            l3_cda_content = """<?xml version="1.0" encoding="UTF-8"?>
+                l3_cda_content = """<?xml version="1.0" encoding="UTF-8"?>
 <ClinicalDocument xmlns="urn:hl7-org:v3">
     <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1" extension="L3"/>
-    <!-- L3 CDA with structured clinical content -->
+    <recordTarget>
+        <patientRole>
+            <id assigningAuthorityName="Mock Authority" extension="{}" root="2.16.840.1.113883.2.9.4.3.2"/>
+            <patient>
+                <name>
+                    <family>Patient</family>
+                    <given>Mock</given>
+                </name>
+                <administrativeGenderCode code="U"/>
+                <birthTime value=""/>
+            </patient>
+        </patientRole>
+    </recordTarget>
     <component>
         <structuredBody>
             <component>
                 <section>
-                    <templateId root="2.16.840.1.113883.10.20.1.8"/>
-                    <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" displayName="HISTORY OF MEDICATION USE"/>
-                    <title>Medications</title>
-                    <text>
-                        <table>
-                            <thead>
-                                <tr><th>Medication</th><th>Dosage</th><th>Frequency</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>Aspirin</td><td>100mg</td><td>Once daily</td></tr>
-                            </tbody>
-                        </table>
-                    </text>
+                    <title>Mock Clinical Section</title>
+                    <text>No real clinical data available for this patient ID.</text>
                 </section>
             </component>
         </structuredBody>
     </component>
-</ClinicalDocument>"""
+</ClinicalDocument>""".format(
+                    credentials.patient_id
+                )
 
-            match = PatientMatch(
-                patient_id=credentials.patient_id,
-                given_name=credentials.given_name,
-                family_name=credentials.family_name,
-                birth_date=credentials.birth_date,
-                gender=credentials.gender,
-                country_code=credentials.country_code,
-                match_score=1.0,
-                confidence_score=1.0,
-                l1_cda_path=l1_file_path,
-                l3_cda_path=l3_file_path,
-                l1_cda_content=l1_cda_content,
-                l3_cda_content=l3_cda_content,
-                patient_data={
-                    "id": credentials.patient_id,
-                    "name": f"{credentials.given_name} {credentials.family_name}",
-                    "birth_date": credentials.birth_date,
-                    "gender": credentials.gender,
-                },
-                available_documents=["L1_CDA", "L3_CDA", "eDispensation", "ePS"],
-            )
-            matches.append(match)
+                l1_file_path = f"mock/l1_{credentials.patient_id}.xml"
+                l3_file_path = f"mock/l3_{credentials.patient_id}.xml"
+
+                # Create fallback match
+                match = PatientMatch(
+                    patient_id=credentials.patient_id,
+                    given_name=patient_info["given_name"],
+                    family_name=patient_info["family_name"],
+                    birth_date=patient_info["birth_date"],
+                    gender=patient_info["gender"],
+                    country_code=credentials.country_code,
+                    match_score=1.0,
+                    confidence_score=1.0,
+                    l1_cda_path=l1_file_path,
+                    l3_cda_path=l3_file_path,
+                    l1_cda_content=l1_cda_content,
+                    l3_cda_content=l3_cda_content,
+                    patient_data={
+                        "id": credentials.patient_id,
+                        "name": f"{patient_info['given_name']} {patient_info['family_name']}",
+                        "given_name": patient_info["given_name"],
+                        "family_name": patient_info["family_name"],
+                        "birth_date": patient_info["birth_date"],
+                        "gender": patient_info["gender"],
+                    },
+                    available_documents=["L1_CDA", "L3_CDA", "eDispensation", "ePS"],
+                )
+                matches.append(match)
 
         return matches
 

@@ -209,7 +209,15 @@
                 <div class="patient-info">
                     <h4>{{ patient.name }}</h4>
                     <p><strong>Date of Birth:</strong> {{ patient.birth_date }}</p>
-                    <p><strong>ID:</strong> {{ patient.id }}</p>
+                    {% if patient.patient_identifiers %}
+                    {% for identifier in patient.patient_identifiers %}
+                    <p><strong>{% if identifier.assigningAuthorityName %}{{ identifier.assigningAuthorityName }}{% else
+                            %}Patient ID ({{ identifier.root|truncate(15, True) }}){% endif %}:</strong> {{
+                        identifier.extension }}</p>
+                    {% endfor %}
+                    {% else %}
+                    <p><strong>Patient ID:</strong> No CDA identifiers available</p>
+                    {% endif %}
                     {% if patient.address %}
                     <p><strong>Address:</strong> {{ patient.address }}</p>
                     {% endif %}

@@ -4,11 +4,12 @@ Test Luxembourg patient identifier display with both IDs: 2544557646 and 1937010
 """
 from xml.etree import ElementTree as ET
 
+
 def test_luxembourg_patient_ids():
     """Test with simulated Luxembourg CDA structure"""
-    
+
     # Create a simulated Luxembourg CDA structure based on the tree view
-    lu_cda_content = '''<?xml version="1.0" encoding="UTF-8"?>
+    lu_cda_content = """<?xml version="1.0" encoding="UTF-8"?>
 <ClinicalDocument xmlns="urn:hl7-org:v3">
     <realmCode code="EU"/>
     <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
@@ -33,18 +34,18 @@ def test_luxembourg_patient_ids():
             </patient>
         </patientRole>
     </recordTarget>
-</ClinicalDocument>'''
-    
+</ClinicalDocument>"""
+
     print("Testing Luxembourg patient identifier extraction...")
     print("=" * 60)
-    
+
     # Parse the CDA
     root = ET.fromstring(lu_cda_content)
-    namespaces = {'hl7': 'urn:hl7-org:v3'}
-    
+    namespaces = {"hl7": "urn:hl7-org:v3"}
+
     # Find patient role
-    patient_role = root.find('.//hl7:recordTarget/hl7:patientRole', namespaces)
-    
+    patient_role = root.find(".//hl7:recordTarget/hl7:patientRole", namespaces)
+
     if patient_role is not None:
         id_elements = patient_role.findall("hl7:id", namespaces)
         patient_identifiers = []
@@ -66,44 +67,60 @@ def test_luxembourg_patient_ids():
                 patient_identifiers.append(identifier_info)
 
         print(f"Found {len(patient_identifiers)} Luxembourg patient identifiers:")
-        
+
         for i, identifier in enumerate(patient_identifiers, 1):
             print(f"  {i}. Extension: {identifier['extension']}")
             print(f"     Root: {identifier['root']}")
-            print(f"     Assigning Authority: {identifier['assigningAuthorityName'] or 'N/A'}")
+            print(
+                f"     Assigning Authority: {identifier['assigningAuthorityName'] or 'N/A'}"
+            )
             print(f"     Type: {identifier['type']}")
             print()
 
         # Test both search IDs
         search_ids = ["2544557646", "193701011247"]
         for search_id in search_ids:
-            found = any(identifier['extension'] == search_id for identifier in patient_identifiers)
+            found = any(
+                identifier["extension"] == search_id
+                for identifier in patient_identifiers
+            )
             print(f"Search ID '{search_id}' found: {found}")
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("ENHANCED TEMPLATE BANNER DISPLAY:")
-        print("="*60)
+        print("=" * 60)
         for i, identifier in enumerate(patient_identifiers, 1):
             css_class = "primary" if i == 1 else "secondary" if i == 2 else "additional"
-            if identifier['assigningAuthorityName']:
-                display = f"{identifier['assigningAuthorityName']}: {identifier['extension']}"
+            if identifier["assigningAuthorityName"]:
+                display = (
+                    f"{identifier['assigningAuthorityName']}: {identifier['extension']}"
+                )
             else:
-                root_truncated = identifier['root'][:15] + "..." if len(identifier['root']) > 15 else identifier['root']
+                root_truncated = (
+                    identifier["root"][:15] + "..."
+                    if len(identifier["root"]) > 15
+                    else identifier["root"]
+                )
                 display = f"ID ({root_truncated}): {identifier['extension']}"
-            
-            print(f"  <span class=\"patient-id-{css_class}\">{display}</span>")
 
-        print("\n" + "="*60)
+            print(f'  <span class="patient-id-{css_class}">{display}</span>')
+
+        print("\n" + "=" * 60)
         print("ENHANCED TEMPLATE INFO SECTION DISPLAY:")
-        print("="*60)
+        print("=" * 60)
         for identifier in patient_identifiers:
-            if identifier['assigningAuthorityName']:
+            if identifier["assigningAuthorityName"]:
                 label = f"Patient ID ({identifier['assigningAuthorityName']})"
             else:
-                root_truncated = identifier['root'][:20] + "..." if len(identifier['root']) > 20 else identifier['root']
+                root_truncated = (
+                    identifier["root"][:20] + "..."
+                    if len(identifier["root"]) > 20
+                    else identifier["root"]
+                )
                 label = f"Patient ID ({root_truncated})"
-            
+
             print(f"  {label}: {identifier['extension']}")
+
 
 if __name__ == "__main__":
     test_luxembourg_patient_ids()

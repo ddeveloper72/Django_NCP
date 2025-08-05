@@ -48,64 +48,27 @@ GENDER_CHOICES = [
 
 
 class PatientDataForm(forms.Form):
-    """Form for patient search credentials"""
-
-    given_name = forms.CharField(
-        max_length=100,
-        required=True,
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Enter given name (first name)",
-            }
-        ),
-        label="Given Name",
-    )
-
-    family_name = forms.CharField(
-        max_length=100,
-        required=True,
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Enter family name (last name)",
-            }
-        ),
-        label="Family Name",
-    )
-
-    birth_date = forms.DateField(
-        required=False,
-        widget=forms.DateInput(
-            attrs={"class": "form-control", "type": "date", "placeholder": "YYYY-MM-DD"}
-        ),
-        label="Date of Birth",
-    )
-
-    gender = forms.ChoiceField(
-        choices=GENDER_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={"class": "form-control"}),
-        label="Gender",
-    )
+    """Form for NCP-to-NCP patient document search"""
 
     country_code = forms.ChoiceField(
         choices=COUNTRY_CHOICES,
-        required=False,
+        required=True,
         widget=forms.Select(attrs={"class": "form-control"}),
-        label="Country of Origin",
+        label="Patient's Country of Origin",
+        help_text="Select the country where the patient's medical records are stored",
     )
 
     patient_id = forms.CharField(
         max_length=100,
-        required=False,
+        required=True,
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
-                "placeholder": "Enter patient ID (if known)",
+                "placeholder": "e.g., NCPNPH80A01H501K",
             }
         ),
-        label="Patient ID (Optional)",
+        label="Patient Identifier",
+        help_text="The unique patient identifier provided by the patient (e.g., national health ID)",
     )
 
     def save(self):

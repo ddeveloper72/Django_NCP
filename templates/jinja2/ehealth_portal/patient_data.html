@@ -35,7 +35,15 @@
                         <strong>Address:</strong> {{ patient.address if patient.address else 'Not provided' }}
                     </div>
                     <div class="info-item">
-                        <strong>Patient ID:</strong> {{ patient.id }}
+                        {% if patient.patient_identifiers %}
+                        {% for identifier in patient.patient_identifiers %}
+                        <strong>{% if identifier.assigningAuthorityName %}{{ identifier.assigningAuthorityName }}{% else
+                            %}Patient ID ({{ identifier.root|truncate(15, True) }}){% endif %}:</strong> {{
+                        identifier.extension }}<br>
+                        {% endfor %}
+                        {% else %}
+                        <strong>Patient ID:</strong> No CDA identifiers available
+                        {% endif %}
                     </div>
                     <div class="info-item">
                         <strong>Last Updated:</strong> {{ patient.last_updated }}

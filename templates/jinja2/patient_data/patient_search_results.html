@@ -16,7 +16,16 @@
         <div class="patient-details">
             <div class="detail-item">
                 <span class="detail-label">Patient ID</span>
-                <span class="detail-value">{{ patient_identifier.patient_id }}</span>
+                <span class="detail-value">
+                    {% if patient_identifier.patient_identifiers %}
+                    {% for identifier in patient_identifier.patient_identifiers %}
+                    {% if identifier.assigningAuthorityName %}{{ identifier.assigningAuthorityName }}: {% endif %}{{
+                    identifier.extension }}{% if not loop.last %}<br>{% endif %}
+                    {% endfor %}
+                    {% else %}
+                    {{ patient_identifier.patient_id }}
+                    {% endif %}
+                </span>
             </div>
             {% if sample_patient_info %}
             <div class="detail-item">
