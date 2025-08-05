@@ -162,7 +162,12 @@ STATICFILES_FINDERS = [
 
 COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
 
-COMPRESS_ENABLED = True
+# Only enable compression in production to avoid caching issues during development
+COMPRESS_ENABLED = not DEBUG
+
+# Additional compression settings to avoid cache issues
+COMPRESS_OFFLINE = False
+COMPRESS_CSS_HASHING_METHOD = "mtime"
 
 # Media files
 MEDIA_URL = "media/"

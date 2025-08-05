@@ -1,6 +1,6 @@
-@import url("https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700");
+@import url('https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700');
 .cda-document-container {
-  font-family: "Montserrat", sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 14px;
   line-height: 1.6;
   background: #ffffff;
@@ -26,6 +26,41 @@
   font-size: 1.1rem;
   opacity: 0.9;
   font-weight: 400;
+}
+
+/* Navigation breadcrumb styling */
+.cda-navigation {
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+  padding: 1rem 2rem;
+}
+.cda-navigation .breadcrumb-nav {
+  margin: 0;
+}
+.cda-navigation .breadcrumb-nav .breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #085a9f;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.cda-navigation .breadcrumb-nav .breadcrumb-link:hover {
+  background: #085a9f;
+  color: #ffffff;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(8, 90, 159, 0.3);
+}
+.cda-navigation .breadcrumb-nav .breadcrumb-link i {
+  font-size: 0.9rem;
 }
 
 .patient-identity-banner {
@@ -56,6 +91,37 @@
   font-size: 0.9rem;
   font-weight: 500;
   border: 1px solid #009fd1;
+}
+
+/* Specific styling for patient identifiers */
+.patient-identity-banner
+  .patient-identity-left
+  .patient-details
+  .patient-id-primary {
+  background: #e8f4f8;
+  border: 1px solid #085a9f;
+  color: #085a9f;
+  font-weight: 600;
+}
+
+.patient-identity-banner
+  .patient-identity-left
+  .patient-details
+  .patient-id-secondary {
+  background: #f0f8ff;
+  border: 1px solid #009fd1;
+  color: #006b96;
+  font-weight: 600;
+}
+
+.patient-identity-banner
+  .patient-identity-left
+  .patient-details
+  .patient-id-additional {
+  background: #f8f9fa;
+  border: 1px solid #6c757d;
+  color: #495057;
+  font-weight: 600;
 }
 .patient-identity-banner .patient-identity-right {
   text-align: right;
@@ -91,16 +157,19 @@
   font-size: 1.5rem;
   animation: pulse 2s infinite;
 }
-.safety-alerts-section .allergy-alerts, .safety-alerts-section .medical-alerts {
+.safety-alerts-section .allergy-alerts,
+.safety-alerts-section .medical-alerts {
   margin-bottom: 1rem;
 }
-.safety-alerts-section .allergy-alerts h4, .safety-alerts-section .medical-alerts h4 {
+.safety-alerts-section .allergy-alerts h4,
+.safety-alerts-section .medical-alerts h4 {
   font-size: 1.1rem;
   margin-bottom: 0.75rem;
   border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   padding-bottom: 0.5rem;
 }
-.safety-alerts-section .allergy-alerts .alert-item, .safety-alerts-section .medical-alerts .alert-item {
+.safety-alerts-section .allergy-alerts .alert-item,
+.safety-alerts-section .medical-alerts .alert-item {
   background: rgba(255, 255, 255, 0.15);
   padding: 0.75rem;
   margin-bottom: 0.5rem;
@@ -108,14 +177,17 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
-.safety-alerts-section .allergy-alerts .alert-item.allergy, .safety-alerts-section .medical-alerts .alert-item.allergy {
+.safety-alerts-section .allergy-alerts .alert-item.allergy,
+.safety-alerts-section .medical-alerts .alert-item.allergy {
   display: flex;
   justify-content: space-between;
 }
-.safety-alerts-section .allergy-alerts .alert-item.allergy .alert-substance, .safety-alerts-section .medical-alerts .alert-item.allergy .alert-substance {
+.safety-alerts-section .allergy-alerts .alert-item.allergy .alert-substance,
+.safety-alerts-section .medical-alerts .alert-item.allergy .alert-substance {
   font-weight: 600;
 }
-.safety-alerts-section .allergy-alerts .alert-item.allergy .alert-reaction, .safety-alerts-section .medical-alerts .alert-item.allergy .alert-reaction {
+.safety-alerts-section .allergy-alerts .alert-item.allergy .alert-reaction,
+.safety-alerts-section .medical-alerts .alert-item.allergy .alert-reaction {
   font-style: italic;
 }
 
@@ -213,7 +285,7 @@
   animation: fadeInUp 0.5s ease-out;
 }
 
-input[type=checkbox] {
+input[type='checkbox'] {
   display: none;
 }
 
@@ -236,7 +308,7 @@ input[type=checkbox] {
   background: #f8f9fa;
 }
 .lbl-toggle-main::before {
-  content: " ";
+  content: ' ';
   display: inline-block;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
@@ -269,7 +341,7 @@ input[type=checkbox] {
   color: #009fd1;
 }
 .lbl-toggle-title::before {
-  content: " ";
+  content: ' ';
   display: inline-block;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
@@ -302,7 +374,7 @@ input[type=checkbox] {
   background: #f8f9fa;
 }
 .lbl-toggle::before {
-  content: " ";
+  content: ' ';
   display: inline-block;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
@@ -506,7 +578,7 @@ input[type=checkbox] {
   border-radius: 8px;
   font-size: 0.7rem;
   font-weight: 500;
-  font-family: "Courier New", monospace;
+  font-family: 'Courier New', monospace;
   background: #f8f9fa;
   color: #6c757d;
   border: 1px solid #dee2e6;
@@ -622,7 +694,7 @@ input[type=checkbox] {
   color: #f7fafc;
   padding: 1.5rem;
   margin: 0;
-  font-family: "Courier New", monospace;
+  font-family: 'Courier New', monospace;
   font-size: 12px;
   line-height: 1.4;
   overflow-x: auto;
@@ -666,6 +738,50 @@ input[type=checkbox] {
   .cda-toolbar .toolbar-right {
     justify-content: center;
   }
+}
+
+/* Session Error Alert Styles */
+.session-error-alert {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  color: #856404;
+}
+
+.session-error-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-error-icon {
+  color: #f39c12;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.session-error-text {
+  flex: 1;
+}
+
+.session-error-message {
+  margin: 5px 0 0 0;
+}
+
+.session-error-action {
+  margin: 5px 0 0 0;
+}
+
+.session-error-link {
+  color: #856404;
+  text-decoration: underline;
+}
+
+.session-error-link:hover {
+  color: #533c01;
+  text-decoration: none;
 }
 
 /*# sourceMappingURL=patient_cda_ps_guidelines.css.map */

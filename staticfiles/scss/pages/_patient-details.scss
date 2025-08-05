@@ -201,6 +201,24 @@
         color: white;
       }
     }
+
+    // PDF Download specific styling
+    &.pdf-download {
+      background: #dc3545;
+      color: white;
+      border: none;
+
+      &:hover {
+        background: darken(#dc3545, 10%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(220, 53, 69, 0.25);
+      }
+    }
   }
 }
 
