@@ -17,6 +17,7 @@ from ..services.enhanced_cda_translation_service import EnhancedCDATranslationSe
 from translation_services.terminology_translator import (
     get_available_translation_languages,
 )
+from ..translation_utils import get_template_translations, detect_document_language
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +55,12 @@ def patient_cda_translated_view(request, patient_id):
             # Get available languages for selectors
             available_languages = get_available_translation_languages()
 
+            # Get template translations based on detected document language
+            detected_lang = detect_document_language(match_data["cda_content"])
+            template_translations = get_template_translations(
+                source_language=detected_lang, target_language=target_language
+            )
+
             context = {
                 "patient_data": patient_data,
                 "translated_document": translated_document,
@@ -64,6 +71,8 @@ def patient_cda_translated_view(request, patient_id):
                 "current_target_language": target_language,
                 "available_languages": available_languages,
                 "translation_available": True,
+                "template_translations": template_translations,
+                "detected_source_language": detected_lang,
             }
 
             return render(

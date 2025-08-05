@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Patient Summary - {{ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
+{% block title %}{{ template_translations.patient_summary if template_translations else "Patient Summary" }} - {{
+patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
 
 {% block extra_css %}
 <link href="{{ static('css/patient_cda_ps_guidelines.css') }}?v=20250804_2" rel="stylesheet" media="screen">
@@ -12,7 +13,8 @@
     <div class="ps-header">
         <div class="ps-title">
             <i class="fas fa-user-md me-2"></i>
-            European Patient Summary
+            {{ template_translations.european_patient_summary if template_translations else "European Patient Summary"
+            }}
         </div>
         <div class="ps-subtitle">
             Cross-Border Healthcare Document Display
@@ -23,7 +25,8 @@
     <div class="cda-navigation">
         <div class="breadcrumb-nav">
             <a href="{{ url('patient_data:patient_details', patient_identity.patient_id) }}" class="breadcrumb-link">
-                <i class="fas fa-arrow-left"></i> Back to Patient Details
+                <i class="fas fa-arrow-left"></i> {{ template_translations.back_to_patient_details if
+                template_translations else "Back to Patient Details" }}
             </a>
         </div>
     </div>
@@ -56,7 +59,8 @@
                 <span class="patient-id-secondary">CDA ID: {{ patient_identity.secondary_patient_id }}</span>
                 {% endif %}
                 {% else %}
-                <span class="patient-id-fallback">No CDA identifiers available</span>
+                <span class="patient-id-fallback">{{ template_translations.no_cda_identifiers if template_translations
+                    else "No CDA identifiers available" }}</span>
                 {% endif %}
             </div>
         </div>
@@ -109,7 +113,9 @@
             Translation Quality & Standards Compliance
         </h3>
         <p class="dashboard-subtitle">
-            Enhanced medical translation with {{ medical_terms_count }} verified medical terms
+            {{ template_translations.enhanced_medical_translation.format(count=medical_terms_count) if
+            template_translations else "Enhanced medical translation with " + medical_terms_count|string + " verified
+            medical terms" }}
             <span class="code-system-badge snomed">TEST: SNOMED-CT</span>
             <span class="code-system-badge atc">TEST: ATC</span>
         </p>
@@ -121,7 +127,8 @@
                 </div>
                 <div class="stat-content">
                     <div class="stat-value">{{ translation_quality }}</div>
-                    <div class="stat-label">Translation Quality</div>
+                    <div class="stat-label">{{ template_translations.translation_quality if template_translations else
+                        "Translation Quality" }}</div>
                 </div>
             </div>
             <div class="stat-card sections">
@@ -130,7 +137,8 @@
                 </div>
                 <div class="stat-content">
                     <div class="stat-value">{{ sections_count }}</div>
-                    <div class="stat-label">Clinical Sections</div>
+                    <div class="stat-label">{{ template_translations.clinical_sections if template_translations else
+                        "Clinical Sections" }}</div>
                 </div>
             </div>
             <div class="stat-card medical-terms">
@@ -139,7 +147,8 @@
                 </div>
                 <div class="stat-content">
                     <div class="stat-value">{{ medical_terms_count }}</div>
-                    <div class="stat-label">Medical Terms</div>
+                    <div class="stat-label">{{ template_translations.medical_terms if template_translations else
+                        "Medical Terms" }}</div>
                 </div>
             </div>
             <div class="stat-card coded">
@@ -148,7 +157,8 @@
                 </div>
                 <div class="stat-content">
                     <div class="stat-value">{{ coded_sections_count }}</div>
-                    <div class="stat-label">HL7 Coded Sections</div>
+                    <div class="stat-label">{{ template_translations.hl7_coded_sections if template_translations else
+                        "HL7 Coded Sections" }}</div>
                 </div>
             </div>
             <div class="stat-card compliance">
@@ -157,7 +167,8 @@
                 </div>
                 <div class="stat-content">
                     <div class="stat-value">{{ coded_sections_percentage }}%</div>
-                    <div class="stat-label">Standards Compliance</div>
+                    <div class="stat-label">{{ template_translations.standards_compliance if template_translations else
+                        "Standards Compliance" }}</div>
                 </div>
             </div>
         </div>
@@ -168,11 +179,12 @@
     <div class="safety-alerts-section">
         <div class="alert-header">
             <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>SAFETY ALERTS</strong>
+            <strong>{{ template_translations.safety_alerts if template_translations else "SAFETY ALERTS" }}</strong>
         </div>
         {% if allergy_alerts %}
         <div class="allergy-alerts">
-            <h4><i class="fas fa-allergies me-2"></i>Known Allergies</h4>
+            <h4><i class="fas fa-allergies me-2"></i>{{ template_translations.known_allergies if template_translations
+                else "Known Allergies" }}</h4>
             {% for allergy in allergy_alerts %}
             <div class="alert-item allergy">
                 <span class="alert-substance">{{ allergy.substance }}</span>
@@ -183,7 +195,8 @@
         {% endif %}
         {% if safety_alerts %}
         <div class="medical-alerts">
-            <h4><i class="fas fa-medical-cross me-2"></i>Medical Alerts</h4>
+            <h4><i class="fas fa-medical-cross me-2"></i>{{ template_translations.medical_alerts if
+                template_translations else "Medical Alerts" }}</h4>
             {% for alert in safety_alerts %}
             <div class="alert-item medical">
                 {{ alert }}
@@ -231,7 +244,8 @@
             <div class="content-inner-main">
                 <div class="info-grid">
                     <div class="info-item">
-                        <span class="info-label">Patient Name:</span>
+                        <span class="info-label">{{ template_translations.patient_name if template_translations else
+                            "Patient Name" }}:</span>
                         <span class="info-value">{{ patient_identity.family_name }}, {{ patient_identity.given_name
                             }}</span>
                     </div>
@@ -310,7 +324,8 @@
                             </div>
                             <div class="admin-info-row">
                                 {% if administrative_data.patient_contact_info.addresses %}
-                                <div class="admin-label">Address</div>
+                                <div class="admin-label">{{ template_translations.address if template_translations else
+                                    "Address" }}</div>
                                 <div class="admin-value">
                                     {% for address in administrative_data.patient_contact_info.addresses %}
                                     <div class="contact-item">
@@ -327,7 +342,7 @@
                             </div>
                             {% if administrative_data.patient_contact_info.telecoms %}
                             <div class="admin-info-row">
-                                <div class="admin-label">Contact</div>
+                                <div class="admin-label">{{ template_translations.contact if template_translations else "Contact" }}</div>
                                 <div class="admin-value contact-info">
                                     {% for telecom in administrative_data.patient_contact_info.telecoms %}
                                     <div class="contact-item">
@@ -351,7 +366,7 @@
                             </div>
                             {% if administrative_data.author_hcp.family_name %}
                             <div class="admin-info-row">
-                                <div class="admin-label">Name</div>
+                                <div class="admin-label">{{ template_translations.name if template_translations else "Name" }}</div>
                                 <div class="admin-value person-name">
                                     {{ administrative_data.author_hcp.title }} {{
                                     administrative_data.author_hcp.given_name }} {{
@@ -361,7 +376,7 @@
                             {% endif %}
                             {% if administrative_data.author_hcp.organization.name %}
                             <div class="admin-info-row">
-                                <div class="admin-label">Organization</div>
+                                <div class="admin-label">{{ template_translations.organization if template_translations else "Organization" }}</div>
                                 <div class="admin-value organization-name">
                                     {{ administrative_data.author_hcp.organization.name }}
                                 </div>
@@ -369,7 +384,7 @@
                             {% endif %}
                             {% if administrative_data.author_hcp.organization.addresses %}
                             <div class="admin-info-row">
-                                <div class="admin-label">Address</div>
+                                <div class="admin-label">{{ template_translations.address if template_translations else "Address" }}</div>
                                 <div class="admin-value">
                                     {% for address in administrative_data.author_hcp.organization.addresses %}
                                     <div class="contact-item">
@@ -385,7 +400,7 @@
                             {% endif %}
                             {% if administrative_data.author_hcp.organization.telecoms %}
                             <div class="admin-info-row">
-                                <div class="admin-label">Contact</div>
+                                <div class="admin-label">{{ template_translations.contact if template_translations else "Contact" }}</div>
                                 <div class="admin-value contact-info">
                                     {% for telecom in administrative_data.author_hcp.organization.telecoms %}
                                     <div class="contact-item">
@@ -449,9 +464,9 @@
                             <div class="admin-info-row">
                                 <div class="admin-label">
                                     {% if telecom.type == 'email' %}
-                                    <i class="fas fa-envelope"></i> Email:
+                                    <i class="fas fa-envelope"></i> {{ template_translations.email if template_translations else "Email" }}:
                                     {% elif telecom.type == 'phone' %}
-                                    <i class="fas fa-phone"></i> Phone:
+                                    <i class="fas fa-phone"></i> {{ template_translations.phone if template_translations else "Phone" }}:
                                     {% else %}
                                     <i class="fas fa-info-circle"></i> {{ telecom.type|title }}:
                                     {% endif %}
@@ -498,9 +513,9 @@
                             <div class="admin-info-row">
                                 <div class="admin-label">
                                     {% if telecom.type == 'email' %}
-                                    <i class="fas fa-envelope"></i> Email:
+                                    <i class="fas fa-envelope"></i> {{ template_translations.email if template_translations else "Email" }}:
                                     {% elif telecom.type == 'phone' %}
-                                    <i class="fas fa-phone"></i> Phone:
+                                    <i class="fas fa-phone"></i> {{ template_translations.phone if template_translations else "Phone" }}:
                                     {% else %}
                                     <i class="fas fa-info-circle"></i> {{ telecom.type|title }}:
                                     {% endif %}
@@ -582,7 +597,8 @@
                         <div class="admin-section other-contacts">
                             <h4 class="admin-section-title">
                                 <i class="fas fa-users me-2"></i>
-                                Other Contacts
+                                {{ template_translations.other_contacts if template_translations else "Other Contacts"
+                                }}
                             </h4>
                             <div class="contact-info-grid">
                                 {% for contact in administrative_data.other_contacts %}
@@ -619,9 +635,9 @@
                                     <div class="admin-info-row">
                                         <div class="admin-label">
                                             {% if telecom.type == 'email' %}
-                                            <i class="fas fa-envelope"></i> Email:
+                                            <i class="fas fa-envelope"></i> {{ template_translations.email if template_translations else "Email" }}:
                                             {% elif telecom.type == 'phone' %}
-                                            <i class="fas fa-phone"></i> Phone:
+                                            <i class="fas fa-phone"></i> {{ template_translations.phone if template_translations else "Phone" }}:
                                             {% else %}
                                             <i class="fas fa-info-circle"></i> {{ telecom.type|title }}:
                                             {% endif %}
@@ -649,7 +665,7 @@
             <input id="collapsible-clinical-sections" class="toggle" type="checkbox" checked="true">
             <label for="collapsible-clinical-sections" class="lbl-toggle-main">
                 <i class="fas fa-stethoscope me-2"></i>
-                Clinical Sections
+                {{ template_translations.clinical_sections if template_translations else "Clinical Sections" }}
             </label>
             <div class="collapsible-content-main">
                 <div class="content-inner-main">

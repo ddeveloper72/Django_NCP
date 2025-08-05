@@ -538,6 +538,10 @@ def patient_cda_view(request, patient_id):
         # Initialize CDA translation manager to process clinical sections
         from .services.cda_translation_manager import CDATranslationManager
         from .services.patient_search_service import PatientMatch
+        from .translation_utils import (
+            get_template_translations,
+            detect_document_language,
+        )
 
         translation_manager = CDATranslationManager(target_language="en")
 
@@ -586,6 +590,14 @@ def patient_cda_view(request, patient_id):
 
         # Get the appropriate CDA content for processing
         cda_content, cda_type = search_result.get_rendering_cda()
+
+        # Detect source language from CDA content if available
+        detected_source_language = source_language  # Default from country code
+        if cda_content and cda_content.strip():
+            detected_source_language = detect_document_language(cda_content)
+            logger.info(
+                f"Detected source language: {detected_source_language} (country: {country_code})"
+            )
 
         if (
             cda_content
@@ -783,6 +795,17 @@ def patient_cda_view(request, patient_id):
                     "has_administrative_data", False
                 )
 
+        # Add template translations for dynamic UI text
+        template_translations = get_template_translations(
+            source_language=detected_source_language, target_language="en"
+        )
+        context["template_translations"] = template_translations
+        context["detected_source_language"] = detected_source_language
+
+        logger.info(
+            f"Added template translations for {detected_source_language} → en with {len(template_translations)} strings"
+        )
+
         return render(request, "patient_data/patient_cda.html", context, using="jinja2")
 
     except Exception as e:
@@ -825,6 +848,8 @@ def patient_cda_view(request, patient_id):
                 "has_administrative_data": False,
                 "error_message": str(e),
                 "error_traceback": full_traceback,
+                "template_translations": get_template_translations(),  # Default English translations for error page
+                "detected_source_language": "en",
             }
 
             messages.error(request, f"Technical error loading CDA document: {str(e)}")
