@@ -535,25 +535,40 @@ def patient_cda_view(request, patient_id):
                 "Displaying basic patient information only.",
             )
 
-        # Initialize CDA translation manager to process clinical sections
-        from .services.cda_translation_manager import CDATranslationManager
+        # Initialize Enhanced CDA Processor for superior clinical section processing
+        from .services.enhanced_cda_processor import EnhancedCDAProcessor
         from .services.patient_search_service import PatientMatch
         from .translation_utils import (
             get_template_translations,
             detect_document_language,
         )
 
-        translation_manager = CDATranslationManager(target_language="en")
+        # Use Enhanced CDA Processor with multi-European language support
+        enhanced_processor = EnhancedCDAProcessor(target_language="en")
 
-        # Determine source language from country code
+        # Determine source language from country code with enhanced mapping
         source_language = "fr"  # Default to French
         country_code = match_data.get("country_code", "").upper()
-        if country_code == "DE":
-            source_language = "de"
-        elif country_code == "IT":
-            source_language = "it"
-        elif country_code == "ES":
-            source_language = "es"
+        
+        # Enhanced country-to-language mapping
+        country_language_map = {
+            "DE": "de", "AT": "de", "CH": "de",  # German-speaking
+            "IT": "it", "SM": "it", "VA": "it",  # Italian-speaking
+            "ES": "es", "AD": "es",               # Spanish-speaking
+            "PT": "pt",                           # Portuguese
+            "LV": "lv",                           # Latvian
+            "LT": "lt",                           # Lithuanian
+            "EE": "et",                           # Estonian
+            "MT": "en",                           # Malta (English)
+            "IE": "en",                           # Ireland (English)
+            "LU": "fr",                           # Luxembourg (French)
+            "BE": "nl",                           # Belgium (Dutch/French)
+            "NL": "nl",                           # Netherlands
+            "GR": "el",                           # Greek
+        }
+        
+        if country_code in country_language_map:
+            source_language = country_language_map[country_code]
 
         # Reconstruct PatientMatch object from session data for translation service
         # This provides the translation service with the proper search result context
@@ -606,123 +621,61 @@ def patient_cda_view(request, patient_id):
         ):
             try:
                 logger.info(
-                    f"Processing {cda_type} CDA content for clinical sections (length: {len(cda_content)}, search_id: {patient_id})"
+                    f"Processing {cda_type} CDA content with Enhanced CDA Processor (length: {len(cda_content)}, patient: {patient_id})"
                 )
-                # Pass the search result to the translation manager for proper context
-                cda_processing_result = translation_manager.process_cda_for_viewer(
-                    cda_content, source_language
+                
+                # Use Enhanced CDA Processor for superior clinical section processing
+                enhanced_processing_result = enhanced_processor.process_clinical_sections(
+                    cda_content=cda_content, 
+                    source_language=detected_source_language
                 )
 
-                if cda_processing_result.get("success"):
-                    # Handle enhanced XML parser results
-                    if cda_processing_result.get("content_type") == "xml_enhanced":
-                        # New enhanced XML parser format
-                        enhanced_translation_result = cda_processing_result.get(
-                            "translation_result", {}
-                        )
-                        # Preserve the enhanced sections data
-                        translation_result = enhanced_translation_result
+                if enhanced_processing_result.get("success"):
+                    # Enhanced CDA Processor results with multi-European language support
+                    translation_result = enhanced_processing_result
+                    
+                    sections_count = enhanced_processing_result.get("sections_count", 0)
+                    coded_sections_count = enhanced_processing_result.get("coded_sections_count", 0)
+                    medical_terms_count = enhanced_processing_result.get("medical_terms_count", 0)
+                    coded_sections_percentage = enhanced_processing_result.get("coded_sections_percentage", 0)
+                    uses_coded_sections = enhanced_processing_result.get("uses_coded_sections", False)
+                    translation_quality = enhanced_processing_result.get("translation_quality", "High")
 
-                        sections_count = enhanced_translation_result.get(
-                            "sections_count", 0
-                        )
-                        coded_sections_count = enhanced_translation_result.get(
-                            "coded_sections_count", 0
-                        )
-                        medical_terms_count = enhanced_translation_result.get(
-                            "medical_terms_count", 0
-                        )
-                        coded_sections_percentage = cda_processing_result.get(
-                            "coded_sections_percentage", 0
-                        )
-                        uses_coded_sections = enhanced_translation_result.get(
-                            "uses_coded_sections", False
-                        )
-                        translation_quality = enhanced_translation_result.get(
-                            "translation_quality", "Basic"
-                        )
-
-                        logger.info(
-                            f"Enhanced XML parser results: {sections_count} sections, "
-                            f"{coded_sections_count} coded, {medical_terms_count} clinical codes"
-                        )
-                    else:
-                        # Legacy HTML parser format
+                    logger.info(
+                        f"✅ Enhanced CDA Processor results: {sections_count} sections, "
+                        f"{coded_sections_count} coded, {medical_terms_count} medical terms, "
+                        f"quality: {translation_quality}, type: {enhanced_processing_result.get('content_type')}"
+                    )
                         clinical_sections = cda_processing_result.get(
                             "clinical_sections", []
                         )
                         sections_count = len(clinical_sections)
 
-                        # Transform clinical sections to match template format
-                        processed_sections = []
-                        for section in clinical_sections:
-                            processed_section = {
-                                "section_id": section.get(
-                                    "id", f"section_{len(processed_sections)}"
-                                ),
-                                "title": {
-                                    "coded": section.get("title", "Unknown Section"),
-                                    "translated": section.get(
-                                        "translated_title",
-                                        section.get("title", "Unknown Section"),
-                                    ),
-                                },
-                                "is_coded_section": section.get(
-                                    "has_coded_elements", False
-                                ),
-                                "content": {
-                                    "original": section.get("original_content", ""),
-                                    "translated": section.get(
-                                        "translated_content",
-                                        section.get("original_content", ""),
-                                    ),
-                                    "medical_terms": section.get(
-                                        "medical_terms_count", 0
-                                    ),
-                                },
-                                "clinical_codes": section.get("coded_elements", {}),
-                                "section_code": section.get("section_code", ""),
-                                "has_ps_table": False,  # For now
-                                "ps_table_html": "",
-                                "ps_table_html_original": "",
-                            }
-                            processed_sections.append(processed_section)
-
-                            # Update counters
-                            if section.get("has_coded_elements"):
-                                coded_sections_count += 1
-                            medical_terms_count += section.get("medical_terms_count", 0)
-
-                        translation_result = {"sections": processed_sections}
-
-                        if sections_count > 0:
-                            coded_sections_percentage = int(
-                                (coded_sections_count / sections_count) * 100
-                            )
-                            uses_coded_sections = coded_sections_count > 0
-                            translation_quality = (
-                                "High" if coded_sections_percentage > 50 else "Medium"
-                            )
-
-                    logger.info(
-                        f"Successfully processed {sections_count} clinical sections from {cda_type} CDA"
-                    )
                 else:
                     logger.warning(
-                        f"CDA processing failed: {cda_processing_result.get('error', 'Unknown error')}"
+                        f"Enhanced CDA processing failed: {enhanced_processing_result.get('error', 'Unknown error')}"
                     )
+                    # Fallback to empty sections if processing fails
+                    translation_result = {"sections": []}
+                    sections_count = 0
+                    coded_sections_count = 0
+                    medical_terms_count = 0
 
             except Exception as e:
-                logger.error(f"Error processing CDA content for clinical sections: {e}")
+                logger.error(f"Error processing CDA content with Enhanced CDA Processor: {e}")
                 import traceback
-
                 logger.error(traceback.format_exc())
+                # Fallback to empty sections on error
+                translation_result = {"sections": []}
+                sections_count = 0
+                coded_sections_count = 0
+                medical_terms_count = 0
         else:
             logger.warning(
                 f"No CDA content available for patient {patient_id} - search result may be incomplete"
             )
 
-        # Build complete context
+        # Build complete context for Enhanced CDA Display
         context = {
             "patient_identity": {
                 "patient_id": patient_id,
@@ -771,27 +724,27 @@ def patient_cda_view(request, patient_id):
             "has_administrative_data": False,
         }
 
-        # Override with enhanced parser data if available
+        # Override with Enhanced CDA Processor data if available
         if (
-            cda_processing_result
-            and cda_processing_result.get("content_type") == "xml_enhanced"
+            enhanced_processing_result
+            and enhanced_processing_result.get("success")
         ):
-            enhanced_patient_identity = cda_processing_result.get(
+            # Extract enhanced patient identity if available
+            enhanced_patient_identity = enhanced_processing_result.get(
                 "patient_identity", {}
             )
-            enhanced_admin_data = cda_processing_result.get("administrative_data", {})
+            enhanced_admin_data = enhanced_processing_result.get("administrative_data", {})
 
-            # Update patient identity if enhanced data is available
+            # Update patient identity with enhanced data while preserving URL patient_id
             if enhanced_patient_identity:
-                # Preserve the original patient_id from the URL parameter
                 original_patient_id = context["patient_identity"]["patient_id"]
                 context["patient_identity"].update(enhanced_patient_identity)
                 context["patient_identity"]["patient_id"] = original_patient_id
 
-            # Update administrative data if enhanced data is available
+            # Update administrative data with enhanced data
             if enhanced_admin_data:
                 context["administrative_data"] = enhanced_admin_data
-                context["has_administrative_data"] = cda_processing_result.get(
+                context["has_administrative_data"] = enhanced_processing_result.get(
                     "has_administrative_data", False
                 )
 
@@ -2048,3 +2001,55 @@ def _get_display_priority(section_code):
         "18776-5": 7,  # Treatment Plan
     }
     return priority_map.get(section_code, 99)  # Unknown sections go last
+
+
+def enhanced_cda_display(request):
+    """
+    Enhanced CDA Display endpoint for multi-European language processing
+    Handles both GET (render template) and POST (AJAX processing) requests
+    """
+    
+    from .services.enhanced_cda_processor import EnhancedCDAProcessor
+    import json
+    
+    if request.method == 'POST':
+        try:
+            # AJAX request for CDA processing
+            cda_content = request.POST.get('cda_content', '')
+            source_language = request.POST.get('source_language', 'fr')
+            target_language = request.POST.get('target_language', 'en')
+            
+            if not cda_content.strip():
+                return JsonResponse({
+                    'success': False,
+                    'error': 'No CDA content provided'
+                })
+            
+            # Initialize Enhanced CDA Processor
+            processor = EnhancedCDAProcessor(target_language=target_language)
+            
+            # Process CDA content
+            result = processor.process_clinical_sections(
+                cda_content=cda_content,
+                source_language=source_language
+            )
+            
+            logger.info(f"Enhanced CDA processing result: success={result.get('success')}, sections={result.get('sections_count', 0)}")
+            
+            return JsonResponse(result)
+            
+        except Exception as e:
+            logger.error(f"Error in enhanced CDA display AJAX processing: {e}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })
+    
+    else:
+        # GET request - render template
+        context = {
+            'page_title': 'Enhanced CDA Display Tool',
+            'description': 'Multi-European Language CDA Document Processor with CTS Compliance'
+        }
+        
+        return render(request, "patient_data/enhanced_patient_cda.html", context, using="jinja2")

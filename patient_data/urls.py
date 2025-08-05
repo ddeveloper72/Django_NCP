@@ -89,6 +89,12 @@ urlpatterns = [
         main_views.download_orcd_pdf,
         name="download_orcd_pdf_indexed",
     ),
+    # Enhanced CDA Display with Multi-European Language Support
+    path(
+        "enhanced_cda_display/",
+        main_views.enhanced_cda_display,
+        name="enhanced_cda_display",
+    ),
     # Enhanced CDA Translation Views
     path(
         "cda/enhanced/<int:patient_id>/",
