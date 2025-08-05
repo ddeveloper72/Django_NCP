@@ -21,6 +21,7 @@ except ImportError:
 
 from .enhanced_cda_translation_service import EnhancedCDATranslationService
 from .enhanced_cda_xml_parser import EnhancedCDAXMLParser
+from .enhanced_cda_processor import EnhancedCDAProcessor
 from translation_services.terminology_translator import TerminologyTranslator
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ class CDATranslationManager:
         self.translation_service = EnhancedCDATranslationService(target_language)
         self.terminology_translator = TerminologyTranslator(target_language)
         self.xml_parser = EnhancedCDAXMLParser()
+        self.enhanced_processor = EnhancedCDAProcessor(target_language)
 
     def process_cda_for_viewer(
         self, cda_content: str, source_language: str = "fr"
@@ -52,14 +54,42 @@ class CDATranslationManager:
             Dictionary with processed content for viewer rendering
         """
         try:
+            # Use enhanced processor for comprehensive clinical section processing
+            logger.info(
+                f"Processing CDA content with enhanced processor (source: {source_language})"
+            )
+            enhanced_result = self.enhanced_processor.process_clinical_sections(
+                cda_content, source_language
+            )
+
+            if enhanced_result.get("success"):
+                logger.info(
+                    f"Enhanced processing successful: {enhanced_result.get('sections_count', 0)} sections found"
+                )
+                return enhanced_result
+            else:
+                logger.warning(
+                    f"Enhanced processing failed: {enhanced_result.get('error', 'Unknown error')}"
+                )
+                # Fallback to legacy processing
+                return self._fallback_process_cda(cda_content, source_language)
+
+        except Exception as e:
+            logger.error(f"Error processing CDA for viewer: {e}")
+            return self._create_error_response(str(e))
+
+    def _fallback_process_cda(
+        self, cda_content: str, source_language: str
+    ) -> Dict[str, Any]:
+        """Fallback to legacy CDA processing methods"""
+        try:
             # Check if content is HTML (transformed) or XML (raw)
             if self._is_html_content(cda_content):
                 return self._process_html_cda(cda_content, source_language)
             else:
                 return self._process_xml_cda(cda_content, source_language)
-
         except Exception as e:
-            logger.error(f"Error processing CDA for viewer: {e}")
+            logger.error(f"Fallback processing also failed: {e}")
             return self._create_error_response(str(e))
 
     def _is_html_content(self, content: str) -> bool:
