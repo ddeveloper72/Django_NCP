@@ -549,24 +549,29 @@ def patient_cda_view(request, patient_id):
         # Determine source language from country code with enhanced mapping
         source_language = "fr"  # Default to French
         country_code = match_data.get("country_code", "").upper()
-        
+
         # Enhanced country-to-language mapping
         country_language_map = {
-            "DE": "de", "AT": "de", "CH": "de",  # German-speaking
-            "IT": "it", "SM": "it", "VA": "it",  # Italian-speaking
-            "ES": "es", "AD": "es",               # Spanish-speaking
-            "PT": "pt",                           # Portuguese
-            "LV": "lv",                           # Latvian
-            "LT": "lt",                           # Lithuanian
-            "EE": "et",                           # Estonian
-            "MT": "en",                           # Malta (English)
-            "IE": "en",                           # Ireland (English)
-            "LU": "fr",                           # Luxembourg (French)
-            "BE": "nl",                           # Belgium (Dutch/French)
-            "NL": "nl",                           # Netherlands
-            "GR": "el",                           # Greek
+            "DE": "de",
+            "AT": "de",
+            "CH": "de",  # German-speaking
+            "IT": "it",
+            "SM": "it",
+            "VA": "it",  # Italian-speaking
+            "ES": "es",
+            "AD": "es",  # Spanish-speaking
+            "PT": "pt",  # Portuguese
+            "LV": "lv",  # Latvian
+            "LT": "lt",  # Lithuanian
+            "EE": "et",  # Estonian
+            "MT": "en",  # Malta (English)
+            "IE": "en",  # Ireland (English)
+            "LU": "fr",  # Luxembourg (French)
+            "BE": "nl",  # Belgium (Dutch/French)
+            "NL": "nl",  # Netherlands
+            "GR": "el",  # Greek
         }
-        
+
         if country_code in country_language_map:
             source_language = country_language_map[country_code]
 
@@ -623,33 +628,41 @@ def patient_cda_view(request, patient_id):
                 logger.info(
                     f"Processing {cda_type} CDA content with Enhanced CDA Processor (length: {len(cda_content)}, patient: {patient_id})"
                 )
-                
+
                 # Use Enhanced CDA Processor for superior clinical section processing
-                enhanced_processing_result = enhanced_processor.process_clinical_sections(
-                    cda_content=cda_content, 
-                    source_language=detected_source_language
+                enhanced_processing_result = (
+                    enhanced_processor.process_clinical_sections(
+                        cda_content=cda_content,
+                        source_language=detected_source_language,
+                    )
                 )
 
                 if enhanced_processing_result.get("success"):
                     # Enhanced CDA Processor results with multi-European language support
                     translation_result = enhanced_processing_result
-                    
+
                     sections_count = enhanced_processing_result.get("sections_count", 0)
-                    coded_sections_count = enhanced_processing_result.get("coded_sections_count", 0)
-                    medical_terms_count = enhanced_processing_result.get("medical_terms_count", 0)
-                    coded_sections_percentage = enhanced_processing_result.get("coded_sections_percentage", 0)
-                    uses_coded_sections = enhanced_processing_result.get("uses_coded_sections", False)
-                    translation_quality = enhanced_processing_result.get("translation_quality", "High")
+                    coded_sections_count = enhanced_processing_result.get(
+                        "coded_sections_count", 0
+                    )
+                    medical_terms_count = enhanced_processing_result.get(
+                        "medical_terms_count", 0
+                    )
+                    coded_sections_percentage = enhanced_processing_result.get(
+                        "coded_sections_percentage", 0
+                    )
+                    uses_coded_sections = enhanced_processing_result.get(
+                        "uses_coded_sections", False
+                    )
+                    translation_quality = enhanced_processing_result.get(
+                        "translation_quality", "High"
+                    )
 
                     logger.info(
                         f"✅ Enhanced CDA Processor results: {sections_count} sections, "
                         f"{coded_sections_count} coded, {medical_terms_count} medical terms, "
                         f"quality: {translation_quality}, type: {enhanced_processing_result.get('content_type')}"
                     )
-                        clinical_sections = cda_processing_result.get(
-                            "clinical_sections", []
-                        )
-                        sections_count = len(clinical_sections)
 
                 else:
                     logger.warning(
@@ -662,8 +675,11 @@ def patient_cda_view(request, patient_id):
                     medical_terms_count = 0
 
             except Exception as e:
-                logger.error(f"Error processing CDA content with Enhanced CDA Processor: {e}")
+                logger.error(
+                    f"Error processing CDA content with Enhanced CDA Processor: {e}"
+                )
                 import traceback
+
                 logger.error(traceback.format_exc())
                 # Fallback to empty sections on error
                 translation_result = {"sections": []}
@@ -725,15 +741,14 @@ def patient_cda_view(request, patient_id):
         }
 
         # Override with Enhanced CDA Processor data if available
-        if (
-            enhanced_processing_result
-            and enhanced_processing_result.get("success")
-        ):
+        if enhanced_processing_result and enhanced_processing_result.get("success"):
             # Extract enhanced patient identity if available
             enhanced_patient_identity = enhanced_processing_result.get(
                 "patient_identity", {}
             )
-            enhanced_admin_data = enhanced_processing_result.get("administrative_data", {})
+            enhanced_admin_data = enhanced_processing_result.get(
+                "administrative_data", {}
+            )
 
             # Update patient identity with enhanced data while preserving URL patient_id
             if enhanced_patient_identity:
@@ -2008,48 +2023,148 @@ def enhanced_cda_display(request):
     Enhanced CDA Display endpoint for multi-European language processing
     Handles both GET (render template) and POST (AJAX processing) requests
     """
-    
+
     from .services.enhanced_cda_processor import EnhancedCDAProcessor
+    from .translation_utils import detect_document_language
     import json
-    
-    if request.method == 'POST':
+
+    if request.method == "POST":
         try:
             # AJAX request for CDA processing
-            cda_content = request.POST.get('cda_content', '')
-            source_language = request.POST.get('source_language', 'fr')
-            target_language = request.POST.get('target_language', 'en')
-            
+            cda_content = request.POST.get("cda_content", "")
+            source_language = request.POST.get("source_language", "")
+            target_language = request.POST.get("target_language", "en")
+            country_code = request.POST.get("country_code", "").upper()
+
             if not cda_content.strip():
-                return JsonResponse({
-                    'success': False,
-                    'error': 'No CDA content provided'
-                })
-            
+                return JsonResponse(
+                    {"success": False, "error": "No CDA content provided"}
+                )
+
+            # Enhanced multi-European language detection
+            detected_source_language = None
+
+            # Method 1: Use provided source_language if valid
+            if source_language and source_language in [
+                "de",
+                "it",
+                "es",
+                "pt",
+                "lv",
+                "lt",
+                "et",
+                "en",
+                "fr",
+                "nl",
+                "el",
+                "mt",
+            ]:
+                detected_source_language = source_language
+                logger.info(f"Using provided source language: {source_language}")
+
+            # Method 2: Derive from country code if provided
+            elif country_code:
+                country_language_map = {
+                    "DE": "de",
+                    "AT": "de",
+                    "CH": "de",  # German-speaking
+                    "IT": "it",
+                    "SM": "it",
+                    "VA": "it",  # Italian-speaking
+                    "ES": "es",
+                    "AD": "es",  # Spanish-speaking
+                    "PT": "pt",  # Portuguese
+                    "LV": "lv",  # Latvian
+                    "LT": "lt",  # Lithuanian
+                    "EE": "et",  # Estonian
+                    "MT": "en",  # Malta (English)
+                    "IE": "en",  # Ireland (English)
+                    "LU": "fr",  # Luxembourg (French)
+                    "BE": "nl",  # Belgium (Dutch/French)
+                    "NL": "nl",  # Netherlands
+                    "GR": "el",  # Greek
+                    "FR": "fr",  # France
+                }
+
+                if country_code in country_language_map:
+                    detected_source_language = country_language_map[country_code]
+                    logger.info(
+                        f"Derived source language from country {country_code}: {detected_source_language}"
+                    )
+
+            # Method 3: Auto-detect from CDA content
+            if not detected_source_language:
+                detected_source_language = detect_document_language(cda_content)
+                logger.info(
+                    f"Auto-detected source language from content: {detected_source_language}"
+                )
+
+            # Method 4: Ultimate fallback to French (for backwards compatibility)
+            if not detected_source_language:
+                detected_source_language = "fr"
+                logger.warning(
+                    "Could not detect source language, falling back to French"
+                )
+
             # Initialize Enhanced CDA Processor
             processor = EnhancedCDAProcessor(target_language=target_language)
-            
-            # Process CDA content
+
+            # Process CDA content with detected source language
             result = processor.process_clinical_sections(
-                cda_content=cda_content,
-                source_language=source_language
+                cda_content=cda_content, source_language=detected_source_language
             )
-            
-            logger.info(f"Enhanced CDA processing result: success={result.get('success')}, sections={result.get('sections_count', 0)}")
-            
+
+            # Add language detection info to result
+            result["detected_source_language"] = detected_source_language
+            result["language_detection_method"] = (
+                "provided"
+                if source_language
+                else (
+                    "country_code"
+                    if country_code
+                    else (
+                        "auto_detected"
+                        if detected_source_language != "fr"
+                        else "fallback"
+                    )
+                )
+            )
+
+            logger.info(
+                f"Enhanced CDA processing result: success={result.get('success')}, "
+                f"sections={result.get('sections_count', 0)}, "
+                f"source_lang={detected_source_language}, target_lang={target_language}"
+            )
+
             return JsonResponse(result)
-            
+
         except Exception as e:
             logger.error(f"Error in enhanced CDA display AJAX processing: {e}")
-            return JsonResponse({
-                'success': False,
-                'error': str(e)
-            })
-    
+            return JsonResponse({"success": False, "error": str(e)})
+
     else:
-        # GET request - render template
-        context = {
-            'page_title': 'Enhanced CDA Display Tool',
-            'description': 'Multi-European Language CDA Document Processor with CTS Compliance'
+        # GET request - render template with multi-language support info
+        supported_languages = {
+            "de": "German (Deutschland, Österreich, Schweiz)",
+            "it": "Italian (Italia, San Marino, Vaticano)",
+            "es": "Spanish (España, Andorra)",
+            "pt": "Portuguese (Portugal)",
+            "lv": "Latvian (Latvija)",
+            "lt": "Lithuanian (Lietuva)",
+            "et": "Estonian (Eesti)",
+            "en": "English (Malta, Ireland)",
+            "fr": "French (France, Luxembourg)",
+            "nl": "Dutch (Nederland, België)",
+            "el": "Greek (Ελλάδα)",
         }
-        
-        return render(request, "patient_data/enhanced_patient_cda.html", context, using="jinja2")
+
+        context = {
+            "page_title": "Enhanced CDA Display Tool",
+            "description": "Multi-European Language CDA Document Processor with CTS Compliance",
+            "supported_languages": supported_languages,
+            "default_target_language": "en",
+        }
+
+        return render(
+            request, "patient_data/enhanced_patient_cda.html", context, using="jinja2"
+        )
