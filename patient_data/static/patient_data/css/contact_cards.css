@@ -1,0 +1,302 @@
+/* Contact Card Styles */
+.contact-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.contact-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Card Type Variations */
+.contact-card--patient {
+  border-left: 4px solid #28a745; /* Green */
+}
+
+.contact-card--legal_auth {
+  border-left: 4px solid #6f42c1; /* Purple */
+}
+
+.contact-card--custodian {
+  border-left: 4px solid #fd7e14; /* Orange */
+}
+
+.contact-card--author {
+  border-left: 4px solid #007bff; /* Blue */
+}
+
+.contact-card--default {
+  border-left: 4px solid #6c757d; /* Gray */
+}
+
+/* Card Header */
+.contact-card__header {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.contact-card__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Card Body */
+.contact-card__body {
+  font-size: 14px;
+}
+
+.contact-card__section {
+  margin-bottom: 12px;
+}
+
+.contact-card__section:last-child {
+  margin-bottom: 0;
+}
+
+/* Name Section */
+.contact-card__name-primary {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 4px;
+}
+
+.contact-card__role {
+  font-size: 13px;
+  color: #6c757d;
+  font-style: italic;
+  margin-bottom: 2px;
+}
+
+.contact-card__signature {
+  font-size: 12px;
+  color: #495057;
+  background: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Organization Section */
+.contact-card__org-name {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 4px;
+}
+
+.contact-card__org-id {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+/* Section Headers */
+.contact-card__section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #495057;
+  font-size: 13px;
+}
+
+.contact-card__icon {
+  margin-right: 6px;
+  width: 14px;
+  color: #6c757d;
+}
+
+/* Address Section */
+.contact-card__address-content {
+  padding-left: 20px;
+}
+
+.contact-card__address-line {
+  margin-bottom: 2px;
+  color: #495057;
+}
+
+.contact-card__address-line:last-child {
+  margin-bottom: 0;
+}
+
+/* Telecoms Section */
+.contact-card__telecoms-list {
+  padding-left: 20px;
+}
+
+.contact-card__telecom {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  padding: 4px 0;
+}
+
+.contact-card__telecom:last-child {
+  margin-bottom: 0;
+}
+
+.contact-card__telecom-icon {
+  margin-right: 8px;
+  width: 14px;
+  color: #6c757d;
+}
+
+.contact-card__telecom-value {
+  color: #495057;
+  margin-right: 6px;
+}
+
+.contact-card__telecom-use {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+/* Phone specific styling */
+.contact-card__telecom--phone .contact-card__telecom-icon {
+  color: #28a745;
+}
+
+.contact-card__telecom--phone .contact-card__telecom-value {
+  font-family: monospace;
+}
+
+/* Email specific styling */
+.contact-card__telecom--email .contact-card__telecom-icon {
+  color: #007bff;
+}
+
+.contact-card__telecom--email .contact-card__telecom-value {
+  word-break: break-all;
+}
+
+/* Identifier Section */
+.contact-card__id-content {
+  padding-left: 20px;
+  font-size: 12px;
+  color: #6c757d;
+  font-family: monospace;
+}
+
+/* Timestamp Section */
+.contact-card__time-content {
+  padding-left: 20px;
+  font-size: 12px;
+  color: #495057;
+}
+
+/* Code Section */
+.contact-card__code-content {
+  padding-left: 20px;
+}
+
+.contact-card__code-display {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 2px;
+}
+
+.contact-card__code-value {
+  font-size: 12px;
+  color: #6c757d;
+  font-family: monospace;
+}
+
+/* Contact Card List Styles */
+.contact-card-list {
+  margin-bottom: 24px;
+}
+
+.contact-card-list__header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.contact-card-list__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.contact-card-list__count {
+  margin-left: 8px;
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: normal;
+}
+
+.contact-card-list__grid {
+  display: grid;
+  gap: 16px;
+}
+
+/* Responsive Grid */
+@media (min-width: 768px) {
+  .contact-card-list__grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .contact-card-list__grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+}
+
+/* Empty State */
+.contact-card-list__empty {
+  text-align: center;
+  padding: 32px;
+  background: #f8f9fa;
+  border: 1px dashed #dee2e6;
+  border-radius: 8px;
+  color: #6c757d;
+}
+
+.contact-card-list__empty-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.contact-card-list__empty-text {
+  margin: 0;
+  font-style: italic;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+  .contact-card {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .contact-card__name-primary {
+    font-size: 15px;
+  }
+
+  .contact-card__section-header {
+    font-size: 12px;
+  }
+
+  .contact-card__telecoms-list,
+  .contact-card__address-content,
+  .contact-card__id-content,
+  .contact-card__time-content,
+  .contact-card__code-content {
+    padding-left: 16px;
+  }
+}

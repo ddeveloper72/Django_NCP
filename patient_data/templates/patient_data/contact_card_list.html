@@ -1,0 +1,30 @@
+{% comment %}
+Contact Card List Template
+Renders multiple contact cards in a consistent layout
+{% endcomment %}
+
+<div class="contact-card-list contact-card-list--{{ card_type }}">
+    {% if list_title %}
+    <div class="contact-card-list__header">
+        <h3 class="contact-card-list__title">{{ list_title }}</h3>
+        {% if contact_count > 0 %}
+        <span class="contact-card-list__count">({{ contact_count }})</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if contacts %}
+    <div class="contact-card-list__grid">
+        {% for contact in contacts %}
+        <div class="contact-card-list__item">
+            {% include 'patient_data/contact_card.html' with contact=contact card_type=card_type %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="contact-card-list__empty">
+        <i class="fas fa-user-slash contact-card-list__empty-icon"></i>
+        <p class="contact-card-list__empty-text">No {{ list_title|lower }} information available</p>
+    </div>
+    {% endif %}
+</div>
