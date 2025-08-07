@@ -127,6 +127,49 @@
                 </button>
             </div>
         </form>
+
+        <!-- CDA Document Upload Section -->
+        <div class="cda-upload-section">
+            <h5 class="upload-section-title">📄 Upload CDA Document</h5>
+            <p class="upload-description">
+                Upload a CDA (Clinical Document Architecture) file to add it to the searchable database.
+                Supported formats: XML files containing Patient Summary documents.
+            </p>
+
+            <form method="post" enctype="multipart/form-data" action="{% url 'patient_data:upload_cda_document' %}"
+                class="upload-form">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                <div class="upload-field-group">
+                    <div class="file-upload-wrapper">
+                        <input type="file" name="cda_file" id="cda_file" class="file-upload-input" accept=".xml,.cda"
+                            required>
+                        <label for="cda_file" class="file-upload-label">
+                            <span class="upload-icon">📁</span>
+                            <span class="upload-text">Choose CDA File</span>
+                            <span class="upload-subtext">Click to browse or drag & drop</span>
+                        </label>
+                        <div class="file-upload-feedback" id="fileUploadFeedback"></div>
+                    </div>
+
+                    <div class="upload-options">
+                        <div class="form-group-inline">
+                            <label for="auto_process" class="checkbox-label">
+                                <input type="checkbox" name="auto_process" id="auto_process" checked>
+                                <span class="checkmark"></span>
+                                Process immediately after upload
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="upload-actions">
+                    <button type="submit" class="btn btn-secondary">
+                        📤 Upload Document
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -161,6 +204,66 @@
     // Initialize break glass reason visibility
     document.addEventListener('DOMContentLoaded', function () {
         toggleBreakGlassReason();
+        initializeFileUpload();
     });
+
+    // File upload functionality
+    function initializeFileUpload() {
+        const fileInput = document.getElementById('cda_file');
+        const fileLabel = document.querySelector('.file-upload-label');
+        const feedback = document.getElementById('fileUploadFeedback');
+
+        fileInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Update label text
+                const uploadText = fileLabel.querySelector('.upload-text');
+                uploadText.textContent = file.name;
+
+                // Validate file type
+                const validExtensions = ['.xml', '.cda'];
+                const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+
+                if (!validExtensions.includes(fileExtension)) {
+                    feedback.innerHTML = '<span class="text-error">⚠️ Please select an XML or CDA file</span>';
+                    feedback.style.display = 'block';
+                    fileLabel.classList.add('upload-error');
+                } else {
+                    feedback.innerHTML = '<span class="text-success">✅ File ready for upload</span>';
+                    feedback.style.display = 'block';
+                    fileLabel.classList.remove('upload-error');
+                    fileLabel.classList.add('upload-ready');
+                }
+            } else {
+                // Reset to original state
+                const uploadText = fileLabel.querySelector('.upload-text');
+                uploadText.textContent = 'Choose CDA File';
+                feedback.style.display = 'none';
+                fileLabel.classList.remove('upload-error', 'upload-ready');
+            }
+        });
+
+        // Drag and drop functionality
+        fileLabel.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            fileLabel.classList.add('upload-dragover');
+        });
+
+        fileLabel.addEventListener('dragleave', function (e) {
+            e.preventDefault();
+            fileLabel.classList.remove('upload-dragover');
+        });
+
+        fileLabel.addEventListener('drop', function (e) {
+            e.preventDefault();
+            fileLabel.classList.remove('upload-dragover');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+    }
 </script>
 {% endblock %}

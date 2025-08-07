@@ -9,6 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
+from django.conf import settings
 from .forms import PatientDataForm
 from .models import PatientData
 from .services import EUPatientSearchService, PatientCredentials
@@ -23,6 +24,362 @@ import re
 import xml.etree.ElementTree as ET
 
 logger = logging.getLogger(__name__)
+
+
+# REFACTOR: Data processing functions (moved from template for proper MVC separation)
+def prepare_enhanced_section_data(sections):
+    """
+    Pre-process sections for template display
+    Handles all value set lookups and field processing in Python
+    
+    Args:
+        sections: Raw sections from enhanced CDA processor
+    
+    Returns:
+        dict: Processed sections ready for simple template display
+    """
+    processed_sections = []
+    
+    for section in sections:
+        processed_section = {
+            'title': section.get('title', 'Unknown Section'),
+            'type': section.get('type', 'unknown'),
+            'section_code': section.get('section_code', ''),
+            'entries': [],
+            'has_entries': False,
+            'medical_terminology_count': 0,
+            'coded_entries_count': 0
+        }
+        
+        # Process entries with proper field lookups
+        if section.get('table_data'):
+            for entry in section.get('table_data', []):
+                processed_entry = process_entry_for_display(entry, section.get('section_code', ''))
+                processed_section['entries'].append(processed_entry)
+                
+                # Update metrics
+                if processed_entry.get('has_medical_terminology'):
+                    processed_section['medical_terminology_count'] += 1
+                if processed_entry.get('is_coded'):
+                    processed_section['coded_entries_count'] += 1
+        
+        processed_section['has_entries'] = len(processed_section['entries']) > 0
+        processed_sections.append(processed_section)
+    
+    return processed_sections
+
+
+def process_entry_for_display(entry, section_code):
+    """
+    Process a single entry for template display
+    Handles all field lookups and terminology resolution in Python
+    
+    Args:
+        entry: Raw entry from CDA processor
+        section_code: Section code for specialized processing
+    
+    Returns:
+        dict: Processed entry with resolved terminology and display fields
+    """
+    processed_entry = {
+        'original_entry': entry,
+        'display_fields': {},
+        'has_medical_terminology': False,
+        'is_coded': False,
+        'display_name': 'Unknown Item',
+        'additional_info': {}
+    }
+    
+    fields = entry.get('fields', {})
+    
+    # Handle different section types with specialized processing
+    if section_code == "48765-2":  # Allergies
+        processed_entry.update(process_allergy_entry(fields))
+    elif section_code == "10160-0":  # Medications
+        processed_entry.update(process_medication_entry(fields))
+    elif section_code == "11450-4":  # Problems
+        processed_entry.update(process_problem_entry(fields))
+    else:
+        processed_entry.update(process_generic_entry(fields))
+    
+    return processed_entry
+
+
+def process_allergy_entry(fields):
+    """Process allergy-specific fields with proper terminology lookup"""
+    result = {
+        'display_name': 'Unknown Allergen',
+        'reaction': 'Unknown Reaction',
+        'severity': 'Unknown Severity',
+        'status': 'Active',
+        'has_medical_terminology': False,
+        'original_value': None
+    }
+    
+    # Try multiple field name patterns for allergen (handles multilingual field names)
+    allergen_patterns = ['Allergen DisplayName', 'Allergen Code', 'Allergène']
+    for pattern in allergen_patterns:
+        if pattern in fields:
+            field_data = fields[pattern]
+            if isinstance(field_data, dict):
+                # Check if this field has value set information
+                if field_data.get('has_valueset'):
+                    result['has_medical_terminology'] = True
+                    result['original_value'] = field_data.get('original_value')
+                
+                display_name = field_data.get('value') or field_data.get('display_name')
+                if display_name and display_name not in ['Unknown', 'Unknown Allergen']:
+                    result['display_name'] = display_name
+                    break
+            elif isinstance(field_data, str) and field_data not in ['Unknown', 'Unknown Allergen']:
+                result['display_name'] = field_data
+                break
+    
+    # Process reaction information
+    reaction_patterns = ['Reaction DisplayName', 'Reaction Code', 'Réaction']
+    for pattern in reaction_patterns:
+        if pattern in fields:
+            reaction_data = fields[pattern]
+            if isinstance(reaction_data, dict):
+                if reaction_data.get('has_valueset'):
+                    result['has_medical_terminology'] = True
+                
+                reaction_name = reaction_data.get('value') or reaction_data.get('display_name')
+                if reaction_name and reaction_name not in ['Unknown', 'Unknown Reaction']:
+                    result['reaction'] = reaction_name
+                    break
+            elif isinstance(reaction_data, str) and reaction_data not in ['Unknown', 'Unknown Reaction']:
+                result['reaction'] = reaction_data
+                break
+    
+    # Process severity
+    severity_patterns = ['Severity', 'Sévérité']
+    for pattern in severity_patterns:
+        if pattern in fields:
+            severity_data = fields[pattern]
+            if isinstance(severity_data, dict):
+                severity_value = severity_data.get('value') or severity_data.get('display_name')
+                if severity_value and severity_value != 'Unknown':
+                    result['severity'] = severity_value
+                    break
+            elif isinstance(severity_data, str) and severity_data != 'Unknown':
+                result['severity'] = severity_data
+                break
+    
+    # Process status
+    status_patterns = ['Status', 'Statut']
+    for pattern in status_patterns:
+        if pattern in fields:
+            status_data = fields[pattern]
+            if isinstance(status_data, dict):
+                status_value = status_data.get('value') or status_data.get('display_name')
+                if status_value:
+                    result['status'] = status_value
+                    break
+            elif isinstance(status_data, str):
+                result['status'] = status_data
+                break
+    
+    return result
+
+
+def process_medication_entry(fields):
+    """Process medication-specific fields with proper terminology lookup"""
+    result = {
+        'display_name': 'Unknown Medication',
+        'dosage': 'Not specified',
+        'frequency': 'Not specified',
+        'status': 'Active',
+        'has_medical_terminology': False,
+        'original_value': None
+    }
+    
+    # Try multiple field name patterns for medication
+    medication_patterns = ['Medication DisplayName', 'Medication Code', 'Médicament']
+    for pattern in medication_patterns:
+        if pattern in fields:
+            field_data = fields[pattern]
+            if isinstance(field_data, dict):
+                if field_data.get('has_valueset'):
+                    result['has_medical_terminology'] = True
+                    result['original_value'] = field_data.get('original_value')
+                
+                display_name = field_data.get('value') or field_data.get('display_name')
+                if display_name and display_name not in ['Unknown', 'Unknown Medication']:
+                    result['display_name'] = display_name
+                    break
+            elif isinstance(field_data, str) and field_data not in ['Unknown', 'Unknown Medication']:
+                result['display_name'] = field_data
+                break
+    
+    # Process dosage
+    if 'Dosage' in fields:
+        dosage_data = fields['Dosage']
+        if isinstance(dosage_data, dict):
+            dosage_value = dosage_data.get('value') or dosage_data.get('display_name')
+            if dosage_value:
+                result['dosage'] = dosage_value
+        elif isinstance(dosage_data, str):
+            result['dosage'] = dosage_data
+    
+    # Process frequency
+    frequency_patterns = ['Frequency', 'Fréquence']
+    for pattern in frequency_patterns:
+        if pattern in fields:
+            frequency_data = fields[pattern]
+            if isinstance(frequency_data, dict):
+                frequency_value = frequency_data.get('value') or frequency_data.get('display_name')
+                if frequency_value:
+                    result['frequency'] = frequency_value
+                    break
+            elif isinstance(frequency_data, str):
+                result['frequency'] = frequency_data
+                break
+    
+    # Process status
+    status_patterns = ['Status', 'Statut']
+    for pattern in status_patterns:
+        if pattern in fields:
+            status_data = fields[pattern]
+            if isinstance(status_data, dict):
+                status_value = status_data.get('value') or status_data.get('display_name')
+                if status_value:
+                    result['status'] = status_value
+                    break
+            elif isinstance(status_data, str):
+                result['status'] = status_data
+                break
+    
+    return result
+
+
+def process_problem_entry(fields):
+    """Process problem/condition-specific fields with proper terminology lookup"""
+    result = {
+        'display_name': 'Unknown Condition',
+        'onset_date': 'Not specified',
+        'status': 'Active',
+        'code': 'No Code',
+        'has_medical_terminology': False,
+        'original_value': None
+    }
+    
+    # Try multiple field name patterns for problems/conditions
+    problem_patterns = ['Problem DisplayName', 'Problem Code', 'Condition']
+    for pattern in problem_patterns:
+        if pattern in fields:
+            field_data = fields[pattern]
+            if isinstance(field_data, dict):
+                if field_data.get('has_valueset'):
+                    result['has_medical_terminology'] = True
+                    result['original_value'] = field_data.get('original_value')
+                
+                display_name = field_data.get('value') or field_data.get('display_name')
+                if display_name and display_name not in ['Unknown', 'Unknown Condition']:
+                    result['display_name'] = display_name
+                    break
+            elif isinstance(field_data, str) and field_data not in ['Unknown', 'Unknown Condition']:
+                result['display_name'] = field_data
+                break
+    
+    # Process onset date
+    onset_patterns = ['Onset Date', 'Date de diagnostic']
+    for pattern in onset_patterns:
+        if pattern in fields:
+            onset_data = fields[pattern]
+            if isinstance(onset_data, dict):
+                onset_value = onset_data.get('value') or onset_data.get('display_name')
+                if onset_value:
+                    result['onset_date'] = onset_value
+                    break
+            elif isinstance(onset_data, str):
+                result['onset_date'] = onset_data
+                break
+    
+    # Process status
+    status_patterns = ['Status', 'Statut']
+    for pattern in status_patterns:
+        if pattern in fields:
+            status_data = fields[pattern]
+            if isinstance(status_data, dict):
+                status_value = status_data.get('value') or status_data.get('display_name')
+                if status_value:
+                    result['status'] = status_value
+                    break
+            elif isinstance(status_data, str):
+                result['status'] = status_data
+                break
+    
+    # Process code
+    code_patterns = ['Code', 'Code ICD-10']
+    for pattern in code_patterns:
+        if pattern in fields:
+            code_data = fields[pattern]
+            if isinstance(code_data, dict):
+                code_value = code_data.get('value') or code_data.get('display_name')
+                if code_value:
+                    result['code'] = code_value
+                    break
+            elif isinstance(code_data, str):
+                result['code'] = code_data
+                break
+    
+    return result
+
+
+def process_generic_entry(fields):
+    """Process generic entry fields with basic terminology lookup"""
+    result = {
+        'display_name': 'Unknown Item',
+        'has_medical_terminology': False,
+        'field_data': []
+    }
+    
+    # Try common field patterns
+    common_patterns = ['DisplayName', 'Name', 'Title', 'Description', 'Value']
+    
+    for pattern in common_patterns:
+        if pattern in fields:
+            field_data = fields[pattern]
+            if isinstance(field_data, dict):
+                if field_data.get('has_valueset'):
+                    result['has_medical_terminology'] = True
+                
+                display_name = field_data.get('value') or field_data.get('display_name')
+                if display_name and display_name != 'Unknown':
+                    result['display_name'] = display_name
+                    break
+            elif isinstance(field_data, str) and field_data != 'Unknown':
+                result['display_name'] = field_data
+                break
+    
+    # Collect first 4 fields for generic display
+    field_count = 0
+    for field_name, field_info in fields.items():
+        if field_count >= 4:
+            break
+        
+        field_value = 'Unknown'
+        has_valueset = False
+        original_value = None
+        
+        if isinstance(field_info, dict):
+            field_value = field_info.get('value') or field_info.get('display_name') or 'Unknown'
+            has_valueset = field_info.get('has_valueset', False)
+            original_value = field_info.get('original_value')
+        elif isinstance(field_info, str):
+            field_value = field_info
+        
+        result['field_data'].append({
+            'name': field_name,
+            'value': field_value,
+            'has_valueset': has_valueset,
+            'original_value': original_value
+        })
+        
+        field_count += 1
+    
+    return result
 
 
 def patient_data_view(request):
@@ -205,6 +562,21 @@ def patient_details_view(request, patient_id):
         # This is an NCP query result - create temp patient from session data
         patient_info = match_data["patient_data"]
 
+        # Debug: Log what's in the session patient data
+        logger.info(f"DEBUG: Session patient_info keys: {list(patient_info.keys())}")
+        logger.info(
+            f"DEBUG: Session given_name: '{patient_info.get('given_name', 'NOT_FOUND')}'"
+        )
+        logger.info(
+            f"DEBUG: Session family_name: '{patient_info.get('family_name', 'NOT_FOUND')}'"
+        )
+        logger.info(
+            f"DEBUG: Session birth_date: '{patient_info.get('birth_date', 'NOT_FOUND')}'"
+        )
+        logger.info(
+            f"DEBUG: Session gender: '{patient_info.get('gender', 'NOT_FOUND')}'"
+        )
+
         # Create a temporary patient object (not saved to DB)
         patient_data = PatientData(
             id=patient_id,
@@ -215,7 +587,7 @@ def patient_details_view(request, patient_id):
         )
 
         logger.info(
-            f"Created temporary patient object for NCP query result: {patient_id}"
+            f"Created temporary patient object: {patient_data.given_name} {patient_data.family_name} for NCP query result: {patient_id}"
         )
     else:
         # Standard database lookup
@@ -535,45 +907,69 @@ def patient_cda_view(request, patient_id):
                 "Displaying basic patient information only.",
             )
 
-        # Initialize Enhanced CDA Processor for superior clinical section processing
+        # Initialize Enhanced CDA Processor with JSON Field Mapping enhancement (hybrid approach)
         from .services.enhanced_cda_processor import EnhancedCDAProcessor
+        from .services.enhanced_cda_field_mapper import EnhancedCDAFieldMapper
         from .services.patient_search_service import PatientMatch
         from .translation_utils import (
             get_template_translations,
             detect_document_language,
         )
 
-        # Use Enhanced CDA Processor with multi-European language support
-        enhanced_processor = EnhancedCDAProcessor(target_language="en")
-
         # Determine source language from country code with enhanced mapping
         source_language = "fr"  # Default to French
         country_code = match_data.get("country_code", "").upper()
 
-        # Enhanced country-to-language mapping
+        # Enhanced country-to-language mapping for all EU NCP countries
         country_language_map = {
-            "DE": "de",
-            "AT": "de",
-            "CH": "de",  # German-speaking
-            "IT": "it",
-            "SM": "it",
-            "VA": "it",  # Italian-speaking
-            "ES": "es",
-            "AD": "es",  # Spanish-speaking
-            "PT": "pt",  # Portuguese
-            "LV": "lv",  # Latvian
-            "LT": "lt",  # Lithuanian
-            "EE": "et",  # Estonian
-            "MT": "en",  # Malta (English)
+            # Western Europe
+            "BE": "nl",  # Belgium (Dutch/Flemish primary, French secondary)
+            "DE": "de",  # Germany
+            "FR": "fr",  # France
             "IE": "en",  # Ireland (English)
-            "LU": "fr",  # Luxembourg (French)
-            "BE": "nl",  # Belgium (Dutch/French)
+            "LU": "fr",  # Luxembourg (French primary, German/Luxembourgish secondary)
             "NL": "nl",  # Netherlands
-            "GR": "el",  # Greek
+            "AT": "de",  # Austria (German)
+            # Southern Europe
+            "ES": "es",  # Spain
+            "IT": "it",  # Italy
+            "PT": "pt",  # Portugal
+            "GR": "el",  # Greece (Greek)
+            "CY": "el",  # Cyprus (Greek primary, Turkish secondary)
+            "MT": "en",  # Malta (English and Maltese)
+            # Central/Eastern Europe
+            "PL": "pl",  # Poland
+            "CZ": "cs",  # Czech Republic (Czech)
+            "SK": "sk",  # Slovakia (Slovak)
+            "HU": "hu",  # Hungary (Hungarian)
+            "SI": "sl",  # Slovenia (Slovenian)
+            "HR": "hr",  # Croatia (Croatian)
+            "RO": "ro",  # Romania (Romanian)
+            "BG": "bg",  # Bulgaria (Bulgarian)
+            # Baltic States
+            "LT": "lt",  # Lithuania (Lithuanian)
+            "LV": "lv",  # Latvia (Latvian)
+            "EE": "et",  # Estonia (Estonian)
+            # Nordic Countries
+            "DK": "da",  # Denmark (Danish)
+            "FI": "fi",  # Finland (Finnish)
+            "SE": "sv",  # Sweden (Swedish)
+            # Special codes
+            "EU": "en",  # European Union documents (English)
+            "CH": "de",  # Switzerland (German primary, but multilingual)
         }
 
         if country_code in country_language_map:
             source_language = country_language_map[country_code]
+
+        # Create TWO processors for dual language support
+        # 1. Original language processor - preserves source language content
+        original_processor = EnhancedCDAProcessor(target_language=source_language)
+        # 2. Translation processor - translates to English
+        translation_processor = EnhancedCDAProcessor(target_language="en")
+
+        # Shared field mapper
+        field_mapper = EnhancedCDAFieldMapper()
 
         # Reconstruct PatientMatch object from session data for translation service
         # This provides the translation service with the proper search result context
@@ -619,6 +1015,34 @@ def patient_cda_view(request, patient_id):
                 f"Detected source language: {detected_source_language} (country: {country_code})"
             )
 
+        # Special handling for English documents - no dual language needed
+        if detected_source_language == "en":
+            logger.info(
+                f"Document is already in English (detected: {detected_source_language}), using single-language processing"
+            )
+
+            # For English documents, just process once without dual language
+            english_processor = EnhancedCDAProcessor(target_language="en")
+
+            enhanced_processing_result = english_processor.process_clinical_sections(
+                cda_content=cda_content,
+                source_language="en",
+            )
+
+            # Mark as single language (no original/translated split)
+            if enhanced_processing_result.get("success"):
+                enhanced_processing_result["dual_language_active"] = False
+                enhanced_processing_result["source_language"] = "en"
+                enhanced_processing_result["is_single_language"] = True
+
+                logger.info(
+                    f"✅ Single-language English processing: {enhanced_processing_result.get('sections_count', 0)} sections"
+                )
+        else:
+            logger.info(
+                f"Document requires translation from {detected_source_language} to English"
+            )
+
         if (
             cda_content
             and cda_content.strip()
@@ -629,19 +1053,134 @@ def patient_cda_view(request, patient_id):
                     f"Processing {cda_type} CDA content with Enhanced CDA Processor (length: {len(cda_content)}, patient: {patient_id})"
                 )
 
-                # Use Enhanced CDA Processor for superior clinical section processing
-                enhanced_processing_result = (
-                    enhanced_processor.process_clinical_sections(
-                        cda_content=cda_content,
-                        source_language=detected_source_language,
+                # Check if document needs dual language processing
+                if detected_source_language != "en":
+                    logger.info(
+                        f"Processing DUAL LANGUAGE content: {detected_source_language} → en"
                     )
-                )
+
+                    # Create TWO processors for dual language support
+                    # 1. Original language processor - preserves source language content
+                    original_processor = EnhancedCDAProcessor(
+                        target_language=detected_source_language
+                    )
+                    # 2. Translation processor - translates to English
+                    translation_processor = EnhancedCDAProcessor(target_language="en")
+
+                    # Process with DUAL LANGUAGE support
+                    # 1. Process for original language (source language preservation)
+                    logger.info(
+                        f"Processing original content in {detected_source_language}"
+                    )
+                    original_processing_result = (
+                        original_processor.process_clinical_sections(
+                            cda_content=cda_content,
+                            source_language=detected_source_language,
+                        )
+                    )
+
+                    # 2. Process for English translation
+                    logger.info(f"Processing translated content to English")
+                    translation_processing_result = (
+                        translation_processor.process_clinical_sections(
+                            cda_content=cda_content,
+                            source_language=detected_source_language,
+                        )
+                    )
+
+                    # Combine both results into dual language sections
+                    enhanced_processing_result = _create_dual_language_sections(
+                        original_processing_result,
+                        translation_processing_result,
+                        detected_source_language,
+                    )
+
+                else:
+                    logger.info(
+                        f"Processing SINGLE LANGUAGE content: document is already in English"
+                    )
+
+                    # For English documents, just process once without dual language
+                    english_processor = EnhancedCDAProcessor(target_language="en")
+
+                    enhanced_processing_result = (
+                        english_processor.process_clinical_sections(
+                            cda_content=cda_content,
+                            source_language="en",
+                        )
+                    )
+
+                    # Mark as single language (no original/translated split)
+                    if enhanced_processing_result.get("success"):
+                        enhanced_processing_result["dual_language_active"] = False
+                        enhanced_processing_result["source_language"] = "en"
+                        enhanced_processing_result["is_single_language"] = True
+
+                # Enhance result with JSON field mapping data
+                if enhanced_processing_result.get("success"):
+                    try:
+                        import xml.etree.ElementTree as ET
+
+                        root = ET.fromstring(cda_content)
+                        namespaces = {"hl7": "urn:hl7-org:v3"}
+
+                        # Add patient demographic mapping
+                        patient_data_mapped = field_mapper.map_patient_data(
+                            root, namespaces
+                        )
+                        enhanced_processing_result["patient_data"] = patient_data_mapped
+                        enhanced_processing_result["field_mapping_active"] = True
+
+                        # Add section field mapping for available sections
+                        sections = root.findall(".//hl7:section", namespaces)
+                        mapped_sections = {}
+
+                        for section in sections:
+                            code_elem = section.find("hl7:code", namespaces)
+                            if code_elem is not None:
+                                section_code = code_elem.get("code")
+                                if field_mapper.get_section_mapping(section_code):
+                                    try:
+                                        section_data = (
+                                            field_mapper.map_clinical_section(
+                                                section, section_code, root, namespaces
+                                            )
+                                        )
+                                        mapped_sections[section_code] = section_data
+                                    except Exception as mapping_error:
+                                        logger.warning(
+                                            f"Section mapping failed for {section_code}: {mapping_error}"
+                                        )
+
+                        enhanced_processing_result["mapped_sections"] = mapped_sections
+
+                        logger.info(
+                            f"Enhanced with JSON field mapping: {len(patient_data_mapped)} patient fields, {len(mapped_sections)} mapped sections"
+                        )
+
+                    except Exception as enhancement_error:
+                        logger.warning(
+                            f"JSON field mapping enhancement failed: {enhancement_error}"
+                        )
+                        # Continue with original result if enhancement fails
 
                 if enhanced_processing_result.get("success"):
-                    # Enhanced CDA Processor results with multi-European language support
+                    # Enhanced CDA Processor with JSON Field Mapping results (hybrid approach)
                     translation_result = enhanced_processing_result
 
-                    sections_count = enhanced_processing_result.get("sections_count", 0)
+                    # Use original sections structure but enhance with field mapping data
+                    clinical_sections = enhanced_processing_result.get("sections", [])
+                    mapped_sections = enhanced_processing_result.get(
+                        "mapped_sections", {}
+                    )
+                    patient_data_mapped = enhanced_processing_result.get(
+                        "patient_data", {}
+                    )
+
+                    # Calculate metrics from original structure
+                    sections_count = enhanced_processing_result.get(
+                        "sections_count", len(clinical_sections)
+                    )
                     coded_sections_count = enhanced_processing_result.get(
                         "coded_sections_count", 0
                     )
@@ -654,14 +1193,27 @@ def patient_cda_view(request, patient_id):
                     uses_coded_sections = enhanced_processing_result.get(
                         "uses_coded_sections", False
                     )
+
+                    # Enhance translation quality if JSON mapping is active
                     translation_quality = enhanced_processing_result.get(
-                        "translation_quality", "High"
+                        "translation_quality", "Basic"
                     )
+                    if enhanced_processing_result.get("field_mapping_active"):
+                        translation_quality = (
+                            "High"  # JSON mapping provides high quality
+                        )
+
+                    # Update translation_result with enhanced data
+                    translation_result["field_mapping_active"] = (
+                        enhanced_processing_result.get("field_mapping_active", False)
+                    )
+                    translation_result["translation_quality"] = translation_quality
 
                     logger.info(
-                        f"✅ Enhanced CDA Processor results: {sections_count} sections, "
+                        f"✅ Enhanced CDA Processor + JSON Field Mapping (hybrid): {sections_count} sections, "
                         f"{coded_sections_count} coded, {medical_terms_count} medical terms, "
-                        f"quality: {translation_quality}, type: {enhanced_processing_result.get('content_type')}"
+                        f"quality: {translation_quality}, JSON mapping: {'Active' if enhanced_processing_result.get('field_mapping_active') else 'Inactive'}, "
+                        f"patient fields: {len(patient_data_mapped)}, mapped sections: {len(mapped_sections)}"
                     )
 
                 else:
@@ -763,6 +1315,14 @@ def patient_cda_view(request, patient_id):
                     "has_administrative_data", False
                 )
 
+        # Add single language flag to context if available
+        if enhanced_processing_result and enhanced_processing_result.get("success"):
+            context["is_single_language"] = enhanced_processing_result.get(
+                "is_single_language", False
+            )
+        else:
+            context["is_single_language"] = False
+
         # Add template translations for dynamic UI text
         template_translations = get_template_translations(
             source_language=detected_source_language, target_language="en"
@@ -773,6 +1333,16 @@ def patient_cda_view(request, patient_id):
         logger.info(
             f"Added template translations for {detected_source_language} → en with {len(template_translations)} strings"
         )
+
+        # REFACTOR: Process sections for template display (move complex logic from template to Python)
+        if translation_result and translation_result.get('sections'):
+            processed_sections = prepare_enhanced_section_data(
+                translation_result.get('sections', [])
+            )
+            context['processed_sections'] = processed_sections
+            logger.info(f"Processed {len(processed_sections)} sections for simplified template display")
+        else:
+            context['processed_sections'] = []
 
         return render(request, "patient_data/patient_cda.html", context, using="jinja2")
 
@@ -2045,7 +2615,7 @@ def enhanced_cda_display(request):
             detected_source_language = None
 
             # Method 1: Use provided source_language if valid
-            if source_language and source_language in [
+            supported_languages = [
                 "de",
                 "it",
                 "es",
@@ -2058,32 +2628,61 @@ def enhanced_cda_display(request):
                 "nl",
                 "el",
                 "mt",
-            ]:
+                "cs",
+                "sk",
+                "hu",
+                "sl",
+                "hr",
+                "ro",
+                "bg",
+                "da",
+                "fi",
+                "sv",
+                "pl",
+            ]
+
+            if source_language and source_language in supported_languages:
                 detected_source_language = source_language
                 logger.info(f"Using provided source language: {source_language}")
 
             # Method 2: Derive from country code if provided
             elif country_code:
                 country_language_map = {
-                    "DE": "de",
-                    "AT": "de",
-                    "CH": "de",  # German-speaking
-                    "IT": "it",
-                    "SM": "it",
-                    "VA": "it",  # Italian-speaking
-                    "ES": "es",
-                    "AD": "es",  # Spanish-speaking
-                    "PT": "pt",  # Portuguese
-                    "LV": "lv",  # Latvian
-                    "LT": "lt",  # Lithuanian
-                    "EE": "et",  # Estonian
-                    "MT": "en",  # Malta (English)
-                    "IE": "en",  # Ireland (English)
-                    "LU": "fr",  # Luxembourg (French)
-                    "BE": "nl",  # Belgium (Dutch/French)
-                    "NL": "nl",  # Netherlands
-                    "GR": "el",  # Greek
+                    # Western Europe
+                    "BE": "nl",  # Belgium (Dutch/Flemish primary, French secondary)
+                    "DE": "de",  # Germany
                     "FR": "fr",  # France
+                    "IE": "en",  # Ireland (English)
+                    "LU": "fr",  # Luxembourg (French primary, German/Luxembourgish secondary)
+                    "NL": "nl",  # Netherlands
+                    "AT": "de",  # Austria (German)
+                    # Southern Europe
+                    "ES": "es",  # Spain
+                    "IT": "it",  # Italy
+                    "PT": "pt",  # Portugal
+                    "GR": "el",  # Greece (Greek)
+                    "CY": "el",  # Cyprus (Greek primary, Turkish secondary)
+                    "MT": "en",  # Malta (English and Maltese)
+                    # Central/Eastern Europe
+                    "PL": "pl",  # Poland
+                    "CZ": "cs",  # Czech Republic (Czech)
+                    "SK": "sk",  # Slovakia (Slovak)
+                    "HU": "hu",  # Hungary (Hungarian)
+                    "SI": "sl",  # Slovenia (Slovenian)
+                    "HR": "hr",  # Croatia (Croatian)
+                    "RO": "ro",  # Romania (Romanian)
+                    "BG": "bg",  # Bulgaria (Bulgarian)
+                    # Baltic States
+                    "LT": "lt",  # Lithuania (Lithuanian)
+                    "LV": "lv",  # Latvia (Latvian)
+                    "EE": "et",  # Estonia (Estonian)
+                    # Nordic Countries
+                    "DK": "da",  # Denmark (Danish)
+                    "FI": "fi",  # Finland (Finnish)
+                    "SE": "sv",  # Sweden (Swedish)
+                    # Special codes
+                    "EU": "en",  # European Union documents (English)
+                    "CH": "de",  # Switzerland (German primary, but multilingual)
                 }
 
                 if country_code in country_language_map:
@@ -2106,10 +2705,10 @@ def enhanced_cda_display(request):
                     "Could not detect source language, falling back to French"
                 )
 
-            # Initialize Enhanced CDA Processor
+            # Initialize Enhanced CDA Processor with JSON Field Mapping
             processor = EnhancedCDAProcessor(target_language=target_language)
 
-            # Process CDA content with detected source language
+            # Process CDA content with comprehensive field mapping
             result = processor.process_clinical_sections(
                 cda_content=cda_content, source_language=detected_source_language
             )
@@ -2168,3 +2767,347 @@ def enhanced_cda_display(request):
         return render(
             request, "patient_data/enhanced_patient_cda.html", context, using="jinja2"
         )
+
+
+def _create_dual_language_sections(original_result, translated_result, source_language):
+    """
+    Create dual language sections by combining original and translated processing results
+
+    Args:
+        original_result: Processing result with source language content
+        translated_result: Processing result with English translation
+        source_language: Source language code (pt, fr, de, etc.)
+
+    Returns:
+        Combined result with dual language sections
+    """
+    if not original_result.get("success") or not translated_result.get("success"):
+        logger.warning(
+            "One or both processing results failed, falling back to single language"
+        )
+        return (
+            translated_result if translated_result.get("success") else original_result
+        )
+
+    # Start with the translated result structure
+    dual_result = dict(translated_result)
+
+    original_sections = original_result.get("sections", [])
+    translated_sections = translated_result.get("sections", [])
+
+    # Create dual language sections
+    dual_sections = []
+
+    for i, translated_section in enumerate(translated_sections):
+        # Find corresponding original section
+        original_section = None
+        if i < len(original_sections):
+            original_section = original_sections[i]
+
+        # Create dual language section
+        dual_section = dict(translated_section)
+
+        # Preserve original content structure while adding dual language content
+        original_content = (
+            original_section.get("content", "") if original_section else ""
+        )
+        translated_content = translated_section.get("content", "")
+
+        # Handle content that might be a dict (with medical_terms) or string
+        if isinstance(translated_content, dict):
+            # Keep all the metadata from translated content
+            dual_section["content"] = dict(translated_content)
+            dual_section["content"]["translated"] = translated_content.get(
+                "content", str(translated_content)
+            )
+            dual_section["content"]["original"] = (
+                original_content.get("content", str(original_content))
+                if isinstance(original_content, dict)
+                else str(original_content)
+            )
+        else:
+            # Simple string content
+            dual_section["content"] = {
+                "translated": str(translated_content),
+                "original": str(original_content),
+                "medical_terms": 0,  # Default for compatibility
+            }
+
+        # Add source language info
+        dual_section["source_language"] = source_language
+        dual_section["has_dual_language"] = True
+
+        # Handle PS table content for both languages if available
+        if translated_section.get("has_ps_table"):
+            dual_section["ps_table_html"] = translated_section.get("ps_table_html", "")
+            if original_section and original_section.get("has_ps_table"):
+                dual_section["ps_table_html_original"] = original_section.get(
+                    "ps_table_html", ""
+                )
+            else:
+                dual_section["ps_table_html_original"] = ""
+
+        dual_sections.append(dual_section)
+
+    # Update the result with dual language sections
+    dual_result["sections"] = dual_sections
+    dual_result["dual_language_active"] = True
+    dual_result["source_language"] = source_language
+
+    # Ensure medical_terms_count is preserved for template compatibility
+    if "medical_terms_count" not in dual_result:
+        dual_result["medical_terms_count"] = translated_result.get(
+            "medical_terms_count", 0
+        )
+
+    logger.info(
+        f"Created {len(dual_sections)} dual language sections ({source_language} | en)"
+    )
+
+    return dual_result
+
+
+@require_http_methods(["POST"])
+def upload_cda_document(request):
+    """Handle CDA document upload and processing"""
+    from django.core.files.storage import default_storage
+    from django.core.files.base import ContentFile
+    from pathlib import Path
+    import uuid
+    from .services.enhanced_cda_processor import EnhancedCDAProcessor
+
+    try:
+        if "cda_file" not in request.FILES:
+            messages.error(request, "No file was uploaded. Please select a CDA file.")
+            return redirect("patient_data:patient_search_enhanced")
+
+        uploaded_file = request.FILES["cda_file"]
+        auto_process = request.POST.get("auto_process") == "on"
+
+        # Validate file type
+        if not uploaded_file.name.lower().endswith((".xml", ".cda")):
+            messages.error(
+                request, "Invalid file type. Please upload an XML or CDA file."
+            )
+            return redirect("patient_data:patient_search_enhanced")
+
+        # Generate unique filename
+        file_extension = Path(uploaded_file.name).suffix
+        unique_filename = f"{uuid.uuid4().hex}{file_extension}"
+
+        # Save file to uploads directory
+        uploads_dir = Path(settings.BASE_DIR) / "media" / "uploads" / "cda_documents"
+        uploads_dir.mkdir(parents=True, exist_ok=True)
+
+        file_path = uploads_dir / unique_filename
+
+        # Save the uploaded file
+        with open(file_path, "wb+") as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+
+        logger.info(f"CDA file uploaded: {uploaded_file.name} -> {unique_filename}")
+
+        if auto_process:
+            try:
+                # Process the CDA document
+                processor = EnhancedCDAProcessor()
+                result = processor.process_cda_file(str(file_path))
+
+                if result and "patient_info" in result:
+                    patient_info = result["patient_info"]
+                    patient_name = f"{patient_info.get('given_name', '')} {patient_info.get('family_name', '')}".strip()
+                    patient_id = patient_info.get("patient_id", "Unknown")
+
+                    # Store in session for search results
+                    if "uploaded_cda_documents" not in request.session:
+                        request.session["uploaded_cda_documents"] = []
+
+                    document_info = {
+                        "original_filename": uploaded_file.name,
+                        "stored_filename": unique_filename,
+                        "file_path": str(file_path),
+                        "patient_name": patient_name,
+                        "patient_id": patient_id,
+                        "upload_date": timezone.now().isoformat(),
+                        "processed": True,
+                        "processing_result": result,
+                    }
+
+                    request.session["uploaded_cda_documents"].append(document_info)
+                    request.session.modified = True
+
+                    messages.success(
+                        request,
+                        f"Document '{uploaded_file.name}' uploaded and processed successfully. "
+                        f"Patient: {patient_name} (ID: {patient_id})",
+                    )
+
+                    # Redirect to search results showing the uploaded document
+                    return redirect("patient_data:uploaded_documents")
+
+                else:
+                    messages.warning(
+                        request,
+                        f"Document '{uploaded_file.name}' was uploaded but could not be processed. "
+                        "The file may not contain valid patient data.",
+                    )
+
+            except Exception as e:
+                logger.error(f"Error processing uploaded CDA document: {str(e)}")
+                messages.error(
+                    request,
+                    f"Document '{uploaded_file.name}' was uploaded but processing failed: {str(e)}",
+                )
+        else:
+            # Just store file info without processing
+            if "uploaded_cda_documents" not in request.session:
+                request.session["uploaded_cda_documents"] = []
+
+            document_info = {
+                "original_filename": uploaded_file.name,
+                "stored_filename": unique_filename,
+                "file_path": str(file_path),
+                "upload_date": timezone.now().isoformat(),
+                "processed": False,
+            }
+
+            request.session["uploaded_cda_documents"].append(document_info)
+            request.session.modified = True
+
+            messages.success(
+                request,
+                f"Document '{uploaded_file.name}' uploaded successfully. "
+                "Use the process button to extract patient information.",
+            )
+
+        return redirect("patient_data:patient_search_enhanced")
+
+    except Exception as e:
+        logger.error(f"Error uploading CDA document: {str(e)}")
+        messages.error(request, f"Upload failed: {str(e)}")
+        return redirect("patient_data:patient_search_enhanced")
+
+
+def uploaded_documents_view(request):
+    """Display uploaded CDA documents"""
+    uploaded_docs = request.session.get("uploaded_cda_documents", [])
+
+    context = {
+        "uploaded_documents": uploaded_docs,
+        "total_documents": len(uploaded_docs),
+    }
+
+    return render(
+        request, "patient_data/uploaded_documents.html", context, using="jinja2"
+    )
+
+
+def process_uploaded_document(request, doc_index):
+    """Process a specific uploaded document"""
+    try:
+        uploaded_docs = request.session.get("uploaded_cda_documents", [])
+
+        if doc_index >= len(uploaded_docs):
+            messages.error(request, "Document not found.")
+            return redirect("patient_data:uploaded_documents")
+
+        document_info = uploaded_docs[doc_index]
+
+        if document_info.get("processed"):
+            messages.info(request, "Document has already been processed.")
+            return redirect("patient_data:uploaded_documents")
+
+        from .services.enhanced_cda_processor import EnhancedCDAProcessor
+
+        processor = EnhancedCDAProcessor()
+        result = processor.process_cda_file(document_info["file_path"])
+
+        if result and "patient_info" in result:
+            patient_info = result["patient_info"]
+            patient_name = f"{patient_info.get('given_name', '')} {patient_info.get('family_name', '')}".strip()
+            patient_id = patient_info.get("patient_id", "Unknown")
+
+            # Update document info
+            document_info.update(
+                {
+                    "patient_name": patient_name,
+                    "patient_id": patient_id,
+                    "processed": True,
+                    "processing_result": result,
+                }
+            )
+
+            request.session["uploaded_cda_documents"] = uploaded_docs
+            request.session.modified = True
+
+            messages.success(
+                request,
+                f"Document processed successfully. Patient: {patient_name} (ID: {patient_id})",
+            )
+        else:
+            messages.error(
+                request,
+                "Failed to process document. The file may not contain valid patient data.",
+            )
+
+        return redirect("patient_data:uploaded_documents")
+
+    except Exception as e:
+        logger.error(f"Error processing uploaded document: {str(e)}")
+        messages.error(request, f"Processing failed: {str(e)}")
+        return redirect("patient_data:uploaded_documents")
+
+
+def view_uploaded_document(request, doc_index):
+    """View details of an uploaded CDA document"""
+    try:
+        uploaded_docs = request.session.get("uploaded_cda_documents", [])
+
+        if doc_index >= len(uploaded_docs):
+            messages.error(request, "Document not found.")
+            return redirect("patient_data:uploaded_documents")
+
+        document_info = uploaded_docs[doc_index]
+
+        if not document_info.get("processed"):
+            messages.error(request, "Document has not been processed yet.")
+            return redirect("patient_data:uploaded_documents")
+
+        processing_result = document_info.get("processing_result")
+        if not processing_result:
+            messages.error(request, "No processing result available for this document.")
+            return redirect("patient_data:uploaded_documents")
+
+        # Create dual language sections if needed (but not for English documents)
+        if processing_result.get("sections"):
+            # Check if this is already marked as single language (English documents)
+            if processing_result.get("is_single_language"):
+                logger.info(
+                    "Document is single-language (English), skipping dual language processing"
+                )
+                # Keep processing_result as is for single language display
+            else:
+                # Use the dual language processor for non-English documents
+                dual_result = _create_dual_language_sections(
+                    processing_result, processing_result, "en"
+                )
+                processing_result = dual_result
+
+        context = {
+            "document_info": document_info,
+            "processing_result": processing_result,
+            "patient_info": processing_result.get("patient_info", {}),
+            "sections": processing_result.get("sections", []),
+            "doc_index": doc_index,
+            "is_single_language": processing_result.get("is_single_language", False),
+        }
+
+        return render(
+            request, "patient_data/view_uploaded_document.html", context, using="jinja2"
+        )
+
+    except Exception as e:
+        logger.error(f"Error viewing uploaded document: {str(e)}")
+        messages.error(request, f"Error loading document: {str(e)}")
+        return redirect("patient_data:uploaded_documents")

@@ -171,3 +171,142 @@
     }
   }
 }
+
+// ========================================
+// CDA Upload Component
+// ========================================
+
+.cda-upload-section {
+  margin-top: $space-xl;
+  padding: $space-lg;
+  background-color: $neutral-lightest;
+  border: 1px solid $neutral-light;
+  border-radius: $border-radius-lg;
+
+  .upload-section-title {
+    margin-bottom: $space-sm;
+    color: $primary-blue;
+    font-weight: $font-weight-bold;
+  }
+
+  .upload-description {
+    margin-bottom: $space-lg;
+    color: $neutral-dark;
+    font-size: $font-size-sm;
+    line-height: 1.5;
+  }
+}
+
+.upload-form {
+  .upload-field-group {
+    margin-bottom: $space-lg;
+  }
+}
+
+.file-upload-wrapper {
+  position: relative;
+  margin-bottom: $space-md;
+
+  .file-upload-input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  .file-upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $space-xl;
+    border: 2px dashed $neutral-medium;
+    border-radius: $border-radius-lg;
+    background-color: $white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: $primary-blue;
+      background-color: rgba($primary-blue, 0.02);
+    }
+
+    &.upload-dragover {
+      border-color: $primary-blue;
+      background-color: rgba($primary-blue, 0.05);
+      transform: scale(1.02);
+    }
+
+    &.upload-ready {
+      border-color: $success-green;
+      background-color: rgba($success-green, 0.02);
+    }
+
+    &.upload-error {
+      border-color: $error-red;
+      background-color: rgba($error-red, 0.02);
+    }
+
+    .upload-icon {
+      font-size: 2rem;
+      margin-bottom: $space-sm;
+      color: $neutral-medium;
+    }
+
+    .upload-text {
+      font-weight: $font-weight-medium;
+      color: $neutral-dark;
+      margin-bottom: $space-xs;
+    }
+
+    .upload-subtext {
+      font-size: $font-size-sm;
+      color: $neutral-medium;
+    }
+  }
+
+  .file-upload-feedback {
+    margin-top: $space-sm;
+    padding: $space-sm;
+    border-radius: $border-radius-sm;
+    display: none;
+
+    .text-success {
+      color: $success-green;
+    }
+
+    .text-error {
+      color: $error-red;
+    }
+  }
+}
+
+.upload-options {
+  .form-group-inline {
+    display: flex;
+    align-items: center;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: $font-size-sm;
+    color: $neutral-dark;
+
+    input[type='checkbox'] {
+      margin-right: $space-sm;
+    }
+
+    .checkmark {
+      margin-left: $space-xs;
+    }
+  }
+}
+
+.upload-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: $space-md;
+}

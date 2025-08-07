@@ -1,0 +1,539 @@
+[
+    {
+        "section": "Patient Block",
+        "fields": [
+            {
+                "label": "Prefix",
+                "xpath": "/ClinicalDocument/recordTarget/patientRole/patient/name/prefix",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Family Name",
+                "xpath": "/ClinicalDocument/recordTarget/patientRole/patient/name/family",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Given Name",
+                "xpath": "/ClinicalDocument/recordTarget/patientRole/patient/name/given",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Primary Patient ID",
+                "xpath": "/ClinicalDocument/recordTarget/patientRole/id[1]/@extension",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Secondary Patient ID",
+                "xpath": "/ClinicalDocument/recordTarget/patientRole/id[2]/@extension",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Gender",
+                "xpath": "/ClinicalDocument/recordTarget/patientRole/patient/administrativeGenderCode/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Birthdate",
+                "xpath": "/ClinicalDocument/recordTarget/patientRole/patient/birthtime/@value",
+                "translation": "NO",
+                "valueSet": "Y"
+            }
+        ]
+    },
+    {
+        "section": "Extended View",
+        "fields": [
+            {
+                "label": "Preferred HCP/Legal Organization Name",
+                "xpath": "N/A",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Author Name",
+                "xpath": "N/A",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Authoring Device",
+                "xpath": "N/A",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Legal Authenticator",
+                "xpath": "N/A",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Custodian",
+                "xpath": "N/A",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Other Contacts",
+                "xpath": "N/A",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Guardian",
+                "xpath": "N/A",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Telecom Info",
+                "xpath": "N/A",
+                "translation": "NO",
+                "valueSet": "Y"
+            }
+        ]
+    },
+    {
+        "section": "General Information Block",
+        "fields": [
+            {
+                "label": "Creation Date",
+                "xpath": "/ClinicalDocument/effectiveTime",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Last Update",
+                "xpath": "/ClinicalDocument/documentationOf/serviceEvent/effectiveTime/high",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Original Document Language",
+                "xpath": "/ClinicalDocument/languageCode",
+                "translation": "NO",
+                "valueSet": "Y"
+            }
+        ]
+    },
+    {
+        "section": "Alerts",
+        "sectionCode": "48765-2",
+        "fields": [
+            {
+                "label": "Section Title",
+                "xpath": "section/code[@code='48765-2']/@displayName",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Reaction Type",
+                "xpath": "entry/act/.../observation/.../code/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Clinical Manifestation",
+                "xpath": "entry/act/.../observation/.../value/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Agent ID",
+                "xpath": "entry/act/.../participant/.../code/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Agent Description",
+                "xpath": "entry/act/.../participant/.../name",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Duration",
+                "xpath": "entry/act/.../effectiveTime/low/@value",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Severity",
+                "xpath": "entry/act/.../observation/.../value/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Criticality",
+                "xpath": "entry/act/.../observation/.../value",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Allergy Status",
+                "xpath": "entry/act/.../observation/.../value",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Certainty",
+                "xpath": "entry/act/.../observation/.../value",
+                "translation": "NO",
+                "valueSet": "Y"
+            }
+        ]
+    },
+    {
+        "section": "Diagnostic Tests",
+        "sectionCode": "30954-2",
+        "fields": [
+            {
+                "label": "Section Title",
+                "xpath": "section/code[@code='30954-2']/@displayName",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Diagnostic Date",
+                "xpath": "entry/observation/effectiveTime/@value",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Result Type",
+                "xpath": "entry/organizer/component/observation/code/@displayName",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Result Value",
+                "xpath": "entry/organizer/component/observation/value/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Performer",
+                "xpath": "entry/organizer/performer",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Reporter",
+                "xpath": "entry/organizer/author",
+                "translation": "NO",
+                "valueSet": "Y"
+            }
+        ]
+    },
+    {
+        "section": "Current Problems / Diagnosis",
+        "sectionCode": "11450-4",
+        "fields": [
+            {
+                "label": "Section Title",
+                "xpath": "section/code[@code='11450-4']/@displayName",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Problem",
+                "xpath": "entry/act/.../observation/.../value/@displayName",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Problem ID",
+                "xpath": "entry/act/.../observation/.../value/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Onset Date",
+                "xpath": "entry/act/.../effectiveTime/low/@value",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Diagnosis Assertion Status",
+                "xpath": "entry/act/.../observation/.../value",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Related Health Professional Name",
+                "xpath": "entry/act/.../assignedEntity/assignedPerson/name",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Related External Resource",
+                "xpath": "entry/act/.../reference/@value",
+                "translation": "NO",
+                "valueSet": "Y"
+            }
+        ]
+    },
+    {
+        "section": "Medication Summary",
+        "sectionCode": "10160-0",
+        "fields": [
+            {
+                "label": "Section Title",
+                "xpath": "section/code[@code='10160-0']/@displayName",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Medicinal Product",
+                "xpath": "entry/substanceAdministration/consumable/manufacturedProduct/manufacturedMaterial/code/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Active Ingredient Description",
+                "xpath": "entry/.../ingredient/code/@displayName",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Active Ingredient ID",
+                "xpath": "entry/.../ingredientSubstance/code/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Strength Value",
+                "xpath": "entry/.../quantity/numerator/@value",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Strength Unit",
+                "xpath": "entry/.../quantity/numerator/@unit",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Dose Form Description",
+                "xpath": "entry/.../formCode/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Units Per Intake",
+                "xpath": "entry/.../doseQuantity/low@value",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Frequency of Intake",
+                "xpath": "entry/.../effectiveTime[2]",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Route of Administration",
+                "xpath": "entry/.../routeCode/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Duration of Treatment",
+                "xpath": "entry/.../effectiveTime[1][@xsi:type='IVL_TS']",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Medication Reason",
+                "xpath": "entry/.../entryRelationship[@typeCode='RSON']/observation/value",
+                "translation": "NO",
+                "valueSet": "Y"
+            }
+        ]
+    },
+    {
+        "section": "Medical Devices and Implants",
+        "sectionCode": "46264-8",
+        "fields": [
+            {
+                "label": "Section Title",
+                "xpath": "section/code[@code='46264-8']/@displayName",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Device and Implant Description",
+                "xpath": "entry/supply/.../playingDevice/code/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Implant Date",
+                "xpath": "entry/supply/.../effectiveTime/@value",
+                "translation": "NO",
+                "valueSet": "Y"
+            }
+        ]
+    },
+    {
+        "section": "Surgical Procedures",
+        "sectionCode": "47519-4",
+        "fields": [
+            {
+                "label": "Section Title",
+                "xpath": "section/code[@code='47519-4']/@displayName",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Procedure",
+                "xpath": "entry/procedure/.../code/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Body Site",
+                "xpath": "entry/procedure/.../targetSiteCode/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Procedure Date",
+                "xpath": "entry/procedure/.../effectiveTime/low/@value",
+                "translation": "NO",
+                "valueSet": "Y"
+            }
+        ]
+    },
+    {
+        "section": "History of Past Illness",
+        "sectionCode": "11348-0",
+        "fields": [
+            {
+                "label": "Section Title",
+                "xpath": "section/code[@code='11348-0']/@displayName",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Closed Problem",
+                "xpath": "entry/act/.../observation/.../value/@displayName",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Closed Problem ID",
+                "xpath": "entry/act/.../observation/.../value/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Onset Date",
+                "xpath": "entry/act/.../effectiveTime/low/@value",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "End Date",
+                "xpath": "entry/act/.../effectiveTime/high/@value",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Problem Status Code",
+                "xpath": "entry/act/.../observation/.../value",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Diagnosis Assertion Status",
+                "xpath": "entry/act/.../observation/.../value",
+                "translation": "NO",
+                "valueSet": "Y"
+            }
+        ]
+    },
+    {
+        "section": "Vaccinations",
+        "sectionCode": "11369-6",
+        "fields": [
+            {
+                "label": "Section Title",
+                "xpath": "section/code[@code='11369-6']/@displayName",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Vaccination",
+                "xpath": "entry/substanceAdministration/.../code/@code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Brand Name",
+                "xpath": "entry/substanceAdministration/.../name[1]",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Vaccination Date",
+                "xpath": "entry/substanceAdministration/effectiveTime/@value",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Agent",
+                "xpath": "entry/substanceAdministration/participant/participantRole/code",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Marketing Authorization Holder",
+                "xpath": "entry/substanceAdministration/.../manufacturerOrganization",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Dose Number",
+                "xpath": "entry/substanceAdministration/.../doseNumber",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Batch/Lot Number",
+                "xpath": "entry/substanceAdministration/.../lotNumberText",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Administering Center",
+                "xpath": "entry/substanceAdministration/.../performer",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Health Professional ID",
+                "xpath": "entry/substanceAdministration/.../assignedEntity/id",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Country of Vaccination",
+                "xpath": "entry/substanceAdministration/.../country",
+                "translation": "NO",
+                "valueSet": "Y"
+            },
+            {
+                "label": "Administered",
+                "xpath": "entry/substanceAdministration/.../value",
+                "translation": "NO",
+                "valueSet": "Y"
+            }
+        ]
+    }
+]

@@ -172,7 +172,17 @@ class EnhancedCDAProcessor:
 
             # Extract structured entries for table generation
             entries = section_elem.findall("hl7:entry", namespaces)
-            table_data = self._extract_structured_data(entries, namespaces)
+
+            # Use field mapper for value set extraction if available
+            from .enhanced_cda_field_mapper import EnhancedCDAFieldMapper
+
+            field_mapper = EnhancedCDAFieldMapper()
+            clinical_fields = field_mapper.get_clinical_section_fields(section_code)
+
+            # Extract table data using both structured extraction and field mapping
+            table_data = self._extract_structured_data_with_valusets(
+                entries, namespaces, clinical_fields, section_code
+            )
 
             # Generate PS-compliant table if structured data exists
             ps_table_html = ""
@@ -246,13 +256,21 @@ class EnhancedCDAProcessor:
             soup = BeautifulSoup(html_content, "html.parser")
             sections = []
 
-            # Look for section elements in HTML
-            section_elements = soup.find_all(
-                ["div", "section"],
-                class_=lambda x: x and "section" in x.lower() if x else False,
-            )
+            # Look for section elements in HTML - prioritize by data-code attribute
+            section_elements = soup.find_all(attrs={"data-code": True})
 
-            # Also look for headings that might indicate sections
+            if not section_elements:
+                # Fallback: Look for section/div elements with section-related classes
+                section_elements = soup.find_all(
+                    ["div", "section"],
+                    class_=lambda x: x and "section" in x.lower() if x else False,
+                )
+
+            if not section_elements:
+                # Second fallback: Look for any section elements
+                section_elements = soup.find_all("section")
+
+            # Final fallback: Look for headings that might indicate sections
             if not section_elements:
                 section_elements = soup.find_all(["h1", "h2", "h3", "h4"])
 
@@ -322,12 +340,58 @@ class EnhancedCDAProcessor:
             tables = content_elem.find_all("table") if content_elem else []
             has_ps_table = len(tables) > 0
 
-            # Generate PS tables if tables exist
+            # Extract table data using value set integration if section code available
+            table_data = []
             ps_table_html = ""
             ps_table_html_original = ""
 
-            if has_ps_table:
-                table_data = self._extract_table_data(tables[0])
+            if has_ps_table and section_code:
+                logger.info(
+                    f"HTML section {section_code}: Applying value set integration for table processing"
+                )
+
+                # Use field mapper for value set extraction if available
+                from .enhanced_cda_field_mapper import EnhancedCDAFieldMapper
+
+                field_mapper = EnhancedCDAFieldMapper()
+                clinical_fields = field_mapper.get_clinical_section_fields(section_code)
+
+                if clinical_fields:
+                    logger.info(
+                        f"Found {len(clinical_fields)} clinical fields for section {section_code}"
+                    )
+                    # Extract structured data with value set support from HTML table
+                    table_data = self._extract_html_table_with_valusets(
+                        tables[0], clinical_fields, section_code
+                    )
+                    logger.info(
+                        f"Extracted {len(table_data)} entries with value set support"
+                    )
+
+                    # Generate PS tables from extracted data
+                    if table_data:
+                        ps_table_html, ps_table_html_original = (
+                            self._generate_ps_tables(
+                                table_data,
+                                section_code,
+                                enhanced_title,
+                                source_language,
+                            )
+                        )
+                else:
+                    logger.info(
+                        f"No clinical fields found for section {section_code}, using standard extraction"
+                    )
+                    # Fall back to standard table extraction
+                    standard_table_data = self._extract_table_data(tables[0])
+                    ps_table_html, ps_table_html_original = (
+                        self._generate_ps_tables_from_html(
+                            tables[0], enhanced_title, source_language
+                        )
+                    )
+            elif has_ps_table:
+                # Standard table processing without section code
+                standard_table_data = self._extract_table_data(tables[0])
                 ps_table_html, ps_table_html_original = (
                     self._generate_ps_tables_from_html(
                         tables[0], enhanced_title, source_language
@@ -373,11 +437,168 @@ class EnhancedCDAProcessor:
                 "has_ps_table": has_ps_table,
                 "ps_table_html": ps_table_html,
                 "ps_table_html_original": ps_table_html_original,
+                "table_data": table_data,  # Include table data for debugging
             }
 
         except Exception as e:
             logger.error(f"Error extracting HTML section: {e}")
             return None
+
+    def _extract_html_table_with_valusets(
+        self, table_elem, clinical_fields: list, section_code: str
+    ) -> list:
+        """
+        Extract HTML table data with value set integration
+        """
+        try:
+            table_data = []
+
+            # Get table headers
+            headers = []
+            thead = table_elem.find("thead")
+            if thead:
+                header_row = thead.find("tr")
+                if header_row:
+                    headers = [
+                        th.get_text().strip()
+                        for th in header_row.find_all(["th", "td"])
+                    ]
+
+            # Process table rows
+            tbody = table_elem.find("tbody")
+            if not tbody:
+                tbody = table_elem  # Some tables don't have explicit tbody
+
+            rows = tbody.find_all("tr")
+
+            # Skip header row if no explicit thead
+            if not thead and rows:
+                rows = rows[1:]  # Skip first row as headers
+
+            logger.info(f"Processing {len(rows)} table rows for section {section_code}")
+
+            for i, row in enumerate(rows):
+                cells = row.find_all(["td", "th"])
+                if not cells:
+                    continue
+
+                try:
+                    entry_data = {
+                        "type": "html_valueset_entry",
+                        "data": {},
+                        "fields": {},
+                        "row_index": i,
+                    }
+
+                    # Map cells to headers and clinical fields
+                    cell_data = {}
+                    for j, cell in enumerate(cells):
+                        if j < len(headers):
+                            cell_data[headers[j]] = cell.get_text().strip()
+
+                    # Map to clinical fields using value sets
+                    for field in clinical_fields:
+                        field_label = field.get("label", "")
+                        has_valueset = field.get("valueSet", "NO").upper() == "YES"
+                        needs_translation = (
+                            field.get("translation", "NO").upper() == "YES"
+                        )
+
+                        # Try to match field label with table headers
+                        matched_value = None
+                        for header, value in cell_data.items():
+                            if self._fuzzy_match_field_to_header(field_label, header):
+                                matched_value = value
+                                break
+
+                        if matched_value:
+                            # Apply value set lookup if needed
+                            if has_valueset and matched_value:
+                                translated_value = self._lookup_valueset_term(
+                                    matched_value, field_label
+                                )
+                                final_value = (
+                                    translated_value
+                                    if translated_value
+                                    else matched_value
+                                )
+                            else:
+                                final_value = matched_value
+
+                            entry_data["fields"][field_label] = {
+                                "value": final_value,
+                                "original_value": matched_value,
+                                "needs_translation": needs_translation,
+                                "has_valueset": has_valueset,
+                                "matched_header": next(
+                                    (
+                                        h
+                                        for h, v in cell_data.items()
+                                        if v == matched_value
+                                    ),
+                                    None,
+                                ),
+                            }
+
+                            logger.debug(
+                                f"Mapped {field_label} -> {final_value} (from {matched_value})"
+                            )
+
+                    # Determine entry type based on section code
+                    entry_data["section_type"] = self._determine_entry_type(
+                        section_code
+                    )
+                    entry_data["section_code"] = section_code
+
+                    # Only add if we extracted meaningful data
+                    if entry_data["fields"]:
+                        table_data.append(entry_data)
+
+                except Exception as row_error:
+                    logger.warning(
+                        f"Error processing table row {i} for section {section_code}: {row_error}"
+                    )
+                    continue
+
+            logger.info(
+                f"Successfully extracted {len(table_data)} entries with value set support from HTML table"
+            )
+            return table_data
+
+        except Exception as e:
+            logger.error(
+                f"Error extracting HTML table with value sets for section {section_code}: {e}"
+            )
+            return []
+
+    def _fuzzy_match_field_to_header(self, field_label: str, header: str) -> bool:
+        """
+        Fuzzy match clinical field labels to table headers
+        """
+        field_lower = field_label.lower()
+        header_lower = header.lower()
+
+        # Direct match
+        if field_lower == header_lower:
+            return True
+
+        # Partial matches for common field types
+        field_mappings = {
+            "allergen": ["allergène", "allergen", "substance", "agent"],
+            "reaction": ["réaction", "reaction", "symptôme", "symptom"],
+            "medication": ["médicament", "medication", "drug", "medicine"],
+            "problem": ["problème", "problem", "condition", "diagnostic"],
+            "code": ["code"],
+            "displayname": ["nom", "name", "libellé", "display", "description"],
+        }
+
+        for field_key, possible_headers in field_mappings.items():
+            if field_key in field_lower:
+                for possible_header in possible_headers:
+                    if possible_header in header_lower:
+                        return True
+
+        return False
 
     def _get_enhanced_section_title(
         self, section_code: str, original_title: str, source_language: str
@@ -706,6 +927,184 @@ class EnhancedCDAProcessor:
             structured_data = self._extract_from_html_tables(entries, namespaces)
 
         return structured_data
+
+    def _extract_structured_data_with_valusets(
+        self, entries, namespaces: Dict, clinical_fields: List[Dict], section_code: str
+    ) -> List[Dict[str, Any]]:
+        """
+        Extract structured data from CDA entries using field mapper and value sets
+        """
+        structured_data = []
+
+        for entry in entries:
+            try:
+                entry_data = {"type": "valueset_entry", "data": {}, "fields": {}}
+
+                # Use field mapper to extract specific fields with value set support
+                for field in clinical_fields:
+                    field_label = field.get("label", "")
+                    xpath = field.get("xpath", "")
+                    needs_translation = field.get("translation", "NO").upper() == "YES"
+                    has_valueset = field.get("valueSet", "NO").upper() == "YES"
+
+                    if not xpath:
+                        continue
+
+                    try:
+                        # Convert relative xpath to absolute path within entry
+                        if not xpath.startswith("//") and not xpath.startswith("./"):
+                            # Make relative to entry context
+                            entry_xpath = (
+                                f".//hl7:{xpath}"
+                                if not xpath.startswith("hl7:")
+                                else f".//{xpath}"
+                            )
+                        else:
+                            entry_xpath = xpath
+
+                        # Extract value based on XPath
+                        extracted_value = self._extract_field_with_valueset(
+                            entry,
+                            entry_xpath,
+                            namespaces,
+                            field_label,
+                            has_valueset,
+                            needs_translation,
+                        )
+
+                        if extracted_value:
+                            entry_data["fields"][field_label] = {
+                                "value": extracted_value,
+                                "needs_translation": needs_translation,
+                                "has_valueset": has_valueset,
+                                "xpath": xpath,
+                            }
+
+                    except Exception as field_error:
+                        logger.warning(
+                            f"Error extracting field '{field_label}' for section {section_code}: {field_error}"
+                        )
+                        continue
+
+                # Determine entry type based on section code
+                entry_data["section_type"] = self._determine_entry_type(section_code)
+                entry_data["section_code"] = section_code
+
+                # Only add if we extracted meaningful data
+                if entry_data["fields"]:
+                    structured_data.append(entry_data)
+
+            except Exception as e:
+                logger.error(f"Error processing entry for section {section_code}: {e}")
+                continue
+
+        logger.info(
+            f"Extracted {len(structured_data)} entries with value set support for section {section_code}"
+        )
+        return structured_data
+
+    def _extract_field_with_valueset(
+        self,
+        entry_elem,
+        xpath: str,
+        namespaces: Dict,
+        field_label: str,
+        has_valueset: bool,
+        needs_translation: bool,
+    ) -> Optional[str]:
+        """
+        Extract field value and apply value set lookup if needed
+        """
+        try:
+            # Handle attribute extraction
+            if "/@" in xpath:
+                elem_path = xpath.split("/@")[0]
+                attr_name = xpath.split("/@")[1]
+                elem = entry_elem.find(elem_path, namespaces)
+                if elem is not None:
+                    raw_value = elem.get(attr_name)
+                    if raw_value and has_valueset:
+                        # Look up in value sets for proper medical terminology
+                        translated_value = self._lookup_valueset_term(
+                            raw_value, field_label
+                        )
+                        return translated_value if translated_value else raw_value
+                    return raw_value
+            else:
+                # Element text extraction
+                elem = entry_elem.find(xpath, namespaces)
+                if elem is not None:
+                    raw_value = elem.text
+                    if raw_value and has_valueset:
+                        translated_value = self._lookup_valueset_term(
+                            raw_value, field_label
+                        )
+                        return translated_value if translated_value else raw_value
+                    return raw_value
+
+        except Exception as e:
+            logger.warning(
+                f"Field extraction error for '{field_label}' with XPath '{xpath}': {e}"
+            )
+
+        return None
+
+    def _determine_entry_type(self, section_code: str) -> str:
+        """Determine entry type based on section code"""
+        section_type_map = {
+            "48765-2": "allergy",  # Allergies
+            "11450-4": "problem",  # Problem list
+            "47519-4": "procedure",  # History of procedures
+            "10160-0": "medication",  # History of medication use
+            "46264-8": "medical_device",  # Medical equipment
+        }
+        return section_type_map.get(section_code, "observation")
+
+    def _lookup_valueset_term(self, code: str, field_label: str) -> Optional[str]:
+        """
+        Look up medical terminology in value sets
+        Enhanced to use MVC/CTS value sets
+        """
+        if not code or not code.strip():
+            return None
+
+        try:
+            # Try to find concept in MVC value sets
+            concept = self.ValueSetConcept.objects.filter(
+                code=code.strip(), status="active"
+            ).first()
+
+            if not concept:
+                # Try partial match on display name for allergens/conditions
+                concept = self.ValueSetConcept.objects.filter(
+                    display__icontains=code.strip(), status="active"
+                ).first()
+
+            if concept:
+                # Get translation for target language
+                translation = self.ConceptTranslation.objects.filter(
+                    concept=concept, language_code=self.target_language
+                ).first()
+
+                if translation:
+                    logger.info(
+                        f"Value set translation found for {field_label}: {code} -> {translation.translated_display}"
+                    )
+                    return translation.translated_display
+                else:
+                    # Return original display name if no translation
+                    logger.info(
+                        f"Value set concept found for {field_label} but no translation: {concept.display}"
+                    )
+                    return concept.display
+
+            return None
+
+        except Exception as e:
+            logger.error(
+                f"Error looking up value set term '{code}' for {field_label}: {e}"
+            )
+            return None
 
     def _extract_medication_data(self, sub_admin, namespaces) -> Dict[str, Any]:
         """Extract medication data from substanceAdministration element"""
@@ -1937,3 +2336,189 @@ class EnhancedCDAProcessor:
         except Exception as e:
             logger.error(f"Error looking up term '{term}' in MVC: {e}")
             return None
+
+    def _extract_patient_identity(
+        self, root: ET.Element, namespaces: Dict, field_mapper
+    ) -> Dict[str, Any]:
+        """
+        Extract patient identity data using field mapper - NO TRANSLATION needed
+        """
+        patient_identity = {
+            "given_name": None,
+            "family_name": None,
+            "birth_date": None,
+            "gender": None,
+            "patient_identifiers": [],
+            "primary_patient_id": None,
+            "secondary_patient_id": None,
+        }
+
+        try:
+            # Get Patient Block field mappings from the JSON
+            patient_fields = field_mapper.get_patient_fields()
+
+            for field in patient_fields:
+                label = field.get("label", "")
+                xpath = field.get("xpath", "")
+                translation_needed = field.get("translation", "NO").upper() == "YES"
+
+                # Skip if translation is needed - we only want direct CDA data here
+                if translation_needed:
+                    continue
+
+                # Convert to namespaced XPath
+                namespaced_xpath = field_mapper.convert_xpath_to_namespaced(xpath)
+
+                try:
+                    if label == "Given Name":
+                        elem = root.find(namespaced_xpath, namespaces)
+                        if elem is not None:
+                            patient_identity["given_name"] = elem.text
+
+                    elif label == "Family Name":
+                        elem = root.find(namespaced_xpath, namespaces)
+                        if elem is not None:
+                            patient_identity["family_name"] = elem.text
+
+                    elif label == "Birthdate":
+                        # Handle @value attribute extraction properly
+                        if "/@" in namespaced_xpath:
+                            elem_path = namespaced_xpath.split("/@")[0]
+                            attr_name = namespaced_xpath.split("/@")[1]
+                            elem = root.find(elem_path, namespaces)
+                            if elem is not None:
+                                patient_identity["birth_date"] = elem.get(attr_name)
+                        else:
+                            elem = root.find(namespaced_xpath, namespaces)
+                            if elem is not None:
+                                patient_identity["birth_date"] = elem.text
+
+                    elif label == "Gender":
+                        # Handle @code attribute extraction properly
+                        if "/@" in namespaced_xpath:
+                            elem_path = namespaced_xpath.split("/@")[0]
+                            attr_name = namespaced_xpath.split("/@")[1]
+                            elem = root.find(elem_path, namespaces)
+                            if elem is not None:
+                                patient_identity["gender"] = elem.get(attr_name)
+                        else:
+                            elem = root.find(namespaced_xpath, namespaces)
+                            if elem is not None:
+                                patient_identity["gender"] = elem.text
+
+                    elif label == "Primary Patient ID":
+                        # Handle @extension attribute extraction properly
+                        if "/@" in namespaced_xpath:
+                            elem_path = namespaced_xpath.split("/@")[0]
+                            attr_name = namespaced_xpath.split("/@")[1]
+                            elem = root.find(elem_path, namespaces)
+                            if elem is not None:
+                                primary_id = elem.get(attr_name)
+                                root_attr = elem.get("root")
+                                patient_identity["primary_patient_id"] = primary_id
+
+                                # Add to identifiers array
+                                if primary_id:
+                                    patient_identity["patient_identifiers"].append(
+                                        {
+                                            "extension": primary_id,
+                                            "root": root_attr,
+                                            "type": "Primary",
+                                        }
+                                    )
+
+                    elif label == "Secondary Patient ID":
+                        # Handle @extension attribute extraction properly
+                        if "/@" in namespaced_xpath:
+                            elem_path = namespaced_xpath.split("/@")[0]
+                            attr_name = namespaced_xpath.split("/@")[1]
+                            elem = root.find(elem_path, namespaces)
+                            if elem is not None:
+                                secondary_id = elem.get(attr_name)
+                                root_attr = elem.get("root")
+                                patient_identity["secondary_patient_id"] = secondary_id
+
+                                # Add to identifiers array
+                                if secondary_id:
+                                    patient_identity["patient_identifiers"].append(
+                                        {
+                                            "extension": secondary_id,
+                                            "root": root_attr,
+                                            "type": "Secondary",
+                                        }
+                                    )
+
+                except Exception as field_error:
+                    logger.warning(
+                        f"Error extracting {label} with XPath {namespaced_xpath}: {field_error}"
+                    )
+                    continue
+
+            logger.info(
+                f"Extracted patient identity - Name: {patient_identity.get('given_name')} {patient_identity.get('family_name')}, "
+                f"Birth: {patient_identity.get('birth_date')}, Gender: {patient_identity.get('gender')}, "
+                f"Primary ID: {patient_identity.get('primary_patient_id')}, "
+                f"Identifiers: {len(patient_identity['patient_identifiers'])}"
+            )
+            return patient_identity
+
+        except Exception as e:
+            logger.error(f"Error extracting patient identity: {e}")
+            return patient_identity
+
+    def _extract_administrative_data(
+        self, root: ET.Element, namespaces: Dict
+    ) -> Dict[str, Any]:
+        """
+        Extract administrative data from CDA - basic implementation
+        """
+        admin_data = {
+            "document_creation_date": None,
+            "document_last_update_date": None,
+            "document_version_number": None,
+            "patient_contact_info": {"addresses": [], "telecoms": []},
+            "author_hcp": {"family_name": None, "organization": {"name": None}},
+            "legal_authenticator": {
+                "family_name": None,
+                "organization": {"name": None},
+            },
+            "custodian_organization": {"name": None},
+            "preferred_hcp": {"name": None},
+            "guardian": {"family_name": None},
+            "other_contacts": [],
+        }
+
+        try:
+            # Extract document creation date
+            effective_time = root.find("hl7:effectiveTime", namespaces)
+            if effective_time is not None:
+                admin_data["document_creation_date"] = effective_time.get("value")
+
+            # Extract author information
+            author = root.find("hl7:author/hl7:assignedAuthor", namespaces)
+            if author is not None:
+                author_person = author.find("hl7:assignedPerson/hl7:name", namespaces)
+                if author_person is not None:
+                    family = author_person.find("hl7:family", namespaces)
+                    if family is not None:
+                        admin_data["author_hcp"]["family_name"] = family.text
+
+                # Author organization
+                org = author.find("hl7:representedOrganization/hl7:name", namespaces)
+                if org is not None:
+                    admin_data["author_hcp"]["organization"]["name"] = org.text
+
+            # Extract custodian
+            custodian = root.find(
+                "hl7:custodian/hl7:assignedCustodian/hl7:representedCustodianOrganization/hl7:name",
+                namespaces,
+            )
+            if custodian is not None:
+                admin_data["custodian_organization"]["name"] = custodian.text
+
+            logger.info("Extracted administrative data from CDA")
+            return admin_data
+
+        except Exception as e:
+            logger.error(f"Error extracting administrative data: {e}")
+            return admin_data

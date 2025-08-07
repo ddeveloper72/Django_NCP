@@ -14,6 +14,7 @@ from .view_modules.enhanced_cda_view import (
     get_section_translation,
     export_translated_cda,
 )
+from .enhanced_cda_display import EnhancedCDADisplayView
 from .view_modules.cda_views import (
     cda_translation_display,
     cda_translation_api,
@@ -95,6 +96,12 @@ urlpatterns = [
         main_views.enhanced_cda_display,
         name="enhanced_cda_display",
     ),
+    # Enhanced CDA Display with Patient ID (using our working view)
+    path(
+        "cda/enhanced_display/<int:patient_id>/",
+        EnhancedCDADisplayView.as_view(),
+        name="enhanced_cda_display_with_id",
+    ),
     # Enhanced CDA Translation Views
     path(
         "cda/enhanced/<int:patient_id>/",
@@ -173,6 +180,23 @@ urlpatterns = [
     path("api/cda/available/", available_cda_files, name="cda_available"),
     # Enhanced Patient Search with CDA Links
     path("search/enhanced/", patient_search_with_cda, name="patient_search_enhanced"),
+    # CDA Document Upload
+    path("upload-cda/", main_views.upload_cda_document, name="upload_cda_document"),
+    path(
+        "uploaded-documents/",
+        main_views.uploaded_documents_view,
+        name="uploaded_documents",
+    ),
+    path(
+        "process-document/<int:doc_index>/",
+        main_views.process_uploaded_document,
+        name="process_uploaded_document",
+    ),
+    path(
+        "view-document/<int:doc_index>/",
+        main_views.view_uploaded_document,
+        name="view_uploaded_document",
+    ),
     # PS Display Guidelines Table Rendering Test
     path("test/ps-tables/", main_views.test_ps_table_rendering, name="test_ps_tables"),
     # Patient data display (if function exists)

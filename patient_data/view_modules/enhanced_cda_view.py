@@ -73,7 +73,7 @@ class EnhancedCDADocumentView(View):
 
             return render(
                 request,
-                "patient_data/enhanced_cda_document.html",
+                "jinja2/patient_data/enhanced_patient_cda.html",
                 context,
                 using="jinja2",
             )

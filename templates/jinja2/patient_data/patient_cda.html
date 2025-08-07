@@ -724,6 +724,26 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                         <div class="collapsible-content-title">
                             <div class="content-inner-title">
 
+                                {% if is_single_language %}
+                                <!-- Single Language View (English documents) -->
+                                <div class="single-language-view">
+                                    <div class="content-inner">
+                                        <div class="content-text">
+                                            {% if section.has_ps_table and section.ps_table_html %}
+                                            <!-- PS Guidelines Structured Table -->
+                                            <div class="ps-table-container">
+                                                {{ section.ps_table_html|safe }}
+                                            </div>
+                                            {% else %}
+                                            <!-- English content -->
+                                            {{ section.content.translated|safe if section.content.translated else
+                                            section.content.original|safe }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <!-- Dual Language View (Non-English documents) -->
                                 <!-- Mobile View with Toggle Buttons -->
                                 <div class="mobile-view">
                                     <div class="toggle-container">
@@ -828,6 +848,7 @@ patient_identity.family_name }}, {{ patient_identity.given_name }}{% endblock %}
                                         </div>
                                     </div>
                                 </div>
+                                {% endif %}
 
                             </div>
                         </div>
