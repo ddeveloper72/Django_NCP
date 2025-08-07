@@ -1,290 +1,452 @@
 [
-    {
-        "section": "Demographic Data",
-        "sectionCode": "N/A",
-        "fields": [
-            {
-                "label": "Name",
-                "xpath": "/recordTarget/patientRole/patient/name",
-                "translation": "NO",
-                "valueSet": "N"
-            },
-            {
-                "label": "Gender",
-                "xpath": "/recordTarget/patientRole/patient/administrativeGenderCode/@code",
-                "translation": "NO",
-                "valueSet": "Y"
-            },
-            {
-                "label": "Date of Birth",
-                "xpath": "/recordTarget/patientRole/patient/birthTime/@value",
-                "translation": "NO",
-                "valueSet": "N"
-            },
-            {
-                "label": "ID",
-                "xpath": "/recordTarget/patientRole/id/@extension",
-                "translation": "NO",
-                "valueSet": "N"
-            }
-        ]
-    },
-    {
-        "section": "Author Information",
-        "sectionCode": "N/A",
-        "fields": [
-            {
-                "label": "Author Name",
-                "xpath": "/author/assignedAuthor/assignedPerson/name",
-                "translation": "NO",
-                "valueSet": "N"
-            },
-            {
-                "label": "Author Institution",
-                "xpath": "/author/assignedAuthor/representedOrganization/name",
-                "translation": "NO",
-                "valueSet": "N"
-            },
-            {
-                "label": "Author Time",
-                "xpath": "/author/time/@value",
-                "translation": "NO",
-                "valueSet": "N"
-            }
-        ]
-    },
-    {
-        "section": "Custodian",
-        "sectionCode": "N/A",
-        "fields": [
-            {
-                "label": "Custodian Name",
-                "xpath": "/custodian/assignedCustodian/representedCustodianOrganization/name",
-                "translation": "NO",
-                "valueSet": "N"
-            }
-        ]
-    },
-    {
-        "section": "Language Information",
-        "sectionCode": "N/A",
-        "fields": [
-            {
-                "label": "Language Code",
-                "xpath": "/languageCode/@code",
-                "translation": "NO",
-                "valueSet": "Y"
-            }
-        ]
-    },
-    {
-        "section": "Legal Authenticator",
-        "sectionCode": "N/A",
-        "fields": [
-            {
-                "label": "Legal Authenticator Name",
-                "xpath": "/legalAuthenticator/assignedEntity/assignedPerson/name",
-                "translation": "NO",
-                "valueSet": "N"
-            },
-            {
-                "label": "Legal Authenticator Institution",
-                "xpath": "/legalAuthenticator/assignedEntity/representedOrganization/name",
-                "translation": "NO",
-                "valueSet": "N"
-            },
-            {
-                "label": "Legal Authenticator Time",
-                "xpath": "/legalAuthenticator/time/@value",
-                "translation": "NO",
-                "valueSet": "N"
-            }
-        ]
-    },
-    {
-        "section": "Allergies",
-        "sectionCode": "48765-2",
-        "fields": [
-            {
-                "label": "Allergen Code",
-                "xpath": "value/@code",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Allergen DisplayName",
-                "xpath": "value/@displayName",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Allergen OriginalText",
-                "xpath": "value/originalText",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Allergy Type",
-                "xpath": "participant/participantRole/code/@code",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Reaction Code",
-                "xpath": "entryRelationship/observation/code/@code",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Reaction DisplayName",
-                "xpath": "entryRelationship/observation/code/@displayName",
-                "translation": "YES",
-                "valueSet": "YES"
-            }
-        ]
-    },
-    {
-        "section": "Problems",
-        "sectionCode": "11450-4",
-        "fields": [
-            {
-                "label": "Problem Code",
-                "xpath": "value/@code",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Problem DisplayName",
-                "xpath": "value/@displayName",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Problem OriginalText",
-                "xpath": "value/originalText",
-                "translation": "YES",
-                "valueSet": "YES"
-            }
-        ]
-    },
-    {
-        "section": "Medications",
-        "sectionCode": "10160-0",
-        "fields": [
-            {
-                "label": "Medication Code",
-                "xpath": "consumable/manufacturedProduct/manufacturedMaterial/code/@code",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Medication DisplayName",
-                "xpath": "consumable/manufacturedProduct/manufacturedMaterial/code/@displayName",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Medication OriginalText",
-                "xpath": "consumable/manufacturedProduct/manufacturedMaterial/code/originalText",
-                "translation": "YES",
-                "valueSet": "YES"
-            }
-        ]
-    },
-    {
-        "section": "Procedures",
-        "sectionCode": "47519-4",
-        "fields": [
-            {
-                "label": "Procedure Code",
-                "xpath": "code/@code",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Procedure DisplayName",
-                "xpath": "code/@displayName",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Procedure OriginalText",
-                "xpath": "code/originalText",
-                "translation": "YES",
-                "valueSet": "YES"
-            }
-        ]
-    },
-    {
-        "section": "Immunizations",
-        "sectionCode": "11369-6",
-        "fields": [
-            {
-                "label": "Immunization Code",
-                "xpath": "consumable/manufacturedProduct/manufacturedMaterial/code/@code",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Immunization DisplayName",
-                "xpath": "consumable/manufacturedProduct/manufacturedMaterial/code/@displayName",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Immunization OriginalText",
-                "xpath": "consumable/manufacturedProduct/manufacturedMaterial/code/originalText",
-                "translation": "YES",
-                "valueSet": "YES"
-            }
-        ]
-    },
-    {
-        "section": "Laboratory Results",
-        "sectionCode": "30954-2",
-        "fields": [
-            {
-                "label": "Lab Result Code",
-                "xpath": "component/observation/code/@code",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Lab Result DisplayName",
-                "xpath": "component/observation/code/@displayName",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Lab Result OriginalText",
-                "xpath": "component/observation/code/originalText",
-                "translation": "YES",
-                "valueSet": "YES"
-            }
-        ]
-    },
-    {
-        "section": "Medical Devices",
-        "sectionCode": "46264-8",
-        "fields": [
-            {
-                "label": "Device Code",
-                "xpath": "participant/participantRole/playingDevice/code/@code",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Device DisplayName",
-                "xpath": "participant/participantRole/playingDevice/code/@displayName",
-                "translation": "YES",
-                "valueSet": "YES"
-            },
-            {
-                "label": "Device OriginalText",
-                "xpath": "participant/participantRole/playingDevice/code/originalText",
-                "translation": "YES",
-                "valueSet": "YES"
-            }
-        ]
-    }
+  {
+    "section": "Demographic Data",
+    "sectionCode": "N/A",
+    "fields": [
+      {
+        "label": "Name",
+        "xpath": "/recordTarget/patientRole/patient/name",
+        "translation": "NO",
+        "valueSet": "N"
+      },
+      {
+        "label": "Gender",
+        "xpath": "/recordTarget/patientRole/patient/administrativeGenderCode/@code",
+        "translation": "NO",
+        "valueSet": "Y"
+      },
+      {
+        "label": "Date of Birth",
+        "xpath": "/recordTarget/patientRole/patient/birthTime/@value",
+        "translation": "NO",
+        "valueSet": "N"
+      },
+      {
+        "label": "ID",
+        "xpath": "/recordTarget/patientRole/id/@extension",
+        "translation": "NO",
+        "valueSet": "N"
+      }
+    ]
+  },
+  {
+    "section": "Author Information",
+    "sectionCode": "N/A",
+    "fields": [
+      {
+        "label": "Author Name",
+        "xpath": "/author/assignedAuthor/assignedPerson/name",
+        "translation": "NO",
+        "valueSet": "N"
+      },
+      {
+        "label": "Author Institution",
+        "xpath": "/author/assignedAuthor/representedOrganization/name",
+        "translation": "NO",
+        "valueSet": "N"
+      },
+      {
+        "label": "Author Time",
+        "xpath": "/author/time/@value",
+        "translation": "NO",
+        "valueSet": "N"
+      }
+    ]
+  },
+  {
+    "section": "Custodian",
+    "sectionCode": "N/A",
+    "fields": [
+      {
+        "label": "Custodian Name",
+        "xpath": "/custodian/assignedCustodian/representedCustodianOrganization/name",
+        "translation": "NO",
+        "valueSet": "N"
+      }
+    ]
+  },
+  {
+    "section": "Language Information",
+    "sectionCode": "N/A",
+    "fields": [
+      {
+        "label": "Language Code",
+        "xpath": "/languageCode/@code",
+        "translation": "NO",
+        "valueSet": "Y"
+      }
+    ]
+  },
+  {
+    "section": "Legal Authenticator",
+    "sectionCode": "N/A",
+    "fields": [
+      {
+        "label": "Legal Authenticator Name",
+        "xpath": "/legalAuthenticator/assignedEntity/assignedPerson/name",
+        "translation": "NO",
+        "valueSet": "N"
+      },
+      {
+        "label": "Legal Authenticator Institution",
+        "xpath": "/legalAuthenticator/assignedEntity/representedOrganization/name",
+        "translation": "NO",
+        "valueSet": "N"
+      },
+      {
+        "label": "Legal Authenticator Time",
+        "xpath": "/legalAuthenticator/time/@value",
+        "translation": "NO",
+        "valueSet": "N"
+      }
+    ]
+  },
+  {
+    "section": "Allergies",
+    "sectionCode": "48765-2",
+    "fields": [
+      {
+        "label": "Allergen Code",
+        "xpath": "value/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Allergen DisplayName",
+        "xpath": "value/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Allergen OriginalText",
+        "xpath": "value/originalText",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Allergy Type",
+        "xpath": "participant/participantRole/code/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Reaction Code",
+        "xpath": "entryRelationship/observation/code/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Reaction DisplayName",
+        "xpath": "entryRelationship/observation/code/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      }
+    ]
+  },
+  {
+    "section": "Problems",
+    "sectionCode": "11450-4",
+    "fields": [
+      {
+        "label": "Problem Code",
+        "xpath": "value/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Problem DisplayName",
+        "xpath": "value/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Problem OriginalText",
+        "xpath": "value/originalText",
+        "translation": "YES",
+        "valueSet": "YES"
+      }
+    ]
+  },
+  {
+    "section": "Medications",
+    "sectionCode": "10160-0",
+    "fields": [
+      {
+        "label": "Medication Code",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/code/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Medication DisplayName",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/code/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Medication OriginalText",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/code/originalText",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Medication Name",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/name",
+        "translation": "YES",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Medication Description",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:desc",
+        "translation": "YES",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Dose Form Code",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:formCode/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Dose Form Name",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:formCode/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Package Quantity",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:asContent/pharm:quantity/@value",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Package Unit",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:asContent/pharm:quantity/@unit",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Container Form Code",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:asContent/pharm:containerPackagedProduct/pharm:formCode/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Container Form Name",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:asContent/pharm:containerPackagedProduct/pharm:formCode/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Active Ingredient Code",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:ingredient/pharm:ingredientSubstance/pharm:code/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Active Ingredient Name",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:ingredient/pharm:ingredientSubstance/pharm:name",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Ingredient Strength Numerator",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:ingredient/pharm:quantity/numerator/@value",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Ingredient Strength Numerator Unit",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:ingredient/pharm:quantity/numerator/@unit",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Ingredient Strength Denominator",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:ingredient/pharm:quantity/denominator/@value",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Ingredient Strength Denominator Unit",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/pharm:ingredient/pharm:quantity/denominator/@unit",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Dose Quantity Low",
+        "xpath": "doseQuantity/low/@value",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Dose Quantity Low Unit",
+        "xpath": "doseQuantity/low/@unit",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Dose Quantity High",
+        "xpath": "doseQuantity/high/@value",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Dose Quantity High Unit",
+        "xpath": "doseQuantity/high/@unit",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Route Code",
+        "xpath": "routeCode/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Route Name",
+        "xpath": "routeCode/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Frequency Period Value",
+        "xpath": "effectiveTime/period/@value",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Frequency Period Unit",
+        "xpath": "effectiveTime/period/@unit",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Treatment Start Date",
+        "xpath": "effectiveTime/low/@value",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Treatment End Date",
+        "xpath": "effectiveTime/high/@value",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Status Code",
+        "xpath": "statusCode/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Indication Code",
+        "xpath": "entryRelationship[@typeCode='RSON']/observation/value/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Indication Text",
+        "xpath": "entryRelationship[@typeCode='RSON']/observation/value/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      }
+    ]
+  },
+  {
+    "section": "Procedures",
+    "sectionCode": "47519-4",
+    "fields": [
+      {
+        "label": "Procedure Code",
+        "xpath": "code/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Procedure DisplayName",
+        "xpath": "code/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Procedure OriginalText",
+        "xpath": "code/originalText",
+        "translation": "YES",
+        "valueSet": "YES"
+      }
+    ]
+  },
+  {
+    "section": "Immunizations",
+    "sectionCode": "11369-6",
+    "fields": [
+      {
+        "label": "Immunization Code",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/code/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Immunization DisplayName",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/code/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Immunization OriginalText",
+        "xpath": "consumable/manufacturedProduct/manufacturedMaterial/code/originalText",
+        "translation": "YES",
+        "valueSet": "YES"
+      }
+    ]
+  },
+  {
+    "section": "Laboratory Results",
+    "sectionCode": "30954-2",
+    "fields": [
+      {
+        "label": "Lab Result Code",
+        "xpath": "component/observation/code/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Lab Result DisplayName",
+        "xpath": "component/observation/code/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Lab Result OriginalText",
+        "xpath": "component/observation/code/originalText",
+        "translation": "YES",
+        "valueSet": "YES"
+      }
+    ]
+  },
+  {
+    "section": "Medical Devices",
+    "sectionCode": "46264-8",
+    "fields": [
+      {
+        "label": "Device Code",
+        "xpath": "participant/participantRole/playingDevice/code/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Device DisplayName",
+        "xpath": "participant/participantRole/playingDevice/code/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Device OriginalText",
+        "xpath": "participant/participantRole/playingDevice/code/originalText",
+        "translation": "YES",
+        "valueSet": "YES"
+      }
+    ]
+  }
 ]

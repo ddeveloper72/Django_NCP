@@ -16,6 +16,7 @@ import logging
 
 from ..models import PatientData
 from ..services.enhanced_cda_translation_service import EnhancedCDATranslationService
+from ..services.enhanced_cda_processor import EnhancedCDAProcessor
 from translation_services.core import TranslationServiceFactory
 
 logger = logging.getLogger(__name__)
@@ -57,10 +58,32 @@ class EnhancedCDADocumentView(View):
                 cda_document, source_language
             )
 
+            # Process CDA for comprehensive clinical data extraction
+            cda_processor = EnhancedCDAProcessor()
+            clinical_sections = cda_processor.process_clinical_sections(
+                cda_document, source_language
+            )
+
+            # Extract medications specifically for enhanced display
+            medications = []
+            if clinical_sections and 'sections' in clinical_sections:
+                for section in clinical_sections['sections']:
+                    if 'structured_data' in section:
+                        section_title = section.get('title', {})
+                        if isinstance(section_title, dict):
+                            title_text = section_title.get('original', '')
+                        else:
+                            title_text = str(section_title)
+                        
+                        if 'medication' in title_text.lower():
+                            medications.extend(section['structured_data'])
+
             # Prepare context for template
             context = {
                 "patient_data": patient_data,
                 "translated_document": translated_document,
+                "clinical_sections": clinical_sections,
+                "medications": medications,
                 "source_language": source_language,
                 "target_language": target_language,
                 "available_languages": ["en", "fr", "de", "es", "it"],
