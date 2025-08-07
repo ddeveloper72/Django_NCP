@@ -31,41 +31,43 @@ def prepare_enhanced_section_data(sections):
     """
     Pre-process sections for template display
     Handles all value set lookups and field processing in Python
-    
+
     Args:
         sections: Raw sections from enhanced CDA processor
-    
+
     Returns:
         dict: Processed sections ready for simple template display
     """
     processed_sections = []
-    
+
     for section in sections:
         processed_section = {
-            'title': section.get('title', 'Unknown Section'),
-            'type': section.get('type', 'unknown'),
-            'section_code': section.get('section_code', ''),
-            'entries': [],
-            'has_entries': False,
-            'medical_terminology_count': 0,
-            'coded_entries_count': 0
+            "title": section.get("title", "Unknown Section"),
+            "type": section.get("type", "unknown"),
+            "section_code": section.get("section_code", ""),
+            "entries": [],
+            "has_entries": False,
+            "medical_terminology_count": 0,
+            "coded_entries_count": 0,
         }
-        
+
         # Process entries with proper field lookups
-        if section.get('table_data'):
-            for entry in section.get('table_data', []):
-                processed_entry = process_entry_for_display(entry, section.get('section_code', ''))
-                processed_section['entries'].append(processed_entry)
-                
+        if section.get("table_data"):
+            for entry in section.get("table_data", []):
+                processed_entry = process_entry_for_display(
+                    entry, section.get("section_code", "")
+                )
+                processed_section["entries"].append(processed_entry)
+
                 # Update metrics
-                if processed_entry.get('has_medical_terminology'):
-                    processed_section['medical_terminology_count'] += 1
-                if processed_entry.get('is_coded'):
-                    processed_section['coded_entries_count'] += 1
-        
-        processed_section['has_entries'] = len(processed_section['entries']) > 0
+                if processed_entry.get("has_medical_terminology"):
+                    processed_section["medical_terminology_count"] += 1
+                if processed_entry.get("is_coded"):
+                    processed_section["coded_entries_count"] += 1
+
+        processed_section["has_entries"] = len(processed_section["entries"]) > 0
         processed_sections.append(processed_section)
-    
+
     return processed_sections
 
 
@@ -73,25 +75,25 @@ def process_entry_for_display(entry, section_code):
     """
     Process a single entry for template display
     Handles all field lookups and terminology resolution in Python
-    
+
     Args:
         entry: Raw entry from CDA processor
         section_code: Section code for specialized processing
-    
+
     Returns:
         dict: Processed entry with resolved terminology and display fields
     """
     processed_entry = {
-        'original_entry': entry,
-        'display_fields': {},
-        'has_medical_terminology': False,
-        'is_coded': False,
-        'display_name': 'Unknown Item',
-        'additional_info': {}
+        "original_entry": entry,
+        "display_fields": {},
+        "has_medical_terminology": False,
+        "is_coded": False,
+        "display_name": "Unknown Item",
+        "additional_info": {},
     }
-    
-    fields = entry.get('fields', {})
-    
+
+    fields = entry.get("fields", {})
+
     # Handle different section types with specialized processing
     if section_code == "48765-2":  # Allergies
         processed_entry.update(process_allergy_entry(fields))
@@ -101,284 +103,321 @@ def process_entry_for_display(entry, section_code):
         processed_entry.update(process_problem_entry(fields))
     else:
         processed_entry.update(process_generic_entry(fields))
-    
+
     return processed_entry
 
 
 def process_allergy_entry(fields):
     """Process allergy-specific fields with proper terminology lookup"""
     result = {
-        'display_name': 'Unknown Allergen',
-        'reaction': 'Unknown Reaction',
-        'severity': 'Unknown Severity',
-        'status': 'Active',
-        'has_medical_terminology': False,
-        'original_value': None
+        "display_name": "Unknown Allergen",
+        "reaction": "Unknown Reaction",
+        "severity": "Unknown Severity",
+        "status": "Active",
+        "has_medical_terminology": False,
+        "original_value": None,
     }
-    
+
     # Try multiple field name patterns for allergen (handles multilingual field names)
-    allergen_patterns = ['Allergen DisplayName', 'Allergen Code', 'Allergène']
+    allergen_patterns = ["Allergen DisplayName", "Allergen Code", "Allergène"]
     for pattern in allergen_patterns:
         if pattern in fields:
             field_data = fields[pattern]
             if isinstance(field_data, dict):
                 # Check if this field has value set information
-                if field_data.get('has_valueset'):
-                    result['has_medical_terminology'] = True
-                    result['original_value'] = field_data.get('original_value')
-                
-                display_name = field_data.get('value') or field_data.get('display_name')
-                if display_name and display_name not in ['Unknown', 'Unknown Allergen']:
-                    result['display_name'] = display_name
+                if field_data.get("has_valueset"):
+                    result["has_medical_terminology"] = True
+                    result["original_value"] = field_data.get("original_value")
+
+                display_name = field_data.get("value") or field_data.get("display_name")
+                if display_name and display_name not in ["Unknown", "Unknown Allergen"]:
+                    result["display_name"] = display_name
                     break
-            elif isinstance(field_data, str) and field_data not in ['Unknown', 'Unknown Allergen']:
-                result['display_name'] = field_data
+            elif isinstance(field_data, str) and field_data not in [
+                "Unknown",
+                "Unknown Allergen",
+            ]:
+                result["display_name"] = field_data
                 break
-    
+
     # Process reaction information
-    reaction_patterns = ['Reaction DisplayName', 'Reaction Code', 'Réaction']
+    reaction_patterns = ["Reaction DisplayName", "Reaction Code", "Réaction"]
     for pattern in reaction_patterns:
         if pattern in fields:
             reaction_data = fields[pattern]
             if isinstance(reaction_data, dict):
-                if reaction_data.get('has_valueset'):
-                    result['has_medical_terminology'] = True
-                
-                reaction_name = reaction_data.get('value') or reaction_data.get('display_name')
-                if reaction_name and reaction_name not in ['Unknown', 'Unknown Reaction']:
-                    result['reaction'] = reaction_name
+                if reaction_data.get("has_valueset"):
+                    result["has_medical_terminology"] = True
+
+                reaction_name = reaction_data.get("value") or reaction_data.get(
+                    "display_name"
+                )
+                if reaction_name and reaction_name not in [
+                    "Unknown",
+                    "Unknown Reaction",
+                ]:
+                    result["reaction"] = reaction_name
                     break
-            elif isinstance(reaction_data, str) and reaction_data not in ['Unknown', 'Unknown Reaction']:
-                result['reaction'] = reaction_data
+            elif isinstance(reaction_data, str) and reaction_data not in [
+                "Unknown",
+                "Unknown Reaction",
+            ]:
+                result["reaction"] = reaction_data
                 break
-    
+
     # Process severity
-    severity_patterns = ['Severity', 'Sévérité']
+    severity_patterns = ["Severity", "Sévérité"]
     for pattern in severity_patterns:
         if pattern in fields:
             severity_data = fields[pattern]
             if isinstance(severity_data, dict):
-                severity_value = severity_data.get('value') or severity_data.get('display_name')
-                if severity_value and severity_value != 'Unknown':
-                    result['severity'] = severity_value
+                severity_value = severity_data.get("value") or severity_data.get(
+                    "display_name"
+                )
+                if severity_value and severity_value != "Unknown":
+                    result["severity"] = severity_value
                     break
-            elif isinstance(severity_data, str) and severity_data != 'Unknown':
-                result['severity'] = severity_data
+            elif isinstance(severity_data, str) and severity_data != "Unknown":
+                result["severity"] = severity_data
                 break
-    
+
     # Process status
-    status_patterns = ['Status', 'Statut']
+    status_patterns = ["Status", "Statut"]
     for pattern in status_patterns:
         if pattern in fields:
             status_data = fields[pattern]
             if isinstance(status_data, dict):
-                status_value = status_data.get('value') or status_data.get('display_name')
+                status_value = status_data.get("value") or status_data.get(
+                    "display_name"
+                )
                 if status_value:
-                    result['status'] = status_value
+                    result["status"] = status_value
                     break
             elif isinstance(status_data, str):
-                result['status'] = status_data
+                result["status"] = status_data
                 break
-    
+
     return result
 
 
 def process_medication_entry(fields):
     """Process medication-specific fields with proper terminology lookup"""
     result = {
-        'display_name': 'Unknown Medication',
-        'dosage': 'Not specified',
-        'frequency': 'Not specified',
-        'status': 'Active',
-        'has_medical_terminology': False,
-        'original_value': None
+        "display_name": "Unknown Medication",
+        "dosage": "Not specified",
+        "frequency": "Not specified",
+        "status": "Active",
+        "has_medical_terminology": False,
+        "original_value": None,
     }
-    
+
     # Try multiple field name patterns for medication
-    medication_patterns = ['Medication DisplayName', 'Medication Code', 'Médicament']
+    medication_patterns = ["Medication DisplayName", "Medication Code", "Médicament"]
     for pattern in medication_patterns:
         if pattern in fields:
             field_data = fields[pattern]
             if isinstance(field_data, dict):
-                if field_data.get('has_valueset'):
-                    result['has_medical_terminology'] = True
-                    result['original_value'] = field_data.get('original_value')
-                
-                display_name = field_data.get('value') or field_data.get('display_name')
-                if display_name and display_name not in ['Unknown', 'Unknown Medication']:
-                    result['display_name'] = display_name
+                if field_data.get("has_valueset"):
+                    result["has_medical_terminology"] = True
+                    result["original_value"] = field_data.get("original_value")
+
+                display_name = field_data.get("value") or field_data.get("display_name")
+                if display_name and display_name not in [
+                    "Unknown",
+                    "Unknown Medication",
+                ]:
+                    result["display_name"] = display_name
                     break
-            elif isinstance(field_data, str) and field_data not in ['Unknown', 'Unknown Medication']:
-                result['display_name'] = field_data
+            elif isinstance(field_data, str) and field_data not in [
+                "Unknown",
+                "Unknown Medication",
+            ]:
+                result["display_name"] = field_data
                 break
-    
+
     # Process dosage
-    if 'Dosage' in fields:
-        dosage_data = fields['Dosage']
+    if "Dosage" in fields:
+        dosage_data = fields["Dosage"]
         if isinstance(dosage_data, dict):
-            dosage_value = dosage_data.get('value') or dosage_data.get('display_name')
+            dosage_value = dosage_data.get("value") or dosage_data.get("display_name")
             if dosage_value:
-                result['dosage'] = dosage_value
+                result["dosage"] = dosage_value
         elif isinstance(dosage_data, str):
-            result['dosage'] = dosage_data
-    
+            result["dosage"] = dosage_data
+
     # Process frequency
-    frequency_patterns = ['Frequency', 'Fréquence']
+    frequency_patterns = ["Frequency", "Fréquence"]
     for pattern in frequency_patterns:
         if pattern in fields:
             frequency_data = fields[pattern]
             if isinstance(frequency_data, dict):
-                frequency_value = frequency_data.get('value') or frequency_data.get('display_name')
+                frequency_value = frequency_data.get("value") or frequency_data.get(
+                    "display_name"
+                )
                 if frequency_value:
-                    result['frequency'] = frequency_value
+                    result["frequency"] = frequency_value
                     break
             elif isinstance(frequency_data, str):
-                result['frequency'] = frequency_data
+                result["frequency"] = frequency_data
                 break
-    
+
     # Process status
-    status_patterns = ['Status', 'Statut']
+    status_patterns = ["Status", "Statut"]
     for pattern in status_patterns:
         if pattern in fields:
             status_data = fields[pattern]
             if isinstance(status_data, dict):
-                status_value = status_data.get('value') or status_data.get('display_name')
+                status_value = status_data.get("value") or status_data.get(
+                    "display_name"
+                )
                 if status_value:
-                    result['status'] = status_value
+                    result["status"] = status_value
                     break
             elif isinstance(status_data, str):
-                result['status'] = status_data
+                result["status"] = status_data
                 break
-    
+
     return result
 
 
 def process_problem_entry(fields):
     """Process problem/condition-specific fields with proper terminology lookup"""
     result = {
-        'display_name': 'Unknown Condition',
-        'onset_date': 'Not specified',
-        'status': 'Active',
-        'code': 'No Code',
-        'has_medical_terminology': False,
-        'original_value': None
+        "display_name": "Unknown Condition",
+        "onset_date": "Not specified",
+        "status": "Active",
+        "code": "No Code",
+        "has_medical_terminology": False,
+        "original_value": None,
     }
-    
+
     # Try multiple field name patterns for problems/conditions
-    problem_patterns = ['Problem DisplayName', 'Problem Code', 'Condition']
+    problem_patterns = ["Problem DisplayName", "Problem Code", "Condition"]
     for pattern in problem_patterns:
         if pattern in fields:
             field_data = fields[pattern]
             if isinstance(field_data, dict):
-                if field_data.get('has_valueset'):
-                    result['has_medical_terminology'] = True
-                    result['original_value'] = field_data.get('original_value')
-                
-                display_name = field_data.get('value') or field_data.get('display_name')
-                if display_name and display_name not in ['Unknown', 'Unknown Condition']:
-                    result['display_name'] = display_name
+                if field_data.get("has_valueset"):
+                    result["has_medical_terminology"] = True
+                    result["original_value"] = field_data.get("original_value")
+
+                display_name = field_data.get("value") or field_data.get("display_name")
+                if display_name and display_name not in [
+                    "Unknown",
+                    "Unknown Condition",
+                ]:
+                    result["display_name"] = display_name
                     break
-            elif isinstance(field_data, str) and field_data not in ['Unknown', 'Unknown Condition']:
-                result['display_name'] = field_data
+            elif isinstance(field_data, str) and field_data not in [
+                "Unknown",
+                "Unknown Condition",
+            ]:
+                result["display_name"] = field_data
                 break
-    
+
     # Process onset date
-    onset_patterns = ['Onset Date', 'Date de diagnostic']
+    onset_patterns = ["Onset Date", "Date de diagnostic"]
     for pattern in onset_patterns:
         if pattern in fields:
             onset_data = fields[pattern]
             if isinstance(onset_data, dict):
-                onset_value = onset_data.get('value') or onset_data.get('display_name')
+                onset_value = onset_data.get("value") or onset_data.get("display_name")
                 if onset_value:
-                    result['onset_date'] = onset_value
+                    result["onset_date"] = onset_value
                     break
             elif isinstance(onset_data, str):
-                result['onset_date'] = onset_data
+                result["onset_date"] = onset_data
                 break
-    
+
     # Process status
-    status_patterns = ['Status', 'Statut']
+    status_patterns = ["Status", "Statut"]
     for pattern in status_patterns:
         if pattern in fields:
             status_data = fields[pattern]
             if isinstance(status_data, dict):
-                status_value = status_data.get('value') or status_data.get('display_name')
+                status_value = status_data.get("value") or status_data.get(
+                    "display_name"
+                )
                 if status_value:
-                    result['status'] = status_value
+                    result["status"] = status_value
                     break
             elif isinstance(status_data, str):
-                result['status'] = status_data
+                result["status"] = status_data
                 break
-    
+
     # Process code
-    code_patterns = ['Code', 'Code ICD-10']
+    code_patterns = ["Code", "Code ICD-10"]
     for pattern in code_patterns:
         if pattern in fields:
             code_data = fields[pattern]
             if isinstance(code_data, dict):
-                code_value = code_data.get('value') or code_data.get('display_name')
+                code_value = code_data.get("value") or code_data.get("display_name")
                 if code_value:
-                    result['code'] = code_value
+                    result["code"] = code_value
                     break
             elif isinstance(code_data, str):
-                result['code'] = code_data
+                result["code"] = code_data
                 break
-    
+
     return result
 
 
 def process_generic_entry(fields):
     """Process generic entry fields with basic terminology lookup"""
     result = {
-        'display_name': 'Unknown Item',
-        'has_medical_terminology': False,
-        'field_data': []
+        "display_name": "Unknown Item",
+        "has_medical_terminology": False,
+        "field_data": [],
     }
-    
+
     # Try common field patterns
-    common_patterns = ['DisplayName', 'Name', 'Title', 'Description', 'Value']
-    
+    common_patterns = ["DisplayName", "Name", "Title", "Description", "Value"]
+
     for pattern in common_patterns:
         if pattern in fields:
             field_data = fields[pattern]
             if isinstance(field_data, dict):
-                if field_data.get('has_valueset'):
-                    result['has_medical_terminology'] = True
-                
-                display_name = field_data.get('value') or field_data.get('display_name')
-                if display_name and display_name != 'Unknown':
-                    result['display_name'] = display_name
+                if field_data.get("has_valueset"):
+                    result["has_medical_terminology"] = True
+
+                display_name = field_data.get("value") or field_data.get("display_name")
+                if display_name and display_name != "Unknown":
+                    result["display_name"] = display_name
                     break
-            elif isinstance(field_data, str) and field_data != 'Unknown':
-                result['display_name'] = field_data
+            elif isinstance(field_data, str) and field_data != "Unknown":
+                result["display_name"] = field_data
                 break
-    
+
     # Collect first 4 fields for generic display
     field_count = 0
     for field_name, field_info in fields.items():
         if field_count >= 4:
             break
-        
-        field_value = 'Unknown'
+
+        field_value = "Unknown"
         has_valueset = False
         original_value = None
-        
+
         if isinstance(field_info, dict):
-            field_value = field_info.get('value') or field_info.get('display_name') or 'Unknown'
-            has_valueset = field_info.get('has_valueset', False)
-            original_value = field_info.get('original_value')
+            field_value = (
+                field_info.get("value") or field_info.get("display_name") or "Unknown"
+            )
+            has_valueset = field_info.get("has_valueset", False)
+            original_value = field_info.get("original_value")
         elif isinstance(field_info, str):
             field_value = field_info
-        
-        result['field_data'].append({
-            'name': field_name,
-            'value': field_value,
-            'has_valueset': has_valueset,
-            'original_value': original_value
-        })
-        
+
+        result["field_data"].append(
+            {
+                "name": field_name,
+                "value": field_value,
+                "has_valueset": has_valueset,
+                "original_value": original_value,
+            }
+        )
+
         field_count += 1
-    
+
     return result
 
 
@@ -1335,16 +1374,18 @@ def patient_cda_view(request, patient_id):
         )
 
         # REFACTOR: Process sections for template display (move complex logic from template to Python)
-        if translation_result and translation_result.get('sections'):
+        if translation_result and translation_result.get("sections"):
             processed_sections = prepare_enhanced_section_data(
-                translation_result.get('sections', [])
+                translation_result.get("sections", [])
             )
-            context['processed_sections'] = processed_sections
-            logger.info(f"Processed {len(processed_sections)} sections for simplified template display")
+            context["processed_sections"] = processed_sections
+            logger.info(
+                f"Processed {len(processed_sections)} sections for simplified template display"
+            )
         else:
-            context['processed_sections'] = []
+            context["processed_sections"] = []
 
-        return render(request, "patient_data/patient_cda.html", context, using="jinja2")
+        return render(request, "patient_data/enhanced_patient_cda.html", context, using="jinja2")
 
     except Exception as e:
         logger.error(
@@ -1393,7 +1434,7 @@ def patient_cda_view(request, patient_id):
             messages.error(request, f"Technical error loading CDA document: {str(e)}")
 
             return render(
-                request, "patient_data/patient_cda.html", context, using="jinja2"
+                request, "patient_data/enhanced_patient_cda.html", context, using="jinja2"
             )
 
         except Exception as render_error:
