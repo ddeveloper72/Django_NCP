@@ -15,8 +15,9 @@ logger = logging.getLogger(__name__)
 class EnhancedCDAProcessor:
     """Enhanced processor for CDA clinical sections with proper titles and tables"""
 
-    def __init__(self, target_language: str = "en"):
+    def __init__(self, target_language: str = "en", country_code: str = None):
         self.target_language = target_language
+        self.country_code = country_code
 
         # Initialize CTS-compliant terminology service
         from translation_services.terminology_translator import TerminologyTranslator
@@ -24,6 +25,11 @@ class EnhancedCDAProcessor:
         self.terminology_service = TerminologyTranslator(
             target_language=target_language
         )
+
+        # Initialize country-specific mapper
+        from .country_specific_cda_mapper import CountrySpecificCDAMapper
+
+        self.country_mapper = CountrySpecificCDAMapper()
 
         # Import MVC models for Central Terminology Server integration
         from translation_services.mvc_models import (
@@ -37,7 +43,7 @@ class EnhancedCDAProcessor:
         self.ConceptTranslation = ConceptTranslation
 
         logger.info(
-            f"Initialized Enhanced CDA Processor with CTS-compliant terminology service for language: {target_language}"
+            f"Initialized Enhanced CDA Processor with CTS-compliant terminology service for language: {target_language}, country: {country_code}"
         )
 
     def process_clinical_sections(
@@ -90,6 +96,7 @@ class EnhancedCDAProcessor:
                 "hl7": "urn:hl7-org:v3",
                 "ext": "urn:hl7-EE-DL-Ext:v1",
                 "xsi": "http://www.w3.org/2001/XMLSchema-instance",
+                "pharm": "urn:hl7-org:pharm",
             }
 
             sections = []
@@ -97,6 +104,144 @@ class EnhancedCDAProcessor:
             medical_terms_count = 0
             coded_sections_count = 0
 
+            # Try country-specific extraction first if country code is available
+            if self.country_code:
+                logger.info(
+                    f"Attempting country-specific extraction for {self.country_code}"
+                )
+                try:
+                    country_data = self.country_mapper.extract_clinical_data(
+                        xml_content, self.country_code
+                    )
+
+                    # Debug log the extracted data (reduced output)
+                    logger.info(f"Country-specific extraction results: {country_data}")
+
+                    # Count total items for quick summary
+                    total_items = sum(len(items) for items in country_data.values())
+
+                    # Only write to debug file if needed, no console spam
+                    if total_items > 0:
+                        logger.info(
+                            f"✅ Country extraction found {total_items} clinical items"
+                        )
+                        try:
+                            debug_summary = f"Malta extraction: {total_items} items\n"
+                            for section_name, items in country_data.items():
+                                if items:
+                                    debug_summary += f"  {section_name}: {len(items)}\n"
+
+                            with open(
+                                "malta_extraction_debug.txt", "w", encoding="utf-8"
+                            ) as f:
+                                f.write(debug_summary)
+                        except Exception:
+                            pass  # Ignore file write errors
+                    else:
+                        logger.info("❌ Country extraction found no clinical items")
+
+                    if any(country_data.values()):  # If any data was extracted
+                        logger.info(
+                            f"Successfully extracted data using {self.country_code} patterns"
+                        )
+                        sections = self._convert_country_data_to_sections(country_data)
+
+                        # Debug log the converted sections
+                        logger.info(f"Converted to {len(sections)} sections")
+                        for section in sections:
+                            logger.info(
+                                f"Section {section['title']}: {section.get('medical_terms_count', 0)} items"
+                            )
+
+                        sections_count = len(sections)
+                        coded_sections_count = len(
+                            [s for s in sections if s.get("is_coded_section")]
+                        )
+                        medical_terms_count = sum(
+                            s.get("medical_terms_count", 0) for s in sections
+                        )
+
+                        return {
+                            "success": True,
+                            "content_type": "xml_country_specific",
+                            "sections": sections,
+                            "sections_count": sections_count,
+                            "medical_terms_count": medical_terms_count,
+                            "coded_sections_count": coded_sections_count,
+                            "coded_sections_percentage": (
+                                int((coded_sections_count / sections_count * 100))
+                                if sections_count > 0
+                                else 0
+                            ),
+                            "uses_coded_sections": coded_sections_count > 0,
+                            "translation_quality": "High",
+                            "extraction_method": "country_specific",
+                        }
+                except Exception as e:
+                    logger.warning(
+                        f"Country-specific extraction failed, trying document mapping: {e}"
+                    )
+
+                    # Try document-specific mapping approach
+                    try:
+                        from .document_mapper_integration import (
+                            DocumentMapperIntegration,
+                        )
+
+                        logger.info("Attempting document-specific mapping as fallback")
+                        document_integration = DocumentMapperIntegration()
+
+                        # Extract patient ID from XML if available
+                        patient_id = self._extract_patient_id(xml_content)
+
+                        document_data = (
+                            document_integration.extract_clinical_data_with_mapping(
+                                xml_content, self.country_code, patient_id
+                            )
+                        )
+
+                        if any(document_data.values()):  # If any data was extracted
+                            logger.info(
+                                "Successfully extracted data using document mapping"
+                            )
+                            sections = self._convert_country_data_to_sections(
+                                document_data
+                            )
+
+                            sections_count = len(sections)
+                            coded_sections_count = len(
+                                [s for s in sections if s.get("is_coded_section")]
+                            )
+                            medical_terms_count = sum(
+                                s.get("medical_terms_count", 0) for s in sections
+                            )
+
+                            return {
+                                "success": True,
+                                "content_type": "xml_document_mapping",
+                                "sections": sections,
+                                "sections_count": sections_count,
+                                "medical_terms_count": medical_terms_count,
+                                "coded_sections_count": coded_sections_count,
+                                "coded_sections_percentage": (
+                                    int((coded_sections_count / sections_count * 100))
+                                    if sections_count > 0
+                                    else 0
+                                ),
+                                "uses_coded_sections": coded_sections_count > 0,
+                                "translation_quality": "High",
+                                "extraction_method": "document_mapping",
+                            }
+                        else:
+                            logger.info(
+                                "Document mapping extracted no data, falling back to generic"
+                            )
+
+                    except Exception as doc_e:
+                        logger.warning(f"Document mapping also failed: {doc_e}")
+
+            # Fall back to generic section parsing
+            logger.info("Using generic XML section parsing")
             # Find all section elements
             section_elements = root.findall(".//hl7:section", namespaces)
 
@@ -138,6 +283,56 @@ class EnhancedCDAProcessor:
         except ET.ParseError as e:
             logger.error(f"XML parsing error: {e}")
             return {"success": False, "error": f"XML parsing error: {e}"}
+
+    def _convert_country_data_to_sections(
+        self, country_data: Dict[str, List]
+    ) -> List[Dict]:
+        """Convert country-specific extracted data to section format"""
+        sections = []
+
+        # Convert allergies
+        if country_data.get("allergies"):
+            sections.append(
+                {
+                    "title": "Allergies and Adverse Reactions",
+                    "section_code": "48765-2",
+                    "type": "allergies",
+                    "table_data": country_data["allergies"],
+                    "is_coded_section": True,
+                    "medical_terms_count": len(country_data["allergies"]),
+                    "has_entries": len(country_data["allergies"]) > 0,
+                }
+            )
+
+        # Convert medications
+        if country_data.get("medications"):
+            sections.append(
+                {
+                    "title": "Current Medications",
+                    "section_code": "10160-0",
+                    "type": "medications",
+                    "table_data": country_data["medications"],
+                    "is_coded_section": True,
+                    "medical_terms_count": len(country_data["medications"]),
+                    "has_entries": len(country_data["medications"]) > 0,
+                }
+            )
+
+        # Convert problems
+        if country_data.get("problems"):
+            sections.append(
+                {
+                    "title": "Problem List",
+                    "section_code": "11450-4",
+                    "type": "problems",
+                    "table_data": country_data["problems"],
+                    "is_coded_section": True,
+                    "medical_terms_count": len(country_data["problems"]),
+                    "has_entries": len(country_data["problems"]) > 0,
+                }
+            )
+
+        return sections
 
     def _extract_xml_section(
         self, section_elem, namespaces: Dict, source_language: str
@@ -582,20 +777,110 @@ class EnhancedCDAProcessor:
         if field_lower == header_lower:
             return True
 
-        # Partial matches for common field types
+        # Enhanced field mappings for IE patient data and other formats
         field_mappings = {
-            "allergen": ["allergène", "allergen", "substance", "agent"],
-            "reaction": ["réaction", "reaction", "symptôme", "symptom"],
-            "medication": ["médicament", "medication", "drug", "medicine"],
+            # Medication mappings
+            "medication": [
+                "médicament",
+                "medication",
+                "drug",
+                "medicine",
+                "name",
+                "nom",
+            ],
+            "medication code": ["medication code", "code", "drug code", "name", "nom"],
+            "medication displayname": [
+                "medication name",
+                "name",
+                "nom",
+                "drug name",
+                "medication displayname",
+            ],
+            "medication originaltext": ["name", "nom", "medication name", "drug name"],
+            # Allergy mappings
+            "allergen": [
+                "allergène",
+                "allergen",
+                "substance",
+                "agent",
+                "causative agent",
+            ],
+            "allergen code": ["allergen code", "agent", "causative agent", "substance"],
+            "allergen displayname": [
+                "agent",
+                "allergen",
+                "substance",
+                "causative agent",
+            ],
+            "allergen originaltext": ["agent", "allergen", "substance", "description"],
+            "allergy type": ["reaction type", "allergy type", "type", "propensity"],
+            "reaction": [
+                "réaction",
+                "reaction",
+                "symptôme",
+                "symptom",
+                "clinical manifestation",
+                "manifestation",
+            ],
+            "reaction code": [
+                "reaction code",
+                "clinical manifestation",
+                "manifestation",
+                "symptom",
+            ],
+            "reaction displayname": [
+                "clinical manifestation",
+                "manifestation",
+                "symptom",
+                "reaction",
+            ],
+            # Problem mappings
             "problem": ["problème", "problem", "condition", "diagnostic"],
-            "code": ["code"],
-            "displayname": ["nom", "name", "libellé", "display", "description"],
+            "problem code": ["problem code", "condition code", "diagnostic code"],
+            "problem displayname": [
+                "problem",
+                "condition",
+                "diagnostic",
+                "description",
+            ],
+            # Procedure mappings
+            "procedure": ["procédure", "procedure", "intervention", "act"],
+            "procedure code": ["procedure code", "intervention code", "act code"],
+            "procedure displayname": [
+                "procedure",
+                "intervention",
+                "act",
+                "description",
+            ],
+            # Generic mappings
+            "code": ["code", "coded value"],
+            "displayname": [
+                "nom",
+                "name",
+                "libellé",
+                "display",
+                "description",
+                "designation",
+            ],
+            "originaltext": ["text", "original text", "description", "narrative"],
         }
 
+        # Check specific field mappings first
         for field_key, possible_headers in field_mappings.items():
             if field_key in field_lower:
                 for possible_header in possible_headers:
                     if possible_header in header_lower:
+                        return True
+
+        # Fallback: check for partial word matches
+        field_words = field_lower.split()
+        header_words = header_lower.split()
+
+        # If any significant word matches (length > 3), consider it a match
+        for field_word in field_words:
+            if len(field_word) > 3:  # Skip short words like "of", "the", etc.
+                for header_word in header_words:
+                    if field_word in header_word or header_word in field_word:
                         return True
 
         return False
@@ -951,16 +1236,10 @@ class EnhancedCDAProcessor:
                         continue
 
                     try:
-                        # Convert relative xpath to absolute path within entry
-                        if not xpath.startswith("//") and not xpath.startswith("./"):
-                            # Make relative to entry context
-                            entry_xpath = (
-                                f".//hl7:{xpath}"
-                                if not xpath.startswith("hl7:")
-                                else f".//{xpath}"
-                            )
-                        else:
-                            entry_xpath = xpath
+                        # Process XPath for CDA namespace - field mappings use simplified paths
+                        # Convert paths like "consumable/manufacturedProduct/code/@code"
+                        # to proper namespaced XPath ".//hl7:consumable/hl7:manufacturedProduct/hl7:code"
+                        entry_xpath = self._convert_field_xpath_to_namespaced(xpath)
 
                         # Extract value based on XPath
                         extracted_value = self._extract_field_with_valueset(
@@ -970,6 +1249,7 @@ class EnhancedCDAProcessor:
                             field_label,
                             has_valueset,
                             needs_translation,
+                            xpath,  # Pass original xpath for attribute handling
                         )
 
                         if extracted_value:
@@ -1006,21 +1286,24 @@ class EnhancedCDAProcessor:
     def _extract_field_with_valueset(
         self,
         entry_elem,
-        xpath: str,
+        namespaced_xpath: str,
         namespaces: Dict,
         field_label: str,
         has_valueset: bool,
         needs_translation: bool,
+        original_xpath: str = "",
     ) -> Optional[str]:
         """
         Extract field value and apply value set lookup if needed
+        namespaced_xpath: The converted XPath with hl7: prefixes
+        original_xpath: The original field mapper XPath (for attribute extraction)
         """
         try:
-            # Handle attribute extraction
-            if "/@" in xpath:
-                elem_path = xpath.split("/@")[0]
-                attr_name = xpath.split("/@")[1]
-                elem = entry_elem.find(elem_path, namespaces)
+            # Determine if we need attribute extraction from original xpath
+            if original_xpath and "/@" in original_xpath:
+                attr_name = original_xpath.split("/@")[1]
+                # Find element using namespaced xpath
+                elem = entry_elem.find(namespaced_xpath, namespaces)
                 if elem is not None:
                     raw_value = elem.get(attr_name)
                     if raw_value and has_valueset:
@@ -1032,7 +1315,7 @@ class EnhancedCDAProcessor:
                     return raw_value
             else:
                 # Element text extraction
-                elem = entry_elem.find(xpath, namespaces)
+                elem = entry_elem.find(namespaced_xpath, namespaces)
                 if elem is not None:
                     raw_value = elem.text
                     if raw_value and has_valueset:
@@ -1044,7 +1327,7 @@ class EnhancedCDAProcessor:
 
         except Exception as e:
             logger.warning(
-                f"Field extraction error for '{field_label}' with XPath '{xpath}': {e}"
+                f"Field extraction error for '{field_label}' with XPath '{namespaced_xpath}' (orig: '{original_xpath}'): {e}"
             )
 
         return None
@@ -1059,6 +1342,50 @@ class EnhancedCDAProcessor:
             "46264-8": "medical_device",  # Medical equipment
         }
         return section_type_map.get(section_code, "observation")
+
+    def _convert_field_xpath_to_namespaced(self, xpath: str) -> str:
+        """
+        Convert field mapper XPath to proper namespaced XPath for CDA extraction
+
+        Examples:
+        - "consumable/manufacturedProduct/code/@code"
+          -> ".//hl7:consumable/hl7:manufacturedProduct/hl7:code"
+        - "participant/participantRole/code/@code"
+          -> ".//hl7:participant/hl7:participantRole/hl7:code"
+        - "pharm:ingredient/pharm:ingredientSubstance/pharm:code/@code"
+          -> ".//pharm:ingredient/pharm:ingredientSubstance/pharm:code"
+        """
+        if not xpath:
+            return xpath
+
+        # Handle attribute extraction - split the attribute part
+        if "/@" in xpath:
+            element_path, attr_name = xpath.split("/@")
+            # Convert element path to namespaced XPath
+            path_parts = element_path.split("/")
+            namespaced_parts = []
+            for part in path_parts:
+                if part:
+                    # Check if already has namespace prefix
+                    if ":" in part:
+                        namespaced_parts.append(part)  # Keep existing namespace
+                    else:
+                        namespaced_parts.append(f"hl7:{part}")  # Add hl7 namespace
+            namespaced_xpath = ".//{}".format("/".join(namespaced_parts))
+        else:
+            # Just element path
+            path_parts = xpath.split("/")
+            namespaced_parts = []
+            for part in path_parts:
+                if part:
+                    # Check if already has namespace prefix
+                    if ":" in part:
+                        namespaced_parts.append(part)  # Keep existing namespace
+                    else:
+                        namespaced_parts.append(f"hl7:{part}")  # Add hl7 namespace
+            namespaced_xpath = ".//{}".format("/".join(namespaced_parts))
+
+        return namespaced_xpath
 
     def _lookup_valueset_term(self, code: str, field_label: str) -> Optional[str]:
         """
@@ -2465,6 +2792,42 @@ class EnhancedCDAProcessor:
         except Exception as e:
             logger.error(f"Error extracting patient identity: {e}")
             return patient_identity
+
+    def _extract_patient_id(self, xml_content: str) -> Optional[str]:
+        """
+        Extract patient ID from CDA XML content
+        """
+        try:
+            root = ET.fromstring(xml_content)
+            namespaces = self._get_xml_namespaces(root)
+
+            # Look for patient ID in various locations
+            patient_id_paths = [
+                ".//hl7:recordTarget/hl7:patientRole/hl7:id/@extension",
+                ".//hl7:recordTarget/hl7:patientRole/hl7:id/@root",
+                ".//hl7:patient/hl7:id/@extension",
+                ".//hl7:patient/hl7:id/@root",
+            ]
+
+            for path in patient_id_paths:
+                try:
+                    result = root.xpath(path, namespaces=namespaces)
+                    if result and result[0]:
+                        return str(result[0])
+                except:
+                    # Try with findall if xpath not available
+                    path_parts = path.replace("@", "").split("/")
+                    elements = root.findall("//".join(path_parts[:-1]), namespaces)
+                    for elem in elements:
+                        attr_name = path_parts[-1]
+                        if attr_name in elem.attrib:
+                            return elem.attrib[attr_name]
+
+            return None
+
+        except Exception as e:
+            logger.warning(f"Could not extract patient ID: {e}")
+            return None
 
     def _extract_administrative_data(
         self, root: ET.Element, namespaces: Dict
