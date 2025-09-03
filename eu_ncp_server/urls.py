@@ -16,9 +16,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 import json
 
-# Import demo clinical view
-from demo_clinical_view import demo_rich_clinical_data
-
 
 def home_view(request):
     """Home page with SMP source configuration"""
@@ -119,8 +116,6 @@ urlpatterns = [
     path("smp/", include("smp_client.urls")),
     # Patient data management
     path("patients/", include("patient_data.urls")),
-    # Demo clinical data view - shows rich medical terminology example
-    path("demo/clinical/", demo_rich_clinical_data, name="demo_clinical"),
     # Translation services API (temporarily disabled due to import errors)
     # path("api/translation/", include("translation_services.urls")),
 ]

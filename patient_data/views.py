@@ -2330,10 +2330,11 @@ def patient_cda_view(request, patient_id, cda_type=None):
 
     try:
         # Import the new CDA display service
-        from cda_display_service import CDADisplayService
+        # from cda_display_service import CDADisplayService  # TODO: Implement this service
 
         # Initialize the display service
-        display_service = CDADisplayService()
+        # display_service = CDADisplayService()  # TODO: Implement this service
+        display_service = None  # Temporarily disabled
 
         # Check if this is a database patient (from NCP gateway) or session patient
         try:

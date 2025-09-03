@@ -20,7 +20,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "eu_ncp_server.settings")
 django.setup()
 
 from ncp_gateway.models import Patient
-from cda_display_service import CDADisplayService
+# from cda_display_service import CDADisplayService  # TODO: Implement this service
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,8 @@ def clean_patient_cda_view(request, patient_id):
 
     try:
         # Initialize the display service
-        display_service = CDADisplayService()
+        # display_service = CDADisplayService()  # TODO: Implement this service
+        display_service = None  # Temporarily disabled
 
         # Get patient data
         try:
