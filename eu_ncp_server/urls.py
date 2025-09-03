@@ -12,7 +12,12 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import logout
+from django.conf import settings
+from django.conf.urls.static import static
 import json
+
+# Import demo clinical view
+from demo_clinical_view import demo_rich_clinical_data
 
 
 def home_view(request):
@@ -114,6 +119,14 @@ urlpatterns = [
     path("smp/", include("smp_client.urls")),
     # Patient data management
     path("patients/", include("patient_data.urls")),
+    # Demo clinical data view - shows rich medical terminology example
+    path("demo/clinical/", demo_rich_clinical_data, name="demo_clinical"),
     # Translation services API (temporarily disabled due to import errors)
     # path("api/translation/", include("translation_services.urls")),
 ]
+
+# Serve static files during development
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.STATIC_URL, document_root=settings.BASE_DIR / "static"
+    )

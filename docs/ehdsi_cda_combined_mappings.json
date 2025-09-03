@@ -374,6 +374,60 @@
         "xpath": "code/originalText",
         "translation": "YES",
         "valueSet": "YES"
+      },
+      {
+        "label": "Procedure Date",
+        "xpath": "effectiveTime/@value",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Procedure Start Date",
+        "xpath": "effectiveTime/low/@value",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Procedure End Date",
+        "xpath": "effectiveTime/high/@value",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Procedure Status Code",
+        "xpath": "statusCode/@code",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Procedure Status",
+        "xpath": "statusCode/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Healthcare Provider Name",
+        "xpath": "performer/assignedEntity/assignedPerson/name",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Healthcare Provider Organization",
+        "xpath": "performer/assignedEntity/representedOrganization/name",
+        "translation": "NO",
+        "valueSet": "NO"
+      },
+      {
+        "label": "Procedure Site",
+        "xpath": "targetSiteCode/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
+      },
+      {
+        "label": "Procedure Approach",
+        "xpath": "approachSiteCode/@displayName",
+        "translation": "YES",
+        "valueSet": "YES"
       }
     ]
   },

@@ -1,1 +1,537 @@
-<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:ext="urn:hl7-EE-DL-Ext:v1" xmlns:mif="urn:hl7-org:v3/mif" xmlns:pharm="urn:hl7-org:pharm" xmlns:sch="http://www.ascc.net/xml/schematron"><realmCode code="MT"/><typeId extension="POCD_HD000040" root="2.16.840.1.113883.1.3"/><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.1.3"/><templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1"/><id extension="9999002M.1" root="2.16.470.1.100.1.4.1000.990.1"/><code code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Patient summary Document"><translation code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Patient Summary"/></code><title>Patient Summary</title><effectiveTime value="20250317220000+0000"/><confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" codeSystemName="Confidentiality" codeSystemVersion="2018-08-12" displayName="normal"/><languageCode code="en-GB"/><recordTarget><patientRole><id extension="9999002M" root="2.16.470.1.100.1.1.1000.990.1.1"/><addr><streetAddressLine>  1234 Main Street</streetAddressLine><city>QORMI</city><postalCode nullFlavor="UNK"/><state nullFlavor="UNK"/><country>MT</country></addr><telecom nullFlavor="NI"/><patient><name><family>Borg</family><given>Mario</given></name><administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" codeSystemName="AdministrativeGender" codeSystemVersion="913-20091020" displayName="Male"/><birthTime value="19510425000000+0000"/><languageCommunication><templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.1"/><languageCode code="en-GB"/></languageCommunication></patient></patientRole></recordTarget><author><time value="20250318150929+0000"/><assignedAuthor><id extension="author.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.2"/><addr><streetAddressLine>Outpatients Building, Unit 17 St Luke's Hospital</streetAddressLine><city>G'Mangia</city><postalCode>PTA1012</postalCode><state nullFlavor="UNK"/><country>MT</country></addr><telecom use="WP" value="tel:+35625952813"/><telecom use="WP" value="mailto:digitalhealth@gov.mt"/><assignedAuthoringDevice classCode="DEV" determinerCode="INSTANCE"><softwareName>National Patient Summary System</softwareName></assignedAuthoringDevice><representedOrganization classCode="ORG" determinerCode="INSTANCE"><id extension="mhec.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.2.1"/><name>Information Management Unit</name><telecom use="WP" value="tel:+35625952813"/><telecom use="WP" value="mailto:digitalhealth@gov.mt"/><addr><streetAddressLine>Outpatients Building, Unit 17 St Luke's Hospital</streetAddressLine><city>G'Mangia</city><postalCode>PTA1012</postalCode><state nullFlavor="UNK"/><country>MT</country></addr></representedOrganization></assignedAuthor></author><custodian><assignedCustodian><representedCustodianOrganization classCode="ORG" determinerCode="INSTANCE"><id extension="mhec.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.5"/><name>Ministry for Health, Government of Malta</name><telecom use="WP" value="tel:+35625952813"/><addr><streetAddressLine>15 Merchants Street</streetAddressLine><city>Valletta</city><postalCode>VLT2000</postalCode><state nullFlavor="UNK"/><country>MT</country></addr></representedCustodianOrganization></assignedCustodian></custodian><legalAuthenticator><time value="20250318150929+0000"/><signatureCode code="S"/><assignedEntity><id extension="legal.authenticator.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.3"/><addr><streetAddressLine>15 Merchants Street</streetAddressLine><city>Valletta</city><postalCode>VLT2000</postalCode><state nullFlavor="UNK"/><country>MT</country></addr><telecom use="WP" value="tel:+35625952813"/><telecom use="WP" value="mailto:digitalhealth@gov.mt"/><assignedPerson><name><family>Ministry for Health, Government of Malta</family><given>Ministry for Health, Government of Malta</given></name></assignedPerson><representedOrganization classCode="ORG" determinerCode="INSTANCE"><id extension="mhec.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.3.1"/><name>Ministry for Health, Government of Malta</name><telecom use="WP" value="tel:+35625952813"/><telecom use="WP" value="mailto:digitalhealth@gov.mt"/><addr><streetAddressLine>15 Merchants Street</streetAddressLine><city>Valletta</city><postalCode>VLT2000</postalCode><state nullFlavor="UNK"/><country>MT</country></addr></representedOrganization></assignedEntity></legalAuthenticator><participant typeCode="IND"><templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.4"/><functionCode code="PCP" codeSystem="2.16.840.1.113883.5.88" codeSystemName="HL7 ParticipationFunction"/><associatedEntity classCode="PRS"><addr><streetAddressLine nullFlavor="UNK"/><city nullFlavor="UNK"/><postalCode nullFlavor="UNK"/><state nullFlavor="UNK"/><country nullFlavor="UNK"/></addr><telecom nullFlavor="NI"/><associatedPerson><name><family>Ministry for Health</family><given>Government of Malta</given></name></associatedPerson></associatedEntity></participant><documentationOf typeCode="DOC"><serviceEvent classCode="PCPR" moodCode="EVN"><effectiveTime><low nullFlavor="UNK"/><high value="20250317220000+0000"/></effectiveTime><performer typeCode="PRF"><functionCode code="221" codeSystem="2.16.840.1.113883.2.9.6.2.7" codeSystemName="ISCO" codeSystemVersion="2008" displayName="Medical doctors"/><assignedEntity><id extension="legal.authenticator.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.4"/><addr><streetAddressLine>15 Merchants Street</streetAddressLine><city>Valletta</city><postalCode>VLT2000</postalCode><state nullFlavor="UNK"/><country>MT</country></addr><telecom use="WP" value="tel:+35625952813"/><telecom use="WP" value="mailto:digitalhealth@gov.mt"/><assignedPerson><name><family>Ministry for Health, Government of Malta</family><given>Ministry for Health, Government of Malta</given></name></assignedPerson><representedOrganization classCode="ORG" determinerCode="INSTANCE"><id extension="mhec.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.4.1"/><name>Ministry for Health, Government of Malta</name><telecom use="WP" value="tel:+35625952813"/><telecom use="WP" value="mailto:digitalhealth@gov.mt"/><addr><streetAddressLine>15 Merchants Street</streetAddressLine><city>Valletta</city><postalCode>VLT2000</postalCode><state nullFlavor="UNK"/><country>MT</country></addr></representedOrganization></assignedEntity></performer></serviceEvent></documentationOf><relatedDocument typeCode="XFRM"><parentDocument><id extension="9999002M.ORIGINAL" root="2.16.470.1.100.1.4.1000.990.1"/></parentDocument></relatedDocument><component><structuredBody><component><section><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.12"/><templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.13"/><id extension="allergy" root="2.16.470.1.100.1.2.1000.990.1.7"/><code code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Allergies and adverse reactions Document"><translation code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Allergies and other adverse reactions"/></code><title>Allergies and other adverse reactions</title><text><table border="1"><thead><tr><th>Onset Date</th><th>Category</th><th>Description</th><th>Criticality</th><th>Manifestations</th></tr></thead><tbody><tr ID="allergy.1"><td>12-Jan-2018</td><td>BETA-LACTAM ANTIBACTERIALS, PENICILLINS</td><td>Allergic disposition , Allergy to Penicillin                                                                                                                                                                                                                                         </td><td>No information</td><td>No information</td></tr></tbody></table></text><entry typeCode="DRIV"><act classCode="ACT" moodCode="EVN"><templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.16"/><templateId root="2.16.840.1.113883.10.20.1.27"/><id extension="allergy.1" root="2.16.470.1.100.1.2.1000.990.1.7"/><code code="CONC" codeSystem="2.16.840.1.113883.5.6"/><statusCode code="active"/><effectiveTime><low value="20180112000000+0000"/></effectiveTime><entryRelationship inversionInd="false" typeCode="SUBJ"><observation classCode="OBS" moodCode="EVN"><templateId root="2.16.840.1.113883.10.20.1.18"/><templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.6"/><templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/><templateId root="2.16.840.1.113883.10.20.1.28"/><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.17"/><id extension="allergy.1.obs.1" root="2.16.470.1.100.1.2.1000.990.1.7"/><code code="609328004" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Allergic disposition"/><text><reference value="#allergy.1"/></text><statusCode code="completed"/><effectiveTime><low value="20180112000000+0000"/></effectiveTime><value nullFlavor="NI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CD"/><participant typeCode="CSM"><participantRole classCode="MANU"><playingEntity classCode="MMAT"><code code="J01C" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="BETA-LACTAM ANTIBACTERIALS, PENICILLINS"><originalText mediaType="text/xml"><reference value="#allergy.1"/></originalText></code></playingEntity></participantRole></participant></observation></entryRelationship></act></entry></section></component><component><section><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.9"/><templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.6"/><templateId root="2.16.840.1.113883.10.20.1.11"/><id extension="problem" root="2.16.470.1.100.1.2.1000.990.1.8"/><code code="11450-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Problem list - Reported"><translation code="11450-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Problem list"/></code><title>Problem list</title><text><table border="1"><thead><tr><th>Onset Date</th><th>Description</th></tr></thead><tbody><tr ID="problem.1"><td>12-Jan-2018</td><td>Unilateral or unspecified inguinal hernia, without obstruction or gangrene, Right inguinal hernia (RIH)</td></tr></tbody></table></text><entry typeCode="DRIV"><act classCode="ACT" moodCode="EVN"><templateId root="2.16.840.1.113883.10.20.1.27"/><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.15"/><templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/><templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.2"/><id extension="problem.1" root="2.16.470.1.100.1.2.1000.990.1.8"/><code code="CONC" codeSystem="2.16.840.1.113883.5.6"/><statusCode code="active"/><effectiveTime><low value="20180112000000+0000"/></effectiveTime><entryRelationship inversionInd="false" typeCode="SUBJ"><observation classCode="OBS" moodCode="EVN"><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.7"/><templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/><id extension="problem.1.obs.1" root="2.16.470.1.100.1.2.1000.990.1.8"/><code code="55607006" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Problem"/><text><reference value="#problem.1"/></text><statusCode code="completed"/><effectiveTime><low value="20180112000000+0000"/></effectiveTime><value code="K40.9" codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.44.2" codeSystemName="ICD-10" codeSystemVersion="2019" displayName="Unilateral or unspecified inguinal hernia, without obstruction or gangrene" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CD"/></observation></entryRelationship></act></entry></section></component><component><section><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.11"/><templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.12"/><templateId root="2.16.840.1.113883.10.20.1.12"/><id extension="procedure" root="2.16.470.1.100.1.2.1000.990.1.9"/><code code="47519-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of Procedures Document"><translation code="47519-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Procedures"/></code><title>History of Procedures</title><text><table border="1"><thead><tr><th>Procedure date</th><th>Description</th></tr></thead><tbody><tr ID="proc.1"><td>11-Jan-2018</td><td>Right inguinal hernia repair</td></tr></tbody></table></text><entry><procedure classCode="PROC" moodCode="EVN"><templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.19"/><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.26"/><id extension="proc.1" root="2.16.470.1.100.1.2.1000.990.1.9"/><code code="44558001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Repair of inguinal hernia"><originalText mediaType="text/xml"><reference value="#proc.1"/></originalText><translation code="44558001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Right inguinal hernia repair"/></code><text><reference value="#proc.1"/></text><statusCode code="completed"/><effectiveTime><low value="20180111000000+0000"/></effectiveTime></procedure></entry></section></component><component><section><templateId root="2.16.840.1.113883.10.20.1.8"/><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.3"/><id extension="medication" root="2.16.470.1.100.1.2.1000.990.1.10"/><code code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of Medication use Narrative"><translation code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of medication use"/></code><title>History of medication use</title><text><table border="1"><thead><tr><th>Start date</th><th>End date</th><th>Description</th><th>Frequency</th></tr></thead><tbody><tr ID="med.1"><td>12-Jan-2018</td><td>UNK</td><td>ASPIRIN 75mg Enteric-coated (EC) tablet, Oral use</td><td>UNK</td></tr><tr ID="med.2"><td>12-Jan-2018</td><td>19-Jan-2018</td><td>CLARITHROMYCIN 250mg Tablet, Oral use</td><td>UNK</td></tr></tbody></table></text><entry typeCode="DRIV"><substanceAdministration classCode="SBADM" moodCode="EVN"><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.4"/><templateId root="2.16.840.1.113883.10.20.1.24"/><id extension="med.1" root="2.16.470.1.100.1.2.1000.990.1.10"/><text><reference value="#med.1"/></text><statusCode code="completed"/><effectiveTime xmlns:urn="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS"><low value="20180112000000+0000"/><high nullFlavor="UNK"/></effectiveTime><effectiveTime nullFlavor="UNK" xmlns:urn="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PIVL_TS"/><routeCode code="20053000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" codeSystemVersion="2025-01-07" displayName="Oral use"/><doseQuantity nullFlavor="UNK"/><consumable typeCode="CSM"><manufacturedProduct><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.31"/><manufacturedMaterial classCode="MMAT" determinerCode="KIND"><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.32"/><pharm:formCode nullFlavor="UNK"/><pharm:ingredient classCode="ACTI"><pharm:quantity><numerator nullFlavor="NI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/><denominator nullFlavor="NI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/></pharm:quantity><pharm:ingredientSubstance classCode="MMAT" determinerCode="KIND"><pharm:code code="B01AC06" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="acetylsalicylic acid" xmlns:urn="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="urn:CE"><pharm:translation xmlns:pharm="urn:hl7-org:v3" code="B01AC06" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" displayName="ASPIRIN 75mg Enteric-coated (EC) tablet"/></pharm:code></pharm:ingredientSubstance></pharm:ingredient></manufacturedMaterial></manufacturedProduct></consumable></substanceAdministration></entry><entry typeCode="DRIV"><substanceAdministration classCode="SBADM" moodCode="EVN"><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.4"/><templateId root="2.16.840.1.113883.10.20.1.24"/><id extension="med.2" root="2.16.470.1.100.1.2.1000.990.1.10"/><text><reference value="#med.2"/></text><statusCode code="completed"/><effectiveTime xmlns:urn="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS"><low value="20180112000000+0000"/><high value="20180119000000+0000"/></effectiveTime><effectiveTime nullFlavor="UNK" xmlns:urn="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PIVL_TS"/><routeCode code="20053000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" codeSystemVersion="2025-01-07" displayName="Oral use"/><doseQuantity nullFlavor="UNK"/><consumable typeCode="CSM"><manufacturedProduct><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.31"/><manufacturedMaterial classCode="MMAT" determinerCode="KIND"><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.32"/><pharm:formCode nullFlavor="UNK"/><pharm:ingredient classCode="ACTI"><pharm:quantity><numerator nullFlavor="NI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/><denominator nullFlavor="NI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/></pharm:quantity><pharm:ingredientSubstance classCode="MMAT" determinerCode="KIND"><pharm:code code="J01FA09" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="clarithromycin" xmlns:urn="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="urn:CE"><pharm:translation xmlns:pharm="urn:hl7-org:v3" code="J01FA09" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" displayName="CLARITHROMYCIN 250mg Tablet"/></pharm:code></pharm:ingredientSubstance></pharm:ingredient></manufacturedMaterial></manufacturedProduct></consumable></substanceAdministration></entry></section></component><component><section><templateId root="2.16.840.1.113883.10.20.1.7"/><templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.5.3.5"/><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.4"/><id extension="device" root="2.16.470.1.100.1.2.1000.990.1.11"/><code code="46264-8" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of medical device use"/><title>History of medical device use</title><text><paragraph ID="dev.1">No known devices in use</paragraph></text><entry typeCode="DRIV"><supply classCode="SPLY" moodCode="EVN"><templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.5"/><text><reference value="#dev.1"/></text><effectiveTime nullFlavor="UNK" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS"/><participant typeCode="DEV"><participantRole classCode="MANU"><playingDevice classCode="DEV" determinerCode="INSTANCE"><code code="no-known-devices" codeSystem="2.16.840.1.113883.5.1150.1" codeSystemName="IPS Absent And Unknown Data" codeSystemVersion="0.2.0" displayName="No known devices in use"/></playingDevice></participantRole></participant></supply></entry></section></component></structuredBody></component></ClinicalDocument>
+<ClinicalDocument xmlns="urn:hl7-org:v3"
+    xmlns:ext="urn:hl7-EE-DL-Ext:v1"
+    xmlns:mif="urn:hl7-org:v3/mif"
+    xmlns:pharm="urn:hl7-org:pharm"
+    xmlns:sch="http://www.ascc.net/xml/schematron">
+    <realmCode code="MT"/>
+    <typeId extension="POCD_HD000040" root="2.16.840.1.113883.1.3"/>
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.1.3"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1"/>
+    <id extension="9999002M.1" root="2.16.470.1.100.1.4.1000.990.1"/>
+    <code code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Patient summary Document">
+        <translation code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Patient Summary"/>
+    </code>
+    <title>Patient Summary</title>
+    <effectiveTime value="20250317220000+0000"/>
+    <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" codeSystemName="Confidentiality" codeSystemVersion="2018-08-12" displayName="normal"/>
+    <languageCode code="en-GB"/>
+    <recordTarget>
+        <patientRole>
+            <id extension="9999002M" root="2.16.470.1.100.1.1.1000.990.1.1"/>
+            <addr>
+                <streetAddressLine>  1234 Main Street</streetAddressLine>
+                <city>QORMI</city>
+                <postalCode nullFlavor="UNK"/>
+                <state nullFlavor="UNK"/>
+                <country>MT</country>
+            </addr>
+            <telecom nullFlavor="NI"/>
+            <patient>
+                <name>
+                    <family>Borg</family>
+                    <given>Mario</given>
+                </name>
+                <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" codeSystemName="AdministrativeGender" codeSystemVersion="913-20091020" displayName="Male"/>
+                <birthTime value="19510425000000+0000"/>
+                <languageCommunication>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.1"/>
+                    <languageCode code="en-GB"/>
+                </languageCommunication>
+            </patient>
+        </patientRole>
+    </recordTarget>
+    <author>
+        <time value="20250318150929+0000"/>
+        <assignedAuthor>
+            <id extension="author.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.2"/>
+            <addr>
+                <streetAddressLine>Outpatients Building, Unit 17 St Luke's Hospital</streetAddressLine>
+                <city>G'Mangia</city>
+                <postalCode>PTA1012</postalCode>
+                <state nullFlavor="UNK"/>
+                <country>MT</country>
+            </addr>
+            <telecom use="WP" value="tel:+35625952813"/>
+            <telecom use="WP" value="mailto:digitalhealth@gov.mt"/>
+            <assignedAuthoringDevice classCode="DEV" determinerCode="INSTANCE">
+                <softwareName>National Patient Summary System</softwareName>
+            </assignedAuthoringDevice>
+            <representedOrganization classCode="ORG" determinerCode="INSTANCE">
+                <id extension="mhec.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.2.1"/>
+                <name>Information Management Unit</name>
+                <telecom use="WP" value="tel:+35625952813"/>
+                <telecom use="WP" value="mailto:digitalhealth@gov.mt"/>
+                <addr>
+                    <streetAddressLine>Outpatients Building, Unit 17 St Luke's Hospital</streetAddressLine>
+                    <city>G'Mangia</city>
+                    <postalCode>PTA1012</postalCode>
+                    <state nullFlavor="UNK"/>
+                    <country>MT</country>
+                </addr>
+            </representedOrganization>
+        </assignedAuthor>
+    </author>
+    <custodian>
+        <assignedCustodian>
+            <representedCustodianOrganization classCode="ORG" determinerCode="INSTANCE">
+                <id extension="mhec.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.5"/>
+                <name>Ministry for Health, Government of Malta</name>
+                <telecom use="WP" value="tel:+35625952813"/>
+                <addr>
+                    <streetAddressLine>15 Merchants Street</streetAddressLine>
+                    <city>Valletta</city>
+                    <postalCode>VLT2000</postalCode>
+                    <state nullFlavor="UNK"/>
+                    <country>MT</country>
+                </addr>
+            </representedCustodianOrganization>
+        </assignedCustodian>
+    </custodian>
+    <legalAuthenticator>
+        <time value="20250318150929+0000"/>
+        <signatureCode code="S"/>
+        <assignedEntity>
+            <id extension="legal.authenticator.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.3"/>
+            <addr>
+                <streetAddressLine>15 Merchants Street</streetAddressLine>
+                <city>Valletta</city>
+                <postalCode>VLT2000</postalCode>
+                <state nullFlavor="UNK"/>
+                <country>MT</country>
+            </addr>
+            <telecom use="WP" value="tel:+35625952813"/>
+            <telecom use="WP" value="mailto:digitalhealth@gov.mt"/>
+            <assignedPerson>
+                <name>
+                    <family>Ministry for Health, Government of Malta</family>
+                    <given>Ministry for Health, Government of Malta</given>
+                </name>
+            </assignedPerson>
+            <representedOrganization classCode="ORG" determinerCode="INSTANCE">
+                <id extension="mhec.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.3.1"/>
+                <name>Ministry for Health, Government of Malta</name>
+                <telecom use="WP" value="tel:+35625952813"/>
+                <telecom use="WP" value="mailto:digitalhealth@gov.mt"/>
+                <addr>
+                    <streetAddressLine>15 Merchants Street</streetAddressLine>
+                    <city>Valletta</city>
+                    <postalCode>VLT2000</postalCode>
+                    <state nullFlavor="UNK"/>
+                    <country>MT</country>
+                </addr>
+            </representedOrganization>
+        </assignedEntity>
+    </legalAuthenticator>
+    <participant typeCode="IND">
+        <templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.4"/>
+        <functionCode code="PCP" codeSystem="2.16.840.1.113883.5.88" codeSystemName="HL7 ParticipationFunction"/>
+        <associatedEntity classCode="PRS">
+            <addr>
+                <streetAddressLine nullFlavor="UNK"/>
+                <city nullFlavor="UNK"/>
+                <postalCode nullFlavor="UNK"/>
+                <state nullFlavor="UNK"/>
+                <country nullFlavor="UNK"/>
+            </addr>
+            <telecom nullFlavor="NI"/>
+            <associatedPerson>
+                <name>
+                    <family>Ministry for Health</family>
+                    <given>Government of Malta</given>
+                </name>
+            </associatedPerson>
+        </associatedEntity>
+    </participant>
+    <documentationOf typeCode="DOC">
+        <serviceEvent classCode="PCPR" moodCode="EVN">
+            <effectiveTime>
+                <low nullFlavor="UNK"/>
+                <high value="20250317220000+0000"/>
+            </effectiveTime>
+            <performer typeCode="PRF">
+                <functionCode code="221" codeSystem="2.16.840.1.113883.2.9.6.2.7" codeSystemName="ISCO" codeSystemVersion="2008" displayName="Medical doctors"/>
+                <assignedEntity>
+                    <id extension="legal.authenticator.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.4"/>
+                    <addr>
+                        <streetAddressLine>15 Merchants Street</streetAddressLine>
+                        <city>Valletta</city>
+                        <postalCode>VLT2000</postalCode>
+                        <state nullFlavor="UNK"/>
+                        <country>MT</country>
+                    </addr>
+                    <telecom use="WP" value="tel:+35625952813"/>
+                    <telecom use="WP" value="mailto:digitalhealth@gov.mt"/>
+                    <assignedPerson>
+                        <name>
+                            <family>Ministry for Health, Government of Malta</family>
+                            <given>Ministry for Health, Government of Malta</given>
+                        </name>
+                    </assignedPerson>
+                    <representedOrganization classCode="ORG" determinerCode="INSTANCE">
+                        <id extension="mhec.gov.mt" root="2.16.470.1.100.1.2.1000.990.1.4.1"/>
+                        <name>Ministry for Health, Government of Malta</name>
+                        <telecom use="WP" value="tel:+35625952813"/>
+                        <telecom use="WP" value="mailto:digitalhealth@gov.mt"/>
+                        <addr>
+                            <streetAddressLine>15 Merchants Street</streetAddressLine>
+                            <city>Valletta</city>
+                            <postalCode>VLT2000</postalCode>
+                            <state nullFlavor="UNK"/>
+                            <country>MT</country>
+                        </addr>
+                    </representedOrganization>
+                </assignedEntity>
+            </performer>
+        </serviceEvent>
+    </documentationOf>
+    <relatedDocument typeCode="XFRM">
+        <parentDocument>
+            <id extension="9999002M.ORIGINAL" root="2.16.470.1.100.1.4.1000.990.1"/>
+        </parentDocument>
+    </relatedDocument>
+    <component>
+        <structuredBody>
+            <component>
+                <section>
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.12"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.13"/>
+                    <id extension="allergy" root="2.16.470.1.100.1.2.1000.990.1.7"/>
+                    <code code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Allergies and adverse reactions Document">
+                        <translation code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Allergies and other adverse reactions"/>
+                    </code>
+                    <title>Allergies and other adverse reactions</title>
+                    <text>
+                        <table border="1">
+                            <thead>
+                                <tr>
+                                    <th>Onset Date</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Criticality</th>
+                                    <th>Manifestations</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ID="allergy.1">
+                                    <td>12-Jan-2018</td>
+                                    <td>BETA-LACTAM ANTIBACTERIALS, PENICILLINS</td>
+                                    <td>Allergic disposition , Allergy to Penicillin                                                                                                                                                                                                                                         </td>
+                                    <td>No information</td>
+                                    <td>No information</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </text>
+                    <entry typeCode="DRIV">
+                        <act classCode="ACT" moodCode="EVN">
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.16"/>
+                            <templateId root="2.16.840.1.113883.10.20.1.27"/>
+                            <id extension="allergy.1" root="2.16.470.1.100.1.2.1000.990.1.7"/>
+                            <code code="CONC" codeSystem="2.16.840.1.113883.5.6"/>
+                            <statusCode code="active"/>
+                            <effectiveTime>
+                                <low value="20180112000000+0000"/>
+                            </effectiveTime>
+                            <entryRelationship inversionInd="false" typeCode="SUBJ">
+                                <observation classCode="OBS" moodCode="EVN">
+                                    <templateId root="2.16.840.1.113883.10.20.1.18"/>
+                                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.6"/>
+                                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+                                    <templateId root="2.16.840.1.113883.10.20.1.28"/>
+                                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.17"/>
+                                    <id extension="allergy.1.obs.1" root="2.16.470.1.100.1.2.1000.990.1.7"/>
+                                    <code code="609328004" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Allergic disposition"/>
+                                    <text>
+                                        <reference value="#allergy.1"/>
+                                    </text>
+                                    <statusCode code="completed"/>
+                                    <effectiveTime>
+                                        <low value="20180112000000+0000"/>
+                                    </effectiveTime>
+                                    <value nullFlavor="NI"
+                                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CD"/>
+                                    <participant typeCode="CSM">
+                                        <participantRole classCode="MANU">
+                                            <playingEntity classCode="MMAT">
+                                                <code code="J01C" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="BETA-LACTAM ANTIBACTERIALS, PENICILLINS">
+                                                    <originalText mediaType="text/xml">
+                                                        <reference value="#allergy.1"/>
+                                                    </originalText>
+                                                </code>
+                                            </playingEntity>
+                                        </participantRole>
+                                    </participant>
+                                </observation>
+                            </entryRelationship>
+                        </act>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.9"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.6"/>
+                    <templateId root="2.16.840.1.113883.10.20.1.11"/>
+                    <id extension="problem" root="2.16.470.1.100.1.2.1000.990.1.8"/>
+                    <code code="11450-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Problem list - Reported">
+                        <translation code="11450-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Problem list"/>
+                    </code>
+                    <title>Problem list</title>
+                    <text>
+                        <table border="1">
+                            <thead>
+                                <tr>
+                                    <th>Onset Date</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ID="problem.1">
+                                    <td>12-Jan-2018</td>
+                                    <td>Unilateral or unspecified inguinal hernia, without obstruction or gangrene, Right inguinal hernia (RIH)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </text>
+                    <entry typeCode="DRIV">
+                        <act classCode="ACT" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.1.27"/>
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.15"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.2"/>
+                            <id extension="problem.1" root="2.16.470.1.100.1.2.1000.990.1.8"/>
+                            <code code="CONC" codeSystem="2.16.840.1.113883.5.6"/>
+                            <statusCode code="active"/>
+                            <effectiveTime>
+                                <low value="20180112000000+0000"/>
+                            </effectiveTime>
+                            <entryRelationship inversionInd="false" typeCode="SUBJ">
+                                <observation classCode="OBS" moodCode="EVN">
+                                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.7"/>
+                                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+                                    <id extension="problem.1.obs.1" root="2.16.470.1.100.1.2.1000.990.1.8"/>
+                                    <code code="55607006" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Problem"/>
+                                    <text>
+                                        <reference value="#problem.1"/>
+                                    </text>
+                                    <statusCode code="completed"/>
+                                    <effectiveTime>
+                                        <low value="20180112000000+0000"/>
+                                    </effectiveTime>
+                                    <value code="K40.9" codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.44.2" codeSystemName="ICD-10" codeSystemVersion="2019" displayName="Unilateral or unspecified inguinal hernia, without obstruction or gangrene"
+                                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CD"/>
+                                </observation>
+                            </entryRelationship>
+                        </act>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.11"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.12"/>
+                    <templateId root="2.16.840.1.113883.10.20.1.12"/>
+                    <id extension="procedure" root="2.16.470.1.100.1.2.1000.990.1.9"/>
+                    <code code="47519-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of Procedures Document">
+                        <translation code="47519-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Procedures"/>
+                    </code>
+                    <title>History of Procedures</title>
+                    <text>
+                        <table border="1">
+                            <thead>
+                                <tr>
+                                    <th>Procedure date</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ID="proc.1">
+                                    <td>11-Jan-2018</td>
+                                    <td>Right inguinal hernia repair</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </text>
+                    <entry>
+                        <procedure classCode="PROC" moodCode="EVN">
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.19"/>
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.26"/>
+                            <id extension="proc.1" root="2.16.470.1.100.1.2.1000.990.1.9"/>
+                            <code code="44558001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Repair of inguinal hernia">
+                                <originalText mediaType="text/xml">
+                                    <reference value="#proc.1"/>
+                                </originalText>
+                                <translation code="44558001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Right inguinal hernia repair"/>
+                            </code>
+                            <text>
+                                <reference value="#proc.1"/>
+                            </text>
+                            <statusCode code="completed"/>
+                            <effectiveTime>
+                                <low value="20180111000000+0000"/>
+                            </effectiveTime>
+                        </procedure>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.1.8"/>
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.3"/>
+                    <id extension="medication" root="2.16.470.1.100.1.2.1000.990.1.10"/>
+                    <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of Medication use Narrative">
+                        <translation code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of medication use"/>
+                    </code>
+                    <title>History of medication use</title>
+                    <text>
+                        <table border="1">
+                            <thead>
+                                <tr>
+                                    <th>Start date</th>
+                                    <th>End date</th>
+                                    <th>Description</th>
+                                    <th>Frequency</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ID="med.1">
+                                    <td>12-Jan-2018</td>
+                                    <td>UNK</td>
+                                    <td>ASPIRIN 75mg Enteric-coated (EC) tablet, Oral use</td>
+                                    <td>UNK</td>
+                                </tr>
+                                <tr ID="med.2">
+                                    <td>12-Jan-2018</td>
+                                    <td>19-Jan-2018</td>
+                                    <td>CLARITHROMYCIN 250mg Tablet, Oral use</td>
+                                    <td>UNK</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </text>
+                    <entry typeCode="DRIV">
+                        <substanceAdministration classCode="SBADM" moodCode="EVN">
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.4"/>
+                            <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                            <id extension="med.1" root="2.16.470.1.100.1.2.1000.990.1.10"/>
+                            <text>
+                                <reference value="#med.1"/>
+                            </text>
+                            <statusCode code="completed"/>
+                            <effectiveTime xmlns:urn="urn:hl7-org:v3"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                                <low value="20180112000000+0000"/>
+                                <high nullFlavor="UNK"/>
+                            </effectiveTime>
+                            <effectiveTime nullFlavor="UNK"
+                                xmlns:urn="urn:hl7-org:v3"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PIVL_TS"/>
+                            <routeCode code="20053000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" codeSystemVersion="2025-01-07" displayName="Oral use"/>
+                            <doseQuantity nullFlavor="UNK"/>
+                            <consumable typeCode="CSM">
+                                <manufacturedProduct>
+                                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.31"/>
+                                    <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+                                        <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.32"/>
+                                        <pharm:formCode nullFlavor="UNK"/>
+                                        <pharm:ingredient classCode="ACTI">
+                                            <pharm:quantity>
+                                                <numerator nullFlavor="NI"
+                                                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/>
+                                                <denominator nullFlavor="NI"
+                                                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/>
+                                            </pharm:quantity>
+                                            <pharm:ingredientSubstance classCode="MMAT" determinerCode="KIND">
+                                                <pharm:code code="B01AC06" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="acetylsalicylic acid"
+                                                    xmlns:urn="urn:hl7-org:v3"
+                                                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="urn:CE">
+                                                    <pharm:translation xmlns:pharm="urn:hl7-org:v3" code="B01AC06" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" displayName="ASPIRIN 75mg Enteric-coated (EC) tablet"/>
+                                                </pharm:code>
+                                            </pharm:ingredientSubstance>
+                                        </pharm:ingredient>
+                                    </manufacturedMaterial>
+                                </manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                    <entry typeCode="DRIV">
+                        <substanceAdministration classCode="SBADM" moodCode="EVN">
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.4"/>
+                            <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                            <id extension="med.2" root="2.16.470.1.100.1.2.1000.990.1.10"/>
+                            <text>
+                                <reference value="#med.2"/>
+                            </text>
+                            <statusCode code="completed"/>
+                            <effectiveTime xmlns:urn="urn:hl7-org:v3"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS">
+                                <low value="20180112000000+0000"/>
+                                <high value="20180119000000+0000"/>
+                            </effectiveTime>
+                            <effectiveTime nullFlavor="UNK"
+                                xmlns:urn="urn:hl7-org:v3"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PIVL_TS"/>
+                            <routeCode code="20053000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" codeSystemVersion="2025-01-07" displayName="Oral use"/>
+                            <doseQuantity nullFlavor="UNK"/>
+                            <consumable typeCode="CSM">
+                                <manufacturedProduct>
+                                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.31"/>
+                                    <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+                                        <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.32"/>
+                                        <pharm:formCode nullFlavor="UNK"/>
+                                        <pharm:ingredient classCode="ACTI">
+                                            <pharm:quantity>
+                                                <numerator nullFlavor="NI"
+                                                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/>
+                                                <denominator nullFlavor="NI"
+                                                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="PQ"/>
+                                            </pharm:quantity>
+                                            <pharm:ingredientSubstance classCode="MMAT" determinerCode="KIND">
+                                                <pharm:code code="J01FA09" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="clarithromycin"
+                                                    xmlns:urn="urn:hl7-org:v3"
+                                                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="urn:CE">
+                                                    <pharm:translation xmlns:pharm="urn:hl7-org:v3" code="J01FA09" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" displayName="CLARITHROMYCIN 250mg Tablet"/>
+                                                </pharm:code>
+                                            </pharm:ingredientSubstance>
+                                        </pharm:ingredient>
+                                    </manufacturedMaterial>
+                                </manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.1.7"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.5.3.5"/>
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.4"/>
+                    <id extension="device" root="2.16.470.1.100.1.2.1000.990.1.11"/>
+                    <code code="46264-8" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of medical device use"/>
+                    <title>History of medical device use</title>
+                    <text>
+                        <paragraph ID="dev.1">No known devices in use</paragraph>
+                    </text>
+                    <entry typeCode="DRIV">
+                        <supply classCode="SPLY" moodCode="EVN">
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.5"/>
+                            <text>
+                                <reference value="#dev.1"/>
+                            </text>
+                            <effectiveTime nullFlavor="UNK"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="IVL_TS"/>
+                            <participant typeCode="DEV">
+                                <participantRole classCode="MANU">
+                                    <playingDevice classCode="DEV" determinerCode="INSTANCE">
+                                        <code code="no-known-devices" codeSystem="2.16.840.1.113883.5.1150.1" codeSystemName="IPS Absent And Unknown Data" codeSystemVersion="0.2.0" displayName="No known devices in use"/>
+                                    </playingDevice>
+                                </participantRole>
+                            </participant>
+                        </supply>
+                    </entry>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>
