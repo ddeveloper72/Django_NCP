@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Clinical Documents - {{ patient_data.given_name }} {{ patient_data.family_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="fas fa-file-medical"></i> Request Clinical Documents</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Patient Information -->
+                    <div class="alert alert-info">
+                        <h5>Patient Information</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Name:</strong> {{ patient_data.given_name }} {{ patient_data.family_name }}<br>
+                                <strong>Birth Date:</strong> {{ patient_data.birth_date }}<br>
+                                <strong>Gender:</strong> {{ patient_data.gender }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Member State:</strong> {{ member_state.country_name }}<br>
+                                <strong>Patient ID:</strong> {{ patient_identifier.patient_id }}<br>
+                                <strong>Address:</strong> {{ patient_data.address_line|default:"Not specified" }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Document Request Form -->
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="document_type" class="form-label">Document Type *</label>
+                            <select class="form-select" id="document_type" name="document_type" required>
+                                <option value="">Select document type...</option>
+                                {% for doc_type in document_types %}
+                                <option value="{{ doc_type.code }}" data-description="{{ doc_type.description }}">
+                                    {{ doc_type.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text" id="document-description"></div>
+                            <div class="invalid-feedback">Please select a document type.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="consent_method" class="form-label">Consent Method *</label>
+                            <select class="form-select" id="consent_method" name="consent_method" required>
+                                <option value="">Select consent method...</option>
+                                {% for consent in consent_methods %}
+                                <option value="{{ consent.code }}" data-description="{{ consent.description }}">
+                                    {{ consent.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text" id="consent-description"></div>
+                            <div class="invalid-feedback">Please select a consent method.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="purpose_of_use" class="form-label">Purpose of Use</label>
+                            <select class="form-select" id="purpose_of_use" name="purpose_of_use">
+                                <option value="TREATMENT" selected>Treatment</option>
+                                <option value="PAYMENT">Payment</option>
+                                <option value="OPERATIONS">Healthcare Operations</option>
+                                <option value="RESEARCH">Research</option>
+                                <option value="EMERGENCY">Emergency</option>
+                            </select>
+                            <div class="form-text">Specify the purpose for accessing this patient's data.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="confirm_authorization" required>
+                                <label class="form-check-label" for="confirm_authorization">
+                                    I confirm that I am authorized to access this patient's clinical documents
+                                    and will use the information only for the specified purpose.
+                                </label>
+                                <div class="invalid-feedback">You must confirm authorization.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'patient_data:patient_search_results' patient_identifier.id %}"
+                                class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> Back to Patient
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Request Documents
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Information Panel -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-info-circle"></i> Information</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Cross-Border Document Exchange</h6>
+                    <p class="small">
+                        This request will be sent to the {{ member_state.country_name }} National Contact Point (NCP)
+                        to retrieve the patient's clinical documents.
+                    </p>
+
+                    <h6>Available Document Types</h6>
+                    <ul class="small">
+                        <li><strong>Patient Summary:</strong> Comprehensive medical overview</li>
+                        <li><strong>Emergency Data:</strong> Critical emergency information</li>
+                        <li><strong>ePrescription:</strong> Electronic prescription records</li>
+                        <li><strong>eDispensation:</strong> Medication dispensation records</li>
+                    </ul>
+
+                    <h6>Privacy & Security</h6>
+                    <p class="small">
+                        All document exchanges are encrypted and logged according to GDPR
+                        and eHealth Network guidelines.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Document History -->
+            <div class="card mt-3">
+                <div class="card-header bg-secondary text-white">
+                    <h5><i class="fas fa-history"></i> Recent Requests</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'patient_data:clinical_document_history' patient_data.id %}"
+                        class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-list"></i> View Document History
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Form validation
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        // Show descriptions for selected options
+        document.getElementById('document_type').addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            const description = selectedOption.getAttribute('data-description');
+            document.getElementById('document-description').textContent = description || '';
+        });
+
+        document.getElementById('consent_method').addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            const description = selectedOption.getAttribute('data-description');
+            document.getElementById('consent-description').textContent = description || '';
+        });
+    });
+</script>
+{% endblock %}

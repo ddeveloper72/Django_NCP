@@ -1,0 +1,3104 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns:n1="urn:hl7-org:v3">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1" crossorigin="anonymous">
+      <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+      <!--Do NOT edit this HTML directly: it was generated via an XSLT transformation from a CDA
+                    Release 2 XML document.
+                -->
+      <title>Patient summary Document</title><style type="text/css">
+
+body {
+    font-family: 'Montserrat';
+    font-size: 12px;
+    margin: 0;
+    padding: 1rem;
+    height: 100%;
+    /*text-rendering: optimizeLegibility;*/
+}
+
+div {}
+table {
+    width: 100%;
+}
+tr {}
+td {
+    font-size:12px;
+    padding:5px;
+    vertical-align: top;
+    text-align: left;
+}
+th {
+    color:#4A4A4A;
+    font-size:13px;
+    padding:6px;
+    vertical-align: top;
+    text-align: left;
+    border-bottom: 1px solid #009fd1;
+}
+
+ul {
+    padding-left: 1rem;
+}
+.h1center {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+    background-color: #085a9f;
+    color: #FFF;
+    margin-bottom: 1rem;
+    padding: 0.5rem ;
+    border-radius: 4px
+}
+.header_table{
+    border-bottom:0 solid #666;
+}
+.header_table th {
+    color:#009fd1;
+    font-size: 12px;
+    border-bottom: 1px solid #009fd1
+}
+.header_table td {
+    font-size: 12px;
+}
+.sectionTitle{
+    color:#3871A9;
+    font-weight: bold;
+    font-size:16px;
+}
+.narr_table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.table_caption {
+    border-bottom:0 solid #666;
+    width: 100%;
+}
+
+.table_caption th {
+    background-color:#9FBFDF;
+    color:#4A4A4A;
+    font-size:13px;
+    padding:6px;
+    border-bottom: 2px solid #4A4A4A;
+    -moz-border-radius: 0;
+    -webkit-border-top-right-radius: 6px;
+    -webkit-border-top-left-radius: 6px;
+    -webkit-border-bottom-right-radius: 0;
+    -webkit-border-bottom-left-radius: 0;
+    border-radius: 6px 6px 0px 0px;
+    text-align:left;
+    vertical-align:middle;
+}
+
+.nullFlavor {
+    display: inline;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 50%;
+    background: yellow;
+    font-weight: bold;
+    padding:5px;
+}
+
+.web-view {
+    display: block;
+}
+
+.mobile-view {
+    display: none;
+}
+
+.wrap-collapsible {
+    margin-bottom: 1.2rem 0px;
+    width: 100%;
+}
+
+input[type='checkbox'] {
+    display: none;
+}
+
+/*****************************/
+/* Default collapsible panel */
+/*****************************/
+.lbl-toggle {
+    display: block;
+
+    color: #009fd1;
+    font-weight: bold;
+    font-size: 13px;
+    text-align: left;
+
+    padding: 0.5rem;
+
+    border: 2px solid #009fd1;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
+    background: #FFF;
+
+    cursor: pointer;
+
+    border-radius: 3px;
+    transition: all 0.25s ease-out;
+}
+
+
+.lbl-toggle::before {
+    content: ' ';
+    display: inline-block;
+
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid currentColor;
+    vertical-align: middle;
+    margin-right: .7rem;
+    transform: translateY(-2px);
+
+    transition: transform .2s ease-out;
+}
+
+.toggle:checked + .lbl-toggle::before {
+    transform: rotate(90deg) translateX(-3px);
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .25s ease-in-out;
+}
+
+.toggle:checked + .lbl-toggle + .collapsible-content {
+    max-height: none;
+    overflow: visible;
+}
+
+.toggle:checked + .lbl-toggle {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.collapsible-content .content-inner {
+    background: white;
+    border-bottom: 2px solid #009fd1;
+    border-left: 2px solid #009fd1;
+    border-right: 2px solid #009fd1;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
+    padding: .5rem 1rem;
+}
+/*******************************************************/
+/* Collapsible panel for:                              */
+/*    - section titles in PS                           */
+/*    - substances in eP                               */
+/*******************************************************/
+.lbl-toggle-title {
+    display: block;
+
+    font-weight: bold;
+    color: #FFF;
+    font-size: 15px;
+    text-align: left;
+
+    padding: 0.5rem;
+
+    border: 2px solid #085a9f;
+    background: #085a9f;
+
+    cursor: pointer;
+
+    border-radius: 3px;
+    transition: all 0.25s ease-out;
+}
+
+.lbl-toggle-title:hover {
+    color: #009fd1;
+}
+
+.lbl-toggle-title::before {
+    content: ' ';
+    display: inline-block;
+
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid currentColor;
+    vertical-align: middle;
+    margin-right: .7rem;
+    transform: translateY(-2px);
+
+    transition: transform .2s ease-out;
+}
+
+.toggle:checked + .lbl-toggle-title::before {
+    transform: rotate(90deg) translateX(-3px);
+}
+
+.collapsible-content-title {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .25s ease-in-out;
+}
+
+.toggle:checked + .lbl-toggle-title + .collapsible-content-title {
+    max-height: none;
+    overflow: visible;
+}
+
+.toggle:checked + .lbl-toggle-title {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.collapsible-content-title .content-inner-title {
+    background: white;
+    border-bottom: 2px solid #085a9f;
+    border-left: 2px solid #085a9f;
+    border-right: 2px solid #085a9f;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
+    padding: .5rem 1rem;
+}
+
+/***************************************/
+/* collapsible panel for main blocks */
+/***************************************/
+.lbl-toggle-main {
+    display: block;
+
+    font-weight: bold;
+    color: #085a9f;
+    font-size: 15px;
+    text-align: left;
+
+    padding: 0.5rem;
+
+    border: 2px solid #085a9f;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
+
+    background: #FFF;
+
+    cursor: pointer;
+
+    border-radius: 3px;
+    transition: all 0.25s ease-out;
+}
+
+.lbl-toggle-main:hover {
+    color: #009fd1;
+}
+
+.lbl-toggle-main::before {
+    content: ' ';
+    display: inline-block;
+
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid currentColor;
+    vertical-align: middle;
+    margin-right: .7rem;
+    transform: translateY(-2px);
+
+    transition: transform .2s ease-out;
+}
+
+.toggle:checked + .lbl-toggle-main::before {
+    transform: rotate(90deg) translateX(-3px);
+}
+
+.collapsible-content-main {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .25s ease-in-out;
+}
+
+.toggle:checked + .lbl-toggle-main + .collapsible-content-main {
+    max-height: none;
+}
+
+.toggle:checked + .lbl-toggle-main {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.collapsible-content-main .content-inner-main {
+    border-bottom: 2px solid #085a9f;
+    border-left: 2px solid #085a9f;
+    border-right: 2px solid #085a9f;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
+    padding: .5rem 1rem;
+}
+
+/************/
+/* Tooltips */
+/************/
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    top: -5px;
+    left: 160%;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #555 transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-right {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-right .tooltiptext {
+    visibility: hidden;
+    width: 150px;
+    background-color: white;
+    color: #3871A9;
+    text-align: left;
+    border-radius: 6px;
+    border-style: solid;
+    border-color: #3871A9;
+    border-width: 1px;
+    padding: 7px 7px;
+    position: absolute;
+    z-index: 1;
+    top: -5px;
+    left: 105%;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip-right .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 50%;
+    right: 100%; /* To the left of the tooltip */
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #3871A9 transparent transparent ;
+}
+
+.tooltip-right:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+.narrative {
+    color: #085a9f;
+}
+
+.label {
+    color: white;
+    padding: 4px;
+}
+
+.otherContacts-personalRelationship {
+    background-color: #009fd1;
+}
+
+.otherContacts-roleClass {
+    background-color: #085a9f;
+}
+
+@media screen and (max-width: 800px) {
+    .web-view {
+        display: none;
+    }
+
+    .mobile-view {
+        display: block;
+    }
+
+    .mobile-content {
+        max-height: none;
+        overflow: visible;
+
+        .content-inner {
+            background: white;
+            border-bottom: none;
+            border-left: none;
+            border-right: none;
+            padding: 0.5rem 0.5rem;
+        }
+    }
+
+    .toggle-container {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px;
+    }
+
+    /* Style for the toggle button */
+    .toggle-button-original {
+        padding: 10px;
+        flex-grow: 1;
+        text-align: center;
+        background-color: #fff;
+        color: #085a9f;
+        border:1px solid #085a9f;
+        border-bottom-right-radius: 4px;
+        border-top-right-radius: 4px;
+        cursor: pointer;
+    }
+
+    .toggle-button-translated {
+        padding: 10px;
+        flex-grow: 1;
+        text-align: center;
+        background-color: #fff;
+        color: #085a9f;
+        border:1px solid #085a9f;
+        border-bottom-left-radius: 4px;
+        border-top-left-radius: 4px;
+        cursor: pointer;
+    }
+
+    /* Style for the active button */
+    .toggle-button-translated.active {
+        background-color: #085a9f;
+        color: #fff;
+    }
+
+    .toggle-button-original.active {
+        background-color: #085a9f;
+        color: #fff;
+    }
+}
+
+
+
+.container {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    column-gap: 10px;
+    row-gap: 10px;
+}
+
+.extended_header_block {
+    height:100%;
+}
+
+.narrative_wrapper {
+}
+
+.narrative_wrapper table {
+    width: 100%;
+    display: inline-block;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+/* Translation table - table containing the coded translations */
+.translation_table{
+    width: 100%;
+    table-layout: fixed;
+}
+
+.translation_table th {
+    background: #E6F2FF;
+    color:#4A4A4A;
+    font-size:12px;
+    padding:6px;
+    vertical-align: top;
+    text-align: left;
+    border-bottom: 1px solid #009fd1;
+}
+
+.translation_table th.subtitle {
+    background: #009fd1;;
+    color:#FFFFFF;
+    font-size:12px;
+    font-weight:bold;
+    padding:6px;
+    vertical-align: top;
+    text-align: left;
+    border-bottom: 1px solid #009fd1;
+}
+
+.translation_table td {
+    font-size:12px;
+    vertical-align: top;
+    text-align: left;
+}
+
+.translation_table tr:nth-child(even) {
+    background: #FFFFFF;
+}
+
+.translation_table tr:nth-child(odd) {
+    background: #E6F2FF;;
+}
+
+/* Medication summary table - table containing the coded translations */
+.medication_summary_table{
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+.medication_summary_table th {
+    color:#4A4A4A;
+    font-size:12px;
+    padding:6px;
+    vertical-align: top;
+    text-align: left;
+    border-bottom: 1px solid #009fd1;
+    border-left: 2px solid #FFFFFF;
+    border-right: 2px solid #FFFFFF;
+}
+.medication_summary_table td {
+    font-size:12px;
+    vertical-align: top;
+    text-align: left;
+}
+
+.medication_summary_table tr:nth-child(even) {
+    background: #FFFFFF;
+}
+
+.medication_summary_table tr:nth-child(odd) {
+    background: #E6F2FF;
+}
+
+.extended_header_table{
+    border: 1px solid #009fd1;
+    width: 100%;
+    height: 100%;
+    table-layout: fixed;
+    border-radius: 3px;
+}
+.extended_header_table th {
+    background-color:#E6F2FF;
+    color:#4A4A4A;
+    font-size:12px;
+    padding:6px;
+    vertical-align: top;
+    height: 20%;
+    text-align: left;
+    border-bottom: 1px solid #009fd1;
+}
+.extended_header_table td {
+    font-size:12px;
+    vertical-align: top;
+    text-align: left;
+}
+
+.contact_information_table{
+    border-radius: 3px;
+    width: 100%;
+    height: 100%;
+}
+.contact_information_table th {
+    background-color:#009fd1;
+    color:white;
+    font-size:11px;
+    vertical-align: top;
+    text-align: left;
+}
+.contact_information_table td {
+    background-color:white;
+    color:#009fd1;
+    font-size:11px;
+    vertical-align: top;
+    text-align: left;
+    word-break: break-word;
+}
+
+@media screen and (max-width: 900px) {
+    .container {
+        height: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: start;
+        column-gap: 10px;
+        row-gap: 10px;
+    }
+
+}
+
+@media screen and (max-width: 800px) {
+    .container {
+        height: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: start;
+        column-gap: 10px;
+        row-gap: 10px;
+    }
+
+    .narrative_wrapper table {
+        width: 100%;
+        display: inline-block;
+        overflow-x: auto;
+        white-space: nowrap;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .translation_table thead {
+        border: none;
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+    .translation_table tr {
+        border-bottom: 1px solid #009fd1;
+        display: block;
+        margin-bottom: .625em;
+    }
+
+    .translation_table td {
+        border-bottom: 1px solid #ddd;
+        display: block;
+        text-align: right;
+        min-height: 12px;
+    }
+
+    .translation_table td::before {
+        /*
+        aria-label has no advantage, it won't be read inside a table
+        content: attr(aria-label);
+        */
+        content: attr(data-label);
+        float: left;
+        font-weight: bold;
+    }
+
+    .translation_table td:last-child {
+        border-bottom: 0;
+    }
+
+    .medication_summary_table table {
+        width: 100%;
+        display: inline-block;
+        overflow-x: auto;
+        white-space: nowrap;
+        border-collapse: collapse;
+    }
+
+    .medication_summary_table thead {
+        border: none;
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+    .medication_summary_table tr {
+        border-bottom: 1px solid #009fd1;
+        display: block;
+        margin-bottom: .625em;
+    }
+
+    .medication_summary_table td {
+        border-bottom: 1px solid #ddd;
+        display: block;
+        text-align: right;
+        min-height: 12px;
+    }
+
+    .medication_summary_table td::before {
+        /*
+        * aria-label has no advantage, it won't be read inside a table
+        content: attr(aria-label);
+        */
+        content: attr(data-label);
+        float: left;
+        font-weight: bold;
+    }
+
+    .medication_summary_table td:last-child {
+        border-bottom: 0;
+    }
+
+}
+
+
+
+/* Ingredients table - Table containing the different ingredients */
+.ingredients_table {
+    border-style: solid;
+    border-width: 1px;
+    border-color: #009fd1;
+}
+.ingredients_table th {
+    border: 1px;
+}
+.ingredients_table td {
+}
+
+/* eP table    */
+.ep_table {
+}
+
+.ep_table tr:nth-child(odd) {
+    background: #e3eff7
+}
+.ep_table tr:nth-child(even)  {
+    background: #FFF;
+}
+
+html, body {
+    background: #fff;
+    min-width: 300px;
+}
+
+/* ---- Timeline ---- */
+ol {
+    position: relative;
+    display: block;
+    margin: 10px;
+    margin-top: 50px;
+    height: 1px;
+    background: #085a9f;
+}
+ol::before,
+ol::after {
+    content: "";
+    position: absolute;
+    top: -4px;
+    display: block;
+    width: 0;
+    height: 0;
+    border-radius: 3px;
+    border: 3px solid #085a9f;
+}
+ol::before {
+    top: -2px;
+    left:-3px;
+}
+ol::after {
+    right: -10px;
+    border: 5px solid transparent;
+    border-right: 0;
+    border-left: 10px solid #085a9f;
+}
+
+/* ---- Timeline elements ---- */
+/* li {
+    position: relative;
+    display: inline-block;
+    float: left;
+    width: 150px;
+    font: 12px arial;
+    height: 50px;
+}
+li .date {
+    position: absolute;
+    top: -35px;
+    left: 30%;
+    color: #000000;
+}
+li .point {
+    top: -2px;
+    left: 43%;
+    display: block;
+    width: 4px;
+    height: 4px;
+    border: 2px solid #085a9f;
+    border-radius: 10px;
+    background: #fff;
+    position: absolute;
+}
+li .description {
+    position: absolute;
+    top: 0px;
+    left: 30%;
+    color: #000000;
+    font: bold 12px arial;
+}*/
+
+/* Fieldset            */
+
+fieldset {
+    font-family: 'Montserrat';
+    border: 2px solid #085a9f;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 5px;
+}
+
+fieldset legend {
+    background: #085a9f;
+    color: #fff;
+    padding: 5px 10px ;
+    font-size: 14px;
+    border-radius: 5px;
+    margin-left: 20px;
+}
+
+/* Code System and ATC blocks */
+.codeSystem {
+    background-color:#666;
+    margin-top:20px;
+    padding-left:10px;
+    padding-right:10px;
+    border-radius:10px 10px 10px 10px;
+}
+
+.button {
+    -moz-box-shadow:inset 0px 1px 0px 0px #54a3f7;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #54a3f7;
+    box-shadow:inset 0px 1px 0px 0px #54a3f7;
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #007dc1), color-stop(1, #0061a7));
+    background:-moz-linear-gradient(top, #007dc1 5%, #0061a7 100%);
+    background:-webkit-linear-gradient(top, #007dc1 5%, #0061a7 100%);
+    background:-o-linear-gradient(top, #007dc1 5%, #0061a7 100%);
+    background:-ms-linear-gradient(top, #007dc1 5%, #0061a7 100%);
+    background:linear-gradient(to bottom, #007dc1 5%, #0061a7 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#007dc1', endColorstr='#0061a7',GradientType=0);
+    background-color:#007dc1;
+    -moz-border-radius:3px;
+    -webkit-border-radius:3px;
+    border-radius:3px;
+    border:1px solid #124d77;
+    display:inline-block;
+    cursor:pointer;
+    color:#ffffff;
+    font-family:'Montserrat';
+    font-size:13px;
+    padding:6px 24px;
+    text-decoration:none;
+    text-shadow:0px 1px 0px #154682;
+}
+.button:hover {
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #0061a7), color-stop(1, #007dc1));
+    background:-moz-linear-gradient(top, #0061a7 5%, #007dc1 100%);
+    background:-webkit-linear-gradient(top, #0061a7 5%, #007dc1 100%);
+    background:-o-linear-gradient(top, #0061a7 5%, #007dc1 100%);
+    background:-ms-linear-gradient(top, #0061a7 5%, #007dc1 100%);
+    background:linear-gradient(to bottom, #0061a7 5%, #007dc1 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#0061a7', endColorstr='#007dc1',GradientType=0);
+    background-color:#0061a7;
+}
+.button:active {
+    position:relative;
+    top:1px;
+}
+
+.additionalInfo {
+    float: left;
+    font-style: italic;
+    color: #009fd1;
+}
+
+</style><script>
+                    function toggleContent(option) {
+                        document.getElementById('content-translated').style.display = option === 'translated' ? 'block' : 'none';
+                        document.getElementById('content-original').style.display = option === 'original' ? 'block' : 'none';
+
+                        // Update the active state of the buttons
+                        const leftButton = document.querySelector('.toggle-button-translated[data-option="translated"]');
+                        const rightButton = document.querySelector('.toggle-button-original[data-option="original"]');
+
+                        leftButton.classList.toggle('active', option === 'translated');
+                        rightButton.classList.toggle('active', option === 'original');
+                    }
+                </script><script>
+                    function toggleContentAllergies(option) {
+                        document.getElementById('content-translated-allergies').style.display = option === 'translated-allergies' ? 'block' : 'none';
+                        document.getElementById('content-original-allergies').style.display = option === 'original-allergies' ? 'block' : 'none';
+
+                        // Update the active state of the buttons
+                        const leftButton = document.querySelector('.toggle-button-translated[data-option="translated-allergies"]');
+                        const rightButton = document.querySelector('.toggle-button-original[data-option="original-allergies"]');
+                        
+                        leftButton.classList.toggle('active', option === 'translated-allergies');
+                        rightButton.classList.toggle('active', option === 'original-allergies');
+                    }
+                </script><script>
+                    function toggleContentImmunizations(option) {
+                        document.getElementById('content-translated-immunizations').style.display = option === 'translated-immunizations' ? 'block' : 'none';
+                        document.getElementById('content-original-immunizations').style.display = option === 'original-immunizations' ? 'block' : 'none';
+
+                        // Update the active state of the buttons
+                        const leftButton = document.querySelector('.toggle-button-translated[data-option="translated-immunizations"]');
+                        const rightButton = document.querySelector('.toggle-button-original[data-option="original-immunizations"]');
+                        
+                        leftButton.classList.toggle('active', option === 'translated-immunizations');
+                        rightButton.classList.toggle('active', option === 'original-immunizations');
+                    }
+                </script><script>
+                    function toggleContentSurgeries(option) {
+                        document.getElementById('content-translated-surgeries').style.display = option === 'translated-surgeries' ? 'block' : 'none';
+                        document.getElementById('content-original-surgeries').style.display = option === 'original-surgeries' ? 'block' : 'none';
+
+                        // Update the active state of the buttons
+                        const leftButton = document.querySelector('.toggle-button-translated[data-option="translated-surgeries"]');
+                        const rightButton = document.querySelector('.toggle-button-original[data-option="original-surgeries"]');
+                        
+                        leftButton.classList.toggle('active', option === 'translated-surgeries');
+                        rightButton.classList.toggle('active', option === 'original-surgeries');
+                    }
+                </script><script>
+                    function toggleContentDevices(option) {
+                        document.getElementById('content-translated-devices').style.display = option === 'translated-devices' ? 'block' : 'none';
+                        document.getElementById('content-original-devices').style.display = option === 'original-devices' ? 'block' : 'none';
+
+                        // Update the active state of the buttons
+                        const leftButton = document.querySelector('.toggle-button-translated[data-option="translated-devices"]');
+                        const rightButton = document.querySelector('.toggle-button-original[data-option="original-devices"]');
+                        
+                        leftButton.classList.toggle('active', option === 'translated-devices');
+                        rightButton.classList.toggle('active', option === 'original-devices');
+                    }
+                </script><script>
+                    function toggleContentSummary(option) {
+                        document.getElementById('content-translated-summary').style.display = option === 'translated-summary' ? 'block' : 'none';
+                        document.getElementById('content-original-summary').style.display = option === 'original-summary' ? 'block' : 'none';
+
+                        // Update the active state of the buttons
+                        const leftButton = document.querySelector('.toggle-button-translated[data-option="translated-summary"]');
+                        const rightButton = document.querySelector('.toggle-button-original[data-option="original-summary"]');
+                        
+                        leftButton.classList.toggle('active', option === 'translated-summary');
+                        rightButton.classList.toggle('active', option === 'original-summary');
+                    }
+                </script><script>
+                    function toggleContentPregnancy(option) {
+                        document.getElementById('content-translated-pregnancy').style.display = option === 'translated-pregnancy' ? 'block' : 'none';
+                        document.getElementById('content-original-pregnancy').style.display = option === 'original-pregnancy' ? 'block' : 'none';
+
+                        // Update the active state of the buttons
+                        const leftButton = document.querySelector('.toggle-button-translated[data-option="translated-pregnancy"]');
+                        const rightButton = document.querySelector('.toggle-button-original[data-option="original-pregnancy"]');
+                        
+                        leftButton.classList.toggle('active', option === 'translated-pregnancy');
+                        rightButton.classList.toggle('active', option === 'original-pregnancy');
+                    }
+                </script><script>
+                    function toggleContentSocial(option) {
+                        document.getElementById('content-translated-social').style.display = option === 'translated-social' ? 'block' : 'none';
+                        document.getElementById('content-original-social').style.display = option === 'original-social' ? 'block' : 'none';
+
+                        // Update the active state of the buttons
+                        const leftButton = document.querySelector('.toggle-button-translated[data-option="translated-social"]');
+                        const rightButton = document.querySelector('.toggle-button-original[data-option="original-social"]');
+                        
+                        leftButton.classList.toggle('active', option === 'translated-social');
+                        rightButton.classList.toggle('active', option === 'original-social');
+                    }
+                </script><script>
+                    function toggleContentSigns(option) {
+                        document.getElementById('content-translated-signs').style.display = option === 'translated-signs' ? 'block' : 'none';
+                        document.getElementById('content-original-signs').style.display = option === 'original-signs' ? 'block' : 'none';
+
+                        // Update the active state of the buttons
+                        const leftButton = document.querySelector('.toggle-button-translated[data-option="translated-signs"]');
+                        const rightButton = document.querySelector('.toggle-button-original[data-option="original-signs"]');
+                        
+                        leftButton.classList.toggle('active', option === 'translated-signs');
+                        rightButton.classList.toggle('active', option === 'original-signs');
+                    }
+                </script><script>
+                    function toggleContentIllness(option) {
+                        document.getElementById('content-translated-illness').style.display = option === 'translated-illness' ? 'block' : 'none';
+                        document.getElementById('content-original-illness').style.display = option === 'original-illness' ? 'block' : 'none';
+
+                        // Update the active state of the buttons
+                        const leftButton = document.querySelector('.toggle-button-translated[data-option="translated-illness"]');
+                        const rightButton = document.querySelector('.toggle-button-original[data-option="original-illness"]');
+                        
+                        leftButton.classList.toggle('active', option === 'translated-illness');
+                        rightButton.classList.toggle('active', option === 'original-illness');
+                    }
+                </script></head>
+   <body>
+      <h1 class="h1center">Patient summary Document</h1>
+      <div class="patient">
+         <div class="wrap-collapsible"><input id="collapsible-patient-header" class="toggle" type="checkbox" checked="true"><label for="collapsible-patient-header" class="lbl-toggle-main">Patient</label><div class="collapsible-content-main">
+               <div class="content-inner-main">
+                  <div>
+                     <table class="header_table">
+                        <tbody>
+                           <tr>
+                              <table class="header_table">
+                                 <tbody>
+                                    <tr>
+                                       <th colspan="2">Prefix</th>
+                                       <th colspan="2">Family Name</th>
+                                       <th>Given Name</th>
+                                    </tr>
+                                    <tr>
+                                       <td colspan="2"></td>
+                                       <td colspan="2">Testpat2&nbsp;
+                                          
+                                       </td>
+                                       <td>Pat2&nbsp;
+                                          
+                                       </td>
+                                    </tr>
+                                    <tr>
+                                       <th style="width:140px;">Primary Patient Identifier</th>
+                                       <td>6668937763</td>
+                                       <th style="width:140px;">Secondary Patient Identifier</th>
+                                       <td>1900010100230</td>
+                                    </tr>
+                                    <tr>
+                                       <th style="width:140px;">Gender</th>
+                                       <td>Male</td>
+                                       <th style="width:140px;">Date of Birth</th>
+                                       <td>1900-01-01</td>
+                                    </tr>
+                                 </tbody>
+                              </table>
+                           </tr>
+                        </tbody>
+                     </table><br><div class="wrap-collapsible"><input id="collapsible-extended-header" class="toggle" type="checkbox"><label for="collapsible-extended-header" class="lbl-toggle">See details</label><div class="collapsible-content">
+                           <div class="content-inner">
+                              <div id="extendedCdaHeader">
+                                 <div class="container">
+                                    <div class="item">
+                                       <div class="extended_header_block">
+                                          <table class="extended_header_table">
+                                             <tbody>
+                                                <tr>
+                                                   <th colspan="2">Patient</th>
+                                                </tr>
+                                                <tr>
+                                                   <td></td>
+                                                   <td>
+                                                      <table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="contact_information_table">
+                                                         <colgroup>
+                                                            <col span="1" style="width: 30%;">
+                                                            <col span="1" style="width: 70%;">
+                                                         </colgroup>
+                                                         <tr>
+                                                            <th colspan="2">Contact Information</th>
+                                                         </tr>
+                                                         <tr></tr>
+                                                         <tr>
+                                                            <th>Address</th>
+                                                            <td> home address:<br>125, route d'Esch<br>Luxembourg&nbsp;L-1407,&nbsp;LU<br></td>
+                                                         </tr>
+                                                         <tr>
+                                                            <th>Telecom</th>
+                                                            <td>Tel (home address):  +352-691-442<br>Tel (mobile contact):  +352-1277-8182<br>Mail (home address):  testpat2@pt-test.lu<br></td>
+                                                         </tr><br></table>
+                                                   </td>
+                                                </tr>
+                                             </tbody>
+                                          </table>
+                                       </div>
+                                    </div>
+                                    <div class="item">
+                                       <div class="extended_header_block">
+                                          <table class="extended_header_table">
+                                             <tbody>
+                                                <tr>
+                                                   <th colspan="2">Preferred HCP/Legal organization to contact</th>
+                                                </tr>
+                                                <tr>
+                                                   <td></td>
+                                                   <td>
+                                                      <table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="contact_information_table">
+                                                         <colgroup>
+                                                            <col span="1" style="width: 30%;">
+                                                            <col span="1" style="width: 70%;">
+                                                         </colgroup>
+                                                         <tr>
+                                                            <th colspan="2">Contact Information</th>
+                                                         </tr>
+                                                         <tr></tr>
+                                                         <tr>
+                                                            <th>Address</th>
+                                                            <td> work place:<br>2 Rue Eugène Ruppert<br>Luxembourg&nbsp;L-2453,&nbsp;LU<br></td>
+                                                         </tr>
+                                                         <tr>
+                                                            <th>Telecom</th>
+                                                            <td>Tel (home address):  +352-2712501-832<br>Mail (home address):  laurent.vandenhove@agence-esante.lu<br></td>
+                                                         </tr><br></table>
+                                                   </td>
+                                                </tr>
+                                                <tr>
+                                                   <td></td>
+                                                   <td>
+                                                      <table class="contact_information_table">
+                                                         <tr>
+                                                            <th colspan="2">Represented Organization</th>
+                                                         </tr>
+                                                         <tr>
+                                                            <tr xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm">
+                                                               <th>Address</th>
+                                                               <td></td>
+                                                            </tr>
+                                                            <tr xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm">
+                                                               <th>Telecom</th>
+                                                               <td></td>
+                                                            </tr><br xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm"></tr>
+                                                      </table>
+                                                   </td>
+                                                </tr>
+                                             </tbody>
+                                          </table>
+                                       </div>
+                                    </div>
+                                    <div class="item">
+                                       <div class="extended_header_block">
+                                          <table class="extended_header_table">
+                                             <tbody>
+                                                <tr>
+                                                   <th colspan="2">Author (HCP)</th>
+                                                </tr>
+                                                <tr>
+                                                   <td>LAURENT VANDENHOVE
+                                                      &nbsp;
+                                                      
+                                                   </td>
+                                                   <td>
+                                                      <table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="contact_information_table">
+                                                         <colgroup>
+                                                            <col span="1" style="width: 30%;">
+                                                            <col span="1" style="width: 70%;">
+                                                         </colgroup>
+                                                         <tr>
+                                                            <th colspan="2">Contact Information</th>
+                                                         </tr>
+                                                         <tr></tr>
+                                                         <tr>
+                                                            <th>Address</th>
+                                                            <td> work place:<br>2 Rue Eugène Ruppert<br>Luxembourg&nbsp;L-2453,&nbsp;LU<br></td>
+                                                         </tr>
+                                                         <tr>
+                                                            <th>Telecom</th>
+                                                            <td>Tel (home address):  +352-2712501-832<br>Mail (home address):  laurent.vandenhove@agence-esante.lu<br></td>
+                                                         </tr><br></table>
+                                                   </td>
+                                                </tr>
+                                                <tr>
+                                                   <td>Cabinet Médicale</td>
+                                                   <td>
+                                                      <table class="contact_information_table">
+                                                         <tr>
+                                                            <th colspan="2">Represented Organization</th>
+                                                         </tr>
+                                                         <tr>
+                                                            <tr xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm">
+                                                               <th>Address</th>
+                                                               <td> work place:<br>2 Rue Eugène Ruppert<br>Luxembourg&nbsp;L-2453,&nbsp;LU<br></td>
+                                                            </tr>
+                                                            <tr xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm">
+                                                               <th>Telecom</th>
+                                                               <td>Tel (home address):  +352-2712501-832<br>Mail (home address):  laurent.vandenhove@agence-esante.lu<br></td>
+                                                            </tr><br xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm"></tr>
+                                                      </table>
+                                                   </td>
+                                                </tr>
+                                             </tbody>
+                                          </table>
+                                       </div>
+                                    </div>
+                                    <div class="item">
+                                       <div class="extended_header_block">
+                                          <table class="extended_header_table">
+                                             <tbody>
+                                                <tr>
+                                                   <th colspan="2">Legal Authenticator</th>
+                                                </tr>
+                                                <tr>
+                                                   <td>LAURENT VANDENHOVE</td>
+                                                   <td>
+                                                      <table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="contact_information_table">
+                                                         <colgroup>
+                                                            <col span="1" style="width: 30%;">
+                                                            <col span="1" style="width: 70%;">
+                                                         </colgroup>
+                                                         <tr>
+                                                            <th colspan="2">Contact Information</th>
+                                                         </tr>
+                                                         <tr></tr>
+                                                         <tr>
+                                                            <th>Address</th>
+                                                            <td> work place:<br>2 Rue Eugène Ruppert<br>Luxembourg&nbsp;L-2453,&nbsp;LU<br></td>
+                                                         </tr>
+                                                         <tr>
+                                                            <th>Telecom</th>
+                                                            <td>Tel (home address):  +352-2712501-832<br>Mail (home address):  laurent.vandenhove@agence-esante.lu<br></td>
+                                                         </tr><br></table>
+                                                   </td>
+                                                </tr>
+                                                <tr>
+                                                   <td>Cabinet Médicale</td>
+                                                   <td>
+                                                      <table class="contact_information_table">
+                                                         <tr>
+                                                            <th colspan="2">Represented Organization</th>
+                                                         </tr>
+                                                         <tr>
+                                                            <tr xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm">
+                                                               <th>Address</th>
+                                                               <td> work place:<br>2 Rue Eugène Ruppert<br>Luxembourg&nbsp;L-2453,&nbsp;LU<br></td>
+                                                            </tr>
+                                                            <tr xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm">
+                                                               <th>Telecom</th>
+                                                               <td>Tel (home address):  +352-2712501-832<br>Mail (home address):  laurent.vandenhove@agence-esante.lu<br></td>
+                                                            </tr><br xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm"></tr>
+                                                      </table>
+                                                   </td>
+                                                </tr>
+                                             </tbody>
+                                          </table>
+                                       </div>
+                                    </div>
+                                    <div class="item">
+                                       <div class="extended_header_block">
+                                          <table class="extended_header_table">
+                                             <tbody>
+                                                <tr>
+                                                   <th colspan="2">Other Contacts</th>
+                                                </tr>
+                                                <tr></tr>
+                                             </tbody>
+                                          </table>
+                                       </div>
+                                    </div>
+                                    <div class="item">
+                                       <div class="extended_header_block">
+                                          <table class="extended_header_table">
+                                             <tbody>
+                                                <tr>
+                                                   <th colspan="2">Guardian</th>
+                                                </tr>
+                                             </tbody>
+                                          </table>
+                                       </div>
+                                    </div>
+                                    <div class="item">
+                                       <div class="extended_header_block">
+                                          <table class="extended_header_table">
+                                             <tbody>
+                                                <tr>
+                                                   <th colspan="2">Custodian</th>
+                                                </tr>
+                                                <tr>
+                                                   <td>Cabinet Médicale</td>
+                                                   <td>
+                                                      <table class="contact_information_table">
+                                                         <tr>
+                                                            <th colspan="2">Represented Organization</th>
+                                                         </tr>
+                                                         <tr>
+                                                            <tr xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm">
+                                                               <th>Address</th>
+                                                               <td> work place:<br>2 Rue Eugène Ruppert<br>Luxembourg&nbsp;L-2453,&nbsp;LU<br></td>
+                                                            </tr>
+                                                            <tr xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm">
+                                                               <th>Telecom</th>
+                                                               <td>Tel (home address):  +352-2712501-832<br>Mail (home address):  laurent.vandenhove@agence-esante.lu<br></td>
+                                                            </tr><br xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm"></tr>
+                                                      </table>
+                                                   </td>
+                                                </tr>
+                                             </tbody>
+                                          </table>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div><br><div class="content">
+         <table class="header_table">
+            <tbody>
+               <tr class="td_creation_date">
+                  <th>Creation Date of the Document</th>
+                  <td>2023-09-25	14:13:38 (CET+2)</td>
+                  <th>Last Update of the Information</th>
+                  <td>2023-09-25	14:13:38 (CET+2)</td>
+                  <th>Original Document Language</th>
+                  <td>French-LUXEMBOURG</td>
+               </tr>
+            </tbody>
+         </table><br><div class="wrap-collapsible"><input id="collapsible-clinical-sections" class="toggle" type="checkbox" checked="true"><label for="collapsible-clinical-sections" class="lbl-toggle-main">Clinical Sections</label><div class="collapsible-content-main">
+               <div class="content-inner-main">
+                  <div class="wrap-collapsible"><input id="collapsible-allergies-and-intolerances-section" class="toggle" type="checkbox" checked="true"><label for="collapsible-allergies-and-intolerances-section" class="lbl-toggle-title">Allergies and adverse reactions Document</label><div class="collapsible-content-title">
+                        <div class="content-inner-title">
+                           <div class="mobile-view">
+                              <div class="toggle-container"><button class="toggle-button-translated active" onclick="toggleContentAllergies('translated-allergies')" data-option="translated-allergies">Translated coded</button><button class="toggle-button-original" onclick="toggleContentAllergies('original-allergies')" data-option="original-allergies">Original narrative</button></div>
+                              <div class="mobile-content" id="content-original-allergies" style="display: none;">
+                                 <div class="content-inner">
+                                    <div class="narrative_wrapper">
+                                       <table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="narr_table">
+                                          
+                                          <thead>
+                                             
+                                             <tr class="narr_tr">
+                                                
+                                                <th class="narr_th">Code (SNOMED-CT)</th>
+                                                
+                                                <th class="narr_th">Type</th>
+                                                
+                                                <th class="narr_th">Agent</th>
+                                                
+                                                <th class="narr_th">Symptôme</th>
+                                                
+                                                <th class="narr_th">Gravité</th>
+                                                
+                                                <th class="narr_th">Date de début</th>
+                                                
+                                                <th class="narr_th">Date de fin</th>
+                                                
+                                                <th class="narr_th">Notes</th>
+                                                
+                                             </tr>
+                                             
+                                          </thead>
+                                          
+                                          <tbody>
+                                             
+                                             <tr class="narr_tr" ID="allergy1">
+                                                
+                                                <td ID="allergy1-code">416098002</td>
+                                                
+                                                <td ID="allergy1-type">Allergie médicamenteuse</td>
+                                                
+                                                <td ID="allergy1-participant">abacavir sulfate</td>
+                                                
+                                                <td ID="allergy1-manif">Anaphylaxie</td>
+                                                
+                                                <td ID="allergy1-sev">Sévère</td>
+                                                
+                                                <td ID="allergy1-start">01/08/2022</td>
+                                                
+                                                <td ID="allergy1-end"></td>
+                                                
+                                                <td ID="allergy1-notes">note</td>
+                                                
+                                             </tr>
+                                             
+                                          </tbody>
+                                          
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="mobile-content" id="content-translated-allergies" style="display: block;">
+                                 <div class="content-inner">
+                                    <table class="translation_table">
+                                       <table class="translation_table">
+                                          <thead>
+                                             <tr>
+                                                <th>Reaction Type</th>
+                                                <th>Clinical Manifestation</th>
+                                                <th>Agent</th>
+                                                <th>Duration</th>
+                                                <th>Severity</th>
+                                                <th>Criticality</th>
+                                                <th>Allergy Status</th>
+                                                <th>Certainty</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <tr>
+                                                   <td data-label="Reaction Type">Allergic disposition</td>
+                                                   <td data-label="Clinical Manifestation">Anaphylaxis</td>
+                                                   <td data-label="Agent">abacavir</td>
+                                                   <td data-label="Duration">From 2022-08-01 Until 
+                                                      <div xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" class="tooltip-right"><i class="fas fa-exclamation-circle" style="color:#085a9f" aria-hidden="true"></i><span class="tooltiptext">Missing Information</span></div> unknown
+                                                   </td>
+                                                   <td data-label="Severity">Severe</td>
+                                                   <td data-label="Criticality"></td>
+                                                   <td data-label="Allergy Status"></td>
+                                                   <td data-label="Certainty"></td>
+                                                </tr>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </table>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="web-view">
+                              <div class="wrap-collapsible"><input id="collapsible-allergies-and-intolerances-original" class="toggle" type="checkbox"><label for="collapsible-allergies-and-intolerances-original" class="lbl-toggle">Original narrative</label><div class="collapsible-content">
+                                    <div class="content-inner">
+                                       <div class="narrative_wrapper">
+                                          <table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="narr_table">
+                                             
+                                             <thead>
+                                                
+                                                <tr class="narr_tr">
+                                                   
+                                                   <th class="narr_th">Code (SNOMED-CT)</th>
+                                                   
+                                                   <th class="narr_th">Type</th>
+                                                   
+                                                   <th class="narr_th">Agent</th>
+                                                   
+                                                   <th class="narr_th">Symptôme</th>
+                                                   
+                                                   <th class="narr_th">Gravité</th>
+                                                   
+                                                   <th class="narr_th">Date de début</th>
+                                                   
+                                                   <th class="narr_th">Date de fin</th>
+                                                   
+                                                   <th class="narr_th">Notes</th>
+                                                   
+                                                </tr>
+                                                
+                                             </thead>
+                                             
+                                             <tbody>
+                                                
+                                                <tr class="narr_tr" ID="allergy1">
+                                                   
+                                                   <td ID="allergy1-code">416098002</td>
+                                                   
+                                                   <td ID="allergy1-type">Allergie médicamenteuse</td>
+                                                   
+                                                   <td ID="allergy1-participant">abacavir sulfate</td>
+                                                   
+                                                   <td ID="allergy1-manif">Anaphylaxie</td>
+                                                   
+                                                   <td ID="allergy1-sev">Sévère</td>
+                                                   
+                                                   <td ID="allergy1-start">01/08/2022</td>
+                                                   
+                                                   <td ID="allergy1-end"></td>
+                                                   
+                                                   <td ID="allergy1-notes">note</td>
+                                                   
+                                                </tr>
+                                                
+                                             </tbody>
+                                             
+                                          </table>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div><br><div class="wrap-collapsible"><input id="collapsible-allergies-and-intolerances-translated" class="toggle" type="checkbox" checked="true"><label for="collapsible-allergies-and-intolerances-translated" class="lbl-toggle">Translated coded</label><div class="collapsible-content">
+                                    <div class="content-inner">
+                                       <table class="translation_table">
+                                          <table class="translation_table">
+                                             <thead>
+                                                <tr>
+                                                   <th>Reaction Type</th>
+                                                   <th>Clinical Manifestation</th>
+                                                   <th>Agent</th>
+                                                   <th>Duration</th>
+                                                   <th>Severity</th>
+                                                   <th>Criticality</th>
+                                                   <th>Allergy Status</th>
+                                                   <th>Certainty</th>
+                                                </tr>
+                                             </thead>
+                                             <tbody>
+                                                <tr>
+                                                   <tr>
+                                                      <td data-label="Reaction Type">Allergic disposition</td>
+                                                      <td data-label="Clinical Manifestation">Anaphylaxis</td>
+                                                      <td data-label="Agent">abacavir</td>
+                                                      <td data-label="Duration">From 2022-08-01 Until 
+                                                         <div xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" class="tooltip-right"><i class="fas fa-exclamation-circle" style="color:#085a9f" aria-hidden="true"></i><span class="tooltiptext">Missing Information</span></div> unknown
+                                                      </td>
+                                                      <td data-label="Severity">Severe</td>
+                                                      <td data-label="Criticality"></td>
+                                                      <td data-label="Allergy Status"></td>
+                                                      <td data-label="Certainty"></td>
+                                                   </tr>
+                                                </tr>
+                                             </tbody>
+                                          </table>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div><br><br><div xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" class="wrap-collapsible"><input id="collapsible-current-problems-section" class="toggle" type="checkbox" checked="true"><label for="collapsible-current-problems-section" class="lbl-toggle-title">Problem list - Reported</label><div class="collapsible-content-title">
+                        <div class="content-inner-title">
+                           <div class="mobile-view">
+                              <div class="toggle-container"><button class="toggle-button-translated active" onclick="toggleContent('translated')" data-option="translated">Translated coded</button><button class="toggle-button-original" onclick="toggleContent('original')" data-option="original">Original narrative</button></div>
+                              <div class="mobile-content" id="content-original" style="display: none;">
+                                 <div class="content-inner">
+                                    <div class="narrative_wrapper">
+                                       <table xmlns:pharm="urn:hl7-org:pharm" class="narr_table" ID="history">
+                                          
+                                          <thead>
+                                             
+                                             <tr class="narr_tr">
+                                                
+                                                <th class="narr_th">Code (ICD-10CM)</th>
+                                                
+                                                <th class="narr_th">Type</th>
+                                                
+                                                <th class="narr_th">Description</th>
+                                                
+                                                <th class="narr_th">Date d'apparition présumée</th>
+                                                
+                                                <th class="narr_th">Date d'fin présumée</th>
+                                                
+                                                <th class="narr_th">Prise en charge</th>
+                                                
+                                             </tr>
+                                             
+                                          </thead>
+                                          
+                                          <tbody>
+                                             
+                                             <tr class="narr_tr" ID="history1">
+                                                
+                                                <td ID="history1-code">A06.6</td>
+                                                
+                                                <td ID="history1-type">abcès amibien de l'encéphale</td>
+                                                
+                                                <td ID="history1-desc">abc</td>
+                                                
+                                                <td ID="history1-start">01/08/2022</td>
+                                                
+                                                <td ID="history1-end"></td>
+                                                
+                                                <td ID="history1-part">Dr Who</td>
+                                                
+                                             </tr>
+                                             
+                                             <tr class="narr_tr" ID="history2">
+                                                
+                                                <td ID="history2-code">B20</td>
+                                                
+                                                <td ID="history2-type">immunodéficience humaine virale [VIH], à l'origine de
+                                                   										maladies infectieuses et parasitaires
+                                                   									
+                                                </td>
+                                                
+                                                <td ID="history2-desc"></td>
+                                                
+                                                <td ID="history2-start">02/08/2022</td>
+                                                
+                                                <td ID="history2-end"></td>
+                                                
+                                                <td ID="history2-part">infectiologue</td>
+                                                
+                                             </tr>
+                                             
+                                          </tbody>
+                                          
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="mobile-content" id="content-translated" style="display: block;">
+                                 <div class="content-inner">
+                                    <table class="translation_table">
+                                       <thead>
+                                          <tr>
+                                             <th>Active Problem</th>
+                                             <th>Onset Date</th>
+                                             <th>Diagnosis Assertion Status</th>
+                                             <th>Related Health Professional</th>
+                                             <th>Related External Resource</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          <tr>
+                                             <tr>
+                                                <td data-label="Active Problem">Amoebic brain abscess (A06.6)</td>
+                                                <td data-label="Onset Date">2022-08-01</td>
+                                                <td data-label="Diagnosis Assertion Status"></td>
+                                                <td data-label="Related Health Professional">
+                                                   <div>
+                                                      <table>
+                                                         <tr>
+                                                            <td>Dr Who</td>
+                                                            <td>
+                                                               <table xmlns:pharm="urn:hl7-org:pharm" class="contact_information_table">
+                                                                  <colgroup>
+                                                                     <col span="1" style="width: 30%;">
+                                                                     <col span="1" style="width: 70%;">
+                                                                  </colgroup>
+                                                                  <tr>
+                                                                     <th colspan="2">Contact Information</th>
+                                                                  </tr>
+                                                                  <tr></tr>
+                                                                  <tr>
+                                                                     <th>Address</th>
+                                                                     <td></td>
+                                                                  </tr>
+                                                                  <tr>
+                                                                     <th>Telecom</th>
+                                                                     <td></td>
+                                                                  </tr><br></table>
+                                                            </td>
+                                                         </tr>
+                                                      </table>
+                                                   </div>
+                                                </td>
+                                                <td data-label="Related External Resource"></td>
+                                             </tr>
+                                             <tr>
+                                                <td data-label="Active Problem">Human immunodeficiency virus [HIV] disease resulting in infectious and parasitic diseases (B20)</td>
+                                                <td data-label="Onset Date">2022-08-02</td>
+                                                <td data-label="Diagnosis Assertion Status"></td>
+                                                <td data-label="Related Health Professional">
+                                                   <div>
+                                                      <table>
+                                                         <tr>
+                                                            <td>infectiologue</td>
+                                                            <td>
+                                                               <table xmlns:pharm="urn:hl7-org:pharm" class="contact_information_table">
+                                                                  <colgroup>
+                                                                     <col span="1" style="width: 30%;">
+                                                                     <col span="1" style="width: 70%;">
+                                                                  </colgroup>
+                                                                  <tr>
+                                                                     <th colspan="2">Contact Information</th>
+                                                                  </tr>
+                                                                  <tr></tr>
+                                                                  <tr>
+                                                                     <th>Address</th>
+                                                                     <td></td>
+                                                                  </tr>
+                                                                  <tr>
+                                                                     <th>Telecom</th>
+                                                                     <td></td>
+                                                                  </tr><br></table>
+                                                            </td>
+                                                         </tr>
+                                                      </table>
+                                                   </div>
+                                                </td>
+                                                <td data-label="Related External Resource"></td>
+                                             </tr>
+                                             <tr>
+                                                <th class="subtitle" colspan="5">Rare Diseases</th>
+                                             </tr>
+                                             <tr>
+                                                <td colspan="5">No information
+                                                   <div class="tooltip-right"><i class="fas fa-exclamation-circle" style="color:#085a9f" aria-hidden="true"></i><span class="tooltiptext">Missing Information</span></div> 
+                                                </td>
+                                             </tr>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="web-view">
+                              <div class="wrap-collapsible"><input id="collapsible-current-problems-original" class="toggle" type="checkbox"><label for="collapsible-current-problems-original" class="lbl-toggle">Original narrative</label><div class="collapsible-content">
+                                    <div class="content-inner">
+                                       <div class="narrative_wrapper">
+                                          <table xmlns:pharm="urn:hl7-org:pharm" class="narr_table" ID="history">
+                                             
+                                             <thead>
+                                                
+                                                <tr class="narr_tr">
+                                                   
+                                                   <th class="narr_th">Code (ICD-10CM)</th>
+                                                   
+                                                   <th class="narr_th">Type</th>
+                                                   
+                                                   <th class="narr_th">Description</th>
+                                                   
+                                                   <th class="narr_th">Date d'apparition présumée</th>
+                                                   
+                                                   <th class="narr_th">Date d'fin présumée</th>
+                                                   
+                                                   <th class="narr_th">Prise en charge</th>
+                                                   
+                                                </tr>
+                                                
+                                             </thead>
+                                             
+                                             <tbody>
+                                                
+                                                <tr class="narr_tr" ID="history1">
+                                                   
+                                                   <td ID="history1-code">A06.6</td>
+                                                   
+                                                   <td ID="history1-type">abcès amibien de l'encéphale</td>
+                                                   
+                                                   <td ID="history1-desc">abc</td>
+                                                   
+                                                   <td ID="history1-start">01/08/2022</td>
+                                                   
+                                                   <td ID="history1-end"></td>
+                                                   
+                                                   <td ID="history1-part">Dr Who</td>
+                                                   
+                                                </tr>
+                                                
+                                                <tr class="narr_tr" ID="history2">
+                                                   
+                                                   <td ID="history2-code">B20</td>
+                                                   
+                                                   <td ID="history2-type">immunodéficience humaine virale [VIH], à l'origine de
+                                                      										maladies infectieuses et parasitaires
+                                                      									
+                                                   </td>
+                                                   
+                                                   <td ID="history2-desc"></td>
+                                                   
+                                                   <td ID="history2-start">02/08/2022</td>
+                                                   
+                                                   <td ID="history2-end"></td>
+                                                   
+                                                   <td ID="history2-part">infectiologue</td>
+                                                   
+                                                </tr>
+                                                
+                                             </tbody>
+                                             
+                                          </table>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div><br><div class="wrap-collapsible"><input id="collapsible-current-problems-translated" class="toggle" type="checkbox" checked="true"><label for="collapsible-current-problems-translated" class="lbl-toggle">Translated coded</label><div class="collapsible-content">
+                                    <div class="content-inner">
+                                       <table class="translation_table">
+                                          <thead>
+                                             <tr>
+                                                <th>Active Problem</th>
+                                                <th>Onset Date</th>
+                                                <th>Diagnosis Assertion Status</th>
+                                                <th>Related Health Professional</th>
+                                                <th>Related External Resource</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <tr>
+                                                   <td data-label="Active Problem">Amoebic brain abscess (A06.6)</td>
+                                                   <td data-label="Onset Date">2022-08-01</td>
+                                                   <td data-label="Diagnosis Assertion Status"></td>
+                                                   <td data-label="Related Health Professional">
+                                                      <div>
+                                                         <table>
+                                                            <tr>
+                                                               <td>Dr Who</td>
+                                                               <td>
+                                                                  <table xmlns:pharm="urn:hl7-org:pharm" class="contact_information_table">
+                                                                     <colgroup>
+                                                                        <col span="1" style="width: 30%;">
+                                                                        <col span="1" style="width: 70%;">
+                                                                     </colgroup>
+                                                                     <tr>
+                                                                        <th colspan="2">Contact Information</th>
+                                                                     </tr>
+                                                                     <tr></tr>
+                                                                     <tr>
+                                                                        <th>Address</th>
+                                                                        <td></td>
+                                                                     </tr>
+                                                                     <tr>
+                                                                        <th>Telecom</th>
+                                                                        <td></td>
+                                                                     </tr><br></table>
+                                                               </td>
+                                                            </tr>
+                                                         </table>
+                                                      </div>
+                                                   </td>
+                                                   <td data-label="Related External Resource"></td>
+                                                </tr>
+                                                <tr>
+                                                   <td data-label="Active Problem">Human immunodeficiency virus [HIV] disease resulting in infectious and parasitic diseases (B20)</td>
+                                                   <td data-label="Onset Date">2022-08-02</td>
+                                                   <td data-label="Diagnosis Assertion Status"></td>
+                                                   <td data-label="Related Health Professional">
+                                                      <div>
+                                                         <table>
+                                                            <tr>
+                                                               <td>infectiologue</td>
+                                                               <td>
+                                                                  <table xmlns:pharm="urn:hl7-org:pharm" class="contact_information_table">
+                                                                     <colgroup>
+                                                                        <col span="1" style="width: 30%;">
+                                                                        <col span="1" style="width: 70%;">
+                                                                     </colgroup>
+                                                                     <tr>
+                                                                        <th colspan="2">Contact Information</th>
+                                                                     </tr>
+                                                                     <tr></tr>
+                                                                     <tr>
+                                                                        <th>Address</th>
+                                                                        <td></td>
+                                                                     </tr>
+                                                                     <tr>
+                                                                        <th>Telecom</th>
+                                                                        <td></td>
+                                                                     </tr><br></table>
+                                                               </td>
+                                                            </tr>
+                                                         </table>
+                                                      </div>
+                                                   </td>
+                                                   <td data-label="Related External Resource"></td>
+                                                </tr>
+                                                <tr>
+                                                   <th class="subtitle" colspan="5">Rare Diseases</th>
+                                                </tr>
+                                                <tr>
+                                                   <td colspan="5">No information
+                                                      <div class="tooltip-right"><i class="fas fa-exclamation-circle" style="color:#085a9f" aria-hidden="true"></i><span class="tooltiptext">Missing Information</span></div> 
+                                                   </td>
+                                                </tr>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div><br xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><br xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><div xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="wrap-collapsible"><input id="collapsible-medication-summary-section-original" class="toggle" type="checkbox" checked="true"><label for="collapsible-medication-summary-section-original" class="lbl-toggle-title">History of Medication use Narrative</label><div class="collapsible-content-title">
+                        <div class="content-inner-title">
+                           <div class="mobile-view">
+                              <div class="toggle-container"><button class="toggle-button-translated active" onclick="toggleContentSummary('translated-summary')" data-option="translated-summary">Translated coded</button><button class="toggle-button-original" onclick="toggleContentSummary('original-summary')" data-option="original-summary">Original narrative</button></div>
+                              <div class="mobile-content" id="content-original-summary" style="display: none;">
+                                 <div class="content-inner">
+                                    <div class="narrative_wrapper">
+                                       <table class="narr_table">
+                                          
+                                          <thead>
+                                             
+                                             <tr class="narr_tr">
+                                                
+                                                <th class="narr_th">Code</th>
+                                                
+                                                <th class="narr_th">Nom commercial</th>
+                                                
+                                                <th class="narr_th">Principe actif et dosage</th>
+                                                
+                                                <th class="narr_th">Forme pharmaceutique</th>
+                                                
+                                                <th class="narr_th">Route</th>
+                                                
+                                                <th class="narr_th">Posologie</th>
+                                                
+                                                <th class="narr_th">Date de début</th>
+                                                
+                                                <th class="narr_th">Date de fin</th>
+                                                
+                                                <th class="narr_th">Notes</th>
+                                                
+                                             </tr>
+                                             
+                                          </thead>
+                                          
+                                          <tbody>
+                                             
+                                             <tr class="narr_tr" ID="medication1">
+                                                
+                                                <td ID="medication1-code">2009050307</td>
+                                                
+                                                <td ID="medication1-nom">RETROVIR</td>
+                                                
+                                                <td ID="medication1-principe">zidovudine 10.0mg/ml</td>
+                                                
+                                                <td ID="medication1-forme">sol buv</td>
+                                                
+                                                <td ID="medication1-route">orale</td>
+                                                
+                                                <td ID="medication1-posologie">300 mg par 12 Heure</td>
+                                                
+                                                <td ID="medication1-start">01/08/2022</td>
+                                                
+                                                <td ID="medication1-end">18/08/2023</td>
+                                                
+                                                <td ID="medication1-notes">abc</td>
+                                                
+                                             </tr>
+                                             
+                                             <tr class="narr_tr" ID="medication2">
+                                                
+                                                <td ID="medication2-code">2007029189</td>
+                                                
+                                                <td ID="medication2-nom">VIREAD</td>
+                                                
+                                                <td ID="medication2-principe">ténofovir disoproxil fumarate 245.0mg</td>
+                                                
+                                                <td ID="medication2-forme">cp</td>
+                                                
+                                                <td ID="medication2-route">orale</td>
+                                                
+                                                <td ID="medication2-posologie">1 cp par Jour</td>
+                                                
+                                                <td ID="medication2-start">01/08/2022</td>
+                                                
+                                                <td ID="medication2-end">18/08/2023</td>
+                                                
+                                                <td ID="medication2-notes"></td>
+                                                
+                                             </tr>
+                                             
+                                             <tr class="narr_tr" ID="medication3">
+                                                
+                                                <td ID="medication3-code">2008039720</td>
+                                                
+                                                <td ID="medication3-nom">VIRAMUNE</td>
+                                                
+                                                <td ID="medication3-principe">névirapine 200.0mg</td>
+                                                
+                                                <td ID="medication3-forme">cp</td>
+                                                
+                                                <td ID="medication3-route">orale</td>
+                                                
+                                                <td ID="medication3-posologie">1 cp par Jour</td>
+                                                
+                                                <td ID="medication3-start">01/08/2022</td>
+                                                
+                                                <td ID="medication3-end">18/08/2023</td>
+                                                
+                                                <td ID="medication3-notes"></td>
+                                                
+                                             </tr>
+                                             
+                                          </tbody>
+                                          
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="mobile-content" id="content-translated-summary" style="display: block;">
+                                 <div class="content-inner">
+                                    <table class="medication_summary_table">
+                                       <thead>
+                                          <tr>
+                                             <th>Medicinal Product</th>
+                                             <th>Active Ingredient</th>
+                                             <th>Strength</th>
+                                             <th>Dose Form</th>
+                                             <th>Units per Intake</th>
+                                             <th>Frequency of Intakes</th>
+                                             <th>Route of Administration</th>
+                                             <th>Duration of Treatment</th>
+                                             <th>Medication Reason</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          <tr>
+                                             <tr>
+                                                <td data-label="Medicinal Product"><b>RETROVIR</b></td>
+                                                <td data-label="Active Ingredient">zidovudine (J05AF01)</td>
+                                                <td data-label="Strength">10.0 milligram 
+                                                   /
+                                                    1.0 milliliter
+                                                </td>
+                                                <td data-label="Dose Form">Oral solution</td>
+                                                <td data-label="Units per Intake">300 milligram&nbsp;
+                                                   
+                                                </td>
+                                                <td data-label="Frequency of Intakes">Every&nbsp;12&nbsp;hour</td>
+                                                <td data-label="Route of Administration">Oral use</td>
+                                                <td data-label="Duration of Treatment">From 2022-08-01 Until 2023-08-18</td>
+                                                <td data-label="Medication Reason"></td>
+                                             </tr>
+                                             <tr>
+                                                <td data-label="Medicinal Product"><b>VIREAD</b></td>
+                                                <td data-label="Active Ingredient">tenofovir disoproxil (J05AF07)</td>
+                                                <td data-label="Strength">245.0 milligram per unit</td>
+                                                <td data-label="Dose Form">Tablet</td>
+                                                <td data-label="Units per Intake">1 unit(s)&nbsp;
+                                                   
+                                                </td>
+                                                <td data-label="Frequency of Intakes">Every&nbsp;1&nbsp;day</td>
+                                                <td data-label="Route of Administration">Oral use</td>
+                                                <td data-label="Duration of Treatment">From 2022-08-01 Until 2023-08-18</td>
+                                                <td data-label="Medication Reason"></td>
+                                             </tr>
+                                             <tr>
+                                                <td data-label="Medicinal Product"><b>VIRAMUNE</b></td>
+                                                <td data-label="Active Ingredient">nevirapine (J05AG01)</td>
+                                                <td data-label="Strength">200.0 milligram per unit</td>
+                                                <td data-label="Dose Form">Tablet</td>
+                                                <td data-label="Units per Intake">1 unit(s)&nbsp;
+                                                   
+                                                </td>
+                                                <td data-label="Frequency of Intakes">Every&nbsp;1&nbsp;day</td>
+                                                <td data-label="Route of Administration">Oral use</td>
+                                                <td data-label="Duration of Treatment">From 2022-08-01 Until 2023-08-18</td>
+                                                <td data-label="Medication Reason"></td>
+                                             </tr>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="web-view">
+                              <div class="wrap-collapsible"><input id="collapsible-medication-summary-original" class="toggle" type="checkbox"><label for="collapsible-medication-summary-original" class="lbl-toggle">Original narrative</label><div class="collapsible-content">
+                                    <div class="content-inner">
+                                       <div class="narrative_wrapper">
+                                          <table class="narr_table">
+                                             
+                                             <thead>
+                                                
+                                                <tr class="narr_tr">
+                                                   
+                                                   <th class="narr_th">Code</th>
+                                                   
+                                                   <th class="narr_th">Nom commercial</th>
+                                                   
+                                                   <th class="narr_th">Principe actif et dosage</th>
+                                                   
+                                                   <th class="narr_th">Forme pharmaceutique</th>
+                                                   
+                                                   <th class="narr_th">Route</th>
+                                                   
+                                                   <th class="narr_th">Posologie</th>
+                                                   
+                                                   <th class="narr_th">Date de début</th>
+                                                   
+                                                   <th class="narr_th">Date de fin</th>
+                                                   
+                                                   <th class="narr_th">Notes</th>
+                                                   
+                                                </tr>
+                                                
+                                             </thead>
+                                             
+                                             <tbody>
+                                                
+                                                <tr class="narr_tr" ID="medication1">
+                                                   
+                                                   <td ID="medication1-code">2009050307</td>
+                                                   
+                                                   <td ID="medication1-nom">RETROVIR</td>
+                                                   
+                                                   <td ID="medication1-principe">zidovudine 10.0mg/ml</td>
+                                                   
+                                                   <td ID="medication1-forme">sol buv</td>
+                                                   
+                                                   <td ID="medication1-route">orale</td>
+                                                   
+                                                   <td ID="medication1-posologie">300 mg par 12 Heure</td>
+                                                   
+                                                   <td ID="medication1-start">01/08/2022</td>
+                                                   
+                                                   <td ID="medication1-end">18/08/2023</td>
+                                                   
+                                                   <td ID="medication1-notes">abc</td>
+                                                   
+                                                </tr>
+                                                
+                                                <tr class="narr_tr" ID="medication2">
+                                                   
+                                                   <td ID="medication2-code">2007029189</td>
+                                                   
+                                                   <td ID="medication2-nom">VIREAD</td>
+                                                   
+                                                   <td ID="medication2-principe">ténofovir disoproxil fumarate 245.0mg</td>
+                                                   
+                                                   <td ID="medication2-forme">cp</td>
+                                                   
+                                                   <td ID="medication2-route">orale</td>
+                                                   
+                                                   <td ID="medication2-posologie">1 cp par Jour</td>
+                                                   
+                                                   <td ID="medication2-start">01/08/2022</td>
+                                                   
+                                                   <td ID="medication2-end">18/08/2023</td>
+                                                   
+                                                   <td ID="medication2-notes"></td>
+                                                   
+                                                </tr>
+                                                
+                                                <tr class="narr_tr" ID="medication3">
+                                                   
+                                                   <td ID="medication3-code">2008039720</td>
+                                                   
+                                                   <td ID="medication3-nom">VIRAMUNE</td>
+                                                   
+                                                   <td ID="medication3-principe">névirapine 200.0mg</td>
+                                                   
+                                                   <td ID="medication3-forme">cp</td>
+                                                   
+                                                   <td ID="medication3-route">orale</td>
+                                                   
+                                                   <td ID="medication3-posologie">1 cp par Jour</td>
+                                                   
+                                                   <td ID="medication3-start">01/08/2022</td>
+                                                   
+                                                   <td ID="medication3-end">18/08/2023</td>
+                                                   
+                                                   <td ID="medication3-notes"></td>
+                                                   
+                                                </tr>
+                                                
+                                             </tbody>
+                                             
+                                          </table>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div><br><div class="wrap-collapsible"><input id="collapsible-medication-summary-translated" class="toggle" type="checkbox" checked="true"><label for="collapsible-medication-summary-translated" class="lbl-toggle">Translated coded</label><div class="collapsible-content">
+                                    <div class="content-inner">
+                                       <table class="medication_summary_table">
+                                          <thead>
+                                             <tr>
+                                                <th>Medicinal Product</th>
+                                                <th>Active Ingredient</th>
+                                                <th>Strength</th>
+                                                <th>Dose Form</th>
+                                                <th>Units per Intake</th>
+                                                <th>Frequency of Intakes</th>
+                                                <th>Route of Administration</th>
+                                                <th>Duration of Treatment</th>
+                                                <th>Medication Reason</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <tr>
+                                                   <td data-label="Medicinal Product"><b>RETROVIR</b></td>
+                                                   <td data-label="Active Ingredient">zidovudine (J05AF01)</td>
+                                                   <td data-label="Strength">10.0 milligram 
+                                                      /
+                                                       1.0 milliliter
+                                                   </td>
+                                                   <td data-label="Dose Form">Oral solution</td>
+                                                   <td data-label="Units per Intake">300 milligram&nbsp;
+                                                      
+                                                   </td>
+                                                   <td data-label="Frequency of Intakes">Every&nbsp;12&nbsp;hour</td>
+                                                   <td data-label="Route of Administration">Oral use</td>
+                                                   <td data-label="Duration of Treatment">From 2022-08-01 Until 2023-08-18</td>
+                                                   <td data-label="Medication Reason"></td>
+                                                </tr>
+                                                <tr>
+                                                   <td data-label="Medicinal Product"><b>VIREAD</b></td>
+                                                   <td data-label="Active Ingredient">tenofovir disoproxil (J05AF07)</td>
+                                                   <td data-label="Strength">245.0 milligram per unit</td>
+                                                   <td data-label="Dose Form">Tablet</td>
+                                                   <td data-label="Units per Intake">1 unit(s)&nbsp;
+                                                      
+                                                   </td>
+                                                   <td data-label="Frequency of Intakes">Every&nbsp;1&nbsp;day</td>
+                                                   <td data-label="Route of Administration">Oral use</td>
+                                                   <td data-label="Duration of Treatment">From 2022-08-01 Until 2023-08-18</td>
+                                                   <td data-label="Medication Reason"></td>
+                                                </tr>
+                                                <tr>
+                                                   <td data-label="Medicinal Product"><b>VIRAMUNE</b></td>
+                                                   <td data-label="Active Ingredient">nevirapine (J05AG01)</td>
+                                                   <td data-label="Strength">200.0 milligram per unit</td>
+                                                   <td data-label="Dose Form">Tablet</td>
+                                                   <td data-label="Units per Intake">1 unit(s)&nbsp;
+                                                      
+                                                   </td>
+                                                   <td data-label="Frequency of Intakes">Every&nbsp;1&nbsp;day</td>
+                                                   <td data-label="Route of Administration">Oral use</td>
+                                                   <td data-label="Duration of Treatment">From 2022-08-01 Until 2023-08-18</td>
+                                                   <td data-label="Medication Reason"></td>
+                                                </tr>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div><br xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm"><br xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm"><div class="wrap-collapsible"><input id="collapsible-medical-devices-section-original" class="toggle" type="checkbox" checked="true"><label for="collapsible-medical-devices-section-original" class="lbl-toggle-title">History of medical device use</label><div class="collapsible-content-title">
+                        <div class="content-inner-title">
+                           <div class="mobile-view">
+                              <div class="toggle-container"><button class="toggle-button-translated active" onclick="toggleContentDevices('translated-devices')" data-option="translated-devices">Translated coded</button><button class="toggle-button-original" onclick="toggleContentDevices('original-devices')" data-option="original-devices">Original narrative</button></div>
+                              <div class="mobile-content" id="content-original-devices" style="display: none;">
+                                 <div class="content-inner">
+                                    <div class="narrative_wrapper">
+                                       <table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="narr_table" ID="devices">
+                                          
+                                          <thead>
+                                             
+                                             <tr class="narr_tr">
+                                                
+                                                <th class="narr_th">Code (FHL MEDDEV)</th>
+                                                
+                                                <th class="narr_th">Nom commercial</th>
+                                                
+                                                <th class="narr_th">Type</th>
+                                                
+                                                <th class="narr_th">Date d'implant</th>
+                                                
+                                                <th class="narr_th">Date de retrait</th>
+                                                
+                                                <th class="narr_th">Date d'expiration</th>
+                                                
+                                                <th class="narr_th">Numéro de série</th>
+                                                
+                                                <th class="narr_th">Notes</th>
+                                                
+                                             </tr>
+                                             
+                                          </thead>
+                                          
+                                          <tbody>
+                                             
+                                             <tr class="narr_tr" ID="devices1">
+                                                
+                                                <td ID="devices1-code">71231130</td>
+                                                
+                                                <td ID="devices1-name">GENOU ADAPTATEUR LEGION Implant Chrome-Cobalt décalé +2mm B/1
+                                                   										stér
+                                                   									
+                                                </td>
+                                                
+                                                <td ID="devices1-desc">IMPLANT GENOU AUTRE</td>
+                                                
+                                                <td ID="devices1-dateImp">01/07/2017</td>
+                                                
+                                                <td ID="devices1-dateOut"></td>
+                                                
+                                                <td ID="devices1-dateExp">01/02/2028</td>
+                                                
+                                                <td ID="devices1-serial">123456789</td>
+                                                
+                                                <td ID="devices1-note"></td>
+                                                
+                                             </tr>
+                                             
+                                          </tbody>
+                                          
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="mobile-content" id="content-translated-devices" style="display: block;">
+                                 <div class="content-inner">
+                                    <table class="translation_table">
+                                       <thead>
+                                          <tr>
+                                             <th>Device/Implant</th>
+                                             <th>Device ID</th>
+                                             <th>Implant Date</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          <tr>
+                                             <tr>
+                                                <td data-label="Device/Implant">Joint implant</td>
+                                                <td data-label="Device ID">123456789</td>
+                                                <td data-label="Implant Date">From 2017-07-01</td>
+                                             </tr>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="web-view">
+                              <div class="wrap-collapsible"><input id="collapsible-medical-devices-original" class="toggle" type="checkbox"><label for="collapsible-medical-devices-original" class="lbl-toggle">Original narrative</label><div class="collapsible-content">
+                                    <div class="content-inner">
+                                       <div class="narrative_wrapper">
+                                          <table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="narr_table" ID="devices">
+                                             
+                                             <thead>
+                                                
+                                                <tr class="narr_tr">
+                                                   
+                                                   <th class="narr_th">Code (FHL MEDDEV)</th>
+                                                   
+                                                   <th class="narr_th">Nom commercial</th>
+                                                   
+                                                   <th class="narr_th">Type</th>
+                                                   
+                                                   <th class="narr_th">Date d'implant</th>
+                                                   
+                                                   <th class="narr_th">Date de retrait</th>
+                                                   
+                                                   <th class="narr_th">Date d'expiration</th>
+                                                   
+                                                   <th class="narr_th">Numéro de série</th>
+                                                   
+                                                   <th class="narr_th">Notes</th>
+                                                   
+                                                </tr>
+                                                
+                                             </thead>
+                                             
+                                             <tbody>
+                                                
+                                                <tr class="narr_tr" ID="devices1">
+                                                   
+                                                   <td ID="devices1-code">71231130</td>
+                                                   
+                                                   <td ID="devices1-name">GENOU ADAPTATEUR LEGION Implant Chrome-Cobalt décalé +2mm B/1
+                                                      										stér
+                                                      									
+                                                   </td>
+                                                   
+                                                   <td ID="devices1-desc">IMPLANT GENOU AUTRE</td>
+                                                   
+                                                   <td ID="devices1-dateImp">01/07/2017</td>
+                                                   
+                                                   <td ID="devices1-dateOut"></td>
+                                                   
+                                                   <td ID="devices1-dateExp">01/02/2028</td>
+                                                   
+                                                   <td ID="devices1-serial">123456789</td>
+                                                   
+                                                   <td ID="devices1-note"></td>
+                                                   
+                                                </tr>
+                                                
+                                             </tbody>
+                                             
+                                          </table>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div><br><div class="wrap-collapsible"><input id="collapsible-medical-devices-translated" class="toggle" type="checkbox" checked="true"><label for="collapsible-medical-devices-translated" class="lbl-toggle">Translated coded</label><div class="collapsible-content">
+                                    <div class="content-inner">
+                                       <table class="translation_table">
+                                          <thead>
+                                             <tr>
+                                                <th>Device/Implant</th>
+                                                <th>Device ID</th>
+                                                <th>Implant Date</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <tr>
+                                                   <td data-label="Device/Implant">Joint implant</td>
+                                                   <td data-label="Device ID">123456789</td>
+                                                   <td data-label="Implant Date">From 2017-07-01</td>
+                                                </tr>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div><br><br><div class="wrap-collapsible"><input id="collapsible-surgical-procedures-section-original" class="toggle" type="checkbox" checked="true"><label for="collapsible-surgical-procedures-section-original" class="lbl-toggle-title">History of Procedures Document</label><div class="collapsible-content-title">
+                        <div class="content-inner-title">
+                           <div class="mobile-view">
+                              <div class="toggle-container"><button class="toggle-button-translated active" onclick="toggleContentSurgeries('translated-surgeries')" data-option="translated-surgeries">Translated coded</button><button class="toggle-button-original" onclick="toggleContentSurgeries('original-surgeries')" data-option="original-surgeries">Original narrative</button></div>
+                              <div class="mobile-content" id="content-original-surgeries" style="display: none;">
+                                 <div class="content-inner">
+                                    <div class="narrative_wrapper">
+                                       <table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="narr_table" ID="surg">
+                                          
+                                          <thead>
+                                             
+                                             <tr class="narr_tr">
+                                                
+                                                <th class="narr_th">Code (SNOMED-CT)</th>
+                                                
+                                                <th class="narr_th">Procédure</th>
+                                                
+                                                <th class="narr_th">Date de début</th>
+                                                
+                                                <th class="narr_th">Date de fin</th>
+                                                
+                                                <th class="narr_th">Note</th>
+                                                
+                                             </tr>
+                                             
+                                          </thead>
+                                          
+                                          <tbody>
+                                             
+                                             <tr class="narr_tr" ID="surg1">
+                                                
+                                                <td ID="surg1-code">118950002</td>
+                                                
+                                                <td ID="surg1-type">Intervention sur la tête et/ou le cou</td>
+                                                
+                                                <td ID="surg1-datestart">03/08/2022</td>
+                                                
+                                                <td ID="surg1-dateend">03/08/2022</td>
+                                                
+                                                <td ID="surg1-note">abcès amibien de l'encéphale</td>
+                                                
+                                             </tr>
+                                             
+                                          </tbody>
+                                          
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="mobile-content" id="content-translated-surgeries" style="display: block;">
+                                 <div class="content-inner">
+                                    <table class="translation_table">
+                                       <thead>
+                                          <tr>
+                                             <th>Procedure</th>
+                                             <th>Body Site</th>
+                                             <th>Procedure Date</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          <tr>
+                                             <tr>
+                                                <td data-label="Procedure">Procedure on head AND/OR neck</td>
+                                                <td data-label="Body Site"></td>
+                                                <td data-label="Procedure Date">From 2022-08-03</td>
+                                             </tr>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="web-view">
+                              <div class="wrap-collapsible"><input id="collapsible-surgical-procedures-original" class="toggle" type="checkbox"><label for="collapsible-surgical-procedures-original" class="lbl-toggle">Original narrative</label><div class="collapsible-content">
+                                    <div class="content-inner">
+                                       <div class="narrative_wrapper">
+                                          <table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="narr_table" ID="surg">
+                                             
+                                             <thead>
+                                                
+                                                <tr class="narr_tr">
+                                                   
+                                                   <th class="narr_th">Code (SNOMED-CT)</th>
+                                                   
+                                                   <th class="narr_th">Procédure</th>
+                                                   
+                                                   <th class="narr_th">Date de début</th>
+                                                   
+                                                   <th class="narr_th">Date de fin</th>
+                                                   
+                                                   <th class="narr_th">Note</th>
+                                                   
+                                                </tr>
+                                                
+                                             </thead>
+                                             
+                                             <tbody>
+                                                
+                                                <tr class="narr_tr" ID="surg1">
+                                                   
+                                                   <td ID="surg1-code">118950002</td>
+                                                   
+                                                   <td ID="surg1-type">Intervention sur la tête et/ou le cou</td>
+                                                   
+                                                   <td ID="surg1-datestart">03/08/2022</td>
+                                                   
+                                                   <td ID="surg1-dateend">03/08/2022</td>
+                                                   
+                                                   <td ID="surg1-note">abcès amibien de l'encéphale</td>
+                                                   
+                                                </tr>
+                                                
+                                             </tbody>
+                                             
+                                          </table>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div><br><div class="wrap-collapsible"><input id="collapsible-surgical-procedures-translated" class="toggle" type="checkbox" checked="true"><label for="collapsible-surgical-procedures-translated" class="lbl-toggle">Translated coded</label><div class="collapsible-content">
+                                    <div class="content-inner">
+                                       <table class="translation_table">
+                                          <thead>
+                                             <tr>
+                                                <th>Procedure</th>
+                                                <th>Body Site</th>
+                                                <th>Procedure Date</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <tr>
+                                                   <td data-label="Procedure">Procedure on head AND/OR neck</td>
+                                                   <td data-label="Body Site"></td>
+                                                   <td data-label="Procedure Date">From 2022-08-03</td>
+                                                </tr>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div><br><br><div class="wrap-collapsible"><input id="collapsible-immunizations-section" class="toggle" type="checkbox" checked="true"><label for="collapsible-immunizations-section" class="lbl-toggle-title">History of Immunization Narrative</label><div class="collapsible-content-title">
+                        <div class="content-inner-title">
+                           <div class="mobile-view">
+                              <div class="toggle-container"><button class="toggle-button-translated active" onclick="toggleContentImmunizations('translated-immunizations')" data-option="translated-immunizations">Translated coded</button><button class="toggle-button-original" onclick="toggleContentImmunizations('original-immunizations')" data-option="original-immunizations">Original narrative</button></div>
+                              <div class="mobile-content" id="content-original-immunizations" style="display: none;">
+                                 <div class="content-inner">
+                                    <div class="narrative_wrapper">
+                                       <table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="narr_table">
+                                          
+                                          <thead>
+                                             
+                                             <tr class="narr_tr">
+                                                
+                                                <th class="narr_th">Nom commercial</th>
+                                                
+                                                <th class="narr_th">Type</th>
+                                                
+                                                <th class="narr_th">Date d'administration</th>
+                                                
+                                                <th class="narr_th">Producteur</th>
+                                                
+                                                <th class="narr_th">Numéro de lot</th>
+                                                
+                                                <th class="narr_th">Date d'expiration</th>
+                                                
+                                                <th class="narr_th">Site</th>
+                                                
+                                                <th class="narr_th">Voie</th>
+                                                
+                                                <th class="narr_th">Status</th>
+                                                
+                                                <th class="narr_th">Quantité</th>
+                                                
+                                                <th class="narr_th">Vaccinateur</th>
+                                                
+                                                <th class="narr_th">Réaction</th>
+                                                
+                                                <th class="narr_th">Note</th>
+                                                
+                                                <th class="narr_th">Protocole</th>
+                                                
+                                             </tr>
+                                             
+                                          </thead>
+                                          
+                                          <tbody>
+                                             
+                                             <tr class="narr_tr" ID="vacc1">
+                                                
+                                                <td ID="vacc1-comName">BOOSTRIX-POLIO</td>
+                                                
+                                                <td ID="vacc1-type">Vaccin ant diphtérique</td>
+                                                
+                                                <td ID="vacc1-admDate">01/08/2022</td>
+                                                
+                                                <td ID="vacc1-producer">GSK</td>
+                                                
+                                                <td ID="vacc1-lotNum">123456789</td>
+                                                
+                                                <td ID="vacc1-expDate">31/08/2022</td>
+                                                
+                                                <td ID="vacc1-site">Bras supérieur droit</td>
+                                                
+                                                <td ID="vacc1-route">orale</td>
+                                                
+                                                <td ID="vacc1-status">Délivré</td>
+                                                
+                                                <td ID="vacc1-qte">Dose complète</td>
+                                                
+                                                <td ID="vacc1-hp"></td>
+                                                
+                                                <td ID="vacc1-reaction">sevère</td>
+                                                
+                                                <td ID="vacc1-note"></td>
+                                                
+                                                <td ID="vacc1-protocol"></td>
+                                                
+                                             </tr>
+                                             
+                                             <tr class="narr_tr" ID="vacc2">
+                                                
+                                                <td ID="vacc2-comName">PREVENAR 13</td>
+                                                
+                                                <td ID="vacc2-type">Vaccin anti pneumococcique</td>
+                                                
+                                                <td ID="vacc2-admDate">01/09/2022</td>
+                                                
+                                                <td ID="vacc2-producer">Pfizer</td>
+                                                
+                                                <td ID="vacc2-lotNum">167813785</td>
+                                                
+                                                <td ID="vacc2-expDate"></td>
+                                                
+                                                <td ID="vacc2-site">Bras supérieur droit</td>
+                                                
+                                                <td ID="vacc2-route">intramusculaire</td>
+                                                
+                                                <td ID="vacc2-status">Délivré</td>
+                                                
+                                                <td ID="vacc2-qte">Dose complète</td>
+                                                
+                                                <td ID="vacc2-hp"></td>
+                                                
+                                                <td ID="vacc2-reaction"></td>
+                                                
+                                                <td ID="vacc2-note"></td>
+                                                
+                                                <td ID="vacc2-protocol"></td>
+                                                
+                                             </tr>
+                                             
+                                             <tr class="narr_tr" ID="vacc3">
+                                                
+                                                <td ID="vacc3-comName">NEIS-VAC-C</td>
+                                                
+                                                <td ID="vacc3-type">Vaccin anti méningococcique</td>
+                                                
+                                                <td ID="vacc3-admDate">02/10/2022</td>
+                                                
+                                                <td ID="vacc3-producer">Pfizer</td>
+                                                
+                                                <td ID="vacc3-lotNum">9853788125</td>
+                                                
+                                                <td ID="vacc3-expDate"></td>
+                                                
+                                                <td ID="vacc3-site">Bras supérieur droit</td>
+                                                
+                                                <td ID="vacc3-route">intramusculaire</td>
+                                                
+                                                <td ID="vacc3-status">Délivré</td>
+                                                
+                                                <td ID="vacc3-qte">Dose complète</td>
+                                                
+                                                <td ID="vacc3-hp"></td>
+                                                
+                                                <td ID="vacc3-reaction"></td>
+                                                
+                                                <td ID="vacc3-note"></td>
+                                                
+                                                <td ID="vacc3-protocol"></td>
+                                                
+                                             </tr>
+                                             
+                                             <tr class="narr_tr" ID="vacc4">
+                                                
+                                                <td ID="vacc4-comName">PRIORIX</td>
+                                                
+                                                <td ID="vacc4-type">Vaccin rougeole-oreillons-rubéole</td>
+                                                
+                                                <td ID="vacc4-admDate">08/09/2022</td>
+                                                
+                                                <td ID="vacc4-producer">GSK</td>
+                                                
+                                                <td ID="vacc4-lotNum">8321487624</td>
+                                                
+                                                <td ID="vacc4-expDate"></td>
+                                                
+                                                <td ID="vacc4-site">Bras supérieur droit</td>
+                                                
+                                                <td ID="vacc4-route">intramusculaire</td>
+                                                
+                                                <td ID="vacc4-status">Délivré</td>
+                                                
+                                                <td ID="vacc4-qte">Dose complète</td>
+                                                
+                                                <td ID="vacc4-hp"></td>
+                                                
+                                                <td ID="vacc4-reaction"></td>
+                                                
+                                                <td ID="vacc4-note"></td>
+                                                
+                                                <td ID="vacc4-protocol"></td>
+                                                
+                                             </tr>
+                                             
+                                          </tbody>
+                                          
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="mobile-content" id="content-translated-immunizations" style="display: block;">
+                                 <div class="content-inner">
+                                    <table class="translation_table">
+                                       <thead>
+                                          <tr>
+                                             <th>Vaccination</th>
+                                             <th>Brand Name</th>
+                                             <th>Vaccination Date</th>
+                                             <th>Agent</th>
+                                             <th>Marketing Authorization Holder</th>
+                                             <th>Dose Number in Series</th>
+                                             <th>Batch/Lot Number</th>
+                                             <th>Administering Center</th>
+                                             <th>Health Professional Identification</th>
+                                             <th>Country of Vaccination</th>
+                                             <th>Administered</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          <tr>
+                                             <tr>
+                                                <td data-label="Vaccination"></td>
+                                                <td data-label="Brand Name">BOOSTRIX-POLIO</td>
+                                                <td data-label="Vaccination Date">2022-08-01
+                                                   &nbsp;
+                                                   
+                                                </td>
+                                                <td data-label="Agent"></td>
+                                                <td data-label="Marketing Authorization Holder">GSK</td>
+                                                <td data-label="Dose Number in Series"></td>
+                                                <td data-label="Batch/Lot Number">123456789</td>
+                                                <td data-label="Administering Center"></td>
+                                                <td data-label="Health Professional Identification"></td>
+                                                <td data-label="Country of Vaccination"></td>
+                                                <td data-label="Administered"><font color="green">✔</font></td>
+                                             </tr>
+                                             <tr>
+                                                <td data-label="Vaccination"></td>
+                                                <td data-label="Brand Name">PREVENAR 13</td>
+                                                <td data-label="Vaccination Date">2022-09-01
+                                                   &nbsp;
+                                                   
+                                                </td>
+                                                <td data-label="Agent"></td>
+                                                <td data-label="Marketing Authorization Holder">Pfizer</td>
+                                                <td data-label="Dose Number in Series"></td>
+                                                <td data-label="Batch/Lot Number">167813785</td>
+                                                <td data-label="Administering Center"></td>
+                                                <td data-label="Health Professional Identification"></td>
+                                                <td data-label="Country of Vaccination"></td>
+                                                <td data-label="Administered"><font color="green">✔</font></td>
+                                             </tr>
+                                             <tr>
+                                                <td data-label="Vaccination"></td>
+                                                <td data-label="Brand Name">NEIS-VAC-C</td>
+                                                <td data-label="Vaccination Date">2022-10-02
+                                                   &nbsp;
+                                                   
+                                                </td>
+                                                <td data-label="Agent"></td>
+                                                <td data-label="Marketing Authorization Holder">Pfizer</td>
+                                                <td data-label="Dose Number in Series"></td>
+                                                <td data-label="Batch/Lot Number">9853788125</td>
+                                                <td data-label="Administering Center"></td>
+                                                <td data-label="Health Professional Identification"></td>
+                                                <td data-label="Country of Vaccination"></td>
+                                                <td data-label="Administered"><font color="green">✔</font></td>
+                                             </tr>
+                                             <tr>
+                                                <td data-label="Vaccination"></td>
+                                                <td data-label="Brand Name">PRIORIX</td>
+                                                <td data-label="Vaccination Date">2022-09-08
+                                                   &nbsp;
+                                                   
+                                                </td>
+                                                <td data-label="Agent"></td>
+                                                <td data-label="Marketing Authorization Holder">GSK</td>
+                                                <td data-label="Dose Number in Series"></td>
+                                                <td data-label="Batch/Lot Number">8321487624</td>
+                                                <td data-label="Administering Center"></td>
+                                                <td data-label="Health Professional Identification"></td>
+                                                <td data-label="Country of Vaccination"></td>
+                                                <td data-label="Administered"><font color="green">✔</font></td>
+                                             </tr>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="web-view">
+                              <div class="wrap-collapsible"><input id="collapsible-immunizations-original" class="toggle" type="checkbox"><label for="collapsible-immunizations-original" class="lbl-toggle">Original narrative</label><div class="collapsible-content">
+                                    <div class="content-inner">
+                                       <div class="narrative_wrapper">
+                                          <table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pharm="urn:hl7-org:pharm" class="narr_table">
+                                             
+                                             <thead>
+                                                
+                                                <tr class="narr_tr">
+                                                   
+                                                   <th class="narr_th">Nom commercial</th>
+                                                   
+                                                   <th class="narr_th">Type</th>
+                                                   
+                                                   <th class="narr_th">Date d'administration</th>
+                                                   
+                                                   <th class="narr_th">Producteur</th>
+                                                   
+                                                   <th class="narr_th">Numéro de lot</th>
+                                                   
+                                                   <th class="narr_th">Date d'expiration</th>
+                                                   
+                                                   <th class="narr_th">Site</th>
+                                                   
+                                                   <th class="narr_th">Voie</th>
+                                                   
+                                                   <th class="narr_th">Status</th>
+                                                   
+                                                   <th class="narr_th">Quantité</th>
+                                                   
+                                                   <th class="narr_th">Vaccinateur</th>
+                                                   
+                                                   <th class="narr_th">Réaction</th>
+                                                   
+                                                   <th class="narr_th">Note</th>
+                                                   
+                                                   <th class="narr_th">Protocole</th>
+                                                   
+                                                </tr>
+                                                
+                                             </thead>
+                                             
+                                             <tbody>
+                                                
+                                                <tr class="narr_tr" ID="vacc1">
+                                                   
+                                                   <td ID="vacc1-comName">BOOSTRIX-POLIO</td>
+                                                   
+                                                   <td ID="vacc1-type">Vaccin ant diphtérique</td>
+                                                   
+                                                   <td ID="vacc1-admDate">01/08/2022</td>
+                                                   
+                                                   <td ID="vacc1-producer">GSK</td>
+                                                   
+                                                   <td ID="vacc1-lotNum">123456789</td>
+                                                   
+                                                   <td ID="vacc1-expDate">31/08/2022</td>
+                                                   
+                                                   <td ID="vacc1-site">Bras supérieur droit</td>
+                                                   
+                                                   <td ID="vacc1-route">orale</td>
+                                                   
+                                                   <td ID="vacc1-status">Délivré</td>
+                                                   
+                                                   <td ID="vacc1-qte">Dose complète</td>
+                                                   
+                                                   <td ID="vacc1-hp"></td>
+                                                   
+                                                   <td ID="vacc1-reaction">sevère</td>
+                                                   
+                                                   <td ID="vacc1-note"></td>
+                                                   
+                                                   <td ID="vacc1-protocol"></td>
+                                                   
+                                                </tr>
+                                                
+                                                <tr class="narr_tr" ID="vacc2">
+                                                   
+                                                   <td ID="vacc2-comName">PREVENAR 13</td>
+                                                   
+                                                   <td ID="vacc2-type">Vaccin anti pneumococcique</td>
+                                                   
+                                                   <td ID="vacc2-admDate">01/09/2022</td>
+                                                   
+                                                   <td ID="vacc2-producer">Pfizer</td>
+                                                   
+                                                   <td ID="vacc2-lotNum">167813785</td>
+                                                   
+                                                   <td ID="vacc2-expDate"></td>
+                                                   
+                                                   <td ID="vacc2-site">Bras supérieur droit</td>
+                                                   
+                                                   <td ID="vacc2-route">intramusculaire</td>
+                                                   
+                                                   <td ID="vacc2-status">Délivré</td>
+                                                   
+                                                   <td ID="vacc2-qte">Dose complète</td>
+                                                   
+                                                   <td ID="vacc2-hp"></td>
+                                                   
+                                                   <td ID="vacc2-reaction"></td>
+                                                   
+                                                   <td ID="vacc2-note"></td>
+                                                   
+                                                   <td ID="vacc2-protocol"></td>
+                                                   
+                                                </tr>
+                                                
+                                                <tr class="narr_tr" ID="vacc3">
+                                                   
+                                                   <td ID="vacc3-comName">NEIS-VAC-C</td>
+                                                   
+                                                   <td ID="vacc3-type">Vaccin anti méningococcique</td>
+                                                   
+                                                   <td ID="vacc3-admDate">02/10/2022</td>
+                                                   
+                                                   <td ID="vacc3-producer">Pfizer</td>
+                                                   
+                                                   <td ID="vacc3-lotNum">9853788125</td>
+                                                   
+                                                   <td ID="vacc3-expDate"></td>
+                                                   
+                                                   <td ID="vacc3-site">Bras supérieur droit</td>
+                                                   
+                                                   <td ID="vacc3-route">intramusculaire</td>
+                                                   
+                                                   <td ID="vacc3-status">Délivré</td>
+                                                   
+                                                   <td ID="vacc3-qte">Dose complète</td>
+                                                   
+                                                   <td ID="vacc3-hp"></td>
+                                                   
+                                                   <td ID="vacc3-reaction"></td>
+                                                   
+                                                   <td ID="vacc3-note"></td>
+                                                   
+                                                   <td ID="vacc3-protocol"></td>
+                                                   
+                                                </tr>
+                                                
+                                                <tr class="narr_tr" ID="vacc4">
+                                                   
+                                                   <td ID="vacc4-comName">PRIORIX</td>
+                                                   
+                                                   <td ID="vacc4-type">Vaccin rougeole-oreillons-rubéole</td>
+                                                   
+                                                   <td ID="vacc4-admDate">08/09/2022</td>
+                                                   
+                                                   <td ID="vacc4-producer">GSK</td>
+                                                   
+                                                   <td ID="vacc4-lotNum">8321487624</td>
+                                                   
+                                                   <td ID="vacc4-expDate"></td>
+                                                   
+                                                   <td ID="vacc4-site">Bras supérieur droit</td>
+                                                   
+                                                   <td ID="vacc4-route">intramusculaire</td>
+                                                   
+                                                   <td ID="vacc4-status">Délivré</td>
+                                                   
+                                                   <td ID="vacc4-qte">Dose complète</td>
+                                                   
+                                                   <td ID="vacc4-hp"></td>
+                                                   
+                                                   <td ID="vacc4-reaction"></td>
+                                                   
+                                                   <td ID="vacc4-note"></td>
+                                                   
+                                                   <td ID="vacc4-protocol"></td>
+                                                   
+                                                </tr>
+                                                
+                                             </tbody>
+                                             
+                                          </table>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div><br><div class="wrap-collapsible"><input id="collapsible-immunizationsSectionCode-translated" class="toggle" type="checkbox" checked="true"><label for="collapsible-immunizationsSectionCode-translated" class="lbl-toggle">Translated coded</label><div class="collapsible-content">
+                                    <div class="content-inner">
+                                       <table class="translation_table">
+                                          <thead>
+                                             <tr>
+                                                <th>Vaccination</th>
+                                                <th>Brand Name</th>
+                                                <th>Vaccination Date</th>
+                                                <th>Agent</th>
+                                                <th>Marketing Authorization Holder</th>
+                                                <th>Dose Number in Series</th>
+                                                <th>Batch/Lot Number</th>
+                                                <th>Administering Center</th>
+                                                <th>Health Professional Identification</th>
+                                                <th>Country of Vaccination</th>
+                                                <th>Administered</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <tr>
+                                                   <td data-label="Vaccination"></td>
+                                                   <td data-label="Brand Name">BOOSTRIX-POLIO</td>
+                                                   <td data-label="Vaccination Date">2022-08-01
+                                                      &nbsp;
+                                                      
+                                                   </td>
+                                                   <td data-label="Agent"></td>
+                                                   <td data-label="Marketing Authorization Holder">GSK</td>
+                                                   <td data-label="Dose Number in Series"></td>
+                                                   <td data-label="Batch/Lot Number">123456789</td>
+                                                   <td data-label="Administering Center"></td>
+                                                   <td data-label="Health Professional Identification"></td>
+                                                   <td data-label="Country of Vaccination"></td>
+                                                   <td data-label="Administered"><font color="green">✔</font></td>
+                                                </tr>
+                                                <tr>
+                                                   <td data-label="Vaccination"></td>
+                                                   <td data-label="Brand Name">PREVENAR 13</td>
+                                                   <td data-label="Vaccination Date">2022-09-01
+                                                      &nbsp;
+                                                      
+                                                   </td>
+                                                   <td data-label="Agent"></td>
+                                                   <td data-label="Marketing Authorization Holder">Pfizer</td>
+                                                   <td data-label="Dose Number in Series"></td>
+                                                   <td data-label="Batch/Lot Number">167813785</td>
+                                                   <td data-label="Administering Center"></td>
+                                                   <td data-label="Health Professional Identification"></td>
+                                                   <td data-label="Country of Vaccination"></td>
+                                                   <td data-label="Administered"><font color="green">✔</font></td>
+                                                </tr>
+                                                <tr>
+                                                   <td data-label="Vaccination"></td>
+                                                   <td data-label="Brand Name">NEIS-VAC-C</td>
+                                                   <td data-label="Vaccination Date">2022-10-02
+                                                      &nbsp;
+                                                      
+                                                   </td>
+                                                   <td data-label="Agent"></td>
+                                                   <td data-label="Marketing Authorization Holder">Pfizer</td>
+                                                   <td data-label="Dose Number in Series"></td>
+                                                   <td data-label="Batch/Lot Number">9853788125</td>
+                                                   <td data-label="Administering Center"></td>
+                                                   <td data-label="Health Professional Identification"></td>
+                                                   <td data-label="Country of Vaccination"></td>
+                                                   <td data-label="Administered"><font color="green">✔</font></td>
+                                                </tr>
+                                                <tr>
+                                                   <td data-label="Vaccination"></td>
+                                                   <td data-label="Brand Name">PRIORIX</td>
+                                                   <td data-label="Vaccination Date">2022-09-08
+                                                      &nbsp;
+                                                      
+                                                   </td>
+                                                   <td data-label="Agent"></td>
+                                                   <td data-label="Marketing Authorization Holder">GSK</td>
+                                                   <td data-label="Dose Number in Series"></td>
+                                                   <td data-label="Batch/Lot Number">8321487624</td>
+                                                   <td data-label="Administering Center"></td>
+                                                   <td data-label="Health Professional Identification"></td>
+                                                   <td data-label="Country of Vaccination"></td>
+                                                   <td data-label="Administered"><font color="green">✔</font></td>
+                                                </tr>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div><br><br></div>
+            </div>
+         </div>
+      </div><br><br></body>
+</html>

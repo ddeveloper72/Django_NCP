@@ -1,0 +1,287 @@
+// ========================================
+// Grid System - CSS Flexbox Based
+// ========================================
+
+.container {
+  @include container;
+}
+
+.container-fluid {
+  width: 100%;
+  padding: 0 $space-md;
+
+  @include tablet-up {
+    padding: 0 $space-lg;
+  }
+}
+
+.row {
+  @include flex-wrap;
+  margin: 0 (-$space-sm);
+
+  // Gutters
+  &.row-no-gutters {
+    margin: 0;
+
+    .col {
+      padding: 0;
+    }
+  }
+
+  &.row-lg-gutters {
+    margin: 0 (-$space-md);
+
+    .col {
+      padding: 0 $space-md;
+    }
+  }
+}
+
+.col {
+  flex: 1;
+  padding: 0 $space-sm;
+  min-width: 0; // Prevent flex items from overflowing
+
+  // Auto-sizing columns
+  &.col-auto {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  // Fixed width columns
+  &.col-1 {
+    flex: 0 0 8.333333%;
+    max-width: 8.333333%;
+  }
+  &.col-2 {
+    flex: 0 0 16.666667%;
+    max-width: 16.666667%;
+  }
+  &.col-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+  &.col-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+  }
+  &.col-5 {
+    flex: 0 0 41.666667%;
+    max-width: 41.666667%;
+  }
+  &.col-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+  &.col-7 {
+    flex: 0 0 58.333333%;
+    max-width: 58.333333%;
+  }
+  &.col-8 {
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
+  }
+  &.col-9 {
+    flex: 0 0 75%;
+    max-width: 75%;
+  }
+  &.col-10 {
+    flex: 0 0 83.333333%;
+    max-width: 83.333333%;
+  }
+  &.col-11 {
+    flex: 0 0 91.666667%;
+    max-width: 91.666667%;
+  }
+  &.col-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  // Responsive columns - tablet and up
+  @include tablet-up {
+    &.col-sm-1 {
+      flex: 0 0 8.333333%;
+      max-width: 8.333333%;
+    }
+    &.col-sm-2 {
+      flex: 0 0 16.666667%;
+      max-width: 16.666667%;
+    }
+    &.col-sm-3 {
+      flex: 0 0 25%;
+      max-width: 25%;
+    }
+    &.col-sm-4 {
+      flex: 0 0 33.333333%;
+      max-width: 33.333333%;
+    }
+    &.col-sm-5 {
+      flex: 0 0 41.666667%;
+      max-width: 41.666667%;
+    }
+    &.col-sm-6 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+    &.col-sm-7 {
+      flex: 0 0 58.333333%;
+      max-width: 58.333333%;
+    }
+    &.col-sm-8 {
+      flex: 0 0 66.666667%;
+      max-width: 66.666667%;
+    }
+    &.col-sm-9 {
+      flex: 0 0 75%;
+      max-width: 75%;
+    }
+    &.col-sm-10 {
+      flex: 0 0 83.333333%;
+      max-width: 83.333333%;
+    }
+    &.col-sm-11 {
+      flex: 0 0 91.666667%;
+      max-width: 91.666667%;
+    }
+    &.col-sm-12 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+
+  // Responsive columns - desktop and up
+  @include desktop-up {
+    &.col-md-1 {
+      flex: 0 0 8.333333%;
+      max-width: 8.333333%;
+    }
+    &.col-md-2 {
+      flex: 0 0 16.666667%;
+      max-width: 16.666667%;
+    }
+    &.col-md-3 {
+      flex: 0 0 25%;
+      max-width: 25%;
+    }
+    &.col-md-4 {
+      flex: 0 0 33.333333%;
+      max-width: 33.333333%;
+    }
+    &.col-md-5 {
+      flex: 0 0 41.666667%;
+      max-width: 41.666667%;
+    }
+    &.col-md-6 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+    &.col-md-7 {
+      flex: 0 0 58.333333%;
+      max-width: 58.333333%;
+    }
+    &.col-md-8 {
+      flex: 0 0 66.666667%;
+      max-width: 66.666667%;
+    }
+    &.col-md-9 {
+      flex: 0 0 75%;
+      max-width: 75%;
+    }
+    &.col-md-10 {
+      flex: 0 0 83.333333%;
+      max-width: 83.333333%;
+    }
+    &.col-md-11 {
+      flex: 0 0 91.666667%;
+      max-width: 91.666667%;
+    }
+    &.col-md-12 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+
+  // Responsive columns - large desktop and up
+  @include large-desktop-up {
+    &.col-lg-1 {
+      flex: 0 0 8.333333%;
+      max-width: 8.333333%;
+    }
+    &.col-lg-2 {
+      flex: 0 0 16.666667%;
+      max-width: 16.666667%;
+    }
+    &.col-lg-3 {
+      flex: 0 0 25%;
+      max-width: 25%;
+    }
+    &.col-lg-4 {
+      flex: 0 0 33.333333%;
+      max-width: 33.333333%;
+    }
+    &.col-lg-5 {
+      flex: 0 0 41.666667%;
+      max-width: 41.666667%;
+    }
+    &.col-lg-6 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+    &.col-lg-7 {
+      flex: 0 0 58.333333%;
+      max-width: 58.333333%;
+    }
+    &.col-lg-8 {
+      flex: 0 0 66.666667%;
+      max-width: 66.666667%;
+    }
+    &.col-lg-9 {
+      flex: 0 0 75%;
+      max-width: 75%;
+    }
+    &.col-lg-10 {
+      flex: 0 0 83.333333%;
+      max-width: 83.333333%;
+    }
+    &.col-lg-11 {
+      flex: 0 0 91.666667%;
+      max-width: 91.666667%;
+    }
+    &.col-lg-12 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+}
+
+// Justify content utilities for rows
+.justify-start {
+  justify-content: flex-start;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-end {
+  justify-content: flex-end;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-around {
+  justify-content: space-around;
+}
+
+// Align items utilities for rows
+.align-start {
+  align-items: flex-start;
+}
+.align-center {
+  align-items: center;
+}
+.align-end {
+  align-items: flex-end;
+}
+.align-stretch {
+  align-items: stretch;
+}

@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %}{{ patient_info.given_name }} {{ patient_info.family_name }} - Uploaded CDA Document{% endblock %}
+
+{% block content %}
+<div class="uploaded-document-view">
+    <div class="country-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>
+                📄 {{ document_info.original_filename }}
+            </h1>
+            <div class="header-actions">
+                <a href="{% url 'patient_data:uploaded_documents' %}" class="btn btn-light ms-2">
+                    ← Back to Documents
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display Django messages -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Patient Information Section -->
+    <div class="patient-info-section">
+        <div class="info-card">
+            <h4>👤 Patient Information</h4>
+            <div class="patient-details-grid">
+                <div class="detail-item">
+                    <span class="label">Full Name:</span>
+                    <span class="value">{{ patient_info.given_name }} {{ patient_info.family_name }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Patient ID:</span>
+                    <span class="value">{{ patient_info.patient_id }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Birth Date:</span>
+                    <span class="value">{{ patient_info.birth_date | default('Not specified') }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Gender:</span>
+                    <span class="value">{{ patient_info.gender | default('Not specified') }}</span>
+                </div>
+                {% if patient_info.address %}
+                <div class="detail-item">
+                    <span class="label">Address:</span>
+                    <span class="value">{{ patient_info.address }}</span>
+                </div>
+                {% endif %}
+                {% if patient_info.country %}
+                <div class="detail-item">
+                    <span class="label">Country:</span>
+                    <span class="value">{{ patient_info.country }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Information -->
+    <div class="document-info-section">
+        <div class="info-card">
+            <h4>📋 Document Information</h4>
+            <div class="document-details-grid">
+                <div class="detail-item">
+                    <span class="label">Original Filename:</span>
+                    <span class="value">{{ document_info.original_filename }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Upload Date:</span>
+                    <span class="value">{{ document_info.upload_date }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Processing Status:</span>
+                    <span class="value">
+                        {% if document_info.processed %}
+                        <span class="status-badge success">✅ Processed</span>
+                        {% else %}
+                        <span class="status-badge pending">⏳ Pending</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Sections Found:</span>
+                    <span class="value">{{ sections | length }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clinical Sections -->
+    {% if sections %}
+    <div class="sections-container">
+        <h4>🏥 Clinical Sections</h4>
+
+        {% for section in sections %}
+        <div class="section-card">
+            <div class="section-header">
+                <h5 class="section-title">
+                    {{ section.title | default('Untitled Section') }}
+                </h5>
+                {% if section.code %}
+                <span class="section-code">Code: {{ section.code }}</span>
+                {% endif %}
+            </div>
+
+            <div class="section-content">
+                {% if section.content %}
+                {% if is_single_language %}
+                <!-- Single Language Content (English documents) -->
+                <div class="single-language-content">
+                    {{ section.content | safe }}
+                </div>
+                {% elif section.content.original and section.content.translated %}
+                <!-- Dual Language Content (Non-English documents) -->
+                <div class="dual-language-content">
+                    <div class="language-tabs">
+                        <button class="tab-button active" onclick="showLanguage({{ loop.index0 }}, 'original')">
+                            Original
+                        </button>
+                        <button class="tab-button" onclick="showLanguage({{ loop.index0 }}, 'translated')">
+                            English
+                        </button>
+                    </div>
+
+                    <div id="section-{{ loop.index0 }}-original" class="language-content active">
+                        {{ section.content.original | safe }}
+                    </div>
+
+                    <div id="section-{{ loop.index0 }}-translated" class="language-content">
+                        {{ section.content.translated | safe }}
+                    </div>
+                </div>
+                {% else %}
+                <!-- Fallback Single Language Content -->
+                <div class="single-language-content">
+                    {{ section.content | safe }}
+                </div>
+                {% endif %}
+                {% else %}
+                <p class="no-content">No content available for this section.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-sections">
+        <div class="empty-state">
+            <h4>📂 No Clinical Sections Found</h4>
+            <p>This document does not contain any recognizable clinical sections.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function showLanguage(sectionIndex, language) {
+        // Hide all language content for this section
+        const originalContent = document.getElementById(`section-${sectionIndex}-original`);
+        const translatedContent = document.getElementById(`section-${sectionIndex}-translated`);
+
+        // Update content visibility
+        if (language === 'original') {
+            originalContent.classList.add('active');
+            translatedContent.classList.remove('active');
+        } else {
+            originalContent.classList.remove('active');
+            translatedContent.classList.add('active');
+        }
+
+        // Update tab buttons
+        const sectionCard = originalContent.closest('.section-card');
+        const buttons = sectionCard.querySelectorAll('.tab-button');
+        buttons.forEach((btn, index) => {
+            if ((index === 0 && language === 'original') || (index === 1 && language === 'translated')) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+</script>
+
+<style>
+    .uploaded-document-view {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .info-card {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .patient-details-grid,
+    .document-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .detail-item .label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+
+    .detail-item .value {
+        color: #212529;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-badge.success {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .sections-container {
+        margin-top: 2rem;
+    }
+
+    .section-card {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .section-header {
+        background: #f8f9fa;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-title {
+        margin: 0;
+        color: #333;
+    }
+
+    .section-code {
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+
+    .section-content {
+        padding: 1.5rem;
+    }
+
+    .dual-language-content {
+        position: relative;
+    }
+
+    .language-tabs {
+        display: flex;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .tab-button {
+        background: none;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        cursor: pointer;
+        font-weight: 500;
+        color: #6c757d;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+    .tab-button:hover {
+        color: #495057;
+        background: #f8f9fa;
+    }
+
+    .tab-button.active {
+        color: #0066cc;
+        border-bottom-color: #0066cc;
+    }
+
+    .language-content {
+        display: none;
+    }
+
+    .language-content.active {
+        display: block;
+    }
+
+    .single-language-content {
+        /* Standard content styling */
+    }
+
+    .no-content {
+        color: #6c757d;
+        font-style: italic;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .no-sections {
+        text-align: center;
+        padding: 3rem 0;
+    }
+
+    .empty-state {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 3rem;
+    }
+
+    .empty-state h4 {
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: #6c757d;
+        margin: 0;
+    }
+</style>
+{% endblock %}

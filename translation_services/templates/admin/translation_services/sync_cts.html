@@ -1,0 +1,50 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='translation_services' %}">Translation Services</a>
+    &rsaquo; <a href="{% url 'admin:translation_services_valuesetcatalogue_changelist' %}">Value Set Catalogues</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module aligned">
+    <h1>{{ title }}</h1>
+
+    <div class="form-row">
+        <div class="form-help">
+            <h3>Synchronize with EU Central Terminology Server</h3>
+            <p>
+                This feature will synchronize your local value sets with the EU Central Terminology Server (CTS).
+                It will fetch the latest versions of value sets and their translations.
+            </p>
+
+            <div class="help-content">
+                <h4>Coming Soon!</h4>
+                <p>
+                    The CTS synchronization feature is currently under development.
+                    For now, please use the MVC file import to load terminology data.
+                </p>
+
+                <h4>Planned Features:</h4>
+                <ul>
+                    <li>Real-time synchronization with CTS API</li>
+                    <li>Incremental updates for changed value sets</li>
+                    <li>Multi-language translation sync</li>
+                    <li>Automated scheduling for regular updates</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="submit-row">
+        <a href="{% url 'admin:translation_services_valuesetcatalogue_changelist' %}" class="button cancel-link">Back to
+            Value Sets</a>
+    </div>
+</div>
+{% endblock %}

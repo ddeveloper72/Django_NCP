@@ -14,6 +14,7 @@ from .european_smp_client import european_smp_client
 import logging
 import json
 import requests
+import os
 from datetime import datetime
 
 logger = logging.getLogger("ehealth")
@@ -112,7 +113,7 @@ def country_selection(request):
     return render(request, "ehealth_portal/country_selection.html", context)
 
 
-# @login_required
+@login_required
 def patient_search(request, country_code):
     """
     Dynamic patient search page based on country's International Search Mask (ISM)
@@ -121,19 +122,48 @@ def patient_search(request, country_code):
     # Get country configuration
     country = get_object_or_404(Country, code=country_code.upper())
 
-    # Get or create/update ISM for this country
+    # Get ISM type from request (default to eu_members)
+    ism_type = request.GET.get("ism_type", "eu_members")
+
+    # Validate ISM type
+    if ism_type not in ["eu_members", "bootcamp"]:
+        ism_type = "eu_members"
+
+    # Get or create/update ISM for this country and type
     try:
         search_mask = country.search_mask
-        # Check if ISM needs updating (older than 24 hours)
+        # Check if ISM needs updating or if type has changed
+        current_ism_type = search_mask.raw_ism_data.get("ism_type", "eu_members")
         if (
             not search_mask.last_synchronized
             or (timezone.now() - search_mask.last_synchronized).days >= 1
+            or current_ism_type != ism_type
         ):
-            update_ism_from_smp(country)
-            search_mask.refresh_from_db()
+            # Update ISM with new type
+            ism_data = get_mock_ism_data(country.code, ism_type)
+            ism_data["ism_type"] = ism_type  # Store the ISM type
+            search_mask.raw_ism_data = ism_data
+            search_mask.mask_name = (
+                f"{country.name} Search ({ism_type.replace('_', ' ').title()})"
+            )
+            search_mask.save()
+
+            # Recreate search fields
+            search_mask.fields.all().delete()
+            create_search_fields_from_ism(search_mask, ism_data)
+
     except InternationalSearchMask.DoesNotExist:
-        # Create default ISM if none exists
-        search_mask = create_default_ism(country)
+        # Create default ISM with specified type
+        ism_data = get_mock_ism_data(country.code, ism_type)
+        ism_data["ism_type"] = ism_type
+        search_mask = InternationalSearchMask.objects.create(
+            country=country,
+            mask_name=f"{country.name} Search ({ism_type.replace('_', ' ').title()})",
+            mask_version="1.0",
+            source_smp_url=country.smp_url or "default",
+            raw_ism_data=ism_data,
+        )
+        create_search_fields_from_ism(search_mask, ism_data)
 
     if request.method == "POST":
         # Process search form submission
@@ -199,13 +229,6 @@ def patient_search(request, country_code):
             grouped_fields[group] = []
         grouped_fields[group].append(field)
 
-    # DEBUG: Print context data - Updated at 21:52
-    print(f"DEBUG: Country: {country}")
-    print(f"DEBUG: Search mask: {search_mask}")
-    print(f"DEBUG: Form fields count: {len(form_fields)}")
-    print(f"DEBUG: First few fields: {form_fields[:2] if form_fields else 'No fields'}")
-    print(f"DEBUG: Grouped fields keys: {list(grouped_fields.keys())}")
-
     context = {
         "country": country,
         "country_code": country_code.upper(),
@@ -215,6 +238,13 @@ def patient_search(request, country_code):
         "page_title": f"Patient Search - {country.name}",
         "step": "PATIENT SEARCH",
         "ism_last_updated": search_mask.last_synchronized,
+        "current_ism_type": ism_type,
+        "ism_type_choices": [
+            ("eu_members", "EU Member States (PTT Partners)"),
+            ("bootcamp", "Bootcamp Test Partners"),
+        ],
+        "has_ism_types": country_code.upper()
+        in ["IE", "FI"],  # Countries with multiple ISM types
     }
 
     return render(request, "ehealth_portal/patient_search.html", context)
@@ -299,10 +329,14 @@ def create_default_ism(country):
     return search_mask
 
 
-def get_mock_ism_data(country_code):
+def get_mock_ism_data(country_code, ism_type="eu_members"):
     """
     Mock ISM data - different for each country to demonstrate dynamic rendering
     In production, this would come from actual SMP API calls
+
+    Args:
+        country_code: The country code (e.g., 'IE', 'BE')
+        ism_type: The ISM type ('eu_members' for PTT partners, 'bootcamp' for Bootcamp test partners)
     """
     ism_configs = {
         "BE": {  # Belgium - Comprehensive form
@@ -437,33 +471,49 @@ def get_mock_ism_data(country_code):
                 },
             ]
         },
-        "IE": {  # Ireland - Minimal form
-            "fields": [
-                {
-                    "code": "pps_number",
-                    "type": "text",
-                    "label": "PPS Number",
-                    "placeholder": "1234567A",
-                    "required": True,
-                    "validation_pattern": r"^\d{7}[A-Z]$",
-                    "help_text": "Personal Public Service Number",
-                    "group": "main",
-                },
-                {
-                    "code": "surname",
-                    "type": "text",
-                    "label": "Surname",
-                    "required": True,
-                    "group": "main",
-                },
-                {
-                    "code": "first_name",
-                    "type": "text",
-                    "label": "First Name",
-                    "required": True,
-                    "group": "main",
-                },
-            ]
+        "FI": {  # Finland - Example of Bootcamp format
+            "bootcamp": {
+                "fields": [
+                    {
+                        "code": "national_identifier",
+                        "type": "text",
+                        "label": "National Person Identifier",
+                        "placeholder": "Enter Finnish national identifier",
+                        "required": True,
+                        "help_text": "National Person Identifier for Finnish test data (domain: 1.2.246.556.12001.4.1000.990.1)",
+                        "group": "main",
+                    },
+                ]
+            }
+        },
+        "IE": {  # Ireland - Two ISM types
+            "eu_members": {  # For EU Member States (PTT Partners)
+                "fields": [
+                    {
+                        "code": "pps_number",
+                        "type": "text",
+                        "label": "PPS Number",
+                        "placeholder": "1234567A",
+                        "required": True,
+                        "validation_pattern": r"^\d{7}[A-Z]$",
+                        "help_text": "Personal Public Service Number (EU Member States format)",
+                        "group": "main",
+                    },
+                ],
+            },
+            "bootcamp": {  # For Bootcamp Test Partners (simplified ISM)
+                "fields": [
+                    {
+                        "code": "national_identifier",
+                        "type": "text",
+                        "label": "National Person Identifier",
+                        "placeholder": "Enter national identifier",
+                        "required": True,
+                        "help_text": "National Person Identifier for Bootcamp test data",
+                        "group": "main",
+                    },
+                ]
+            },
         },
         "EU": {  # European Commission Test - Comprehensive test form
             "fields": [
@@ -527,6 +577,16 @@ def get_mock_ism_data(country_code):
         },
     }
 
+    # Handle countries with multiple ISM types (structured format)
+    country_config = ism_configs.get(country_code, {})
+    if "eu_members" in country_config or "bootcamp" in country_config:
+        # Country has structured ISM types
+        return country_config.get(
+            ism_type,
+            country_config.get("eu_members", country_config.get("bootcamp", {})),
+        )
+
+    # Handle countries with single ISM format (legacy format)
     return ism_configs.get(country_code, ism_configs["EU"])
 
 
@@ -589,39 +649,148 @@ def perform_patient_search(country, search_fields, user):
         # In production, this would make actual NCP API calls
         # For demo, we'll simulate different responses based on search criteria
 
-        # Simulate patient found for certain test IDs
+        # Simulate patient found for various test IDs based on country
         test_ids = ["EU-TEST-12345", "1234567A", "XX.XX.XX-XXX.XX"]
+
+        # Add country-specific test IDs
+        if country.code == "IE":  # Ireland
+            # Add Irish test patient IDs
+            test_ids.extend(
+                [
+                    "53930545",  # Patrick Murphy from test data
+                    "2-1234-W8",  # Bootcamp test ID
+                    "1-2345-V9",  # Additional test patterns
+                    "3-4567-X0",
+                    "4-5678-Y1",
+                    "5-6789-Z2",
+                ]
+            )
+        elif country.code == "FI":  # Finland
+            test_ids.extend(
+                [
+                    "FI-TEST-001",
+                    "FI-BOOTCAMP-123",
+                ]
+            )
+        elif country.code == "PT":  # Portugal
+            # Add Portuguese test patient IDs including Wave 7 data
+            test_ids.extend(
+                [
+                    "2-1234-W7",  # Portuguese Wave 7 test document
+                    "PT-TEST-001",
+                    "12345",  # Common test ID
+                    "Ferreira",  # Family name from Wave 7
+                    "Diana",  # Given name from Wave 7
+                    "PT-BOOTCAMP-123",
+                ]
+            )
+
         found_patient = False
 
         for field_value in search_fields.values():
-            if any(test_id in str(field_value) for test_id in test_ids):
+            field_str = str(field_value).strip()
+            if any(test_id in field_str for test_id in test_ids):
                 found_patient = True
                 break
 
         if found_patient:
+            # Generate realistic patient data based on country and search criteria
+            patient_id = list(search_fields.values())[0]
+
+            # Generate country-specific patient names and data
+            if country.code == "IE":  # Ireland
+                if "53930545" in str(patient_id):
+                    patient_name = "Patrick Murphy"
+                    birth_date = "1975-03-15"
+                elif "2-1234-W8" in str(patient_id):
+                    patient_name = "Seán O'Connor"
+                    birth_date = "1982-07-22"
+                else:
+                    patient_name = "Aoife Kelly"  # Default Irish name
+                    birth_date = "1985-11-08"
+            elif country.code == "PT":  # Portugal
+                if (
+                    "2-1234-W7" in str(patient_id)
+                    or "Ferreira" in str(search_fields.values())
+                    or "Diana" in str(search_fields.values())
+                ):
+                    patient_name = "Diana Ferreira"  # From Portuguese Wave 7 test data
+                    birth_date = "1985-08-15"
+                elif "12345" in str(patient_id):
+                    patient_name = "João Silva"
+                    birth_date = "1978-12-03"
+                else:
+                    patient_name = "Maria Santos"  # Default Portuguese name
+                    birth_date = "1983-04-20"
+            else:
+                # Default patient data
+                patient_name = f"{search_fields.get('first_name', search_fields.get('given_name', 'John'))} {search_fields.get('last_name', search_fields.get('surname', search_fields.get('family_name', 'Doe')))}"
+                birth_date = search_fields.get("birth_date", "1980-01-01")
+
             # Simulate successful patient data
             result.patient_found = True
             result.patient_data = {
-                "id": list(search_fields.values())[0],  # Use first search field as ID
-                "name": f"{search_fields.get('first_name', search_fields.get('given_name', 'John'))} {search_fields.get('last_name', search_fields.get('surname', search_fields.get('family_name', 'Doe')))}",
-                "birth_date": search_fields.get("birth_date", "1980-01-01"),
+                "id": patient_id,
+                "name": patient_name,
+                "birth_date": birth_date,
                 "country": country.code,
                 "last_updated": timezone.now().isoformat(),
+                "gender": (
+                    "M"
+                    if "Murphy" in patient_name
+                    or "Seán" in patient_name
+                    or "João" in patient_name
+                    else "F"
+                ),
+                "address": f"Test Address, {country.name}",
             }
-            result.available_documents = [
-                {
-                    "type": "PS",
-                    "title": "Patient Summary",
-                    "date": "2024-12-01",
-                    "available": True,
-                },
-                {
-                    "type": "eP",
-                    "title": "ePrescription",
-                    "date": "2024-11-28",
-                    "available": True,
-                },
-            ]
+            # Add realistic document availability based on ISM type and country
+            documents = []
+            if country.code == "IE":
+                # Irish patient documents
+                documents = [
+                    {
+                        "type": "PS",
+                        "title": "Patient Summary (Ireland)",
+                        "date": "2024-12-01",
+                        "available": True,
+                        "format": "CDA L1",
+                    },
+                    {
+                        "type": "PS_L3",
+                        "title": "Patient Summary L3 (Detailed)",
+                        "date": "2024-12-01",
+                        "available": True,
+                        "format": "CDA L3",
+                    },
+                    {
+                        "type": "eP",
+                        "title": "ePrescription Summary",
+                        "date": "2024-11-28",
+                        "available": True,
+                        "format": "CDA",
+                    },
+                ]
+            else:
+                # Default documents
+                documents = [
+                    {
+                        "type": "PS",
+                        "title": "Patient Summary",
+                        "date": "2024-12-01",
+                        "available": True,
+                        "format": "CDA",
+                    },
+                    {
+                        "type": "eP",
+                        "title": "ePrescription",
+                        "date": "2024-11-28",
+                        "available": True,
+                        "format": "CDA",
+                    },
+                ]
+
+            result.available_documents = documents
             result.ncp_response_time = 1.2
             result.ncp_status_code = "200"
         else:
@@ -691,59 +860,149 @@ def patient_data(request, country_code, patient_id):
         "step": "PATIENT DATA",
     }
 
-    return render(request, "ehealth_portal/patient_data.html", context)
+    # Force Jinja2 template engine usage
+    from django.template.response import TemplateResponse
 
-    return render(request, "ehealth_portal/patient_data.html", context)
+    return TemplateResponse(
+        request, "ehealth_portal/patient_data.html", context, using="jinja2"
+    )
 
 
 @login_required
 def document_viewer(request, country_code, patient_id, document_type):
     """
-    View specific document (CDA or FHIR)
+    View specific document (CDA or FHIR) with Enhanced CDA Processing
     """
-    # Mock document retrieval
+    # Default language to English, but can be changed based on user preference
+    target_language = request.GET.get("lang", "en")
+
+    # Initialize document data
     document_data = {
         "type": document_type,
         "patient_id": patient_id,
         "format": "CDA" if document_type == "PS" else "FHIR",
         "content": "Document content would be displayed here...",
+        "sections": [],
+        "processing_success": False,
+        "error_message": None,
     }
+
+    # If this is a CDA document (Patient Summary), process with Enhanced CDA Processor
+    if document_type == "PS":
+        try:
+            # Try to load real CDA data from test files or patient data
+            cda_content = None
+
+            # Check for Wave 7 test data first
+            test_cda_path = (
+                f"test_data/eu_member_states/{country_code.upper()}/2-1234-W7.xml"
+            )
+            if os.path.exists(test_cda_path):
+                with open(test_cda_path, "r", encoding="utf-8") as file:
+                    cda_content = file.read()
+                logger.info(
+                    f"Loaded test CDA data for {country_code}: {len(cda_content)} characters"
+                )
+
+            # If we have CDA content, process it with Enhanced CDA Processor
+            if cda_content:
+                from patient_data.services.enhanced_cda_processor import (
+                    EnhancedCDAProcessor,
+                )
+
+                processor = EnhancedCDAProcessor(target_language=target_language)
+                result = processor.process_clinical_sections(
+                    cda_content=cda_content,
+                    source_language="en",  # Most test documents are in English
+                )
+
+                if result.get("success"):
+                    document_data.update(
+                        {
+                            "sections": result.get("sections", []),
+                            "processing_success": True,
+                            "content": f"Processed {len(result.get('sections', []))} clinical sections with Enhanced CDA Processor",
+                        }
+                    )
+                    logger.info(
+                        f"Enhanced CDA processing successful: {len(result.get('sections', []))} sections"
+                    )
+                else:
+                    document_data["error_message"] = result.get(
+                        "error", "Unknown processing error"
+                    )
+                    logger.error(
+                        f"Enhanced CDA processing failed: {document_data['error_message']}"
+                    )
+            else:
+                # No real CDA data available, use mock data
+                document_data["content"] = (
+                    "No CDA test data available for this country/patient combination"
+                )
+                logger.warning(f"No CDA data found for {country_code}/{patient_id}")
+
+        except Exception as e:
+            document_data["error_message"] = f"CDA processing error: {str(e)}"
+            logger.error(f"Enhanced CDA Processor error: {e}")
 
     context = {
         "document": document_data,
         "patient_id": patient_id,
         "country_code": country_code,
         "page_title": f"Document Viewer - {document_type}",
+        "target_language": target_language,
+        "available_languages": ["en", "de", "fr", "es", "it", "pt", "nl", "pl", "cs"],
     }
 
     return render(request, "ehealth_portal/document_viewer.html", context)
 
 
 @login_required
-def smp_status(request):
+def process_cda_ajax(request):
     """
-    Display detailed SMP connectivity and certificate status
+    AJAX endpoint for Enhanced CDA Processing
     """
-    from .european_smp_client import european_smp_client
+    if request.method != "POST":
+        return JsonResponse({"error": "POST method required"}, status=405)
 
-    # Get connectivity test results
-    connectivity_results = european_smp_client.test_connectivity()
+    try:
+        data = json.loads(request.body)
+        cda_content = data.get("cda_content")
+        target_language = data.get("target_language", "en")
+        source_language = data.get("source_language", "en")
 
-    # Get certificate info
-    cert_info = connectivity_results.get("certificate_config", {})
+        if not cda_content:
+            return JsonResponse({"error": "CDA content required"}, status=400)
 
-    context = {
-        "page_title": "European SMP Status",
-        "connectivity_results": connectivity_results,
-        "cert_configured": cert_info.get("configured", False),
-        "cert_name": cert_info.get("config_name"),
-        "cert_path": cert_info.get("cert_path"),
-        "ca_cert_path": cert_info.get("ca_cert_path"),
-        "smp_admin": connectivity_results.get("smp_admin", {}),
-        "country_smps": connectivity_results.get("country_smps", {}),
-    }
+        # Process with Enhanced CDA Processor
+        from patient_data.services.enhanced_cda_processor import EnhancedCDAProcessor
 
-    return render(request, "ehealth_portal/smp_status.html", context)
+        processor = EnhancedCDAProcessor(target_language=target_language)
+        result = processor.process_clinical_sections(
+            cda_content=cda_content, source_language=source_language
+        )
+
+        if result.get("success"):
+            return JsonResponse(
+                {
+                    "success": True,
+                    "sections": result.get("sections", []),
+                    "message": f"Processed {len(result.get('sections', []))} clinical sections",
+                }
+            )
+        else:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": result.get("error", "Unknown processing error"),
+                }
+            )
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
+    except Exception as e:
+        logger.error(f"CDA AJAX processing error: {e}")
+        return JsonResponse({"error": f"Processing error: {str(e)}"}, status=500)
 
 
 @login_required
@@ -784,20 +1043,10 @@ def refresh_country_ism(request, country_code):
                 f"Successfully updated ISM for {country.name} from European SMP",
             )
         else:
-            # Check if certificates are configured
-            from .european_smp_client import european_smp_client
-
-            if european_smp_client.cert_config:
-                cert_name = european_smp_client.cert_config.get("name", "Unknown")
-                messages.info(
-                    request,
-                    f"Using enhanced fallback ISM for {country.name}. Certificates configured ({cert_name}) but European SMP infrastructure requires VPN access to EU internal networks.",
-                )
-            else:
-                messages.info(
-                    request,
-                    f"Using enhanced fallback ISM for {country.name}. European SMP requires client certificates and VPN access to EU internal networks.",
-                )
+            messages.warning(
+                request,
+                f"Could not fetch ISM for {country.name} from SMP, using fallback configuration",
+            )
 
         return redirect("patient_search", country_code=country_code)
 

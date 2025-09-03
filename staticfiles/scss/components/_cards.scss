@@ -1,0 +1,146 @@
+// ========================================
+// Card Components
+// ========================================
+
+.card {
+  @include card-base;
+
+  // Card variants
+  &.card-bordered {
+    border: $border-width solid $neutral-lighter;
+  }
+
+  &.card-elevated {
+    box-shadow: $shadow-lg;
+  }
+
+  &.card-flat {
+    box-shadow: none;
+    border: $border-width solid $neutral-lighter;
+  }
+
+  // Card sizes
+  &.card-sm {
+    padding: $space-md;
+  }
+
+  &.card-lg {
+    padding: $space-xxl;
+  }
+}
+
+.card-header {
+  padding: $space-lg $space-lg $space-md $space-lg;
+  border-bottom: $border-width solid $neutral-lighter;
+  margin: (-$space-lg) (-$space-lg) $space-lg (-$space-lg);
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-bottom: 0;
+  }
+}
+
+.card-body {
+  // Default card body styles applied by card-base mixin
+  flex: 1; // Allow card body to grow in flex layouts
+}
+
+.card-footer {
+  padding: $space-md $space-lg $space-lg $space-lg;
+  border-top: $border-width solid $neutral-lighter;
+  margin: $space-lg (-$space-lg) (-$space-lg) (-$space-lg);
+  background-color: $neutral-lightest;
+  border-radius: 0 0 $border-radius-lg $border-radius-lg;
+}
+
+// Card groups
+.card-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-lg;
+
+  .card {
+    flex: 1;
+    min-width: 250px;
+  }
+}
+
+// Card grid
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: $space-lg;
+
+  &.card-grid-sm {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  &.card-grid-lg {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+}
+
+// Specialty cards
+.info-card {
+  @include card-base;
+  background: linear-gradient(
+    135deg,
+    $light-blue 0%,
+    rgba($primary-blue, 0.05) 100%
+  );
+  border-left: 4px solid $primary-blue;
+
+  .card-icon {
+    color: $primary-blue;
+    font-size: $font-size-xxl;
+    margin-bottom: $space-md;
+  }
+}
+
+.success-card {
+  @include card-base;
+  background: linear-gradient(
+    135deg,
+    $light-green 0%,
+    rgba($success-green, 0.05) 100%
+  );
+  border-left: 4px solid $success-green;
+
+  .card-icon {
+    color: $success-green;
+    font-size: $font-size-xxl;
+    margin-bottom: $space-md;
+  }
+}
+
+.warning-card {
+  @include card-base;
+  background: linear-gradient(
+    135deg,
+    #fff3cd 0%,
+    rgba($warning-orange, 0.05) 100%
+  );
+  border-left: 4px solid $warning-orange;
+
+  .card-icon {
+    color: $warning-orange;
+    font-size: $font-size-xxl;
+    margin-bottom: $space-md;
+  }
+}
+
+.error-card {
+  @include card-base;
+  background: linear-gradient(135deg, #f8d7da 0%, rgba($error-red, 0.05) 100%);
+  border-left: 4px solid $error-red;
+
+  .card-icon {
+    color: $error-red;
+    font-size: $font-size-xxl;
+    margin-bottom: $space-md;
+  }
+}

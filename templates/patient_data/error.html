@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Error - EU NCP Portal{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">
+            <i class="icon-alert-triangle"></i>
+            An Error Occurred
+        </h4>
+
+        {% if error_message %}
+        <p><strong>Error Details:</strong> {{ error_message }}</p>
+        {% else %}
+        <p>An unexpected error occurred while processing your request.</p>
+        {% endif %}
+
+        {% if patient_id %}
+        <hr>
+        <p class="mb-0">
+            <strong>Patient ID:</strong> {{ patient_id }}
+        </p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>What you can do:</h5>
+        </div>
+        <div class="card-body">
+            <ul>
+                <li>Go back and try again</li>
+                <li>Check if the patient data exists</li>
+                <li>Verify the document is available</li>
+                <li>Contact support if the problem persists</li>
+            </ul>
+
+            <div class="mt-3">
+                <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-primary">
+                    <i class="icon-arrow-left"></i>
+                    Back to Patient Search
+                </a>
+
+                {% if patient_id %}
+                <a href="{% url 'patient_data:patient_details' patient_id %}" class="btn btn-outline-secondary ml-2">
+                    <i class="icon-user"></i>
+                    Patient Details
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

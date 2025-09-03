@@ -1,0 +1,121 @@
+{% load contact_cards %}
+
+{% comment %}
+Example: How to use the new contact card system in your patient summary template
+{% endcomment %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Patient Summary - Contact Cards Example</title>
+    <link rel="stylesheet" href="{% load static %}{% static 'patient_data/css/contact_cards.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+
+        {% comment %} Example 1: Single Legal Authenticator Card {% endcomment %}
+        <section class="example-section">
+            <h2>Legal Authenticator (Single Card)</h2>
+            {% if administrative_info.legal_authenticator %}
+            {% contact_card administrative_info.legal_authenticator "Legal Authenticator" "legal_auth" %}
+            {% else %}
+            <p>No legal authenticator information available.</p>
+            {% endif %}
+        </section>
+
+        {% comment %} Example 2: Authors List {% endcomment %}
+        <section class="example-section">
+            <h2>Authors (Card List)</h2>
+            {% if administrative_info.authors %}
+            {% contact_card_list administrative_info.authors "Document Authors" "author" %}
+            {% else %}
+            <p>No author information available.</p>
+            {% endif %}
+        </section>
+
+        {% comment %} Example 3: Patient Contact {% endcomment %}
+        <section class="example-section">
+            <h2>Patient Contact Information</h2>
+            {% if administrative_info.patient_contact %}
+            {% contact_card administrative_info.patient_contact "Patient Contact" "patient" %}
+            {% else %}
+            <p>No patient contact information available.</p>
+            {% endif %}
+        </section>
+
+        {% comment %} Example 4: Custodian {% endcomment %}
+        <section class="example-section">
+            <h2>Document Custodian</h2>
+            {% if administrative_info.custodian %}
+            {% contact_card administrative_info.custodian "Custodian Organization" "custodian" %}
+            {% else %}
+            <p>No custodian information available.</p>
+            {% endif %}
+        </section>
+
+        {% comment %} Example 5: Using template filters for individual values {% endcomment %}
+        <section class="example-section">
+            <h2>Individual Field Access (Template Filters)</h2>
+            {% if administrative_info.legal_authenticator %}
+            <div class="field-examples">
+                <p><strong>Legal Authenticator Name:</strong> {{
+                    administrative_info.legal_authenticator|get_contact_name }}</p>
+                <p><strong>Legal Authenticator Role:</strong> {{
+                    administrative_info.legal_authenticator|get_contact_role }}</p>
+                <p><strong>Organization:</strong> {{ administrative_info.legal_authenticator|get_organization_name }}
+                </p>
+                <p><strong>Phone:</strong> {{ administrative_info.legal_authenticator|get_primary_phone|default:"Not
+                    provided" }}</p>
+                <p><strong>Email:</strong> {{ administrative_info.legal_authenticator|get_primary_email|default:"Not
+                    provided" }}</p>
+            </div>
+            {% endif %}
+        </section>
+
+        {% comment %} Example 6: Complete Administrative Section {% endcomment %}
+        <section class="example-section">
+            <h2>Complete Administrative Information</h2>
+            {% include 'patient_data/administrative_info.html' %}
+        </section>
+
+    </div>
+
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .example-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .example-section h2 {
+            margin-top: 0;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+
+        .field-examples {
+            background: white;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .field-examples p {
+            margin: 8px 0;
+        }
+    </style>
+</body>
+
+</html>

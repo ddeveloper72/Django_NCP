@@ -1,0 +1,16 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static %}
+
+{% block object-tools-items %}
+{{ block.super }}
+<li>
+    <a href="{% url 'admin:translation_services_valuesetcatalogue_import_mvc' %}" class="addlink">
+        Import MVC File
+    </a>
+</li>
+<li>
+    <a href="{% url 'admin:translation_services_valuesetcatalogue_sync_cts' %}" class="addlink">
+        Sync with CTS
+    </a>
+</li>
+{% endblock %}

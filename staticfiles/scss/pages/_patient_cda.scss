@@ -1,0 +1,1406 @@
+// Professional CDA Document Styling - PS Display Guideline Compliant
+@import url('https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700');
+
+// PS Display Guidelines - Variables
+$ps-primary-blue: #085a9f;
+$ps-secondary-blue: #009fd1;
+$ps-success-green: #28a745;
+$ps-warning-orange: #ffc107;
+$ps-danger-red: #dc3545;
+$ps-light-blue: #e6f2ff;
+$ps-white: #ffffff;
+$ps-dark-gray: #4a4a4a;
+$ps-light-gray: #f8f9fa;
+
+// Professional CDA Document Page Styles
+.cda-document-container {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  background: $ps-white;
+  color: $ps-dark-gray;
+  padding: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// PS Display Guidelines - Header Section
+.ps-header {
+  background: linear-gradient(
+    135deg,
+    $ps-primary-blue 0%,
+    $ps-secondary-blue 100%
+  );
+  color: $ps-white;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+  .ps-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .ps-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 400;
+  }
+}
+
+// Patient Identity Banner - Critical for Safety
+.patient-identity-banner {
+  background: $ps-light-blue;
+  border: 3px solid $ps-primary-blue;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+  .patient-identity-left {
+    .patient-name {
+      font-size: 1.5rem;
+      color: $ps-primary-blue;
+      margin-bottom: 0.5rem;
+    }
+
+    .patient-details {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+
+      span {
+        background: $ps-white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        border: 1px solid $ps-secondary-blue;
+      }
+    }
+  }
+
+  .patient-identity-right {
+    text-align: right;
+
+    .document-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+
+      div {
+        background: $ps-white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-weight: 500;
+        border: 1px solid $ps-secondary-blue;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        font-size: 0.85rem;
+
+        i {
+          margin-right: 0.4rem;
+          opacity: 0.8;
+        }
+      }
+
+      .document-country {
+        background: linear-gradient(
+          135deg,
+          $ps-primary-blue,
+          $ps-secondary-blue
+        );
+        color: $ps-white;
+        border-color: $ps-primary-blue;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .document-creation-date {
+        background: linear-gradient(135deg, #e8f5e8, #d4edda);
+        border-color: #28a745;
+
+        i {
+          color: #28a745;
+        }
+      }
+
+      .document-update-date {
+        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        border-color: #ffc107;
+
+        i {
+          color: #e67e22;
+        }
+
+        &.critical-info {
+          background: linear-gradient(135deg, #fff3cd, #f39c12);
+          border-color: #e67e22;
+          border-width: 2px;
+          font-weight: 600;
+          animation: subtle-pulse 3s ease-in-out infinite;
+
+          i {
+            color: #d35400;
+            font-weight: bold;
+          }
+        }
+      }
+
+      .document-version {
+        background: linear-gradient(135deg, #e2f3f8, #d1ecf1);
+        border-color: #17a2b8;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.8rem;
+
+        i {
+          color: #17a2b8;
+        }
+      }
+
+      .document-language {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-color: #6c757d;
+        opacity: 0.9;
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+// Safety Alerts Section - Critical Information
+.safety-alerts-section {
+  background: linear-gradient(135deg, $ps-danger-red 0%, #e74c3c 100%);
+  color: $ps-white;
+  padding: 1.5rem;
+  margin: 1rem 0 2rem 0;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+
+  .alert-header {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-align: center;
+
+    i {
+      font-size: 1.5rem;
+      animation: pulse 2s infinite;
+    }
+  }
+
+  .allergy-alerts,
+  .medical-alerts {
+    margin-bottom: 1rem;
+
+    h4 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 0.5rem;
+    }
+
+    .alert-item {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+
+      &.allergy {
+        display: flex;
+        justify-content: space-between;
+
+        .alert-substance {
+          font-weight: 600;
+        }
+
+        .alert-reaction {
+          font-style: italic;
+        }
+      }
+    }
+  }
+}
+
+// Enhanced Translation Dashboard
+.cda-translation-dashboard {
+  background: linear-gradient(
+    135deg,
+    $ps-primary-blue 0%,
+    $ps-secondary-blue 100%
+  );
+  color: white;
+  padding: 2rem;
+  border-radius: 15px;
+  margin-bottom: 2rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+
+  .dashboard-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .dashboard-subtitle {
+    opacity: 0.9;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+.translation-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  &.quality {
+    border-left: 5px solid $ps-success-green;
+  }
+
+  &.sections {
+    border-left: 5px solid $ps-secondary-blue;
+  }
+
+  &.medical-terms {
+    border-left: 5px solid $ps-warning-orange;
+  }
+
+  &.coded {
+    border-left: 5px solid #6f42c1;
+  }
+
+  &.compliance {
+    border-left: 5px solid $ps-success-green;
+  }
+
+  .stat-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+  }
+
+  .stat-content {
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+  }
+}
+
+// Modern Container System
+.container {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  column-gap: 10px;
+  row-gap: 10px;
+}
+
+// Professional Section Headers
+.wrap-collapsible {
+  margin-bottom: 1.2rem;
+  width: 100%;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+input[type='checkbox'] {
+  display: none;
+}
+
+// Main Section Toggle
+.lbl-toggle-main {
+  display: block;
+  font-weight: bold;
+  color: #085a9f;
+  font-size: 15px;
+  text-align: left;
+  padding: 1rem 1.5rem;
+  border: 2px solid #085a9f;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 10px 10px 0 0;
+  transition: all 0.25s ease-out;
+  margin: 0;
+
+  &:hover {
+    color: #009fd1;
+    background: #f8f9fa;
+  }
+
+  &::before {
+    content: ' ';
+    display: inline-block;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid currentColor;
+    vertical-align: middle;
+    margin-right: 0.7rem;
+    transform: translateY(-2px);
+    transition: transform 0.2s ease-out;
+  }
+}
+
+.toggle:checked + .lbl-toggle-main::before {
+  transform: rotate(90deg) translateX(-3px);
+}
+
+// Title Section Toggle
+.lbl-toggle-title {
+  display: block;
+  font-weight: bold;
+  color: #fff;
+  font-size: 15px;
+  text-align: left;
+  padding: 1rem 1.5rem;
+  border: 2px solid #085a9f;
+  background: #085a9f;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.25s ease-out;
+  margin: 0;
+
+  &:hover {
+    color: #009fd1;
+  }
+
+  &::before {
+    content: ' ';
+    display: inline-block;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid currentColor;
+    vertical-align: middle;
+    margin-right: 0.7rem;
+    transform: translateY(-2px);
+    transition: transform 0.2s ease-out;
+  }
+}
+
+.toggle:checked + .lbl-toggle-title::before {
+  transform: rotate(90deg) translateX(-3px);
+}
+
+// Sub-section Toggle
+.lbl-toggle {
+  display: block;
+  color: #009fd1;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: left;
+  padding: 0.8rem 1.5rem;
+  border: 2px solid #009fd1;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.25s ease-out;
+  margin: 0.5rem 0;
+
+  &:hover {
+    background: #f8f9fa;
+  }
+
+  &::before {
+    content: ' ';
+    display: inline-block;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid currentColor;
+    vertical-align: middle;
+    margin-right: 0.7rem;
+    transform: translateY(-2px);
+    transition: transform 0.2s ease-out;
+  }
+}
+
+.toggle:checked + .lbl-toggle::before {
+  transform: rotate(90deg) translateX(-3px);
+}
+
+// Collapsible Content
+.collapsible-content-main,
+.collapsible-content-title,
+.collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease-in-out;
+}
+
+.toggle:checked + .lbl-toggle-main + .collapsible-content-main,
+.toggle:checked + .lbl-toggle-title + .collapsible-content-title,
+.toggle:checked + .lbl-toggle + .collapsible-content {
+  max-height: none;
+  overflow: visible;
+}
+
+.content-inner-main,
+.content-inner-title,
+.content-inner {
+  background: white;
+  border-bottom: 2px solid #085a9f;
+  border-left: 2px solid #085a9f;
+  border-right: 2px solid #085a9f;
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
+  padding: 1.5rem;
+}
+
+// Professional Tables
+.translation_table,
+.medication_summary_table,
+.extended_header_table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  th {
+    background: #e6f2ff;
+    color: #4a4a4a;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 12px;
+    vertical-align: top;
+    text-align: left;
+    border-bottom: 1px solid #009fd1;
+
+    &.subtitle {
+      background: #009fd1;
+      color: #ffffff;
+    }
+  }
+
+  td {
+    font-size: 12px;
+    padding: 12px;
+    vertical-align: top;
+    text-align: left;
+    border-bottom: 1px solid #ecf0f1;
+  }
+
+  tr:nth-child(even) {
+    background: #ffffff;
+  }
+
+  tr:nth-child(odd) {
+    background: #e6f2ff;
+  }
+}
+
+// Mobile-First Design
+.mobile-view {
+  display: none;
+}
+
+.web-view {
+  display: block;
+}
+
+.toggle-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 15px;
+  gap: 2px;
+}
+
+.toggle-button-translated,
+.toggle-button-original {
+  padding: 12px 20px;
+  flex-grow: 1;
+  text-align: center;
+  background-color: #fff;
+  color: #085a9f;
+  border: 2px solid #085a9f;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 13px;
+  border-radius: 5px;
+
+  &:hover {
+    background-color: #085a9f;
+    color: #fff;
+  }
+
+  &.active {
+    background-color: #085a9f;
+    color: #fff;
+  }
+}
+
+// Professional Data Display
+.data-section {
+  margin-bottom: 2rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.section-header {
+  background: linear-gradient(135deg, #085a9f 0%, #009fd1 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.section-content {
+  padding: 1.5rem;
+}
+
+// Compliance Indicators
+.compliance-indicators {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+
+  &.coded {
+    background: #e8f5e8;
+    color: #2d5a27;
+    border: 1px solid #4a7c59;
+  }
+
+  &.free-text {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+  }
+}
+
+// Section Type Badges
+.section-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+
+  &.coded {
+    background: #e8f5e8;
+    color: #2d5a27;
+    border: 1px solid #4a7c59;
+  }
+
+  &.free-text {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+  }
+}
+
+// Section Code Badge
+.section-code-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  font-family: 'Courier New', monospace;
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+  margin-left: 0.5rem;
+}
+
+// Enhanced Medical Terms Badge
+.medical-terms-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #e6f2ff;
+  color: #085a9f;
+  border: 1px solid #009fd1;
+  margin-left: 0.5rem;
+}
+
+// Code System Badge - Credibility & Terminology Service Validation
+.code-system-badge {
+  display: none; // Hidden by default, shown with toggle
+  font-size: 0.7rem; // Readable size for medical professionals
+  font-weight: 600; // Bold for authority and credibility
+  font-family: 'Courier New', monospace;
+  color: #2c5530; // Professional dark green for validation
+  margin-left: 0.5rem;
+  margin-right: 0.75rem;
+  padding: 0.2rem 0.4rem; // Adequate padding for professional appearance
+  border: 1px solid #4a7c59; // Subtle border for definition
+  background: #e8f5e8; // Light green background indicating validation
+  border-radius: 4px; // Professional rounded corners
+  white-space: nowrap;
+  font-style: normal;
+
+  // Icon for credibility indicator
+  &::before {
+    content: '✓ '; // Check mark to indicate validated terminology
+    color: #28a745; // Success green
+    font-weight: bold;
+    margin-right: 0.15rem;
+  }
+
+  // Show badges only when toggle is checked
+  &.show {
+    display: inline-block;
+    opacity: 1; // Full opacity for professional credibility
+  }
+
+  // Add slight spacing between multiple badges
+  &:not(:last-child) {
+    margin-right: 0.75rem;
+  }
+}
+
+// Enhanced table cell structure for sub-row badge display
+.table-cell-enhanced {
+  .primary-content {
+    display: block;
+    line-height: 1.3;
+    margin-bottom: 0.125rem;
+  }
+
+  .badge-row {
+    display: none; // Hidden by default
+    margin-top: 0.5rem; // More space for professional separation
+    padding-top: 0.375rem; // Better padding for credibility indicators
+    border-top: 1px solid rgba(74, 124, 89, 0.2); // Green border matching validation theme
+    font-size: 0.7rem; // Match badge font size
+    line-height: 1.3; // Better line height for readability
+    opacity: 1; // Full opacity for professional credibility display
+    background: rgba(
+      232,
+      245,
+      232,
+      0.3
+    ); // Very light green background for validation context
+
+    // Show when badges are enabled
+    &.show {
+      display: block;
+    }
+
+    .code-system-badge {
+      display: inline-block;
+      margin-right: 1rem; // More space between validation badges
+
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+
+    // Add label for credibility context
+    &::before {
+      content: 'Terminology Source: ';
+      font-size: 0.65rem;
+      color: #6c757d;
+      font-weight: 500;
+      margin-right: 0.5rem;
+      font-style: italic;
+    }
+  }
+}
+
+/* Updated CSS for badge toggle functionality */
+
+// Table cell enhancements - keep simple to avoid breaking table layout
+.patient-summary-table,
+.ps-table {
+  td,
+  .ps-td {
+    position: relative;
+    vertical-align: top; // Ensure consistent top alignment of cell content
+  }
+}
+
+// Animation Effects - PS Guidelines Compliant
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes subtle-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// Accessibility Features - PS Guidelines Compliance
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+// High Contrast Mode Support
+@media (prefers-contrast: high) {
+  .stat-card {
+    border: 3px solid $ps-white;
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .patient-identity-banner {
+    border-width: 4px;
+  }
+
+  .safety-alerts-section {
+    border: 3px solid $ps-white;
+  }
+}
+
+// Reduced Motion Support
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// XML Display Styling
+.cda-viewer {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+
+  .cda-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+
+    .toolbar-left h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .toolbar-right {
+      display: flex;
+      gap: 1rem;
+    }
+  }
+
+  .cda-content {
+    background: #2d3748;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+
+    #xmlContent {
+      background: #2d3748;
+      color: #f7fafc;
+      padding: 1.5rem;
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .cda-document-container {
+    padding: 0.5rem;
+  }
+
+  .h1center {
+    font-size: 1.3em;
+    padding: 0.5rem;
+  }
+
+  .cda-translation-dashboard {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .translation-stats {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .toggle-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .toggle-button-translated,
+  .toggle-button-original {
+    padding: 10px 15px;
+    font-size: 12px;
+  }
+
+  .cda-toolbar {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+
+    .toolbar-right {
+      justify-content: center;
+    }
+  }
+}
+
+// PS Display Guidelines - Structured Tables
+.ps-table-container {
+  margin: 1.5rem 0;
+  background: $ps-white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.ps-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: $ps-white;
+  font-size: 0.9rem;
+
+  .ps-th {
+    background: linear-gradient(
+      135deg,
+      $ps-primary-blue 0%,
+      $ps-secondary-blue 100%
+    );
+    color: $ps-white;
+    font-weight: 600;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    border: none;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ps-td {
+    padding: 0.875rem 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .ps-tr:hover {
+    background-color: $ps-light-blue;
+    transition: background-color 0.2s ease;
+  }
+
+  .ps-row-even {
+    background-color: $ps-white;
+  }
+
+  .ps-row-odd {
+    background-color: #f8f9fa;
+  }
+}
+
+// Section-specific table styling
+.ps-table-medications {
+  .ps-th:nth-child(1) {
+    width: 20%;
+  } // Medication
+  .ps-th:nth-child(2) {
+    width: 15%;
+  } // Active Ingredient
+  .ps-th:nth-child(3) {
+    width: 12%;
+  } // Dosage
+  .ps-th:nth-child(4) {
+    width: 8%;
+  } // Route
+  .ps-th:nth-child(5) {
+    width: 12%;
+  } // Frequency
+  .ps-th:nth-child(6) {
+    width: 10%;
+  } // Start Date
+  .ps-th:nth-child(7) {
+    width: 10%;
+  } // End Date
+  .ps-th:nth-child(8) {
+    width: 13%;
+  } // Notes
+}
+
+.ps-table-allergies {
+  .ps-th:nth-child(1) {
+    width: 20%;
+  } // Allergy Type
+  .ps-th:nth-child(2) {
+    width: 25%;
+  } // Causative Agent
+  .ps-th:nth-child(3) {
+    width: 20%;
+  } // Manifestation
+  .ps-th:nth-child(4) {
+    width: 15%;
+  } // Severity
+  .ps-th:nth-child(5) {
+    width: 20%;
+  } // Status
+}
+
+.ps-table-problems {
+  .ps-th:nth-child(1) {
+    width: 30%;
+  } // Problem/Diagnosis
+  .ps-th:nth-child(2) {
+    width: 15%;
+  } // Status
+  .ps-th:nth-child(3) {
+    width: 15%;
+  } // Onset Date
+  .ps-th:nth-child(4) {
+    width: 40%;
+  } // Notes
+}
+
+.ps-table-procedures {
+  .ps-th:nth-child(1) {
+    width: 25%;
+  } // Procedure
+  .ps-th:nth-child(2) {
+    width: 15%;
+  } // Date
+  .ps-th:nth-child(3) {
+    width: 20%;
+  } // Performer
+  .ps-th:nth-child(4) {
+    width: 15%;
+  } // Location
+  .ps-th:nth-child(5) {
+    width: 25%;
+  } // Notes
+}
+
+.ps-table-results {
+  .ps-th:nth-child(1) {
+    width: 25%;
+  } // Test/Result
+  .ps-th:nth-child(2) {
+    width: 15%;
+  } // Value
+  .ps-th:nth-child(3) {
+    width: 20%;
+  } // Reference Range
+  .ps-th:nth-child(4) {
+    width: 15%;
+  } // Date
+  .ps-th:nth-child(5) {
+    width: 25%;
+  } // Status
+}
+
+// Mobile responsiveness for PS tables
+@media (max-width: 768px) {
+  .ps-table {
+    .ps-th,
+    .ps-td {
+      padding: 0.5rem;
+      font-size: 0.8rem;
+    }
+  }
+
+  .ps-table-container {
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+}
+
+// Administrative Information Section - PS Display Guidelines Compliant
+.administrative-section {
+  margin-bottom: 2rem;
+  background: $ps-white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
+  .admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+}
+
+.admin-contact-card {
+  background: $ps-light-blue;
+  border: 2px solid $ps-secondary-blue;
+  border-radius: 8px;
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 159, 209, 0.2);
+  }
+
+  .admin-card-header {
+    background: $ps-secondary-blue;
+    color: $ps-white;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    margin: -1.25rem -1.25rem 1rem -1.25rem;
+    border-radius: 6px 6px 0 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    .fa,
+    .fas {
+      margin-right: 0.5rem;
+      opacity: 0.9;
+    }
+  }
+
+  .admin-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(8, 90, 159, 0.1);
+
+    &:last-child {
+      margin-bottom: 0;
+      border-bottom: none;
+    }
+
+    .admin-label {
+      font-weight: 600;
+      color: $ps-primary-blue;
+      font-size: 0.85rem;
+      min-width: 80px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .admin-value {
+      color: $ps-dark-gray;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      text-align: right;
+      flex: 1;
+      margin-left: 1rem;
+
+      &.organization-name {
+        font-weight: 600;
+        color: $ps-primary-blue;
+      }
+
+      &.person-name {
+        font-weight: 600;
+        color: $ps-dark-gray;
+      }
+
+      &.contact-info {
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+        background: rgba(255, 255, 255, 0.7);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        border: 1px solid rgba(8, 90, 159, 0.2);
+      }
+
+      .contact-item {
+        display: block;
+        margin-bottom: 0.25rem;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .contact-type {
+          font-weight: 500;
+          color: $ps-secondary-blue;
+          margin-right: 0.5rem;
+          text-transform: capitalize;
+        }
+
+        .contact-address {
+          color: $ps-dark-gray;
+          line-height: 1.3;
+        }
+      }
+    }
+  }
+
+  // Contact type specific styling
+  &.patient-contact {
+    border-color: $ps-success-green;
+    background: lighten($ps-success-green, 45%);
+
+    .admin-card-header {
+      background: $ps-success-green;
+    }
+  }
+
+  &.author-hcp {
+    border-color: $ps-primary-blue;
+
+    .admin-card-header {
+      background: $ps-primary-blue;
+    }
+  }
+
+  &.legal-authenticator {
+    border-color: $ps-warning-orange;
+    background: lighten($ps-warning-orange, 40%);
+
+    .admin-card-header {
+      background: $ps-warning-orange;
+      color: $ps-dark-gray;
+    }
+  }
+
+  &.custodian {
+    border-color: #6f42c1;
+    background: lighten(#6f42c1, 45%);
+
+    .admin-card-header {
+      background: #6f42c1;
+    }
+  }
+
+  &.guardian {
+    border-color: $ps-danger-red;
+    background: lighten($ps-danger-red, 45%);
+
+    .admin-card-header {
+      background: $ps-danger-red;
+    }
+  }
+
+  &.cabinet-medicale {
+    border-color: #17a2b8;
+    background: lighten(#17a2b8, 45%);
+
+    .admin-card-header {
+      background: #17a2b8;
+    }
+  }
+}
+
+// Contact information grid layout
+.contact-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+// Empty state for administrative data
+.admin-empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  font-style: italic;
+
+  .fa,
+  .fas {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+}
+
+// Responsive design for administrative section
+@media (max-width: 768px) {
+  .administrative-section {
+    .admin-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+  }
+
+  .admin-contact-card {
+    padding: 1rem;
+
+    .admin-card-header {
+      margin: -1rem -1rem 0.75rem -1rem;
+      font-size: 0.8rem;
+    }
+
+    .admin-info-row {
+      flex-direction: column;
+      gap: 0.25rem;
+
+      .admin-label {
+        min-width: auto;
+        margin-bottom: 0.25rem;
+      }
+
+      .admin-value {
+        text-align: left;
+        margin-left: 0;
+      }
+    }
+  }
+}
+
+// Print styles for PDF generation
+@media print {
+  .ps-table {
+    break-inside: avoid;
+
+    .ps-th {
+      background: #f0f0f0 !important;
+      color: #000 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .ps-tr:hover {
+      background-color: transparent !important;
+    }
+  }
+
+  .ps-table-container {
+    box-shadow: none;
+    margin: 0.5rem 0;
+  }
+
+  .administrative-section {
+    break-inside: avoid;
+    box-shadow: none;
+
+    .admin-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .admin-contact-card {
+      break-inside: avoid;
+      box-shadow: none;
+      border: 1px solid #ddd;
+
+      .admin-card-header {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  }
+}

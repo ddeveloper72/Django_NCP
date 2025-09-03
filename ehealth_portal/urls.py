@@ -20,8 +20,13 @@ urlpatterns = [
         views.document_viewer,
         name="document_viewer",
     ),
+    # Enhanced CDA Processing endpoint
+    path(
+        "api/cda/process/",
+        views.process_cda_ajax,
+        name="process_cda_ajax",
+    ),
     # European SMP integration endpoints
-    path("smp/status/", views.smp_status, name="smp_status"),
     path("smp/test/", views.european_smp_test, name="european_smp_test"),
     path(
         "country/<str:country_code>/refresh-ism/",

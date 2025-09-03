@@ -1,0 +1,92 @@
+// ========================================
+// Footer Layout Component
+// ========================================
+
+.site-footer {
+  background-color: $neutral-dark;
+  color: $white;
+  padding: $space-xxl 0 $space-lg 0;
+  margin-top: auto; // Push footer to bottom in flex layouts
+
+  .footer-container {
+    @include container;
+  }
+
+  .footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: $space-xl;
+    margin-bottom: $space-xl;
+
+    @include mobile-up {
+      grid-template-columns: 1fr;
+      gap: $space-lg;
+    }
+  }
+
+  .footer-section {
+    h4 {
+      color: $white;
+      margin-bottom: $space-md;
+      font-size: $font-size-lg;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        margin-bottom: $space-sm;
+
+        a {
+          color: $neutral-light;
+          text-decoration: none;
+          transition: color $transition-normal;
+
+          &:hover {
+            color: $white;
+          }
+        }
+      }
+    }
+
+    p {
+      color: $neutral-light;
+      line-height: 1.6;
+    }
+  }
+
+  .footer-bottom {
+    border-top: $border-width solid $neutral-medium;
+    padding-top: $space-lg;
+    text-align: center;
+    color: $neutral-light;
+    font-size: $font-size-sm;
+
+    @include tablet-up {
+      @include flex-between;
+      text-align: left;
+    }
+  }
+
+  .footer-links {
+    @include flex-center;
+    gap: $space-lg;
+    margin-top: $space-md;
+
+    @include tablet-up {
+      margin-top: 0;
+    }
+
+    a {
+      color: $neutral-light;
+      text-decoration: none;
+      font-size: $font-size-sm;
+
+      &:hover {
+        color: $white;
+      }
+    }
+  }
+}

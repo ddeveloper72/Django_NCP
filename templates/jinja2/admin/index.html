@@ -1,0 +1,76 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block content %}
+{{ block.super }}
+
+<!-- EU Test Data Management Section -->
+<div class="module filtered" id="test-data-management">
+    <table>
+        <caption>
+            <a href="{% url 'admin:patient_data_test_data_dashboard' %}" class="section">
+                EU Test Data Management
+            </a>
+        </caption>
+        <tbody>
+            <tr class="model-row">
+                <th scope="row">
+                    <a href="{% url 'admin:patient_data_test_data_dashboard' %}">
+                        Test Data Dashboard
+                    </a>
+                </th>
+                <td>
+                    <a href="{% url 'admin:patient_data_test_data_dashboard' %}" class="addlink">
+                        View Dashboard
+                    </a>
+                </td>
+            </tr>
+            <tr class="model-row">
+                <th scope="row">
+                    <a href="{% url 'admin:patient_data_test_data_list' %}">
+                        Test Data Patients
+                    </a>
+                </th>
+                <td>
+                    <a href="{% url 'admin:patient_data_test_data_list' %}" class="changelink">
+                        {% if test_data_count %}
+                        {{ test_data_count }} patient{{ test_data_count|pluralize }}
+                        {% else %}
+                        View patients
+                        {% endif %}
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<style>
+    #test-data-management {
+        margin-top: 20px;
+    }
+
+    #test-data-management caption {
+        background: linear-gradient(135deg, #2c3e50, #3498db);
+        color: white;
+        font-weight: bold;
+        padding: 8px 12px;
+        border-radius: 4px 4px 0 0;
+    }
+
+    #test-data-management caption a {
+        color: white;
+        text-decoration: none;
+    }
+
+    #test-data-management .model-row th {
+        background: #f8f9fa;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+
+    #test-data-management .model-row:hover {
+        background: #f1f3f4;
+    }
+</style>
+{% endblock %}

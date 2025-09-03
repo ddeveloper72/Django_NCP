@@ -1,0 +1,301 @@
+// ========================================
+// Country Selection Page Styles
+// ========================================
+
+.country-selection-page {
+  min-height: 100vh;
+  background: $neutral-lightest;
+
+  .country-header {
+    background: linear-gradient(135deg, $primary-blue 0%, $secondary-blue 100%);
+    color: $white;
+    padding: $space-xl $space-lg;
+    margin: 0 0 $space-xl 0;
+    position: relative;
+    overflow: hidden;
+
+    // Floating animation background
+    &::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(
+        circle,
+        rgba($white, 0.1) 1px,
+        transparent 1px
+      );
+      background-size: 20px 20px;
+      animation: float 10s linear infinite;
+    }
+
+    h1 {
+      color: $white;
+      font-size: $font-size-xxl;
+      font-weight: $font-weight-bold;
+      margin: 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .page-subtitle {
+      color: rgba($white, 0.9);
+      font-size: $font-size-lg;
+      margin: $space-sm 0 0 0;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-actions {
+      margin-left: 2rem;
+
+      @include mobile-up {
+        margin-left: 0;
+      }
+
+      a {
+        font-size: $font-size-sm;
+      }
+    }
+
+    @include mobile-up {
+      padding: $space-lg;
+
+      h1 {
+        font-size: $font-size-xl;
+      }
+
+      .header-actions {
+        margin-top: $space-md;
+      }
+
+      .header-actions a {
+        padding: $space-xs $space-sm;
+        font-size: $font-size-xs;
+      }
+    }
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: $space-xl;
+
+    .page-title {
+      color: $text-dark;
+      font-size: $font-size-xxl;
+      font-weight: $font-weight-bold;
+      margin-bottom: $space-sm;
+    }
+
+    .page-subtitle {
+      color: $text-muted;
+      font-size: $font-size-lg;
+      margin-bottom: $space-xl;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  .search-section {
+    margin-bottom: $space-xl;
+    text-align: center;
+
+    .search-box {
+      max-width: 500px;
+      margin: 0 auto;
+      position: relative;
+
+      &::before {
+        content: '🔍';
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: $font-size-lg;
+        opacity: 0.5;
+        z-index: 2;
+      }
+    }
+
+    .search-input {
+      width: 100%;
+      padding: $space-lg $space-xl;
+      padding-right: 50px; // Make room for search icon
+      border: 2px solid $border-light;
+      border-radius: $border-radius-lg;
+      font-size: $font-size-md;
+      background: $white;
+      transition: all $transition-normal;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+      &:focus {
+        outline: none;
+        border-color: $primary-blue;
+        box-shadow: 0 0 0 4px rgba($primary-blue, 0.1);
+        transform: translateY(-2px);
+      }
+
+      &::placeholder {
+        color: $text-muted;
+      }
+    }
+  }
+
+  .country-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: $space-lg;
+    margin-bottom: $space-xl;
+
+    @include mobile-up {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: $space-md;
+    }
+  }
+
+  .country-card {
+    @include card-base;
+    padding: $space-lg;
+    text-align: center;
+    transition: all $transition-normal;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f8f9ff 0%, #f1f3ff 100%);
+    border: 2px solid $border-light;
+
+    &:hover:not(.unavailable) {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+      border-color: $primary-blue;
+      background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    }
+
+    &.unavailable {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: $neutral-lightest;
+
+      &:hover {
+        transform: none;
+        box-shadow: $shadow-base;
+      }
+    }
+
+    .country-flag {
+      width: 60px;
+      height: 45px;
+      margin: 0 auto $space-md auto;
+      border-radius: $border-radius-sm;
+      overflow: hidden;
+      background: $neutral-light;
+      border: 2px solid rgba($white, 0.5);
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: $border-radius-xs;
+      }
+    }
+
+    .country-name {
+      font-weight: $font-weight-bold;
+      color: $text-dark;
+      margin-bottom: $space-sm;
+      font-size: $font-size-md;
+    }
+
+    .country-status {
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
+      padding: $space-xs $space-sm;
+      border-radius: $border-radius-full;
+      display: inline-block;
+
+      &.available {
+        color: $success-dark;
+        background: linear-gradient(
+          135deg,
+          $success-light 0%,
+          $success-lighter 100%
+        );
+      }
+
+      &.unavailable {
+        color: $error-dark;
+        background: linear-gradient(
+          135deg,
+          $error-light 0%,
+          $error-lighter 100%
+        );
+      }
+    }
+  }
+
+  .footer-actions {
+    text-align: center;
+    margin-top: $space-xxl;
+    padding-top: $space-xl;
+    border-top: 2px solid $border-light;
+
+    .btn {
+      margin: 0 $space-sm;
+
+      @include mobile-up {
+        display: block;
+        margin: $space-sm 0;
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Enhanced button styles for country selection
+.btn-lg {
+  padding: $space-md $space-xl;
+  font-size: $font-size-lg;
+  border-radius: $border-radius-md;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba($white, 0.2),
+      transparent
+    );
+    transition: left 0.5s;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba($primary-blue, 0.4);
+  }
+}
+
+// Floating animation for header background
+@keyframes float {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(1px, -1px) rotate(1deg);
+  }
+  66% {
+    transform: translate(-1px, 1px) rotate(-1deg);
+  }
+}

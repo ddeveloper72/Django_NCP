@@ -1,0 +1,200 @@
+// ========================================
+// Alert/Notification Components
+// ========================================
+
+.alert {
+  padding: $space-md $space-lg;
+  border-radius: $border-radius-md;
+  margin-bottom: $space-lg;
+  border: $border-width solid transparent;
+  position: relative;
+
+  // Alert variants
+  &.alert-info {
+    background-color: $light-blue;
+    border-color: rgba($primary-blue, 0.3);
+    color: $primary-blue;
+  }
+
+  &.alert-success {
+    background-color: $light-green;
+    border-color: rgba($success-green, 0.3);
+    color: $primary-green;
+  }
+
+  &.alert-warning {
+    background-color: #fff3cd;
+    border-color: rgba($warning-orange, 0.3);
+    color: #c05621;
+  }
+
+  &.alert-error,
+  &.alert-danger {
+    background-color: #f8d7da;
+    border-color: rgba($error-red, 0.3);
+    color: #721c24;
+  }
+
+  // Dismissible alerts
+  &.alert-dismissible {
+    padding-right: 4rem;
+
+    .alert-close {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: $space-md $space-lg;
+      background: transparent;
+      border: none;
+      font-size: $font-size-lg;
+      color: inherit;
+      opacity: 0.7;
+      cursor: pointer;
+      transition: opacity $transition-normal;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  // Alert with icons
+  &.alert-with-icon {
+    @include flex-center;
+    justify-content: flex-start;
+    gap: $space-md;
+
+    .alert-icon {
+      font-size: $font-size-xl;
+      flex-shrink: 0;
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+  }
+
+  // Solid variant
+  &.alert-solid {
+    &.alert-info {
+      background-color: $primary-blue;
+      color: $white;
+    }
+
+    &.alert-success {
+      background-color: $success-green;
+      color: $white;
+    }
+
+    &.alert-warning {
+      background-color: $warning-orange;
+      color: $white;
+    }
+
+    &.alert-error,
+    &.alert-danger {
+      background-color: $error-red;
+      color: $white;
+    }
+  }
+}
+
+// Toast notifications
+.toast {
+  position: fixed;
+  top: $space-lg;
+  right: $space-lg;
+  min-width: 300px;
+  max-width: 500px;
+  background: $white;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-lg;
+  border: $border-width solid $neutral-lighter;
+  z-index: $z-notification;
+  transform: translateX(100%);
+  transition: transform $transition-normal;
+
+  &.toast-show {
+    transform: translateX(0);
+  }
+
+  .toast-header {
+    @include flex-between;
+    padding: $space-md $space-lg;
+    border-bottom: $border-width solid $neutral-lighter;
+    background-color: $neutral-lightest;
+    border-radius: $border-radius-md $border-radius-md 0 0;
+
+    .toast-title {
+      font-weight: $font-weight-medium;
+      margin: 0;
+    }
+
+    .toast-close {
+      background: transparent;
+      border: none;
+      font-size: $font-size-lg;
+      color: $neutral-medium;
+      cursor: pointer;
+      padding: 0;
+
+      &:hover {
+        color: $neutral-dark;
+      }
+    }
+  }
+
+  .toast-body {
+    padding: $space-lg;
+  }
+}
+
+// Status indicators
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-xs;
+  padding: $space-xs $space-sm;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &.status-online {
+    background-color: $light-green;
+    color: $primary-green;
+
+    &::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: $success-green;
+    }
+  }
+
+  &.status-offline {
+    background-color: #f8d7da;
+    color: #721c24;
+
+    &::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: $error-red;
+    }
+  }
+
+  &.status-pending {
+    background-color: #fff3cd;
+    color: #c05621;
+
+    &::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: $warning-orange;
+    }
+  }
+}

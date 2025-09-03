@@ -55,7 +55,7 @@ def smp_dashboard(request):
         "recent_queries": SMPQuery.objects.order_by("-timestamp")[:10],
         "recent_participants": Participant.objects.order_by("-created_at")[:5],
     }
-    return render(request, "smp_client/dashboard.html", context)
+    return render(request, "smp_client/dashboard.html", context, using="jinja2")
 
 
 @login_required
@@ -90,7 +90,9 @@ def participant_search(request):
         "domain_filter": domain_filter,
         "country_filter": country_filter,
     }
-    return render(request, "smp_client/participant_search.html", context)
+    return render(
+        request, "smp_client/participant_search.html", context, using="jinja2"
+    )
 
 
 @login_required
@@ -424,7 +426,7 @@ def smp_editor(request):
         "templates": DocumentTemplate.objects.filter(is_active=True),
         "recent_documents": SMPDocument.objects.filter(created_by=request.user)[:10],
     }
-    return render(request, "smp_client/smp_editor.html", context)
+    return render(request, "smp_client/smp_editor.html", context, using="jinja2")
 
 
 @login_required

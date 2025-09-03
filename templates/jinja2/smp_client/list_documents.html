@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}SMP Documents{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>📄 SMP Documents</h1>
+        <p class="page-subtitle">Service Metadata Publisher Document Management</p>
+    </div>
+
+    <div class="container">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Search and Filter Section -->
+        <div class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Document Search</h2>
+                <div class="section-actions">
+                    <a href="{{ url('smp_client:smp_editor') }}" class="btn btn-primary">
+                        ➕ Add New Document
+                    </a>
+                </div>
+            </div>
+
+            <div class="search-form">
+                <div class="search-group">
+                    <input type="text" id="document-search" placeholder="Search documents..." class="form-control">
+                    <button type="button" class="btn btn-secondary">🔍 Search</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents List -->
+        <div class="content-section">
+            <h2 class="section-title">Available Documents</h2>
+
+            {% if documents %}
+            <div class="documents-grid">
+                {% for document in documents %}
+                <div class="document-card">
+                    <div class="document-header">
+                        <h3 class="document-title">{{ document.name or 'Unnamed Document' }}</h3>
+                        <div class="document-status {{ document.status|lower }}">
+                            {{ document.status or 'Active' }}
+                        </div>
+                    </div>
+                    <div class="document-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Service ID:</span>
+                            <span class="meta-value">{{ document.service_id or 'N/A' }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Process ID:</span>
+                            <span class="meta-value">{{ document.process_id or 'N/A' }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Last Updated:</span>
+                            <span class="meta-value">{{ document.last_updated or 'Unknown' }}</span>
+                        </div>
+                    </div>
+                    <div class="document-actions">
+                        <a href="{{ url('smp_client:document_detail', document.id) }}"
+                            class="btn btn-sm btn-outline-primary">
+                            👁️ View
+                        </a>
+                        <a href="{{ url('smp_client:document_edit', document.id) }}"
+                            class="btn btn-sm btn-outline-secondary">
+                            ✏️ Edit
+                        </a>
+                        <button onclick="deleteDocument('{{ document.id }}')" class="btn btn-sm btn-outline-danger">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📄</div>
+                <h3>No Documents Found</h3>
+                <p>There are no SMP documents configured yet. Start by adding your first document.</p>
+                <a href="{{ url('smp_client:smp_editor') }}" class="btn btn-primary">
+                    ➕ Add First Document
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="content-section">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="actions-grid">
+                <div class="action-card">
+                    <div class="action-icon">📄</div>
+                    <h3>Create Document</h3>
+                    <p>Add a new SMP document configuration.</p>
+                    <a href="{{ url('smp_client:smp_editor') }}" class="btn btn-primary">Create</a>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">📁</div>
+                    <h3>Import Documents</h3>
+                    <p>Import documents from XML files.</p>
+                    <button class="btn btn-secondary">Import</button>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">📤</div>
+                    <h3>Export All</h3>
+                    <p>Export all documents to XML format.</p>
+                    <button class="btn btn-secondary">Export</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get CSRF token from cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function deleteDocument(documentId) {
+        if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+            fetch(`{{ url('smp_client:document_delete', '0') }}`.replace('0', documentId), {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error deleting document: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('Network error: ' + error.message);
+                });
+        }
+    }
+
+    // Document search functionality
+    document.getElementById('document-search').addEventListener('input', function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const documentCards = document.querySelectorAll('.document-card');
+
+        documentCards.forEach(card => {
+            const title = card.querySelector('.document-title').textContent.toLowerCase();
+            const serviceId = card.querySelector('.meta-value').textContent.toLowerCase();
+
+            if (title.includes(searchTerm) || serviceId.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

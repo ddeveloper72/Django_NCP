@@ -1,0 +1,933 @@
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:pharm="urn:hl7-org:pharm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <realmCode code="EU"/>
+    <typeId extension="POCD_HD000040" root="2.16.840.1.113883.1.3"/>
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.1.3"/>
+    <id extension="493163.3" root="2.16.840.1.113883.2.9.2.190.4.4"/>
+    <code code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Patient summary Document"><translation code="60591-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Patient summary"/></code>
+    <title>Patient Summary</title>
+    <effectiveTime value="20080728130000+0100"/>
+    <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" codeSystemName="Confidentiality" codeSystemVersion="2018-08-12" displayName="normal"><translation code="N" codeSystem="2.16.840.1.113883.5.25" codeSystemName="Confidentiality" displayName="Normal"/></confidentialityCode>
+    <languageCode code="it-IT"/>
+    <setId displayable="true" extension="190206123456_0001" root="2.16.840.1.113883.2.9.2.190.4.4"/>
+    <versionNumber value="2"/>
+    <recordTarget contextControlCode="OP" typeCode="RCT">
+        <patientRole classCode="PAT">
+            <id assigningAuthorityName="Ministero Economia e Finanze" displayable="true" extension="NCPNPH80A01H501K" root="2.16.840.1.113883.2.9.4.3.2"/>
+            <addr use="HP">
+                <country>IT</country>
+                <state>Italia</state>
+                <city>Milano</city>
+                <postalCode>20019</postalCode>
+                <streetAddressLine>Via Monte Napoleone, 15</streetAddressLine>
+            </addr>
+            <telecom use="HP" value="tel:(0039)061234567"/>
+            <patient classCode="PSN" determinerCode="INSTANCE">
+                <name>
+                    <family>Pino</family>
+                    <given>Mario</given>
+                </name>
+                <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" codeSystemName="AdministrativeGender" codeSystemVersion="913-20091020" displayName="Male"><translation code="M" codeSystem="2.16.840.1.113883.5.1" codeSystemName="AdministrativeGender" displayName="Maschio"/></administrativeGenderCode>
+                <birthTime value="19700101"/>
+                <guardian classCode="GUARD">
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.4"/>
+                    <addr>
+                        <country>UK</country>
+                        <state>London</state>
+                        <city>London</city>
+                        <postalCode>A1B 2C3</postalCode>
+                        <streetAddressLine>2222 Home Street</streetAddressLine>
+                    </addr>
+                    <telecom value="tel:+452070256161"/>
+                    <guardianPerson>
+                        <name>
+                            <family>Verdi</family>
+                            <given>Giuseppe</given>
+                        </name>
+                    </guardianPerson>
+                </guardian>
+                <guardian classCode="GUARD">
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.4"/>
+                    <addr>
+                        <country>IT</country>
+                        <state>Italia</state>
+                        <city>Roma</city>
+                        <postalCode>00100</postalCode>
+                        <streetAddressLine>Piazza Virgilio, 123</streetAddressLine>
+                    </addr>
+                    <telecom value="tel:+452070259999"/>
+                    <telecom value="mailto:jsmith@myprovider.co.uk"/>
+                    <guardianPerson>
+                        <name>
+                            <family>Alighieri</family>
+                            <given>Dante</given>
+                        </name>
+                    </guardianPerson>
+                </guardian>
+                <languageCommunication>
+                    <languageCode code="it-IT"/>
+                </languageCommunication>
+            </patient>
+        </patientRole>
+    </recordTarget>
+    <author contextControlCode="OP" typeCode="AUT">
+        <functionCode code="221" codeSystem="2.16.840.1.113883.2.9.6.2.7" codeSystemName="ISCO" codeSystemVersion="2008" displayName="Medical doctors"/>
+        <time value="20121229001234+0100"/>
+        <assignedAuthor classCode="ASSIGNED">
+            <id assigningAuthorityName="Ministero Economia e Finanze" displayable="true" extension="LBNFNN56D08H889H" root="2.16.840.1.113883.2.9.4.3.2"/>
+            <code nullFlavor="NA"/>
+            <addr use="HP">
+                <country>IT</country>
+                <state>Italia</state>
+                <city>Milano</city>
+                <postalCode>20019</postalCode>
+                <streetAddressLine>Via Monte Napoleone, 15</streetAddressLine>
+            </addr>
+            <telecom use="WP" value="tel:(0039)0697645111"/>
+            <telecom use="WP" value="mailto:medico@email.it"/>
+            <telecom use="WP" value="mailto:medico@pec.it"/>
+            <assignedPerson classCode="PSN" determinerCode="INSTANCE">
+                <name>
+                    <family>Rossi</family>
+                    <given>Paolo</given>
+                </name>
+            </assignedPerson>
+            <representedOrganization classCode="ORG" determinerCode="INSTANCE">
+                <id extension="206" root="2.16.840.1.113883.2.9.4.1.1"/>
+                <name>Maria Rossina</name>
+                <telecom use="WP" value="tel:(0039)0697645222"/>
+                <addr use="HP">
+                    <country>IT</country>
+                    <state>Italia</state>
+                    <city>Milano</city>
+                    <postalCode>20019</postalCode>
+                    <streetAddressLine>Via Monte Napoleone, 15</streetAddressLine>
+                </addr>
+            </representedOrganization>
+        </assignedAuthor>
+    </author>
+    <custodian typeCode="CST">
+        <assignedCustodian classCode="ASSIGNED">
+            <representedCustodianOrganization classCode="ORG" determinerCode="INSTANCE">
+                <id assigningAuthorityName="Ministero della Salute" extension="100202" root="2.16.840.1.113883.2.9.4.1.1"/>
+                <name>Esposito Gennaro</name>
+                <telecom use="WP" value="tel:(0039)0697645321"/>
+                <addr use="HP">
+                    <country>IT</country>
+                    <state>Italia</state>
+                    <city>Milano</city>
+                    <postalCode>20019</postalCode>
+                    <streetAddressLine>Via Del Custodian, 00</streetAddressLine>
+                </addr>
+            </representedCustodianOrganization>
+        </assignedCustodian>
+    </custodian>
+    <legalAuthenticator>
+        <time value="20140329173712+0100"/>
+        <signatureCode code="S"/>
+        <assignedEntity>
+            <id assigningAuthorityName="Ministero Economia e Finanze" displayable="true" extension="PROVAZ00Z00Z000Z" root="2.16.840.1.113883.2.9.4.3.2"/>
+            <code nullFlavor="NA"/>
+            <addr>
+                <country>RM</country>
+                <city>Roma</city>
+                <postalCode>00191</postalCode>
+                <houseNumber>15</houseNumber>
+                <streetName>Via di Corso Francia</streetName>
+            </addr>
+            <telecom use="WP" value="tel:(0039)0697645321"/>
+            <assignedPerson classCode="PSN" determinerCode="INSTANCE">
+                <name>
+                    <family>Autenticatore</family>
+                    <given>Legale</given>
+                </name>
+            </assignedPerson>
+            <representedOrganization classCode="ORG" determinerCode="INSTANCE">
+                <id assigningAuthorityName="Ministero della Salute" extension="100202" root="2.16.840.1.113883.2.9.4.1.1"/>
+                <name>Pasquale Pironti</name>
+                <telecom use="WP" value="tel:(0039)0697645321"/>
+                <addr>
+                    <country>IT</country>
+                    <state>Italia</state>
+                    <city>Milano</city>
+                    <postalCode>20019</postalCode>
+                    <streetAddressLine>Via Del Legal Authenticator, 00</streetAddressLine>
+                </addr>
+            </representedOrganization>
+        </assignedEntity>
+    </legalAuthenticator>
+    <participant typeCode="IND">
+        <templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.4"/>
+        <functionCode code="PCP" codeSystem="2.16.840.1.113883.5.88"/>
+        <associatedEntity classCode="PRS">
+            <addr>
+                <country>IT</country>
+                <state>Italia</state>
+                <city>Milano</city>
+                <postalCode>20019</postalCode>
+                <streetAddressLine>Via Monte Napoleone, 15</streetAddressLine>
+            </addr>
+            <telecom use="WP" value="tel:(0039)0697645111"/>
+            <telecom use="WP" value="mailto:medico@email.it"/>
+            <telecom use="WP" value="mailto:medico@pec.it"/>
+            <associatedPerson>
+                <name>
+                    <family>Rossi</family>
+                    <given>Paolo</given>
+                </name>
+            </associatedPerson>
+        </associatedEntity>
+    </participant>
+    <participant typeCode="IND">
+        <templateId root="1.3.6.1.4.1.19376.1.5.3.1.2.4"/>
+        <time value="20160512"/>
+        <associatedEntity classCode="NOK">
+            <code code="FTH" codeSystem="2.16.840.1.113883.5.111" codeSystemName="RoleCode" codeSystemVersion="913-20091020" displayName="Father"><translation code="FTH" codeSystem="2.16.840.1.113883.5.111" codeSystemName="RoleCode" displayName="Padre"/></code>
+            <addr>
+                <country>IT</country>
+                <state>Italia</state>
+                <city>Roma</city>
+                <postalCode>00168</postalCode>
+                <streetAddressLine>via Salaria, 23</streetAddressLine>
+            </addr>
+            <telecom value="tel:(0039)0654981932"/>
+            <associatedPerson>
+                <name>
+                    <family>Bellomo</family>
+                    <given>Gennaro</given>
+                </name>
+            </associatedPerson>
+        </associatedEntity>
+    </participant>
+    <documentationOf typeCode="DOC">
+        <serviceEvent classCode="PCPR" moodCode="EVN">
+            <id extension="iii" root="490A1C9D-3CA6-432F-A0C3-C2013C4C56B3"/>
+            <id extension="iii" root="490A1C9D-3CA6-432F-A0C3-C2013C4C56B4"/>
+            <code code="code_docOf" codeSystem="2.16.840.1.113883.6.1" codeSystemName="csn_docOf" codeSystemVersion="csv_docOf" displayName="dn_docOf"/>
+            <effectiveTime><low nullFlavor="UNK"/><high value="20201104201500"/></effectiveTime>
+            <performer typeCode="PPRF">
+                <functionCode code="2211" codeSystem="2.16.840.1.113883.2.9.6.2.7" codeSystemName="ISCO" codeSystemVersion="2008" displayName="Generalist medical practitioners"/>
+                <time value="20160512"/>
+                <assignedEntity>
+                    <id assigningAuthorityName="Ministero Economia e Finanze" displayable="true" extension="PROVAK00K00K000K" root="2.16.840.1.113883.2.9.4.3.2"/>
+                    <code nullFlavor="NA"/>
+                    <addr>
+                        <country>IT</country>
+                        <city>TERNI</city>
+                    </addr>
+                    <telecom use="WP" value="tel:(0039)0697645321"/>
+                    <assignedPerson classCode="PSN" determinerCode="INSTANCE">
+                        <name>
+                            <prefix>Van</prefix>
+                            <family>DOC</family>
+                            <given>Giovanni</given>
+                        </name>
+                    </assignedPerson>
+                    <representedOrganization classCode="ORG" determinerCode="INSTANCE">
+                        <id assigningAuthorityName="Ministero della Salute" extension="160114" root="2.16.840.1.113883.2.9.4.1.1"/>
+                        <name>Clinica villa serena</name>
+                        <telecom use="WP" value="tel:(0039)0697645321"/>
+                        <addr>
+                            <country>IT</country>
+                            <state>Italia</state>
+                            <city>TERNI</city>
+                            <postalCode>20019</postalCode>
+                            <streetAddressLine>Via Del Legal Authenticator, 00</streetAddressLine>
+                        </addr>
+                    </representedOrganization>
+                </assignedEntity>
+            </performer>
+            <performer typeCode="PPRF">
+                <functionCode code="2211" codeSystem="2.16.840.1.113883.2.9.6.2.7" codeSystemName="ISCO" codeSystemVersion="2008" displayName="Generalist medical practitioners"/>
+                <time value="20160512"/>
+                <assignedEntity>
+                    <id assigningAuthorityName="Ministero Economia e Finanze" displayable="true" extension="PROVAY00Y00Y000Y" root="2.16.840.1.113883.2.9.4.3.2"/>
+                    <code nullFlavor="NA"/>
+                    <addr>
+                        <country>IT</country>
+                        <state>Italia</state>
+                        <city>TERNI</city>
+                    </addr>
+                    <telecom use="WP" value="tel:(0039)0697645321"/>
+                    <assignedPerson classCode="PSN" determinerCode="INSTANCE">
+                        <name>
+                            <family>doc</family>
+                            <given>Uto</given>
+                        </name>
+                    </assignedPerson>
+                    <representedOrganization classCode="ORG" determinerCode="INSTANCE">
+                        <id assigningAuthorityName="Ministero della Salute" extension="100202" root="2.16.840.1.113883.2.9.4.1.1"/>
+                        <name>Ospedale Gemelli</name>
+                        <telecom use="WP" value="tel:(0039)0697645321"/>
+                        <addr>
+                            <country>IT</country>
+                            <state>Italia</state>
+                            <city>TERNI</city>
+                            <postalCode>20019</postalCode>
+                            <streetAddressLine>Via Del Legal Authenticator, 00</streetAddressLine>
+                        </addr>
+                    </representedOrganization>
+                </assignedEntity>
+            </performer>
+        </serviceEvent>
+    </documentationOf>
+    <relatedDocument typeCode="XFRM">
+        <parentDocument classCode="DOCCLIN" moodCode="EVN">
+            <id assigningAuthorityName="ASL 5 Montalbano Jonico" extension="001.001.20070902234501" root="2.16.840.1.113883.2.9.2.170.4.4"/>
+            <code nullFlavor="UNK"/>
+            <text nullFlavor="UNK"/>
+            <setId extension="35" root="2.16.840.1.113883.2.9.2.170.4.4"/>
+            <versionNumber value="1"/>
+        </parentDocument>
+    </relatedDocument>
+    <component>
+        <structuredBody classCode="DOCBODY">
+            <component>
+                <section classCode="DOCSECT">
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.13"/>
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.12"/>
+                    <templateId root="2.16.840.1.113883.10.20.1.2"/>
+                    <id root="490A1C9D-3CA6-432F-A0C3-A2013C4C56B3"/>
+                    <code code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Allergies and adverse reactions Document"><translation code="48765-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Allergies, adverse reactions, alerts"/></code>
+                    <title>Allergies and Other Adverse Reactions</title>
+                    <text>
+					
+						<table>
+							<thead>
+								<tr>
+									<th>Tipo</th>
+									<th>Nome</th>
+									<th>Reazione</th>
+									<th>Criticità</th>
+									<th>Stato</th>
+									<th>Data</th></tr></thead>
+							<tbody>
+								<tr>
+									<td>
+										<content ID="TIPO_Allergia_A0">Allergia alimentare</content></td>
+									<td>
+										<content ID="NOME_Agente_Allergia_A0">Kiwi</content></td>
+									<td>
+										<content ID="REAZIONE_Allergia_A0">Eczema</content></td>
+									<td>
+										<content ID="CRITICITA_Allergia_A0">Alta</content></td>
+									<td>
+										<content ID="STATO_Allergia_A0">Attivo</content></td>
+									<td>
+										<content ID="DATA_Allergia_A0">22/10/2021</content></td></tr></tbody></table></text>
+                    <entry>
+                        <act classCode="ACT" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.1.27"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.3"/>
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.16"/>
+                            <id root="0CE99136-4E39-44FE-BCED-1086E9C2919C"/>
+                            <code code="CONC" codeSystem="2.16.840.1.113883.5.6"/>
+                            <statusCode code="active"/>
+                            <effectiveTime><low value="20211022"/></effectiveTime>
+                            <entryRelationship inversionInd="false" typeCode="SUBJ">
+<observation classCode="OBS" moodCode="EVN" negationInd="false">
+    <templateId root="2.16.840.1.113883.10.20.1.18"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.6"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+    <templateId root="2.16.840.1.113883.10.20.1.28"/>
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.17"/>
+    <id root="48E1A5DC-E9C4-4458-A454-F3D5D45E3D66"/>
+    <code code="609328004" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Allergic disposition"/>
+    <text><reference value="#TIPO_Allergia_A0"/></text>
+    <statusCode code="completed"/>
+    <effectiveTime><low value="20211022"/></effectiveTime>
+    <participant typeCode="CSM">
+        <participantRole classCode="MANU">
+            <playingEntity classCode="MMAT">
+                <code code="260176001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2023-07-31" displayName="Kiwi fruit">
+                    <originalText><reference value="#NOME_Agente_Allergia_A0"/></originalText>
+                <translation code="260176001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Kiwi frutto"/></code>
+                <name>Kiwi</name>
+            </playingEntity>
+        </participantRole>
+    </participant>
+    <entryRelationship inversionInd="true" typeCode="MFST">
+        <observation classCode="OBS" moodCode="EVN">
+            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.7"/>
+            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+            <templateId root="2.16.840.1.113883.10.20.1.28"/>
+            <id root="2.999.2.1.1.1"/>
+            <code code="418799008" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Finding reported by subject or history provider">
+                <originalText><reference value="#REAZIONE_Allergia_A0"/></originalText>
+            </code>
+            <text><reference value="#REAZIONE_Allergia_A0"/></text>
+            <value code="43116000" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Eczema" xsi:type="CD">
+                <originalText><reference value="#REAZIONE_Allergia_A0"/></originalText>
+            </value>
+        </observation>
+    </entryRelationship>
+    <entryRelationship inversionInd="true" typeCode="SUBJ">
+        <observation classCode="OBS" moodCode="EVN">
+            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1"/>
+            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.33"/>
+            <code code="82606-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="ActCode" displayName="Criticality"/>
+            <text><reference value="#CRITICITA_Allergia_A0"/></text>
+            <statusCode code="completed"/>
+            <value code="high" codeSystem="2.16.840.1.113883.4.642.4.130" codeSystemName="FHIR AllergyIntoleranceCriticality" codeSystemVersion="4.0.1" displayName="High Risk" xsi:type="CD"/>
+        </observation>
+    </entryRelationship>
+    <entryRelationship inversionInd="false" typeCode="REFR">
+        <observation classCode="OBS" moodCode="EVN">
+            <templateId root="2.16.840.1.113883.10.20.1.51"/>
+            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1.2"/>
+            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.34"/>
+            <code code="33999-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Health Status"/>
+            <text><reference value="#STATO_Allergia_A0"/></text>
+            <statusCode code="completed"/>
+            <value code="active" codeSystem="2.16.840.1.113883.4.642.4.1373" codeSystemName="FHIR AllergyIntoleranceClinicalStatusCodes" codeSystemVersion="4.0.1" displayName="Active" xsi:type="CE"/>
+        </observation>
+    </entryRelationship>
+</observation>
+                            </entryRelationship>
+                        </act>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section classCode="DOCSECT">
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.3"/>
+                    <templateId root="2.16.840.1.113883.10.20.1.8"/>
+                    <id root="049C10BE-16D7-4B11-BC4E-2031F02D5118"/>
+                    <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of Medication use Narrative"><translation code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of medication use"/></code>
+                    <title>Medication Summary</title>
+                    <text>
+					
+						<paragraph ID="TERAPIA_1">Eutirox : EUTIROX*100MCG 50CPR : levothyroxine sodium : 17/03/2021 (Uso Orale)</paragraph>
+						<table>
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Confezione (AIC)</th>
+									<th>Principio attivo (ATC)</th>
+									<th>Time</th>
+									<th>Somministrazione</th>
+									<th>Forma</th>
+									<th>Quantità</th>
+									<th>Dosaggio</th>
+									<th>Inizio</th>
+									<th>Fine</th>
+									<th>Frequenza di somministrazione</th></tr></thead>
+							<tbody>
+								<tr>
+									<td>
+										<content ID="Nome_F0">Eutirox</content></td>
+									<td>
+										<content ID="Confezione_F0">EUTIROX*100MCG 50CPR</content></td>
+									<td>
+										<content ID="ATC_F0">levothyroxine sodium</content></td>
+									<td>
+										<content ID="DataPresc_F0">17/03/2021</content></td>
+									<td>
+										<content ID="ROUTE_F0">Uso Orale</content></td>
+									<td>
+										<content ID="FORMCODE_F0">Compresse</content></td>
+									<td>
+										<content ID="DOSEQUANT_F0">1-2</content></td>
+									<td>
+										<content ID="DOSAGE_F0">100/1</content></td>
+									<td>15/08/2012</td>
+									<td/>
+									<td>Prima della colazione</td></tr></tbody></table></text>
+                    <entry>
+                        <substanceAdministration classCode="SBADM" moodCode="INT">
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.4"/>
+                            <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7.1"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.11"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.9"/>
+                            <id root="3E73BD7C-DC22-4C21-9680-661A311DE288"/>
+                            <text><reference value="#TERAPIA_1"/></text>
+                            <statusCode code="active"/>
+                            <effectiveTime xsi:type="IVL_TS"><low value="20120815"/><high nullFlavor="UNK"/></effectiveTime>
+                            <effectiveTime operator="A" xsi:type="EIVL_TS">
+<event code="ACM" codeSystem="2.16.840.1.113883.5.139"/>
+                            </effectiveTime>
+                            <routeCode code="20053000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" codeSystemVersion="2025-01-07" displayName="Oral use">
+<originalText><reference value="#ROUTE_F0"/></originalText>
+                            </routeCode>
+                            <doseQuantity><low unit="1" value="1"/><high unit="1" value="2"/></doseQuantity>
+                            <consumable typeCode="CSM">
+<manufacturedProduct classCode="MANU">
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.31"/>
+    <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+        <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.32"/>
+        <name>Eutirox</name>
+        <pharm:formCode code="10219000" codeSystem="0.4.0.127.0.16.1.1.2.1" codeSystemName="EDQM" codeSystemVersion="2025-01-07" displayName="Tablet">
+            <originalText><reference value="#FORMCODE_F0"/></originalText>
+        </pharm:formCode>
+        <pharm:ingredient classCode="ACTI">
+            <pharm:quantity>
+                <numerator unit="ug" value="100" xsi:type="PQ"/>
+                <denominator unit="1" value="1" xsi:type="PQ"/>
+            </pharm:quantity>
+            <pharm:ingredientSubstance classCode="MMAT" determinerCode="KIND">
+                <pharm:code code="H03AA01" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" codeSystemVersion="2025-01" displayName="levothyroxine sodium" xsi:type="CE">
+                    <originalText><reference value="#ATC_F0"/></originalText>
+                </pharm:code>
+                <pharm:name>levothyroxine sodium</pharm:name>
+            </pharm:ingredientSubstance>
+        </pharm:ingredient>
+    </manufacturedMaterial>
+</manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section classCode="DOCSECT">
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.9"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.6"/>
+                    <templateId root="2.16.840.1.113883.10.20.1.11"/>
+                    <id root="DC503129-DBBA-4A2C-9BF3-906582462E55"/>
+                    <code code="11450-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Problem list - Reported"><translation code="11450-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Problem list"/></code>
+                    <title>Active Problems</title>
+                    <text>
+					
+						<table>
+							<thead>
+								<tr>
+									<th>Problema</th>
+									<th>Stato</th>
+									<th>Data insorgenza</th>
+									<th>Data chiusura</th></tr></thead>
+							<tbody>
+								<tr>
+									<td>
+										<content ID="PROBLEMA_1">Hypertensive heart disease</content></td>
+									<td>
+										<content ID="STATO_1">Attivo</content></td>
+									<td>11/04/2018</td>
+									<td/></tr>
+								<tr>
+									<td>
+										<content ID="PROBLEMA_2">Asthma</content></td>
+									<td>
+										<content ID="STATO_2">Attivo</content></td>
+									<td>11/04/2018</td>
+									<td/></tr>
+								<tr>
+									<td>
+										<content ID="PROBLEMA_3">Diabetes mellitus</content></td>
+									<td>
+										<content ID="STATO_3">Attivo</content></td>
+									<td>14/06/2019</td>
+									<td/></tr></tbody></table></text>
+                    <entry>
+                        <act classCode="ACT" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.1.27"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.2"/>
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.15"/>
+                            <id root="D24A2D47-1555-4679-A3F2-1785067B777A"/>
+                            <code code="CONC" codeSystem="2.16.840.1.113883.5.6"/>
+                            <text><reference value="#PROBLEMA_1"/></text>
+                            <effectiveTime><low value="20180411"/></effectiveTime>
+                            <entryRelationship inversionInd="false" typeCode="SUBJ">
+<observation classCode="OBS" moodCode="EVN">
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.7"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+    <templateId root="2.16.840.1.113883.10.20.1.28"/>
+    <id root="CEAAD97D-BC9E-50C4-27D0-3DFD4BF9F8FF"/>
+    <code code="55607006" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Problem"/>
+    <text><reference value="#PROBLEMA_1"/></text>
+    <statusCode code="completed"/>
+    <effectiveTime><low value="20180411"/></effectiveTime>
+    <value codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.44.2" nullFlavor="OTH" xsi:type="CD">
+        <originalText><reference value="#PROBLEMA_1"/></originalText>
+        <translation code="402" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD-9CM (diagnosis codes)" displayName="Hypertensive heart disease"/>
+    </value>
+    <entryRelationship inversionInd="false" typeCode="REFR">
+        <observation classCode="OBS" moodCode="EVN">
+            <templateId root="2.16.840.1.113883.10.20.1.57"/>
+            <templateId root="2.16.840.1.113883.10.20.1.50"/>
+            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.9"/>
+            <code code="33999-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Status"/>
+            <text><reference value="#STATO_1"/></text>
+            <statusCode code="completed"/>
+            <value code="55561003" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Active" xsi:type="CE">
+                <originalText><reference value="#STATO_1"/></originalText>
+            </value>
+        </observation>
+    </entryRelationship>
+</observation>
+                            </entryRelationship>
+                        </act>
+                    </entry>
+                    <entry>
+                        <act classCode="ACT" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.1.27"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.2"/>
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.15"/>
+                            <id root="D24A2D47-1555-4679-A3F2-1785067B777B"/>
+                            <code code="CONC" codeSystem="2.16.840.1.113883.5.6"/>
+                            <text><reference value="#PROBLEMA_2"/></text>
+                            <effectiveTime><low value="20180411"/></effectiveTime>
+                            <entryRelationship inversionInd="false" typeCode="SUBJ">
+<observation classCode="OBS" moodCode="EVN">
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.7"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+    <templateId root="2.16.840.1.113883.10.20.1.28"/>
+    <id root="1CFC262F-2000-F9CF-13C6-315281B13722"/>
+    <code code="55607006" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Problem"/>
+    <text><reference value="#PROBLEMA_2"/></text>
+    <statusCode code="completed"/>
+    <effectiveTime><low value="20180411"/></effectiveTime>
+    <value codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.44.2" nullFlavor="OTH" xsi:type="CD">
+        <originalText><reference value="#PROBLEMA_2"/></originalText>
+        <translation code="493" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD-9CM (diagnosis codes)" displayName="Asthma"/>
+    </value>
+    <entryRelationship inversionInd="false" typeCode="REFR">
+        <observation classCode="OBS" moodCode="EVN">
+            <templateId root="2.16.840.1.113883.10.20.1.57"/>
+            <templateId root="2.16.840.1.113883.10.20.1.50"/>
+            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.9"/>
+            <code code="33999-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Status"/>
+            <text><reference value="#STATO_2"/></text>
+            <statusCode code="completed"/>
+            <value code="55561003" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Active" xsi:type="CE">
+                <originalText><reference value="#STATO_2"/></originalText>
+            </value>
+        </observation>
+    </entryRelationship>
+</observation>
+                            </entryRelationship>
+                        </act>
+                    </entry>
+                    <entry>
+                        <act classCode="ACT" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.1.27"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.1"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5.2"/>
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.15"/>
+                            <id root="D24A2D47-1555-4679-A3F2-1785067B777C"/>
+                            <code code="CONC" codeSystem="2.16.840.1.113883.5.6"/>
+                            <text><reference value="#PROBLEMA_3"/></text>
+                            <effectiveTime><low value="20190614"/></effectiveTime>
+                            <entryRelationship inversionInd="false" typeCode="SUBJ">
+<observation classCode="OBS" moodCode="EVN">
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.7"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.5"/>
+    <templateId root="2.16.840.1.113883.10.20.1.28"/>
+    <id root="238B1642-D790-DD9F-8083-8FEE5BC6B97D"/>
+    <code code="55607006" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Problem"/>
+    <text><reference value="#PROBLEMA_3"/></text>
+    <statusCode code="completed"/>
+    <effectiveTime><low value="20190614"/></effectiveTime>
+    <value codeSystem="1.3.6.1.4.1.12559.11.10.1.3.1.44.2" nullFlavor="OTH" xsi:type="CD">
+        <originalText><reference value="#PROBLEMA_3"/></originalText>
+        <translation code="250" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD-9CM (diagnosis codes)" displayName="Diabetes mellitus"/>
+    </value>
+    <entryRelationship inversionInd="false" typeCode="REFR">
+        <observation classCode="OBS" moodCode="EVN">
+            <templateId root="2.16.840.1.113883.10.20.1.57"/>
+            <templateId root="2.16.840.1.113883.10.20.1.50"/>
+            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.9"/>
+            <code code="33999-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Status"/>
+            <text><reference value="#STATO_3"/></text>
+            <statusCode code="completed"/>
+            <value code="55561003" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Active" xsi:type="CE">
+                <originalText><reference value="#STATO_3"/></originalText>
+            </value>
+        </observation>
+    </entryRelationship>
+</observation>
+                            </entryRelationship>
+                        </act>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section classCode="DOCSECT">
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.4"/>
+                    <templateId root="2.16.840.1.113883.10.20.1.7"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.5.3.5"/>
+                    <id root="31D4AFA9-69AB-4336-B78E-983011D67225"/>
+                    <code code="46264-8" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of medical device use"/>
+                    <title>History of medical device use</title>
+                    <text>
+					
+						<table>
+							<thead>
+								<tr>
+									<th>Protesi/impianto</th>
+									<th>Data impianto</th>
+									<th>Data rimozione</th></tr></thead>
+							<tbody>
+								<tr>
+									<td>
+										<content ID="PROTESI_P0">Permanent cardiac pacemaker, device</content></td>
+									<td>28/07/2008 14:33:00</td>
+									<td/></tr></tbody></table></text>
+                    <entry>
+                        <supply classCode="SPLY" moodCode="EVN">
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.5"/>
+                            <id root="31D4AFA9-69AB-4336-B78E-983011D67225"/>
+                            <code code="424921004" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Permanent cardiac pacemaker, device"/>
+                            <effectiveTime xsi:type="IVL_TS"><low value="20080728143300"/></effectiveTime>
+                            <participant typeCode="DEV">
+<participantRole classCode="MANU">
+    <playingDevice classCode="DEV" determinerCode="INSTANCE">
+        <code code="424921004" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Permanent cardiac pacemaker, device"/>
+    </playingDevice>
+</participantRole>
+                            </participant>
+                        </supply>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section classCode="DOCSECT">
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.12"/>
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.11"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.11"/>
+                    <id root="31D4AFA9-69AB-4336-B78E-983011D67226"/>
+                    <code code="47519-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of Procedures Document"><translation code="47519-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Procedures"/></code>
+                    <title>Coded List of Surgeries</title>
+                    <text>
+					
+						<table>
+							<thead>
+								<tr>
+									<th>Descrizione</th>
+									<th>Data ora inizio</th>
+									<th>Data ora fine</th>
+									<th>Punto del corpo</th></tr></thead>
+							<tbody>
+								<tr>
+									<td>
+										<content ID="trattamenti_01">trattamento al sistema urinario</content></td>
+									<td>17/03/2013 12:45:00</td>
+									<td>17/03/2013 13:30:00</td>
+									<td>NA</td></tr></tbody></table></text>
+                    <entry>
+                        <procedure classCode="PROC" moodCode="EVN">
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.19"/>
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.26"/>
+                            <id root="44CEB94B-0832-5590-B9D4-3B91F9CB1D99"/>
+                            <id root="9AC099D7-DCB3-4BF4-916A-1967FF03147B"/>
+                            <code code="392048005" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Operation on urinary system" xsi:type="CE"/>
+                            <text><reference value="#trattamenti_01"/></text>
+                            <statusCode code="completed"/>
+                            <effectiveTime><low value="20130317124500"/><high value="20130317133000"/></effectiveTime>
+                        </procedure>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section classCode="DOCSECT">
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.6"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.5.3.2"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.25"/>
+                    <id root="0932EEFA-C7B8-410A-ADDE-36DC178989E2"/>
+                    <code code="8716-3" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Vital signs"><translation code="8716-3" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Physical findings"/></code>
+                    <title>Coded Vital Signs</title>
+                    <text>
+					
+						<paragraph ID="DIASTOLICA_HEAD">Diastolic blood pressure: 82 mm[Hg]</paragraph>
+						<paragraph ID="SISTOLICA_HEAD">Systolic blood pressure: 121 mm[Hg]</paragraph>
+						<table>
+							<thead>
+								<tr>
+									<th>Parametro</th>
+									<th>Valore</th>
+									<th>Data</th></tr></thead>
+							<tbody>
+								<tr>
+									<th>
+										<content ID="SISTOLICA_1">Pressione sistolica</content></th>
+									<td>121  mm[Hg]</td>
+									<td>04/11/2020 14:38:00</td></tr>
+								<tr>
+									<th>
+										<content ID="DIASTOLICA_1">Pressione diastolica</content></th>
+									<td>82  mm[Hg]</td>
+									<td>04/11/2020 14:38:00</td></tr></tbody></table></text>
+                    <entry>
+                        <organizer classCode="CLUSTER" moodCode="EVN">
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.21"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.13.1"/>
+                            <templateId root="2.16.840.1.113883.10.20.1.32"/>
+                            <templateId root="2.16.840.1.113883.10.20.1.35"/>
+                            <id root="B6911488-3D1B-BEF8-D38A-CEBA62A00001"/>
+                            <code code="46680005" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Vital signs" xsi:type="CE"/>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20201104143800"/>
+                            <component typeCode="COMP">
+<observation classCode="OBS" moodCode="EVN">
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.22"/>
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.20"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.13"/>
+    <templateId root="2.16.840.1.113883.10.20.1.31"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.13.2"/>
+    <id root="20052413-2ABC-CEA3-E170-30002033E322"/>
+    <code code="8480-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Systolic blood pressure" xsi:type="CE">
+        <originalText><reference value="#SISTOLICA_1"/></originalText>
+    <translation code="8480-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Pressione sistolica"/></code>
+    <text><reference value="#SISTOLICA_HEAD"/></text>
+    <statusCode code="completed"/>
+    <effectiveTime value="20201104143800"/>
+    <value unit="mm[Hg]" value="121" xsi:type="PQ"/>
+</observation>
+                            </component>
+                            <component typeCode="COMP">
+<observation classCode="OBS" moodCode="EVN">
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.22"/>
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.20"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.13"/>
+    <templateId root="2.16.840.1.113883.10.20.1.31"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.13.2"/>
+    <id root="1E7C0447-D403-A0CC-A75C-FE4CC73FC0CF"/>
+    <code code="8462-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Diastolic blood pressure" xsi:type="CE">
+        <originalText><reference value="#DIASTOLICA_1"/></originalText>
+    <translation code="8462-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Pressione diastolica"/></code>
+    <text><reference value="#DIASTOLICA_HEAD"/></text>
+    <statusCode code="completed"/>
+    <effectiveTime value="20201104143800"/>
+    <value unit="mm[Hg]" value="82" xsi:type="PQ"/>
+</observation>
+                            </component>
+                        </organizer>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section classCode="DOCSECT">
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.13"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.16.1"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.16"/>
+                    <templateId root="2.16.840.1.113883.10.20.1.15"/>
+                    <id root="F0499D91-5D4E-4717-8943-067302E08396"/>
+                    <code code="29762-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="Social history Narrative"><translation code="29762-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Social history"/></code>
+                    <title>Coded Social History</title>
+                    <text>
+					
+						<table>
+							<thead>
+								<tr>
+									<th>Fattori di Rischio</th>
+									<th>Data rilevazione</th>
+									<th>Osservazioni</th></tr></thead>
+							<tbody>
+								<tr>
+									<td>
+										<content ID="Fattore_1">Attività fisica</content></td>
+									<td>04/11/2020</td>
+									<td>2 volte a settimana</td></tr></tbody></table></text>
+                    <entry>
+                        <observation classCode="OBS" moodCode="EVN">
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.23"/>
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.20"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.13"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.13.4"/>
+                            <templateId root="2.16.840.1.113883.10.20.1.33"/>
+                            <id root="22045E56-1DF2-5E0B-D04B-7AA648288611"/>
+                            <code code="256235009" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Exercise"/>
+                            <text><reference value="#Fattore_1"/></text>
+                            <statusCode code="completed"/>
+                            <effectiveTime><low value="20201104"/></effectiveTime>
+                            <value unit="{times}/wk" value="2" xsi:type="PQ"/>
+                        </observation>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section classCode="DOCSECT">
+                    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.2.15"/>
+                    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.23"/>
+                    <templateId root="2.16.840.1.113883.10.20.1.6"/>
+                    <code code="11369-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" codeSystemVersion="2.59" displayName="History of Immunization Narrative"><translation code="11369-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of immunization"/></code>
+                    <title>Immunizations</title>
+                    <text>
+					
+						<table>
+							<thead>
+								<tr>
+									<th>Vaccino si</th>
+									<th>Data si</th>
+									<th>Stato si</th>
+									<th>Agente</th>
+									<th>Titolare autorizzazione</th>
+									<th>Numero di serie</th>
+									<th>Numero di lotto</th></tr></thead>
+							<tbody>
+								<tr>
+									<td>
+										<content ID="IMMUNIZATIONS_1">Inflexal V</content></td>
+									<td>15/12/2011 10:30:00</td>
+									<td>completato</td>
+									<td>NA</td>
+									<td>NA</td>
+									<td>NA</td>
+									<td>NA</td></tr>
+								<tr>
+									<td>
+										<content ID="IMMUNIZATIONS_2">Vaccino Influenzale Inat., Virus Split O Antigene Di Superf.</content></td>
+									<td>16/11/2013 14:10:00</td>
+									<td>completato</td>
+									<td>NA</td>
+									<td>NA</td>
+									<td>NA</td>
+									<td>NA</td></tr></tbody></table></text>
+                    <entry>
+                        <substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="false">
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.19"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.12"/>
+                            <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                            <id root="48E1A5DC-E9C4-4458-A454-F3D5D45E5555"/>
+                            <code code="IMMUNIZ" codeSystem="1.3.5.1.4.1.19376.1.5.3.2" codeSystemName="IHEActCode" displayName="IHEActCode"/>
+                            <text><reference value="#IMMUNIZATIONS_1"/></text>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20111215103000"/>
+                            <consumable typeCode="CSM">
+<manufacturedProduct classCode="MANU">
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.18"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7.2"/>
+    <templateId root="2.16.840.1.113883.10.20.1.53"/>
+    <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+        <code code="1181000221105" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" codeSystemVersion="2022-07-31" displayName="Influenza virus antigen only vaccine product">
+            <originalText><reference value="#IMMUNIZATIONS_1"/></originalText>
+        </code>
+        <name>Inflexal V</name>
+    </manufacturedMaterial>
+</manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                    <entry>
+                        <substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="false">
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.19"/>
+                            <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.12"/>
+                            <templateId root="2.16.840.1.113883.10.20.1.24"/>
+                            <id root="48E1A5DC-E9C4-4458-A454-F3D5D45E4444"/>
+                            <code code="IMMUNIZ" codeSystem="1.3.5.1.4.1.19376.1.5.3.2" codeSystemName="IHEActCode" displayName="IHEActCode"/>
+                            <text><reference value="#IMMUNIZATIONS_2"/></text>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20131116141000"/>
+                            <consumable typeCode="CSM">
+<manufacturedProduct classCode="MANU">
+    <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.18"/>
+    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.7.2"/>
+    <templateId root="2.16.840.1.113883.10.20.1.53"/>
+    <manufacturedMaterial classCode="MMAT" determinerCode="KIND">
+        <code code="J07BB02" codeSystem="2.16.840.1.113883.6.73" codeSystemName="Anatomical Therapeutic Chemical" displayName="Vaccino Influenzale Inat., Virus Split O Antigene Di Superf.">
+            <originalText><reference value="#IMMUNIZATIONS_2"/></originalText>
+        </code>
+        <name>Vaccino Influenzale Inat., Virus Split O Antigene Di Superf.</name>
+    </manufacturedMaterial>
+</manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>

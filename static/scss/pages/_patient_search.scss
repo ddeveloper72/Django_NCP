@@ -1,0 +1,911 @@
+// ========================================
+// Patient Search Page Styles - DMZ Compatible
+// ========================================
+
+.patient-search-page {
+  background: linear-gradient(135deg, $neutral-lightest 0%, #c3cfe2 100%);
+  min-height: 100vh;
+
+  // Country Header
+  .country-header {
+    background: linear-gradient(135deg, $primary-blue 0%, $accent-blue 100%);
+    color: $white;
+    padding: $space-xl;
+    border-radius: 20px;
+    margin-bottom: $space-xl;
+    box-shadow: $shadow-lg;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 300px;
+      height: 300px;
+      background: rgba($white, 0.1);
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: $font-size-xxxl;
+      font-weight: $font-weight-bold;
+      display: flex;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+
+      @media (max-width: $breakpoint-sm) {
+        font-size: 1.8rem;
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    .country-flag {
+      width: 60px;
+      height: 40px;
+      border-radius: 8px;
+      margin-right: $space-lg;
+      vertical-align: middle;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      border: 2px solid rgba($white, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 12px;
+
+      &.country-flag-de {
+        background: #000;
+        color: #ff0000;
+      }
+
+      @media (max-width: $breakpoint-sm) {
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+    }
+
+    .header-actions {
+      position: relative;
+      z-index: 2;
+
+      @media (max-width: $breakpoint-sm) {
+        margin-top: $space-lg;
+        text-align: center;
+
+        a {
+          display: block;
+          margin: 10px 0;
+        }
+      }
+    }
+  }
+
+  // ISM Information Box
+  .ism-info {
+    background: linear-gradient(135deg, $light-green 0%, #d4edda 100%);
+    padding: 25px;
+    margin: $space-xl 0;
+    border-radius: 15px;
+    border-left: 6px solid $success-green;
+    box-shadow: 0 5px 20px rgba($success-green, 0.1);
+    position: relative;
+
+    &::before {
+      content: '🌍';
+      position: absolute;
+      top: -10px;
+      right: 20px;
+      font-size: 3rem;
+      opacity: 0.1;
+    }
+
+    h4 {
+      color: $success-green;
+      margin-bottom: 10px;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-medium;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  // Search Form Container
+  .search-form {
+    background: $white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    position: relative;
+
+    @media (max-width: $breakpoint-sm) {
+      padding: 25px;
+      margin: 15px;
+    }
+  }
+
+  // Field Groups
+  .field-group {
+    margin-bottom: 35px;
+    padding: $space-xl;
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #f8f9ff 0%, #f1f3ff 100%);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    transition: transform $transition-normal, box-shadow $transition-normal;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, $primary-blue, $accent-blue);
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      padding: $space-lg;
+      margin-bottom: 25px;
+    }
+  }
+
+  .field-group-title {
+    font-weight: $font-weight-bold;
+    color: $primary-blue;
+    margin-bottom: $space-lg;
+    font-size: $font-size-xl;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba($primary-blue, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  // Form Fields
+  .form-field {
+    margin-bottom: 25px;
+    position: relative;
+
+    label {
+      display: block;
+      font-weight: $font-weight-medium;
+      margin-bottom: 8px;
+      color: $neutral-dark;
+      font-size: $font-size-base;
+      transition: color $transition-normal;
+
+      &.required::after {
+        content: ' *';
+        color: $error-red;
+        font-weight: bold;
+      }
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 15px 20px;
+      border: 2px solid $neutral-lighter;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all $transition-normal;
+      background: $white;
+      position: relative;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-blue;
+        box-shadow: 0 0 0 4px rgba($primary-blue, 0.1);
+        transform: translateY(-1px);
+      }
+
+      &:hover {
+        border-color: $neutral-light;
+      }
+    }
+
+    .help-text {
+      font-size: $font-size-sm;
+      color: $neutral-medium;
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    .error-message {
+      color: $error-red;
+      font-size: $font-size-sm;
+      margin-top: 8px;
+      display: none;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  // Search Button
+  .search-button {
+    background: linear-gradient(135deg, $primary-blue 0%, $accent-blue 100%);
+    color: $white;
+    border: none;
+    padding: 18px 40px;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all $transition-normal;
+    display: block;
+    margin: 40px auto 0;
+    min-width: 250px;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba($white, 0.2),
+        transparent
+      );
+      transition: left 0.5s;
+    }
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba($primary-blue, 0.4);
+
+      &::before {
+        left: 100%;
+      }
+    }
+
+    &:active {
+      transform: translateY(-1px);
+    }
+
+    &.loading {
+      pointer-events: none;
+
+      &::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        margin: auto;
+        border: 2px solid transparent;
+        border-top-color: $white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+  }
+
+  // Action Buttons
+  .refresh-ism {
+    background: linear-gradient(135deg, $success-green 0%, #2f855a 100%);
+    color: $white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin-left: 15px;
+    transition: all $transition-normal;
+    font-weight: $font-weight-medium;
+
+    &:hover {
+      background: linear-gradient(135deg, #2f855a 0%, #276749 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba($success-green, 0.3);
+    }
+  }
+
+  .btn-light {
+    background: rgba($white, 0.9);
+    border: 2px solid rgba($white, 0.3);
+    color: $neutral-dark;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: $font-weight-medium;
+    transition: all $transition-normal;
+
+    &:hover {
+      background: $white;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  // Alert Styles
+  .alert-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #fef7e0 100%);
+    border: none;
+    border-left: 6px solid $warning-orange;
+    border-radius: 15px;
+    padding: $space-xl;
+    box-shadow: 0 5px 20px rgba($warning-orange, 0.1);
+
+    h4 {
+      color: #c05621;
+      font-weight: $font-weight-bold;
+    }
+  }
+}
+
+// Animations
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(10deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+// Custom Alert Styles
+.custom-alert {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: $z-notification;
+  padding: $space-lg;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  animation: slideIn 0.3s ease;
+
+  &.alert-error {
+    background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+    border-left: 4px solid $error-red;
+  }
+
+  &.alert-info {
+    background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
+    border-left: 4px solid $primary-blue;
+  }
+
+  .alert-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: $neutral-dark;
+    font-weight: $font-weight-medium;
+  }
+
+  .alert-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-left: auto;
+    opacity: 0.7;
+    transition: opacity $transition-normal;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+// Enhanced Form Validation Styles
+.form-control {
+  &.is-valid {
+    border-color: $success-green;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+
+    &:focus {
+      border-color: $success-green;
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+  }
+
+  &.is-invalid {
+    border-color: $error-red;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+
+    &:focus {
+      border-color: $error-red;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+  }
+}
+
+.validation-error {
+  color: $error-red;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+
+  &::before {
+    content: '⚠ ';
+    margin-right: 0.25rem;
+  }
+}
+
+// Patient ID Field Enhancement
+#patient_id {
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+
+  &:focus {
+    font-weight: bold;
+  }
+
+  &.is-valid {
+    background-color: rgba($success-green, 0.05);
+  }
+
+  &.is-invalid {
+    background-color: rgba($error-red, 0.05);
+  }
+}
+
+// ISM Type Selection
+.ism-type-selection {
+  margin-bottom: 2rem;
+
+  .ism-type-title {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    font-weight: $font-weight-medium;
+    font-size: $font-size-lg;
+  }
+
+  .ism-type-options {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .ism-type-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 2px solid #e9ecef;
+    cursor: pointer;
+    transition: all $transition-normal;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &.selected {
+      background: #e3f2fd;
+      border-color: #1976d2;
+    }
+
+    .ism-type-radio {
+      accent-color: #1976d2;
+    }
+
+    .ism-type-content {
+      .ism-type-label {
+        font-weight: 600;
+        color: #2c3e50;
+        cursor: pointer;
+        margin: 0;
+        display: block;
+      }
+
+      .ism-type-description {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.25rem;
+        line-height: 1.3;
+      }
+    }
+  }
+}
+
+// Local CDA Search Section
+.local-search-section {
+  margin-bottom: 2rem;
+
+  .local-search-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 2px solid #e3f2fd;
+    transition: all $transition-normal;
+
+    &:hover {
+      background: #f0f7ff;
+      border-color: #3498db;
+    }
+
+    .local-search-checkbox {
+      transform: scale(1.2);
+      accent-color: #3498db;
+    }
+
+    .local-search-content {
+      .local-search-label {
+        font-weight: 600;
+        color: #2c3e50;
+        cursor: pointer;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .local-search-description {
+        font-size: 0.9rem;
+        color: #666;
+        font-style: italic;
+        margin-top: 0.25rem;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Break Glass Emergency Access Section
+.break-glass-section {
+  background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+  border: 2px solid #fc8181;
+  border-radius: 15px;
+  padding: $space-xl;
+  margin-bottom: 2rem;
+  position: relative;
+
+  &::before {
+    content: '🚨';
+    position: absolute;
+    top: -15px;
+    right: 20px;
+    font-size: 2rem;
+    background: $white;
+    padding: 5px 10px;
+    border-radius: 50%;
+    border: 2px solid #fc8181;
+  }
+
+  .break-glass-title {
+    color: #c53030;
+    font-weight: $font-weight-bold;
+    margin-bottom: $space-lg;
+    font-size: $font-size-lg;
+  }
+
+  .break-glass-checkbox {
+    display: flex;
+    align-items: center;
+    gap: $space-md;
+    margin-bottom: $space-md;
+
+    input[type='checkbox'] {
+      transform: scale(1.3);
+      accent-color: #c53030;
+    }
+
+    .break-glass-label {
+      font-weight: $font-weight-medium;
+      color: #c53030;
+      cursor: pointer;
+      margin: 0;
+      user-select: none;
+    }
+  }
+
+  .break-glass-explanation {
+    color: #742a2a;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: $space-lg;
+    font-style: italic;
+  }
+
+  .break-glass-reason {
+    animation: slideDown 0.3s ease-out;
+
+    label {
+      font-weight: $font-weight-medium;
+      color: #c53030;
+    }
+
+    textarea {
+      border: 2px solid #fc8181;
+      border-radius: 8px;
+      padding: $space-md;
+      resize: vertical;
+      min-height: 100px;
+
+      &:focus {
+        outline: none;
+        border-color: #c53030;
+        box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+// ISM Type Selection
+.ism-type-selection {
+  margin-bottom: 2rem;
+
+  .ism-type-title {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    font-weight: $font-weight-medium;
+    font-size: $font-size-lg;
+  }
+
+  .ism-type-options {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .ism-type-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 2px solid #e9ecef;
+    cursor: pointer;
+    transition: all $transition-normal;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &.selected {
+      background: #e3f2fd;
+      border-color: #1976d2;
+    }
+
+    .ism-type-radio {
+      accent-color: #1976d2;
+    }
+
+    .ism-type-content {
+      .ism-type-label {
+        font-weight: 600;
+        color: #2c3e50;
+        cursor: pointer;
+        margin: 0;
+        display: block;
+      }
+
+      .ism-type-description {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.25rem;
+        line-height: 1.3;
+      }
+    }
+  }
+}
+
+// Local CDA Search Section
+.local-search-section {
+  margin-bottom: 2rem;
+
+  .local-search-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 2px solid #e3f2fd;
+    transition: all $transition-normal;
+
+    &:hover {
+      background: #f0f7ff;
+      border-color: #3498db;
+    }
+
+    .local-search-checkbox {
+      transform: scale(1.2);
+      accent-color: #3498db;
+    }
+
+    .local-search-content {
+      .local-search-label {
+        font-weight: 600;
+        color: #2c3e50;
+        cursor: pointer;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .local-search-description {
+        font-size: 0.9rem;
+        color: #666;
+        font-style: italic;
+        margin-top: 0.25rem;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Break Glass Emergency Access Section
+.break-glass-section {
+  background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+  border: 2px solid #fc8181;
+  border-radius: 15px;
+  padding: $space-xl;
+  margin-bottom: 2rem;
+  position: relative;
+
+  &::before {
+    content: '🚨';
+    position: absolute;
+    top: -15px;
+    right: 20px;
+    font-size: 2rem;
+    background: $white;
+    padding: 5px 10px;
+    border-radius: 50%;
+    border: 2px solid #fc8181;
+  }
+
+  .break-glass-title {
+    color: #c53030;
+    font-weight: $font-weight-bold;
+    margin-bottom: $space-lg;
+    font-size: $font-size-lg;
+  }
+
+  .break-glass-checkbox {
+    display: flex;
+    align-items: center;
+    gap: $space-md;
+    margin-bottom: $space-md;
+
+    input[type='checkbox'] {
+      transform: scale(1.3);
+      accent-color: #c53030;
+    }
+
+    .break-glass-label {
+      font-weight: $font-weight-medium;
+      color: #c53030;
+      cursor: pointer;
+      margin: 0;
+      user-select: none;
+    }
+  }
+
+  .break-glass-explanation {
+    color: #742a2a;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: $space-lg;
+    font-style: italic;
+  }
+
+  .break-glass-reason {
+    animation: slideDown 0.3s ease-out;
+
+    label {
+      font-weight: $font-weight-medium;
+      color: #c53030;
+    }
+
+    textarea {
+      border: 2px solid #fc8181;
+      border-radius: 8px;
+      padding: $space-md;
+      resize: vertical;
+      min-height: 100px;
+
+      &:focus {
+        outline: none;
+        border-color: #c53030;
+        box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
+      }
+    }
+  }
+}

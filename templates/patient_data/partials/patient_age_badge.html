@@ -1,0 +1,63 @@
+{% comment %}
+Patient Age Badge Template Partial
+Displays patient age with birth date in a styled badge
+{% endcomment %}
+
+<div class="patient-age-info {{ css_class }}">
+    {% if has_age %}
+    <span class="age-number">{{ age }}</span>
+    <span class="age-label">years old</span>
+    <span class="birth-date-detail">(Born: {{ birth_date }})</span>
+    {% else %}
+    <span class="age-unknown">Age unknown</span>
+    {% if birth_date != "Unknown" %}
+    <span class="birth-date-detail">(Born: {{ birth_date }})</span>
+    {% endif %}
+    {% endif %}
+</div>
+
+<style>
+    .patient-age-info {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        background: var(--neutral-lightest, #f8f9fa);
+        border-radius: var(--border-radius-sm, 4px);
+        font-size: var(--font-size-sm, 0.875rem);
+        border: 1px solid var(--neutral-lighter, #e9ecef);
+    }
+
+    .age-number {
+        font-weight: var(--font-weight-semibold, 600);
+        color: var(--primary-blue, #0066cc);
+    }
+
+    .age-label {
+        color: var(--text-secondary, #666);
+    }
+
+    .birth-date-detail {
+        color: var(--text-muted, #999);
+        font-size: var(--font-size-xs, 0.75rem);
+        margin-left: 0.25rem;
+    }
+
+    .age-unknown {
+        color: var(--warning-dark, #856404);
+        font-style: italic;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .patient-age-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.125rem;
+        }
+
+        .birth-date-detail {
+            margin-left: 0;
+        }
+    }
+</style>

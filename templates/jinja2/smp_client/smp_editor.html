@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}SMP Editor{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>SMP Editor</h1>
+    <p>Service Metadata Publisher Editor - Configure and manage SMP entries</p>
+
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        This is a simplified version of the SMP editor for Jinja2 compatibility.
+        Full functionality will be restored in the next update.
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Document Types</h5>
+                </div>
+                <div class="card-body">
+                    <p>Configure supported document types for SMP.</p>
+                    <button class="btn btn-primary">Manage Document Types</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Participants</h5>
+                </div>
+                <div class="card-body">
+                    <p>Manage SMP participant information.</p>
+                    <button class="btn btn-primary">Manage Participants</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

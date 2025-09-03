@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+
+</head>
+
+<body>
+    <div class="header">
+        <h1>{{ page_title }}</h1>
+        <div class="user-info">
+            <span>👤 user</span>
+            <span>🔄</span>
+        </div>
+    </div>
+
+    <div class="step-indicator">
+        {{ step }}
+    </div>
+
+    <div class="container">
+        <h2 class="page-title">Please choose the patient country</h2>
+        <p class="page-subtitle">Select a country to search for patient records</p>
+
+        <div class="search-box">
+            <input type="text" placeholder="Search countries..." id="countrySearch">
+        </div>
+
+        <div class="country-grid">
+            {% for country in countries %}
+            <div class="country-card" onclick="selectCountry('{{ country.code }}')">
+                <div class="country-flag">
+                    {% if country.code == 'BE' %}🇧🇪
+                    {% elif country.code == 'AT' %}🇦🇹
+                    {% elif country.code == 'HU' %}🇭🇺
+                    {% elif country.code == 'EU' %}🇪🇺
+                    {% elif country.code == 'IE' %}🇮🇪
+                    {% else %}🏳️{% endif %}
+                </div>
+                <div class="country-name">{{ country.name }}</div>
+                <div class="country-status">
+                    {% if country.available %}✅ Available{% else %}❌ Unavailable{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function selectCountry(countryCode) {
+            window.location.href = `/portal/country/${countryCode}/search/`;
+        }
+
+        // Country search functionality
+        document.getElementById('countrySearch').addEventListener('input', function (e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.country-card');
+
+            cards.forEach(card => {
+                const countryName = card.querySelector('.country-name').textContent.toLowerCase();
+                if (countryName.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

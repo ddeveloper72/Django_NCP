@@ -1,0 +1,432 @@
+// ========================================
+// Home Page Styles
+// ========================================
+
+.home-page {
+  // Page Background
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+  }
+
+  // Header Section
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: $white;
+    padding: $space-xl;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 300px;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: $font-size-xxxl;
+      font-weight: $font-weight-bold;
+      position: relative;
+      z-index: 2;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+
+      @include mobile-up {
+        font-size: 2rem;
+      }
+    }
+
+    p {
+      margin: $space-lg 0 0 0;
+      font-size: $font-size-lg;
+      position: relative;
+      z-index: 2;
+      opacity: 0.9;
+    }
+  }
+
+  // Main Container
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: $space-xxl $space-lg;
+    background: $white;
+    margin-top: $space-lg;
+    border-radius: $space-lg;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    position: relative;
+
+    @include mobile-up {
+      padding: $space-lg;
+      margin: $space-sm;
+    }
+  }
+
+  // Page Title
+  .page-title {
+    text-align: center;
+    color: $text-dark;
+    margin-bottom: $space-xxl;
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+  }
+
+  // SMP Information Section
+  .smp-info {
+    background: $neutral-lightest;
+    border: 1px solid $neutral-lighter;
+    border-radius: $border-radius-md;
+    padding: $space-lg;
+    margin-bottom: $space-xxl;
+
+    p {
+      margin: 0;
+
+      &.smp-portal-link {
+        margin: $space-xs 0;
+        font-size: $font-size-sm;
+        opacity: 0.8;
+      }
+
+      &.smp-note {
+        margin: 0;
+        font-size: $font-size-xs;
+        font-style: italic;
+        color: $text-muted;
+      }
+    }
+
+    .smp-link {
+      color: $primary-blue;
+      text-decoration: underline;
+
+      &:hover {
+        color: $secondary-blue;
+        text-decoration: none;
+      }
+    }
+  }
+
+  // Integration Options Grid -> Flexbox
+  .integration-options {
+    @include flex-wrap;
+    gap: $space-xl;
+    margin-bottom: $space-xxl;
+
+    // Each option card takes equal width, min 350px (same as CSS Grid)
+    > .option-card {
+      flex: 1;
+      min-width: 350px;
+    }
+
+    @include mobile-up {
+      > .option-card {
+        min-width: 100%;
+      }
+    }
+  }
+
+  // Option Cards
+  .option-card {
+    @include card-base;
+    background: linear-gradient(135deg, #f8f9ff 0%, #f1f3ff 100%);
+    position: relative;
+    overflow: hidden;
+    border: 2px solid $neutral-lighter;
+    transition: all $transition-normal;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+      border-color: #667eea;
+    }
+
+    h3 {
+      color: $primary-blue;
+      font-size: $font-size-xl;
+      margin-bottom: $space-md;
+      @include flex-center;
+      gap: $space-sm;
+      justify-content: flex-start;
+    }
+
+    p {
+      color: $neutral-medium;
+      margin-bottom: $space-lg;
+      line-height: 1.6;
+    }
+  }
+
+  // Option Links
+  .option-link {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: $white;
+    padding: $space-sm $space-lg;
+    border-radius: $border-radius-md;
+    text-decoration: none;
+    font-weight: $font-weight-medium;
+    transition: all $transition-normal;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      transition: left 0.5s;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+
+      &::before {
+        left: 100%;
+      }
+    }
+  }
+
+  // API Section
+  .api-section {
+    background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+    padding: $space-xl;
+    border-radius: $border-radius-lg;
+    border-left: 6px solid $success-green;
+    margin-bottom: $space-xl;
+
+    h3 {
+      color: $primary-green;
+      margin-bottom: $space-lg;
+      font-size: $font-size-xl;
+    }
+  }
+
+  .api-list {
+    @include flex-wrap;
+    gap: $space-md;
+
+    // Each API item flexes to fill space, min 300px
+    > .api-item {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    @include mobile-up {
+      > .api-item {
+        min-width: 100%;
+      }
+    }
+  }
+
+  .api-item {
+    background: $white;
+    padding: $space-md;
+    border-radius: $border-radius-md;
+    box-shadow: $shadow-sm;
+
+    strong {
+      color: $primary-blue;
+    }
+
+    a {
+      color: $accent-blue;
+      text-decoration: none;
+      font-weight: $font-weight-medium;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // External Services Section
+  .external-services {
+    background: linear-gradient(135deg, #fff3cd 0%, #fef7e0 100%);
+    padding: $space-xl;
+    border-radius: $border-radius-lg;
+    border-left: 6px solid $warning-orange;
+    margin-bottom: $space-xl;
+
+    h3 {
+      color: #c05621;
+      margin-bottom: $space-lg;
+      font-size: $font-size-xl;
+    }
+  }
+
+  .service-grid {
+    @include flex-wrap;
+    gap: $space-lg;
+
+    // Each service item flexes to fill space, min 250px
+    > .service-item {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    @include mobile-up {
+      > .service-item {
+        min-width: 100%;
+      }
+    }
+  }
+
+  .service-item {
+    background: $white;
+    padding: $space-lg;
+    border-radius: $border-radius-md;
+    text-align: center;
+    box-shadow: $shadow-sm;
+
+    a {
+      display: inline-block;
+      background: $warning-orange;
+      color: $white;
+      padding: $space-sm $space-lg;
+      border-radius: $border-radius-sm;
+      text-decoration: none;
+      font-weight: $font-weight-medium;
+      transition: all $transition-normal;
+
+      &:hover {
+        background: darken($warning-orange, 10%);
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  // Status Indicator
+  .status-indicator {
+    background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
+    padding: $space-lg;
+    border-radius: $border-radius-lg;
+    border-left: 6px solid $accent-blue;
+    text-align: center;
+
+    p {
+      color: $primary-blue;
+      font-weight: $font-weight-medium;
+      margin: 0;
+      font-size: $font-size-lg;
+    }
+  }
+
+  // SMP Configuration Section
+  .smp-config {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f3ff 100%);
+    padding: $space-xl;
+    border-radius: $space-lg;
+    margin: $space-xl auto;
+    max-width: 800px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+    border: 2px solid rgba(102, 126, 234, 0.1);
+
+    h3 {
+      color: $primary-blue;
+      margin-bottom: $space-lg;
+      @include flex-center;
+      justify-content: flex-start;
+      gap: $space-sm;
+      font-size: $font-size-xl;
+    }
+  }
+
+  .smp-selection {
+    @include flex-between;
+    gap: $space-lg;
+    flex-wrap: wrap;
+
+    @include mobile-up {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    select {
+      flex: 1;
+      min-width: 250px;
+      padding: $space-md $space-lg;
+      border: 2px solid $neutral-lighter;
+      border-radius: $border-radius-lg;
+      font-size: $font-size-base;
+      background: $white;
+      transition: all $transition-normal;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-blue;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      }
+
+      @include mobile-up {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+  }
+
+  .smp-status {
+    @include flex-center;
+    gap: $space-sm;
+    padding: $space-sm $space-lg;
+    border-radius: $border-radius-md;
+    background: rgba(56, 161, 105, 0.1);
+    border: 2px solid rgba(56, 161, 105, 0.2);
+    color: $primary-green;
+    font-weight: $font-weight-medium;
+    min-width: 200px;
+
+    @include mobile-up {
+      min-width: auto;
+      width: 100%;
+    }
+  }
+
+  .smp-url {
+    font-size: $font-size-sm;
+    color: $neutral-medium;
+    margin-top: $space-md;
+    padding: $space-sm;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: $border-radius-sm;
+    font-family: $font-family-mono;
+    border-left: 4px solid $primary-blue;
+  }
+}
+
+// Animation keyframes
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(10deg);
+  }
+}

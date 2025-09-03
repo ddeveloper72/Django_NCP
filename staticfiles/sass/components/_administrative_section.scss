@@ -1,0 +1,347 @@
+// Administrative Information Section Styling
+// Professional SASS styling for the administrative contact cards
+
+// Color palette
+$primary-color: #085a9f;
+$primary-light: rgba(8, 90, 159, 0.1);
+$primary-dark: darken(#085a9f, 10%);
+$text-color: #333;
+$text-muted: #6c757d;
+$border-color: #dee2e6;
+$background-light: #f8f9fa;
+$white: #ffffff;
+
+// Role-based colors
+$emergency-contact-color: #dc3545;
+$primary-care-color: #28a745;
+$author-color: #007bff;
+$legal-auth-color: #ffc107;
+$patient-contact-color: #17a2b8;
+$custodian-color: #6f42c1;
+
+// Mixins
+@mixin card-shadow {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+}
+
+@mixin contact-icon {
+  color: $primary-color;
+  width: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+// Administrative Information Styling
+.admin-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $border-color;
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+}
+
+.admin-section-title {
+  color: $primary-color;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  @include flex-center;
+  gap: 0.5rem;
+
+  i {
+    font-size: 18px;
+  }
+}
+
+.contact-count {
+  font-size: 14px;
+  font-weight: normal;
+  color: $text-muted;
+  margin-left: auto;
+}
+
+// Contact card styling
+.contact-card {
+  background: $background-light;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  @include card-shadow;
+  transition: all 0.3s ease;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.contact-name {
+  margin-bottom: 0.75rem;
+  @include flex-center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  strong {
+    font-size: 15px;
+    color: $text-color;
+  }
+}
+
+.contact-detail {
+  @include flex-center;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 14px;
+  line-height: 1.4;
+  color: $text-color;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  i {
+    @include contact-icon;
+  }
+
+  strong {
+    color: $primary-dark;
+    margin-right: 0.25rem;
+  }
+}
+
+// Role badges
+.role-badge {
+  background: $primary-color;
+  color: $white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+
+  // Role-specific colors
+  &.emergency-contact-family-member {
+    background: $emergency-contact-color;
+  }
+
+  &.primary-care-provider {
+    background: $primary-care-color;
+  }
+
+  &.author-hcp {
+    background: $author-color;
+  }
+
+  &.legal-authenticator {
+    background: $legal-auth-color;
+    color: #212529;
+  }
+
+  &.contact-ind {
+    background: $text-muted;
+  }
+}
+
+// Contact type specific styling with left border accents
+.patient-contact {
+  border-left: 4px solid $patient-contact-color;
+  background: linear-gradient(
+    135deg,
+    $white 0%,
+    lighten($patient-contact-color, 45%) 100%
+  );
+}
+
+.author-contact {
+  border-left: 4px solid $author-color;
+  background: linear-gradient(
+    135deg,
+    $white 0%,
+    lighten($author-color, 45%) 100%
+  );
+}
+
+.legal-auth-contact {
+  border-left: 4px solid $legal-auth-color;
+  background: linear-gradient(
+    135deg,
+    $white 0%,
+    lighten($legal-auth-color, 35%) 100%
+  );
+}
+
+.custodian-contact {
+  border-left: 4px solid $custodian-color;
+  background: linear-gradient(
+    135deg,
+    $white 0%,
+    lighten($custodian-color, 45%) 100%
+  );
+}
+
+.participant-contact {
+  border-left: 4px solid $primary-care-color;
+  background: linear-gradient(
+    135deg,
+    $white 0%,
+    lighten($primary-care-color, 45%) 100%
+  );
+}
+
+// Indicator styling
+.indicator {
+  font-size: 12px;
+  color: rgba(8, 90, 159, 0.7);
+  font-weight: normal;
+  margin-left: auto;
+  padding: 0.125rem 0.5rem;
+  background: $primary-light;
+  border-radius: 10px;
+}
+
+// Administrative section animations
+.wrap-collapsible {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .contact-detail {
+    flex-direction: column;
+    gap: 0.25rem;
+
+    i {
+      margin-top: 0;
+    }
+  }
+
+  .contact-name {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .admin-section-title {
+    font-size: 14px;
+
+    i {
+      font-size: 16px;
+    }
+  }
+
+  .contact-card {
+    padding: 0.75rem;
+  }
+
+  .role-badge {
+    font-size: 10px;
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-section {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .contact-card {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .contact-detail {
+    font-size: 13px;
+  }
+
+  .indicator {
+    font-size: 11px;
+    padding: 0.1rem 0.4rem;
+  }
+}
+
+// Print styles
+@media print {
+  .contact-card {
+    box-shadow: none;
+    border: 1px solid #000;
+    background: $white !important;
+    page-break-inside: avoid;
+  }
+
+  .role-badge {
+    border: 1px solid #000;
+    background: $white !important;
+    color: #000 !important;
+  }
+
+  .admin-section-title {
+    color: #000;
+  }
+
+  .contact-detail i {
+    color: #000;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .contact-card {
+    border: 2px solid $text-color;
+    background: $white;
+  }
+
+  .role-badge {
+    border: 1px solid $text-color;
+  }
+
+  .contact-detail {
+    color: $text-color;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .contact-card {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  .wrap-collapsible {
+    animation: none;
+  }
+}

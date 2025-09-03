@@ -1,0 +1,96 @@
+// ========================================
+// Base Typography Styles
+// ========================================
+
+// Font Loading
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
+
+// Override variables for custom fonts if needed
+// $font-family-primary: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+// Base typography classes
+.text-xs {
+  font-size: $font-size-xs;
+}
+.text-sm {
+  font-size: $font-size-sm;
+}
+.text-base {
+  font-size: $font-size-base;
+}
+.text-lg {
+  font-size: $font-size-lg;
+}
+.text-xl {
+  font-size: $font-size-xl;
+}
+.text-xxl {
+  font-size: $font-size-xxl;
+}
+.text-xxxl {
+  font-size: $font-size-xxxl;
+}
+
+// Font weights
+.font-light {
+  font-weight: $font-weight-light;
+}
+.font-normal {
+  font-weight: $font-weight-normal;
+}
+.font-medium {
+  font-weight: $font-weight-medium;
+}
+.font-bold {
+  font-weight: $font-weight-bold;
+}
+
+// Text alignment
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+
+// Text transforms
+.uppercase {
+  @include text-uppercase;
+}
+.truncate {
+  @include text-truncate;
+}
+
+// Text colors
+.text-primary {
+  color: $primary-blue;
+}
+.text-secondary {
+  color: $neutral-medium;
+}
+.text-muted {
+  color: $neutral-light;
+}
+.text-success {
+  color: $success-green;
+}
+.text-warning {
+  color: $warning-orange;
+}
+.text-error {
+  color: $error-red;
+}
+
+// Line heights
+.leading-tight {
+  line-height: 1.2;
+}
+.leading-normal {
+  line-height: 1.5;
+}
+.leading-relaxed {
+  line-height: 1.75;
+}

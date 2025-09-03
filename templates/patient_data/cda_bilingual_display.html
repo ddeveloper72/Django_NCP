@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+
+{% block title %}CDA Document Translation - {{ country_code }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cda-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .cda-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+
+    .cda-header h1 {
+        margin: 0 0 10px 0;
+        font-size: 28px;
+    }
+
+    .language-indicator {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+
+    .patient-info-section {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .patient-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .patient-info-column h3 {
+        color: #495057;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+
+    .patient-field {
+        margin-bottom: 15px;
+        padding: 10px;
+        background: white;
+        border-radius: 4px;
+        border-left: 4px solid #007bff;
+    }
+
+    .field-label {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+
+    .field-value {
+        color: #6c757d;
+    }
+
+    .bilingual-sections {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .section-column {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .section-column-header {
+        padding: 15px 20px;
+        font-weight: bold;
+        color: white;
+    }
+
+    .original-column .section-column-header {
+        background: #dc3545;
+    }
+
+    .translated-column .section-column-header {
+        background: #28a745;
+    }
+
+    .section-content {
+        padding: 20px;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .medical-section {
+        margin-bottom: 30px;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .section-title {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        margin: 0;
+        font-size: 18px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .section-body {
+        padding: 20px;
+    }
+
+    .medical-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+        font-size: 14px;
+    }
+
+    .medical-table th {
+        background: #f8f9fa;
+        padding: 12px 8px;
+        text-align: left;
+        border: 1px solid #dee2e6;
+        font-weight: bold;
+    }
+
+    .medical-table td {
+        padding: 10px 8px;
+        border: 1px solid #dee2e6;
+        vertical-align: top;
+    }
+
+    .medical-table tr:nth-child(even) {
+        background: #f8f9fa;
+    }
+
+    .section-text {
+        line-height: 1.6;
+        color: #495057;
+    }
+
+    .translation-controls {
+        background: #e9ecef;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .view-toggle {
+        display: flex;
+        gap: 10px;
+    }
+
+    .toggle-btn {
+        padding: 8px 16px;
+        border: 1px solid #007bff;
+        background: white;
+        color: #007bff;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .toggle-btn.active,
+    .toggle-btn:hover {
+        background: #007bff;
+        color: white;
+    }
+
+    .single-column {
+        grid-template-columns: 1fr;
+    }
+
+    @media (max-width: 768px) {
+        .bilingual-sections {
+            grid-template-columns: 1fr;
+        }
+
+        .patient-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .translation-controls {
+            flex-direction: column;
+            gap: 15px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cda-container">
+    <!-- Header -->
+    <div class="cda-header">
+        <h1>Clinical Document Architecture Translation</h1>
+        <div>
+            <strong>Country:</strong> {{ country_code }}
+            {% if patient_id %}
+            | <strong>Patient ID:</strong> {{ patient_id }}
+            {% endif %}
+        </div>
+        <div class="language-indicator">
+            Original Language: {{ source_language|upper }} → English Translation
+        </div>
+    </div>
+
+    <!-- Translation Controls -->
+    <div class="translation-controls">
+        <div>
+            <strong>View Mode:</strong>
+        </div>
+        <div class="view-toggle">
+            <button class="toggle-btn active" onclick="showBilingual()">Side-by-Side</button>
+            <button class="toggle-btn" onclick="showOriginal()">Original Only</button>
+            <button class="toggle-btn" onclick="showTranslated()">English Only</button>
+        </div>
+    </div>
+
+    <!-- Patient Information -->
+    {% if patient_info %}
+    <div class="patient-info-section">
+        <h2>Patient Information</h2>
+        <div class="patient-info-grid">
+            <div class="patient-info-column">
+                <h3>Original ({{ source_language|upper }})</h3>
+                {% for key, data in patient_info.items %}
+                <div class="patient-field">
+                    <div class="field-label">{{ data.key_original }}</div>
+                    <div class="field-value">{{ data.original }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="patient-info-column">
+                <h3>English Translation</h3>
+                {% for key, data in patient_info.items %}
+                <div class="patient-field">
+                    <div class="field-label">{{ data.key_translated }}</div>
+                    <div class="field-value">{{ data.translated }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Medical Sections -->
+    <div class="bilingual-sections" id="bilingual-container">
+        <!-- Original Language Column -->
+        <div class="section-column original-column">
+            <div class="section-column-header">
+                Original Document ({{ source_language|upper }})
+            </div>
+            <div class="section-content">
+                {% for section in sections %}
+                <div class="medical-section">
+                    <h3 class="section-title">{{ section.title_original }}</h3>
+                    <div class="section-body">
+                        {% if section.tables %}
+                        {% for table in section.tables %}
+                        <table class="medical-table">
+                            <thead>
+                                <tr>
+                                    {% for header in table.headers_original %}
+                                    <th>{{ header }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in table.rows %}
+                                <tr>
+                                    {% for cell in row %}
+                                    <td>{{ cell }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if section.content_original %}
+                        <div class="section-text">
+                            {{ section.content_original|linebreaks }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- English Translation Column -->
+        <div class="section-column translated-column">
+            <div class="section-column-header">
+                English Translation
+            </div>
+            <div class="section-content">
+                {% for section in sections %}
+                <div class="medical-section">
+                    <h3 class="section-title">{{ section.title_translated }}</h3>
+                    <div class="section-body">
+                        {% if section.tables %}
+                        {% for table in section.tables %}
+                        <table class="medical-table">
+                            <thead>
+                                <tr>
+                                    {% for header in table.headers_translated %}
+                                    <th>{{ header }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in table.rows %}
+                                <tr>
+                                    {% for cell in row %}
+                                    <td>{{ cell }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if section.content_translated %}
+                        <div class="section-text">
+                            {{ section.content_translated|linebreaks }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showBilingual() {
+        document.getElementById('bilingual-container').style.gridTemplateColumns = '1fr 1fr';
+        document.querySelector('.original-column').style.display = 'block';
+        document.querySelector('.translated-column').style.display = 'block';
+        updateActiveButton(0);
+    }
+
+    function showOriginal() {
+        document.getElementById('bilingual-container').style.gridTemplateColumns = '1fr';
+        document.querySelector('.original-column').style.display = 'block';
+        document.querySelector('.translated-column').style.display = 'none';
+        updateActiveButton(1);
+    }
+
+    function showTranslated() {
+        document.getElementById('bilingual-container').style.gridTemplateColumns = '1fr';
+        document.querySelector('.original-column').style.display = 'none';
+        document.querySelector('.translated-column').style.display = 'block';
+        updateActiveButton(2);
+    }
+
+    function updateActiveButton(activeIndex) {
+        const buttons = document.querySelectorAll('.toggle-btn');
+        buttons.forEach((btn, index) => {
+            if (index === activeIndex) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    // Sync scroll between columns
+    document.addEventListener('DOMContentLoaded', function () {
+        const originalContent = document.querySelector('.original-column .section-content');
+        const translatedContent = document.querySelector('.translated-column .section-content');
+
+        let isScrolling = false;
+
+        originalContent.addEventListener('scroll', function () {
+            if (!isScrolling) {
+                isScrolling = true;
+                translatedContent.scrollTop = originalContent.scrollTop;
+                setTimeout(() => isScrolling = false, 50);
+            }
+        });
+
+        translatedContent.addEventListener('scroll', function () {
+            if (!isScrolling) {
+                isScrolling = true;
+                originalContent.scrollTop = translatedContent.scrollTop;
+                setTimeout(() => isScrolling = false, 50);
+            }
+        });
+    });
+</script>
+{% endblock %}

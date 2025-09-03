@@ -37,11 +37,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Third-party apps
+    "compressor",
     # EU eHealth NCP Applications
     "ncp_gateway",
     "ehealth_portal",
     "smp_client",
     "fhir_services",
+    # Patient Data and Translation Services
+    "patient_data",
+    "translation_manager",
+    "translation_services",
     # Third-party apps for eHealth functionality
     "rest_framework",
     "corsheaders",
@@ -66,7 +72,26 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                "django.template.context_processors.debug",
                 "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.csrf",
+            ],
+        },
+    },
+    {
+        "BACKEND": "django.template.backends.jinja2.Jinja2",
+        "DIRS": [
+            BASE_DIR / "templates" / "jinja2",
+            BASE_DIR / "ehealth_portal" / "templates" / "jinja2",
+        ],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "environment": "eu_ncp_server.jinja2.environment",
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.template.context_processors.csrf",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
@@ -127,6 +152,22 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+# Django Compressor settings for SASS compilation
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "compressor.finders.CompressorFinder",
+]
+
+COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
+
+# Only enable compression in production to avoid caching issues during development
+COMPRESS_ENABLED = not DEBUG
+
+# Additional compression settings to avoid cache issues
+COMPRESS_OFFLINE = False
+COMPRESS_CSS_HASHING_METHOD = "mtime"
 
 # Media files
 MEDIA_URL = "media/"

@@ -100,6 +100,11 @@ class Patient(models.Model):
     consent_date = models.DateTimeField(null=True, blank=True)
     data_sharing_restrictions = models.TextField(null=True, blank=True)
 
+    # Clinical data
+    raw_patient_summary = models.TextField(
+        null=True, blank=True, help_text="Raw CDA XML content for patient summary"
+    )
+
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

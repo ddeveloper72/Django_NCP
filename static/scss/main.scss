@@ -1,0 +1,256 @@
+// ========================================
+// Main SCSS File - DMZ Compatible
+// Import all components for compilation
+// ========================================
+// Production SCSS compilation - Updated patient search styles with SASS classes - Force compile v2
+
+// 1. Utilities (Variables and Mixins first)
+@import 'utils/variables';
+@import 'utils/mixins';
+
+// 2. Base Styles
+@import 'base/reset';
+@import 'base/typography';
+
+// 3. Layout Components
+@import 'layouts/grid';
+@import 'layouts/header';
+@import 'layouts/footer';
+@import 'layouts/sidebar';
+
+// 4. UI Components
+@import 'components/buttons';
+@import 'components/forms';
+@import 'components/cards';
+@import 'components/tables';
+@import 'components/navigation';
+@import 'components/modals';
+@import 'components/alerts';
+@import 'components/administrative_section';
+
+// 5. Page-specific Styles
+@import 'pages/home';
+@import 'pages/dashboard';
+@import 'pages/forms';
+@import 'pages/patient_data_view';
+@import 'pages/admin_import';
+@import 'pages/country_selection';
+@import 'pages/patient_search';
+@import 'pages/patient-details';
+@import 'pages/patient_cda';
+@import 'pages/patient_form';
+
+// 6. Utility Classes
+.container {
+  @include container;
+}
+
+.flex-center {
+  @include flex-center;
+}
+
+.flex-between {
+  @include flex-between;
+}
+
+.flex-column {
+  @include flex-column;
+}
+
+.margin-center {
+  @include margin-center;
+}
+
+// Text utilities
+.text-primary {
+  color: $primary-blue;
+}
+.text-center {
+  text-align: center;
+}
+.text-sm {
+  font-size: $font-size-sm;
+}
+.text-xs {
+  font-size: $font-size-xs;
+}
+.italic {
+  font-style: italic;
+}
+.opacity-80 {
+  opacity: 0.8;
+}
+
+// Flexbox Grid Utilities (replacing CSS Grid)
+.grid-container {
+  @include flex-wrap;
+  margin: 0 (-$space-md);
+}
+
+.grid-item {
+  padding: 0 $space-md;
+  margin-bottom: $space-lg;
+}
+
+// Grid column widths using Flexbox
+.grid-auto {
+  @include flex-wrap;
+  gap: $space-xl;
+
+  > * {
+    flex: 1;
+    min-width: 350px; // Equivalent to minmax(350px, 1fr)
+
+    @include mobile-up {
+      min-width: 100%;
+    }
+  }
+}
+
+.grid-auto-sm {
+  @include flex-wrap;
+  gap: $space-lg;
+
+  > * {
+    flex: 1;
+    min-width: 250px;
+
+    @include mobile-up {
+      min-width: 100%;
+    }
+  }
+}
+
+.grid-auto-lg {
+  @include flex-wrap;
+  gap: $space-lg;
+
+  > * {
+    flex: 1;
+    min-width: 300px;
+
+    @include mobile-up {
+      min-width: 100%;
+    }
+  }
+}
+
+// Service grid (2-column on desktop, 1-column on mobile)
+.service-grid {
+  @include flex-wrap;
+  gap: $space-lg;
+
+  > * {
+    flex: 1;
+    min-width: 250px;
+
+    @include mobile-up {
+      min-width: 100%;
+    }
+  }
+}
+
+// Spacing utilities
+.m-0 {
+  margin: 0;
+}
+.m-xs {
+  margin: $space-xs;
+}
+.m-sm {
+  margin: $space-sm;
+}
+.m-md {
+  margin: $space-md;
+}
+.m-lg {
+  margin: $space-lg;
+}
+.m-xl {
+  margin: $space-xl;
+}
+
+.p-0 {
+  padding: 0;
+}
+.p-xs {
+  padding: $space-xs;
+}
+.p-sm {
+  padding: $space-sm;
+}
+.p-md {
+  padding: $space-md;
+}
+.p-lg {
+  padding: $space-lg;
+}
+.p-xl {
+  padding: $space-xl;
+}
+
+// Margin top/bottom
+.mt-0 {
+  margin-top: 0;
+}
+.mt-sm {
+  margin-top: $space-sm;
+}
+.mt-md {
+  margin-top: $space-md;
+}
+.mt-lg {
+  margin-top: $space-lg;
+}
+.mt-xl {
+  margin-top: $space-xl;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+.mb-sm {
+  margin-bottom: $space-sm;
+}
+.mb-md {
+  margin-bottom: $space-md;
+}
+.mb-lg {
+  margin-bottom: $space-lg;
+}
+.mb-xl {
+  margin-bottom: $space-xl;
+}
+
+// Padding top/bottom
+.pt-0 {
+  padding-top: 0;
+}
+.pt-sm {
+  padding-top: $space-sm;
+}
+.pt-md {
+  padding-top: $space-md;
+}
+.pt-lg {
+  padding-top: $space-lg;
+}
+.pt-xl {
+  padding-top: $space-xl;
+}
+
+.pb-0 {
+  padding-bottom: 0;
+}
+.pb-sm {
+  padding-bottom: $space-sm;
+}
+.pb-md {
+  padding-bottom: $space-md;
+}
+.pb-lg {
+  padding-bottom: $space-lg;
+}
+.pb-xl {
+  padding-bottom: $space-xl;
+}
