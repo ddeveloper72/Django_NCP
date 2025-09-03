@@ -1,138 +1,234 @@
 // ========================================
-// Variables - DMZ Compatible SASS Architecture
+// Variables - HSE-Inspired Color Palette
 // ========================================
 
-// Color Palette
-$primary-blue: #1f4e79;
-$secondary-blue: #2e5f8a;
-$accent-blue: #3d70ab;
-$light-blue: #e8f2ff;
+// HSE Primary Colors - Based on Irish Health Service Executive Brand
+$hse-primary-teal: #007b7f; // Main HSE teal color
+$hse-primary-teal-dark: #005b5f; // Darker teal for depth
+$hse-primary-teal-light: #33969a; // Lighter teal for highlights
+$hse-primary-teal-lighter: #80bebf; // Very light teal for backgrounds
 
-$primary-green: #2d5a27;
-$accent-green: #4a7c59;
-$light-green: #e8f5e8;
+// HSE Secondary Colors
+$hse-secondary-green: #2d5a27; // Professional healthcare green
+$hse-secondary-green-light: #4a7c59; // Lighter healthcare green
+$hse-accent-blue: #1e3a5f; // Deep professional blue
+$hse-accent-blue-light: #3a5a7f; // Lighter professional blue
 
-$neutral-dark: #333333;
-$neutral-medium: #666666;
-$neutral-light: #999999;
-$neutral-lighter: #cccccc;
-$neutral-lightest: #f5f5f5;
+// Main Color Palette (Updated with HSE colors)
+$primary-color: $hse-primary-teal;
+$primary-dark: $hse-primary-teal-dark;
+$primary-light: $hse-primary-teal-light;
+$primary-lighter: $hse-primary-teal-lighter;
+
+$secondary-color: $hse-secondary-green;
+$secondary-light: $hse-secondary-green-light;
+$accent-color: $hse-accent-blue;
+$accent-light: $hse-accent-blue-light;
+
+// Legacy color mappings for backward compatibility
+$primary-blue: $hse-primary-teal;
+$secondary-blue: $hse-primary-teal-dark;
+$accent-blue: $hse-accent-blue;
+$light-blue: #e8f6f7; // Very light teal background
+
+$primary-green: $hse-secondary-green;
+$accent-green: $hse-secondary-green-light;
+$light-green: #e8f5e8; // Light green background
+
+// Neutral Colors - Clean, accessible grays
+$neutral-dark: #2d3748; // Almost black for text
+$neutral-medium: #4a5568; // Medium gray for secondary text
+$neutral-light: #718096; // Light gray for muted text
+$neutral-lighter: #e2e8f0; // Very light gray for borders
+$neutral-lightest: #f7fafc; // Off-white backgrounds
 
 // Text Colors
-$text-dark: #2d3748;
-$text-muted: #718096;
+$text-dark: $neutral-dark;
+$text-muted: $neutral-light;
 
-// Background Colors
-$bg-light: #f7fafc;
-$bg-dark: #2d3748;
-$bg-white: #ffffff;
+// Background Colors - Clean, accessible backgrounds
+$bg-light: #f7fafc; // Very light gray-blue background
+$bg-dark: $neutral-dark; // Dark background
+$bg-white: #ffffff; // Pure white
+$bg-primary: rgba($hse-primary-teal, 0.05); // Very subtle teal background
+$bg-secondary: rgba($hse-secondary-green, 0.05); // Very subtle green background
 
-// Border Colors
-$border-light: #e2e8f0;
+// Border Colors - Professional, subtle borders
+$border-light: #e2e8f0; // Light gray border
+$border-medium: #cbd5e0; // Medium gray border
+$border-primary: $hse-primary-teal; // Teal border for accents
 
+// Status Colors - HSE-compatible with accessibility in mind
 $white: #ffffff;
-$error-red: #d32f2f;
-$warning-orange: #ff9800;
-$success-green: #4caf50;
+$success: #22c55e; // Professional green (better contrast than default)
+$success-dark: #16a34a;
+$success-light: #4ade80;
+$success-lighter: #dcfce7;
 
-// Status Colors with Variations
-$success: #4caf50;
-$success-dark: #388e3c;
-$success-light: #81c784;
-$success-lighter: #c8e6c9;
+$error: #dc2626; // Professional red
+$error-dark: #b91c1c;
+$error-light: #f87171;
+$error-lighter: #fee2e2;
 
-$error: #d32f2f;
-$error-dark: #c62828;
-$error-light: #ef5350;
-$error-lighter: #ffcdd2;
+$warning: #f59e0b; // Professional amber
+$warning-dark: #d97706;
+$warning-light: #fcd34d;
+$warning-lighter: #fef3c7;
 
-$warning: #ff9800;
-$warning-dark: #f57c00;
-$warning-light: #ffb74d;
-$warning-lighter: #ffe0b2;
+$info: $hse-primary-teal; // Use HSE teal for info
+$info-dark: $hse-primary-teal-dark;
+$info-light: $hse-primary-teal-light;
+$info-lighter: rgba($hse-primary-teal, 0.1);
 
-$info: #2196f3;
-$info-dark: #1976d2;
-$info-light: #64b5f6;
-$info-lighter: #bbdefb;
+// Healthcare Theme Colors - Updated for HSE
+$healthcare-primary: $hse-primary-teal;
+$healthcare-secondary: $hse-secondary-green;
+$healthcare-accent: $hse-accent-blue;
 
-// Healthcare Theme Colors
-$primary-pink: #c2185b;
+// Legacy mappings (keeping for compatibility)
+$primary-pink: #c2185b; // Keep existing pink if needed
 $secondary-pink: #e91e63;
 
-// Primary Blue Theme
-$primary-blue: #1976d2;
-$primary-blue-light: #64b5f6;
-$secondary-blue: #0d47a1;
+// Updated primary blue theme to use HSE colors
+$primary-blue: $hse-primary-teal;
+$primary-blue-light: $hse-primary-teal-light;
+$secondary-blue: $hse-primary-teal-dark;
 
-// Typography
-$font-family-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-$font-family-mono: 'Courier New', Courier, monospace;
+// Typography - HSE-inspired, accessible font stack
+$font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+  'Helvetica Neue', Arial, sans-serif;
+$font-family-secondary: 'Georgia', 'Times New Roman', serif; // For emphasis/headers
+$font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas,
+  'Courier New', monospace;
 
-$font-size-xs: 0.75rem; // 12px
-$font-size-sm: 0.875rem; // 14px
-$font-size-base: 1rem; // 16px
-$font-size-md: 1.125rem; // 18px
-$font-size-lg: 1.25rem; // 20px
-$font-size-xl: 1.5rem; // 24px
-$font-size-xxl: 2rem; // 32px
-$font-size-xxxl: 2.5rem; // 40px
+// Font Sizes - HSE-compatible scale for accessibility
+$font-size-xs: 0.75rem; // 12px - Use sparingly
+$font-size-sm: 0.875rem; // 14px - Small text
+$font-size-base: 1rem; // 16px - Base text (recommended minimum)
+$font-size-md: 1.125rem; // 18px - Slightly larger for better readability
+$font-size-lg: 1.25rem; // 20px - Larger text
+$font-size-xl: 1.5rem; // 24px - Small headers
+$font-size-xxl: 2rem; // 32px - Medium headers
+$font-size-xxxl: 2.5rem; // 40px - Large headers
+$font-size-display: 3rem; // 48px - Hero/display text
 
+// Font Weights - Professional, accessible range
 $font-weight-light: 300;
-$font-weight-normal: 400;
-$font-weight-medium: 500;
-$font-weight-semibold: 600;
-$font-weight-bold: 700;
+$font-weight-normal: 400; // Default text weight
+$font-weight-medium: 500; // Slightly emphasized text
+$font-weight-semibold: 600; // Important text/labels
+$font-weight-bold: 700; // Headers and emphasis
 
-// Spacing Scale
-$space-xs: 0.25rem; // 4px
-$space-sm: 0.5rem; // 8px
-$space-md: 1rem; // 16px
-$space-lg: 1.5rem; // 24px
-$space-xl: 2rem; // 32px
-$space-xxl: 3rem; // 48px
-$space-xxxl: 4rem; // 64px
+// Line Heights - Optimized for readability
+$line-height-tight: 1.25; // For large headers
+$line-height-normal: 1.5; // Default reading text
+$line-height-relaxed: 1.75; // For long-form content
 
-// Border & Radius
+// Spacing Scale - Clean, consistent spacing
+$space-xs: 0.25rem; // 4px - Minimal spacing
+$space-sm: 0.5rem; // 8px - Small spacing
+$space-md: 1rem; // 16px - Base spacing unit
+$space-lg: 1.5rem; // 24px - Large spacing
+$space-xl: 2rem; // 32px - Extra large spacing
+$space-xxl: 3rem; // 48px - Section spacing
+$space-xxxl: 4rem; // 64px - Large section spacing
+$space-huge: 6rem; // 96px - Hero section spacing
+
+// Border & Radius - HSE professional styling
 $border-width: 1px;
 $border-width-thick: 2px;
-$border-radius-xs: 0.125rem;
-$border-radius-sm: 0.25rem;
-$border-radius-md: 0.5rem;
-$border-radius-lg: 1rem;
-$border-radius-full: 9999px;
+$border-width-thicker: 3px;
 
-// Shadows
-$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+$border-radius-xs: 0.125rem; // 2px - Minimal rounding
+$border-radius-sm: 0.25rem; // 4px - Small rounding
+$border-radius-md: 0.375rem; // 6px - Medium rounding (HSE-preferred)
+$border-radius-lg: 0.5rem; // 8px - Large rounding
+$border-radius-xl: 0.75rem; // 12px - Extra large rounding
+$border-radius-full: 9999px; // Perfect circle/pill shape
+
+// Shadows - Professional, subtle depth
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
 $shadow-base: 0 2px 4px rgba(0, 0, 0, 0.1);
-$shadow-md: 0 2px 6px rgba(0, 0, 0, 0.15);
-$shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+$shadow-focus: 0 0 0 3px rgba($hse-primary-teal, 0.2); // HSE focus shadow
 
-// Breakpoints for Responsive Design
-$breakpoint-xs: 480px;
-$breakpoint-sm: 768px;
-$breakpoint-md: 1024px;
-$breakpoint-lg: 1200px;
-$breakpoint-xl: 1440px;
+// Breakpoints for Responsive Design - Updated for modern devices
+$breakpoint-xs: 480px; // Small phones
+$breakpoint-sm: 640px; // Large phones
+$breakpoint-md: 768px; // Tablets
+$breakpoint-lg: 1024px; // Small laptops
+$breakpoint-xl: 1280px; // Large laptops/desktops
+$breakpoint-xxl: 1536px; // Large desktops
 
-// Z-index Scale
+// Z-index Scale - Organized layer management
+$z-base: 1;
 $z-dropdown: 1000;
+$z-sticky: 1020;
+$z-modal-backdrop: 1040;
 $z-modal: 1050;
-$z-notification: 1100;
-$z-tooltip: 1150;
+$z-notification: 1060;
+$z-tooltip: 1070;
+$z-popover: 1080;
 
-// Animation
-$transition-fast: 0.15s ease;
-$transition-normal: 0.3s ease;
-$transition-slow: 0.5s ease;
+// Animation - Smooth, professional transitions
+$transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1); // Quick interactions
+$transition-normal: 0.2s cubic-bezier(0.4, 0, 0.2, 1); // Standard interactions
+$transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1); // Deliberate interactions
+$transition-slower: 0.5s cubic-bezier(0.4, 0, 0.2, 1); // Page transitions
 
-// Form Elements
-$input-height: 2.5rem;
-$input-padding: $space-sm $space-md;
-$input-border: $border-width solid $neutral-lighter;
-$input-border-focus: $border-width solid $primary-blue;
+// HSE-specific animations
+$transition-hse: 0.2s ease-out; // HSE standard transition
 
-// Button Sizing
-$button-height-sm: 2rem;
-$button-height-md: 2.5rem;
-$button-height-lg: 3rem;
+// Form Elements - HSE-compliant, accessible forms
+$input-height-sm: 2rem; // 32px - Compact forms
+$input-height-md: 2.5rem; // 40px - Standard forms
+$input-height-lg: 3rem; // 48px - Large forms
+
+$input-padding-sm: $space-xs $space-sm; // Compact padding
+$input-padding-md: $space-sm $space-md; // Standard padding
+$input-padding-lg: $space-md $space-lg; // Large padding
+
+$input-border: $border-width solid $border-light;
+$input-border-hover: $border-width solid $border-medium;
+$input-border-focus: $border-width-thick solid $primary-color;
+$input-border-error: $border-width-thick solid $error;
+
+$input-background: $bg-white;
+$input-background-disabled: $neutral-lightest;
+$input-background-focus: $bg-white;
+
+// Button Sizing - Consistent, accessible buttons
+$button-height-sm: 2rem; // 32px - Compact buttons
+$button-height-md: 2.5rem; // 40px - Standard buttons (recommended minimum)
+$button-height-lg: 3rem; // 48px - Large buttons
+
+$button-padding-sm: $space-xs $space-md;
+$button-padding-md: $space-sm $space-lg;
+$button-padding-lg: $space-md $space-xl;
+
+// HSE Button Colors
+$button-primary-bg: $primary-color;
+$button-primary-hover: $primary-dark;
+$button-primary-text: $white;
+
+$button-secondary-bg: transparent;
+$button-secondary-border: $primary-color;
+$button-secondary-hover: $primary-color;
+$button-secondary-text: $primary-color;
+$button-secondary-text-hover: $white;
+
+// Focus States - WCAG AA compliant
+$focus-ring: 0 0 0 2px rgba($primary-color, 0.2);
+$focus-ring-error: 0 0 0 2px rgba($error, 0.2);
+$focus-ring-success: 0 0 0 2px rgba($success, 0.2);
+
+// Legacy Variable Mappings (for backward compatibility)
+$success-green: $success;
+$error-red: $error;
+$warning-orange: $warning;
+$input-height: $input-height-md;
+$input-padding: $input-padding-md;
+$input-border-focus: $border-width-thick solid $primary-color;

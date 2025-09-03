@@ -2,8 +2,50 @@
 
 {% block title %}Patient Data - {{ patient.name if patient else 'Unknown Patient' }}{% endblock %}
 
+{% block extra_css %}
+<link href="{{ static('css/patient_cda_ps_guidelines.css') }}?v=20250804" rel="stylesheet" media="screen">
+{% endblock %}
+
 {% block content %}
 <div class="container">
+    <!-- Enhanced Navigation Breadcrumb -->
+    <!-- <div class="cda-navigation">
+        <div class="breadcrumb-nav">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="/" class="breadcrumb-link">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/portal/" class="breadcrumb-link">
+                            <i class="fas fa-globe"></i> Country Selection
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/portal/country/{{ country_code }}/search/" class="breadcrumb-link">
+                            <i class="fas fa-search"></i> {{ country.name }} Search
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <i class="fas fa-user"></i> Patient Data
+                    </li>
+                </ol>
+            </nav> -->
+
+            <!-- Quick Actions -->
+            <!-- <div class="quick-actions">
+                <a href="/portal/country/{{ country_code }}/search/" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Back to Search
+                </a>
+                <a href="/portal/" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-search"></i> New Search
+                </a>
+            </div>
+        </div>
+    </div> -->
+
     <div class="results-header">
         <h1>🏥 Patient Data</h1>
         <div class="country-info">

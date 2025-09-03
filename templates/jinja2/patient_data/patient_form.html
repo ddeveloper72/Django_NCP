@@ -2,8 +2,40 @@
 
 {% block title %}Patient Search - EU NCP Portal{% endblock %}
 
+{% block extra_css %}
+<link href="{{ static('css/patient_cda_ps_guidelines.css') }}?v=20250804" rel="stylesheet" media="screen">
+{% endblock %}
+
 {% block content %}
 <div class="patient-form-container">
+    <!-- Enhanced Navigation Breadcrumb -->
+    <!-- <div class="cda-navigation">
+        <div class="breadcrumb-nav">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="/" class="breadcrumb-link">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <i class="fas fa-search"></i> Patient Search
+                    </li>
+                </ol>
+            </nav> -->
+
+            <!-- Quick Actions -->
+            <!-- <div class="quick-actions">
+                <a href="/" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="/portal/" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-search"></i> Portal Search
+                </a>
+            </div>
+        </div>
+    </div> -->
+
     <div class="form-header">
         <h1 class="page-title">EU NCP Patient Document Search</h1>
         <p class="page-subtitle">

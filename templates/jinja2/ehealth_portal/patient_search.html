@@ -4,6 +4,33 @@
 
 {% block extra_css %}
 <!-- Patient search styles now handled by SASS compilation in main.css -->
+<link href="{{ static('css/patient_cda_ps_guidelines.css') }}?v=20250804" rel="stylesheet" media="screen">
+{% endblock %}
+
+{% block page_context %}
+<div class="page-context-content">
+    <div class="page-info">
+        {% if country_code %}
+        <span class="page-location">
+            <img src="{{ static('flags/' + country_code + '.webp') }}" alt="{{ country.name }} flag"
+                class="context-flag">
+            {{ country.name }} Patient Search
+        </span>
+        {% else %}
+        <span class="page-location">Patient Search</span>
+        {% endif %}
+    </div>
+    <div class="page-actions">
+        <a href="/portal/" class="btn btn-outline-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> Back to Countries
+        </a>
+        {% if country_code %}
+        <a href="/portal/country/{{ country_code }}/refresh-ism/" class="btn btn-outline-primary btn-sm">
+            <i class="fa fa-refresh"></i> Refresh ISM
+        </a>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -17,14 +44,6 @@
                 {% endif %}
                 {{ country.name }} Patient Search
             </h1>
-            <div class="header-actions">
-                <a href="/portal/country/{{ country_code }}/refresh-ism/" class="refresh-ism">
-                    🔄 Refresh ISM
-                </a>
-                <a href="{{ url('country_selection') }}" class="btn btn-light ms-2">
-                    ← Back to Countries
-                </a>
-            </div>
         </div>
     </div>
 

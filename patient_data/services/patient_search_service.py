@@ -64,8 +64,21 @@ class PatientMatch:
         """Check if L3 CDA is available"""
         return bool(self.l3_cda_content)
 
-    def get_rendering_cda(self) -> tuple[Optional[str], str]:
-        """Get the CDA content and type for rendering"""
+    def get_rendering_cda(
+        self, preferred_type: Optional[str] = None
+    ) -> tuple[Optional[str], str]:
+        """Get the CDA content and type for rendering
+
+        Args:
+            preferred_type: Preferred CDA type ('L1' or 'L3'). If None, defaults to L3.
+        """
+        # If specific type is requested and available, use it
+        if preferred_type == "L1" and self.l1_cda_content:
+            return self.l1_cda_content, "L1"
+        elif preferred_type == "L3" and self.l3_cda_content:
+            return self.l3_cda_content, "L3"
+
+        # Fallback to default logic (prefer L3, then L1)
         if self.l3_cda_content:
             return self.l3_cda_content, "L3"
         elif self.l1_cda_content:

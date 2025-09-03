@@ -9,12 +9,19 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.urls import path, reverse
 from django.http import HttpResponseRedirect
+from django.forms import JSONField
+from django import forms
+import json
+
 from .models import (
     MemberState,
     PatientIdentifier,
     PatientData,
     AvailableService,
     PatientServiceRequest,
+    ClinicalSectionConfig,
+    ColumnPreset,
+    DataExtractionLog,
 )
 
 # from . import test_data_views  # Temporarily disabled - needs fixing
@@ -358,6 +365,165 @@ patient_admin_site = PatientDataAdminSite(name="patient_admin")
 patient_admin_site.register(MemberState, MemberStateAdmin)
 patient_admin_site.register(AvailableService, AvailableServiceAdmin)
 patient_admin_site.register(PatientIdentifier, PatientIdentifierAdmin)
+
+
+# Column Configuration Admin Classes
+class ClinicalSectionConfigForm(forms.ModelForm):
+    """Custom form for column configuration"""
+
+    xpath_patterns = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 3, "cols": 80}),
+        help_text="Enter XPath patterns as JSON list, e.g., ['.//hl7:code/@code', './/hl7:value/@displayName']",
+        required=False,
+    )
+
+    field_mappings = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 3, "cols": 80}),
+        help_text="Enter field name patterns as JSON list, e.g., ['Problem DisplayName', 'Condition', 'problem']",
+        required=False,
+    )
+
+    class Meta:
+        model = ClinicalSectionConfig
+        fields = "__all__"
+
+    def clean_xpath_patterns(self):
+        """Validate XPath patterns JSON"""
+        data = self.cleaned_data["xpath_patterns"]
+        if not data:
+            return []
+        try:
+            patterns = json.loads(data)
+            if not isinstance(patterns, list):
+                raise forms.ValidationError("XPath patterns must be a JSON list")
+            return patterns
+        except json.JSONDecodeError:
+            raise forms.ValidationError("Invalid JSON format for XPath patterns")
+
+    def clean_field_mappings(self):
+        """Validate field mappings JSON"""
+        data = self.cleaned_data["field_mappings"]
+        if not data:
+            return []
+        try:
+            mappings = json.loads(data)
+            if not isinstance(mappings, list):
+                raise forms.ValidationError("Field mappings must be a JSON list")
+            return mappings
+        except json.JSONDecodeError:
+            raise forms.ValidationError("Invalid JSON format for field mappings")
+
+
+@admin.register(ClinicalSectionConfig)
+class ClinicalSectionConfigAdmin(admin.ModelAdmin):
+    """Admin interface for clinical section column configuration"""
+
+    form = ClinicalSectionConfigForm
+    list_display = [
+        "section_code",
+        "display_label",
+        "column_type",
+        "is_enabled",
+        "is_primary",
+        "display_order",
+        "created_by",
+    ]
+    list_filter = [
+        "section_code",
+        "column_type",
+        "is_enabled",
+        "is_primary",
+        "created_by",
+    ]
+    search_fields = ["display_label", "column_key", "section_code"]
+    ordering = ["section_code", "display_order", "display_label"]
+
+    fieldsets = (
+        (
+            "Basic Configuration",
+            {"fields": ("section_code", "column_key", "display_label", "column_type")},
+        ),
+        (
+            "Display Settings",
+            {"fields": ("is_enabled", "is_primary", "display_order", "css_class")},
+        ),
+        (
+            "Data Extraction",
+            {
+                "fields": ("xpath_patterns", "field_mappings"),
+                "description": "Configure how data is extracted from CDA XML",
+            },
+        ),
+    )
+
+    def save_model(self, request, obj, form, change):
+        """Set created_by to current user"""
+        if not change:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(ColumnPreset)
+class ColumnPresetAdmin(admin.ModelAdmin):
+    """Admin interface for column presets"""
+
+    list_display = ["name", "section_code", "is_default", "created_by", "created_at"]
+    list_filter = ["section_code", "is_default", "created_by"]
+    search_fields = ["name", "description"]
+
+    fieldsets = (
+        (
+            "Preset Information",
+            {"fields": ("name", "description", "section_code", "is_default")},
+        ),
+        (
+            "Column Configuration",
+            {
+                "fields": ("columns_config",),
+                "description": "JSON configuration for all columns in this preset",
+            },
+        ),
+    )
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(DataExtractionLog)
+class DataExtractionLogAdmin(admin.ModelAdmin):
+    """Admin interface for data extraction discovery logs"""
+
+    list_display = [
+        "section_code",
+        "field_name",
+        "frequency_count",
+        "value_type",
+        "last_seen",
+    ]
+    list_filter = ["section_code", "value_type", "first_seen", "last_seen"]
+    search_fields = ["field_name", "xpath_found", "sample_value"]
+    readonly_fields = ["first_seen", "last_seen"]
+    ordering = ["-frequency_count", "section_code", "field_name"]
+
+    fieldsets = (
+        (
+            "Extraction Details",
+            {"fields": ("patient_id", "section_code", "field_name", "xpath_found")},
+        ),
+        (
+            "Value Information",
+            {"fields": ("sample_value", "value_type", "frequency_count")},
+        ),
+        ("Timestamps", {"fields": ("first_seen", "last_seen")}),
+    )
+
+    def has_add_permission(self, request):
+        """Logs are created automatically, no manual additions"""
+        return False
+
+
 patient_admin_site.register(PatientData, PatientDataAdmin)
 patient_admin_site.register(PatientServiceRequest, PatientServiceRequestAdmin)
 

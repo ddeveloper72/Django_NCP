@@ -64,19 +64,31 @@ class EnhancedCDADocumentView(View):
                 cda_document, source_language
             )
 
-            # Extract medications specifically for enhanced display
+            # Extract medications specifically for enhanced display and create clinical tables
             medications = []
-            if clinical_sections and 'sections' in clinical_sections:
-                for section in clinical_sections['sections']:
-                    if 'structured_data' in section:
-                        section_title = section.get('title', {})
+            if clinical_sections and "sections" in clinical_sections:
+                # Import the clinical table creation function
+                from ..views import create_clinical_table
+
+                for section in clinical_sections["sections"]:
+                    # Create clinical table structure for proper display
+                    if "table_data" in section and section["table_data"]:
+                        section["clinical_table"] = create_clinical_table(
+                            section["table_data"],
+                            section.get("section_code", ""),
+                            section.get("title", "Clinical Data"),
+                        )
+
+                    # Extract medications for the separate comprehensive section
+                    if "structured_data" in section:
+                        section_title = section.get("title", {})
                         if isinstance(section_title, dict):
-                            title_text = section_title.get('original', '')
+                            title_text = section_title.get("original", "")
                         else:
                             title_text = str(section_title)
-                        
-                        if 'medication' in title_text.lower():
-                            medications.extend(section['structured_data'])
+
+                        if "medication" in title_text.lower():
+                            medications.extend(section["structured_data"])
 
             # Prepare context for template
             context = {

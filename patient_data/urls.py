@@ -8,6 +8,7 @@ from django.urls import path
 from patient_data import views as main_views
 from .cda_test_views import test_patients_view, refresh_cda_index_view
 from .debug_views import debug_cda_index
+from .clean_cda_views import clean_patient_cda_view
 from .view_modules.enhanced_cda_view import (
     EnhancedCDADocumentView,
     toggle_translation_view,
@@ -38,7 +39,16 @@ urlpatterns = [
         main_views.patient_details_view,
         name="patient_details",
     ),
+    # Default CDA view (L3 preferred)
     path("cda/<int:patient_id>/", main_views.patient_cda_view, name="patient_cda_view"),
+    # Clean CDA view with structured data extraction
+    path("clean/<int:patient_id>/", clean_patient_cda_view, name="clean_cda_view"),
+    # Specific CDA type view
+    path(
+        "cda/<int:patient_id>/<str:cda_type>/",
+        main_views.patient_cda_view,
+        name="patient_cda_view_typed",
+    ),
     path(
         "cda/translation-toggle/<int:patient_id>/",
         main_views.cda_translation_toggle,
@@ -124,11 +134,6 @@ urlpatterns = [
         name="export_translated_cda",
     ),
     path(
-        "cda/translated/<int:patient_id>/",
-        enhanced_cda_translation_views.patient_cda_translated_view,
-        name="patient_cda_translated_view",
-    ),
-    path(
         "cda/translate-section/",
         enhanced_cda_translation_views.translate_cda_section_ajax,
         name="translate_cda_section_ajax",
@@ -197,8 +202,6 @@ urlpatterns = [
         main_views.view_uploaded_document,
         name="view_uploaded_document",
     ),
-    # PS Display Guidelines Table Rendering Test
-    path("test/ps-tables/", main_views.test_ps_table_rendering, name="test_ps_tables"),
     # Patient data display (if function exists)
     # path("patient/<str:patient_id>/", views.patient_data_view, name="patient_data"),
     # Demo and testing (comment out until views exist)

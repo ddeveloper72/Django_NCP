@@ -23,80 +23,6 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def patient_cda_translated_view(request, patient_id):
-    """
-    Enhanced CDA document view with comprehensive translation capabilities
-    """
-    try:
-        patient_data = PatientData.objects.get(id=patient_id)
-
-        # Get CDA match from session
-        match_data = request.session.get(f"patient_match_{patient_id}")
-
-        if not match_data:
-            messages.error(request, "No CDA document found for this patient.")
-            return redirect("patient_data:patient_details", patient_id=patient_id)
-
-        # Get translation parameters
-        source_language = request.GET.get("source_language", "fr")  # Default to French
-        target_language = request.GET.get("target_language", "en")  # Default to English
-
-        # Initialize translation service
-        translation_service = EnhancedCDATranslationService(
-            target_language=target_language
-        )
-
-        try:
-            # Translate the CDA document
-            translated_document = translation_service.translate_cda_document(
-                xml_content=match_data["cda_content"], source_language=source_language
-            )
-
-            # Get available languages for selectors
-            available_languages = get_available_translation_languages()
-
-            # Get template translations based on detected document language
-            detected_lang = detect_document_language(match_data["cda_content"])
-            template_translations = get_template_translations(
-                source_language=detected_lang, target_language=target_language
-            )
-
-            context = {
-                "patient_data": patient_data,
-                "translated_document": translated_document,
-                "source_country": match_data["country_code"],
-                "confidence": round(match_data["confidence_score"] * 100, 1),
-                "file_name": match_data.get("file_path", "").split("/")[-1],
-                "current_source_language": source_language,
-                "current_target_language": target_language,
-                "available_languages": available_languages,
-                "translation_available": True,
-                "template_translations": template_translations,
-                "detected_source_language": detected_lang,
-            }
-
-            return render(
-                request,
-                "patient_data/patient_cda_translated.html",
-                context,
-                using="jinja2",
-            )
-
-        except Exception as e:
-            logger.error(f"Error translating CDA document: {e}")
-            messages.error(request, f"Translation failed: {str(e)}")
-            return redirect("patient_data:patient_cda_view", patient_id=patient_id)
-
-    except PatientData.DoesNotExist:
-        messages.error(request, "Patient data not found.")
-        return redirect("patient_data:patient_data_form")
-    except Exception as e:
-        logger.error(f"Error in translated CDA view: {e}")
-        messages.error(request, f"Error loading translated document: {str(e)}")
-        return redirect("patient_data:patient_details", patient_id=patient_id)
-
-
-@login_required
 @require_http_methods(["POST"])
 @csrf_exempt
 def translate_cda_section_ajax(request):
@@ -233,9 +159,7 @@ def download_translated_cda(request, patient_id):
     except Exception as e:
         logger.error(f"Error downloading translated CDA: {e}")
         messages.error(request, f"Download failed: {str(e)}")
-        return redirect(
-            "patient_data:patient_cda_translated_view", patient_id=patient_id
-        )
+        return redirect("patient_data:patient_cda_view", patient_id=patient_id)
 
 
 @login_required

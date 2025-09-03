@@ -4,10 +4,36 @@
 
 {% block extra_css %}
 <!-- Country selection styles are handled by SASS compilation in main.css -->
+<link href="{{ static('css/patient_cda_ps_guidelines.css') }}?v=20250804" rel="stylesheet" media="screen">
+{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb breadcrumb-enhanced">
+        <li class="breadcrumb-item">
+            <a href="/" class="breadcrumb-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-globe"></i> Country Selection
+        </li>
+    </ol>
+</nav>
 {% endblock %}
 
 {% block content %}
 <div class="country-selection-page">
+    <!-- Quick Actions moved to top of content -->
+    <div class="mb-4 text-end">
+        <a href="/" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <a href="/patients/" class="btn btn-secondary btn-sm">
+            <i class="fas fa-search-plus"></i> Advanced Search
+        </a>
+    </div>
+
     <!-- Main Content Container -->
     <div class="container">
         <div class="country-header">

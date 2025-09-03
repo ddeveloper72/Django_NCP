@@ -239,3 +239,143 @@ class PatientServiceRequest(models.Model):
 
     def __str__(self):
         return f"{self.requested_service.service_name} for {self.patient_identifier} - {self.status}"
+
+
+# Column Configuration Models for Dynamic Clinical Tables
+class ClinicalSectionConfig(models.Model):
+    """Configuration for dynamic column management in clinical tables"""
+
+    SECTION_CHOICES = [
+        ("11450-4", "Problem List"),
+        ("47519-4", "History of Procedures"),
+        ("10160-0", "Medication History"),
+        ("30954-2", "Relevant Diagnostic Tests"),
+        ("8716-3", "Vital Signs"),
+        ("47420-5", "Functional Status"),
+        ("29762-2", "Social History"),
+        ("10157-6", "Family History"),
+        ("48765-2", "Allergies and Adverse Reactions"),
+    ]
+
+    COLUMN_TYPES = [
+        ("code", "Medical Code"),
+        ("text", "Free Text"),
+        ("date", "Date/Time"),
+        ("numeric", "Numeric Value"),
+        ("status", "Status/State"),
+        ("reference", "Reference/Link"),
+        ("coded_text", "Coded Text"),
+        ("composite", "Composite Field"),
+        ("custom", "Custom Processing"),
+    ]
+
+    section_code = models.CharField(max_length=20, choices=SECTION_CHOICES)
+    column_key = models.CharField(
+        max_length=100, help_text="Unique key for this column"
+    )
+    display_label = models.CharField(
+        max_length=200, help_text="Label shown in table header"
+    )
+    column_type = models.CharField(max_length=20, choices=COLUMN_TYPES)
+
+    # Data extraction configuration
+    xpath_patterns = models.JSONField(
+        default=list, blank=True, help_text="XPath patterns to extract data from XML"
+    )
+    field_mappings = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Field name patterns to match in parsed data",
+    )
+
+    # Display configuration
+    is_enabled = models.BooleanField(default=True)
+    is_primary = models.BooleanField(
+        default=False, help_text="Primary identifying column"
+    )
+    display_order = models.IntegerField(default=0, help_text="Column display order")
+    css_class = models.CharField(
+        max_length=100, blank=True, help_text="CSS class for styling"
+    )
+
+    # Metadata
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ["section_code", "column_key"]
+        ordering = ["section_code", "display_order", "display_label"]
+        verbose_name = "Clinical Section Column Configuration"
+        verbose_name_plural = "Clinical Section Column Configurations"
+
+    def __str__(self):
+        return f"{self.get_section_code_display()} - {self.display_label}"
+
+
+class ColumnPreset(models.Model):
+    """Predefined column sets for different clinical scenarios"""
+
+    name = models.CharField(max_length=200, unique=True)
+    description = models.TextField(blank=True)
+    section_code = models.CharField(
+        max_length=20, choices=ClinicalSectionConfig.SECTION_CHOICES
+    )
+
+    # Preset configuration
+    columns_config = models.JSONField(
+        help_text="Complete column configuration for this preset"
+    )
+    is_default = models.BooleanField(
+        default=False, help_text="Default preset for this section"
+    )
+
+    # Metadata
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["section_code", "name"]
+        verbose_name = "Column Configuration Preset"
+        verbose_name_plural = "Column Configuration Presets"
+
+    def __str__(self):
+        return f"{self.name} ({self.get_section_code_display()})"
+
+
+class DataExtractionLog(models.Model):
+    """Log discovered data endpoints for admin configuration"""
+
+    VALUE_TYPES = [
+        ("text", "Text Content"),
+        ("code", "Medical Code"),
+        ("date", "Date/Time"),
+        ("numeric", "Numeric Value"),
+        ("boolean", "Boolean"),
+        ("reference", "Reference/ID"),
+        ("unknown", "Unknown Type"),
+    ]
+
+    patient_id = models.CharField(max_length=200, help_text="Patient identifier")
+    section_code = models.CharField(max_length=20, help_text="Clinical section code")
+    field_name = models.CharField(max_length=200, help_text="Discovered field name")
+    xpath_found = models.TextField(help_text="XPath where data was found")
+    sample_value = models.TextField(blank=True, help_text="Sample value for reference")
+    value_type = models.CharField(max_length=20, choices=VALUE_TYPES, default="unknown")
+    frequency_count = models.IntegerField(
+        default=1, help_text="How often this endpoint appears"
+    )
+
+    # Timestamps
+    first_seen = models.DateTimeField(auto_now_add=True)
+    last_seen = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ["section_code", "field_name", "xpath_found"]
+        ordering = ["-frequency_count", "section_code", "field_name"]
+        verbose_name = "Data Extraction Discovery Log"
+        verbose_name_plural = "Data Extraction Discovery Logs"
+
+    def __str__(self):
+        return f"{self.section_code}: {self.field_name} ({self.frequency_count}x)"
