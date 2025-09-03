@@ -97,3 +97,106 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Prototyping and Testing Files
+# Test files
+test_*.py
+*_test.py
+debug_*.py
+analyze_*.py
+check_*.py
+investigate_*.py
+extract_*.py
+validate_*.py
+verify_*.py
+write_*.py
+diagnose_*.py
+demonstrate_*.py
+direct_*.py
+
+# Quick prototype files
+quick_*.py
+simple_*.py
+basic_*.py
+minimal_*.py
+temp_*.py
+temporary_*.py
+
+# Demo and example files
+demo_*.py
+example_*.py
+sample_*.py
+mock_*.py
+
+# Template and migration helpers
+*_fix.py
+*_helper.py
+*_migration.py
+fix_*.py
+convert_*.py
+replace_*.py
+targeted_*.py
+template_*.py
+comprehensive_*.py
+optional_*.py
+
+# Test output files
+*_results.txt
+*_results.json
+*_debug.txt
+*_debug.json
+*_output.txt
+*_output.json
+test_output.*
+debug_output.*
+
+# Temporary data files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+nul
+
+# Malta-specific test files
+malta_*.py
+malta_*.txt
+malta_*.json
+
+# CDA test files
+cda_*.py
+cda_*.txt
+cda_*.json
+*_cda_*.py
+
+# Test output and server files
+test_server.log
+test_cda_with_*.xml
+
+# Comprehensive analysis files
+comprehensive_*.py
+administrative_*.py
+*_integration.py
+*_gap_analysis.py
+
+# Portuguese/Language specific test files
+portuguese_*.py
+
+# Test CSS files
+test_*.css
+test_*.scss
+test_*.css.map
+
+# Fix and conversion utilities
+fix_*.py
+convert_*.py
+*_to_*.py
+
+# Important Exceptions - Keep these files tracked
+!patient_data/test_*.py
+!patient_data/**/test_*.py
+!*/management/commands/test_*.py
+!test_data/
+!*/test_data/
+!test_data/**/*
+!*/test_data/**/*
