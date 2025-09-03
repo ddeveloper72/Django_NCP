@@ -22,6 +22,8 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import reverse
 from jinja2 import Environment
 import os
+import sys
+import django
 
 
 def url_helper(viewname, *args, **kwargs):
@@ -80,6 +82,8 @@ def environment(**options):
         {
             "static": staticfiles_storage.url,
             "url": url_helper,  # DO NOT change to: "url": reverse
+            "django_version": django.get_version(),
+            "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         }
     )
 
