@@ -35,79 +35,79 @@ urlpatterns = [
     # Patient data form and search
     path("", main_views.patient_data_view, name="patient_data_form"),
     path(
-        "details/<int:patient_id>/",
+        "details/<str:patient_id>/",
         main_views.patient_details_view,
         name="patient_details",
     ),
     # Default CDA view (L3 preferred)
-    path("cda/<int:patient_id>/", main_views.patient_cda_view, name="patient_cda_view"),
+    path("cda/<str:patient_id>/", main_views.patient_cda_view, name="patient_cda_view"),
     # Document selection for multiple CDA documents
     path(
-        "select-document/<int:patient_id>/",
+        "select-document/<str:patient_id>/",
         main_views.select_document_view,
         name="select_document",
     ),
     # Clean CDA view with structured data extraction
-    path("clean/<int:patient_id>/", clean_patient_cda_view, name="clean_cda_view"),
+    path("clean/<str:patient_id>/", clean_patient_cda_view, name="clean_cda_view"),
     # Specific CDA type view
     path(
-        "cda/<int:patient_id>/<str:cda_type>/",
+        "cda/<str:patient_id>/<str:cda_type>/",
         main_views.patient_cda_view,
         name="patient_cda_view_typed",
     ),
     path(
-        "cda/translation-toggle/<int:patient_id>/",
+        "cda/translation-toggle/<str:patient_id>/",
         main_views.cda_translation_toggle,
         name="cda_translation_toggle",
     ),
     path(
-        "download/<int:patient_id>/",
+        "download/<str:patient_id>/",
         main_views.download_cda_pdf,
         name="download_cda_pdf",
     ),
     # New CDA/ORCD views based on requirements
     path(
-        "download/html/<int:patient_id>/",
+        "download/html/<str:patient_id>/",
         main_views.download_cda_html,
         name="download_cda_html",
     ),
     path(
-        "download/patient-summary-pdf/<int:patient_id>/",
+        "download/patient-summary-pdf/<str:patient_id>/",
         main_views.download_patient_summary_pdf,
         name="download_patient_summary_pdf",
     ),
     path(
-        "download/patient-summary-pdf-file/<int:patient_id>/",
+        "download/patient-summary-pdf-file/<str:patient_id>/",
         main_views.download_patient_summary_pdf_file,
         name="download_patient_summary_pdf_file",
     ),
     path(
-        "orcd/<int:patient_id>/",
+        "orcd/<str:patient_id>/",
         main_views.patient_orcd_view,
         name="patient_orcd_view",
     ),
     path(
-        "orcd/<int:patient_id>/download/",
+        "orcd/<str:patient_id>/download/",
         main_views.download_orcd_pdf,
         name="download_orcd_pdf",
     ),
     path(
-        "orcd/<int:patient_id>/view/",
+        "orcd/<str:patient_id>/view/",
         main_views.view_orcd_pdf,
         name="view_orcd_pdf",
     ),
     path(
-        "orcd/<int:patient_id>/debug/",
+        "orcd/<str:patient_id>/debug/",
         main_views.debug_orcd_pdf,
         name="debug_orcd_pdf",
     ),
     path(
-        "orcd/<int:patient_id>/base64/",
+        "orcd/<str:patient_id>/base64/",
         main_views.orcd_pdf_base64,
         name="orcd_pdf_base64",
     ),
     path(
-        "orcd/<int:patient_id>/download/<int:attachment_index>/",
+        "orcd/<str:patient_id>/download/<int:attachment_index>/",
         main_views.download_orcd_pdf,
         name="download_orcd_pdf_indexed",
     ),
@@ -119,28 +119,28 @@ urlpatterns = [
     ),
     # Enhanced CDA Display with Patient ID (using our working view)
     path(
-        "cda/enhanced_display/<int:patient_id>/",
+        "cda/enhanced_display/<str:patient_id>/",
         EnhancedCDADisplayView.as_view(),
         name="enhanced_cda_display_with_id",
     ),
     # Enhanced CDA Translation Views
     path(
-        "cda/enhanced/<int:patient_id>/",
+        "cda/enhanced/<str:patient_id>/",
         EnhancedCDADocumentView.as_view(),
         name="enhanced_cda_view",
     ),
     path(
-        "cda/translate-toggle/<int:patient_id>/",
+        "cda/translate-toggle/<str:patient_id>/",
         toggle_translation_view,
         name="toggle_translation_view",
     ),
     path(
-        "cda/section/<int:patient_id>/<str:section_id>/",
+        "cda/section/<str:patient_id>/<str:section_id>/",
         get_section_translation,
         name="get_section_translation",
     ),
     path(
-        "cda/export/<int:patient_id>/",
+        "cda/export/<str:patient_id>/",
         export_translated_cda,
         name="export_translated_cda",
     ),
@@ -150,7 +150,7 @@ urlpatterns = [
         name="translate_cda_section_ajax",
     ),
     path(
-        "cda/download-translated/<int:patient_id>/",
+        "cda/download-translated/<str:patient_id>/",
         enhanced_cda_translation_views.download_translated_cda,
         name="download_translated_cda",
     ),
