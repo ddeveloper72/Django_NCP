@@ -879,22 +879,6 @@
                     {% else %}
                     <p class="text-muted">No original clinical data available for this section.</p>
                     {% endif %}
-                    <div class="alert alert-info mb-3">
-                        <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical
-                                data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
-                            mapping.</small>
-                    </div>
-                    <pre class="json-content">{{ section.structured_data | tojson(indent=2) }}</pre>
-                    {% elif section.content and section.content.original %}
-                    <div class="alert alert-warning mb-3">
-                        <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing
-                            raw XML content.</small>
-                    </div>
-                    <pre
-                        class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
-                    {% else %}
-                    <p class="text-muted">No original clinical data available for this section.</p>
-                    {% endif %}
                 </div>
             </div>
         </div> {% elif section.has_entries %}
