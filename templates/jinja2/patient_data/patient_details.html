@@ -211,10 +211,10 @@
                     <div class="metadata-item">
                         <i class="icon-eye"></i>
                         <span>Rendering: {{ preferred_cda_type }} CDA ({{ 'Structured Clinical Content' if
-                            preferred_cda_type == 'L3' else 'Original Document Headers' }})</span>
+                            preferred_cda_type == 'L3' else 'Unstructured Document Content' }})</span>
                     </div>
                 </div>
-                <span>Document Type: L3 CDA with L1 ORCD</span>
+                <span>Document Type: {{ preferred_cda_type }} CDA {{ 'with L1 ORCD' if l1_available else '' }}</span>
             </div>
         </div>
     </div>
