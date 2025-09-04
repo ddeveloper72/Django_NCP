@@ -363,6 +363,54 @@
         margin-bottom: 15px;
         font-size: 1.1rem;
     }
+
+    /* Original Clinical Data Table Styling */
+    .original-clinical-table .table {
+        margin-bottom: 0;
+        font-size: 0.9em;
+    }
+
+    .original-clinical-table .table-primary th {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0a58ca;
+        font-weight: 600;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .original-clinical-table .table td {
+        padding: 0.75rem 0.5rem;
+        vertical-align: top;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .original-clinical-table .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .original-value {
+        font-weight: 600;
+        color: #212529;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .original-clinical-table code {
+        background-color: #f8f9fa;
+        color: #e83e8c;
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+        font-size: 0.8em;
+    }
+
+    .original-clinical-table .badge {
+        font-size: 0.75em;
+        margin-bottom: 0.25rem;
+    }
+
+    .original-clinical-table .card-footer {
+        border-top: 1px solid #0d6efd;
+        background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
+    }
 </style>
 {% endblock %}
 
@@ -819,7 +867,89 @@
                                 data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
                             mapping.</small>
                     </div>
-                    <pre class="json-content">{{ section.structured_data | tojson(indent=2) }}</pre>
+                    
+                    <!-- Original Clinical Data Table -->
+                    <div class="original-clinical-table">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th style="width: 25%;">Field</th>
+                                    <th style="width: 40%;">Original Value (NCPeH-A)</th>
+                                    <th style="width: 35%;">Context & Metadata</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in section.structured_data %}
+                                    {% if entry.fields %}
+                                        {% for field_name, field_data in entry.fields.items() %}
+                                        <tr>
+                                            <td class="fw-bold text-primary">{{ field_name }}</td>
+                                            <td>
+                                                <span class="original-value">{{ field_data.value or 'N/A' }}</span>
+                                                {% if field_data.xpath %}
+                                                <br><small class="text-muted">
+                                                    <i class="fas fa-code me-1"></i>XPath: <code>{{ field_data.xpath }}</code>
+                                                </small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if field_data.has_valueset %}
+                                                <span class="badge bg-success me-1">
+                                                    <i class="fas fa-database"></i> Value Set
+                                                </span>
+                                                {% endif %}
+                                                {% if field_data.needs_translation %}
+                                                <span class="badge bg-warning me-1">
+                                                    <i class="fas fa-language"></i> Translatable
+                                                </span>
+                                                {% endif %}
+                                                {% if entry.section_code %}
+                                                <br><small class="text-muted">
+                                                    <i class="fas fa-tag me-1"></i>Section: <code>{{ entry.section_code }}</code>
+                                                </small>
+                                                {% endif %}
+                                                {% if entry.section_type %}
+                                                <br><small class="text-muted">
+                                                    <i class="fas fa-folder me-1"></i>Type: {{ entry.section_type }}
+                                                </small>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <!-- Fallback for entries without structured fields -->
+                                        <tr>
+                                            <td class="fw-bold text-secondary">Entry {{ loop.index }}</td>
+                                            <td colspan="2">
+                                                <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                        <!-- Table Summary -->
+                        <div class="card-footer bg-light">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        <strong>{{ section.structured_data | length }}</strong> original entries
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        <strong>NCPeH-A</strong> source data
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        <strong>{{ section.title or 'Clinical Section' }}</strong>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     {% elif section.content and section.content.original %}
                     <div class="alert alert-warning mb-3">
                         <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing
@@ -940,7 +1070,89 @@
                                 data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
                             mapping.</small>
                     </div>
-                    <pre class="json-content">{{ section.structured_data | tojson(indent=2) }}</pre>
+                    
+                    <!-- Original Clinical Data Table -->
+                    <div class="original-clinical-table">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th style="width: 25%;">Field</th>
+                                    <th style="width: 40%;">Original Value (NCPeH-A)</th>
+                                    <th style="width: 35%;">Context & Metadata</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in section.structured_data %}
+                                    {% if entry.fields %}
+                                        {% for field_name, field_data in entry.fields.items() %}
+                                        <tr>
+                                            <td class="fw-bold text-primary">{{ field_name }}</td>
+                                            <td>
+                                                <span class="original-value">{{ field_data.value or 'N/A' }}</span>
+                                                {% if field_data.xpath %}
+                                                <br><small class="text-muted">
+                                                    <i class="fas fa-code me-1"></i>XPath: <code>{{ field_data.xpath }}</code>
+                                                </small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if field_data.has_valueset %}
+                                                <span class="badge bg-success me-1">
+                                                    <i class="fas fa-database"></i> Value Set
+                                                </span>
+                                                {% endif %}
+                                                {% if field_data.needs_translation %}
+                                                <span class="badge bg-warning me-1">
+                                                    <i class="fas fa-language"></i> Translatable
+                                                </span>
+                                                {% endif %}
+                                                {% if entry.section_code %}
+                                                <br><small class="text-muted">
+                                                    <i class="fas fa-tag me-1"></i>Section: <code>{{ entry.section_code }}</code>
+                                                </small>
+                                                {% endif %}
+                                                {% if entry.section_type %}
+                                                <br><small class="text-muted">
+                                                    <i class="fas fa-folder me-1"></i>Type: {{ entry.section_type }}
+                                                </small>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <!-- Fallback for entries without structured fields -->
+                                        <tr>
+                                            <td class="fw-bold text-secondary">Entry {{ loop.index }}</td>
+                                            <td colspan="2">
+                                                <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                        <!-- Table Summary -->
+                        <div class="card-footer bg-light">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        <strong>{{ section.structured_data | length }}</strong> original entries
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        <strong>NCPeH-A</strong> source data
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        <strong>{{ section.title or 'Clinical Section' }}</strong>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     {% elif section.content and section.content.original %}
                     <div class="alert alert-warning mb-3">
                         <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing
@@ -1031,7 +1243,89 @@
                                 data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
                             mapping.</small>
                     </div>
-                    <pre class="json-content">{{ section.structured_data | tojson(indent=2) }}</pre>
+                    
+                    <!-- Original Clinical Data Table -->
+                    <div class="original-clinical-table">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th style="width: 25%;">Field</th>
+                                    <th style="width: 40%;">Original Value (NCPeH-A)</th>
+                                    <th style="width: 35%;">Context & Metadata</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in section.structured_data %}
+                                    {% if entry.fields %}
+                                        {% for field_name, field_data in entry.fields.items() %}
+                                        <tr>
+                                            <td class="fw-bold text-primary">{{ field_name }}</td>
+                                            <td>
+                                                <span class="original-value">{{ field_data.value or 'N/A' }}</span>
+                                                {% if field_data.xpath %}
+                                                <br><small class="text-muted">
+                                                    <i class="fas fa-code me-1"></i>XPath: <code>{{ field_data.xpath }}</code>
+                                                </small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if field_data.has_valueset %}
+                                                <span class="badge bg-success me-1">
+                                                    <i class="fas fa-database"></i> Value Set
+                                                </span>
+                                                {% endif %}
+                                                {% if field_data.needs_translation %}
+                                                <span class="badge bg-warning me-1">
+                                                    <i class="fas fa-language"></i> Translatable
+                                                </span>
+                                                {% endif %}
+                                                {% if entry.section_code %}
+                                                <br><small class="text-muted">
+                                                    <i class="fas fa-tag me-1"></i>Section: <code>{{ entry.section_code }}</code>
+                                                </small>
+                                                {% endif %}
+                                                {% if entry.section_type %}
+                                                <br><small class="text-muted">
+                                                    <i class="fas fa-folder me-1"></i>Type: {{ entry.section_type }}
+                                                </small>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <!-- Fallback for entries without structured fields -->
+                                        <tr>
+                                            <td class="fw-bold text-secondary">Entry {{ loop.index }}</td>
+                                            <td colspan="2">
+                                                <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                        <!-- Table Summary -->
+                        <div class="card-footer bg-light">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        <strong>{{ section.structured_data | length }}</strong> original entries
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        <strong>NCPeH-A</strong> source data
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">
+                                        <strong>{{ section.title or 'Clinical Section' }}</strong>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     {% elif section.content and section.content.original %}
                     <div class="alert alert-warning mb-3">
                         <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing
