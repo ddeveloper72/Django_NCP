@@ -6,6 +6,7 @@ Basic implementation for patient search and credential management
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
 import logging
+import os
 import xml.etree.ElementTree as ET
 
 logger = logging.getLogger(__name__)
@@ -42,11 +43,23 @@ class PatientMatch:
     l3_cda_path: Optional[str] = None
     preferred_cda_type: str = "L3"  # Will be auto-determined in __post_init__
 
+    # Multiple document support for user selection
+    l1_documents: List[Dict[str, str]] = None  # List of {path, description, size}
+    l3_documents: List[Dict[str, str]] = None  # List of {path, description, size}
+    selected_l1_index: int = 0  # Index of currently selected L1 document
+    selected_l3_index: int = 0  # Index of currently selected L3 document
+
     def __post_init__(self):
         if self.available_documents is None:
             self.available_documents = []
         if self.confidence_score == 1.0 and self.match_score != 1.0:
             self.confidence_score = self.match_score
+
+        # Initialize document lists
+        if self.l1_documents is None:
+            self.l1_documents = []
+        if self.l3_documents is None:
+            self.l3_documents = []
 
         # Auto-determine preferred CDA type based on what's actually available
         # Priority: Use what's available, prefer L1 for unstructured docs, L3 for structured
@@ -105,6 +118,62 @@ class PatientMatch:
     def get_orcd_cda(self) -> Optional[str]:
         """Get the CDA content for ORCD (PDF) extraction - prefer L1"""
         return self.l1_cda_content or self.l3_cda_content
+
+    def get_available_document_types(self) -> List[str]:
+        """Get list of available CDA document types for this patient"""
+        types = []
+        if self.l1_documents and len(self.l1_documents) > 0:
+            types.append("L1")
+        if self.l3_documents and len(self.l3_documents) > 0:
+            types.append("L3")
+        return types
+
+    def get_document_list(self, cda_type: str) -> List[Dict[str, str]]:
+        """Get list of available documents for a specific CDA type"""
+        if cda_type == "L1":
+            return self.l1_documents or []
+        elif cda_type == "L3":
+            return self.l3_documents or []
+        return []
+
+    def select_document(self, cda_type: str, document_index: int) -> bool:
+        """Select a specific document by type and index"""
+        if (
+            cda_type == "L1"
+            and self.l1_documents
+            and 0 <= document_index < len(self.l1_documents)
+        ):
+            self.selected_l1_index = document_index
+            return True
+        elif (
+            cda_type == "L3"
+            and self.l3_documents
+            and 0 <= document_index < len(self.l3_documents)
+        ):
+            self.selected_l3_index = document_index
+            return True
+        return False
+
+    def get_selected_document_content(self, cda_type: str) -> Optional[str]:
+        """Get content of the currently selected document for a CDA type"""
+        try:
+            if cda_type == "L1" and self.l1_documents:
+                selected_doc = self.l1_documents[self.selected_l1_index]
+                with open(selected_doc["path"], "r", encoding="utf-8") as f:
+                    return f.read()
+            elif cda_type == "L3" and self.l3_documents:
+                selected_doc = self.l3_documents[self.selected_l3_index]
+                with open(selected_doc["path"], "r", encoding="utf-8") as f:
+                    return f.read()
+        except Exception as e:
+            logger.error(f"Error loading selected {cda_type} document: {e}")
+        return None
+
+    def get_document_summary(self) -> str:
+        """Get a summary of available documents for UI display"""
+        l1_count = len(self.l1_documents) if self.l1_documents else 0
+        l3_count = len(self.l3_documents) if self.l3_documents else 0
+        return f"L1: {l1_count} documents, L3: {l3_count} documents"
 
 
 class EUPatientSearchService:
@@ -217,36 +286,60 @@ class EUPatientSearchService:
                 l1_docs = [doc for doc in documents if doc.cda_type == "L1"]
                 l3_docs = [doc for doc in documents if doc.cda_type == "L3"]
 
-                # Load CDA content
+                # Prepare document lists for user selection
+                l1_document_list = []
+                l3_document_list = []
+
+                # Process all L1 documents
+                for i, l1_doc in enumerate(l1_docs):
+                    doc_info = {
+                        "path": l1_doc.file_path,
+                        "description": f"L1 Document {i+1} ({os.path.basename(l1_doc.file_path)})",
+                        "size": str(l1_doc.file_size),
+                        "last_modified": str(l1_doc.last_modified),
+                    }
+                    l1_document_list.append(doc_info)
+
+                # Process all L3 documents
+                for i, l3_doc in enumerate(l3_docs):
+                    doc_info = {
+                        "path": l3_doc.file_path,
+                        "description": f"L3 Document {i+1} ({os.path.basename(l3_doc.file_path)})",
+                        "size": str(l3_doc.file_size),
+                        "last_modified": str(l3_doc.last_modified),
+                    }
+                    l3_document_list.append(doc_info)
+
+                # Load default documents (first of each type) for backward compatibility
                 l1_cda_content = None
                 l3_cda_content = None
                 l1_file_path = None
                 l3_file_path = None
 
-                # Load L1 document if available
+                # Load first L1 document if available
                 if l1_docs:
-                    l1_doc = l1_docs[0]  # Use first L1 document
+                    l1_doc = l1_docs[0]
                     try:
                         with open(l1_doc.file_path, "r", encoding="utf-8") as f:
                             l1_cda_content = f.read()
                         l1_file_path = l1_doc.file_path
                         self.logger.info(
-                            f"Loaded L1 CDA from index: {l1_doc.file_path}"
+                            f"Loaded default L1 CDA from index: {l1_doc.file_path}"
                         )
                     except Exception as e:
                         self.logger.error(
                             f"Error loading L1 CDA {l1_doc.file_path}: {e}"
                         )
 
-                # Load L3 document if available
+                # Load first L3 document if available
                 if l3_docs:
-                    l3_doc = l3_docs[0]  # Use first L3 document
+                    l3_doc = l3_docs[0]
                     try:
                         with open(l3_doc.file_path, "r", encoding="utf-8") as f:
                             l3_cda_content = f.read()
                         l3_file_path = l3_doc.file_path
                         self.logger.info(
-                            f"Loaded L3 CDA from index: {l3_doc.file_path}"
+                            f"Loaded default L3 CDA from index: {l3_doc.file_path}"
                         )
                     except Exception as e:
                         self.logger.error(
@@ -281,6 +374,8 @@ class EUPatientSearchService:
                     l3_cda_path=l3_file_path,
                     l1_cda_content=l1_cda_content,
                     l3_cda_content=l3_cda_content,
+                    l1_documents=l1_document_list,
+                    l3_documents=l3_document_list,
                     patient_data={
                         "id": credentials.patient_id,
                         "name": f"{patient_info['given_name']} {patient_info['family_name']}",
