@@ -3420,78 +3420,159 @@ def transform_entries_for_interactive_tables(entries, section_title):
     """Transform entries from CDA processor format to interactive table format"""
     if not entries:
         return []
-    
+
     transformed = []
-    
+
     for entry in entries:
         # Handle different entry formats from Enhanced CDA Processor
-        
+
         # Format 1: Entry with fields structure (from generic XML parsing)
         fields = entry.get("fields", {})
         entry_text = entry.get("text", "")
-        
+
         # Format 2: Direct field data (from country-specific or table extraction)
         if not fields and isinstance(entry, dict):
             # Convert direct entry to fields format
-            fields = {k: {"value": v} for k, v in entry.items() if k not in ["text", "id", "entry_type"]}
+            fields = {
+                k: {"value": v}
+                for k, v in entry.items()
+                if k not in ["text", "id", "entry_type"]
+            }
             if not entry_text:
                 entry_text = entry.get("text", entry.get("description", ""))
-        
+
         if "medication" in section_title.lower():
             # Transform for medication table
             transformed_entry = {
-                "Medication": extract_field_value_simple(fields, ["Medication Name", "Medication", "Drug Name", "medication_name", "name"]) or entry_text,
-                "Dosage & Strength": extract_field_value_simple(fields, ["Dosage", "Strength", "Dose", "dose", "dosage"]),
-                "Frequency": extract_field_value_simple(fields, ["Frequency", "Administration Frequency", "frequency"]),
-                "Status": extract_field_value_simple(fields, ["Status", "Medication Status", "status"]) or "Active",
-                "Start Date": extract_field_value_simple(fields, ["Start Date", "Effective Date", "start_date", "date"]),
-                "Codes": extract_codes_simple(fields)
+                "Medication": extract_field_value_simple(
+                    fields,
+                    [
+                        "Medication Name",
+                        "Medication",
+                        "Drug Name",
+                        "medication_name",
+                        "name",
+                    ],
+                )
+                or entry_text,
+                "Dosage & Strength": extract_field_value_simple(
+                    fields, ["Dosage", "Strength", "Dose", "dose", "dosage"]
+                ),
+                "Frequency": extract_field_value_simple(
+                    fields, ["Frequency", "Administration Frequency", "frequency"]
+                ),
+                "Status": extract_field_value_simple(
+                    fields, ["Status", "Medication Status", "status"]
+                )
+                or "Active",
+                "Start Date": extract_field_value_simple(
+                    fields, ["Start Date", "Effective Date", "start_date", "date"]
+                ),
+                "Codes": extract_codes_simple(fields),
             }
         elif "allergi" in section_title.lower() or "adverse" in section_title.lower():
             # Transform for allergy table
             transformed_entry = {
-                "Allergen": extract_field_value_simple(fields, ["Allergen", "Agent", "Substance", "allergen", "agent"]) or entry_text,
-                "Reaction": extract_field_value_simple(fields, ["Reaction", "Manifestation", "reaction"]),
-                "Severity": extract_field_value_simple(fields, ["Severity", "Criticality", "severity"]),
-                "Status": extract_field_value_simple(fields, ["Status", "status"]) or "Active",
-                "First Noted": extract_field_value_simple(fields, ["Onset Date", "First Noted", "Date", "date", "onset_date"]),
-                "Codes": extract_codes_simple(fields)
+                "Allergen": extract_field_value_simple(
+                    fields, ["Allergen", "Agent", "Substance", "allergen", "agent"]
+                )
+                or entry_text,
+                "Reaction": extract_field_value_simple(
+                    fields, ["Reaction", "Manifestation", "reaction"]
+                ),
+                "Severity": extract_field_value_simple(
+                    fields, ["Severity", "Criticality", "severity"]
+                ),
+                "Status": extract_field_value_simple(fields, ["Status", "status"])
+                or "Active",
+                "First Noted": extract_field_value_simple(
+                    fields, ["Onset Date", "First Noted", "Date", "date", "onset_date"]
+                ),
+                "Codes": extract_codes_simple(fields),
             }
         elif "procedure" in section_title.lower():
             # Transform for procedure table
             transformed_entry = {
-                "Procedure": extract_field_value_simple(fields, ["Procedure", "Procedure Name", "procedure_name", "name"]) or entry_text,
-                "Date Performed": extract_field_value_simple(fields, ["Date Performed", "Procedure Date", "Date", "date", "performed_date"]),
-                "Status": extract_field_value_simple(fields, ["Status", "status"]) or "Completed",
-                "Healthcare Provider": extract_field_value_simple(fields, ["Provider", "Performer", "Healthcare Provider", "provider"]),
-                "Medical Codes": extract_codes_simple(fields)
+                "Procedure": extract_field_value_simple(
+                    fields, ["Procedure", "Procedure Name", "procedure_name", "name"]
+                )
+                or entry_text,
+                "Date Performed": extract_field_value_simple(
+                    fields,
+                    [
+                        "Date Performed",
+                        "Procedure Date",
+                        "Date",
+                        "date",
+                        "performed_date",
+                    ],
+                ),
+                "Status": extract_field_value_simple(fields, ["Status", "status"])
+                or "Completed",
+                "Healthcare Provider": extract_field_value_simple(
+                    fields, ["Provider", "Performer", "Healthcare Provider", "provider"]
+                ),
+                "Medical Codes": extract_codes_simple(fields),
             }
         elif "problem" in section_title.lower() or "diagnosis" in section_title.lower():
             # Transform for problem table
             transformed_entry = {
-                "Problem": extract_field_value_simple(fields, ["Problem", "Diagnosis", "Condition", "problem", "diagnosis", "condition"]) or entry_text,
-                "Status": extract_field_value_simple(fields, ["Status", "status"]) or "Active",
-                "Onset Date": extract_field_value_simple(fields, ["Onset Date", "Date", "onset_date", "date"]),
-                "Notes": extract_field_value_simple(fields, ["Notes", "Comment", "notes", "comment"]),
-                "Codes": extract_codes_simple(fields)
+                "Problem": extract_field_value_simple(
+                    fields,
+                    [
+                        "Problem",
+                        "Diagnosis",
+                        "Condition",
+                        "problem",
+                        "diagnosis",
+                        "condition",
+                    ],
+                )
+                or entry_text,
+                "Status": extract_field_value_simple(fields, ["Status", "status"])
+                or "Active",
+                "Onset Date": extract_field_value_simple(
+                    fields, ["Onset Date", "Date", "onset_date", "date"]
+                ),
+                "Notes": extract_field_value_simple(
+                    fields, ["Notes", "Comment", "notes", "comment"]
+                ),
+                "Codes": extract_codes_simple(fields),
             }
         elif "immuniz" in section_title.lower() or "vaccin" in section_title.lower():
             # Transform for immunization table
             transformed_entry = {
-                "Vaccine": extract_field_value_simple(fields, ["Vaccine", "Immunization", "vaccine_name", "name"]) or entry_text,
-                "Date Given": extract_field_value_simple(fields, ["Date Given", "Administration Date", "Date", "date"]),
-                "Dose": extract_field_value_simple(fields, ["Dose", "Dose Number", "dose"]),
-                "Status": extract_field_value_simple(fields, ["Status", "status"]) or "Completed",
-                "Codes": extract_codes_simple(fields)
+                "Vaccine": extract_field_value_simple(
+                    fields, ["Vaccine", "Immunization", "vaccine_name", "name"]
+                )
+                or entry_text,
+                "Date Given": extract_field_value_simple(
+                    fields, ["Date Given", "Administration Date", "Date", "date"]
+                ),
+                "Dose": extract_field_value_simple(
+                    fields, ["Dose", "Dose Number", "dose"]
+                ),
+                "Status": extract_field_value_simple(fields, ["Status", "status"])
+                or "Completed",
+                "Codes": extract_codes_simple(fields),
             }
         elif "device" in section_title.lower():
             # Transform for medical device table
             transformed_entry = {
-                "Device": extract_field_value_simple(fields, ["Device", "Device Name", "Medical Device", "device_name", "name"]) or entry_text,
-                "Type": extract_field_value_simple(fields, ["Type", "Device Type", "type"]),
-                "Status": extract_field_value_simple(fields, ["Status", "status"]) or "Active",
-                "Implant Date": extract_field_value_simple(fields, ["Implant Date", "Date", "implant_date", "date"]),
-                "Codes": extract_codes_simple(fields)
+                "Device": extract_field_value_simple(
+                    fields,
+                    ["Device", "Device Name", "Medical Device", "device_name", "name"],
+                )
+                or entry_text,
+                "Type": extract_field_value_simple(
+                    fields, ["Type", "Device Type", "type"]
+                ),
+                "Status": extract_field_value_simple(fields, ["Status", "status"])
+                or "Active",
+                "Implant Date": extract_field_value_simple(
+                    fields, ["Implant Date", "Date", "implant_date", "date"]
+                ),
+                "Codes": extract_codes_simple(fields),
             }
         else:
             # Generic transformation
@@ -3499,21 +3580,23 @@ def transform_entries_for_interactive_tables(entries, section_title):
             # Add all available fields
             for field_name, field_data in fields.items():
                 if isinstance(field_data, dict):
-                    value = field_data.get("value", field_data.get("displayName", str(field_data)))
+                    value = field_data.get(
+                        "value", field_data.get("displayName", str(field_data))
+                    )
                 else:
                     value = str(field_data)
-                
+
                 # Clean up field name for display
                 clean_field_name = field_name.replace("_", " ").title()
                 transformed_entry[clean_field_name] = value
-            
+
             # Add text content if available
             if entry_text and "Text Content" not in transformed_entry:
                 transformed_entry["Content"] = entry_text
-        
+
         if transformed_entry:
             transformed.append(transformed_entry)
-    
+
     return transformed
 
 
@@ -3557,14 +3640,16 @@ def generate_structured_cda_html(
         # Build the structured HTML content with collapsible sections
         sections_html = ""
 
-        logger.info(f"Processing {len(processed_sections)} sections for HTML generation")
+        logger.info(
+            f"Processing {len(processed_sections)} sections for HTML generation"
+        )
 
         for i, section in enumerate(processed_sections):
             section_title = section.get("title", "Unknown Section")
-            
+
             # Handle different section data formats from Enhanced CDA Processor
             section_entries = []
-            
+
             # Check if section has structured_data (the new format)
             if "structured_data" in section and section["structured_data"]:
                 section_entries = section["structured_data"]
@@ -3577,16 +3662,23 @@ def generate_structured_cda_html(
             # Fallback to entries field
             elif "entries" in section:
                 section_entries = section["entries"]
-            
+
             # Handle title format - could be string or dict
             if isinstance(section_title, dict):
-                section_title = section_title.get("translated", section_title.get("coded", section_title.get("original", "Unknown Section")))
-            
+                section_title = section_title.get(
+                    "translated",
+                    section_title.get(
+                        "coded", section_title.get("original", "Unknown Section")
+                    ),
+                )
+
             section_code = section.get("code", section.get("section_code", ""))
             original_content = section.get("original_content", "")
 
-            logger.info(f"Section {i}: '{section_title}' with {len(section_entries)} entries")
-            
+            logger.info(
+                f"Section {i}: '{section_title}' with {len(section_entries)} entries"
+            )
+
             # Debug: Log first entry structure if available
             if section_entries:
                 logger.info(f"First entry structure: {section_entries[0]}")
@@ -3596,8 +3688,10 @@ def generate_structured_cda_html(
                 continue
 
             # Transform entries to the format expected by interactive tables
-            transformed_entries = transform_entries_for_interactive_tables(section_entries, section_title)
-            
+            transformed_entries = transform_entries_for_interactive_tables(
+                section_entries, section_title
+            )
+
             if not transformed_entries:
                 logger.info(f"No transformed entries for section: {section_title}")
                 continue
@@ -3670,11 +3764,20 @@ def generate_structured_cda_html(
 
         # Handle patient data format - could be dict or object
         if isinstance(patient_data, dict):
-            patient_given_name = patient_data.get("name", "Unknown").split()[0] if patient_data.get("name") else "Unknown"
-            patient_family_name = patient_data.get("name", "Unknown").split()[-1] if patient_data.get("name") and len(patient_data.get("name", "").split()) > 1 else ""
+            patient_given_name = (
+                patient_data.get("name", "Unknown").split()[0]
+                if patient_data.get("name")
+                else "Unknown"
+            )
+            patient_family_name = (
+                patient_data.get("name", "Unknown").split()[-1]
+                if patient_data.get("name")
+                and len(patient_data.get("name", "").split()) > 1
+                else ""
+            )
         else:
-            patient_given_name = getattr(patient_data, 'given_name', 'Unknown')
-            patient_family_name = getattr(patient_data, 'family_name', '')
+            patient_given_name = getattr(patient_data, "given_name", "Unknown")
+            patient_family_name = getattr(patient_data, "family_name", "")
 
         # Create the complete self-contained HTML document
         html_content = f"""<!DOCTYPE html>
@@ -4058,9 +4161,9 @@ def generate_structured_cda_html(
         import traceback
 
         logger.error(f"Traceback: {traceback.format_exc()}")
-        
+
         # Only try to add messages if request has session middleware
-        if hasattr(request, '_messages'):
+        if hasattr(request, "_messages"):
             messages.error(request, "Error generating CDA HTML document.")
             return redirect("patient_data:patient_details", patient_id=patient_id)
         else:
