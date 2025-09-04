@@ -3223,11 +3223,29 @@ def patient_cda_view(request, patient_id, cda_type=None):
                 "administrative_data", {}
             )
 
-            # Update patient identity with enhanced data while preserving URL patient_id
+            # Update patient identity with enhanced data while preserving URL patient_id for routing
             if enhanced_patient_identity:
-                original_patient_id = context["patient_identity"]["patient_id"]
+                url_patient_id = context["patient_identity"][
+                    "patient_id"
+                ]  # Keep for URL routing
+                xml_patient_id = enhanced_patient_identity.get(
+                    "patient_id"
+                )  # From XML document
+
                 context["patient_identity"].update(enhanced_patient_identity)
-                context["patient_identity"]["patient_id"] = original_patient_id
+
+                # Use XML patient ID for display, URL patient ID for routing
+                if xml_patient_id:
+                    context["patient_identity"][
+                        "patient_id"
+                    ] = xml_patient_id  # Display the XML patient ID
+                    context["patient_identity"][
+                        "url_patient_id"
+                    ] = url_patient_id  # Keep URL ID for navigation
+                else:
+                    context["patient_identity"][
+                        "patient_id"
+                    ] = url_patient_id  # Fallback to URL ID
 
             # Update administrative data with enhanced data
             if enhanced_admin_data:
