@@ -64,7 +64,7 @@ class EnhancedCDAFieldMapper:
     def get_patient_fields(self) -> List[Dict]:
         """Get patient demographic field mappings"""
         for section in self.field_mappings:
-            if section.get("section") == "Patient Block":
+            if section.get("section") == "Demographic Data":
                 return section.get("fields", [])
         return []
 
