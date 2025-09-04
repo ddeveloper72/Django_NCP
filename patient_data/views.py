@@ -2051,6 +2051,13 @@ def patient_data_view(request):
                     "preferred_cda_type": match.preferred_cda_type,
                     "has_l1": match.has_l1_cda(),
                     "has_l3": match.has_l3_cda(),
+                    # Enhanced multiple document support
+                    "l1_documents": match.l1_documents or [],
+                    "l3_documents": match.l3_documents or [],
+                    "selected_l1_index": match.selected_l1_index,
+                    "selected_l3_index": match.selected_l3_index,
+                    "document_summary": match.get_document_summary(),
+                    "available_document_types": match.get_available_document_types(),
                 }
 
                 # Add success message
@@ -2335,6 +2342,15 @@ def patient_details_view(request, patient_id):
                 "l1_available": match_data.get("has_l1", False),
                 "l3_available": match_data.get("has_l3", False),
                 "preferred_cda_type": match_data.get("preferred_cda_type", "L3"),
+                # Enhanced multiple document support
+                "l1_documents": match_data.get("l1_documents", []),
+                "l3_documents": match_data.get("l3_documents", []),
+                "document_summary": match_data.get("document_summary", {}),
+                "available_document_types": match_data.get(
+                    "available_document_types", []
+                ),
+                "selected_l1_index": match_data.get("selected_l1_index", 0),
+                "selected_l3_index": match_data.get("selected_l3_index", 0),
             }
         )
 
@@ -2820,6 +2836,11 @@ def patient_cda_view(request, patient_id, cda_type=None):
             cda_content=match_data.get("cda_content"),
             patient_data=patient_info,
             preferred_cda_type=cda_type or "L3",  # Use requested type or default to L3
+            # Include document arrays and selected indices for proper CDA selection
+            l1_documents=match_data.get("l1_documents", []),
+            l3_documents=match_data.get("l3_documents", []),
+            selected_l1_index=match_data.get("selected_l1_index", 0),
+            selected_l3_index=match_data.get("selected_l3_index", 0),
         )
 
         # Process CDA content for clinical sections using the search result
@@ -3366,7 +3387,7 @@ def cda_translation_toggle(request, patient_id):
 
 
 def download_cda_pdf(request, patient_id):
-    """Download CDA document as XML file"""
+    """Download CDA document as XML file - prefers L1 for better PDF structure"""
 
     try:
         patient_data = PatientData.objects.get(id=patient_id)
@@ -3376,12 +3397,50 @@ def download_cda_pdf(request, patient_id):
             messages.error(request, "No CDA document found for this patient.")
             return redirect("patient_data:patient_details", patient_id=patient_id)
 
-        # Return the XML content for download
-        response = HttpResponse(
-            match_data["cda_content"], content_type="application/xml"
+        # For PDF/ORCD extraction, prefer L1 documents as they have better structure
+        # Reconstruct PatientMatch to get the appropriate content
+        from .services.patient_search_service import PatientMatch
+
+        # Get patient info
+        patient_info = match_data.get("patient_data", {})
+
+        # Reconstruct PatientMatch object to use proper content selection
+        search_result = PatientMatch(
+            patient_id=patient_id,
+            given_name=patient_info.get("given_name", "Unknown"),
+            family_name=patient_info.get("family_name", "Patient"),
+            birth_date=patient_info.get("birth_date", ""),
+            gender=patient_info.get("gender", ""),
+            country_code=match_data.get("country_code", ""),
+            confidence_score=match_data.get("confidence_score", 0.95),
+            file_path=match_data.get("file_path"),
+            l1_cda_content=match_data.get("l1_cda_content"),
+            l3_cda_content=match_data.get("l3_cda_content"),
+            l1_cda_path=match_data.get("l1_cda_path"),
+            l3_cda_path=match_data.get("l3_cda_path"),
+            cda_content=match_data.get("cda_content"),
+            patient_data=patient_info,
+            # Include document arrays and selected indices
+            l1_documents=match_data.get("l1_documents", []),
+            l3_documents=match_data.get("l3_documents", []),
+            selected_l1_index=match_data.get("selected_l1_index", 0),
+            selected_l3_index=match_data.get("selected_l3_index", 0),
         )
+
+        # Get ORCD content (prefers L1 for PDF generation)
+        orcd_content = search_result.get_orcd_cda()
+
+        if not orcd_content:
+            messages.error(request, "No CDA content available for download.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+        # Determine the document type being downloaded
+        document_type = "L1" if search_result.l1_cda_content else "L3"
+
+        # Return the XML content for download
+        response = HttpResponse(orcd_content, content_type="application/xml")
         response["Content-Disposition"] = (
-            f'attachment; filename="patient_cda_{patient_id}.xml"'
+            f'attachment; filename="patient_cda_{patient_id}_{document_type}.xml"'
         )
 
         return response
@@ -7045,11 +7104,80 @@ def generate_generic_table_html_interactive(entries):
                     str(value)[:100] + "..." if len(str(value)) > 100 else str(value)
                 )
                 html_content += f"<td>{display_value}</td>"
-        html_content += "</tr>"
-
     html_content += """
         </tbody>
     </table>
     """
 
     return html_content
+
+
+def select_document_view(request, patient_id):
+    """Handle document selection for patients with multiple CDA documents"""
+    try:
+        # Get the session data for this patient
+        session_key = f"patient_match_{patient_id}"
+        match_data = request.session.get(session_key)
+
+        if not match_data:
+            messages.error(
+                request, "Patient session data not found. Please search again."
+            )
+            return redirect("patient_data:patient_data_form")
+
+        if request.method == "POST":
+            # Handle document selection
+            document_type = request.POST.get("document_type")  # "L1" or "L3"
+            document_index = int(request.POST.get("document_index", 0))
+
+            if document_type == "L1" and "l1_documents" in match_data:
+                if 0 <= document_index < len(match_data["l1_documents"]):
+                    selected_doc = match_data["l1_documents"][document_index]
+                    match_data["selected_l1_index"] = document_index
+                    # Update preferred CDA type to L1 since user selected an L1 document
+                    match_data["preferred_cda_type"] = "L1"
+                    # Update displayed metadata to reflect selected document
+                    match_data["file_path"] = selected_doc["path"]
+                    match_data["cda_type"] = "L1"
+                    request.session[session_key] = match_data
+                    messages.success(
+                        request, f"Selected L1 document {document_index + 1}"
+                    )
+
+            elif document_type == "L3" and "l3_documents" in match_data:
+                if 0 <= document_index < len(match_data["l3_documents"]):
+                    selected_doc = match_data["l3_documents"][document_index]
+                    match_data["selected_l3_index"] = document_index
+                    # Update preferred CDA type to L3 since user selected an L3 document
+                    match_data["preferred_cda_type"] = "L3"
+                    # Update displayed metadata to reflect selected document
+                    match_data["file_path"] = selected_doc["path"]
+                    match_data["cda_type"] = "L3"
+                    request.session[session_key] = match_data
+                    messages.success(
+                        request, f"Selected L3 document {document_index + 1}"
+                    )
+
+            # Redirect back to patient details to show the selected document
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+        # GET request - show document selection form
+        context = {
+            "patient_id": patient_id,
+            "patient_data": match_data.get("patient_data", {}),
+            "l1_documents": match_data.get("l1_documents", []),
+            "l3_documents": match_data.get("l3_documents", []),
+            "selected_l1_index": match_data.get("selected_l1_index", 0),
+            "selected_l3_index": match_data.get("selected_l3_index", 0),
+            "document_summary": match_data.get("document_summary", {}),
+            "available_document_types": match_data.get("available_document_types", []),
+        }
+
+        return render(
+            request, "patient_data/select_document.html", context, using="jinja2"
+        )
+
+    except Exception as e:
+        logger.error(f"Error in select_document_view: {e}")
+        messages.error(request, "Error accessing document selection.")
+        return redirect("patient_data:patient_data_form")
