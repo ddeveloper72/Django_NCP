@@ -280,14 +280,26 @@
         padding: 20px;
         background: white;
         border-radius: 0 0 0.375rem 0.375rem;
+        /* Ensure tab content expands to fit all content */
+        height: auto;
+        min-height: fit-content;
+        overflow: visible;
     }
 
     .tab-content.active {
         display: block;
+        /* Ensure active tab content is fully visible */
+        height: auto;
+        min-height: fit-content;
+        overflow: visible;
     }
 
     .original-content {
         /* Removed max-height restriction to allow content to fit naturally */
+        /* Ensure original content container expands fully */
+        height: auto;
+        min-height: fit-content;
+        overflow: visible;
     }
 
     .xml-content {
@@ -383,14 +395,20 @@
     .original-clinical-table {
         border: 1px solid #dee2e6;
         border-radius: 0.5rem;
-        overflow: hidden;
+        overflow: visible;
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         margin-bottom: 1rem;
+        /* Ensure table container expands to fit all content */
+        height: auto;
+        min-height: fit-content;
     }
 
     .original-clinical-table .table {
         margin-bottom: 0;
         font-size: 0.9em;
+        /* Ensure table expands to show all rows */
+        height: auto;
+        min-height: fit-content;
     }
 
     .original-clinical-table .table-primary th {
