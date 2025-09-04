@@ -69,6 +69,10 @@ def prepare_enhanced_section_data(sections):
             "medical_terminology_count": 0,
             "coded_entries_count": 0,
             "clinical_table": None,  # New: structured table for clinical display
+            "structured_data": section.get(
+                "structured_data"
+            ),  # Preserve original clinical data from NCPeH-A
+            "content": section.get("content"),  # Preserve raw XML content as fallback
         }
 
         # Process entries with proper field lookups
