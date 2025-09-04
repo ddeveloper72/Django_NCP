@@ -3325,21 +3325,156 @@ def download_cda_html(request, patient_id):
 
 
 def download_patient_summary_pdf(request, patient_id):
-    """Download Patient Summary as PDF generated from structured patient summary data"""
+    """Download Patient Summary as PDF - checks for embedded PDF in CDA first, falls back to HTML->PDF"""
+
+    logger.info(f"PDF download requested for patient {patient_id}")
 
     try:
-        patient_data = PatientData.objects.get(id=patient_id)
-        match_data = request.session.get(f"patient_match_{patient_id}")
+        # Check if this is an NCP query result (session data exists but no DB record)
+        session_key = f"patient_match_{patient_id}"
+        match_data = request.session.get(session_key)
+
+        if match_data and not PatientData.objects.filter(id=patient_id).exists():
+            # This is an NCP query result - create temp patient from session data
+            patient_info = match_data["patient_data"]
+
+            # Create a temporary patient object (not saved to DB)
+            patient_data = PatientData(
+                id=patient_id,
+                given_name=patient_info.get("given_name", "Unknown"),
+                family_name=patient_info.get("family_name", "Patient"),
+                birth_date=patient_info.get("birth_date") or None,
+                gender=patient_info.get("gender", ""),
+            )
+
+            logger.info(
+                f"Created temporary patient object for PDF download: {patient_id}"
+            )
+        else:
+            # Standard database lookup
+            try:
+                patient_data = PatientData.objects.get(id=patient_id)
+                logger.info(
+                    f"Found patient_data: {patient_data.given_name} {patient_data.family_name}"
+                )
+            except PatientData.DoesNotExist:
+                logger.error(f"Patient data not found for ID: {patient_id}")
+                messages.error(request, "Patient data not found.")
+                return redirect("patient_data:patient_data_form")
+
+            # Get CDA match from session for database patients
+            if not match_data:
+                match_data = request.session.get(session_key)
+
+        logger.info(f"Match data exists: {match_data is not None}")
 
         if not match_data:
+            logger.error("No match_data found in session")
             messages.error(request, "No CDA document found for this patient.")
             return redirect("patient_data:patient_details", patient_id=patient_id)
 
+        # First, try to extract embedded PDF from CDA content (like your Flask app)
+        logger.info("Attempting to extract embedded PDF from CDA content")
+
+        # Check all available CDA content sources
+        cda_sources = [
+            ("L1", match_data.get("l1_cda_content")),
+            ("L3", match_data.get("l3_cda_content")),
+            ("original", match_data.get("cda_content")),
+        ]
+
+        for source_type, cda_content in cda_sources:
+            if cda_content:
+                logger.info(f"Checking {source_type} CDA content for embedded PDF")
+
+                # Look for base64 PDF content (similar to your Flask app)
+                import base64
+
+                # Convert to bytes if it's a string
+                if isinstance(cda_content, str):
+                    cda_bytes = cda_content.encode("utf-8")
+                else:
+                    cda_bytes = cda_content
+
+                # Look for base64 PDF patterns
+                pdf_patterns = [
+                    b'<text mediaType="application/pdf" representation="B64">',
+                    b'<text mediatype="application/pdf" representation="B64">',
+                    b'mediaType="application/pdf"',
+                    b'mediatype="application/pdf"',
+                ]
+
+                for pattern in pdf_patterns:
+                    start_index = cda_bytes.find(pattern)
+                    if start_index != -1:
+                        logger.info(
+                            f"Found PDF pattern in {source_type} CDA: {pattern.decode('utf-8', errors='ignore')}"
+                        )
+
+                        # Find the content between tags
+                        tag_end = cda_bytes.find(b">", start_index) + 1
+                        end_tag = cda_bytes.find(b"</text>", tag_end)
+
+                        if end_tag != -1:
+                            # Extract base64 content
+                            base64_content = cda_bytes[tag_end:end_tag].strip()
+
+                            try:
+                                # Decode base64 to get PDF bytes
+                                pdf_bytes = base64.b64decode(base64_content)
+
+                                # Verify it's a valid PDF
+                                if pdf_bytes.startswith(b"%PDF"):
+                                    logger.info(
+                                        f"Successfully extracted PDF from {source_type} CDA. Size: {len(pdf_bytes)} bytes"
+                                    )
+
+                                    # Create filename
+                                    filename = f"{patient_data.given_name}_{patient_data.family_name}_Patient_Summary.pdf"
+
+                                    # Return PDF response for preview (not attachment)
+                                    response = HttpResponse(
+                                        pdf_bytes, content_type="application/pdf"
+                                    )
+                                    # Remove Content-Disposition to show in browser instead of downloading
+                                    # response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+                                    logger.info(
+                                        f"Generated patient summary PDF preview for patient {patient_id}"
+                                    )
+                                    return response
+
+                            except Exception as e:
+                                logger.warning(
+                                    f"Failed to decode base64 PDF from {source_type}: {e}"
+                                )
+                                continue
+
+        logger.info("No embedded PDF found, falling back to HTML->PDF generation")
+
+        # Fallback: Generate PDF from HTML content (existing logic)
+        return generate_pdf_from_html(request, patient_id, patient_data, match_data)
+
+    except Exception as e:
+        logger.error(f"Unexpected error in download_patient_summary_pdf: {e}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        import traceback
+
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        messages.error(request, "Error generating PDF document.")
+        return redirect("patient_data:patient_details", patient_id=patient_id)
+
+
+def generate_pdf_from_html(request, patient_id, patient_data, match_data):
+    """Generate PDF from HTML content using xhtml2pdf"""
+
+    logger.info("Generating PDF from HTML content using xhtml2pdf")
+
+    try:
         # Get patient summary using the same logic as the details view
         search_service = EUPatientSearchService()
 
         # Reconstruct match object for summary
-        # Define result class directly to avoid import conflicts
         from dataclasses import dataclass
         from typing import Dict
 
@@ -3355,11 +3490,6 @@ def download_patient_summary_pdf(request, patient_id):
 
         # Extract required fields from patient_data or use defaults
         patient_info = match_data.get("patient_data", {})
-        patient_name_parts = patient_info.get("name", "Unknown Unknown").split(" ", 1)
-        given_name = patient_name_parts[0] if len(patient_name_parts) > 0 else "Unknown"
-        family_name = (
-            patient_name_parts[1] if len(patient_name_parts) > 1 else "Unknown"
-        )
 
         match = SimplePatientResult(
             file_path=match_data["file_path"],
@@ -3371,171 +3501,583 @@ def download_patient_summary_pdf(request, patient_id):
 
         patient_summary = search_service.get_patient_summary(match)
 
+        logger.info(f"Patient summary retrieved: {patient_summary is not None}")
+        if patient_summary:
+            logger.info(
+                f"Patient summary keys: {list(patient_summary.keys()) if isinstance(patient_summary, dict) else type(patient_summary)}"
+            )
+
         if not patient_summary:
-            messages.error(request, "No patient summary content available.")
-            return redirect("patient_data:patient_details", patient_id=patient_id)
+            logger.error("No patient summary content available")
+            # Create a basic summary from available data
+            patient_summary = {
+                "patient_name": f"{patient_data.given_name} {patient_data.family_name}",
+                "birth_date": (
+                    str(patient_data.birth_date)
+                    if patient_data.birth_date
+                    else "Not specified"
+                ),
+                "gender": patient_data.gender or "Not specified",
+                "primary_patient_id": patient_info.get(
+                    "primary_patient_id", "Not specified"
+                ),
+                "secondary_patient_id": patient_info.get("secondary_patient_id", ""),
+                "cda_content": match_data.get("cda_content", ""),
+            }
 
-        try:
-            # Get the CDA content from patient summary
-            cda_content = patient_summary.get("cda_content", "")
+        # Get the CDA content from patient summary
+        cda_content = patient_summary.get("cda_content", "")
 
-            # If we have L3 content (HTML), prefer that
-            l3_cda_content = match_data.get("l3_cda_content")
-            if l3_cda_content:
-                cda_content = l3_cda_content
+        # If we have L3 content (HTML), prefer that
+        l3_cda_content = match_data.get("l3_cda_content")
+        if l3_cda_content:
+            cda_content = l3_cda_content
 
-            # Clean up and structure the content for PDF
-            sections_html = ""
-            if cda_content:
-                # Clean up the CDA content for better PDF display
-                import re
-                from html import unescape
+        # Clean up and structure the content for PDF
+        sections_html = ""
+        if cda_content:
+            # Clean up the CDA content for better PDF display
+            import re
+            from html import unescape
 
-                # Remove XML declaration and root elements if present
-                clean_content = re.sub(r"<\?xml[^>]*\?>", "", cda_content)
-                clean_content = re.sub(r"<ClinicalDocument[^>]*>", "", clean_content)
-                clean_content = re.sub(r"</ClinicalDocument>", "", clean_content)
-                clean_content = re.sub(r"<component[^>]*>", "", clean_content)
-                clean_content = re.sub(r"</component>", "", clean_content)
-                clean_content = re.sub(r"<structuredBody[^>]*>", "", clean_content)
-                clean_content = re.sub(r"</structuredBody>", "", clean_content)
+            # Remove XML declaration and root elements if present
+            clean_content = re.sub(r"<\?xml[^>]*\?>", "", cda_content)
+            clean_content = re.sub(r"<ClinicalDocument[^>]*>", "", clean_content)
+            clean_content = re.sub(r"</ClinicalDocument>", "", clean_content)
+            clean_content = re.sub(r"<component[^>]*>", "", clean_content)
+            clean_content = re.sub(r"</component>", "", clean_content)
+            clean_content = re.sub(r"<structuredBody[^>]*>", "", clean_content)
+            clean_content = re.sub(r"</structuredBody>", "", clean_content)
 
-                # Unescape HTML entities
-                clean_content = unescape(clean_content)
+            # Unescape HTML entities
+            clean_content = unescape(clean_content)
 
-                # If it's mostly tables and structured content, use it as-is
-                sections_html = f"""
-                <div class="section">
-                    <h2>Patient Summary Content</h2>
-                    <div class="content">
-                        {clean_content}
-                    </div>
-                </div>
-                """
-            else:
-                sections_html = """
-                <div class="section">
-                    <p>No detailed patient summary content available.</p>
-                </div>
-                """  # Prepare HTML content with proper structure and inline CSS
-            html_content = f"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>Patient Summary - {patient_data.given_name} {patient_data.family_name}</title>
-                <style>
-                    @page {{
-                        size: A4;
-                        margin: 2cm;
-                    }}
-                    
-                    body {{
-                        font-family: Arial, sans-serif;
-                        font-size: 10pt;
-                        line-height: 1.4;
-                        color: #333;
-                        margin: 0;
-                        padding: 0;
-                    }}
-                    
-                    h1, h2, h3, h4, h5, h6 {{
-                        color: #2c3e50;
-                        margin-top: 1.5em;
-                        margin-bottom: 0.5em;
-                    }}
-                    
-                    h1 {{ font-size: 16pt; }}
-                    h2 {{ font-size: 14pt; }}
-                    h3 {{ font-size: 12pt; }}
-                    
-                    table {{
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin: 1em 0;
-                    }}
-                    
-                    th, td {{
-                        border: 1px solid #ddd;
-                        padding: 8px;
-                        text-align: left;
-                        vertical-align: top;
-                    }}
-                    
-                    th {{
-                        background-color: #f8f9fa;
-                        font-weight: bold;
-                        color: #2c3e50;
-                    }}
-                    
-                    .patient-header {{
-                        background-color: #e8f4f8;
-                        padding: 15px;
-                        border-radius: 5px;
-                        margin-bottom: 20px;
-                    }}
-                    
-                    .section {{
-                        margin-bottom: 20px;
-                    }}
-
-                    ul {{
-                        padding-left: 20px;
-                    }}
-
-                    li {{
-                        margin-bottom: 5px;
-                    }}
-                </style>
-            </head>
-            <body>
-                <div class="patient-header">
-                    <h1>Patient Summary</h1>
-                    <p><strong>Patient:</strong> {patient_summary.get('patient_name', 'Unknown')}</p>
-                    <p><strong>Date of Birth:</strong> {patient_summary.get('birth_date', 'Not specified')}</p>
-                    <p><strong>Gender:</strong> {patient_summary.get('gender', 'Not specified')}</p>
-                    <p><strong>Primary Patient ID:</strong> {patient_summary.get('primary_patient_id', 'Not specified')}</p>
-                    {f'<p><strong>Secondary Patient ID:</strong> {patient_summary.get("secondary_patient_id")}</p>' if patient_summary.get('secondary_patient_id') else ''}
-                    <p><strong>Generated:</strong> {timezone.now().strftime('%Y-%m-%d %H:%M')}</p>
-                </div>
-                
+            # If it's mostly tables and structured content, use it as-is
+            sections_html = f"""
+            <div class="section">
+                <h2>Patient Summary Content</h2>
                 <div class="content">
-                    {sections_html}
+                    {clean_content}
                 </div>
-            </body>
-            </html>
+            </div>
+            """
+        else:
+            sections_html = """
+            <div class="section">
+                <p>No detailed patient summary content available.</p>
+            </div>
             """
 
-            # Generate PDF using xhtml2pdf
-            result = BytesIO()
-            pdf = pisa.pisaDocument(BytesIO(html_content.encode("UTF-8")), result)
+        # Prepare HTML content with proper structure and inline CSS
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Patient Summary - {patient_data.given_name} {patient_data.family_name}</title>
+            <style>
+                @page {{
+                    size: A4;
+                    margin: 2cm;
+                }}
+                
+                body {{
+                    font-family: Arial, sans-serif;
+                    font-size: 10pt;
+                    line-height: 1.4;
+                    color: #333;
+                    margin: 0;
+                    padding: 0;
+                }}
+                
+                h1, h2, h3, h4, h5, h6 {{
+                    color: #2c3e50;
+                    margin-top: 1.5em;
+                    margin-bottom: 0.5em;
+                }}
+                
+                h1 {{ font-size: 16pt; }}
+                h2 {{ font-size: 14pt; }}
+                h3 {{ font-size: 12pt; }}
+                
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 1em 0;
+                }}
+                
+                th, td {{
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: left;
+                    vertical-align: top;
+                }}
+                
+                th {{
+                    background-color: #f8f9fa;
+                    font-weight: bold;
+                    color: #2c3e50;
+                }}
+                
+                .patient-header {{
+                    background-color: #e8f4f8;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin-bottom: 20px;
+                }}
+                
+                .section {{
+                    margin-bottom: 20px;
+                }}
 
-            if not pdf.err:
-                pdf_bytes = result.getvalue()
-                result.close()
+                ul {{
+                    padding-left: 20px;
+                }}
 
-                # Create filename
-                filename = f"{patient_data.given_name}_{patient_data.family_name}_Patient_Summary.pdf"
+                li {{
+                    margin-bottom: 5px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="patient-header">
+                <h1>Patient Summary</h1>
+                <p><strong>Patient:</strong> {patient_summary.get('patient_name', 'Unknown')}</p>
+                <p><strong>Date of Birth:</strong> {patient_summary.get('birth_date', 'Not specified')}</p>
+                <p><strong>Gender:</strong> {patient_summary.get('gender', 'Not specified')}</p>
+                <p><strong>Primary Patient ID:</strong> {patient_summary.get('primary_patient_id', 'Not specified')}</p>
+                {f'<p><strong>Secondary Patient ID:</strong> {patient_summary.get("secondary_patient_id")}</p>' if patient_summary.get('secondary_patient_id') else ''}
+                <p><strong>Generated:</strong> {timezone.now().strftime('%Y-%m-%d %H:%M')}</p>
+            </div>
+            
+            <div class="content">
+                {sections_html}
+            </div>
+        </body>
+        </html>
+        """
 
-                # Return PDF response
-                response = HttpResponse(pdf_bytes, content_type="application/pdf")
-                response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        # Generate PDF using xhtml2pdf
+        logger.info("Starting PDF generation with xhtml2pdf")
+        logger.info(f"HTML content length: {len(html_content)} characters")
 
-                logger.info(f"Generated patient summary PDF for patient {patient_id}")
-                return response
-            else:
-                logger.error(f"Error generating PDF: {pdf.err}")
-                messages.error(request, "Error generating PDF document.")
-                return redirect("patient_data:patient_details", patient_id=patient_id)
+        result = BytesIO()
+        pdf = pisa.pisaDocument(BytesIO(html_content.encode("UTF-8")), result)
 
-        except Exception as e:
-            logger.error(f"Error generating patient summary PDF: {e}")
+        logger.info(f"PDF generation completed. Errors: {pdf.err}")
+
+        if not pdf.err:
+            pdf_bytes = result.getvalue()
+            result.close()
+
+            logger.info(f"PDF generated successfully. Size: {len(pdf_bytes)} bytes")
+
+            # Create filename
+            filename = f"{patient_data.given_name}_{patient_data.family_name}_Patient_Summary.pdf"
+
+            # Return PDF response for preview (not attachment)
+            response = HttpResponse(pdf_bytes, content_type="application/pdf")
+            # Remove Content-Disposition to show in browser instead of downloading
+            # response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+            logger.info(
+                f"Generated patient summary PDF preview for patient {patient_id}"
+            )
+            return response
+        else:
+            logger.error(f"Error generating PDF: {pdf.err}")
             messages.error(request, "Error generating PDF document.")
             return redirect("patient_data:patient_details", patient_id=patient_id)
 
-    except PatientData.DoesNotExist:
-        messages.error(request, "Patient data not found.")
-        return redirect("patient_data:patient_data_form")
+    except Exception as e:
+        logger.error(f"Error in generate_pdf_from_html: {e}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        import traceback
+
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        messages.error(request, "Error generating PDF document.")
+        return redirect("patient_data:patient_details", patient_id=patient_id)
+
+
+def download_patient_summary_pdf_file(request, patient_id):
+    """Download Patient Summary as PDF file (force download, not preview)"""
+
+    logger.info(f"PDF file download requested for patient {patient_id}")
+
+    try:
+        # Check if this is an NCP query result (session data exists but no DB record)
+        session_key = f"patient_match_{patient_id}"
+        match_data = request.session.get(session_key)
+
+        if match_data and not PatientData.objects.filter(id=patient_id).exists():
+            # This is an NCP query result - create temp patient from session data
+            patient_info = match_data["patient_data"]
+
+            # Create a temporary patient object (not saved to DB)
+            patient_data = PatientData(
+                id=patient_id,
+                given_name=patient_info.get("given_name", "Unknown"),
+                family_name=patient_info.get("family_name", "Patient"),
+                birth_date=patient_info.get("birth_date") or None,
+                gender=patient_info.get("gender", ""),
+            )
+
+            logger.info(
+                f"Created temporary patient object for PDF file download: {patient_id}"
+            )
+        else:
+            # Standard database lookup
+            try:
+                patient_data = PatientData.objects.get(id=patient_id)
+                logger.info(
+                    f"Found patient_data: {patient_data.given_name} {patient_data.family_name}"
+                )
+            except PatientData.DoesNotExist:
+                logger.error(f"Patient data not found for ID: {patient_id}")
+                messages.error(request, "Patient data not found.")
+                return redirect("patient_data:patient_data_form")
+
+            # Get CDA match from session for database patients
+            if not match_data:
+                match_data = request.session.get(session_key)
+
+        logger.info(f"Match data exists: {match_data is not None}")
+
+        if not match_data:
+            logger.error("No match_data found in session")
+            messages.error(request, "No CDA document found for this patient.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+        # First, try to extract embedded PDF from CDA content (like your Flask app)
+        logger.info("Attempting to extract embedded PDF from CDA content")
+
+        # Check all available CDA content sources
+        cda_sources = [
+            ("L1", match_data.get("l1_cda_content")),
+            ("L3", match_data.get("l3_cda_content")),
+            ("original", match_data.get("cda_content")),
+        ]
+
+        for source_type, cda_content in cda_sources:
+            if cda_content:
+                logger.info(f"Checking {source_type} CDA content for embedded PDF")
+
+                # Look for base64 PDF content (similar to your Flask app)
+                import base64
+
+                # Convert to bytes if it's a string
+                if isinstance(cda_content, str):
+                    cda_bytes = cda_content.encode("utf-8")
+                else:
+                    cda_bytes = cda_content
+
+                # Look for base64 PDF patterns
+                pdf_patterns = [
+                    b'<text mediaType="application/pdf" representation="B64">',
+                    b'<text mediatype="application/pdf" representation="B64">',
+                    b'mediaType="application/pdf"',
+                    b'mediatype="application/pdf"',
+                ]
+
+                for pattern in pdf_patterns:
+                    start_index = cda_bytes.find(pattern)
+                    if start_index != -1:
+                        logger.info(
+                            f"Found PDF pattern in {source_type} CDA: {pattern.decode('utf-8', errors='ignore')}"
+                        )
+
+                        # Find the content between tags
+                        tag_end = cda_bytes.find(b">", start_index) + 1
+                        end_tag = cda_bytes.find(b"</text>", tag_end)
+
+                        if end_tag != -1:
+                            # Extract base64 content
+                            base64_content = cda_bytes[tag_end:end_tag].strip()
+
+                            try:
+                                # Decode base64 to get PDF bytes
+                                pdf_bytes = base64.b64decode(base64_content)
+
+                                # Verify it's a valid PDF
+                                if pdf_bytes.startswith(b"%PDF"):
+                                    logger.info(
+                                        f"Successfully extracted PDF from {source_type} CDA. Size: {len(pdf_bytes)} bytes"
+                                    )
+
+                                    # Create filename
+                                    filename = f"{patient_data.given_name}_{patient_data.family_name}_Patient_Summary.pdf"
+
+                                    # Return PDF response for download (with attachment)
+                                    response = HttpResponse(
+                                        pdf_bytes, content_type="application/pdf"
+                                    )
+                                    response["Content-Disposition"] = (
+                                        f'attachment; filename="{filename}"'
+                                    )
+
+                                    logger.info(
+                                        f"Generated patient summary PDF file download for patient {patient_id}"
+                                    )
+                                    return response
+
+                            except Exception as e:
+                                logger.warning(
+                                    f"Failed to decode base64 PDF from {source_type}: {e}"
+                                )
+                                continue
+
+        logger.info(
+            "No embedded PDF found, falling back to HTML->PDF generation for file download"
+        )
+
+        # Fallback: Generate PDF from HTML content for download
+        return generate_pdf_file_from_html(
+            request, patient_id, patient_data, match_data
+        )
+
+    except Exception as e:
+        logger.error(f"Unexpected error in download_patient_summary_pdf_file: {e}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        import traceback
+
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        messages.error(request, "Error generating PDF document.")
+        return redirect("patient_data:patient_details", patient_id=patient_id)
+
+
+def generate_pdf_file_from_html(request, patient_id, patient_data, match_data):
+    """Generate PDF file (for download) from HTML content using xhtml2pdf"""
+
+    logger.info("Generating PDF file from HTML content using xhtml2pdf")
+
+    try:
+        # Get patient summary using the same logic as the preview function
+        search_service = EUPatientSearchService()
+
+        # Reconstruct match object for summary
+        from dataclasses import dataclass
+        from typing import Dict
+
+        @dataclass
+        class SimplePatientResult:
+            """Simple patient result for views"""
+
+            file_path: str
+            country_code: str
+            confidence_score: float
+            patient_data: Dict
+            cda_content: str
+
+        # Extract required fields from patient_data or use defaults
+        patient_info = match_data.get("patient_data", {})
+
+        match = SimplePatientResult(
+            file_path=match_data["file_path"],
+            country_code=match_data["country_code"],
+            confidence_score=match_data["confidence_score"],
+            patient_data=match_data["patient_data"],
+            cda_content=match_data["cda_content"],
+        )
+
+        patient_summary = search_service.get_patient_summary(match)
+
+        logger.info(f"Patient summary retrieved: {patient_summary is not None}")
+        if patient_summary:
+            logger.info(
+                f"Patient summary keys: {list(patient_summary.keys()) if isinstance(patient_summary, dict) else type(patient_summary)}"
+            )
+
+        if not patient_summary:
+            logger.error("No patient summary content available")
+            # Create a basic summary from available data
+            patient_summary = {
+                "patient_name": f"{patient_data.given_name} {patient_data.family_name}",
+                "birth_date": (
+                    str(patient_data.birth_date)
+                    if patient_data.birth_date
+                    else "Not specified"
+                ),
+                "gender": patient_data.gender or "Not specified",
+                "primary_patient_id": patient_info.get(
+                    "primary_patient_id", "Not specified"
+                ),
+                "secondary_patient_id": patient_info.get("secondary_patient_id", ""),
+                "cda_content": match_data.get("cda_content", ""),
+            }
+
+        # Get the CDA content from patient summary
+        cda_content = patient_summary.get("cda_content", "")
+
+        # If we have L3 content (HTML), prefer that
+        l3_cda_content = match_data.get("l3_cda_content")
+        if l3_cda_content:
+            cda_content = l3_cda_content
+
+        # Clean up and structure the content for PDF
+        sections_html = ""
+        if cda_content:
+            # Clean up the CDA content for better PDF display
+            import re
+            from html import unescape
+
+            # Remove XML declaration and root elements if present
+            clean_content = re.sub(r"<\?xml[^>]*\?>", "", cda_content)
+            clean_content = re.sub(r"<ClinicalDocument[^>]*>", "", clean_content)
+            clean_content = re.sub(r"</ClinicalDocument>", "", clean_content)
+            clean_content = re.sub(r"<component[^>]*>", "", clean_content)
+            clean_content = re.sub(r"</component>", "", clean_content)
+            clean_content = re.sub(r"<structuredBody[^>]*>", "", clean_content)
+            clean_content = re.sub(r"</structuredBody>", "", clean_content)
+
+            # Unescape HTML entities
+            clean_content = unescape(clean_content)
+
+            # If it's mostly tables and structured content, use it as-is
+            sections_html = f"""
+            <div class="section">
+                <h2>Patient Summary Content</h2>
+                <div class="content">
+                    {clean_content}
+                </div>
+            </div>
+            """
+        else:
+            sections_html = """
+            <div class="section">
+                <p>No detailed patient summary content available.</p>
+            </div>
+            """
+
+        # Prepare HTML content with proper structure and inline CSS
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Patient Summary - {patient_data.given_name} {patient_data.family_name}</title>
+            <style>
+                @page {{
+                    size: A4;
+                    margin: 2cm;
+                }}
+                
+                body {{
+                    font-family: Arial, sans-serif;
+                    font-size: 10pt;
+                    line-height: 1.4;
+                    color: #333;
+                    margin: 0;
+                    padding: 0;
+                }}
+                
+                h1, h2, h3, h4, h5, h6 {{
+                    color: #2c3e50;
+                    margin-top: 1.5em;
+                    margin-bottom: 0.5em;
+                }}
+                
+                h1 {{ font-size: 16pt; }}
+                h2 {{ font-size: 14pt; }}
+                h3 {{ font-size: 12pt; }}
+                
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 1em 0;
+                }}
+                
+                th, td {{
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: left;
+                    vertical-align: top;
+                }}
+                
+                th {{
+                    background-color: #f8f9fa;
+                    font-weight: bold;
+                    color: #2c3e50;
+                }}
+                
+                .patient-header {{
+                    background-color: #e8f4f8;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin-bottom: 20px;
+                }}
+                
+                .section {{
+                    margin-bottom: 20px;
+                }}
+
+                ul {{
+                    padding-left: 20px;
+                }}
+
+                li {{
+                    margin-bottom: 5px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="patient-header">
+                <h1>Patient Summary</h1>
+                <p><strong>Patient:</strong> {patient_summary.get('patient_name', 'Unknown')}</p>
+                <p><strong>Date of Birth:</strong> {patient_summary.get('birth_date', 'Not specified')}</p>
+                <p><strong>Gender:</strong> {patient_summary.get('gender', 'Not specified')}</p>
+                <p><strong>Primary Patient ID:</strong> {patient_summary.get('primary_patient_id', 'Not specified')}</p>
+                {f'<p><strong>Secondary Patient ID:</strong> {patient_summary.get("secondary_patient_id")}</p>' if patient_summary.get('secondary_patient_id') else ''}
+                <p><strong>Generated:</strong> {timezone.now().strftime('%Y-%m-%d %H:%M')}</p>
+            </div>
+            
+            <div class="content">
+                {sections_html}
+            </div>
+        </body>
+        </html>
+        """
+
+        # Generate PDF using xhtml2pdf
+        logger.info("Starting PDF file generation with xhtml2pdf")
+        logger.info(f"HTML content length: {len(html_content)} characters")
+
+        result = BytesIO()
+        pdf = pisa.pisaDocument(BytesIO(html_content.encode("UTF-8")), result)
+
+        logger.info(f"PDF file generation completed. Errors: {pdf.err}")
+
+        if not pdf.err:
+            pdf_bytes = result.getvalue()
+            result.close()
+
+            logger.info(
+                f"PDF file generated successfully. Size: {len(pdf_bytes)} bytes"
+            )
+
+            # Create filename
+            filename = f"{patient_data.given_name}_{patient_data.family_name}_Patient_Summary.pdf"
+
+            # Return PDF response for download (with attachment)
+            response = HttpResponse(pdf_bytes, content_type="application/pdf")
+            response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+            logger.info(
+                f"Generated patient summary PDF file download for patient {patient_id}"
+            )
+            return response
+        else:
+            logger.error(f"Error generating PDF file: {pdf.err}")
+            messages.error(request, "Error generating PDF document.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+    except Exception as e:
+        logger.error(f"Error in generate_pdf_file_from_html: {e}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        import traceback
+
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        messages.error(request, "Error generating PDF document.")
+        return redirect("patient_data:patient_details", patient_id=patient_id)
 
 
 def patient_orcd_view(request, patient_id):
