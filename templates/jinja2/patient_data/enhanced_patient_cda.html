@@ -871,63 +871,62 @@
                     <!-- Original Clinical Data Table -->
                     <div class="original-clinical-table">
                         <table class="table table-bordered table-hover">
+                            {% if section.structured_data and section.structured_data|length > 0 %}
+                            {% set first_entry = section.structured_data[0] %}
+                            {% if first_entry.fields %}
                             <thead class="table-primary">
                                 <tr>
-                                    <th style="width: 25%;">Field</th>
-                                    <th style="width: 40%;">Original Value (NCPeH-A)</th>
-                                    <th style="width: 35%;">Context & Metadata</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for entry in section.structured_data %}
-                                {% if entry.fields %}
-                                {% for field_name, field_data in entry.fields.items() %}
-                                <tr>
-                                    <td class="fw-bold text-primary">{{ field_name }}</td>
-                                    <td>
-                                        <span class="original-value">{{ field_data.value or 'N/A' }}</span>
-                                        {% if field_data.xpath %}
-                                        <br><small class="text-muted">
-                                            <i class="fas fa-code me-1"></i>XPath: <code>{{ field_data.xpath }}</code>
-                                        </small>
-                                        {% endif %}
-                                    </td>
-                                    <td>
+                                    {% for field_name, field_data in first_entry.fields.items() %}
+                                    <th class="text-center">
+                                        {{ field_name }}
                                         {% if field_data.has_valueset %}
-                                        <span class="badge bg-success me-1">
+                                        <br><span class="badge bg-success mt-1">
                                             <i class="fas fa-database"></i> Value Set
                                         </span>
                                         {% endif %}
                                         {% if field_data.needs_translation %}
-                                        <span class="badge bg-warning me-1">
+                                        <br><span class="badge bg-warning mt-1">
                                             <i class="fas fa-language"></i> Translatable
                                         </span>
                                         {% endif %}
-                                        {% if entry.section_code %}
-                                        <br><small class="text-muted">
-                                            <i class="fas fa-tag me-1"></i>Section:
-                                            <code>{{ entry.section_code }}</code>
-                                        </small>
-                                        {% endif %}
-                                        {% if entry.section_type %}
-                                        <br><small class="text-muted">
-                                            <i class="fas fa-folder me-1"></i>Type: {{ entry.section_type }}
+                                    </th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in section.structured_data %}
+                                <tr>
+                                    {% for field_name, field_data in entry.fields.items() %}
+                                    <td class="text-center">
+                                        <div class="original-value">{{ field_data.value or 'N/A' }}</div>
+                                        {% if field_data.xpath %}
+                                        <small class="text-muted d-block mt-1">
+                                            <i class="fas fa-code me-1"></i><code>{{ field_data.xpath }}</code>
                                         </small>
                                         {% endif %}
                                     </td>
+                                    {% endfor %}
                                 </tr>
                                 {% endfor %}
-                                {% else %}
-                                <!-- Fallback for entries without structured fields -->
+                            </tbody>
+                            {% else %}
+                            <!-- Fallback for entries without structured fields -->
+                            <thead class="table-primary">
                                 <tr>
-                                    <td class="fw-bold text-secondary">Entry {{ loop.index }}</td>
-                                    <td colspan="2">
+                                    <th>Entry Data</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in section.structured_data %}
+                                <tr>
+                                    <td>
                                         <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
                                     </td>
                                 </tr>
-                                {% endif %}
                                 {% endfor %}
                             </tbody>
+                            {% endif %}
+                            {% endif %}
                         </table>
 
                         <!-- Table Summary -->
