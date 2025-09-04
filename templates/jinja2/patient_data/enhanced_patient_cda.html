@@ -1,5 +1,35 @@
 {% extends "base.html" %}
 
+{# Jinja2 macro for formatting medical dates #}
+{% macro format_medical_date(date_string) %}
+{% if date_string and date_string != 'N/A' %}
+{% set clean_date = date_string|string|trim %}
+{% if clean_date|length == 14 and clean_date.isdigit() %}
+{# Format: YYYYMMDDHHMMSS #}
+{% set year = clean_date[0:4] %}
+{% set month = clean_date[4:6] %}
+{% set day = clean_date[6:8] %}
+{% set hour = clean_date[8:10] %}
+{% set minute = clean_date[10:12] %}
+<span class="formatted-date" title="Original: {{ clean_date }}">
+    {{ month }}/{{ day }}/{{ year }} {{ hour }}:{{ minute }}
+</span>
+{% elif clean_date|length == 8 and clean_date.isdigit() %}
+{# Format: YYYYMMDD #}
+{% set year = clean_date[0:4] %}
+{% set month = clean_date[4:6] %}
+{% set day = clean_date[6:8] %}
+<span class="formatted-date" title="Original: {{ clean_date }}">
+    {{ month }}/{{ day }}/{{ year }}
+</span>
+{% else %}
+{{ date_string }}
+{% endif %}
+{% else %}
+{{ date_string }}
+{% endif %}
+{% endmacro %}
+
 {% block title %}Enhanced CDA Display - {{ patient_identity.given_name }} {{ patient_identity.family_name }}{% endblock
 %}
 
@@ -607,6 +637,31 @@
         border-top: 1px solid #f1f3f4;
         padding-top: 0.375rem;
     }
+
+    /* Formatted date styling */
+    .formatted-date {
+        color: #28a745;
+        font-weight: 500;
+        padding: 0.125rem 0.375rem;
+        background: rgba(40, 167, 69, 0.1);
+        border-radius: 0.25rem;
+        border: 1px solid rgba(40, 167, 69, 0.2);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        cursor: help;
+        transition: all 0.2s ease;
+    }
+
+    .formatted-date:hover {
+        background: rgba(40, 167, 69, 0.15);
+        border-color: rgba(40, 167, 69, 0.3);
+    }
+
+    /* Date formatting for original clinical tables */
+    .original-clinical-table .formatted-date {
+        display: inline-block;
+        max-width: 100%;
+        text-align: center;
+    }
 </style>
 {% endblock %}
 
@@ -786,13 +841,15 @@
 
                                 {% if medication.fields.get('Treatment Start Date', {}).get('value') %}
                                 <p class="mb-2"><strong>Start Date:</strong>
-                                    {{ medication.fields.get('Treatment Start Date', {}).get('value') }}
+                                    {{ format_medical_date(medication.fields.get('Treatment Start Date',
+                                    {}).get('value')) }}
                                 </p>
                                 {% endif %}
 
                                 {% if medication.fields.get('Treatment End Date', {}).get('value') %}
                                 <p class="mb-2"><strong>End Date:</strong>
-                                    {{ medication.fields.get('Treatment End Date', {}).get('value') }}
+                                    {{ format_medical_date(medication.fields.get('Treatment End Date', {}).get('value'))
+                                    }}
                                 </p>
                                 {% endif %}
 
@@ -1084,7 +1141,11 @@
                                 <tr>
                                     {% for field_name, field_data in entry.fields.items() %}
                                     <td class="text-center">
+                                        {% if 'date' in field_name.lower() or 'time' in field_name.lower() %}
+                                        <div class="original-value">{{ format_medical_date(field_data.value) }}</div>
+                                        {% else %}
                                         <div class="original-value">{{ field_data.value or 'N/A' }}</div>
+                                        {% endif %}
                                     </td>
                                     {% endfor %}
                                 </tr>
@@ -1621,6 +1682,82 @@
 
 <!-- Section Tabs JavaScript -->
 <script>
+    // Date formatting function for various medical date formats
+    function formatMedicalDate(dateStr) {
+        if (!dateStr || typeof dateStr !== 'string') return dateStr;
+
+        // Remove any whitespace
+        dateStr = dateStr.trim();
+
+        // Handle various CDA date formats
+        let parsedDate = null;
+
+        // Format: YYYYMMDDHHMMSS (e.g., 20130317124500)
+        if (/^\d{14}$/.test(dateStr)) {
+            const year = dateStr.substring(0, 4);
+            const month = dateStr.substring(4, 6);
+            const day = dateStr.substring(6, 8);
+            const hour = dateStr.substring(8, 10);
+            const minute = dateStr.substring(10, 12);
+            const second = dateStr.substring(12, 14);
+            parsedDate = new Date(year, month - 1, day, hour, minute, second);
+        }
+        // Format: YYYYMMDD (e.g., 20130317)
+        else if (/^\d{8}$/.test(dateStr)) {
+            const year = dateStr.substring(0, 4);
+            const month = dateStr.substring(4, 6);
+            const day = dateStr.substring(6, 8);
+            parsedDate = new Date(year, month - 1, day);
+        }
+        // Format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS (ISO format)
+        else if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+            parsedDate = new Date(dateStr);
+        }
+
+        // If we successfully parsed a date, format it as MM/DD/YYYY HH:MM
+        if (parsedDate && !isNaN(parsedDate.getTime())) {
+            const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+            const day = String(parsedDate.getDate()).padStart(2, '0');
+            const year = parsedDate.getFullYear();
+            const hour = String(parsedDate.getHours()).padStart(2, '0');
+            const minute = String(parsedDate.getMinutes()).padStart(2, '0');
+
+            // If it's just a date (no time component), don't show time
+            if (/^\d{8}$/.test(dateStr.trim()) || /^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
+                return `${month}/${day}/${year}`;
+            } else {
+                return `${month}/${day}/${year} ${hour}:${minute}`;
+            }
+        }        // Return original string if we couldn't parse it
+        return dateStr;
+    }
+
+    // Function to apply date formatting to elements with date-like content
+    function formatDateElements() {
+        // Format dates in original clinical data
+        document.querySelectorAll('.original-value').forEach(element => {
+            const text = element.textContent.trim();
+            if (text && text !== 'N/A') {
+                const formatted = formatMedicalDate(text);
+                if (formatted !== text) {
+                    element.innerHTML = `<span class="formatted-date" title="Original: ${text}">${formatted}</span>`;
+                }
+            }
+        });
+
+        // Format dates in structured data that contain date-like patterns
+        document.querySelectorAll('td, div').forEach(element => {
+            const text = element.textContent.trim();
+            // Look for date patterns in cells that might contain dates
+            if (/^\d{8,14}$/.test(text) || /^\d{4}-\d{2}-\d{2}/.test(text)) {
+                const formatted = formatMedicalDate(text);
+                if (formatted !== text && element.children.length === 0) {
+                    element.innerHTML = `<span class="formatted-date" title="Original: ${text}">${formatted}</span>`;
+                }
+            }
+        });
+    }
+
     function showTab(sectionId, tabType) {
         // Hide all tab contents for this section
         const structuredTab = document.getElementById(sectionId + '_structured');
@@ -1647,10 +1784,15 @@
             if (originalTab) originalTab.classList.add('active');
             if (buttons[1]) buttons[1].classList.add('active');
         }
-    }    // Initialize tooltips and any other interactive elements
+    }
+
+    // Initialize tooltips and any other interactive elements
     document.addEventListener('DOMContentLoaded', function () {
-        // Add any initialization code here
-        console.log('Enhanced CDA Display with tabs initialized');
+        // Format dates throughout the document
+        formatDateElements();
+
+        // Add any other initialization code here
+        console.log('Enhanced CDA Display with tabs and date formatting initialized');
     });
 </script>
 {% endblock %}
