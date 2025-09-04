@@ -34,12 +34,18 @@ def determine_cda_type_standalone(content: str, file_path: str = "") -> str:
     filename = os.path.basename(file_path).upper() if file_path else ""
 
     # First check filename patterns (fastest)
-    if "L1" in filename or "PIVOT" in filename:
-        return "L1"
-    elif "L3" in filename or "FRIENDLY" in filename:
+    # Check for explicit level indicators first (most specific)
+    if "L3" in filename:
         return "L3"
+    elif "L1" in filename:
+        return "L1"
     elif "L2" in filename:
         return "L2"
+    # Then check document type patterns (less specific)
+    elif "FRIENDLY" in filename:
+        return "L3"  # FRIENDLY documents are typically L3
+    elif "PIVOT" in filename:
+        return "L1"  # PIVOT documents are typically L1 (but L3 should be caught above)
     else:
         # Determine from content using improved HL7 logic
         try:
@@ -200,12 +206,20 @@ class CDADocumentIndexer:
         filename = os.path.basename(file_path).upper()
 
         # First check filename patterns (fastest)
-        if "L1" in filename or "PIVOT" in filename:
-            return "L1"
-        elif "L3" in filename or "FRIENDLY" in filename:
+        # Check for explicit level indicators first (most specific)
+        if "L3" in filename:
             return "L3"
+        elif "L1" in filename:
+            return "L1"
         elif "L2" in filename:
             return "L2"
+        # Then check document type patterns (less specific)
+        elif "FRIENDLY" in filename:
+            return "L3"  # FRIENDLY documents are typically L3
+        elif "PIVOT" in filename:
+            return (
+                "L1"  # PIVOT documents are typically L1 (but L3 should be caught above)
+            )
         else:
             # Determine from content using improved HL7 logic
             try:
