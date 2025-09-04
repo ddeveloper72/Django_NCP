@@ -40,7 +40,7 @@ class PatientMatch:
     l3_cda_content: Optional[str] = None
     l1_cda_path: Optional[str] = None
     l3_cda_path: Optional[str] = None
-    preferred_cda_type: str = "L3"  # Default to L3 for rendering
+    preferred_cda_type: str = "L3"  # Will be auto-determined in __post_init__
 
     def __post_init__(self):
         if self.available_documents is None:
@@ -48,8 +48,25 @@ class PatientMatch:
         if self.confidence_score == 1.0 and self.match_score != 1.0:
             self.confidence_score = self.match_score
 
+        # Auto-determine preferred CDA type based on what's actually available
+        # Priority: Use what's available, prefer L1 for unstructured docs, L3 for structured
+        if self.l1_cda_content and self.l3_cda_content:
+            # Both available - determine which is more appropriate by analyzing structure
+            # For now, prefer L1 as it's the original document format
+            self.preferred_cda_type = "L1"
+        elif self.l1_cda_content and not self.l3_cda_content:
+            # Only L1 available - use it
+            self.preferred_cda_type = "L1"
+        elif self.l3_cda_content and not self.l1_cda_content:
+            # Only L3 available - use it
+            self.preferred_cda_type = "L3"
+        # else: keep default "L3" if neither is available
+
         # Set legacy cda_content to preferred type for backward compatibility
-        if self.preferred_cda_type == "L3" and self.l3_cda_content:
+        if self.preferred_cda_type == "L1" and self.l1_cda_content:
+            self.cda_content = self.l1_cda_content
+            self.file_path = self.l1_cda_path
+        elif self.preferred_cda_type == "L3" and self.l3_cda_content:
             self.cda_content = self.l3_cda_content
             self.file_path = self.l3_cda_path
         elif self.l1_cda_content:
