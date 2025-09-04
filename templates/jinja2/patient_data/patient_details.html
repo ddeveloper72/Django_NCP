@@ -119,8 +119,8 @@
 
                     {% if patient_data.patient_id %}
                     <div class="info-item">
-                        <label class="info-label">Internal ID:</label>
-                        <span class="info-value">{{ patient_data.patient_id }}</span>
+                        <label class="info-label">Patient ID:</label>
+                        <span class="info-value">{{ patient_id }}</span>
                     </div>
                     {% endif %}
 
@@ -153,7 +153,7 @@
                 <div class="action-buttons">
                     <!-- View CDA Document - Dynamic type based on user selection -->
                     {% set selected_cda_type = preferred_cda_type or "L3" %}
-                    <a href="{{ url('patient_data:patient_cda_view_typed', patient_data.id, selected_cda_type) }}"
+                    <a href="{{ url('patient_data:patient_cda_view_typed', patient_id, selected_cda_type) }}"
                         class="action-button primary">
                         <i class="icon-eye"></i>
                         View CDA Document
@@ -163,8 +163,7 @@
                     <!-- Document Selection - Multiple Documents Available -->
                     {% if (l1_documents and l1_documents|length > 1) or (l3_documents and l3_documents|length > 1) or
                     (l1_available and l3_available) %}
-                    <a href="{{ url('patient_data:select_document', patient_data.id) }}"
-                        class="action-button selection">
+                    <a href="{{ url('patient_data:select_document', patient_id) }}" class="action-button selection">
                         <i class="icon-list"></i>
                         Select Document
                         <span class="button-subtitle">
@@ -176,8 +175,7 @@
                     {% endif %}
 
                     <!-- CDA Download - Always uses L1 for better PDF structure when available -->
-                    <a href="{{ url('patient_data:download_cda_pdf', patient_data.id) }}"
-                        class="action-button secondary">
+                    <a href="{{ url('patient_data:download_cda_pdf', patient_id) }}" class="action-button secondary">
                         <i class="icon-download"></i>
                         CDA Download
                         <span class="button-subtitle">
@@ -187,7 +185,7 @@
                     </a>
 
                     <!-- Patient Summary PDF Download -->
-                    <a href="{{ url('patient_data:download_patient_summary_pdf', patient_data.id) }}"
+                    <a href="{{ url('patient_data:download_patient_summary_pdf', patient_id) }}"
                         class="action-button pdf-download" download>
                         <i class="icon-file-pdf"></i>
                         Patient Summary PDF
@@ -195,7 +193,7 @@
                     </a>
 
                     <!-- ORCD - PDF Preview and Download -->
-                    <a href="{{ url('patient_data:patient_orcd_view', patient_data.id) }}" class="action-button accent">
+                    <a href="{{ url('patient_data:patient_orcd_view', patient_id) }}" class="action-button accent">
                         <i class="icon-file-text"></i>
                         ORCD
                         <span class="button-subtitle">PDF Preview & Download</span>
