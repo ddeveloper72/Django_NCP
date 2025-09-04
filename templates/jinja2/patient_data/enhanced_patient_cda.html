@@ -271,8 +271,7 @@
     }
 
     .original-content {
-        max-height: 400px;
-        overflow-y: auto;
+        /* Removed max-height restriction to allow content to fit naturally */
     }
 
     .xml-content {
@@ -364,52 +363,144 @@
         font-size: 1.1rem;
     }
 
-    /* Original Clinical Data Table Styling */
+    /* Original Clinical Data Table Styling - Enhanced to match structured tables */
+    .original-clinical-table {
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 1rem;
+    }
+
     .original-clinical-table .table {
         margin-bottom: 0;
         font-size: 0.9em;
     }
 
     .original-clinical-table .table-primary th {
-        background-color: #0d6efd;
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
         color: white;
         border-color: #0a58ca;
         font-weight: 600;
-        padding: 0.75rem 0.5rem;
+        padding: 0.75rem;
+        text-align: center;
+        vertical-align: middle;
+        position: relative;
+        border-bottom: 2px solid #0a58ca;
     }
 
     .original-clinical-table .table td {
-        padding: 0.75rem 0.5rem;
-        vertical-align: top;
-        border-bottom: 1px solid #e9ecef;
+        padding: 0.75rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f8f9fa;
+        text-align: center;
+    }
+
+    .original-clinical-table .table tbody tr {
+        transition: background-color 0.15s ease-in-out;
     }
 
     .original-clinical-table .table tbody tr:hover {
         background-color: #f8f9fa;
+        transform: translateY(-1px);
+        box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+    }
+
+    .original-clinical-table .table tbody tr:last-child td {
+        border-bottom: none;
     }
 
     .original-value {
         font-weight: 600;
         color: #212529;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: block;
+        margin-bottom: 0.25rem;
     }
 
     .original-clinical-table code {
         background-color: #f8f9fa;
         color: #e83e8c;
-        padding: 0.125rem 0.25rem;
+        padding: 0.25rem 0.5rem;
         border-radius: 0.25rem;
         font-size: 0.8em;
+        border: 1px solid #dee2e6;
+        font-family: 'Courier New', monospace;
+        display: inline-block;
     }
 
     .original-clinical-table .badge {
-        font-size: 0.75em;
-        margin-bottom: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin: 0.125rem 0.25rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.375rem;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    .original-clinical-table .badge.bg-success {
+        background-color: #198754 !important;
+        color: white;
+    }
+
+    .original-clinical-table .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529;
+    }
+
+    .original-clinical-table .text-muted {
+        color: #6c757d !important;
+        font-size: 0.8rem;
+        line-height: 1.4;
     }
 
     .original-clinical-table .card-footer {
-        border-top: 1px solid #0d6efd;
+        border-top: 2px solid #0d6efd;
         background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
+        padding: 0.75rem 1rem;
+        border-radius: 0 0 0.5rem 0.5rem;
+    }
+
+    .original-clinical-table .card-footer .row {
+        align-items: center;
+    }
+
+    .original-clinical-table .card-footer small {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    /* Responsive enhancements for original clinical tables */
+    @media (max-width: 768px) {
+
+        .original-clinical-table .table th,
+        .original-clinical-table .table td {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        .original-clinical-table .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .original-clinical-table code {
+            font-size: 0.75em;
+            padding: 0.125rem 0.25rem;
+        }
+    }
+
+    /* Additional styling for better visual hierarchy */
+    .original-clinical-table .table thead th .badge {
+        margin-top: 0.25rem;
+        margin-bottom: 0;
+    }
+
+    .original-clinical-table .table td .original-value+.text-muted {
+        margin-top: 0.25rem;
+        border-top: 1px solid #f8f9fa;
+        padding-top: 0.25rem;
     }
 </style>
 {% endblock %}
@@ -879,16 +970,6 @@
                                     {% for field_name, field_data in first_entry.fields.items() %}
                                     <th class="text-center">
                                         {{ field_name }}
-                                        {% if field_data.has_valueset %}
-                                        <br><span class="badge bg-success mt-1">
-                                            <i class="fas fa-database"></i> Value Set
-                                        </span>
-                                        {% endif %}
-                                        {% if field_data.needs_translation %}
-                                        <br><span class="badge bg-warning mt-1">
-                                            <i class="fas fa-language"></i> Translatable
-                                        </span>
-                                        {% endif %}
                                     </th>
                                     {% endfor %}
                                 </tr>
@@ -899,11 +980,6 @@
                                     {% for field_name, field_data in entry.fields.items() %}
                                     <td class="text-center">
                                         <div class="original-value">{{ field_data.value or 'N/A' }}</div>
-                                        {% if field_data.xpath %}
-                                        <small class="text-muted d-block mt-1">
-                                            <i class="fas fa-code me-1"></i><code>{{ field_data.xpath }}</code>
-                                        </small>
-                                        {% endif %}
                                     </td>
                                     {% endfor %}
                                 </tr>
