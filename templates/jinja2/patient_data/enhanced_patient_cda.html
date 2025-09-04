@@ -303,6 +303,61 @@
         color: #2d5a2d;
     }
 
+    .text-content {
+        background: #f8f9fa;
+        border: 1px solid #ffc107;
+        border-radius: 0.375rem;
+        padding: 15px;
+        font-size: 0.85em;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        max-height: 400px;
+        overflow-y: auto;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        color: #856404;
+    }
+
+    .xml-content {
+        background: #f8f9fa;
+        border: 1px solid #fd7e14;
+        border-radius: 0.375rem;
+        padding: 15px;
+        font-size: 0.85em;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        max-height: 400px;
+        overflow-y: auto;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        color: #6c2e00;
+    }
+
+    .original-entries-content .table {
+        margin-bottom: 0;
+        font-size: 0.9em;
+    }
+
+    .original-entries-content .table th {
+        background-color: #e3f2fd;
+        border-bottom: 2px solid #1976d2;
+        font-weight: 600;
+        color: #1565c0;
+        padding: 0.5rem;
+    }
+
+    .original-entries-content .table td {
+        padding: 0.5rem;
+        vertical-align: top;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .original-entries-content .json-content {
+        margin: 0;
+        max-height: 200px;
+        font-size: 0.8em;
+    }
+
     .original-content h4 {
         color: #495057;
         margin-bottom: 15px;
@@ -758,19 +813,72 @@
                 <div class="original-content">
                     <h4>Original Clinical Data from NCPeH-A{% if section.title %} - {{ section.title }}{% endif %}</h4>
 
-                    <!-- DEBUG: Section data inspection -->
-                    <div class="alert alert-warning mb-2" style="font-size: 0.8em;">
-                        <strong>🔍 Debug Info:</strong><br>
-                        <strong>Section keys:</strong> {{ section.keys() | list | join(', ') }}<br>
-                        <strong>structured_data exists:</strong> {{ section.structured_data is defined and
-                        section.structured_data is not none }}<br>
-                        <strong>structured_data type:</strong> {{ section.structured_data.__class__.__name__ if
-                        section.structured_data else 'None' }}<br>
-                        <strong>structured_data length:</strong> {{ section.structured_data | length if
-                        section.structured_data else 'N/A' }}
-                    </div>
-
                     {% if section.structured_data %}
+                    <div class="alert alert-info mb-3">
+                        <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical
+                                data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
+                            mapping.</small>
+                    </div>
+                    <pre class="json-content">{{ section.structured_data | tojson(indent=2) }}</pre>
+                    {% elif section.content and section.content.original %}
+                    <div class="alert alert-warning mb-3">
+                        <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing
+                            raw XML content.</small>
+                    </div>
+                    <pre
+                        class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
+                    {% elif section.content %}
+                    <div class="alert alert-warning mb-3">
+                        <small><i class="fas fa-file-text me-1"></i>Structured data not available. Showing
+                            original text/table content.</small>
+                    </div>
+                    <div class="original-text-content">
+                        {% if section.content is string %}
+                        <pre
+                            class="text-content">{{ section.content[:3000] }}{% if section.content|length > 3000 %}...{% endif %}</pre>
+                        {% else %}
+                        <pre class="xml-content">{{ section.content | string }}</pre>
+                        {% endif %}
+                    </div>
+                    {% elif section.entries and section.entries|length > 0 %}
+                    <div class="alert alert-info mb-3">
+                        <small><i class="fas fa-table me-1"></i>Structured data not available. Showing
+                            original table entries.</small>
+                    </div>
+                    <div class="original-entries-content">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in section.entries[:10] %}
+                                <tr>
+                                    <td><strong>Entry {{ loop.index }}</strong></td>
+                                    <td>
+                                        {% if entry is mapping %}
+                                        <pre class="json-content">{{ entry | tojson(indent=2) }}</pre>
+                                        {% else %}
+                                        {{ entry | string }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% if section.entries|length > 10 %}
+                                <tr>
+                                    <td colspan="2" class="text-muted text-center">
+                                        ... and {{ section.entries|length - 10 }} more entries
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No original clinical data available for this section.</p>
+                    {% endif %}
                     <div class="alert alert-info mb-3">
                         <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical
                                 data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
@@ -856,6 +964,55 @@
                     </div>
                     <pre
                         class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
+                    {% elif section.content %}
+                    <div class="alert alert-warning mb-3">
+                        <small><i class="fas fa-file-text me-1"></i>Structured data not available. Showing
+                            original text/table content.</small>
+                    </div>
+                    <div class="original-text-content">
+                        {% if section.content is string %}
+                        <pre
+                            class="text-content">{{ section.content[:3000] }}{% if section.content|length > 3000 %}...{% endif %}</pre>
+                        {% else %}
+                        <pre class="xml-content">{{ section.content | string }}</pre>
+                        {% endif %}
+                    </div>
+                    {% elif section.entries and section.entries|length > 0 %}
+                    <div class="alert alert-info mb-3">
+                        <small><i class="fas fa-table me-1"></i>Structured data not available. Showing
+                            original table entries.</small>
+                    </div>
+                    <div class="original-entries-content">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in section.entries[:10] %}
+                                <tr>
+                                    <td><strong>Entry {{ loop.index }}</strong></td>
+                                    <td>
+                                        {% if entry is mapping %}
+                                        <pre class="json-content">{{ entry | tojson(indent=2) }}</pre>
+                                        {% else %}
+                                        {{ entry | string }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% if section.entries|length > 10 %}
+                                <tr>
+                                    <td colspan="2" class="text-muted text-center">
+                                        ... and {{ section.entries|length - 10 }} more entries
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
                     {% else %}
                     <p class="text-muted">No original clinical data available for this section.</p>
                     {% endif %}
@@ -898,6 +1055,55 @@
                     </div>
                     <pre
                         class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
+                    {% elif section.content %}
+                    <div class="alert alert-warning mb-3">
+                        <small><i class="fas fa-file-text me-1"></i>Structured data not available. Showing
+                            original text/table content.</small>
+                    </div>
+                    <div class="original-text-content">
+                        {% if section.content is string %}
+                        <pre
+                            class="text-content">{{ section.content[:3000] }}{% if section.content|length > 3000 %}...{% endif %}</pre>
+                        {% else %}
+                        <pre class="xml-content">{{ section.content | string }}</pre>
+                        {% endif %}
+                    </div>
+                    {% elif section.entries and section.entries|length > 0 %}
+                    <div class="alert alert-info mb-3">
+                        <small><i class="fas fa-table me-1"></i>Structured data not available. Showing
+                            original table entries.</small>
+                    </div>
+                    <div class="original-entries-content">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in section.entries[:10] %}
+                                <tr>
+                                    <td><strong>Entry {{ loop.index }}</strong></td>
+                                    <td>
+                                        {% if entry is mapping %}
+                                        <pre class="json-content">{{ entry | tojson(indent=2) }}</pre>
+                                        {% else %}
+                                        {{ entry | string }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% if section.entries|length > 10 %}
+                                <tr>
+                                    <td colspan="2" class="text-muted text-center">
+                                        ... and {{ section.entries|length - 10 }} more entries
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
                     {% else %}
                     <p class="text-muted">No original clinical data available for this section.</p>
                     {% endif %}
