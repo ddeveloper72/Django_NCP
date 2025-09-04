@@ -1035,6 +1035,56 @@
             margin-bottom: 0.75rem;
         }
     }
+
+    /* Document Info Cards */
+    .document-info-card {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .document-info-card h6 {
+        color: #17a2b8;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .info-item {
+        margin-bottom: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .info-item strong {
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .info-item code {
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+    }
+
+    .address-breakdown {
+        font-size: 0.875rem;
+        padding-left: 1rem;
+    }
+
+    .address-breakdown div {
+        margin-bottom: 0.25rem;
+    }
 </style>
 {% endblock %}
 
@@ -1271,14 +1321,22 @@
                                     <h6><i class="fas fa-home me-1"></i>Addresses</h6>
                                     {% for address in patient_extended_data.patient_contact.addresses %}
                                     <div class="contact-info-card">
-                                        <div class="contact-type">{{ address.use or 'Address' }}</div>
+                                        <div class="contact-type">{{ address.use or 'Primary Address' }}</div>
                                         <div class="contact-details address-display">
-                                            {% if address.formatted %}
-                                            {% for line in address.formatted.split('\n') %}
-                                            <div class="address-line">{{ line.strip() }}</div>
-                                            {% endfor %}
-                                            {% else %}
-                                            {{ address.formatted or 'No address details' }}
+                                            <div class="address-line"><strong>{{ address.formatted or 'No address
+                                                    details' }}</strong></div>
+                                            {% if address.street or address.city or address.country %}
+                                            <div class="address-breakdown mt-2 text-muted">
+                                                {% if address.street %}<div><i class="fas fa-road me-1"></i>Street: {{
+                                                    address.street }}</div>{% endif %}
+                                                {% if address.city %}<div><i class="fas fa-city me-1"></i>City: {{
+                                                    address.city }}</div>{% endif %}
+                                                {% if address.postal_code %}<div><i
+                                                        class="fas fa-mail-bulk me-1"></i>Postal Code: {{
+                                                    address.postal_code }}</div>{% endif %}
+                                                {% if address.country %}<div><i class="fas fa-flag me-1"></i>Country: {{
+                                                    address.country }}</div>{% endif %}
+                                            </div>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -1608,79 +1666,88 @@
                             <h5><i class="fas fa-file-medical-alt me-2"></i>Document Information</h5>
 
                             {% if patient_extended_data.document_info %}
-                            <div class="document-info-section">
-                                {% if patient_extended_data.document_info.title %}
-                                <div class="info-row">
-                                    <div class="info-label">
-                                        <i class="fas fa-file-alt"></i>Document Title
-                                    </div>
-                                    <div class="info-value">{{ patient_extended_data.document_info.title }}</div>
-                                </div>
-                                {% endif %}
-
-                                {% if patient_extended_data.document_info.creation_date %}
-                                <div class="info-row">
-                                    <div class="info-label">
-                                        <i class="fas fa-calendar-plus"></i>Creation Date
-                                    </div>
-                                    <div class="info-value date-value">{{
-                                        patient_extended_data.document_info.creation_date }}</div>
-                                </div>
-                                {% endif %}
-
-                                {% if patient_extended_data.document_info.last_update_date %}
-                                <div class="info-row">
-                                    <div class="info-label">
-                                        <i class="fas fa-calendar-check"></i>Last Update
-                                    </div>
-                                    <div class="info-value date-value">{{
-                                        patient_extended_data.document_info.last_update_date }}</div>
-                                </div>
-                                {% endif %}
-
-                                {% if patient_extended_data.document_info.language %}
-                                <div class="info-row">
-                                    <div class="info-label">
-                                        <i class="fas fa-language"></i>Language
-                                    </div>
-                                    <div class="info-value language-value">{{
-                                        patient_extended_data.document_info.language }}</div>
-                                </div>
-                                {% endif %}
-
-                                {% if patient_extended_data.document_info.version %}
-                                <div class="info-row">
-                                    <div class="info-label">
-                                        <i class="fas fa-code-branch"></i>Version
-                                    </div>
-                                    <div class="info-value">{{ patient_extended_data.document_info.version }}</div>
-                                </div>
-                                {% endif %}
-
-                                {% if patient_extended_data.document_info.status %}
-                                <div class="info-row">
-                                    <div class="info-label">
-                                        <i class="fas fa-check-circle"></i>Status
-                                    </div>
-                                    <div class="info-value">{{ patient_extended_data.document_info.status|title }}</div>
-                                </div>
-                                {% endif %}
-
-                                {% if patient_extended_data.document_info.confidentiality %}
-                                <div class="info-row">
-                                    <div class="info-label">
-                                        <i class="fas fa-shield-alt"></i>Confidentiality
-                                    </div>
-                                    <div class="info-value">{{ patient_extended_data.document_info.confidentiality }}
+                            {% set doc_info = patient_extended_data.document_info %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="document-info-card">
+                                        <h6><i class="fas fa-info-circle me-1"></i>Document Details</h6>
+                                        {% if doc_info.title %}
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-file-alt me-1"></i>Title:</strong> {{
+                                            doc_info.title }}
+                                        </div>
+                                        {% endif %}
+                                        {% if doc_info.language %}
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-language me-1"></i>Language:</strong>
+                                            <span class="badge bg-info">{{ doc_info.language }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if doc_info.document_id %}
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-fingerprint me-1"></i>Document ID:</strong>
+                                            <code>{{ doc_info.document_id.extension }}</code>
+                                        </div>
+                                        {% endif %}
                                     </div>
                                 </div>
-                                {% endif %}
+                                <div class="col-md-6">
+                                    <div class="document-info-card">
+                                        <h6><i class="fas fa-calendar me-1"></i>Timeline</h6>
+                                        {% if doc_info.creation_date %}
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-calendar-plus me-1"></i>Created:</strong>
+                                            <span class="badge bg-success">{{ doc_info.creation_date }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if doc_info.last_update %}
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-calendar-check me-1"></i>Last Updated:</strong>
+                                            <span class="badge bg-warning">{{ doc_info.last_update }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if doc_info.version %}
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-code-branch me-1"></i>Version:</strong> {{
+                                            doc_info.version }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
+
+                            <!-- Metadata Section -->
+                            {% if patient_extended_data.metadata %}
+                            {% set metadata = patient_extended_data.metadata %}
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    <div class="document-info-card">
+                                        <h6><i class="fas fa-tags me-1"></i>Document Metadata</h6>
+                                        {% if metadata.creation_info %}
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-info me-1"></i>Status:</strong>
+                                            <span class="badge bg-primary">{{ metadata.creation_info.status|title
+                                                }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if metadata.relationships %}
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-link me-1"></i>Related Documents:</strong> {{
+                                            metadata.relationships.related_documents }}
+                                        </div>
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-calendar-alt me-1"></i>Service Events:</strong> {{
+                                            metadata.relationships.service_events }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                             {% else %}
-                            <div class="empty-state">
-                                <i class="fas fa-info-circle"></i>
-                                <h6>No Document Information</h6>
-                                <p>No additional document metadata is available.</p>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Document information is not available for this patient record.
                             </div>
                             {% endif %}
                         </div>
