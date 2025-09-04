@@ -1180,10 +1180,14 @@ class EnhancedCDAProcessor:
                 # Extract observation (allergies, lab results, etc.)
                 obs_elem = entry.find(".//hl7:observation", namespaces)
                 if obs_elem is not None:
-                    entry_data["data"] = self._extract_observation_data(
-                        obs_elem, namespaces
-                    )
+                    obs_data = self._extract_observation_data(obs_elem, namespaces)
+                    entry_data["data"] = obs_data
                     entry_data["section_type"] = "observation"
+
+                    # Convert observation data to structured fields format
+                    entry_data["fields"] = (
+                        self._convert_observation_to_structured_fields(obs_data)
+                    )
 
                 # Extract procedure data
                 procedure = entry.find(".//hl7:procedure", namespaces)
@@ -1497,11 +1501,16 @@ class EnhancedCDAProcessor:
         return data
 
     def _extract_observation_data(self, obs_elem, namespaces) -> Dict[str, Any]:
-        """Extract observation data (allergies, lab results, problems, etc.)"""
+        """Extract observation data (allergies, lab results, problems, vital signs, etc.)"""
         data = {}
 
         try:
-            # Get observation code
+            # Extract observation ID
+            id_elem = obs_elem.find("hl7:id", namespaces)
+            if id_elem is not None:
+                data["id"] = id_elem.get("root", "")
+
+            # Get observation code (what is being measured)
             code_elem = obs_elem.find("hl7:code", namespaces)
             if code_elem is not None:
                 data["code"] = code_elem.get("code", "")
@@ -1509,22 +1518,46 @@ class EnhancedCDAProcessor:
                 data["code_system"] = self._get_code_system_name(
                     code_elem.get("codeSystem", "")
                 )
+                data["code_system_name"] = code_elem.get("codeSystemName", "")
 
-            # Extract value - this is usually the main clinical content
+                # Extract translation if available (e.g., Italian translation)
+                translation_elem = code_elem.find("hl7:translation", namespaces)
+                if translation_elem is not None:
+                    data["translation_display"] = translation_elem.get(
+                        "displayName", ""
+                    )
+                    data["translation_code"] = translation_elem.get("code", "")
+
+            # Extract value - this is the measured value
             value_elem = obs_elem.find("hl7:value", namespaces)
             if value_elem is not None:
-                # Main value
-                data["value"] = value_elem.get(
-                    "displayName", value_elem.get("value", "")
-                )
-
-                # Check xsi:type with proper namespace handling
+                # Check the type of value (PQ = Physical Quantity, CD = Coded Display, etc.)
                 xsi_type = value_elem.get(
                     "{http://www.w3.org/2001/XMLSchema-instance}type"
-                )
+                ) or value_elem.get("xsi:type")
 
-                # For problem observations, map value fields to condition fields
-                if xsi_type == "CD" or value_elem.get("xsi:type") == "CD":
+                if xsi_type == "PQ":
+                    # Physical Quantity (e.g., vital signs with units)
+                    data["value"] = value_elem.get("value", "")
+                    data["unit"] = value_elem.get("unit", "")
+                    data["value_type"] = "quantity"
+
+                    # Format display value with unit
+                    if data["value"] and data["unit"]:
+                        data["formatted_value"] = f"{data['value']} {data['unit']}"
+                    else:
+                        data["formatted_value"] = data["value"]
+
+                elif xsi_type == "CD":
+                    # Coded Display (e.g., conditions, problems)
+                    data["value"] = value_elem.get(
+                        "displayName", value_elem.get("value", "")
+                    )
+                    data["value_code"] = value_elem.get("code", "")
+                    data["value_type"] = "coded"
+                    data["formatted_value"] = data["value"]
+
+                    # For problem observations, map value fields to condition fields
                     data["condition_code"] = value_elem.get("code", "")
                     data["condition_display"] = value_elem.get(
                         "displayName", "Unknown Condition"
@@ -1538,6 +1571,35 @@ class EnhancedCDAProcessor:
                     data["agent_display"] = value_elem.get(
                         "displayName", "Unknown Agent"
                     )
+
+                else:
+                    # Default handling for other types
+                    data["value"] = value_elem.get(
+                        "displayName", value_elem.get("value", "")
+                    )
+                    data["value_type"] = "text"
+                    data["formatted_value"] = data["value"]
+
+            # Extract status
+            status_code = obs_elem.find("hl7:statusCode", namespaces)
+            if status_code is not None:
+                data["status"] = status_code.get("code", "completed")
+
+            # Extract effective time (when the observation was made)
+            effective_time = obs_elem.find("hl7:effectiveTime", namespaces)
+            if effective_time is not None:
+                time_value = effective_time.get("value", "")
+                if time_value:
+                    data["effective_time"] = time_value
+                    # Try to format the date/time
+                    data["formatted_time"] = self._format_hl7_datetime(time_value)
+
+            # Also check for low/high time in effectiveTime
+            effective_time_low = obs_elem.find("hl7:effectiveTime/hl7:low", namespaces)
+            if effective_time_low is not None:
+                onset_value = effective_time_low.get("value", "")
+                if onset_value:
+                    data["onset_date"] = self._format_hl7_datetime(onset_value)
 
             # Extract participant (for allergies - causative agent)
             participant = obs_elem.find(
@@ -1577,29 +1639,152 @@ class EnhancedCDAProcessor:
                     "displayName", "Unknown Reaction"
                 )
 
-            # Extract status
-            status_code = obs_elem.find("hl7:statusCode", namespaces)
-            if status_code is not None:
-                data["status"] = status_code.get("code", "active")
+            # Extract interpretation codes (normal, high, low, etc.)
+            interpretation = obs_elem.find("hl7:interpretationCode", namespaces)
+            if interpretation is not None:
+                data["interpretation"] = interpretation.get("code", "")
+                data["interpretation_display"] = interpretation.get("displayName", "")
 
-            # Extract onset date from effectiveTime
-            effective_time = obs_elem.find("hl7:effectiveTime/hl7:low", namespaces)
-            if effective_time is not None:
-                onset_value = effective_time.get("value", "")
-                if onset_value:
-                    # Format HL7 date (YYYYMMDD) to readable format
-                    if len(onset_value) >= 8:
-                        year = onset_value[:4]
-                        month = onset_value[4:6]
-                        day = onset_value[6:8]
-                        data["onset_date"] = f"{year}-{month}-{day}"
-                    else:
-                        data["onset_date"] = onset_value
+            # Extract reference ranges
+            reference_range = obs_elem.find(
+                "hl7:referenceRange/hl7:observationRange", namespaces
+            )
+            if reference_range is not None:
+                low_elem = reference_range.find("hl7:value/hl7:low", namespaces)
+                high_elem = reference_range.find("hl7:value/hl7:high", namespaces)
+                if low_elem is not None or high_elem is not None:
+                    data["reference_range"] = {}
+                    if low_elem is not None:
+                        data["reference_range"]["low"] = low_elem.get("value", "")
+                        data["reference_range"]["low_unit"] = low_elem.get("unit", "")
+                    if high_elem is not None:
+                        data["reference_range"]["high"] = high_elem.get("value", "")
+                        data["reference_range"]["high_unit"] = high_elem.get("unit", "")
 
         except Exception as e:
             logger.error(f"Error extracting observation data: {e}")
 
         return data
+
+    def _format_hl7_datetime(self, hl7_datetime: str) -> str:
+        """Format HL7 datetime string to human readable format"""
+        try:
+            if not hl7_datetime:
+                return ""
+
+            # Handle different HL7 datetime formats
+            if len(hl7_datetime) >= 14:
+                # YYYYMMDDHHMMSS format
+                year = hl7_datetime[0:4]
+                month = hl7_datetime[4:6]
+                day = hl7_datetime[6:8]
+                hour = hl7_datetime[8:10]
+                minute = hl7_datetime[10:12]
+                return f"{month}/{day}/{year} {hour}:{minute}"
+            elif len(hl7_datetime) >= 8:
+                # YYYYMMDD format
+                year = hl7_datetime[0:4]
+                month = hl7_datetime[4:6]
+                day = hl7_datetime[6:8]
+                return f"{month}/{day}/{year}"
+            else:
+                return hl7_datetime
+        except Exception:
+            return hl7_datetime
+
+    def _convert_observation_to_structured_fields(
+        self, obs_data: Dict[str, Any]
+    ) -> Dict[str, Dict[str, str]]:
+        """Convert observation data to structured fields format for table display"""
+        fields = {}
+
+        try:
+            # Extract main observation name/type
+            if obs_data.get("display"):
+                fields["Observation Type"] = {"value": obs_data["display"]}
+
+            # Extract the measured value with unit
+            if obs_data.get("formatted_value"):
+                if obs_data.get("value_type") == "quantity":
+                    fields["Value"] = {"value": obs_data["formatted_value"]}
+                else:
+                    fields["Result"] = {"value": obs_data["formatted_value"]}
+            elif obs_data.get("value"):
+                fields["Value"] = {"value": str(obs_data["value"])}
+
+            # Extract date/time information
+            if obs_data.get("formatted_time"):
+                fields["Date Performed"] = {"value": obs_data["formatted_time"]}
+            elif obs_data.get("effective_time"):
+                fields["Date Performed"] = {"value": obs_data["effective_time"]}
+
+            # Extract status
+            if obs_data.get("status"):
+                fields["Status"] = {"value": obs_data["status"].title()}
+
+            # Extract codes
+            if obs_data.get("code"):
+                fields["Code"] = {"value": obs_data["code"]}
+
+            # Extract interpretation (normal, high, low, etc.)
+            if obs_data.get("interpretation_display"):
+                fields["Interpretation"] = {"value": obs_data["interpretation_display"]}
+            elif obs_data.get("interpretation"):
+                fields["Interpretation"] = {"value": obs_data["interpretation"]}
+
+            # Extract reference range
+            if obs_data.get("reference_range"):
+                ref_range = obs_data["reference_range"]
+                range_text = ""
+                if ref_range.get("low"):
+                    range_text += f"Low: {ref_range['low']}"
+                    if ref_range.get("low_unit"):
+                        range_text += f" {ref_range['low_unit']}"
+                if ref_range.get("high"):
+                    if range_text:
+                        range_text += ", "
+                    range_text += f"High: {ref_range['high']}"
+                    if ref_range.get("high_unit"):
+                        range_text += f" {ref_range['high_unit']}"
+                if range_text:
+                    fields["Reference Range"] = {"value": range_text}
+
+            # For allergies - extract agent information
+            if obs_data.get("agent_display"):
+                fields["Allergen"] = {"value": obs_data["agent_display"]}
+                if obs_data.get("agent_code"):
+                    fields["Allergen Code"] = {"value": obs_data["agent_code"]}
+
+            # Extract severity
+            if obs_data.get("severity"):
+                fields["Severity"] = {"value": obs_data["severity"]}
+
+            # Extract manifestation (reaction)
+            if obs_data.get("manifestation_display"):
+                fields["Reaction"] = {"value": obs_data["manifestation_display"]}
+
+            # For conditions/problems
+            if obs_data.get("condition_display"):
+                fields["Condition"] = {"value": obs_data["condition_display"]}
+                if obs_data.get("condition_code"):
+                    fields["Condition Code"] = {"value": obs_data["condition_code"]}
+
+            # Extract onset date for problems/allergies
+            if obs_data.get("onset_date"):
+                fields["Onset Date"] = {"value": obs_data["onset_date"]}
+
+            # Extract code system information
+            if obs_data.get("code_system_name"):
+                fields["Code System"] = {"value": obs_data["code_system_name"]}
+
+            # Extract translation if available (for international display)
+            if obs_data.get("translation_display"):
+                fields["Local Name"] = {"value": obs_data["translation_display"]}
+
+        except Exception as e:
+            logger.error(f"Error converting observation to structured fields: {e}")
+
+        return fields
 
     def _extract_procedure_data(self, procedure, namespaces) -> Dict[str, Any]:
         """Extract procedure data"""
