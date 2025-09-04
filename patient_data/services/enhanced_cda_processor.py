@@ -3054,7 +3054,8 @@ class EnhancedCDAProcessor:
         self, root: ET.Element, namespaces: Dict
     ) -> Dict[str, Any]:
         """
-        Simple patient ID extraction as fallback
+        Comprehensive patient identity extraction based on EHDSI templates
+        Extracts all available demographic and header information
         """
         patient_identity = {
             "given_name": None,
@@ -3067,30 +3068,155 @@ class EnhancedCDAProcessor:
         }
 
         try:
-            # Look for patient ID in recordTarget/patientRole/id
-            record_targets = root.findall(".//hl7:recordTarget", namespaces)
-            for record_target in record_targets:
-                patient_roles = record_target.findall(".//hl7:patientRole", namespaces)
-                for patient_role in patient_roles:
-                    id_elements = patient_role.findall("hl7:id", namespaces)
-                    for id_elem in id_elements:
-                        extension = id_elem.get("extension")
-                        if extension and extension != "N/A":
+            # Extract comprehensive patient demographics following EHDSI structure
+            patient_role = root.find(".//hl7:recordTarget/hl7:patientRole", namespaces)
+
+            if patient_role is not None:
+                patient = patient_role.find("hl7:patient", namespaces)
+
+                if patient is not None:
+                    # Patient name - extract all components
+                    name_elem = patient.find("hl7:name", namespaces)
+                    if name_elem is not None:
+                        given_elem = name_elem.find("hl7:given", namespaces)
+                        family_elem = name_elem.find("hl7:family", namespaces)
+                        prefix_elem = name_elem.find("hl7:prefix", namespaces)
+                        suffix_elem = name_elem.find("hl7:suffix", namespaces)
+
+                        patient_identity["given_name"] = (
+                            given_elem.text
+                            if given_elem is not None and given_elem.text
+                            else None
+                        )
+                        patient_identity["family_name"] = (
+                            family_elem.text
+                            if family_elem is not None and family_elem.text
+                            else None
+                        )
+                        patient_identity["prefix"] = (
+                            prefix_elem.text
+                            if prefix_elem is not None and prefix_elem.text
+                            else None
+                        )
+                        patient_identity["suffix"] = (
+                            suffix_elem.text
+                            if suffix_elem is not None and suffix_elem.text
+                            else None
+                        )
+
+                        # Create full name for display
+                        name_parts = []
+                        if patient_identity["prefix"]:
+                            name_parts.append(patient_identity["prefix"])
+                        if patient_identity["given_name"]:
+                            name_parts.append(patient_identity["given_name"])
+                        if patient_identity["family_name"]:
+                            name_parts.append(patient_identity["family_name"])
+                        if patient_identity["suffix"]:
+                            name_parts.append(patient_identity["suffix"])
+
+                        patient_identity["full_name"] = (
+                            " ".join(name_parts) if name_parts else None
+                        )
+
+                    # Gender
+                    gender_elem = patient.find(
+                        "hl7:administrativeGenderCode", namespaces
+                    )
+                    if gender_elem is not None:
+                        patient_identity["gender"] = gender_elem.get(
+                            "displayName"
+                        ) or gender_elem.get("code")
+                        patient_identity["gender_code"] = gender_elem.get("code")
+
+                    # Birth date
+                    birth_time = patient.find("hl7:birthTime", namespaces)
+                    if birth_time is not None:
+                        birth_value = birth_time.get("value")
+                        patient_identity["birth_date"] = birth_value
+
+                        # Format birth date for display
+                        if birth_value and len(birth_value) >= 8:
+                            try:
+                                year = birth_value[:4]
+                                month = birth_value[4:6]
+                                day = birth_value[6:8]
+                                patient_identity["birth_date_formatted"] = (
+                                    f"{day}/{month}/{year}"
+                                )
+                            except:
+                                patient_identity["birth_date_formatted"] = birth_value
+
+                # Patient identifiers - extract all IDs
+                id_elements = patient_role.findall("hl7:id", namespaces)
+                for i, id_elem in enumerate(id_elements):
+                    extension = id_elem.get("extension")
+                    root_id = id_elem.get("root")
+
+                    if extension and extension != "N/A":
+                        identifier = {
+                            "extension": extension,
+                            "root": root_id,
+                            "type": "primary" if i == 0 else "secondary",
+                        }
+                        patient_identity["patient_identifiers"].append(identifier)
+
+                        # Set primary and secondary IDs
+                        if i == 0:
                             patient_identity["primary_patient_id"] = extension
                             patient_identity["patient_id"] = (
                                 extension  # Convenient access
                             )
-                            logger.info(
-                                f"Simple extraction found patient ID: {extension}"
-                            )
-                            return patient_identity
+                        elif i == 1:
+                            patient_identity["secondary_patient_id"] = extension
 
-            logger.warning("Simple patient ID extraction found no patient ID")
+                # Extract document metadata
+                patient_identity["document_metadata"] = self._extract_document_metadata(
+                    root, namespaces
+                )
+
+                logger.info(
+                    f"Comprehensive extraction - Name: {patient_identity.get('full_name')}, "
+                    f"Birth: {patient_identity.get('birth_date_formatted')}, "
+                    f"Gender: {patient_identity.get('gender')}, "
+                    f"ID: {patient_identity.get('patient_id')}"
+                )
+
+                return patient_identity
+
+            logger.warning("Comprehensive patient extraction found no patient role")
             return patient_identity
 
         except Exception as e:
-            logger.error(f"Simple patient ID extraction failed: {e}")
+            logger.error(f"Comprehensive patient extraction failed: {e}")
             return patient_identity
+
+    def _extract_document_metadata(
+        self, root: ET.Element, namespaces: Dict
+    ) -> Dict[str, Any]:
+        """Extract document metadata"""
+        metadata = {}
+
+        try:
+            # Document creation date
+            effective_time = root.find(".//hl7:effectiveTime", namespaces)
+            if effective_time is not None:
+                metadata["creation_date"] = effective_time.get("value")
+
+            # Document title
+            title = root.find(".//hl7:title", namespaces)
+            if title is not None:
+                metadata["title"] = title.text
+
+            # Document language
+            language_code = root.find(".//hl7:languageCode", namespaces)
+            if language_code is not None:
+                metadata["language_code"] = language_code.get("code")
+
+        except Exception as e:
+            logger.error(f"Error extracting document metadata: {e}")
+
+        return metadata
 
     def _extract_administrative_data(
         self, root: ET.Element, namespaces: Dict
@@ -3148,3 +3274,152 @@ class EnhancedCDAProcessor:
         except Exception as e:
             logger.error(f"Error extracting administrative data: {e}")
             return admin_data
+
+    def extract_extended_header_data(self, xml_content: str) -> Dict[str, Any]:
+        """
+        Extract comprehensive extended header data for patient viewer
+        Includes next of kin, dependants, legal authenticator, organization details, etc.
+        """
+        try:
+            from enhanced_cda_extended_header_extractor import (
+                EnhancedCDAExtendedHeaderExtractor,
+            )
+            from cda_extended_header_integration import CDAExtendedHeaderIntegration
+
+            integration = CDAExtendedHeaderIntegration()
+            return integration.extract_extended_patient_header_for_processor(
+                xml_content
+            )
+        except Exception as e:
+            logger.error(f"Error extracting extended header data: {e}")
+            return {}
+
+    def get_patient_emergency_contacts(self, xml_content: str) -> Dict[str, Any]:
+        """
+        Get patient emergency contacts including next of kin and guardians
+        """
+        try:
+            extended_data = self.extract_extended_header_data(xml_content)
+            return extended_data.get("emergency_contacts", {})
+        except Exception as e:
+            logger.error(f"Error getting emergency contacts: {e}")
+            return {"has_emergency_contacts": False, "total_count": 0}
+
+    def get_patient_healthcare_team(self, xml_content: str) -> Dict[str, Any]:
+        """
+        Get patient healthcare team information including authors and preferred HCP
+        """
+        try:
+            extended_data = self.extract_extended_header_data(xml_content)
+            return extended_data.get("healthcare_team", {})
+        except Exception as e:
+            logger.error(f"Error getting healthcare team: {e}")
+            return {"has_healthcare_team": False, "total_count": 0}
+
+    def get_patient_contact_details(self, xml_content: str) -> Dict[str, Any]:
+        """
+        Get comprehensive patient contact details for enhanced patient card display
+        """
+        try:
+            extended_data = self.extract_extended_header_data(xml_content)
+            return extended_data.get("patient_contact", {})
+        except Exception as e:
+            logger.error(f"Error getting patient contact details: {e}")
+            return {"has_contact_info": False}
+
+    def get_document_creation_info(self, xml_content: str) -> Dict[str, Any]:
+        """
+        Get document creation and metadata information for display
+        """
+        try:
+            extended_data = self.extract_extended_header_data(xml_content)
+            return {
+                "document_info": extended_data.get("document_info", {}),
+                "metadata": extended_data.get("metadata", {}),
+            }
+        except Exception as e:
+            logger.error(f"Error getting document creation info: {e}")
+            return {"document_info": {}, "metadata": {}}
+
+    def get_patient_dependants(self, xml_content: str) -> Dict[str, Any]:
+        """
+        Get patient dependants information
+        """
+        try:
+            extended_data = self.extract_extended_header_data(xml_content)
+            return extended_data.get("dependants", {})
+        except Exception as e:
+            logger.error(f"Error getting dependants: {e}")
+            return {"has_dependants": False, "total_count": 0}
+
+    def get_comprehensive_patient_summary(self, xml_content: str) -> Dict[str, Any]:
+        """
+        Get comprehensive patient summary including all extended header information
+        Suitable for display in patient summary tabs or extended views
+        """
+        try:
+            import xml.etree.ElementTree as ET
+
+            # Parse XML
+            root = ET.fromstring(xml_content)
+            namespaces = {"hl7": "urn:hl7-org:v3", "n1": "urn:hl7-org:v3"}
+
+            # Get basic patient identity using existing method
+            basic_identity = self._simple_patient_id_extraction(root, namespaces)
+
+            # Get extended header data
+            extended_data = self.extract_extended_header_data(xml_content)
+
+            # Combine for comprehensive summary
+            comprehensive_summary = {
+                # Basic patient information
+                "patient_identity": basic_identity,
+                # Document information
+                "document_info": extended_data.get("document_info", {}),
+                # Contact information
+                "contact_details": extended_data.get("patient_contact", {}),
+                # Family and emergency contacts
+                "emergency_contacts": extended_data.get("emergency_contacts", {}),
+                # Healthcare team
+                "healthcare_team": extended_data.get("healthcare_team", {}),
+                # Dependants
+                "dependants": extended_data.get("dependants", {}),
+                # Extended demographics
+                "extended_demographics": extended_data.get("extended_demographics", {}),
+                # Metadata
+                "metadata": extended_data.get("metadata", {}),
+                # Summary statistics
+                "summary_stats": {
+                    "has_emergency_contacts": extended_data.get(
+                        "emergency_contacts", {}
+                    ).get("has_emergency_contacts", False),
+                    "emergency_contacts_count": extended_data.get(
+                        "emergency_contacts", {}
+                    ).get("total_count", 0),
+                    "has_healthcare_team": extended_data.get("healthcare_team", {}).get(
+                        "has_healthcare_team", False
+                    ),
+                    "healthcare_team_count": extended_data.get(
+                        "healthcare_team", {}
+                    ).get("total_count", 0),
+                    "has_dependants": extended_data.get("dependants", {}).get(
+                        "has_dependants", False
+                    ),
+                    "dependants_count": extended_data.get("dependants", {}).get(
+                        "total_count", 0
+                    ),
+                    "has_contact_info": extended_data.get("patient_contact", {}).get(
+                        "has_contact_info", False
+                    ),
+                },
+            }
+
+            logger.info(
+                f"Generated comprehensive patient summary with {comprehensive_summary['summary_stats']['emergency_contacts_count']} emergency contacts, {comprehensive_summary['summary_stats']['healthcare_team_count']} healthcare team members"
+            )
+
+            return comprehensive_summary
+
+        except Exception as e:
+            logger.error(f"Error generating comprehensive patient summary: {e}")
+            return {}
