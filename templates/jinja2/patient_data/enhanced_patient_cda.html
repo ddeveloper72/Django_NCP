@@ -391,16 +391,19 @@
         font-size: 1.1rem;
     }
 
-    /* Original Clinical Data Table Styling - Enhanced to match structured tables */
+    /* Original Clinical Data Table Styling - Enhanced with elegant NCPeH-A styling */
     .original-clinical-table {
         border: 1px solid #dee2e6;
-        border-radius: 0.5rem;
-        overflow: visible;
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border-radius: 0.875rem;
+        overflow: hidden;
+        box-shadow: 0 0.375rem 1rem rgba(111, 66, 193, 0.15);
         margin-bottom: 1rem;
         /* Ensure table container expands to fit all content */
         height: auto;
         min-height: fit-content;
+        background: white;
+        position: relative;
+        margin-top: 1.5rem;
     }
 
     .original-clinical-table .table {
@@ -409,91 +412,145 @@
         /* Ensure table expands to show all rows */
         height: auto;
         min-height: fit-content;
+        border-radius: 0.875rem;
+        overflow: hidden;
     }
 
     .original-clinical-table .table-primary th {
-        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
         color: white;
-        border-color: #0a58ca;
-        font-weight: 600;
-        padding: 0.75rem;
+        border: none;
+        font-weight: 700;
+        padding: 1.125rem 1rem;
         text-align: center;
         vertical-align: middle;
         position: relative;
-        border-bottom: 2px solid #0a58ca;
+        font-size: 0.95rem;
+        letter-spacing: 0.05em;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        text-transform: uppercase;
+    }
+
+    .original-clinical-table .table-primary th:first-child {
+        border-top-left-radius: 0.875rem;
+    }
+
+    .original-clinical-table .table-primary th:last-child {
+        border-top-right-radius: 0.875rem;
     }
 
     .original-clinical-table .table td {
-        padding: 0.75rem;
+        padding: 1rem 0.875rem;
         vertical-align: middle;
-        border-bottom: 1px solid #f8f9fa;
+        border-bottom: 1px solid #f1f3f4;
         text-align: center;
+        background: linear-gradient(135deg, #fdfdfe 0%, #f8fafb 100%);
+        transition: all 0.3s ease-in-out;
+        font-size: 0.9rem;
     }
 
     .original-clinical-table .table tbody tr {
-        transition: background-color 0.15s ease-in-out;
+        transition: all 0.3s ease-in-out;
     }
 
     .original-clinical-table .table tbody tr:hover {
-        background-color: #f8f9fa;
-        transform: translateY(-1px);
-        box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, #faf7ff 0%, #f3f0ff 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1.5rem rgba(111, 66, 193, 0.15);
+    }
+
+    .original-clinical-table .table tbody tr:hover td {
+        background: linear-gradient(135deg, #faf7ff 0%, #f3f0ff 100%);
+        border-color: #e9d5ff;
+        color: #553c9a;
     }
 
     .original-clinical-table .table tbody tr:last-child td {
         border-bottom: none;
     }
 
+    .original-clinical-table .table tbody tr:last-child td:first-child {
+        border-bottom-left-radius: 0.875rem;
+    }
+
+    .original-clinical-table .table tbody tr:last-child td:last-child {
+        border-bottom-right-radius: 0.875rem;
+    }
+
     .original-value {
-        font-weight: 600;
-        color: #212529;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-weight: 700;
+        color: #2d3748;
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
         display: block;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0;
+        font-size: 1rem;
+        letter-spacing: 0.025em;
     }
 
     .original-clinical-table code {
-        background-color: #f8f9fa;
-        color: #e83e8c;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        color: #6f42c1;
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.5rem;
         font-size: 0.8em;
-        border: 1px solid #dee2e6;
-        font-family: 'Courier New', monospace;
+        border: 1px solid #e9d5ff;
+        font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Courier New', monospace;
         display: inline-block;
+        font-weight: 600;
+        box-shadow: 0 1px 3px rgba(111, 66, 193, 0.1);
     }
 
     .original-clinical-table .badge {
         font-size: 0.75rem;
-        font-weight: 500;
+        font-weight: 600;
         margin: 0.125rem 0.25rem;
-        padding: 0.375rem 0.75rem;
-        border-radius: 0.375rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.75rem;
         white-space: nowrap;
         display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     .original-clinical-table .badge.bg-success {
-        background-color: #198754 !important;
+        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%) !important;
         color: white;
+        border: 1px solid #2f855a;
     }
 
     .original-clinical-table .badge.bg-warning {
-        background-color: #ffc107 !important;
-        color: #212529;
+        background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%) !important;
+        color: white;
+        border: 1px solid #dd6b20;
     }
 
     .original-clinical-table .text-muted {
-        color: #6c757d !important;
+        color: #718096 !important;
         font-size: 0.8rem;
-        line-height: 1.4;
+        line-height: 1.5;
+        font-style: italic;
     }
 
     .original-clinical-table .card-footer {
-        border-top: 2px solid #0d6efd;
-        background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
-        padding: 0.75rem 1rem;
-        border-radius: 0 0 0.5rem 0.5rem;
+        border-top: 3px solid #6f42c1;
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        padding: 1rem 1.25rem;
+        border-radius: 0.875rem;
+        margin-top: 1rem;
+        box-shadow: 0 0.25rem 0.75rem rgba(111, 66, 193, 0.1);
+        border: 1px solid #e9d5ff;
+    }
+
+    /* Standalone card footer styling for original clinical tables */
+    .card-footer.bg-light {
+        border-top: 3px solid #6f42c1;
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        padding: 1rem 1.25rem;
+        border-radius: 0.875rem;
+        margin-top: 1rem;
+        box-shadow: 0 0.25rem 0.75rem rgba(111, 66, 193, 0.1);
+        border: 1px solid #e9d5ff;
     }
 
     .original-clinical-table .card-footer .row {
@@ -501,27 +558,41 @@
     }
 
     .original-clinical-table .card-footer small {
-        font-weight: 500;
-        color: #495057;
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 0.85rem;
+        letter-spacing: 0.025em;
     }
 
-    /* Responsive enhancements for original clinical tables */
+    /* Enhanced responsive design for original clinical tables */
     @media (max-width: 768px) {
 
         .original-clinical-table .table th,
         .original-clinical-table .table td {
-            padding: 0.5rem 0.25rem;
+            padding: 0.75rem 0.5rem;
             font-size: 0.85rem;
         }
 
         .original-clinical-table .badge {
             font-size: 0.7rem;
-            padding: 0.25rem 0.5rem;
+            padding: 0.375rem 0.75rem;
         }
 
         .original-clinical-table code {
             font-size: 0.75em;
-            padding: 0.125rem 0.25rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .original-clinical-table::before {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            top: -0.5rem;
+            left: 1rem;
+        }
+
+        .original-clinical-table {
+            border-radius: 0.75rem;
+            margin-top: 1rem;
         }
     }
 
@@ -532,9 +603,9 @@
     }
 
     .original-clinical-table .table td .original-value+.text-muted {
-        margin-top: 0.25rem;
-        border-top: 1px solid #f8f9fa;
-        padding-top: 0.25rem;
+        margin-top: 0.375rem;
+        border-top: 1px solid #f1f3f4;
+        padding-top: 0.375rem;
     }
 </style>
 {% endblock %}
@@ -993,11 +1064,11 @@
                             mapping.</small>
                     </div>
 
+                    {% set first_entry = section.structured_data[0] if section.structured_data|length > 0 else none %}
+                    {% if first_entry and first_entry.fields and first_entry.fields|length > 1 %}
                     <!-- Original Clinical Data Table -->
                     <div class="original-clinical-table">
                         <table class="table table-bordered table-hover">
-                            {% if section.structured_data and section.structured_data|length > 0 %}
-                            {% set first_entry = section.structured_data[0] %}
                             {% if first_entry.fields %}
                             <thead class="table-primary">
                                 <tr>
@@ -1036,30 +1107,30 @@
                                 {% endfor %}
                             </tbody>
                             {% endif %}
-                            {% endif %}
                         </table>
+                    </div>
 
-                        <!-- Table Summary -->
-                        <div class="card-footer bg-light">
-                            <div class="row text-center">
-                                <div class="col-md-4">
-                                    <small class="text-muted">
-                                        <strong>{{ section.structured_data | length }}</strong> original entries
-                                    </small>
-                                </div>
-                                <div class="col-md-4">
-                                    <small class="text-muted">
-                                        <strong>NCPeH-A</strong> source data
-                                    </small>
-                                </div>
-                                <div class="col-md-4">
-                                    <small class="text-muted">
-                                        <strong>{{ section.title or 'Clinical Section' }}</strong>
-                                    </small>
-                                </div>
+                    <!-- Table Summary -->
+                    <div class="card-footer bg-light">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <small class="text-muted">
+                                    <strong>{{ section.structured_data | length }}</strong> original entries
+                                </small>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">
+                                    <strong>NCPeH-A</strong> source data
+                                </small>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">
+                                    <strong>{{ section.title or 'Clinical Section' }}</strong>
+                                </small>
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                     {% elif section.content and section.content.original %}
                     <div class="alert alert-warning mb-3">
                         <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing
