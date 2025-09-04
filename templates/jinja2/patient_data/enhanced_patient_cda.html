@@ -273,7 +273,8 @@
     </div>
     <div class="page-actions">
         {% if patient_identity.patient_id %}
-        <a href="{{ url('patient_data:patient_details', patient_identity.patient_id) }}" class="btn btn-outline-secondary btn-sm">
+        <a href="{{ url('patient_data:patient_details', patient_identity.patient_id) }}"
+            class="btn btn-outline-secondary btn-sm">
             <i class="fa fa-arrow-left"></i> Back to Patient
         </a>
         {% else %}
