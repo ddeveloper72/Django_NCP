@@ -161,6 +161,12 @@ class EnhancedCDAProcessor:
                             s.get("medical_terms_count", 0) for s in sections
                         )
 
+                        # Extract patient identity
+                        # Use simple extraction since complex field mapper has XPath issues
+                        patient_identity = self._simple_patient_id_extraction(
+                            root, namespaces
+                        )
+
                         return {
                             "success": True,
                             "content_type": "xml_country_specific",
@@ -176,6 +182,7 @@ class EnhancedCDAProcessor:
                             "uses_coded_sections": coded_sections_count > 0,
                             "translation_quality": "High",
                             "extraction_method": "country_specific",
+                            "patient_identity": patient_identity,
                         }
                 except Exception as e:
                     logger.warning(
@@ -216,6 +223,12 @@ class EnhancedCDAProcessor:
                                 s.get("medical_terms_count", 0) for s in sections
                             )
 
+                            # Extract patient identity
+                            # Use simple extraction since complex field mapper has XPath issues
+                            patient_identity = self._simple_patient_id_extraction(
+                                root, namespaces
+                            )
+
                             return {
                                 "success": True,
                                 "content_type": "xml_document_mapping",
@@ -231,6 +244,7 @@ class EnhancedCDAProcessor:
                                 "uses_coded_sections": coded_sections_count > 0,
                                 "translation_quality": "High",
                                 "extraction_method": "document_mapping",
+                                "patient_identity": patient_identity,
                             }
                         else:
                             logger.info(
@@ -262,6 +276,10 @@ class EnhancedCDAProcessor:
                     )
                     medical_terms_count += medical_terms
 
+            # Extract patient identity regardless of processing method
+            # Use simple extraction since complex field mapper has XPath issues
+            patient_identity = self._simple_patient_id_extraction(root, namespaces)
+
             return {
                 "success": True,
                 "content_type": "xml_enhanced",
@@ -278,6 +296,7 @@ class EnhancedCDAProcessor:
                 "translation_quality": (
                     "High" if coded_sections_count > (sections_count / 2) else "Medium"
                 ),
+                "patient_identity": patient_identity,
             }
 
         except ET.ParseError as e:
@@ -2976,6 +2995,23 @@ class EnhancedCDAProcessor:
 
         except Exception as e:
             logger.error(f"Error extracting patient identity: {e}")
+
+            # Fallback: try to extract at least the patient ID using simple method
+            try:
+                patient_id = self._extract_patient_id(
+                    ET.tostring(root, encoding="unicode")
+                )
+                if patient_id:
+                    patient_identity["primary_patient_id"] = patient_id
+                    patient_identity["patient_id"] = patient_id  # Add convenient access
+                    logger.info(
+                        f"Fallback patient ID extraction successful: {patient_id}"
+                    )
+            except Exception as fallback_e:
+                logger.error(
+                    f"Fallback patient ID extraction also failed: {fallback_e}"
+                )
+
             return patient_identity
 
     def _extract_patient_id(self, xml_content: str) -> Optional[str]:
@@ -3013,6 +3049,48 @@ class EnhancedCDAProcessor:
         except Exception as e:
             logger.warning(f"Could not extract patient ID: {e}")
             return None
+
+    def _simple_patient_id_extraction(
+        self, root: ET.Element, namespaces: Dict
+    ) -> Dict[str, Any]:
+        """
+        Simple patient ID extraction as fallback
+        """
+        patient_identity = {
+            "given_name": None,
+            "family_name": None,
+            "birth_date": None,
+            "gender": None,
+            "patient_identifiers": [],
+            "primary_patient_id": None,
+            "secondary_patient_id": None,
+        }
+
+        try:
+            # Look for patient ID in recordTarget/patientRole/id
+            record_targets = root.findall(".//hl7:recordTarget", namespaces)
+            for record_target in record_targets:
+                patient_roles = record_target.findall(".//hl7:patientRole", namespaces)
+                for patient_role in patient_roles:
+                    id_elements = patient_role.findall("hl7:id", namespaces)
+                    for id_elem in id_elements:
+                        extension = id_elem.get("extension")
+                        if extension and extension != "N/A":
+                            patient_identity["primary_patient_id"] = extension
+                            patient_identity["patient_id"] = (
+                                extension  # Convenient access
+                            )
+                            logger.info(
+                                f"Simple extraction found patient ID: {extension}"
+                            )
+                            return patient_identity
+
+            logger.warning("Simple patient ID extraction found no patient ID")
+            return patient_identity
+
+        except Exception as e:
+            logger.error(f"Simple patient ID extraction failed: {e}")
+            return patient_identity
 
     def _extract_administrative_data(
         self, root: ET.Element, namespaces: Dict
