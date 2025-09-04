@@ -3416,6 +3416,133 @@ def download_cda_pdf(request, patient_id):
         return redirect("patient_data:patient_details", patient_id=patient_id)
 
 
+def transform_entries_for_interactive_tables(entries, section_title):
+    """Transform entries from CDA processor format to interactive table format"""
+    if not entries:
+        return []
+    
+    transformed = []
+    
+    for entry in entries:
+        # Handle different entry formats from Enhanced CDA Processor
+        
+        # Format 1: Entry with fields structure (from generic XML parsing)
+        fields = entry.get("fields", {})
+        entry_text = entry.get("text", "")
+        
+        # Format 2: Direct field data (from country-specific or table extraction)
+        if not fields and isinstance(entry, dict):
+            # Convert direct entry to fields format
+            fields = {k: {"value": v} for k, v in entry.items() if k not in ["text", "id", "entry_type"]}
+            if not entry_text:
+                entry_text = entry.get("text", entry.get("description", ""))
+        
+        if "medication" in section_title.lower():
+            # Transform for medication table
+            transformed_entry = {
+                "Medication": extract_field_value_simple(fields, ["Medication Name", "Medication", "Drug Name", "medication_name", "name"]) or entry_text,
+                "Dosage & Strength": extract_field_value_simple(fields, ["Dosage", "Strength", "Dose", "dose", "dosage"]),
+                "Frequency": extract_field_value_simple(fields, ["Frequency", "Administration Frequency", "frequency"]),
+                "Status": extract_field_value_simple(fields, ["Status", "Medication Status", "status"]) or "Active",
+                "Start Date": extract_field_value_simple(fields, ["Start Date", "Effective Date", "start_date", "date"]),
+                "Codes": extract_codes_simple(fields)
+            }
+        elif "allergi" in section_title.lower() or "adverse" in section_title.lower():
+            # Transform for allergy table
+            transformed_entry = {
+                "Allergen": extract_field_value_simple(fields, ["Allergen", "Agent", "Substance", "allergen", "agent"]) or entry_text,
+                "Reaction": extract_field_value_simple(fields, ["Reaction", "Manifestation", "reaction"]),
+                "Severity": extract_field_value_simple(fields, ["Severity", "Criticality", "severity"]),
+                "Status": extract_field_value_simple(fields, ["Status", "status"]) or "Active",
+                "First Noted": extract_field_value_simple(fields, ["Onset Date", "First Noted", "Date", "date", "onset_date"]),
+                "Codes": extract_codes_simple(fields)
+            }
+        elif "procedure" in section_title.lower():
+            # Transform for procedure table
+            transformed_entry = {
+                "Procedure": extract_field_value_simple(fields, ["Procedure", "Procedure Name", "procedure_name", "name"]) or entry_text,
+                "Date Performed": extract_field_value_simple(fields, ["Date Performed", "Procedure Date", "Date", "date", "performed_date"]),
+                "Status": extract_field_value_simple(fields, ["Status", "status"]) or "Completed",
+                "Healthcare Provider": extract_field_value_simple(fields, ["Provider", "Performer", "Healthcare Provider", "provider"]),
+                "Medical Codes": extract_codes_simple(fields)
+            }
+        elif "problem" in section_title.lower() or "diagnosis" in section_title.lower():
+            # Transform for problem table
+            transformed_entry = {
+                "Problem": extract_field_value_simple(fields, ["Problem", "Diagnosis", "Condition", "problem", "diagnosis", "condition"]) or entry_text,
+                "Status": extract_field_value_simple(fields, ["Status", "status"]) or "Active",
+                "Onset Date": extract_field_value_simple(fields, ["Onset Date", "Date", "onset_date", "date"]),
+                "Notes": extract_field_value_simple(fields, ["Notes", "Comment", "notes", "comment"]),
+                "Codes": extract_codes_simple(fields)
+            }
+        elif "immuniz" in section_title.lower() or "vaccin" in section_title.lower():
+            # Transform for immunization table
+            transformed_entry = {
+                "Vaccine": extract_field_value_simple(fields, ["Vaccine", "Immunization", "vaccine_name", "name"]) or entry_text,
+                "Date Given": extract_field_value_simple(fields, ["Date Given", "Administration Date", "Date", "date"]),
+                "Dose": extract_field_value_simple(fields, ["Dose", "Dose Number", "dose"]),
+                "Status": extract_field_value_simple(fields, ["Status", "status"]) or "Completed",
+                "Codes": extract_codes_simple(fields)
+            }
+        elif "device" in section_title.lower():
+            # Transform for medical device table
+            transformed_entry = {
+                "Device": extract_field_value_simple(fields, ["Device", "Device Name", "Medical Device", "device_name", "name"]) or entry_text,
+                "Type": extract_field_value_simple(fields, ["Type", "Device Type", "type"]),
+                "Status": extract_field_value_simple(fields, ["Status", "status"]) or "Active",
+                "Implant Date": extract_field_value_simple(fields, ["Implant Date", "Date", "implant_date", "date"]),
+                "Codes": extract_codes_simple(fields)
+            }
+        else:
+            # Generic transformation
+            transformed_entry = {}
+            # Add all available fields
+            for field_name, field_data in fields.items():
+                if isinstance(field_data, dict):
+                    value = field_data.get("value", field_data.get("displayName", str(field_data)))
+                else:
+                    value = str(field_data)
+                
+                # Clean up field name for display
+                clean_field_name = field_name.replace("_", " ").title()
+                transformed_entry[clean_field_name] = value
+            
+            # Add text content if available
+            if entry_text and "Text Content" not in transformed_entry:
+                transformed_entry["Content"] = entry_text
+        
+        if transformed_entry:
+            transformed.append(transformed_entry)
+    
+    return transformed
+
+
+def extract_field_value_simple(fields, field_patterns):
+    """Extract value from fields using field patterns"""
+    for pattern in field_patterns:
+        for field_name, field_data in fields.items():
+            if pattern.lower() in field_name.lower():
+                if isinstance(field_data, dict):
+                    return field_data.get("value", field_data.get("displayName", ""))
+                else:
+                    return str(field_data)
+    return "Not specified"
+
+
+def extract_codes_simple(fields):
+    """Extract medical codes from fields"""
+    codes = []
+    for field_name, field_data in fields.items():
+        if "code" in field_name.lower():
+            if isinstance(field_data, dict):
+                code_value = field_data.get("code", field_data.get("value", ""))
+                if code_value:
+                    codes.append(str(code_value))
+            elif field_data:
+                codes.append(str(field_data))
+    return ", ".join(codes) if codes else ""
+
+
 def generate_structured_cda_html(
     request, patient_id, patient_data, match_data, processed_sections
 ):
@@ -3430,13 +3557,49 @@ def generate_structured_cda_html(
         # Build the structured HTML content with collapsible sections
         sections_html = ""
 
+        logger.info(f"Processing {len(processed_sections)} sections for HTML generation")
+
         for i, section in enumerate(processed_sections):
             section_title = section.get("title", "Unknown Section")
-            section_entries = section.get("entries", [])
-            section_code = section.get("code", "")
+            
+            # Handle different section data formats from Enhanced CDA Processor
+            section_entries = []
+            
+            # Check if section has structured_data (the new format)
+            if "structured_data" in section and section["structured_data"]:
+                section_entries = section["structured_data"]
+            # Check if section has table_rows (alternative format)
+            elif "table_rows" in section and section["table_rows"]:
+                section_entries = section["table_rows"]
+            # Check if section has table_data (country-specific format)
+            elif "table_data" in section and section["table_data"]:
+                section_entries = section["table_data"]
+            # Fallback to entries field
+            elif "entries" in section:
+                section_entries = section["entries"]
+            
+            # Handle title format - could be string or dict
+            if isinstance(section_title, dict):
+                section_title = section_title.get("translated", section_title.get("coded", section_title.get("original", "Unknown Section")))
+            
+            section_code = section.get("code", section.get("section_code", ""))
             original_content = section.get("original_content", "")
 
+            logger.info(f"Section {i}: '{section_title}' with {len(section_entries)} entries")
+            
+            # Debug: Log first entry structure if available
+            if section_entries:
+                logger.info(f"First entry structure: {section_entries[0]}")
+
             if not section_entries:
+                logger.info(f"Skipping empty section: {section_title}")
+                continue
+
+            # Transform entries to the format expected by interactive tables
+            transformed_entries = transform_entries_for_interactive_tables(section_entries, section_title)
+            
+            if not transformed_entries:
+                logger.info(f"No transformed entries for section: {section_title}")
                 continue
 
             section_id = f"section_{i}"
@@ -3467,29 +3630,29 @@ def generate_structured_cda_html(
             # Handle different section types based on title
             if "medication" in section_title.lower():
                 sections_html += generate_medication_table_html_interactive(
-                    section_entries
+                    transformed_entries
                 )
             elif (
                 "allergi" in section_title.lower() or "adverse" in section_title.lower()
             ):
                 sections_html += generate_allergy_table_html_interactive(
-                    section_entries
+                    transformed_entries
                 )
             elif "procedure" in section_title.lower():
                 sections_html += generate_procedure_table_html_interactive(
-                    section_entries
+                    transformed_entries
                 )
             elif (
                 "problem" in section_title.lower()
                 or "diagnosis" in section_title.lower()
             ):
                 sections_html += generate_problem_table_html_interactive(
-                    section_entries
+                    transformed_entries
                 )
             else:
                 # Generic table for other sections
                 sections_html += generate_generic_table_html_interactive(
-                    section_entries
+                    transformed_entries
                 )
 
             sections_html += f"""
@@ -3505,13 +3668,21 @@ def generate_structured_cda_html(
             </div>
             """
 
+        # Handle patient data format - could be dict or object
+        if isinstance(patient_data, dict):
+            patient_given_name = patient_data.get("name", "Unknown").split()[0] if patient_data.get("name") else "Unknown"
+            patient_family_name = patient_data.get("name", "Unknown").split()[-1] if patient_data.get("name") and len(patient_data.get("name", "").split()) > 1 else ""
+        else:
+            patient_given_name = getattr(patient_data, 'given_name', 'Unknown')
+            patient_family_name = getattr(patient_data, 'family_name', '')
+
         # Create the complete self-contained HTML document
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinical Document - {patient_data.given_name} {patient_data.family_name}</title>
+    <title>Clinical Document - {patient_given_name} {patient_family_name}</title>
     <style>
         /* Self-contained CSS for clinical document */
         * {{
@@ -3792,17 +3963,17 @@ def generate_structured_cda_html(
 <body>
     <div class="document-container">
         <div class="patient-header">
-            <h1>👤 {patient_data.given_name} {patient_data.family_name}</h1>
+            <h1>👤 {patient_given_name} {patient_family_name}</h1>
             
             <div class="patient-info">
                 <div class="info-card">
-                    <strong>Birth Date:</strong> {patient_data.birth_date or 'Not specified'}
+                    <strong>Birth Date:</strong> {patient_data.get('dob') if isinstance(patient_data, dict) else getattr(patient_data, 'birth_date', None) or 'Not specified'}
                 </div>
                 <div class="info-card">
-                    <strong>Gender:</strong> {patient_data.gender or 'Not specified'}
+                    <strong>Gender:</strong> {patient_data.get('gender') if isinstance(patient_data, dict) else getattr(patient_data, 'gender', None) or 'Not specified'}
                 </div>
                 <div class="info-card">
-                    <strong>Patient ID:</strong> {patient_data.id}
+                    <strong>Patient ID:</strong> {patient_id}
                 </div>
                 <div class="info-card">
                     <strong>Source Country:</strong> {patient_info.get('source_country', 'Unknown')}
@@ -3874,7 +4045,7 @@ def generate_structured_cda_html(
         # Create the HTTP response with HTML content
         response = HttpResponse(html_content, content_type="text/html")
         response["Content-Disposition"] = (
-            f'attachment; filename="clinical_document_{patient_data.given_name}_{patient_data.family_name}_{patient_id}.html"'
+            f'attachment; filename="clinical_document_{patient_given_name}_{patient_family_name}_{patient_id}.html"'
         )
 
         logger.info(f"Generated structured CDA HTML for patient {patient_id}")
@@ -3887,8 +4058,14 @@ def generate_structured_cda_html(
         import traceback
 
         logger.error(f"Traceback: {traceback.format_exc()}")
-        messages.error(request, "Error generating CDA HTML document.")
-        return redirect("patient_data:patient_details", patient_id=patient_id)
+        
+        # Only try to add messages if request has session middleware
+        if hasattr(request, '_messages'):
+            messages.error(request, "Error generating CDA HTML document.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+        else:
+            # For testing environments, return the error as HTML
+            return f"<html><body><h1>Error generating CDA HTML</h1><p>{e}</p></body></html>"
     """Generate PDF from structured CDA sections (like the rendered view in the browser)"""
 
     logger.info("Generating structured CDA PDF")
