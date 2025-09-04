@@ -3281,9 +3281,14 @@ class EnhancedCDAProcessor:
         Includes next of kin, dependants, legal authenticator, organization details, etc.
         """
         try:
-            from enhanced_cda_extended_header_extractor import (
-                EnhancedCDAExtendedHeaderExtractor,
-            )
+            import sys
+            import os
+            
+            # Add the project root to Python path for imports
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            if project_root not in sys.path:
+                sys.path.append(project_root)
+            
             from cda_extended_header_integration import CDAExtendedHeaderIntegration
 
             integration = CDAExtendedHeaderIntegration()
