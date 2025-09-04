@@ -9,6 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 import html
 from django.conf import settings
 from .forms import PatientDataForm
@@ -2229,6 +2230,7 @@ def patient_details_view(request, patient_id):
 
     context = {
         "patient_data": patient_data,
+        "patient_id": patient_id,  # Add patient_id for correct URL generation
         "has_cda_match": match_data is not None,
     }
 
@@ -2545,9 +2547,11 @@ def patient_cda_view(request, patient_id, cda_type=None):
                     f"No structured clinical data available for patient {patient_id}, using fallback"
                 )
 
-        except Patient.DoesNotExist:
-            # This is a session-based patient from EU search
-            logger.info(f"Session-based patient {patient_id}, checking session data")
+        except (Patient.DoesNotExist, ValueError, ValidationError) as e:
+            # This is a session-based patient from EU search or invalid UUID format
+            logger.info(
+                f"Session-based patient {patient_id}, checking session data (reason: {type(e).__name__})"
+            )
 
         # Existing session-based patient logic continues here:
         # Debug: Check what's in the session
@@ -2559,7 +2563,13 @@ def patient_cda_view(request, patient_id, cda_type=None):
         logger.info(f"DEBUG: All session keys: {list(request.session.keys())}")
 
         # Check if this is an NCP query result (session data exists but no DB record)
-        if match_data and not PatientData.objects.filter(id=patient_id).exists():
+        try:
+            db_patient_exists = PatientData.objects.filter(id=patient_id).exists()
+        except (ValueError, TypeError):
+            # Non-numeric patient IDs (like Malta's 9999002M) can't exist in DB
+            db_patient_exists = False
+
+        if match_data and not db_patient_exists:
             # This is an NCP query result - create temp patient from session data
             patient_info = match_data["patient_data"]
 
@@ -2578,10 +2588,18 @@ def patient_cda_view(request, patient_id, cda_type=None):
         else:
             # Standard database lookup
             try:
-                patient_data = PatientData.objects.get(id=patient_id)
-                logger.info(
-                    f"Found database patient: {patient_data.given_name} {patient_data.family_name}"
-                )
+                # Try database lookup only for numeric IDs
+                if patient_id.isdigit():
+                    patient_data = PatientData.objects.get(id=patient_id)
+                    logger.info(
+                        f"Found database patient: {patient_data.given_name} {patient_data.family_name}"
+                    )
+                else:
+                    # Non-numeric patient IDs (like Malta 9999002M) are session-only
+                    logger.info(
+                        f"Non-numeric patient ID {patient_id}, skipping database lookup"
+                    )
+                    patient_data = None
             except PatientData.DoesNotExist:
                 logger.warning(f"Patient {patient_id} not found in database")
                 # Don't redirect immediately - check for session data first
@@ -2968,7 +2986,7 @@ def patient_cda_view(request, patient_id, cda_type=None):
 
                 # Apply Malta-specific enhancements if this is a Malta document
                 if (
-                    country_detected == "MT" or "malta" in cda_content.lower()
+                    country_code == "MT" or "malta" in cda_content.lower()
                 ) and enhanced_processing_result.get("success"):
                     try:
                         from .services.malta_cda_enhancer import MaltaCDAEnhancer
