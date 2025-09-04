@@ -41,6 +41,12 @@ urlpatterns = [
     ),
     # Default CDA view (L3 preferred)
     path("cda/<int:patient_id>/", main_views.patient_cda_view, name="patient_cda_view"),
+    # Document selection for multiple CDA documents
+    path(
+        "select-document/<int:patient_id>/",
+        main_views.select_document_view,
+        name="select_document",
+    ),
     # Clean CDA view with structured data extraction
     path("clean/<int:patient_id>/", clean_patient_cda_view, name="clean_cda_view"),
     # Specific CDA type view
