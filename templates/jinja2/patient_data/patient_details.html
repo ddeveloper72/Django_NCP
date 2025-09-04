@@ -72,8 +72,7 @@
                 </h2>
                 {% if has_cda_match %}
                 <div class="card-subtitle">
-                    Source: {{ source_country }} • Document: Patient Summary ({{ patient_summary.cda_type|default("L3")
-                    }})
+                    Source: {{ source_country }} • Document: Patient Summary ({{ preferred_cda_type|default("L3") }})
                 </div>
                 {% endif %}
             </div>
@@ -152,19 +151,39 @@
 
             <div class="card-content">
                 <div class="action-buttons">
-                    <!-- View CDA Document - L3 Browser View -->
-                    <a href="{{ url('patient_data:patient_cda_view', patient_data.id) }}" class="action-button primary">
+                    <!-- View CDA Document - Dynamic type based on user selection -->
+                    {% set selected_cda_type = preferred_cda_type or "L3" %}
+                    <a href="{{ url('patient_data:patient_cda_view_typed', patient_data.id, selected_cda_type) }}"
+                        class="action-button primary">
                         <i class="icon-eye"></i>
                         View CDA Document
-                        <span class="button-subtitle">L3 Browser View</span>
+                        <span class="button-subtitle">{{ selected_cda_type }} Browser View</span>
                     </a>
 
-                    <!-- CDA Download - PDF Structured View -->
+                    <!-- Document Selection - Multiple Documents Available -->
+                    {% if (l1_documents and l1_documents|length > 1) or (l3_documents and l3_documents|length > 1) or
+                    (l1_available and l3_available) %}
+                    <a href="{{ url('patient_data:select_document', patient_data.id) }}"
+                        class="action-button selection">
+                        <i class="icon-list"></i>
+                        Select Document
+                        <span class="button-subtitle">
+                            {% set total_docs = (l1_documents|length if l1_documents else 0) + (l3_documents|length if
+                            l3_documents else 0) %}
+                            {{ total_docs }} Available
+                        </span>
+                    </a>
+                    {% endif %}
+
+                    <!-- CDA Download - Always uses L1 for better PDF structure when available -->
                     <a href="{{ url('patient_data:download_cda_pdf', patient_data.id) }}"
                         class="action-button secondary">
                         <i class="icon-download"></i>
                         CDA Download
-                        <span class="button-subtitle">PDF Document</span>
+                        <span class="button-subtitle">
+                            {% if l1_available %}L1 Document (PDF Structure){% else %}{{
+                            preferred_cda_type|default("L3") }} Document{% endif %}
+                        </span>
                     </a>
 
                     <!-- Patient Summary PDF Download -->
@@ -187,6 +206,10 @@
                     <div class="metadata-item">
                         <i class="icon-file"></i>
                         <span>Source File: {{ cda_file_name }}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <i class="icon-folder"></i>
+                        <span>File Path: {{ patient_summary.file_path }}</span>
                     </div>
                     <div class="metadata-item">
                         <i class="icon-globe"></i>
