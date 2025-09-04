@@ -9,6 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
+import html
 from django.conf import settings
 from .forms import PatientDataForm
 from .models import PatientData
@@ -467,12 +468,12 @@ def extract_clinical_row_data(entry, headers, section_code):
 
             print(f"🔍 PROBLEMS SECTION DEBUG: Available fields: {list(fields.keys())}")
             logger.info(
-                f"🔍 PROBLEMS SECTION DEBUG: Available fields: {list(fields.keys())}"
+                "PROBLEMS SECTION DEBUG: Available fields: {list(fields.keys())}"
             )
 
             for field_name, field_data in fields.items():
-                print(f"🔍 FIELD: {field_name} = {field_data}")
-                logger.info(f"🔍 FIELD: {field_name} = {field_data}")
+                print(f"FIELD: {field_name} = {field_data}")
+                logger.info(f"FIELD: {field_name} = {field_data}")
 
             # Strategy 1: Look for any field containing "55561003" and map it directly
             problem_value = "Unknown Problem"
@@ -485,10 +486,10 @@ def extract_clinical_row_data(entry, headers, section_code):
                     problem_value = "Type 2 diabetes mellitus"
                     found_diabetes = True
                     print(
-                        f"🎯 FOUND DIABETES CODE 55561003 in {field_name} → 'Type 2 diabetes mellitus'"
+                        f"FOUND DIABETES CODE 55561003 in {field_name} → 'Type 2 diabetes mellitus'"
                     )
                     logger.info(
-                        f"🎯 FOUND DIABETES CODE 55561003 in {field_name} → 'Type 2 diabetes mellitus'"
+                        f"FOUND DIABETES CODE 55561003 in {field_name} → 'Type 2 diabetes mellitus'"
                     )
                     break
 
@@ -514,8 +515,8 @@ def extract_clinical_row_data(entry, headers, section_code):
                     ],
                 )
                 problem_value = problem_data.get("display_value", "Unknown Problem")
-                print(f"🎯 STANDARD EXTRACTION: '{problem_value}'")
-                logger.info(f"🎯 STANDARD EXTRACTION: '{problem_value}'")
+                print(f"STANDARD EXTRACTION: '{problem_value}'")
+                logger.info(f"STANDARD EXTRACTION: '{problem_value}'")
 
                 # Strategy 3: If we get "Active", force it to look for codes in any field
                 if problem_value in [
@@ -528,35 +529,34 @@ def extract_clinical_row_data(entry, headers, section_code):
                     print(
                         f"⚠️  Got status-like value '{problem_value}', scanning ALL fields for medical codes..."
                     )
-                    logger.info(
-                        f"⚠️  Got status-like value '{problem_value}', scanning ALL fields for medical codes..."
-                    )
+                logger.info(
+                    f"Got status-like value '{problem_value}', scanning ALL fields for medical codes..."
+                )
+                # Define expanded condition mappings
+                condition_mappings = {
+                    "55561003": "Type 2 diabetes mellitus",
+                    "73211009": "Diabetes mellitus",
+                    "44054006": "Type 2 diabetes mellitus",
+                }
 
-                    # Define expanded condition mappings
-                    condition_mappings = {
-                        "55561003": "Type 2 diabetes mellitus",
-                        "73211009": "Diabetes mellitus",
-                        "44054006": "Type 2 diabetes mellitus",
-                    }
-
-                    # Check every single field for any of our medical codes
-                    for field_name, field_data in fields.items():
-                        for code, condition_name in condition_mappings.items():
-                            if code in str(field_data):
-                                problem_value = condition_name
-                                print(
-                                    f"🎯 FOUND CODE {code} → '{condition_name}' in field: {field_name}"
-                                )
-                                logger.info(
-                                    f"🎯 FOUND CODE {code} → '{condition_name}' in field: {field_name}"
-                                )
-                                found_diabetes = True
-                                break
-                        if found_diabetes:
+                # Check every single field for any of our medical codes
+                for field_name, field_data in fields.items():
+                    for code, condition_name in condition_mappings.items():
+                        if code in str(field_data):
+                            problem_value = condition_name
+                            print(
+                                f"🎯 FOUND CODE {code} → '{condition_name}' in field: {field_name}"
+                            )
+                            logger.info(
+                                f"🎯 FOUND CODE {code} → '{condition_name}' in field: {field_name}"
+                            )
+                            found_diabetes = True
                             break
+                    if found_diabetes:
+                        break
 
             print(f"🎯 FINAL PROBLEM EXTRACTION RESULT: '{problem_value}'")
-            logger.info(f"🎯 FINAL PROBLEM EXTRACTION RESULT: '{problem_value}'")
+            logger.info(f"FINAL PROBLEM EXTRACTION RESULT: '{problem_value}'")
 
             row["data"][key] = {
                 "value": problem_value,
@@ -3324,6 +3324,997 @@ def download_cda_html(request, patient_id):
         return redirect("patient_data:patient_data_form")
 
 
+def download_cda_pdf(request, patient_id):
+    """Download the rendered CDA document as self-contained HTML with collapsible sections"""
+
+    logger.info(f"CDA HTML download requested for patient {patient_id}")
+
+    try:
+        # Check if this is an NCP query result (session data exists but no DB record)
+        session_key = f"patient_match_{patient_id}"
+        match_data = request.session.get(session_key)
+
+        if match_data and not PatientData.objects.filter(id=patient_id).exists():
+            # This is an NCP query result - create temp patient from session data
+            patient_info = match_data["patient_data"]
+
+            # Create a temporary patient object (not saved to DB)
+            patient_data = PatientData(
+                id=patient_id,
+                given_name=patient_info.get("given_name", "Unknown"),
+                family_name=patient_info.get("family_name", "Patient"),
+                birth_date=patient_info.get("birth_date") or None,
+                gender=patient_info.get("gender", ""),
+            )
+
+            logger.info(f"Created temporary patient object for CDA HTML: {patient_id}")
+        else:
+            # Standard database lookup
+            try:
+                patient_data = PatientData.objects.get(id=patient_id)
+                logger.info(
+                    f"Found patient_data: {patient_data.given_name} {patient_data.family_name}"
+                )
+            except PatientData.DoesNotExist:
+                logger.error(f"Patient data not found for ID: {patient_id}")
+                messages.error(request, "Patient data not found.")
+                return redirect("patient_data:patient_data_form")
+
+            # Get CDA match from session for database patients
+            if not match_data:
+                match_data = request.session.get(session_key)
+
+        if not match_data:
+            logger.error("No match_data found in session")
+            messages.error(request, "No CDA document found for this patient.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+        # Get the enhanced CDA processor to render the structured view
+        from .services.enhanced_cda_processor import EnhancedCDAProcessor
+
+        # Process the CDA content to get structured sections
+        processor = EnhancedCDAProcessor()
+
+        # Use L3 content if available, otherwise fall back to main content
+        cda_content = match_data.get("l3_cda_content") or match_data.get(
+            "cda_content", ""
+        )
+
+        if not cda_content:
+            messages.error(request, "No CDA content available for processing.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+        # Process the CDA content
+        processed_data = processor.process_clinical_sections(cda_content)
+
+        logger.info(
+            f"Processed CDA into {processed_data.get('sections_count', 0)} sections"
+        )
+
+        # Extract sections from the processed data
+        if not processed_data.get("success", False):
+            messages.error(
+                request,
+                f"Error processing CDA: {processed_data.get('error', 'Unknown error')}",
+            )
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+        processed_sections = processed_data.get("sections", [])
+
+        # Generate self-contained HTML from the structured sections
+        return generate_structured_cda_html(
+            request, patient_id, patient_data, match_data, processed_sections
+        )
+
+    except Exception as e:
+        logger.error(f"Error in download_cda_pdf: {e}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        import traceback
+
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        messages.error(request, "Error generating CDA HTML document.")
+        return redirect("patient_data:patient_details", patient_id=patient_id)
+
+
+def generate_structured_cda_html(
+    request, patient_id, patient_data, match_data, processed_sections
+):
+    """Generate self-contained HTML from structured CDA sections with collapsible functionality"""
+
+    logger.info("Generating structured CDA HTML with collapsible sections")
+
+    try:
+        # Get patient info
+        patient_info = match_data.get("patient_data", {})
+
+        # Build the structured HTML content with collapsible sections
+        sections_html = ""
+
+        for i, section in enumerate(processed_sections):
+            section_title = section.get("title", "Unknown Section")
+            section_entries = section.get("entries", [])
+            section_code = section.get("code", "")
+            original_content = section.get("original_content", "")
+
+            if not section_entries:
+                continue
+
+            section_id = f"section_{i}"
+
+            sections_html += f"""
+            <div class="clinical-section" id="{section_id}">
+                <div class="section-header" onclick="toggleSection('{section_id}')">
+                    <h2 class="section-title">
+                        <span class="toggle-icon">▼</span>
+                        {section_title}
+                        <small class="section-info">({len(section_entries)} entries)</small>
+                    </h2>
+                </div>
+                
+                <div class="section-content expanded" id="{section_id}_content">
+                    <div class="section-tabs">
+                        <button class="tab-button active" onclick="showTab('{section_id}', 'structured')">
+                            📊 Structured View
+                        </button>
+                        <button class="tab-button" onclick="showTab('{section_id}', 'original')">
+                            📄 Original Content
+                        </button>
+                    </div>
+                    
+                    <div id="{section_id}_structured" class="tab-content active">
+            """
+
+            # Handle different section types based on title
+            if "medication" in section_title.lower():
+                sections_html += generate_medication_table_html_interactive(
+                    section_entries
+                )
+            elif (
+                "allergi" in section_title.lower() or "adverse" in section_title.lower()
+            ):
+                sections_html += generate_allergy_table_html_interactive(
+                    section_entries
+                )
+            elif "procedure" in section_title.lower():
+                sections_html += generate_procedure_table_html_interactive(
+                    section_entries
+                )
+            elif (
+                "problem" in section_title.lower()
+                or "diagnosis" in section_title.lower()
+            ):
+                sections_html += generate_problem_table_html_interactive(
+                    section_entries
+                )
+            else:
+                # Generic table for other sections
+                sections_html += generate_generic_table_html_interactive(
+                    section_entries
+                )
+
+            sections_html += f"""
+                    </div>
+                    
+                    <div id="{section_id}_original" class="tab-content">
+                        <div class="original-content">
+                            <h4>Original CDA Content (Code: {section_code})</h4>
+                            <pre class="xml-content">{html.escape(original_content[:2000]) if original_content else "No original content available"}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """
+
+        # Create the complete self-contained HTML document
+        html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Document - {patient_data.given_name} {patient_data.family_name}</title>
+    <style>
+        /* Self-contained CSS for clinical document */
+        * {{
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }}
+        
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }}
+        
+        .document-container {{
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }}
+        
+        .patient-header {{
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }}
+        
+        .patient-header h1 {{
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }}
+        
+        .patient-info {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }}
+        
+        .info-card {{
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #fff;
+        }}
+        
+        .clinical-section {{
+            border-bottom: 1px solid #e9ecef;
+        }}
+        
+        .section-header {{
+            background: #f8f9fa;
+            padding: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-left: 4px solid #4a90e2;
+        }}
+        
+        .section-header:hover {{
+            background: #e9ecef;
+        }}
+        
+        .section-title {{
+            display: flex;
+            align-items: center;
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2c3e50;
+        }}
+        
+        .toggle-icon {{
+            margin-right: 12px;
+            transition: transform 0.3s;
+            font-size: 0.8em;
+        }}
+        
+        .section-header.collapsed .toggle-icon {{
+            transform: rotate(-90deg);
+        }}
+        
+        .section-info {{
+            margin-left: auto;
+            font-size: 0.9em;
+            color: #6c757d;
+            font-weight: 400;
+        }}
+        
+        .section-content {{
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }}
+        
+        .section-content.collapsed {{
+            max-height: 0;
+        }}
+        
+        .section-tabs {{
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }}
+        
+        .tab-button {{
+            background: none;
+            border: none;
+            padding: 15px 25px;
+            cursor: pointer;
+            font-size: 1em;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }}
+        
+        .tab-button:hover {{
+            background: #e9ecef;
+            color: #495057;
+        }}
+        
+        .tab-button.active {{
+            color: #4a90e2;
+            border-bottom-color: #4a90e2;
+            background: white;
+        }}
+        
+        .tab-content {{
+            display: none;
+            padding: 25px;
+        }}
+        
+        .tab-content.active {{
+            display: block;
+        }}
+        
+        .clinical-table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }}
+        
+        .clinical-table th {{
+            background: #4a90e2;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }}
+        
+        .clinical-table td {{
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }}
+        
+        .clinical-table tr:nth-child(even) {{
+            background: #f8f9fa;
+        }}
+        
+        .clinical-table tr:hover {{
+            background: #e3f2fd;
+        }}
+        
+        .status-badge {{
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }}
+        
+        .status-active {{
+            background: #d4edda;
+            color: #155724;
+        }}
+        
+        .status-completed {{
+            background: #d1ecf1;
+            color: #0c5460;
+        }}
+        
+        .status-inactive {{
+            background: #f8d7da;
+            color: #721c24;
+        }}
+        
+        .medical-code {{
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #495057;
+            cursor: help;
+            margin: 2px;
+            display: inline-block;
+        }}
+        
+        .medical-code:hover {{
+            background: #4a90e2;
+            color: white;
+        }}
+        
+        .original-content {{
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+        }}
+        
+        .xml-content {{
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin-top: 10px;
+        }}
+        
+        .document-footer {{
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+            border-top: 1px solid #dee2e6;
+        }}
+        
+        @media print {{
+            body {{ 
+                background: white; 
+                padding: 0; 
+            }}
+            .document-container {{ 
+                box-shadow: none; 
+                border-radius: 0; 
+            }}
+            .section-content {{ 
+                max-height: none !important; 
+            }}
+            .tab-content {{ 
+                display: block !important; 
+            }}
+        }}
+        
+        @media (max-width: 768px) {{
+            .patient-info {{
+                grid-template-columns: 1fr;
+            }}
+            .clinical-table {{
+                font-size: 0.9em;
+            }}
+            .clinical-table th,
+            .clinical-table td {{
+                padding: 10px;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="document-container">
+        <div class="patient-header">
+            <h1>👤 {patient_data.given_name} {patient_data.family_name}</h1>
+            
+            <div class="patient-info">
+                <div class="info-card">
+                    <strong>Birth Date:</strong> {patient_data.birth_date or 'Not specified'}
+                </div>
+                <div class="info-card">
+                    <strong>Gender:</strong> {patient_data.gender or 'Not specified'}
+                </div>
+                <div class="info-card">
+                    <strong>Patient ID:</strong> {patient_data.id}
+                </div>
+                <div class="info-card">
+                    <strong>Source Country:</strong> {patient_info.get('source_country', 'Unknown')}
+                </div>
+            </div>
+        </div>
+        
+        <div class="document-body">
+            {sections_html}
+        </div>
+        
+        <div class="document-footer">
+            <p><strong>Generated:</strong> {timezone.now().strftime('%Y-%m-%d %H:%M')} | 
+            <strong>Source:</strong> EU NCP Portal | 
+            <strong>Document Type:</strong> L3 CDA with Structured Clinical Content</p>
+        </div>
+    </div>
+    
+    <script>
+        // Self-contained JavaScript for interactivity
+        function toggleSection(sectionId) {{
+            const content = document.getElementById(sectionId + '_content');
+            const header = document.querySelector('#' + sectionId + ' .section-header');
+            
+            if (content.classList.contains('collapsed')) {{
+                content.classList.remove('collapsed');
+                header.classList.remove('collapsed');
+            }} else {{
+                content.classList.add('collapsed');
+                header.classList.add('collapsed');
+            }}
+        }}
+        
+        function showTab(sectionId, tabType) {{
+            // Hide all tab contents for this section
+            const structuredTab = document.getElementById(sectionId + '_structured');
+            const originalTab = document.getElementById(sectionId + '_original');
+            const buttons = document.querySelectorAll('#' + sectionId + ' .tab-button');
+            
+            structuredTab.classList.remove('active');
+            originalTab.classList.remove('active');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            if (tabType === 'structured') {{
+                structuredTab.classList.add('active');
+                buttons[0].classList.add('active');
+            }} else {{
+                originalTab.classList.add('active');
+                buttons[1].classList.add('active');
+            }}
+        }}
+        
+        // Add tooltips for medical codes
+        document.addEventListener('DOMContentLoaded', function() {{
+            const codes = document.querySelectorAll('.medical-code');
+            codes.forEach(code => {{
+                code.addEventListener('mouseenter', function() {{
+                    // Future: Add tooltip with code description
+                }});
+            }});
+        }});
+    </script>
+</body>
+</html>"""
+
+        logger.info(f"HTML content length: {len(html_content)} characters")
+
+        # Create the HTTP response with HTML content
+        response = HttpResponse(html_content, content_type="text/html")
+        response["Content-Disposition"] = (
+            f'attachment; filename="clinical_document_{patient_data.given_name}_{patient_data.family_name}_{patient_id}.html"'
+        )
+
+        logger.info(f"Generated structured CDA HTML for patient {patient_id}")
+
+        return response
+
+    except Exception as e:
+        logger.error(f"Error in generate_structured_cda_html: {e}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        import traceback
+
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        messages.error(request, "Error generating CDA HTML document.")
+        return redirect("patient_data:patient_details", patient_id=patient_id)
+    """Generate PDF from structured CDA sections (like the rendered view in the browser)"""
+
+    logger.info("Generating structured CDA PDF")
+
+    try:
+        # Get patient info
+        patient_info = match_data.get("patient_data", {})
+
+        # Build the structured HTML content for PDF
+        sections_html = ""
+
+        for section in processed_sections:
+            section_title = section.get("title", "Unknown Section")
+            section_entries = section.get("entries", [])
+
+            if not section_entries:
+                continue
+
+            sections_html += f'<div class="clinical-section">'
+            sections_html += f'<h2 class="section-title">{section_title}</h2>'
+
+            # Handle different section types based on title
+            if "medication" in section_title.lower():
+                sections_html += generate_medication_table_html(section_entries)
+            elif (
+                "allergi" in section_title.lower() or "adverse" in section_title.lower()
+            ):
+                sections_html += generate_allergy_table_html(section_entries)
+            elif "procedure" in section_title.lower():
+                sections_html += generate_procedure_table_html(section_entries)
+            elif (
+                "problem" in section_title.lower()
+                or "diagnosis" in section_title.lower()
+            ):
+                sections_html += generate_problem_table_html(section_entries)
+            else:
+                # Generic table for other sections
+                sections_html += generate_generic_table_html(section_entries)
+
+            sections_html += "</div>"
+
+        # Create the complete HTML document for PDF
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Clinical Document - {patient_data.given_name} {patient_data.family_name}</title>
+            <style>
+                @page {{
+                    size: A4;
+                    margin: 1.5cm;
+                }}
+                
+                body {{
+                    font-family: Arial, sans-serif;
+                    font-size: 9pt;
+                    line-height: 1.3;
+                    color: #333;
+                    margin: 0;
+                    padding: 0;
+                }}
+                
+                .patient-header {{
+                    background-color: #4a90e2;
+                    color: white;
+                    padding: 15px;
+                    margin-bottom: 20px;
+                }}
+                
+                .patient-header h1 {{
+                    margin: 0;
+                    font-size: 18pt;
+                }}
+                
+                .patient-info {{
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 10px;
+                    font-size: 10pt;
+                }}
+                
+                .clinical-section {{
+                    margin-bottom: 25px;
+                    page-break-inside: avoid;
+                }}
+                
+                .section-title {{
+                    background-color: #f8f9fa;
+                    padding: 10px;
+                    margin: 0 0 15px 0;
+                    font-size: 14pt;
+                    color: #2c3e50;
+                    border-left: 4px solid #4a90e2;
+                }}
+                
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 10px 0;
+                    font-size: 8pt;
+                }}
+                
+                th {{
+                    background-color: #e8f4f8;
+                    padding: 8px 6px;
+                    text-align: left;
+                    font-weight: bold;
+                    border: 1px solid #ddd;
+                    font-size: 8pt;
+                }}
+                
+                td {{
+                    padding: 6px;
+                    border: 1px solid #ddd;
+                    vertical-align: top;
+                }}
+                
+                .status-active {{
+                    background-color: #d4edda;
+                    color: #155724;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-size: 7pt;
+                }}
+                
+                .status-completed {{
+                    background-color: #cce5ff;
+                    color: #004085;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-size: 7pt;
+                }}
+                
+                .medical-code {{
+                    background-color: #e9ecef;
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                    font-family: monospace;
+                    font-size: 7pt;
+                    margin: 1px;
+                }}
+                
+                .footer {{
+                    margin-top: 30px;
+                    padding-top: 15px;
+                    border-top: 1px solid #ddd;
+                    font-size: 8pt;
+                    color: #666;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="patient-header">
+                <h1>👤 {patient_data.given_name} {patient_data.family_name}</h1>
+                <div class="patient-info">
+                    <div>
+                        <strong>Birth Date:</strong> {patient_info.get('birth_date', 'Not specified')}<br>
+                        <strong>Gender:</strong> {patient_info.get('gender', 'Not specified')}
+                    </div>
+                    <div>
+                        <strong>Source Country:</strong> {match_data.get('country_code', 'Unknown')}<br>
+                        <strong>Patient ID:</strong> {patient_info.get('primary_patient_id', 'Not specified')}
+                    </div>
+                </div>
+            </div>
+            
+            {sections_html}
+            
+            <div class="footer">
+                <p><strong>Generated:</strong> {timezone.now().strftime('%Y-%m-%d %H:%M')} | <strong>Source:</strong> EU NCP Portal | <strong>Document Type:</strong> L3 CDA with Structured Clinical Content</p>
+            </div>
+        </body>
+        </html>
+        """
+
+        # Generate PDF using xhtml2pdf
+        logger.info("Starting structured CDA PDF generation")
+        logger.info(f"HTML content length: {len(html_content)} characters")
+
+        result = BytesIO()
+        pdf = pisa.pisaDocument(BytesIO(html_content.encode("UTF-8")), result)
+
+        logger.info(f"PDF generation completed. Errors: {pdf.err}")
+
+        if not pdf.err:
+            pdf_bytes = result.getvalue()
+            result.close()
+
+            logger.info(
+                f"Structured CDA PDF generated successfully. Size: {len(pdf_bytes)} bytes"
+            )
+
+            # Create filename
+            filename = f"{patient_data.given_name}_{patient_data.family_name}_Clinical_Document.pdf"
+
+            # Return PDF response for preview
+            response = HttpResponse(pdf_bytes, content_type="application/pdf")
+            # Remove Content-Disposition to show in browser instead of downloading
+            # response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+            logger.info(
+                f"Generated structured CDA PDF preview for patient {patient_id}"
+            )
+            return response
+        else:
+            logger.error(f"Error generating structured CDA PDF: {pdf.err}")
+            messages.error(request, "Error generating PDF document.")
+            return redirect("patient_data:patient_details", patient_id=patient_id)
+
+    except Exception as e:
+        logger.error(f"Error in generate_structured_cda_pdf: {e}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        import traceback
+
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        messages.error(request, "Error generating PDF document.")
+        return redirect("patient_data:patient_details", patient_id=patient_id)
+
+
+def generate_medication_table_html(entries):
+    """Generate HTML table for medication entries"""
+    html = """
+    <table>
+        <thead>
+            <tr>
+                <th>Medication</th>
+                <th>Dosage & Strength</th>
+                <th>Frequency</th>
+                <th>Status</th>
+                <th>Start Date</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+
+    for entry in entries:
+        fields = entry.get("fields", {})
+        medication_name = fields.get("Medication Name", {}).get(
+            "value", "Not specified"
+        )
+        dosage = fields.get("Dosage & Strength", {}).get(
+            "value", "Concentrate for solution for injection"
+        )
+        frequency = fields.get("Frequency", {}).get("value", "1 day")
+        status = fields.get("Status", {}).get("value", "Active")
+        start_date = fields.get("Start Date", {}).get("value", "")
+
+        status_class = "status-active" if status.lower() == "active" else ""
+
+        html += f"""
+        <tr>
+            <td>{medication_name}</td>
+            <td>{dosage}</td>
+            <td>{frequency}</td>
+            <td><span class="{status_class}">{status}</span></td>
+            <td>{start_date}</td>
+        </tr>
+        """
+
+    html += "</tbody></table>"
+    return html
+
+
+def generate_allergy_table_html(entries):
+    """Generate HTML table for allergy entries"""
+    html = """
+    <table>
+        <thead>
+            <tr>
+                <th>Allergen</th>
+                <th>Reaction</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>First Noted</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+
+    for entry in entries:
+        fields = entry.get("fields", {})
+        allergen = fields.get("Allergen", {}).get("value", "Not specified")
+        reaction = fields.get("Reaction", {}).get("value", "Not specified")
+        severity = fields.get("Severity", {}).get("value", "Not specified")
+        status = fields.get("Status", {}).get("value", "Not specified")
+        first_noted = fields.get("First Noted", {}).get("value", "Not recorded")
+
+        html += f"""
+        <tr>
+            <td>{allergen}</td>
+            <td>{reaction}</td>
+            <td>{severity}</td>
+            <td>{status}</td>
+            <td>{first_noted}</td>
+        </tr>
+        """
+
+    html += "</tbody></table>"
+    return html
+
+
+def generate_procedure_table_html(entries):
+    """Generate HTML table for procedure entries"""
+    html = """
+    <table>
+        <thead>
+            <tr>
+                <th>Procedure</th>
+                <th>Date Performed</th>
+                <th>Status</th>
+                <th>Healthcare Provider</th>
+                <th>Medical Codes</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+
+    for entry in entries:
+        fields = entry.get("fields", {})
+        procedure = fields.get("Procedure", {}).get("value", "Not specified")
+        date_performed = fields.get("Date Performed", {}).get("value", "")
+        status = fields.get("Status", {}).get("value", "Completed")
+        provider = fields.get("Healthcare Provider", {}).get("value", "Not specified")
+
+        # Handle medical codes
+        codes_html = ""
+        medical_codes = fields.get("Medical Codes", {})
+        if isinstance(medical_codes, dict):
+            for code_type, code_value in medical_codes.items():
+                if code_value:
+                    codes_html += f'<span class="medical-code">{code_value}</span> '
+
+        status_class = "status-completed" if status.lower() == "completed" else ""
+
+        html += f"""
+        <tr>
+            <td>{procedure}</td>
+            <td>{date_performed}</td>
+            <td><span class="{status_class}">{status}</span></td>
+            <td>{provider}</td>
+            <td>{codes_html}</td>
+        </tr>
+        """
+
+    html += "</tbody></table>"
+    return html
+
+
+def generate_problem_table_html(entries):
+    """Generate HTML table for problem/diagnosis entries"""
+    html = """
+    <table>
+        <thead>
+            <tr>
+                <th>Problem/Diagnosis</th>
+                <th>Status</th>
+                <th>Date Onset</th>
+                <th>Medical Codes</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+
+    for entry in entries:
+        fields = entry.get("fields", {})
+        problem = fields.get("Problem", {}).get(
+            "value", entry.get("text", "Not specified")
+        )
+        status = fields.get("Status", {}).get("value", "Active")
+        date_onset = fields.get("Date Onset", {}).get("value", "")
+
+        # Handle medical codes
+        codes_html = ""
+        medical_codes = fields.get("Medical Codes", {})
+        if isinstance(medical_codes, dict):
+            for code_type, code_value in medical_codes.items():
+                if code_value:
+                    codes_html += f'<span class="medical-code">{code_value}</span> '
+
+        status_class = "status-active" if status.lower() == "active" else ""
+
+        html += f"""
+        <tr>
+            <td>{problem}</td>
+            <td><span class="{status_class}">{status}</span></td>
+            <td>{date_onset}</td>
+            <td>{codes_html}</td>
+        </tr>
+        """
+
+    html += "</tbody></table>"
+    return html
+
+
+def generate_generic_table_html(entries):
+    """Generate HTML table for generic entries"""
+    if not entries:
+        return "<p>No entries found in this section.</p>"
+
+    # Get all unique field names for table headers
+    all_fields = set()
+    for entry in entries:
+        if "fields" in entry:
+            all_fields.update(entry["fields"].keys())
+
+    if not all_fields:
+        return "<p>No structured data available for this section.</p>"
+
+    html = "<table><thead><tr>"
+    for field in sorted(all_fields):
+        html += f"<th>{field}</th>"
+    html += "</tr></thead><tbody>"
+
+    for entry in entries:
+        html += "<tr>"
+        fields = entry.get("fields", {})
+        for field in sorted(all_fields):
+            value = fields.get(field, {}).get("value", "")
+            html += f"<td>{value}</td>"
+        html += "</tr>"
+
+    html += "</tbody></table>"
+    return html
+
+
 def download_patient_summary_pdf(request, patient_id):
     """Download Patient Summary as PDF - checks for embedded PDF in CDA first, falls back to HTML->PDF"""
 
@@ -5368,3 +6359,294 @@ def view_uploaded_document(request, doc_index):
         logger.error(f"Error viewing uploaded document: {str(e)}")
         messages.error(request, f"Error loading document: {str(e)}")
         return redirect("patient_data:uploaded_documents")
+
+
+def generate_medication_table_html_interactive(entries):
+    """Generate interactive HTML table for medications with collapsible details"""
+    if not entries:
+        return "<p>No medication data available.</p>"
+
+    html_content = """
+    <table class="clinical-table">
+        <thead>
+            <tr>
+                <th>💊 Medication</th>
+                <th>📏 Dosage & Strength</th>
+                <th>⏰ Frequency</th>
+                <th>📊 Status</th>
+                <th>📅 Start Date</th>
+                <th>🔬 Codes</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+
+    for entry in entries:
+        medication = entry.get("Medication", "Not specified")
+        dosage = entry.get("Dosage & Strength", "Not specified")
+        frequency = entry.get("Frequency", "Not specified")
+        status = entry.get("Status", "Unknown")
+        start_date = entry.get("Start Date", "Not recorded")
+        codes = entry.get("Codes", "")
+
+        status_class = (
+            "status-active" if status.lower() == "active" else "status-inactive"
+        )
+
+        codes_html = ""
+        if codes:
+            code_list = codes.split(", ") if isinstance(codes, str) else [str(codes)]
+            for code in code_list:
+                if code.strip():
+                    codes_html += f'<span class="medical-code" title="Medical Code: {code.strip()}">{code.strip()}</span>'
+
+        html_content += f"""
+        <tr>
+            <td><strong>{medication}</strong></td>
+            <td>{dosage}</td>
+            <td>{frequency}</td>
+            <td><span class="status-badge {status_class}">{status}</span></td>
+            <td>{start_date}</td>
+            <td>{codes_html or "N/A"}</td>
+        </tr>
+        """
+
+    html_content += """
+        </tbody>
+    </table>
+    """
+
+    return html_content
+
+
+def generate_allergy_table_html_interactive(entries):
+    """Generate interactive HTML table for allergies with collapsible details"""
+    if not entries:
+        return "<p>No allergy data available.</p>"
+
+    html_content = """
+    <table class="clinical-table">
+        <thead>
+            <tr>
+                <th>⚠️ Allergen</th>
+                <th>🔥 Reaction</th>
+                <th>📊 Severity</th>
+                <th>📋 Status</th>
+                <th>📅 First Noted</th>
+                <th>🔬 Codes</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+
+    for entry in entries:
+        allergen = entry.get("Allergen", "Not specified")
+        reaction = entry.get("Reaction", "Not specified")
+        severity = entry.get("Severity", "Not specified")
+        status = entry.get("Status", "Unknown")
+        first_noted = entry.get("First Noted", "Not recorded")
+        codes = entry.get("Codes", "")
+
+        status_class = (
+            "status-active" if status.lower() == "active" else "status-inactive"
+        )
+
+        codes_html = ""
+        if codes:
+            code_list = codes.split(", ") if isinstance(codes, str) else [str(codes)]
+            for code in code_list:
+                if code.strip():
+                    codes_html += f'<span class="medical-code" title="Medical Code: {code.strip()}">{code.strip()}</span>'
+
+        html_content += f"""
+        <tr>
+            <td><strong>{allergen}</strong></td>
+            <td>{reaction}</td>
+            <td>{severity}</td>
+            <td><span class="status-badge {status_class}">{status}</span></td>
+            <td>{first_noted}</td>
+            <td>{codes_html or "N/A"}</td>
+        </tr>
+        """
+
+    html_content += """
+        </tbody>
+    </table>
+    """
+
+    return html_content
+
+
+def generate_procedure_table_html_interactive(entries):
+    """Generate interactive HTML table for procedures with collapsible details"""
+    if not entries:
+        return "<p>No procedure data available.</p>"
+
+    html_content = """
+    <table class="clinical-table">
+        <thead>
+            <tr>
+                <th>🏥 Procedure</th>
+                <th>📅 Date Performed</th>
+                <th>📊 Status</th>
+                <th>👨‍⚕️ Healthcare Provider</th>
+                <th>🔬 Medical Codes</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+
+    for entry in entries:
+        procedure = entry.get("Procedure", "Not specified")
+        date_performed = entry.get("Date Performed", "Not recorded")
+        status = entry.get("Status", "Unknown")
+        provider = entry.get("Healthcare Provider", "Not specified")
+        codes = entry.get("Medical Codes", "")
+
+        status_class = (
+            "status-completed" if status.lower() == "completed" else "status-active"
+        )
+
+        codes_html = ""
+        if codes:
+            code_list = codes.split(", ") if isinstance(codes, str) else [str(codes)]
+            for code in code_list:
+                if code.strip():
+                    codes_html += f'<span class="medical-code" title="Medical Code: {code.strip()}">{code.strip()}</span>'
+
+        html_content += f"""
+        <tr>
+            <td><strong>{procedure}</strong></td>
+            <td>{date_performed}</td>
+            <td><span class="status-badge {status_class}">{status}</span></td>
+            <td>{provider}</td>
+            <td>{codes_html or "N/A"}</td>
+        </tr>
+        """
+
+    html_content += """
+        </tbody>
+    </table>
+    """
+
+    return html_content
+
+
+def generate_problem_table_html_interactive(entries):
+    """Generate interactive HTML table for problems/diagnoses with collapsible details"""
+    if not entries:
+        return "<p>No problem data available.</p>"
+
+    html_content = """
+    <table class="clinical-table">
+        <thead>
+            <tr>
+                <th>🩺 Problem/Diagnosis</th>
+                <th>📊 Status</th>
+                <th>📅 Onset Date</th>
+                <th>📝 Notes</th>
+                <th>🔬 Medical Codes</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+
+    for entry in entries:
+        problem = entry.get("Problem", entry.get("Diagnosis", "Not specified"))
+        status = entry.get("Status", "Unknown")
+        onset_date = entry.get("Onset Date", "Not recorded")
+        notes = entry.get("Notes", "")
+        codes = entry.get("Codes", "")
+
+        status_class = (
+            "status-active" if status.lower() == "active" else "status-inactive"
+        )
+
+        codes_html = ""
+        if codes:
+            code_list = codes.split(", ") if isinstance(codes, str) else [str(codes)]
+            for code in code_list:
+                if code.strip():
+                    codes_html += f'<span class="medical-code" title="Medical Code: {code.strip()}">{code.strip()}</span>'
+
+        html_content += f"""
+        <tr>
+            <td><strong>{problem}</strong></td>
+            <td><span class="status-badge {status_class}">{status}</span></td>
+            <td>{onset_date}</td>
+            <td>{notes[:100] + '...' if len(notes) > 100 else notes}</td>
+            <td>{codes_html or "N/A"}</td>
+        </tr>
+        """
+
+    html_content += """
+        </tbody>
+    </table>
+    """
+
+    return html_content
+
+
+def generate_generic_table_html_interactive(entries):
+    """Generate interactive HTML table for generic clinical data"""
+    if not entries:
+        return "<p>No data available.</p>"
+
+    # Get all unique keys from entries to create dynamic headers
+    all_keys = set()
+    for entry in entries:
+        all_keys.update(entry.keys())
+
+    headers = list(all_keys)
+
+    html_content = """
+    <table class="clinical-table">
+        <thead>
+            <tr>
+    """
+
+    for header in headers:
+        html_content += f"<th>{header}</th>"
+
+    html_content += """
+            </tr>
+        </thead>
+        <tbody>
+    """
+
+    for entry in entries:
+        html_content += "<tr>"
+        for header in headers:
+            value = entry.get(header, "")
+            if "code" in header.lower() and value:
+                # Handle medical codes
+                codes_html = ""
+                code_list = (
+                    value.split(", ") if isinstance(value, str) else [str(value)]
+                )
+                for code in code_list:
+                    if code.strip():
+                        codes_html += f'<span class="medical-code" title="Medical Code: {code.strip()}">{code.strip()}</span>'
+                html_content += f"<td>{codes_html}</td>"
+            elif "status" in header.lower():
+                # Handle status with badges
+                status_class = (
+                    "status-active" if value.lower() == "active" else "status-inactive"
+                )
+                html_content += (
+                    f'<td><span class="status-badge {status_class}">{value}</span></td>'
+                )
+            else:
+                # Regular content
+                display_value = (
+                    str(value)[:100] + "..." if len(str(value)) > 100 else str(value)
+                )
+                html_content += f"<td>{display_value}</td>"
+        html_content += "</tr>"
+
+    html_content += """
+        </tbody>
+    </table>
+    """
+
+    return html_content

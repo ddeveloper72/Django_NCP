@@ -192,6 +192,25 @@ fix_*.py
 convert_*.py
 *_to_*.py
 
+# PDF output files
+*.pdf
+test_cda_output.pdf
+server_test_cda.pdf
+*_output.pdf
+
+# Test XML files with patient IDs
+test_cda_with_*.xml
+
+# Bash dumps and session logs
+*.stackdump
+bash.exe.stackdump
+
+# Cookie files
+cookies.txt
+
+# Temporary and nul files
+nul
+
 # Important Exceptions - Keep these files tracked
 !patient_data/test_*.py
 !patient_data/**/test_*.py
