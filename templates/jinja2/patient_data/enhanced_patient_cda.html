@@ -725,15 +725,27 @@
                 <div class="card-header bg-primary text-white">
                     <h2 class="mb-0">
                         <i class="fas fa-user-injured me-2"></i>
-                        {{ patient_identity.given_name }} {{ patient_identity.family_name }}
+                        {{ patient_identity.full_name or (patient_identity.given_name ~ ' ' ~
+                        patient_identity.family_name) or 'Patient' }}
                     </h2>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>Birth Date:</strong> {{ patient_identity.birth_date or 'Unknown' }}</p>
+                            <p><strong>Birth Date:</strong>
+                                {% if patient_identity.birth_date_formatted %}
+                                {{ patient_identity.birth_date_formatted }}
+                                {% elif patient_identity.birth_date %}
+                                {{ format_medical_date(patient_identity.birth_date) }}
+                                {% else %}
+                                Unknown
+                                {% endif %}
+                            </p>
                             <p><strong>Gender:</strong> {{ patient_identity.gender or 'Unknown' }}</p>
                             <p><strong>Patient ID:</strong> {{ patient_identity.patient_id }}</p>
+                            {% if patient_identity.secondary_patient_id %}
+                            <p><strong>Secondary ID:</strong> {{ patient_identity.secondary_patient_id }}</p>
+                            {% endif %}
                         </div>
                         <div class="col-md-6">
                             <p><strong>Source Country:</strong> {{ source_country }}</p>
@@ -741,6 +753,15 @@
                             <p><strong>Translation Quality:</strong>
                                 <span class="badge bg-success">{{ translation_quality }}</span>
                             </p>
+                            {% if patient_identity.document_metadata %}
+                            {% set doc_meta = patient_identity.document_metadata %}
+                            {% if doc_meta.title %}
+                            <p><strong>Document:</strong> {{ doc_meta.title }}</p>
+                            {% endif %}
+                            {% if doc_meta.language_code %}
+                            <p><strong>Language:</strong> {{ doc_meta.language_code }}</p>
+                            {% endif %}
+                            {% endif %}
                         </div>
                     </div>
 
@@ -774,6 +795,409 @@
             </div>
         </div>
     </div>
+
+    <!-- Extended Header Information Section -->
+    {% if patient_extended_data %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-address-book me-2"></i>
+                        Extended Patient Information
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Extended Info Navigation Tabs -->
+                    <ul class="nav nav-tabs" id="extendedInfoTabs" role="tablist">
+                        {% if patient_extended_data.patient_contact.has_contact_info %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="contact-tab" data-bs-toggle="tab"
+                                data-bs-target="#contact" type="button" role="tab">
+                                <i class="fas fa-address-card me-1"></i>Contact Details
+                                <span class="badge bg-primary ms-1">
+                                    {{ patient_extended_data.patient_contact.addresses|length +
+                                    patient_extended_data.patient_contact.phone_numbers|length +
+                                    patient_extended_data.patient_contact.email_addresses|length }}
+                                </span>
+                            </button>
+                        </li>
+                        {% endif %}
+
+                        {% if patient_extended_data.emergency_contacts.has_emergency_contacts %}
+                        <li class="nav-item" role="presentation">
+                            <button
+                                class="nav-link {% if not patient_extended_data.patient_contact.has_contact_info %}active{% endif %}"
+                                id="emergency-tab" data-bs-toggle="tab" data-bs-target="#emergency" type="button"
+                                role="tab">
+                                <i class="fas fa-user-friends me-1"></i>Emergency Contacts
+                                <span class="badge bg-danger ms-1">{{
+                                    patient_extended_data.emergency_contacts.total_count }}</span>
+                            </button>
+                        </li>
+                        {% endif %}
+
+                        {% if patient_extended_data.healthcare_team.has_healthcare_team %}
+                        <li class="nav-item" role="presentation">
+                            <button
+                                class="nav-link {% if not patient_extended_data.patient_contact.has_contact_info and not patient_extended_data.emergency_contacts.has_emergency_contacts %}active{% endif %}"
+                                id="healthcare-tab" data-bs-toggle="tab" data-bs-target="#healthcare" type="button"
+                                role="tab">
+                                <i class="fas fa-stethoscope me-1"></i>Healthcare Team
+                                <span class="badge bg-success ms-1">{{ patient_extended_data.healthcare_team.total_count
+                                    }}</span>
+                            </button>
+                        </li>
+                        {% endif %}
+
+                        {% if patient_extended_data.dependants.has_dependants %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="dependants-tab" data-bs-toggle="tab"
+                                data-bs-target="#dependants" type="button" role="tab">
+                                <i class="fas fa-baby me-1"></i>Dependants
+                                <span class="badge bg-warning ms-1">{{ patient_extended_data.dependants.total_count
+                                    }}</span>
+                            </button>
+                        </li>
+                        {% endif %}
+
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="document-tab" data-bs-toggle="tab" data-bs-target="#document"
+                                type="button" role="tab">
+                                <i class="fas fa-file-medical-alt me-1"></i>Document Info
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Extended Info Tab Content -->
+                    <div class="tab-content mt-3" id="extendedInfoTabContent">
+
+                        <!-- Contact Details Tab -->
+                        {% if patient_extended_data.patient_contact.has_contact_info %}
+                        <div class="tab-pane fade show active" id="contact" role="tabpanel">
+                            <h5><i class="fas fa-address-card me-2"></i>Patient Contact Information</h5>
+
+                            <!-- Addresses -->
+                            {% if patient_extended_data.patient_contact.addresses %}
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <h6><i class="fas fa-home me-1"></i>Addresses</h6>
+                                    {% for address in patient_extended_data.patient_contact.addresses %}
+                                    <div class="alert alert-light border-start border-primary border-3 mb-2">
+                                        <strong>{{ address.use or 'Address' }}:</strong><br>
+                                        {{ address.formatted }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Phone Numbers -->
+                            {% if patient_extended_data.patient_contact.phone_numbers %}
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-phone me-1"></i>Phone Numbers</h6>
+                                    {% for phone in patient_extended_data.patient_contact.phone_numbers %}
+                                    <p><strong>{{ phone.use or 'Phone' }}:</strong>
+                                        <a href="tel:{{ phone.number }}" class="text-decoration-none">{{ phone.number
+                                            }}</a>
+                                    </p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Email Addresses -->
+                            {% if patient_extended_data.patient_contact.email_addresses %}
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-envelope me-1"></i>Email Addresses</h6>
+                                    {% for email in patient_extended_data.patient_contact.email_addresses %}
+                                    <p><strong>{{ email.use or 'Email' }}:</strong>
+                                        <a href="mailto:{{ email.email }}" class="text-decoration-none">{{ email.email
+                                            }}</a>
+                                    </p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Preferred Language -->
+                            {% if patient_extended_data.patient_contact.preferred_language %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-language me-1"></i>Preferred Language</h6>
+                                    <p><span class="badge bg-info">{{
+                                            patient_extended_data.patient_contact.preferred_language.display }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Emergency Contacts Tab -->
+                        {% if patient_extended_data.emergency_contacts.has_emergency_contacts %}
+                        <div class="tab-pane fade {% if not patient_extended_data.patient_contact.has_contact_info %}show active{% endif %}"
+                            id="emergency" role="tabpanel">
+                            <h5><i class="fas fa-user-friends me-2"></i>Emergency Contacts & Next of Kin</h5>
+
+                            <!-- Next of Kin -->
+                            {% if patient_extended_data.emergency_contacts.next_of_kin %}
+                            <div class="mb-4">
+                                <h6><i class="fas fa-heart me-1"></i>Next of Kin</h6>
+                                {% for kin in patient_extended_data.emergency_contacts.next_of_kin %}
+                                <div class="card border-danger mb-2">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-danger">{{ kin.name }}</h6>
+                                        <p class="card-text">
+                                            <strong>Relationship:</strong> {{ kin.relationship }}<br>
+                                            {% if kin.contact_info.phone_numbers %}
+                                            <strong>Phone:</strong>
+                                            {% for phone in kin.contact_info.phone_numbers %}
+                                            <a href="tel:{{ phone }}" class="text-decoration-none me-2">{{ phone }}</a>
+                                            {% endfor %}<br>
+                                            {% endif %}
+                                            {% if kin.contact_info.email_addresses %}
+                                            <strong>Email:</strong>
+                                            {% for email in kin.contact_info.email_addresses %}
+                                            <a href="mailto:{{ email }}" class="text-decoration-none me-2">{{ email
+                                                }}</a>
+                                            {% endfor %}
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Guardians -->
+                            {% if patient_extended_data.emergency_contacts.guardians %}
+                            <div class="mb-4">
+                                <h6><i class="fas fa-shield-alt me-1"></i>Guardians</h6>
+                                {% for guardian in patient_extended_data.emergency_contacts.guardians %}
+                                <div class="card border-warning mb-2">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-warning">{{ guardian.name }}</h6>
+                                        <p class="card-text">
+                                            <strong>Relationship:</strong> {{ guardian.relationship }}<br>
+                                            {% if guardian.organization %}
+                                            <strong>Organization:</strong> {{ guardian.organization }}<br>
+                                            {% endif %}
+                                            {% if guardian.contact_info.phone_numbers %}
+                                            <strong>Phone:</strong>
+                                            {% for phone in guardian.contact_info.phone_numbers %}
+                                            <a href="tel:{{ phone }}" class="text-decoration-none me-2">{{ phone }}</a>
+                                            {% endfor %}<br>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Other Emergency Contacts -->
+                            {% if patient_extended_data.emergency_contacts.emergency_contacts %}
+                            <div class="mb-4">
+                                <h6><i class="fas fa-users me-1"></i>Other Emergency Contacts</h6>
+                                {% for contact in patient_extended_data.emergency_contacts.emergency_contacts %}
+                                <div class="card border-info mb-2">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-info">{{ contact.name }}</h6>
+                                        <p class="card-text">
+                                            <strong>Relationship:</strong> {{ contact.relationship }}<br>
+                                            {% if contact.organization %}
+                                            <strong>Organization:</strong> {{ contact.organization }}<br>
+                                            {% endif %}
+                                            {% if contact.role_class %}
+                                            <strong>Role:</strong> {{ contact.role_class }}<br>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Healthcare Team Tab -->
+                        {% if patient_extended_data.healthcare_team.has_healthcare_team %}
+                        <div class="tab-pane fade {% if not patient_extended_data.patient_contact.has_contact_info and not patient_extended_data.emergency_contacts.has_emergency_contacts %}show active{% endif %}"
+                            id="healthcare" role="tabpanel">
+                            <h5><i class="fas fa-stethoscope me-2"></i>Healthcare Team</h5>
+
+                            <!-- Document Authors -->
+                            {% if patient_extended_data.healthcare_team.authors %}
+                            <div class="mb-4">
+                                <h6><i class="fas fa-user-md me-1"></i>Document Authors</h6>
+                                {% for author in patient_extended_data.healthcare_team.authors %}
+                                <div class="card border-success mb-2">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-success">{{ author.name }}</h6>
+                                        <p class="card-text">
+                                            <strong>Role:</strong> <span class="badge bg-success">{{ author.role
+                                                }}</span><br>
+                                            <strong>Type:</strong> {{ author.type|title }}<br>
+                                            {% if author.organization %}
+                                            <strong>Organization:</strong> {{ author.organization }}<br>
+                                            {% endif %}
+                                            {% if author.time %}
+                                            <strong>Authored:</strong> {{ author.time }}<br>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Preferred Healthcare Providers -->
+                            {% if patient_extended_data.healthcare_team.preferred_providers %}
+                            <div class="mb-4">
+                                <h6><i class="fas fa-star me-1"></i>Preferred Healthcare Providers</h6>
+                                {% for provider in patient_extended_data.healthcare_team.preferred_providers %}
+                                <div class="card border-primary mb-2">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-primary">{{ provider.name }}</h6>
+                                        <p class="card-text">
+                                            <strong>Role:</strong> <span class="badge bg-primary">{{ provider.role
+                                                }}</span><br>
+                                            {% if provider.organization %}
+                                            <strong>Organization:</strong> {{ provider.organization }}<br>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Legal Authenticator -->
+                            {% if patient_extended_data.healthcare_team.legal_authenticator %}
+                            {% set legal_auth = patient_extended_data.healthcare_team.legal_authenticator %}
+                            <div class="mb-4">
+                                <h6><i class="fas fa-gavel me-1"></i>Legal Authenticator</h6>
+                                <div class="card border-secondary mb-2">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ legal_auth.name }}</h6>
+                                        <p class="card-text">
+                                            <strong>Role:</strong> <span class="badge bg-secondary">{{ legal_auth.role
+                                                }}</span><br>
+                                            {% if legal_auth.organization %}
+                                            <strong>Organization:</strong> {{ legal_auth.organization }}<br>
+                                            {% endif %}
+                                            {% if legal_auth.authentication_time %}
+                                            <strong>Authenticated:</strong> {{ legal_auth.authentication_time }}<br>
+                                            {% endif %}
+                                            {% if legal_auth.signature_code %}
+                                            <strong>Signature Code:</strong> {{ legal_auth.signature_code }}
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Custodian Organization -->
+                            {% if patient_extended_data.healthcare_team.custodian_organization %}
+                            {% set custodian = patient_extended_data.healthcare_team.custodian_organization %}
+                            <div class="mb-4">
+                                <h6><i class="fas fa-building me-1"></i>Custodian Organization</h6>
+                                <div class="alert alert-secondary">
+                                    <strong>Organization:</strong> {{ custodian.name }}<br>
+                                    {% if custodian.contact_info.addresses %}
+                                    <strong>Address:</strong> {{ custodian.contact_info.addresses[0] }}<br>
+                                    {% endif %}
+                                    {% if custodian.contact_info.phone_numbers %}
+                                    <strong>Phone:</strong> {{ custodian.contact_info.phone_numbers[0] }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Dependants Tab -->
+                        {% if patient_extended_data.dependants.has_dependants %}
+                        <div class="tab-pane fade" id="dependants" role="tabpanel">
+                            <h5><i class="fas fa-baby me-2"></i>Dependants</h5>
+                            {% for dependant in patient_extended_data.dependants.dependants %}
+                            <div class="card border-warning mb-2">
+                                <div class="card-body">
+                                    <h6 class="card-title text-warning">{{ dependant.name }}</h6>
+                                    <p class="card-text">
+                                        <strong>Relationship:</strong> {{ dependant.relationship }}<br>
+                                        {% if dependant.organization %}
+                                        <strong>Organization:</strong> {{ dependant.organization }}<br>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Document Information Tab -->
+                        <div class="tab-pane fade" id="document" role="tabpanel">
+                            <h5><i class="fas fa-file-medical-alt me-2"></i>Document Information</h5>
+
+                            <!-- Document Header Info -->
+                            {% if patient_extended_data.document_info %}
+                            {% set doc_info = patient_extended_data.document_info %}
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-info-circle me-1"></i>Document Details</h6>
+                                    <p><strong>Title:</strong> {{ doc_info.title or 'Patient Summary' }}</p>
+                                    <p><strong>Language:</strong> {{ doc_info.language or 'Unknown' }}</p>
+                                    {% if doc_info.version %}
+                                    <p><strong>Version:</strong> {{ doc_info.version }}</p>
+                                    {% endif %}
+                                    {% if doc_info.document_id %}
+                                    <p><strong>Document ID:</strong> {{ doc_info.document_id.extension }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-calendar me-1"></i>Timeline</h6>
+                                    {% if doc_info.creation_date %}
+                                    <p><strong>Created:</strong> {{ doc_info.creation_date }}</p>
+                                    {% endif %}
+                                    {% if doc_info.last_update %}
+                                    <p><strong>Last Updated:</strong> {{ doc_info.last_update }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Metadata -->
+                            {% if patient_extended_data.metadata %}
+                            {% set metadata = patient_extended_data.metadata %}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h6><i class="fas fa-tags me-1"></i>Document Metadata</h6>
+                                    {% if metadata.creation_info %}
+                                    <div class="alert alert-light">
+                                        <strong>Status:</strong> <span class="badge bg-success">{{
+                                            metadata.creation_info.status or 'Active' }}</span><br>
+                                        {% if metadata.relationships %}
+                                        <strong>Related Documents:</strong> {{ metadata.relationships.related_documents
+                                        }}<br>
+                                        <strong>Service Events:</strong> {{ metadata.relationships.service_events }}
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Enhanced Medication Information Section -->
     {% if medications and medications|length > 0 %}
