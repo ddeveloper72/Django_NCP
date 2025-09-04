@@ -1492,11 +1492,57 @@ def get_severity_css_class(severity_value):
 
 
 def format_clinical_date(date_string):
-    """Format date for clinical display"""
+    """Format date for clinical display with timezone support"""
     if not date_string or date_string in ["Not specified", "Unknown"]:
         return "Not recorded"
 
-    # Basic date formatting - can be enhanced with proper date parsing
+    # Handle Malta timezone-aware formats first
+    try:
+        # Check for Malta-style timezone format: YYYYMMDDHHMMSS+ZZZZ
+        if "+" in date_string or (date_string.count("-") > 2):
+            # Extract timezone if present
+            timezone_info = ""
+            core_datetime = date_string
+
+            for i, char in enumerate(date_string):
+                if char in ["+", "-"] and i >= 8:
+                    core_datetime = date_string[:i]
+                    timezone_info = date_string[i:]
+                    break
+
+            # Parse core datetime (YYYYMMDDHHMMSS or YYYYMMDD)
+            if len(core_datetime) >= 8:
+                year = core_datetime[:4]
+                month = core_datetime[4:6]
+                day = core_datetime[6:8]
+
+                # Create formatted date
+                from datetime import datetime
+
+                try:
+                    date_obj = datetime(int(year), int(month), int(day))
+                    formatted_date = date_obj.strftime("%B %d, %Y")
+
+                    # Add time if present
+                    if len(core_datetime) >= 14:
+                        hour = core_datetime[8:10]
+                        minute = core_datetime[10:12]
+                        formatted_date += f" at {hour}:{minute}"
+
+                    # Add timezone info if present
+                    if timezone_info:
+                        if timezone_info == "+0000":
+                            formatted_date += " (UTC)"
+                        else:
+                            formatted_date += f" (UTC{timezone_info})"
+
+                    return formatted_date
+                except ValueError:
+                    pass
+    except:
+        pass
+
+    # Basic date formatting for standard formats
     try:
         from datetime import datetime
 
@@ -2898,6 +2944,45 @@ def patient_cda_view(request, patient_id, cda_type=None):
                         enhanced_processing_result["dual_language_active"] = False
                         enhanced_processing_result["source_language"] = "en"
                         enhanced_processing_result["is_single_language"] = True
+
+                # Apply Malta-specific enhancements if this is a Malta document
+                if (
+                    country_detected == "MT" or "malta" in cda_content.lower()
+                ) and enhanced_processing_result.get("success"):
+                    try:
+                        from .services.malta_cda_enhancer import MaltaCDAEnhancer
+
+                        malta_enhancer = MaltaCDAEnhancer()
+
+                        logger.info(
+                            "Applying Malta CDA enhancements to patient CDA view..."
+                        )
+
+                        if enhanced_processing_result.get("sections"):
+                            # Enhance sections with Malta-specific processing
+                            enhanced_sections = malta_enhancer.enhance_cda_sections(
+                                enhanced_processing_result["sections"], cda_content
+                            )
+
+                            # Fix empty clinical sections
+                            enhanced_sections = (
+                                malta_enhancer.fix_empty_clinical_sections(
+                                    enhanced_sections
+                                )
+                            )
+
+                            enhanced_processing_result["sections"] = enhanced_sections
+                            enhanced_processing_result["malta_enhanced"] = True
+
+                            logger.info(
+                                f"Malta enhancements applied to {len(enhanced_sections)} sections in patient CDA view"
+                            )
+
+                    except Exception as e:
+                        logger.error(
+                            f"Malta enhancement failed in patient CDA view: {e}"
+                        )
+                        # Continue with original result if enhancement fails
 
                 # Enhance result with JSON field mapping data
                 if enhanced_processing_result.get("success"):
@@ -6247,6 +6332,37 @@ def enhanced_cda_display(request):
             result = processor.process_clinical_sections(
                 cda_content=cda_content, source_language=detected_source_language
             )
+
+            # Apply Malta-specific enhancements if this is a Malta document
+            if country_code == "MT" or "malta" in cda_content.lower():
+                try:
+                    from .services.malta_cda_enhancer import MaltaCDAEnhancer
+
+                    malta_enhancer = MaltaCDAEnhancer()
+
+                    if result.get("success") and result.get("sections"):
+                        logger.info("Applying Malta CDA enhancements...")
+
+                        # Enhance sections with Malta-specific processing
+                        enhanced_sections = malta_enhancer.enhance_cda_sections(
+                            result["sections"], cda_content
+                        )
+
+                        # Fix empty clinical sections
+                        enhanced_sections = malta_enhancer.fix_empty_clinical_sections(
+                            enhanced_sections
+                        )
+
+                        result["sections"] = enhanced_sections
+                        result["malta_enhanced"] = True
+
+                        logger.info(
+                            f"Malta enhancements applied to {len(enhanced_sections)} sections"
+                        )
+
+                except Exception as e:
+                    logger.error(f"Malta enhancement failed: {e}")
+                    # Continue with original result if enhancement fails
 
             # Add language detection info to result
             result["detected_source_language"] = detected_source_language
