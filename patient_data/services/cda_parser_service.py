@@ -560,25 +560,71 @@ class CDAParserService:
         return telecom
 
     def _format_hl7_datetime(self, hl7_datetime: str) -> str:
-        """Format HL7 datetime string to readable format"""
+        """Format HL7 datetime string to readable format with timezone support"""
         try:
-            if len(hl7_datetime) >= 8:
-                # Extract date parts (YYYYMMDD format)
-                year = hl7_datetime[:4]
-                month = hl7_datetime[4:6]
-                day = hl7_datetime[6:8]
+            if not hl7_datetime or len(hl7_datetime) < 8:
+                return hl7_datetime
 
-                if len(hl7_datetime) >= 14:
+            # Handle timezone-aware format: YYYYMMDDHHMMSS+ZZZZ or YYYYMMDD+ZZZZ
+            timezone_info = ""
+            core_datetime = hl7_datetime
+
+            # Extract timezone if present (+ZZZZ or -ZZZZ)
+            if "+" in hl7_datetime or (
+                hl7_datetime.count("-") > 2
+            ):  # More than 2 hyphens indicates timezone
+                # Find timezone offset
+                for i, char in enumerate(hl7_datetime):
+                    if char in ["+", "-"] and i >= 8:  # Timezone starts after date
+                        core_datetime = hl7_datetime[:i]
+                        timezone_info = hl7_datetime[i:]
+                        break
+
+            # Parse core datetime
+            if len(core_datetime) >= 8:
+                year = core_datetime[:4]
+                month = core_datetime[4:6]
+                day = core_datetime[6:8]
+
+                # Format date
+                formatted_date = f"{year}-{month}-{day}"
+
+                if len(core_datetime) >= 14:
                     # Include time (YYYYMMDDHHMMSS format)
-                    hour = hl7_datetime[8:10]
-                    minute = hl7_datetime[10:12]
-                    second = hl7_datetime[12:14]
-                    return f"{year}-{month}-{day} {hour}:{minute}:{second}"
+                    hour = core_datetime[8:10]
+                    minute = core_datetime[10:12]
+                    second = core_datetime[12:14]
+                    formatted_time = f"{hour}:{minute}:{second}"
+
+                    # Combine date, time, and timezone
+                    if timezone_info:
+                        # Format timezone for better readability
+                        if timezone_info == "+0000":
+                            tz_display = " (UTC)"
+                        elif timezone_info.startswith("+"):
+                            tz_display = f" (UTC{timezone_info})"
+                        elif timezone_info.startswith("-"):
+                            tz_display = f" (UTC{timezone_info})"
+                        else:
+                            tz_display = f" ({timezone_info})"
+
+                        return f"{formatted_date} {formatted_time}{tz_display}"
+                    else:
+                        return f"{formatted_date} {formatted_time}"
                 else:
-                    return f"{year}-{month}-{day}"
+                    # Date only, but might have timezone
+                    if timezone_info:
+                        if timezone_info == "+0000":
+                            tz_display = " (UTC)"
+                        else:
+                            tz_display = f" ({timezone_info})"
+                        return f"{formatted_date}{tz_display}"
+                    else:
+                        return formatted_date
 
             return hl7_datetime
-        except:
+        except Exception as e:
+            logger.warning(f"Error formatting HL7 datetime '{hl7_datetime}': {e}")
             return hl7_datetime
 
     def _format_gender(self, gender_code: str) -> str:
