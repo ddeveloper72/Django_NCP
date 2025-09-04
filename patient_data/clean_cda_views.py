@@ -20,6 +20,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "eu_ncp_server.settings")
 django.setup()
 
 from ncp_gateway.models import Patient
+
 # from cda_display_service import CDADisplayService  # TODO: Implement this service
 
 logger = logging.getLogger(__name__)
