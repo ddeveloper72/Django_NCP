@@ -3002,26 +3002,46 @@ def patient_cda_view(request, patient_id, cda_type=None):
                             enhanced_sections = malta_enhancer.enhance_cda_sections(
                                 enhanced_processing_result["sections"], cda_content
                             )
-
-                            # Fix empty clinical sections
-                            enhanced_sections = (
-                                malta_enhancer.fix_empty_clinical_sections(
-                                    enhanced_sections
-                                )
-                            )
-
                             enhanced_processing_result["sections"] = enhanced_sections
-                            enhanced_processing_result["malta_enhanced"] = True
+                            logger.info("Malta CDA enhancements applied successfully")
 
+                    except Exception as e:
+                        logger.error(f"Error applying Malta CDA enhancements: {e}")
+
+                # Extract extended header data if enhanced processing was successful
+                extended_header_data = {}
+                if enhanced_processing_result.get("success") and cda_content:
+                    try:
+                        logger.info(
+                            "Extracting extended header data for patient viewer..."
+                        )
+
+                        # Get the enhanced processor that was already created
+                        processor = None
+                        if detected_source_language != "en":
+                            # Use the translation processor for dual language
+                            processor = translation_processor
+                        else:
+                            # Use the english processor for single language
+                            processor = english_processor
+
+                        if processor:
+                            extended_header_data = (
+                                processor.extract_extended_header_data(cda_content)
+                            )
                             logger.info(
-                                f"Malta enhancements applied to {len(enhanced_sections)} sections in patient CDA view"
+                                f"Extended header extraction successful - Contact info: {extended_header_data.get('patient_contact', {}).get('has_contact_info', False)}, "
+                                f"Emergency contacts: {extended_header_data.get('emergency_contacts', {}).get('total_count', 0)}, "
+                                f"Healthcare team: {extended_header_data.get('healthcare_team', {}).get('total_count', 0)}"
+                            )
+                        else:
+                            logger.warning(
+                                "No processor available for extended header extraction"
                             )
 
                     except Exception as e:
-                        logger.error(
-                            f"Malta enhancement failed in patient CDA view: {e}"
-                        )
-                        # Continue with original result if enhancement fails
+                        logger.error(f"Error extracting extended header data: {e}")
+                        extended_header_data = {}
 
                 # Enhance result with JSON field mapping data
                 if enhanced_processing_result.get("success"):
@@ -3272,6 +3292,19 @@ def patient_cda_view(request, patient_id, cda_type=None):
         logger.info(
             f"Added template translations for {detected_source_language} → en with {len(template_translations)} strings"
         )
+
+        # Add extended header data to context for enhanced patient information display
+        if extended_header_data:
+            context["patient_extended_data"] = extended_header_data
+            logger.info(
+                f"Added extended header data to context - Contact info: {extended_header_data.get('patient_contact', {}).get('has_contact_info', False)}, "
+                f"Emergency contacts: {extended_header_data.get('emergency_contacts', {}).get('total_count', 0)}, "
+                f"Healthcare team: {extended_header_data.get('healthcare_team', {}).get('total_count', 0)}, "
+                f"Dependants: {extended_header_data.get('dependants', {}).get('total_count', 0)}"
+            )
+        else:
+            context["patient_extended_data"] = None
+            logger.info("No extended header data available for context")
 
         # REFACTOR: Process sections for template display (move complex logic from template to Python)
         if translation_result and translation_result.get("sections"):
