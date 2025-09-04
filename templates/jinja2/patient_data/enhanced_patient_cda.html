@@ -264,23 +264,32 @@
 </nav>
 {% endblock %}
 
+{% block page_context %}
+<div class="page-context-content">
+    <div class="page-info">
+        <span class="page-location">
+            <i class="fa fa-file-medical"></i> CDA Document
+        </span>
+    </div>
+    <div class="page-actions">
+        {% if patient_identity.patient_id %}
+        <a href="{{ url('patient_data:patient_details', patient_identity.patient_id) }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> Back to Patient
+        </a>
+        {% else %}
+        <a href="{{ url('patient_data:patient_data_form') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> Back to Search
+        </a>
+        {% endif %}
+        <a href="{{ url('patient_data:patient_data_form') }}" class="btn btn-outline-primary btn-sm">
+            <i class="fa fa-search"></i> New Search
+        </a>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-4">
-    <!-- Quick actions section moved to top of content -->
-    <div class="mb-4">
-        <div class="quick-actions text-end">
-            <a href="{{ url('patient_data:patient_data_form') }}" class="btn btn-outline-primary btn-sm me-2">
-                <i class="fas fa-search me-1"></i>New Search
-            </a>
-            {% if patient_identity.patient_id %}
-            <a href="{{ url('patient_data:patient_details', patient_identity.patient_id) }}"
-                class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-arrow-left me-1"></i>Back to Patient
-            </a>
-            {% endif %}
-        </div>
-    </div>
-
     <!-- Patient Header -->
     <div class="row mb-4">
         <div class="col-12">
