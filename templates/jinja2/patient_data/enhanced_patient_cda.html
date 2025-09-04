@@ -896,11 +896,26 @@
 <!-- Section Tabs JavaScript -->
 <script>
     function showTab(sectionId, tabType) {
+        console.log('showTab called with:', sectionId, tabType); // Debug log
+
         // Hide all tab contents for this section
         const structuredTab = document.getElementById(sectionId + '_structured');
         const originalTab = document.getElementById(sectionId + '_original');
-        const tabContainer = document.querySelector('#' + sectionId).closest('.medical-section');
+
+        console.log('Found tabs:', structuredTab ? 'structured exists' : 'structured missing',
+            originalTab ? 'original exists' : 'original missing'); // Debug log
+
+        // Find the parent container that contains the tabs
+        const tabContainer = structuredTab ? structuredTab.closest('.card-body') :
+            (originalTab ? originalTab.closest('.card-body') : null);
+
+        if (!tabContainer) {
+            console.log('No tab container found!'); // Debug log
+            return; // Exit if we can't find the container
+        }
+
         const buttons = tabContainer.querySelectorAll('.tab-button');
+        console.log('Found buttons:', buttons.length); // Debug log
 
         // Remove active class from all tabs and buttons in this section
         if (structuredTab) structuredTab.classList.remove('active');
@@ -915,6 +930,8 @@
             if (originalTab) originalTab.classList.add('active');
             if (buttons[1]) buttons[1].classList.add('active');
         }
+
+        console.log('Tab switching completed for:', tabType); // Debug log
     }
 
     // Initialize tooltips and any other interactive elements
