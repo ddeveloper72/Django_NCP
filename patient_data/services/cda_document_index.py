@@ -22,6 +22,54 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def determine_cda_type_standalone(content: str, file_path: str = "") -> str:
+    """
+    Standalone function to determine CDA type from content using improved HL7 logic
+
+    Detection rules:
+    - Search for <entry> → If present, it's Level 3
+    - Search for <section> without <entry> → Likely Level 2
+    - If only <nonXMLBody> or plain <text> → It's Level 1
+    """
+    filename = os.path.basename(file_path).upper() if file_path else ""
+
+    # First check filename patterns (fastest)
+    if "L1" in filename or "PIVOT" in filename:
+        return "L1"
+    elif "L3" in filename or "FRIENDLY" in filename:
+        return "L3"
+    elif "L2" in filename:
+        return "L2"
+    else:
+        # Determine from content using improved HL7 logic
+        try:
+            # Count key structural elements
+            entry_count = content.count("<entry")
+            section_count = content.count("<section")
+            has_nonxml_body = "<nonXMLBody" in content
+            text_count = content.count("<text")
+
+            # Apply HL7 CDA level detection rules
+            if entry_count > 0:
+                # Level 3: Structured entries present
+                return "L3"
+            elif section_count > 0 and entry_count == 0:
+                # Level 2: Sections but no structured entries
+                return "L2"
+            elif has_nonxml_body or (text_count > 0 and entry_count == 0):
+                # Level 1: Unstructured content or plain text without entries
+                return "L1"
+            else:
+                # Fallback: check for legacy structuredBody pattern
+                if "structuredBody" in content:
+                    return "L3"
+
+        except Exception as e:
+            logger.warning(f"Error analyzing CDA content: {e}")
+
+    return "Unknown"
+
+
 @dataclass
 class CDADocumentInfo:
     """Information about a CDA document"""
@@ -141,24 +189,52 @@ class CDADocumentIndexer:
             return None
 
     def determine_cda_type(self, file_path: str) -> str:
-        """Determine CDA type from filename or content"""
+        """
+        Determine CDA type from filename or content using improved HL7 logic
+
+        Detection rules:
+        - Search for <entry> → If present, it's Level 3
+        - Search for <section> without <entry> → Likely Level 2
+        - If only <nonXMLBody> or plain <text> → It's Level 1
+        """
         filename = os.path.basename(file_path).upper()
 
+        # First check filename patterns (fastest)
         if "L1" in filename or "PIVOT" in filename:
             return "L1"
         elif "L3" in filename or "FRIENDLY" in filename:
             return "L3"
+        elif "L2" in filename:
+            return "L2"
         else:
-            # Try to determine from content
+            # Determine from content using improved HL7 logic
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
-                if "nonXMLBody" in content:
-                    return "L1"
-                elif "structuredBody" in content:
+
+                # Count key structural elements
+                entry_count = content.count("<entry")
+                section_count = content.count("<section")
+                has_nonxml_body = "<nonXMLBody" in content
+                text_count = content.count("<text")
+
+                # Apply HL7 CDA level detection rules
+                if entry_count > 0:
+                    # Level 3: Structured entries present
                     return "L3"
-            except:
-                pass
+                elif section_count > 0 and entry_count == 0:
+                    # Level 2: Sections but no structured entries
+                    return "L2"
+                elif has_nonxml_body or (text_count > 0 and entry_count == 0):
+                    # Level 1: Unstructured content or plain text without entries
+                    return "L1"
+                else:
+                    # Fallback: check for legacy structuredBody pattern
+                    if "structuredBody" in content:
+                        return "L3"
+
+            except Exception as e:
+                self.logger.warning(f"Error reading CDA content from {file_path}: {e}")
 
         return "Unknown"
 
