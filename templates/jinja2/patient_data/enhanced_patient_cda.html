@@ -751,28 +751,32 @@
                         </div>
                     </div>
                 </div> <!-- End clinical-table -->
-                </div> <!-- End structured tab content -->
-                
-                <!-- Original Content Tab -->
-                <div id="section_{{ loop.index0 }}_original" class="tab-content">
-                    <div class="original-content">
-                        <h4>Original Clinical Data from NCPeH-A{% if section.title %} - {{ section.title }}{% endif %}</h4>
-                        {% if section.structured_data %}
-                        <div class="alert alert-info mb-3">
-                            <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical data</strong> from the Country of Affiliation (NCPeH-A) before transformation and mapping.</small>
-                        </div>
-                        <pre class="json-content">{{ section.structured_data | tojson(indent=2) }}</pre>
-                        {% elif section.content and section.content.original %}
-                        <div class="alert alert-warning mb-3">
-                            <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing raw XML content.</small>
-                        </div>
-                        <pre class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
-                        {% else %}
-                        <p class="text-muted">No original clinical data available for this section.</p>
-                        {% endif %}
+            </div> <!-- End structured tab content -->
+
+            <!-- Original Content Tab -->
+            <div id="section_{{ loop.index0 }}_original" class="tab-content">
+                <div class="original-content">
+                    <h4>Original Clinical Data from NCPeH-A{% if section.title %} - {{ section.title }}{% endif %}</h4>
+                    {% if section.structured_data %}
+                    <div class="alert alert-info mb-3">
+                        <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical
+                                data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
+                            mapping.</small>
                     </div>
+                    <pre class="json-content">{{ section.structured_data | tojson(indent=2) }}</pre>
+                    {% elif section.content and section.content.original %}
+                    <div class="alert alert-warning mb-3">
+                        <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing
+                            raw XML content.</small>
+                    </div>
+                    <pre
+                        class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
+                    {% else %}
+                    <p class="text-muted">No original clinical data available for this section.</p>
+                    {% endif %}
                 </div>
-            </div>        {% elif section.has_entries %}
+            </div>
+        </div> {% elif section.has_entries %}
         <!-- Fallback to simple list display if no clinical table -->
         <div class="card-body p-0">
             <!-- Section Tabs -->
@@ -827,14 +831,18 @@
                     <h4>Original Clinical Data from NCPeH-A{% if section.title %} - {{ section.title }}{% endif %}</h4>
                     {% if section.structured_data %}
                     <div class="alert alert-info mb-3">
-                        <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical data</strong> from the Country of Affiliation (NCPeH-A) before transformation and mapping.</small>
+                        <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical
+                                data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
+                            mapping.</small>
                     </div>
                     <pre class="json-content">{{ section.structured_data | tojson(indent=2) }}</pre>
                     {% elif section.content and section.content.original %}
                     <div class="alert alert-warning mb-3">
-                        <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing raw XML content.</small>
+                        <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing
+                            raw XML content.</small>
                     </div>
-                    <pre class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
+                    <pre
+                        class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
                     {% else %}
                     <p class="text-muted">No original clinical data available for this section.</p>
                     {% endif %}
@@ -865,14 +873,18 @@
                     <h4>Original Clinical Data from NCPeH-A{% if section.title %} - {{ section.title }}{% endif %}</h4>
                     {% if section.structured_data %}
                     <div class="alert alert-info mb-3">
-                        <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical data</strong> from the Country of Affiliation (NCPeH-A) before transformation and mapping.</small>
+                        <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical
+                                data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
+                            mapping.</small>
                     </div>
                     <pre class="json-content">{{ section.structured_data | tojson(indent=2) }}</pre>
                     {% elif section.content and section.content.original %}
                     <div class="alert alert-warning mb-3">
-                        <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing raw XML content.</small>
+                        <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing
+                            raw XML content.</small>
                     </div>
-                    <pre class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
+                    <pre
+                        class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
                     {% else %}
                     <p class="text-muted">No original clinical data available for this section.</p>
                     {% endif %}
@@ -933,13 +945,13 @@
         // Hide all tab contents for this section
         const structuredTab = document.getElementById(sectionId + '_structured');
         const originalTab = document.getElementById(sectionId + '_original');
-        
+
         // Find the parent container that contains the tabs
-        const tabContainer = structuredTab ? structuredTab.closest('.card-body') : 
-                            (originalTab ? originalTab.closest('.card-body') : null);
-        
+        const tabContainer = structuredTab ? structuredTab.closest('.card-body') :
+            (originalTab ? originalTab.closest('.card-body') : null);
+
         if (!tabContainer) return; // Exit if we can't find the container
-        
+
         const buttons = tabContainer.querySelectorAll('.tab-button');
 
         // Remove active class from all tabs and buttons in this section
