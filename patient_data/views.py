@@ -128,7 +128,10 @@ def prepare_enhanced_section_data(sections):
                 entries_data, section.get("section_code", ""), section_title
             )
 
-        processed_section["has_entries"] = len(processed_section["entries"]) > 0
+        processed_section["has_entries"] = (
+            len(processed_section["entries"]) > 0 
+            or (processed_section["structured_data"] and len(processed_section["structured_data"]) > 0)
+        )
         processed_sections.append(processed_section)
 
     return processed_sections
