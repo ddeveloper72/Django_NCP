@@ -680,7 +680,7 @@
         </li>
         {% if patient_identity.patient_id %}
         <li class="breadcrumb-item">
-            <a href="{{ url('patient_data:patient_details', patient_identity.patient_id) }}"
+            <a href="{{ url('patient_data:patient_details', patient_identity.url_patient_id or patient_identity.patient_id) }}"
                 class="text-decoration-none">
                 <i class="fas fa-user me-1"></i>{{ patient_identity.given_name }} {{
                 patient_identity.family_name }}
@@ -703,7 +703,7 @@
     </div>
     <div class="page-actions">
         {% if patient_identity.patient_id %}
-        <a href="{{ url('patient_data:patient_details', patient_identity.patient_id) }}"
+        <a href="{{ url('patient_data:patient_details', patient_identity.url_patient_id or patient_identity.patient_id) }}"
             class="btn btn-outline-secondary btn-sm">
             <i class="fa fa-arrow-left"></i> Back to Patient
         </a>
@@ -748,12 +748,12 @@
                     <div class="row mt-3">
                         <div class="col-12">
                             <div class="btn-group" role="group" aria-label="CDA Type Selection">
-                                <a href="{{ url('patient_data:patient_cda_view_typed', patient_identity.patient_id, 'L1') }}"
+                                <a href="{{ url('patient_data:patient_cda_view_typed', patient_identity.url_patient_id or patient_identity.patient_id, 'L1') }}"
                                     class="btn {% if cda_type == 'L1' %}btn-primary{% else %}btn-outline-primary{% endif %} {% if not has_l1_cda %}disabled{% endif %}">
                                     <i class="fas fa-file-medical me-1"></i>L1 Original Document
                                     {% if not has_l1_cda %}<small>(Not Available)</small>{% endif %}
                                 </a>
-                                <a href="{{ url('patient_data:patient_cda_view_typed', patient_identity.patient_id, 'L3') }}"
+                                <a href="{{ url('patient_data:patient_cda_view_typed', patient_identity.url_patient_id or patient_identity.patient_id, 'L3') }}"
                                     class="btn {% if cda_type == 'L3' %}btn-primary{% else %}btn-outline-primary{% endif %} {% if not has_l3_cda %}disabled{% endif %}">
                                     <i class="fas fa-language me-1"></i>L3 Patient Summary
                                     {% if not has_l3_cda %}<small>(Not Available)</small>{% endif %}
