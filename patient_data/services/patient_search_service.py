@@ -102,13 +102,36 @@ class PatientMatch:
         Args:
             preferred_type: Preferred CDA type ('L1' or 'L3'). If None, defaults to L3.
         """
-        # If specific type is requested and available, use it
+        # If specific type is requested and available, use selected document
+        if preferred_type == "L1" and self.l1_documents and len(self.l1_documents) > 0:
+            content = self.get_selected_document_content("L1")
+            if content:
+                return content, "L1"
+        elif (
+            preferred_type == "L3" and self.l3_documents and len(self.l3_documents) > 0
+        ):
+            content = self.get_selected_document_content("L3")
+            if content:
+                return content, "L3"
+
+        # Fallback to default logic (prefer L3, then L1) using selected documents
+        if self.l3_documents and len(self.l3_documents) > 0:
+            content = self.get_selected_document_content("L3")
+            if content:
+                return content, "L3"
+
+        if self.l1_documents and len(self.l1_documents) > 0:
+            content = self.get_selected_document_content("L1")
+            if content:
+                return content, "L1"
+
+        # Legacy fallback to old content fields if document arrays are not available
         if preferred_type == "L1" and self.l1_cda_content:
             return self.l1_cda_content, "L1"
         elif preferred_type == "L3" and self.l3_cda_content:
             return self.l3_cda_content, "L3"
 
-        # Fallback to default logic (prefer L3, then L1)
+        # Final fallback to legacy content (prefer L3, then L1)
         if self.l3_cda_content:
             return self.l3_cda_content, "L3"
         elif self.l1_cda_content:
@@ -174,6 +197,18 @@ class PatientMatch:
         l1_count = len(self.l1_documents) if self.l1_documents else 0
         l3_count = len(self.l3_documents) if self.l3_documents else 0
         return f"L1: {l1_count} documents, L3: {l3_count} documents"
+
+    def has_l1_cda(self) -> bool:
+        """Check if L1 CDA content is available"""
+        return bool(
+            self.l1_cda_content or (self.l1_documents and len(self.l1_documents) > 0)
+        )
+
+    def has_l3_cda(self) -> bool:
+        """Check if L3 CDA content is available"""
+        return bool(
+            self.l3_cda_content or (self.l3_documents and len(self.l3_documents) > 0)
+        )
 
 
 class EUPatientSearchService:
