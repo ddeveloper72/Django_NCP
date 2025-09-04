@@ -71,6 +71,11 @@ urlpatterns = [
         name="download_patient_summary_pdf",
     ),
     path(
+        "download/patient-summary-pdf-file/<int:patient_id>/",
+        main_views.download_patient_summary_pdf_file,
+        name="download_patient_summary_pdf_file",
+    ),
+    path(
         "orcd/<int:patient_id>/",
         main_views.patient_orcd_view,
         name="patient_orcd_view",
