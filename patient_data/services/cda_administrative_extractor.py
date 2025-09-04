@@ -511,39 +511,64 @@ class CDAAdministrativeExtractor:
         return ""
 
     def _format_cda_datetime(self, cda_datetime: str) -> str:
-        """Format CDA datetime string to human-readable format"""
+        """Format CDA datetime string to human-readable format with timezone support"""
         if not cda_datetime:
             return ""
 
         try:
-            # CDA datetime format is usually YYYYMMDDHHMMSS[+/-ZZZZ]
-            # Parse and format to: YYYY-MM-DD HH:MM:SS (TZ)
-            if len(cda_datetime) >= 14:
-                year = cda_datetime[:4]
-                month = cda_datetime[4:6]
-                day = cda_datetime[6:8]
-                hour = cda_datetime[8:10]
-                minute = cda_datetime[10:12]
-                second = cda_datetime[12:14]
+            # Handle timezone-aware format: YYYYMMDDHHMMSS+ZZZZ or YYYYMMDD+ZZZZ
+            timezone_info = ""
+            core_datetime = cda_datetime
+
+            # Extract timezone if present (+ZZZZ or -ZZZZ)
+            if "+" in cda_datetime or (cda_datetime.count("-") > 2):
+                # Find timezone offset
+                for i, char in enumerate(cda_datetime):
+                    if char in ["+", "-"] and i >= 8:  # Timezone starts after date
+                        core_datetime = cda_datetime[:i]
+                        timezone_info = cda_datetime[i:]
+                        break
+
+            # Parse core datetime
+            if len(core_datetime) >= 14:
+                year = core_datetime[:4]
+                month = core_datetime[4:6]
+                day = core_datetime[6:8]
+                hour = core_datetime[8:10]
+                minute = core_datetime[10:12]
+                second = core_datetime[12:14]
 
                 formatted = f"{year}-{month}-{day} {hour}:{minute}:{second}"
 
                 # Add timezone if present
-                if len(cda_datetime) > 14 and (
-                    "+" in cda_datetime[14:] or "-" in cda_datetime[14:]
-                ):
-                    tz_part = cda_datetime[14:]
-                    formatted += f" ({tz_part})"
+                if timezone_info:
+                    if timezone_info == "+0000":
+                        formatted += " (UTC)"
+                    elif timezone_info.startswith("+"):
+                        formatted += f" (UTC{timezone_info})"
+                    elif timezone_info.startswith("-"):
+                        formatted += f" (UTC{timezone_info})"
+                    else:
+                        formatted += f" ({timezone_info})"
 
                 return formatted
-            elif len(cda_datetime) >= 8:
+            elif len(core_datetime) >= 8:
                 # Date only format
-                year = cda_datetime[:4]
-                month = cda_datetime[4:6]
-                day = cda_datetime[6:8]
-                return f"{year}-{month}-{day}"
-        except (ValueError, IndexError):
-            pass
+                year = core_datetime[:4]
+                month = core_datetime[4:6]
+                day = core_datetime[6:8]
+                formatted = f"{year}-{month}-{day}"
+
+                # Add timezone if present
+                if timezone_info:
+                    if timezone_info == "+0000":
+                        formatted += " (UTC)"
+                    else:
+                        formatted += f" ({timezone_info})"
+
+                return formatted
+        except (ValueError, IndexError) as e:
+            logger.warning(f"Error formatting CDA datetime '{cda_datetime}': {e}")
 
         return cda_datetime  # Return as-is if parsing fails
 
