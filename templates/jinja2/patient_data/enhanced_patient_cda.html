@@ -867,7 +867,7 @@
                                 data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
                             mapping.</small>
                     </div>
-                    
+
                     <!-- Original Clinical Data Table -->
                     <div class="original-clinical-table">
                         <table class="table table-bordered table-hover">
@@ -880,55 +880,56 @@
                             </thead>
                             <tbody>
                                 {% for entry in section.structured_data %}
-                                    {% if entry.fields %}
-                                        {% for field_name, field_data in entry.fields.items() %}
-                                        <tr>
-                                            <td class="fw-bold text-primary">{{ field_name }}</td>
-                                            <td>
-                                                <span class="original-value">{{ field_data.value or 'N/A' }}</span>
-                                                {% if field_data.xpath %}
-                                                <br><small class="text-muted">
-                                                    <i class="fas fa-code me-1"></i>XPath: <code>{{ field_data.xpath }}</code>
-                                                </small>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if field_data.has_valueset %}
-                                                <span class="badge bg-success me-1">
-                                                    <i class="fas fa-database"></i> Value Set
-                                                </span>
-                                                {% endif %}
-                                                {% if field_data.needs_translation %}
-                                                <span class="badge bg-warning me-1">
-                                                    <i class="fas fa-language"></i> Translatable
-                                                </span>
-                                                {% endif %}
-                                                {% if entry.section_code %}
-                                                <br><small class="text-muted">
-                                                    <i class="fas fa-tag me-1"></i>Section: <code>{{ entry.section_code }}</code>
-                                                </small>
-                                                {% endif %}
-                                                {% if entry.section_type %}
-                                                <br><small class="text-muted">
-                                                    <i class="fas fa-folder me-1"></i>Type: {{ entry.section_type }}
-                                                </small>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    {% else %}
-                                        <!-- Fallback for entries without structured fields -->
-                                        <tr>
-                                            <td class="fw-bold text-secondary">Entry {{ loop.index }}</td>
-                                            <td colspan="2">
-                                                <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
-                                            </td>
-                                        </tr>
-                                    {% endif %}
+                                {% if entry.fields %}
+                                {% for field_name, field_data in entry.fields.items() %}
+                                <tr>
+                                    <td class="fw-bold text-primary">{{ field_name }}</td>
+                                    <td>
+                                        <span class="original-value">{{ field_data.value or 'N/A' }}</span>
+                                        {% if field_data.xpath %}
+                                        <br><small class="text-muted">
+                                            <i class="fas fa-code me-1"></i>XPath: <code>{{ field_data.xpath }}</code>
+                                        </small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if field_data.has_valueset %}
+                                        <span class="badge bg-success me-1">
+                                            <i class="fas fa-database"></i> Value Set
+                                        </span>
+                                        {% endif %}
+                                        {% if field_data.needs_translation %}
+                                        <span class="badge bg-warning me-1">
+                                            <i class="fas fa-language"></i> Translatable
+                                        </span>
+                                        {% endif %}
+                                        {% if entry.section_code %}
+                                        <br><small class="text-muted">
+                                            <i class="fas fa-tag me-1"></i>Section:
+                                            <code>{{ entry.section_code }}</code>
+                                        </small>
+                                        {% endif %}
+                                        {% if entry.section_type %}
+                                        <br><small class="text-muted">
+                                            <i class="fas fa-folder me-1"></i>Type: {{ entry.section_type }}
+                                        </small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <!-- Fallback for entries without structured fields -->
+                                <tr>
+                                    <td class="fw-bold text-secondary">Entry {{ loop.index }}</td>
+                                    <td colspan="2">
+                                        <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
+                                    </td>
+                                </tr>
+                                {% endif %}
                                 {% endfor %}
                             </tbody>
                         </table>
-                        
+
                         <!-- Table Summary -->
                         <div class="card-footer bg-light">
                             <div class="row text-center">
@@ -1070,7 +1071,7 @@
                                 data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
                             mapping.</small>
                     </div>
-                    
+
                     <!-- Original Clinical Data Table -->
                     <div class="original-clinical-table">
                         <table class="table table-bordered table-hover">
@@ -1083,55 +1084,56 @@
                             </thead>
                             <tbody>
                                 {% for entry in section.structured_data %}
-                                    {% if entry.fields %}
-                                        {% for field_name, field_data in entry.fields.items() %}
-                                        <tr>
-                                            <td class="fw-bold text-primary">{{ field_name }}</td>
-                                            <td>
-                                                <span class="original-value">{{ field_data.value or 'N/A' }}</span>
-                                                {% if field_data.xpath %}
-                                                <br><small class="text-muted">
-                                                    <i class="fas fa-code me-1"></i>XPath: <code>{{ field_data.xpath }}</code>
-                                                </small>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if field_data.has_valueset %}
-                                                <span class="badge bg-success me-1">
-                                                    <i class="fas fa-database"></i> Value Set
-                                                </span>
-                                                {% endif %}
-                                                {% if field_data.needs_translation %}
-                                                <span class="badge bg-warning me-1">
-                                                    <i class="fas fa-language"></i> Translatable
-                                                </span>
-                                                {% endif %}
-                                                {% if entry.section_code %}
-                                                <br><small class="text-muted">
-                                                    <i class="fas fa-tag me-1"></i>Section: <code>{{ entry.section_code }}</code>
-                                                </small>
-                                                {% endif %}
-                                                {% if entry.section_type %}
-                                                <br><small class="text-muted">
-                                                    <i class="fas fa-folder me-1"></i>Type: {{ entry.section_type }}
-                                                </small>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    {% else %}
-                                        <!-- Fallback for entries without structured fields -->
-                                        <tr>
-                                            <td class="fw-bold text-secondary">Entry {{ loop.index }}</td>
-                                            <td colspan="2">
-                                                <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
-                                            </td>
-                                        </tr>
-                                    {% endif %}
+                                {% if entry.fields %}
+                                {% for field_name, field_data in entry.fields.items() %}
+                                <tr>
+                                    <td class="fw-bold text-primary">{{ field_name }}</td>
+                                    <td>
+                                        <span class="original-value">{{ field_data.value or 'N/A' }}</span>
+                                        {% if field_data.xpath %}
+                                        <br><small class="text-muted">
+                                            <i class="fas fa-code me-1"></i>XPath: <code>{{ field_data.xpath }}</code>
+                                        </small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if field_data.has_valueset %}
+                                        <span class="badge bg-success me-1">
+                                            <i class="fas fa-database"></i> Value Set
+                                        </span>
+                                        {% endif %}
+                                        {% if field_data.needs_translation %}
+                                        <span class="badge bg-warning me-1">
+                                            <i class="fas fa-language"></i> Translatable
+                                        </span>
+                                        {% endif %}
+                                        {% if entry.section_code %}
+                                        <br><small class="text-muted">
+                                            <i class="fas fa-tag me-1"></i>Section:
+                                            <code>{{ entry.section_code }}</code>
+                                        </small>
+                                        {% endif %}
+                                        {% if entry.section_type %}
+                                        <br><small class="text-muted">
+                                            <i class="fas fa-folder me-1"></i>Type: {{ entry.section_type }}
+                                        </small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <!-- Fallback for entries without structured fields -->
+                                <tr>
+                                    <td class="fw-bold text-secondary">Entry {{ loop.index }}</td>
+                                    <td colspan="2">
+                                        <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
+                                    </td>
+                                </tr>
+                                {% endif %}
                                 {% endfor %}
                             </tbody>
                         </table>
-                        
+
                         <!-- Table Summary -->
                         <div class="card-footer bg-light">
                             <div class="row text-center">
@@ -1243,7 +1245,7 @@
                                 data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
                             mapping.</small>
                     </div>
-                    
+
                     <!-- Original Clinical Data Table -->
                     <div class="original-clinical-table">
                         <table class="table table-bordered table-hover">
@@ -1256,55 +1258,56 @@
                             </thead>
                             <tbody>
                                 {% for entry in section.structured_data %}
-                                    {% if entry.fields %}
-                                        {% for field_name, field_data in entry.fields.items() %}
-                                        <tr>
-                                            <td class="fw-bold text-primary">{{ field_name }}</td>
-                                            <td>
-                                                <span class="original-value">{{ field_data.value or 'N/A' }}</span>
-                                                {% if field_data.xpath %}
-                                                <br><small class="text-muted">
-                                                    <i class="fas fa-code me-1"></i>XPath: <code>{{ field_data.xpath }}</code>
-                                                </small>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if field_data.has_valueset %}
-                                                <span class="badge bg-success me-1">
-                                                    <i class="fas fa-database"></i> Value Set
-                                                </span>
-                                                {% endif %}
-                                                {% if field_data.needs_translation %}
-                                                <span class="badge bg-warning me-1">
-                                                    <i class="fas fa-language"></i> Translatable
-                                                </span>
-                                                {% endif %}
-                                                {% if entry.section_code %}
-                                                <br><small class="text-muted">
-                                                    <i class="fas fa-tag me-1"></i>Section: <code>{{ entry.section_code }}</code>
-                                                </small>
-                                                {% endif %}
-                                                {% if entry.section_type %}
-                                                <br><small class="text-muted">
-                                                    <i class="fas fa-folder me-1"></i>Type: {{ entry.section_type }}
-                                                </small>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    {% else %}
-                                        <!-- Fallback for entries without structured fields -->
-                                        <tr>
-                                            <td class="fw-bold text-secondary">Entry {{ loop.index }}</td>
-                                            <td colspan="2">
-                                                <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
-                                            </td>
-                                        </tr>
-                                    {% endif %}
+                                {% if entry.fields %}
+                                {% for field_name, field_data in entry.fields.items() %}
+                                <tr>
+                                    <td class="fw-bold text-primary">{{ field_name }}</td>
+                                    <td>
+                                        <span class="original-value">{{ field_data.value or 'N/A' }}</span>
+                                        {% if field_data.xpath %}
+                                        <br><small class="text-muted">
+                                            <i class="fas fa-code me-1"></i>XPath: <code>{{ field_data.xpath }}</code>
+                                        </small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if field_data.has_valueset %}
+                                        <span class="badge bg-success me-1">
+                                            <i class="fas fa-database"></i> Value Set
+                                        </span>
+                                        {% endif %}
+                                        {% if field_data.needs_translation %}
+                                        <span class="badge bg-warning me-1">
+                                            <i class="fas fa-language"></i> Translatable
+                                        </span>
+                                        {% endif %}
+                                        {% if entry.section_code %}
+                                        <br><small class="text-muted">
+                                            <i class="fas fa-tag me-1"></i>Section:
+                                            <code>{{ entry.section_code }}</code>
+                                        </small>
+                                        {% endif %}
+                                        {% if entry.section_type %}
+                                        <br><small class="text-muted">
+                                            <i class="fas fa-folder me-1"></i>Type: {{ entry.section_type }}
+                                        </small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <!-- Fallback for entries without structured fields -->
+                                <tr>
+                                    <td class="fw-bold text-secondary">Entry {{ loop.index }}</td>
+                                    <td colspan="2">
+                                        <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
+                                    </td>
+                                </tr>
+                                {% endif %}
                                 {% endfor %}
                             </tbody>
                         </table>
-                        
+
                         <!-- Table Summary -->
                         <div class="card-footer bg-light">
                             <div class="row text-center">
