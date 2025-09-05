@@ -98,13 +98,25 @@ def custom_admin_logout_view(request):
     return redirect("/")  # Redirect to home page instead of admin logout page
 
 
+def custom_logout_view(request):
+    """Custom logout view for regular users"""
+    logout(request)
+    # Add a success message
+    from django.contrib import messages
+
+    messages.success(request, "You have been successfully logged out.")
+    return redirect("/")  # Redirect to home page
+
+
 urlpatterns = [
     path("", home_view, name="home"),
     path("api/update-smp-source/", update_smp_source, name="update_smp_source"),
     # Custom admin logout that redirects to home
     path("admin/logout/", custom_admin_logout_view, name="admin_logout"),
     path("admin/", admin.site.urls),
-    # Authentication URLs
+    # Custom logout view for regular users
+    path("accounts/logout/", custom_logout_view, name="logout"),
+    # Authentication URLs (login, password reset, etc.)
     path("accounts/", include("django.contrib.auth.urls")),
     # Option 1: API endpoints for Java portal integration
     path("api/", include("ncp_gateway.urls")),
