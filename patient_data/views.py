@@ -2534,13 +2534,14 @@ def patient_cda_view(request, patient_id, cda_type=None):
                     "clinical_data": clinical_data,  # Also provide the raw structured data
                 }
 
-                # Render with the existing enhanced template
-                return render(
-                    request,
-                    "patient_data/enhanced_patient_cda.html",
-                    context,
-                    using="jinja2",
-                )
+                # TEMPORARILY DISABLED: Early return prevents extended header extraction
+                # TODO: Move extended header extraction before this point
+                # return render(
+                #     request,
+                #     "patient_data/enhanced_patient_cda.html",
+                #     context,
+                #     using="jinja2",
+                # )
             else:
                 # Fall back to existing logic for non-structured CDAs
                 logger.info(
@@ -2616,9 +2617,24 @@ def patient_cda_view(request, patient_id, cda_type=None):
                 # This allows viewing of database patients with basic info
                 if not match_data and patient_data is not None:
                     logger.info(
-                        f"Creating minimal session data for database patient {patient_id}"
+                        f"Creating session data for database patient {patient_id} with raw_patient_summary"
                     )
-                    # Create minimal match data for database patients without session data
+
+                    # Check if patient has raw CDA content in database
+                    cda_content = (
+                        patient_data.raw_patient_summary
+                        if hasattr(patient_data, "raw_patient_summary")
+                        else None
+                    )
+                    has_cda_content = bool(
+                        cda_content and len(cda_content.strip()) > 100
+                    )
+
+                    logger.info(
+                        f"Database patient {patient_id} has CDA content: {has_cda_content} (length: {len(cda_content) if cda_content else 0})"
+                    )
+
+                    # Create match data for database patients with CDA content
                     match_data = {
                         "file_path": f"database_patient_{patient_id}.xml",
                         "country_code": "TEST",
@@ -2633,14 +2649,22 @@ def patient_cda_view(request, patient_id, cda_type=None):
                             ),
                             "gender": patient_data.gender,
                         },
-                        "cda_content": None,  # No CDA content for database-only patients
-                        "l1_cda_content": None,
-                        "l3_cda_content": None,
-                        "l1_cda_path": None,
-                        "l3_cda_path": None,
+                        "cda_content": cda_content if has_cda_content else None,
+                        "l1_cda_content": cda_content if has_cda_content else None,
+                        "l3_cda_content": cda_content if has_cda_content else None,
+                        "l1_cda_path": (
+                            f"database_patient_{patient_id}_L1.xml"
+                            if has_cda_content
+                            else None
+                        ),
+                        "l3_cda_path": (
+                            f"database_patient_{patient_id}_L3.xml"
+                            if has_cda_content
+                            else None
+                        ),
                         "preferred_cda_type": "L3",
-                        "has_l1": False,
-                        "has_l3": False,
+                        "has_l1": has_cda_content,
+                        "has_l3": has_cda_content,
                     }
                     # Store in session for this request
                     request.session[session_key] = match_data
@@ -3010,10 +3034,23 @@ def patient_cda_view(request, patient_id, cda_type=None):
 
                 # Extract extended header data if enhanced processing was successful
                 extended_header_data = {}
-                if enhanced_processing_result.get("success") and cda_content:
+
+                # DEBUG: Log the enhanced processing result status
+                logger.info(
+                    f"🔍 DEBUG: Enhanced processing success = {enhanced_processing_result.get('success')}"
+                )
+                logger.info(f"🔍 DEBUG: CDA content available = {bool(cda_content)}")
+                logger.info(
+                    f"🔍 DEBUG: CDA content length = {len(cda_content) if cda_content else 0}"
+                )
+
+                # TEMPORARY FIX: Force extended header extraction if we have CDA content
+                if (
+                    cda_content and len(cda_content) > 10000
+                ):  # Bypass the enhanced_processing_result condition
                     try:
                         logger.info(
-                            "Extracting extended header data for patient viewer..."
+                            f"🚀 FORCED: Extracting extended header data for patient viewer... CDA length: {len(cda_content)}"
                         )
 
                         # Get the enhanced processor that was already created
@@ -3042,6 +3079,21 @@ def patient_cda_view(request, patient_id, cda_type=None):
                     except Exception as e:
                         logger.error(f"Error extracting extended header data: {e}")
                         extended_header_data = {}
+                else:
+                    logger.warning(
+                        f"Skipping extended header extraction - CDA content length: {len(cda_content) if cda_content else 0} (need >10000), Enhanced processing success: {enhanced_processing_result.get('success')}"
+                    )
+                    logger.warning(
+                        f"🔍 DEBUG: Enhanced processing result keys: {list(enhanced_processing_result.keys()) if enhanced_processing_result else 'None'}"
+                    )
+                    if not enhanced_processing_result.get("success"):
+                        logger.warning(
+                            f"Enhanced processing result: {enhanced_processing_result}"
+                        )
+                    if not cda_content:
+                        logger.warning(
+                            "No CDA content available for extended header extraction"
+                        )
 
                 # Enhance result with JSON field mapping data
                 if enhanced_processing_result.get("success"):
@@ -3297,14 +3349,18 @@ def patient_cda_view(request, patient_id, cda_type=None):
         if extended_header_data:
             context["patient_extended_data"] = extended_header_data
             logger.info(
-                f"Added extended header data to context - Contact info: {extended_header_data.get('patient_contact', {}).get('has_contact_info', False)}, "
+                f"✅ SUCCESSFULLY Added extended header data to context - Contact info: {extended_header_data.get('patient_contact', {}).get('has_contact_info', False)}, "
                 f"Emergency contacts: {extended_header_data.get('emergency_contacts', {}).get('total_count', 0)}, "
                 f"Healthcare team: {extended_header_data.get('healthcare_team', {}).get('total_count', 0)}, "
                 f"Dependants: {extended_header_data.get('dependants', {}).get('total_count', 0)}"
             )
         else:
             context["patient_extended_data"] = None
-            logger.info("No extended header data available for context")
+            logger.info("❌ No extended header data available for context")
+
+        # FORCE DEBUG: Always add some test data to verify template is working
+        context["debug_message"] = "✅ Template context is being set correctly!"
+        logger.info("🔧 DEBUG: Added debug_message to context")
 
         # REFACTOR: Process sections for template display (move complex logic from template to Python)
         if translation_result and translation_result.get("sections"):
