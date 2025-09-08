@@ -1,0 +1,77 @@
+{# Empty Section Template - For sections without entries #}
+<div class="card-body">
+    <!-- Section Tabs (even for empty sections) -->
+    <div class="section-tabs">
+        <button class="tab-button active" onclick="showTab('section_{{ section_index }}', 'structured')">
+            📊 Structured View
+        </button>
+        <button class="tab-button" onclick="showTab('section_{{ section_index }}', 'original')">
+            📄 Original Content
+        </button>
+    </div>
+
+    <!-- Structured View Tab Content -->
+    <div id="section_{{ section_index }}_structured" class="tab-content active">
+        {% if section.structured_data %}
+        <div class="clinical-table">
+            <!-- Check if we have data to display -->
+            {% set first_entry = section.structured_data[0] if section.structured_data|length > 0 else none %}
+            {% if first_entry and first_entry.fields and first_entry.fields|length > 1 %}
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        {% for field_name, field_data in first_entry.fields.items() %}
+                        <th>
+                            {% if 'code' in field_name.lower() %}
+                            <i class="fas fa-code me-1"></i>
+                            {% endif %}
+                            {{ field_name }}
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in section.structured_data %}
+                    <tr>
+                        {% for field_name, field_data in entry.fields.items() %}
+                        <td>
+                            {% if 'date' in field_name.lower() or 'time' in field_name.lower() %}
+                            {{ format_medical_date(field_data.value) }}
+                            {% else %}
+                            {{ field_data.value or 'N/A' }}
+                            {% endif %}
+                            {% if field_data.has_valueset %}
+                            <span class="badge bg-info ms-1">Coded</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Table Summary -->
+            <div class="card-footer bg-light">
+                <div class="row text-center">
+                    <div class="col-12">
+                        <small class="text-muted">
+                            <i class="fas fa-table me-1"></i>
+                            <strong>{{ section.structured_data|length }}</strong> entries processed
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">Data available but not in tabular format.</p>
+            {% endif %}
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No entries found in this section.</p>
+        {% endif %}
+    </div>
+
+    <!-- Original Content Tab -->
+    <div id="section_{{ section_index }}_original" class="tab-content">
+        {% include 'patient_data/sections/original_content.html' %}
+    </div>
+</div>
