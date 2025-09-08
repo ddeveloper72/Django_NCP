@@ -3291,12 +3291,12 @@ class EnhancedCDAProcessor:
             if project_root not in sys.path:
                 sys.path.append(project_root)
 
-            from cda_extended_header_integration import CDAExtendedHeaderIntegration
-
-            integration = CDAExtendedHeaderIntegration()
-            return integration.extract_extended_patient_header_for_processor(
-                xml_content
+            from patient_data.utils.administrative_extractor import (
+                CDAAdministrativeExtractor,
             )
+
+            administrative_extractor = CDAAdministrativeExtractor()
+            return administrative_extractor.extract_administrative_data(xml_content)
         except Exception as e:
             logger.error(f"Error extracting extended header data: {e}")
             return {}
