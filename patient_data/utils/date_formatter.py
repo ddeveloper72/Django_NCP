@@ -20,20 +20,33 @@ class PatientDateFormatter:
     user-friendly display formats suitable for healthcare professionals.
     """
 
-    # Common CDA date patterns
+    # Common CDA date patterns used by EU member states
     CDA_PATTERNS = [
-        # Full datetime: 20080728130000+0100
+        # Full datetime with timezone: 20080728130000+0100, 20250318150929+0000
         (r"^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})[+-]\d{4}$", "%Y%m%d%H%M%S"),
-        # Date with time: 20080728130000
+        # Date with time: 20080728130000, 20250318150929
         (r"^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$", "%Y%m%d%H%M%S"),
-        # Date only: 20080728 or 19700101
+        # Date with partial time (hour/minute only): 202503181509
+        (r"^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$", "%Y%m%d%H%M"),
+        # Date only: 20080728, 20250318
         (r"^(\d{4})(\d{2})(\d{2})$", "%Y%m%d"),
-        # Date with dashes: 2008-07-28
-        (r"^(\d{4})-(\d{2})-(\d{2})$", "%Y-%m-%d"),
-        # Date with slashes: 28/07/2008 or 07/28/2008
-        (r"^(\d{1,2})/(\d{1,2})/(\d{4})$", None),  # Ambiguous, needs context
-        # ISO format: 2008-07-28T13:00:00
+        # ISO datetime with seconds: 2008-07-28T13:00:00, 2025-03-18T15:09:29
         (r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})", "%Y-%m-%dT%H:%M:%S"),
+        # ISO datetime without seconds: 2008-07-28T13:00
+        (r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})", "%Y-%m-%dT%H:%M"),
+        # Date with dashes: 2008-07-28, 2025-03-18
+        (r"^(\d{4})-(\d{2})-(\d{2})$", "%Y-%m-%d"),
+        # European date format: 28-07-2008, 18-03-2025
+        (r"^(\d{1,2})-(\d{1,2})-(\d{4})$", "%d-%m-%Y"),
+        # Date with dots (German/Austrian): 28.07.2008, 18.03.2025
+        (r"^(\d{1,2})\.(\d{1,2})\.(\d{4})$", "%d.%m.%Y"),
+        # Date with slashes (European): 28/07/2008, 18/03/2025
+        (r"^(\d{1,2})/(\d{1,2})/(\d{4})$", "%d/%m/%Y"),  # Assuming European format
+        # HL7 standard format: 20080728130000.000+0100
+        (
+            r"^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\.\d{3}[+-]\d{4}$",
+            "%Y%m%d%H%M%S",
+        ),
     ]
 
     def __init__(self, default_format: str = "dd/mm/yyyy", locale: str = "en-GB"):
@@ -113,6 +126,44 @@ class PatientDateFormatter:
             logger.error(f"Error formatting document date '{date_input}': {e}")
             return "Unknown"
 
+    def format_clinical_datetime(self, date_input: Union[str, datetime, None]) -> str:
+        """
+        Format a clinical datetime for Enhanced Extended Header display.
+        Provides professional medical-grade formatting similar to Malta standards.
+
+        Args:
+            date_input: Raw date from CDA document
+
+        Returns:
+            Formatted datetime string in format: "March 18, 2025, 3:09:29PM +0000"
+        """
+        if not date_input:
+            return "Not specified"
+
+        try:
+            if isinstance(date_input, datetime):
+                return self._format_clinical_datetime_display(date_input)
+
+            if isinstance(date_input, str):
+                cleaned_date = date_input.strip()
+
+                # Extract timezone if present
+                timezone_match = re.search(r"([+-]\d{4})$", cleaned_date)
+                timezone_str = timezone_match.group(1) if timezone_match else ""
+
+                parsed_date = self._parse_cda_date(cleaned_date)
+                if parsed_date:
+                    formatted = self._format_clinical_datetime_display(parsed_date)
+                    if timezone_str:
+                        formatted += f" {timezone_str}"
+                    return formatted
+
+            return "Not specified"
+
+        except Exception as e:
+            logger.error(f"Error formatting clinical datetime '{date_input}': {e}")
+            return "Not specified"
+
     def _parse_cda_date(self, date_str: str) -> Optional[datetime]:
         """
         Parse various CDA date formats into a datetime object.
@@ -126,27 +177,52 @@ class PatientDateFormatter:
         if not date_str:
             return None
 
-        # Remove timezone offset for parsing (we'll handle display separately)
-        date_clean = re.sub(r"[+-]\d{4}$", "", date_str)
+        # Clean up the input
+        date_clean = date_str.strip()
 
+        # Remove timezone offset and milliseconds for parsing (we'll handle display separately)
+        date_clean = re.sub(r"\.\d{3}[+-]\d{4}$", "", date_clean)  # Remove .000+0100
+        date_clean = re.sub(r"[+-]\d{4}$", "", date_clean)  # Remove +0100
+
+        # Try each pattern in order of specificity
         for pattern, format_str in self.CDA_PATTERNS:
-            if format_str is None:  # Skip ambiguous patterns for now
+            if format_str is None:  # Skip patterns without format strings
                 continue
 
             match = re.match(pattern, date_clean)
             if match:
                 try:
-                    return datetime.strptime(date_clean, format_str)
+                    parsed = datetime.strptime(date_clean, format_str)
+                    logger.debug(
+                        f"Successfully parsed '{date_str}' using pattern '{format_str}'"
+                    )
+                    return parsed
+                except ValueError as e:
+                    logger.debug(
+                        f"Pattern '{format_str}' matched but parsing failed for '{date_clean}': {e}"
+                    )
+                    continue
+
+        # Handle special formats that don't fit standard patterns
+        special_formats = [
+            # HL7 format variations
+            (r"^\d{14}$", "%Y%m%d%H%M%S"),  # 20250318150929
+            (r"^\d{12}$", "%Y%m%d%H%M"),  # 202503181509
+            (r"^\d{8}$", "%Y%m%d"),  # 20250318
+        ]
+
+        for pattern, format_str in special_formats:
+            if re.match(pattern, date_clean):
+                try:
+                    parsed = datetime.strptime(date_clean, format_str)
+                    logger.debug(
+                        f"Successfully parsed '{date_str}' using special format '{format_str}'"
+                    )
+                    return parsed
                 except ValueError:
                     continue
 
-        # Handle special CDA date formats
-        if re.match(r"^\d{8}$", date_clean):  # YYYYMMDD
-            try:
-                return datetime.strptime(date_clean, "%Y%m%d")
-            except ValueError:
-                pass
-
+        logger.warning(f"Unable to parse date string: '{date_str}'")
         return None
 
     def _format_datetime_to_display(
@@ -177,6 +253,29 @@ class PatientDateFormatter:
             return f"{date_part} {time_part}"
 
         return date_part
+
+    def _format_clinical_datetime_display(self, dt: datetime) -> str:
+        """
+        Format datetime for clinical/medical display following Malta standards.
+
+        Args:
+            dt: Datetime object to format
+
+        Returns:
+            Formatted string like "March 18, 2025, 3:09:29PM"
+        """
+        # Format: "March 18, 2025, 3:09:29PM"
+        date_part = dt.strftime("%B %d, %Y")  # March 18, 2025
+
+        # Handle time formatting with 12-hour format
+        if dt.hour != 0 or dt.minute != 0 or dt.second != 0:
+            time_part = dt.strftime("%I:%M:%S%p")  # 3:09:29PM
+            # Remove leading zero from hour if present
+            time_part = time_part.lstrip("0")
+            return f"{date_part}, {time_part}"
+        else:
+            # Date only
+            return date_part
 
     def get_age_from_birth_date(
         self, birth_date: Union[str, datetime, None]
