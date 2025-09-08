@@ -17,7 +17,7 @@ project_root = os.path.dirname(
 )
 sys.path.insert(0, project_root)
 
-from eu_mvc_parser import EUMVCParser
+# TEMPORARILY COMMENTED OUT: from eu_mvc_parser import EUMVCParser
 from .models import ValueSetCatalogue, ValueSetConcept, MVCSyncLog
 
 
@@ -154,7 +154,8 @@ class MVCImportForm(forms.Form):
                 sheets_to_process = all_sheets[:5]
 
             # Initialize parser and process sheets
-            parser = EUMVCParser()
+            # TEMPORARILY COMMENTED OUT: parser = EUMVCParser()
+            raise NotImplementedError("EUMVCParser module not available")
             results = {
                 "total_value_sets": 0,
                 "total_concepts": 0,
