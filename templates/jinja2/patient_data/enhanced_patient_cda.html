@@ -1166,6 +1166,8 @@
                             </p>
                             <p><strong>Gender:</strong> {{ patient_identity.gender or 'Unknown' }}</p>
                             <p><strong>Patient ID:</strong> {{ patient_identity.patient_id }}</p>
+                            <!-- DEBUG: Raw patient_identity.patient_id = "{{ patient_identity.patient_id }}" -->
+                            <!-- DEBUG: All patient_identity keys: {{ patient_identity.keys() | list }} -->
                             {% if patient_identity.secondary_patient_id %}
                             <p><strong>Secondary ID:</strong> {{ patient_identity.secondary_patient_id }}</p>
                             {% endif %}
@@ -1192,13 +1194,29 @@
                     <div class="row mt-3">
                         <div class="col-12">
                             <div class="btn-group" role="group" aria-label="CDA Type Selection">
+                                {% if cda_type == 'L1' %}
+                                {% set l1_btn_class = "btn btn-primary" %}
+                                {% else %}
+                                {% set l1_btn_class = "btn btn-outline-primary" %}
+                                {% endif %}
+                                {% if not has_l1_cda %}
+                                {% set l1_btn_class = l1_btn_class + " disabled" %}
+                                {% endif %}
                                 <a href="{{ url('patient_data:patient_cda_view_typed', patient_identity.url_patient_id or patient_identity.patient_id, 'L1') }}"
-                                    class="btn {% if cda_type == 'L1' %}btn-primary{% else %}btn-outline-primary{% endif %} {% if not has_l1_cda %}disabled{% endif %}">
+                                    class="{{ l1_btn_class }}">
                                     <i class="fas fa-file-medical me-1"></i>L1 Original Document
                                     {% if not has_l1_cda %}<small>(Not Available)</small>{% endif %}
                                 </a>
+                                {% if cda_type == 'L3' %}
+                                {% set l3_btn_class = "btn btn-primary" %}
+                                {% else %}
+                                {% set l3_btn_class = "btn btn-outline-primary" %}
+                                {% endif %}
+                                {% if not has_l3_cda %}
+                                {% set l3_btn_class = l3_btn_class + " disabled" %}
+                                {% endif %}
                                 <a href="{{ url('patient_data:patient_cda_view_typed', patient_identity.url_patient_id or patient_identity.patient_id, 'L3') }}"
-                                    class="btn {% if cda_type == 'L3' %}btn-primary{% else %}btn-outline-primary{% endif %} {% if not has_l3_cda %}disabled{% endif %}">
+                                    class="{{ l3_btn_class }}">
                                     <i class="fas fa-language me-1"></i>L3 Patient Summary
                                     {% if not has_l3_cda %}<small>(Not Available)</small>{% endif %}
                                 </a>
@@ -1220,1580 +1238,206 @@
     </div>
 
     <!-- Extended Header Information Section -->
-    {% if patient_extended_data %}
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card extended-patient-info">
-                <div class="card-header bg-info text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-address-book me-2"></i>
-                        Extended Patient Information
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <!-- Extended Info Navigation Tabs -->
-                    <ul class="nav nav-tabs" id="extendedInfoTabs" role="tablist">
-                        <!-- Contact Details Tab -->
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link {{ 'active' if first_tab == 'contact' else '' }}" id="contact-tab"
-                                data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab"
-                                aria-controls="contact" {% if first_tab=='contact' %}aria-selected="true" {% else
-                                %}aria-selected="false" {% endif %}>
-                                <i class="fas fa-address-card me-1"></i>Contact Details
-                                {% if contact_tab_available %}
-                                <span class="badge bg-primary ms-1">1</span>
+    {% include 'patient_data/components/extended_patient_info.html' %}
+
+    <!-- Enhanced Medication Information Section -->
+    {% if medications and medications|length > 0 %}
+    <div class="medical-section">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-pills me-2"></i>
+                    Comprehensive Medication Analysis
+                    <span class="badge bg-primary ms-2">{{ medications|length }} medication(s)</span>
+                </h4>
+            </div>
+            <div class="card-body">
+                {% for medication in medications %}
+                <div class="medication-entry border-bottom pb-3 mb-3">
+                    <div class="row">
+                        <!-- Main Medication Info -->
+                        <div class="col-lg-6">
+                            <h5 class="text-primary mb-2">
+                                <i class="fas fa-prescription-bottle me-2"></i>
+                                {{ medication.fields.get('Medication Name', {}).get('value', 'Unknown Medication')
+                                }}
+                            </h5>
+
+                            <div class="medication-details">
+                                {% if medication.fields.get('Active Ingredient Name', {}).get('value') %}
+                                <p class="mb-2"><strong>Active Ingredient:</strong>
+                                    {{ medication.fields.get('Active Ingredient Name', {}).get('value') }}
+                                </p>
                                 {% endif %}
-                            </button>
-                        </li>
 
-                        <!-- Healthcare Team Tab -->
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link {{ 'active' if first_tab == 'healthcare' else '' }}"
-                                id="healthcare-tab" data-bs-toggle="tab" data-bs-target="#healthcare" type="button"
-                                role="tab" aria-controls="healthcare" {% if first_tab=='healthcare'
-                                %}aria-selected="true" {% else %}aria-selected="false" {% endif %}>
-                                <i class="fas fa-stethoscope me-1"></i>Healthcare Team
-                                {% if healthcare_tab_available %}
-                                <span class="badge bg-success ms-1">
-                                    {% set team_count = 0 %}
-                                    {% if patient_extended_data.get('authors') %}{% set team_count = team_count +
-                                    patient_extended_data.authors|length %}{% endif %}
-                                    {% if patient_extended_data.get('legal_authenticator') %}{% set team_count =
-                                    team_count + 1 %}{% endif %}
-                                    {% if patient_extended_data.get('custodian') %}{% set team_count = team_count + 1
-                                    %}{% endif %}
-                                    {{ team_count }}
-                                </span>
+                                {% if medication.fields.get('Dose Form Name', {}).get('value') %}
+                                <p class="mb-2"><strong>Dose Form:</strong>
+                                    {{ medication.fields.get('Dose Form Name', {}).get('value') }}
+                                </p>
                                 {% endif %}
-                            </button>
-                        </li>
 
-                        <!-- Document Info Tab -->
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link {{ 'active' if first_tab == 'document' else '' }}" id="document-tab"
-                                data-bs-toggle="tab" data-bs-target="#document" type="button" role="tab"
-                                aria-controls="document" {% if first_tab=='document' %}aria-selected="true" {% else
-                                %}aria-selected="false" {% endif %}>
-                                <i class="fas fa-file-medical-alt me-1"></i>Document Info
-                            </button>
-                        </li>
-                    </ul>
-
-                    <!-- Extended Info Tab Content -->
-                    <div class="tab-content mt-3" id="extendedInfoTabContent">
-
-                        {% set tabs_available = [] %}
-                        {% set contact_tab_available = patient_extended_data and (
-                        patient_extended_data.get('patient_contact') or
-                        patient_extended_data.get('contact_info')
-                        ) %}
-                        {% set healthcare_tab_available = patient_extended_data and (
-                        patient_extended_data.get('healthcare_team') or
-                        patient_extended_data.get('authors') or
-                        patient_extended_data.get('legal_authenticator') or
-                        patient_extended_data.get('custodian')
-                        ) %}
-                        {% set document_tab_available = patient_extended_data and (
-                        patient_extended_data.get('document_info') or
-                        patient_extended_data.get('metadata')
-                        ) %}
-
-                        {% if contact_tab_available %}{% set tabs_available = tabs_available + ['contact'] %}{% endif %}
-                        {% if healthcare_tab_available %}{% set tabs_available = tabs_available + ['healthcare'] %}{%
-                        endif %}
-                        {% if document_tab_available %}{% set tabs_available = tabs_available + ['document'] %}{% endif
-                        %}
-
-                        {% set first_tab = tabs_available[0] if tabs_available else 'contact' %}
-
-                        <!-- Contact Details Tab -->
-                        <div class="tab-pane fade {{ 'show active' if first_tab == 'contact' else '' }}" id="contact"
-                            role="tabpanel" aria-labelledby="contact-tab">
-                            <h5><i class="fas fa-address-card me-2"></i>Patient Contact Information</h5>
-
-                            {% if patient_extended_data %}
-                            {% set contact_data = patient_extended_data.get('patient_contact',
-                            patient_extended_data.get('contact_info', {})) %}
-
-                            <!-- Addresses -->
-                            {% if contact_data.get('addresses') %}
-                            <div class="row mb-3">
-                                <div class="col-md-12">
-                                    <h6><i class="fas fa-home me-1"></i>Addresses <span class="badge bg-info">{{
-                                            contact_data.addresses|length }}</span></h6>
-                                    {% for address in contact_data.addresses %}
-                                    <div class="contact-info-card">
-                                        <div class="contact-type">{{ address.get('use', 'Primary Address') }}</div>
-                                        <div class="contact-details address-display">
-                                            {% if address.get('formatted') %}
-                                            <div class="address-line"><strong>{{ address.formatted }}</strong></div>
-                                            {% elif address.get('text') %}
-                                            <div class="address-line"><strong>{{ address.text }}</strong></div>
-                                            {% else %}
-                                            <div class="address-line">
-                                                {% if address.get('street') %}{{ address.street }}{% endif %}
-                                                {% if address.get('city') %}{% if address.get('street') %}, {% endif
-                                                %}{{ address.city }}{% endif %}
-                                                {% if address.get('postal_code') %} {{ address.postal_code }}{% endif %}
-                                                {% if address.get('country') %}, {{ address.country }}{% endif %}
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
+                                {% if medication.fields.get('Route Name', {}).get('value') %}
+                                <p class="mb-2"><strong>Route:</strong>
+                                    {{ medication.fields.get('Route Name', {}).get('value') }}
+                                </p>
+                                {% endif %}
                             </div>
-                            {% endif %}
+                        </div>
 
-                            <!-- Phone Numbers -->
-                            {% if contact_data.get('phone_numbers') or contact_data.get('telecoms') %}
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <h6><i class="fas fa-phone me-1"></i>Phone Numbers</h6>
-                                    {% set phones = contact_data.get('phone_numbers', []) %}
-                                    {% if not phones %}
-                                    {% for telecom in contact_data.get('telecoms', []) %}
-                                    {% if telecom.get('type') == 'phone' or telecom.get('use') == 'tel' %}
-                                    {% set phones = phones + [{'number': telecom.get('value', '').replace('tel:', ''),
-                                    'use': telecom.get('use', 'Phone')}] %}
-                                    {% endif %}
-                                    {% endfor %}
-                                    {% endif %}
+                        <!-- Dosing and Timing -->
+                        <div class="col-lg-6">
+                            <h6 class="text-secondary mb-2">
+                                <i class="fas fa-clock me-2"></i>
+                                Dosing & Timing
+                            </h6>
 
-                                    {% for phone in phones %}
-                                    <div class="contact-info-card">
-                                        <div class="contact-type">{{ phone.get('use', 'Phone') }}</div>
-                                        <div class="contact-details">
-                                            <a href="tel:{{ phone.get('number', phone.get('value', '')) }}"
-                                                class="contact-link phone-link">
-                                                {{ phone.get('number', phone.get('value', '')) }}
-                                            </a>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
+                            <div class="dosing-info">
+                                {% if medication.fields.get('Frequency Period Value', {}).get('value') and
+                                medication.fields.get('Frequency Period Unit', {}).get('value') %}
+                                <p class="mb-2"><strong>Frequency:</strong>
+                                    {{ medication.fields.get('Frequency Period Value', {}).get('value') }}
+                                    time(s) per {{ medication.fields.get('Frequency Period Unit', {}).get('value')
+                                    }}
+                                </p>
+                                {% endif %}
+
+                                {% if medication.fields.get('Treatment Start Date', {}).get('value') %}
+                                <p class="mb-2"><strong>Start Date:</strong>
+                                    {{ format_medical_date(medication.fields.get('Treatment Start Date',
+                                    {}).get('value')) }}
+                                </p>
+                                {% endif %}
+
+                                {% if medication.fields.get('Treatment End Date', {}).get('value') %}
+                                <p class="mb-2"><strong>End Date:</strong>
+                                    {{ format_medical_date(medication.fields.get('Treatment End Date', {}).get('value'))
+                                    }}
+                                </p>
+                                {% endif %}
+
+                                {% if medication.fields.get('Status Code', {}).get('value') %}
+                                {% if medication.fields.get('Status Code', {}).get('value') == 'Active' %}
+                                {% set status_class = 'bg-success' %}
+                                {% else %}
+                                {% set status_class = 'bg-secondary' %}
+                                {% endif %}
+                                <p class="mb-2"><strong>Status:</strong>
+                                    <span class="badge {{ status_class }}">
+                                        {{ medication.fields.get('Status Code', {}).get('value') }}
+                                    </span>
+                                </p>
+                                {% endif %}
                             </div>
-                            {% endif %}
+                        </div>
+                    </div>
 
-                            <!-- Email Addresses -->
-                            {% if contact_data.get('email_addresses') or contact_data.get('telecoms') %}
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <h6><i class="fas fa-envelope me-1"></i>Email Addresses</h6>
-                                    {% set emails = contact_data.get('email_addresses', []) %}
-                                    {% if not emails %}
-                                    {% for telecom in contact_data.get('telecoms', []) %}
-                                    {% if telecom.get('type') == 'email' or telecom.get('use') == 'mailto' %}
-                                    {% set emails = emails + [{'email': telecom.get('value', '').replace('mailto:', ''),
-                                    'use': telecom.get('use', 'Email')}] %}
-                                    {% endif %}
-                                    {% endfor %}
-                                    {% endif %}
+                    <!-- Detailed Pharmaceutical Information -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6 class="text-secondary mb-2">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Pharmaceutical Details
+                            </h6>
 
-                                    {% for email in emails %}
-                                    <div class="contact-info-card">
-                                        <div class="contact-type">{{ email.get('use', 'Email') }}</div>
-                                        <div class="contact-details">
-                                            <a href="mailto:{{ email.get('email', email.get('value', '')) }}"
-                                                class="contact-link email-link">
-                                                {{ email.get('email', email.get('value', '')) }}
-                                            </a>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            <!-- Preferred Language -->
-                            {% if contact_data.get('preferred_language') %}
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h6><i class="fas fa-language me-1"></i>Preferred Language</h6>
-                                    <div class="contact-info-card">
-                                        <div class="contact-details">
-                                            <span class="badge bg-info language-value">
-                                                {{ contact_data.preferred_language.get('display',
-                                                contact_data.preferred_language) }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            <!-- Show message if no contact info -->
-                            {% if not contact_data.get('addresses') and not contact_data.get('phone_numbers') and not
-                            contact_data.get('email_addresses') and not contact_data.get('telecoms') %}
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>No contact information available in the CDA
-                                document.
-                            </div>
-                            {% endif %}
-
-                            {% else %}
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle me-2"></i>No extended patient data available.
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Emergency Contacts Tab -->
-                        {% if patient_extended_data.emergency_contacts.has_emergency_contacts %}
-                        <div class="tab-pane fade {% if first_tab_active %}show active{% endif %}" id="emergency"
-                            role="tabpanel" aria-labelledby="emergency-tab">
-                            <h5><i class="fas fa-user-friends me-2"></i>Emergency Contacts & Next of Kin</h5>
-
-                            <!-- Next of Kin -->
-                            {% if patient_extended_data.emergency_contacts.next_of_kin %}
-                            <div class="mb-4">
-                                <h6><i class="fas fa-heart me-1"></i>Next of Kin</h6>
-                                {% for kin in patient_extended_data.emergency_contacts.next_of_kin %}
-                                <div class="emergency-contact-card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">{{ kin.name }}</h6>
-                                        <div class="mb-2">
-                                            <span class="relationship-badge">{{ kin.relationship }}</span>
-                                        </div>
-                                        {% if kin.contact_info.phone_numbers %}
-                                        <div class="contact-details mb-2">
-                                            <strong><i class="fas fa-phone me-1"></i>Phone:</strong>
-                                            {% for phone in kin.contact_info.phone_numbers %}
-                                            <a href="tel:{{ phone }}" class="contact-link phone-link me-2">{{ phone
-                                                }}</a>
-                                            {% endfor %}
-                                        </div>
+                                    {% if medication.fields.get('Ingredient Strength Numerator', {}).get('value') and
+                                    medication.fields.get('Ingredient Strength Numerator Unit', {}).get('value') %}
+                                    <small class="text-muted d-block">
+                                        <strong>Strength:</strong>
+                                        {{ medication.fields.get('Ingredient Strength Numerator', {}).get('value')
+                                        }}
+                                        {{ medication.fields.get('Ingredient Strength Numerator Unit',
+                                        {}).get('value') }}
+                                        {% if medication.fields.get('Ingredient Strength Denominator', {}).get('value')
+                                        and medication.fields.get('Ingredient Strength Denominator Unit',
+                                        {}).get('value') %}
+                                        / {{ medication.fields.get('Ingredient Strength Denominator',
+                                        {}).get('value') }}
+                                        {{ medication.fields.get('Ingredient Strength Denominator Unit',
+                                        {}).get('value') }}
                                         {% endif %}
-                                        {% if kin.contact_info.email_addresses %}
-                                        <div class="contact-details">
-                                            <strong><i class="fas fa-envelope me-1"></i>Email:</strong>
-                                            {% for email in kin.contact_info.email_addresses %}
-                                            <a href="mailto:{{ email }}" class="contact-link email-link me-2">{{ email
-                                                }}</a>
-                                            {% endfor %}
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-
-                            <!-- Guardians -->
-                            {% if patient_extended_data.emergency_contacts.guardians %}
-                            <div class="mb-4">
-                                <h6><i class="fas fa-shield-alt me-1"></i>Guardians</h6>
-                                {% for guardian in patient_extended_data.emergency_contacts.guardians %}
-                                <div class="emergency-contact-card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">{{ guardian.name }}</h6>
-                                        <div class="mb-2">
-                                            <span class="relationship-badge">{{ guardian.relationship }}</span>
-                                        </div>
-                                        {% if guardian.organization %}
-                                        <div class="organization-info mb-2">
-                                            <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{
-                                            guardian.organization }}
-                                        </div>
-                                        {% endif %}
-                                        {% if guardian.contact_info.phone_numbers %}
-                                        <div class="contact-details">
-                                            <strong><i class="fas fa-phone me-1"></i>Phone:</strong>
-                                            {% for phone in guardian.contact_info.phone_numbers %}
-                                            <a href="tel:{{ phone }}" class="contact-link phone-link me-2">{{ phone
-                                                }}</a>
-                                            {% endfor %}
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-
-                            <!-- Other Emergency Contacts -->
-                            {% if patient_extended_data.emergency_contacts.emergency_contacts %}
-                            <div class="mb-4">
-                                <h6><i class="fas fa-users me-1"></i>Other Emergency Contacts</h6>
-                                {% for contact in patient_extended_data.emergency_contacts.emergency_contacts %}
-                                <div class="emergency-contact-card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">{{ contact.name }}</h6>
-                                        <div class="mb-2">
-                                            <span class="relationship-badge">{{ contact.relationship }}</span>
-                                        </div>
-                                        {% if contact.organization %}
-                                        <div class="organization-info mb-2">
-                                            <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{
-                                            contact.organization }}
-                                        </div>
-                                        {% endif %}
-                                        {% if contact.role_class %}
-                                        <div class="contact-details">
-                                            <strong><i class="fas fa-user-tag me-1"></i>Role:</strong> {{
-                                            contact.role_class }}
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-                        {% set first_tab_active = false %}
-                        {% endif %}
-
-                        <!-- Healthcare Team Tab -->
-                        <div class="tab-pane fade {{ 'show active' if first_tab == 'healthcare' else '' }}"
-                            id="healthcare" role="tabpanel" aria-labelledby="healthcare-tab">
-                            <h5><i class="fas fa-stethoscope me-2"></i>Healthcare Team</h5>
-
-                            {% if patient_extended_data %}
-                            {% set healthcare_data = patient_extended_data.get('healthcare_team', {}) %}
-
-                            <!-- Document Authors -->
-                            {% if patient_extended_data.get('authors') or healthcare_data.get('authors') %}
-                            <div class="mb-4">
-                                <h6><i class="fas fa-user-md me-1"></i>Document Authors</h6>
-                                {% set authors = patient_extended_data.get('authors', healthcare_data.get('authors',
-                                [])) %}
-                                {% for author in authors %}
-                                <div class="healthcare-member-card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">
-                                            {{ author.get('name', author.get('person', {}).get('full_name', 'Unknown
-                                            Author')) }}
-                                        </h6>
-                                        <div class="mb-2">
-                                            <span class="role-badge">{{ author.get('role', author.get('type', 'Author'))
-                                                }}</span>
-                                        </div>
-                                        {% if author.get('organization') %}
-                                        <div class="organization-info mb-2">
-                                            <strong><i class="fas fa-building me-1"></i>Organization:</strong>
-                                            {{ author.organization.get('name') if author.organization is mapping else
-                                            author.organization }}
-                                        </div>
-                                        {% endif %}
-                                        {% if author.get('time') %}
-                                        <div class="contact-details">
-                                            <strong><i class="fas fa-clock me-1"></i>Authored:</strong>
-                                            <span class="date-value">{{ author.time }}</span>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-
-                            <!-- Legal Authenticator -->
-                            {% if patient_extended_data.get('legal_authenticator') %}
-                            {% set legal_auth = patient_extended_data.legal_authenticator %}
-                            <div class="mb-4">
-                                <h6><i class="fas fa-gavel me-1"></i>Legal Authenticator</h6>
-                                <div class="healthcare-member-card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">
-                                            {{ legal_auth.get('name', legal_auth.get('full_name', 'Unknown')) }}
-                                        </h6>
-                                        <div class="mb-2">
-                                            <span class="role-badge">Legal Authenticator</span>
-                                        </div>
-                                        {% if legal_auth.get('organization') %}
-                                        <div class="organization-info mb-2">
-                                            <strong><i class="fas fa-building me-1"></i>Organization:</strong>
-                                            {{ legal_auth.organization.get('name') if legal_auth.organization is mapping
-                                            else legal_auth.organization }}
-                                        </div>
-                                        {% endif %}
-                                        {% if legal_auth.get('time') %}
-                                        <div class="contact-details">
-                                            <strong><i class="fas fa-calendar me-1"></i>Authenticated:</strong>
-                                            <span class="date-value">{{ legal_auth.time }}</span>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            <!-- Custodian Organization -->
-                            {% if patient_extended_data.get('custodian') %}
-                            {% set custodian = patient_extended_data.custodian %}
-                            <div class="mb-4">
-                                <h6><i class="fas fa-building me-1"></i>Custodian Organization</h6>
-                                <div class="healthcare-member-card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">
-                                            {{ custodian.get('name', custodian.get('organization', {}).get('name',
-                                            'Unknown Organization')) }}
-                                        </h6>
-                                        <div class="mb-2">
-                                            <span class="role-badge">Document Custodian</span>
-                                        </div>
-                                        {% if custodian.get('addresses') or custodian.get('organization',
-                                        {}).get('addresses') %}
-                                        {% set addresses = custodian.get('addresses', custodian.get('organization',
-                                        {}).get('addresses', [])) %}
-                                        {% for address in addresses %}
-                                        <div class="contact-details mb-2">
-                                            <strong><i class="fas fa-map-marker-alt me-1"></i>Address:</strong>
-                                            {% if address.get('formatted') %}
-                                            {{ address.formatted }}
-                                            {% elif address.get('text') %}
-                                            {{ address.text }}
-                                            {% else %}
-                                            {{ address.get('street', '') }}{% if address.get('city') %}, {{ address.city
-                                            }}{% endif %}{% if address.get('country') %}, {{ address.country }}{% endif
-                                            %}
-                                            {% endif %}
-                                        </div>
-                                        {% endfor %}
-                                        {% endif %}
-                                        {% if custodian.get('telecoms') or custodian.get('organization',
-                                        {}).get('telecoms') %}
-                                        {% set telecoms = custodian.get('telecoms', custodian.get('organization',
-                                        {}).get('telecoms', [])) %}
-                                        {% for telecom in telecoms %}
-                                        <div class="contact-details">
-                                            {% if telecom.get('type') == 'phone' or 'tel:' in telecom.get('value', '')
-                                            %}
-                                            <strong><i class="fas fa-phone me-1"></i>Phone:</strong>
-                                            <a href="tel:{{ telecom.get('value', '').replace('tel:', '') }}"
-                                                class="contact-link phone-link">
-                                                {{ telecom.get('value', '').replace('tel:', '') }}
-                                            </a>
-                                            {% elif telecom.get('type') == 'email' or 'mailto:' in telecom.get('value',
-                                            '') %}
-                                            <strong><i class="fas fa-envelope me-1"></i>Email:</strong>
-                                            <a href="mailto:{{ telecom.get('value', '').replace('mailto:', '') }}"
-                                                class="contact-link email-link">
-                                                {{ telecom.get('value', '').replace('mailto:', '') }}
-                                            </a>
-                                            {% endif %}
-                                        </div>
-                                        {% endfor %}
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            <!-- Show message if no healthcare team info -->
-                            {% if not patient_extended_data.get('authors') and not
-                            patient_extended_data.get('legal_authenticator') and not
-                            patient_extended_data.get('custodian') and not healthcare_data.get('preferred_providers') %}
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>No healthcare team information available in the
-                                CDA document.
-                            </div>
-                            {% endif %}
-
-                            {% else %}
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle me-2"></i>No extended patient data available.
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Emergency Contacts Tab (if needed in future) -->
-
-                        <!-- Dependants Tab -->
-                        {% if patient_extended_data.dependants.has_dependants %}
-                        <div class="tab-pane fade {% if first_tab_active %}show active{% endif %}" id="dependants"
-                            role="tabpanel" aria-labelledby="dependants-tab">
-                            <h5><i class="fas fa-baby me-2"></i>Dependants</h5>
-                            {% for dependant in patient_extended_data.dependants.dependants %}
-                            <div class="dependant-card">
-                                <div class="card-body">
-                                    <h6 class="card-title">{{ dependant.name }}</h6>
-                                    <div class="mb-2">
-                                        <span class="relationship-badge">{{ dependant.relationship }}</span>
-                                    </div>
-                                    {% if dependant.organization %}
-                                    <div class="organization-info">
-                                        <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{
-                                        dependant.organization }}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% set first_tab_active = false %}
-                        {% endif %}
-
-                        <!-- Clean up old duplicated content above this point -->
-
-                        <!-- Document Information Tab -->
-                        <div class="tab-pane fade {{ 'show active' if first_tab == 'document' else '' }}" id="document"
-                            role="tabpanel" aria-labelledby="document-tab">
-                            <h5><i class="fas fa-file-medical-alt me-2"></i>Document Information</h5>
-
-                            {% if patient_extended_data %}
-                            {% set doc_data = patient_extended_data.get('document_info',
-                            patient_extended_data.get('metadata', {})) %}
-
-                            <!-- Document Metadata -->
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <div class="contact-info-card">
-                                        <div class="contact-type">Document Title</div>
-                                        <div class="contact-details">
-                                            {{ doc_data.get('title', patient_extended_data.get('document_title',
-                                            'Patient Summary')) }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="contact-info-card">
-                                        <div class="contact-type">Document Type</div>
-                                        <div class="contact-details">
-                                            {{ doc_data.get('type', cda_type|default('CDA Document')) }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <div class="contact-info-card">
-                                        <div class="contact-type">Creation Date</div>
-                                        <div class="contact-details">
-                                            {{ doc_data.get('creation_date', doc_data.get('effective_time', 'Not
-                                            specified')) }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="contact-info-card">
-                                        <div class="contact-type">Document ID</div>
-                                        <div class="contact-details">
-                                            {{ doc_data.get('document_id', patient_identity.get('patient_id', 'Not
-                                            available')) }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <div class="contact-info-card">
-                                        <div class="contact-type">Language</div>
-                                        <div class="contact-details">
-                                            {{ doc_data.get('language', source_language|default('en-GB')) }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="contact-info-card">
-                                        <div class="contact-type">Version</div>
-                                        <div class="contact-details">
-                                            {{ doc_data.get('version', '1.0') }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Document Status -->
-                            <div class="row mb-3">
-                                <div class="col-md-12">
-                                    <h6><i class="fas fa-info-circle me-1"></i>Document Status</h6>
-                                    <div class="contact-info-card">
-                                        <div class="contact-details">
-                                            <span class="badge bg-success me-2">Active</span>
-                                            <span class="badge bg-info me-2">Encrypted</span>
-                                            {% if doc_data.get('confidentiality') %}
-                                            <span class="badge bg-warning">{{ doc_data.confidentiality }}</span>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Show message if no document info -->
-                            {% if not doc_data and not patient_extended_data.get('document_title') %}
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>Limited document information available.
-                            </div>
-                            {% endif %}
-
-                            {% else %}
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle me-2"></i>No extended patient data available.
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<!-- Enhanced Medication Information Section -->
-{% if medications and medications|length > 0 %}
-<div class="medical-section">
-    <div class="card">
-        <div class="card-header">
-            <h4 class="mb-0">
-                <i class="fas fa-pills me-2"></i>
-                Comprehensive Medication Analysis
-                <span class="badge bg-primary ms-2">{{ medications|length }} medication(s)</span>
-            </h4>
-        </div>
-        <div class="card-body">
-            {% for medication in medications %}
-            <div class="medication-entry border-bottom pb-3 mb-3">
-                <div class="row">
-                    <!-- Main Medication Info -->
-                    <div class="col-lg-6">
-                        <h5 class="text-primary mb-2">
-                            <i class="fas fa-prescription-bottle me-2"></i>
-                            {{ medication.fields.get('Medication Name', {}).get('value', 'Unknown Medication')
-                            }}
-                        </h5>
-
-                        <div class="medication-details">
-                            {% if medication.fields.get('Active Ingredient Name', {}).get('value') %}
-                            <p class="mb-2"><strong>Active Ingredient:</strong>
-                                {{ medication.fields.get('Active Ingredient Name', {}).get('value') }}
-                            </p>
-                            {% endif %}
-
-                            {% if medication.fields.get('Dose Form Name', {}).get('value') %}
-                            <p class="mb-2"><strong>Dose Form:</strong>
-                                {{ medication.fields.get('Dose Form Name', {}).get('value') }}
-                            </p>
-                            {% endif %}
-
-                            {% if medication.fields.get('Route Name', {}).get('value') %}
-                            <p class="mb-2"><strong>Route:</strong>
-                                {{ medication.fields.get('Route Name', {}).get('value') }}
-                            </p>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Dosing and Timing -->
-                    <div class="col-lg-6">
-                        <h6 class="text-secondary mb-2">
-                            <i class="fas fa-clock me-2"></i>
-                            Dosing & Timing
-                        </h6>
-
-                        <div class="dosing-info">
-                            {% if medication.fields.get('Frequency Period Value', {}).get('value') and
-                            medication.fields.get('Frequency Period Unit', {}).get('value') %}
-                            <p class="mb-2"><strong>Frequency:</strong>
-                                {{ medication.fields.get('Frequency Period Value', {}).get('value') }}
-                                time(s) per {{ medication.fields.get('Frequency Period Unit', {}).get('value')
-                                }}
-                            </p>
-                            {% endif %}
-
-                            {% if medication.fields.get('Treatment Start Date', {}).get('value') %}
-                            <p class="mb-2"><strong>Start Date:</strong>
-                                {{ format_medical_date(medication.fields.get('Treatment Start Date',
-                                {}).get('value')) }}
-                            </p>
-                            {% endif %}
-
-                            {% if medication.fields.get('Treatment End Date', {}).get('value') %}
-                            <p class="mb-2"><strong>End Date:</strong>
-                                {{ format_medical_date(medication.fields.get('Treatment End Date', {}).get('value'))
-                                }}
-                            </p>
-                            {% endif %}
-
-                            {% if medication.fields.get('Status Code', {}).get('value') %}
-                            <p class="mb-2"><strong>Status:</strong>
-                                <span
-                                    class="badge {{ 'bg-success' if medication.fields.get('Status Code', {}).get('value') == 'Active' else 'bg-secondary' }}">
-                                    {{ medication.fields.get('Status Code', {}).get('value') }}
-                                </span>
-                            </p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Detailed Pharmaceutical Information -->
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <h6 class="text-secondary mb-2">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Pharmaceutical Details
-                        </h6>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                {% if medication.fields.get('Ingredient Strength Numerator', {}).get('value')
-                                and medication.fields.get('Ingredient Strength Numerator Unit', {}).get('value')
-                                %}
-                                <small class="text-muted d-block">
-                                    <strong>Strength:</strong>
-                                    {{ medication.fields.get('Ingredient Strength Numerator', {}).get('value')
-                                    }}
-                                    {{ medication.fields.get('Ingredient Strength Numerator Unit',
-                                    {}).get('value') }}
-                                    {% if medication.fields.get('Ingredient Strength Denominator',
-                                    {}).get('value') and medication.fields.get('Ingredient Strength Denominator
-                                    Unit', {}).get('value') %}
-                                    / {{ medication.fields.get('Ingredient Strength Denominator',
-                                    {}).get('value') }}
-                                    {{ medication.fields.get('Ingredient Strength Denominator Unit',
-                                    {}).get('value') }}
-                                    {% endif %}
-                                </small>
-                                {% endif %}
-
-                                {% if medication.fields.get('Package Quantity', {}).get('value') and
-                                medication.fields.get('Package Unit', {}).get('value') %}
-                                <small class="text-muted d-block">
-                                    <strong>Package:</strong>
-                                    {{ medication.fields.get('Package Quantity', {}).get('value') }}
-                                    {{ medication.fields.get('Package Unit', {}).get('value') }}
-                                </small>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-md-6">
-                                {% if medication.fields.get('Medication Code', {}).get('value') %}
-                                <small class="text-muted d-block">
-                                    <strong>Code:</strong> {{ medication.fields.get('Medication Code',
-                                    {}).get('value') }}
-                                </small>
-                                {% endif %}
-
-                                {% if medication.fields.get('Indication Code', {}).get('value') %}
-                                <small class="text-muted d-block">
-                                    <strong>Indication:</strong> {{ medication.fields.get('Indication Code',
-                                    {}).get('value') }}
-                                </small>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<!-- Medical Sections with Clinical Tables -->
-{% if processed_sections %}
-{% for section in processed_sections %}
-<div class="medical-section">
-    <div class="card">
-        <div class="card-header">
-            <h4 class="mb-0">
-                {% if section.clinical_table %}
-                <i class="{{ section.clinical_table.icon }} me-2"></i>
-                {{ section.clinical_table.title }}
-                {% else %}
-                <i class="fas fa-clipboard-list me-2"></i>
-                {{ section.title }}
-                {% endif %}
-
-                {% if section.medical_terminology_count > 0 %}
-                <span class="badge bg-success ms-2">
-                    <i class="fas fa-check me-1"></i>{{ section.medical_terminology_count }} coded entries
-                </span>
-                {% endif %}
-
-                {% if section.clinical_table and section.clinical_table.medical_terminology_coverage > 0 %}
-                <span class="badge bg-info ms-2">
-                    {{ section.clinical_table.medical_terminology_coverage }}% terminology coverage
-                </span>
-                {% endif %}
-            </h4>
-        </div>
-
-        {% if section.has_entries and section.clinical_table %}
-        <!-- Clinical Table Display with Tabs -->
-        <div class="card-body p-0">
-            <!-- Section Tabs -->
-            <div class="section-tabs">
-                <button class="tab-button active" onclick="showTab('section_{{ loop.index0 }}', 'structured')">
-                    📊 Structured View
-                </button>
-                <button class="tab-button" onclick="showTab('section_{{ loop.index0 }}', 'original')">
-                    📄 Original Content
-                </button>
-            </div>
-
-            <!-- Structured View Tab Content -->
-            <div id="section_{{ loop.index0 }}_structured" class="tab-content active">
-                <div class="clinical-table">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                {% for header in section.clinical_table.headers %}
-                                <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
-                                    {{ header.label }}
-                                    {% if header.type == 'codes' %}
-                                    <i class="fas fa-code ms-1 terminology-indicator" title="Medical Codes"></i>
-                                    {% elif header.type == 'date' %}
-                                    <i class="fas fa-calendar ms-1 terminology-indicator" title="Date"></i>
-                                    {% elif header.type == 'status' %}
-                                    <i class="fas fa-info-circle ms-1 terminology-indicator" title="Status"></i>
-                                    {% endif %}
-                                </th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in section.clinical_table.rows %}
-                            <tr {% if row.has_medical_codes %}class="table-success" {% endif %}>
-                                {% for header in section.clinical_table.headers %}
-                                <td>
-                                    {% set cell_data = row.data[header.key] %}
-
-                                    {% if header.primary %}
-                                    <!-- Primary field with enhanced display -->
-                                    <div class="primary-field">
-                                        {{ cell_data.value }}
-                                        {% if cell_data.has_terminology %}
-                                        <i class="fas fa-check text-success ms-1"
-                                            title="Medical terminology verified"></i>
-                                        {% endif %}
-                                    </div>
-
-                                    {% elif header.type == 'status' %}
-                                    <!-- Status with color coding -->
-                                    <span class="{{ cell_data.css_class }}">
-                                        {{ cell_data.value }}
-                                    </span>
-
-                                    {% elif header.type == 'severity' %}
-                                    <!-- Severity with color coding -->
-                                    <span class="{{ cell_data.css_class }}">
-                                        {{ cell_data.value }}
-                                    </span>
-
-                                    {% elif header.type == 'date' %}
-                                    <!-- Formatted date display -->
-                                    <div>{{ cell_data.formatted or cell_data.value }}</div>
-
-                                    {% elif header.type == 'codes' %}
-                                    <!-- Medical codes display with system badges -->
-                                    {% if cell_data.has_codes %}
-                                    <div class="medical-codes-container">
-                                        {% for code in cell_data.codes %}
-                                        <div class="medical-code-item d-flex align-items-center mb-1">
-                                            <code class="me-2 text-primary">{{ code.code }}</code>
-                                            {% if code.badge %}
-                                            <span class="{{ code.badge }}" title="{{ code.system }} System">{{
-                                                code.system }}</span>
-                                            {% else %}
-                                            <span class="badge bg-outline-secondary" title="Code System">{{
-                                                code.system }}</span>
-                                            {% endif %}
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                    {% else %}
-                                    <span class="text-muted">No codes</span>
-                                    {% endif %}
-
-                                    {% else %}
-                                    <!-- Standard field display -->
-                                    <div>
-                                        {{ cell_data.value }}
-                                        {% if cell_data.has_terminology %}
-                                        <i class="fas fa-check text-success ms-1"
-                                            title="Medical terminology verified"></i>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
-                                </td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Table Summary -->
-                <div class="card-footer bg-light">
-                    <div class="row text-center">
-                        <div class="col-md-4">
-                            <small class="text-muted">
-                                <strong>{{ section.clinical_table.entry_count }}</strong> entries
-                            </small>
-                        </div>
-                        <div class="col-md-4">
-                            <small class="text-muted">
-                                <strong>{{ section.clinical_table.medical_terminology_coverage }}%</strong> coded
-                            </small>
-                        </div>
-                        <div class="col-md-4">
-                            <small class="text-muted">
-                                {% if section.clinical_table.has_coded_entries %}
-                                <i class="fas fa-check text-success"></i> Medical terminology
-                                {% else %}
-                                <i class="fas fa-info-circle text-info"></i> Text only
-                                {% endif %}
-                            </small>
-                        </div>
-                        {% if section.clinical_table.has_coded_entries %}
-                        <div class="col-12 mt-2">
-                            <details class="code-system-legend">
-                                <summary class="text-muted" style="font-size: 0.75rem; cursor: pointer;">
-                                    <i class="fas fa-info-circle me-1"></i>Code System Legend
-                                </summary>
-                                <div class="mt-2" style="font-size: 0.75rem;">
-                                    <span class="badge bg-primary me-2">SNOMED CT</span>
-                                    <span class="badge bg-success me-2">LOINC</span>
-                                    <span class="badge bg-warning me-2">RxNorm</span>
-                                    <span class="badge bg-danger me-2">ICD-10</span>
-                                    <span class="badge bg-info me-2">UCUM</span>
-                                    <span class="badge bg-secondary me-2">Legacy</span>
-                                    <span class="badge bg-dark">ATC</span>
-                                </div>
-                            </details>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div> <!-- End clinical-table -->
-        </div> <!-- End structured tab content -->
-
-        <!-- Original Content Tab -->
-        <div id="section_{{ loop.index0 }}_original" class="tab-content">
-            <div class="original-content">
-                <h4>Original Clinical Data from NCPeH-A{% if section.title %} - {{ section.title }}{% endif %}</h4>
-
-                {% if section.structured_data %}
-                <div class="alert alert-info mb-3">
-                    <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical
-                            data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
-                        mapping.</small>
-                </div>
-
-                {% set first_entry = section.structured_data[0] if section.structured_data|length > 0 else none %}
-                {% if first_entry and first_entry.fields and first_entry.fields|length > 1 %}
-                <!-- Original Clinical Data Table -->
-                <div class="original-clinical-table">
-                    <table class="table table-bordered table-hover">
-                        {% if first_entry.fields %}
-                        <thead class="table-primary">
-                            <tr>
-                                {% for field_name, field_data in first_entry.fields.items() %}
-                                <th class="text-center">
-                                    {{ field_name }}
-                                </th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for entry in section.structured_data %}
-                            <tr>
-                                {% for field_name, field_data in entry.fields.items() %}
-                                <td class="text-center">
-                                    {% if 'date' in field_name.lower() or 'time' in field_name.lower() %}
-                                    <div class="original-value">{{ format_medical_date(field_data.value) }}</div>
-                                    {% else %}
-                                    <div class="original-value">{{ field_data.value or 'N/A' }}</div>
-                                    {% endif %}
-                                </td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        {% else %}
-                        <!-- Fallback for entries without structured fields -->
-                        <thead class="table-primary">
-                            <tr>
-                                <th>Entry Data</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for entry in section.structured_data %}
-                            <tr>
-                                <td>
-                                    <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        {% endif %}
-                    </table>
-                </div>
-
-                <!-- Table Summary -->
-                <div class="card-footer bg-light">
-                    <div class="row text-center">
-                        <div class="col-md-4">
-                            <small class="text-muted">
-                                <strong>{{ section.structured_data | length }}</strong> original entries
-                            </small>
-                        </div>
-                        <div class="col-md-4">
-                            <small class="text-muted">
-                                <strong>NCPeH-A</strong> source data
-                            </small>
-                        </div>
-                        <div class="col-md-4">
-                            <small class="text-muted">
-                                <strong>{{ section.title or 'Clinical Section' }}</strong>
-                            </small>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                {% elif section.content and section.content.original %}
-                <div class="alert alert-warning mb-3">
-                    <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing
-                        raw XML content.</small>
-                </div>
-                <pre
-                    class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
-                {% elif section.content %}
-                <div class="alert alert-warning mb-3">
-                    <small><i class="fas fa-file-text me-1"></i>Structured data not available. Showing
-                        original text/table content.</small>
-                </div>
-                <div class="original-text-content">
-                    {% if section.content is string %}
-                    <pre
-                        class="text-content">{{ section.content[:3000] }}{% if section.content|length > 3000 %}...{% endif %}</pre>
-                    {% else %}
-                    <pre class="xml-content">{{ section.content | string }}</pre>
-                    {% endif %}
-                </div>
-                {% elif section.entries and section.entries|length > 0 %}
-                <div class="alert alert-info mb-3">
-                    <small><i class="fas fa-table me-1"></i>Structured data not available. Showing
-                        original table entries.</small>
-                </div>
-                <div class="original-entries-content">
-                    <table class="table table-sm table-bordered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Field</th>
-                                <th>Value</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for entry in section.entries[:10] %}
-                            <tr>
-                                <td><strong>Entry {{ loop.index }}</strong></td>
-                                <td>
-                                    {% if entry is mapping %}
-                                    <pre class="json-content">{{ entry | tojson(indent=2) }}</pre>
-                                    {% else %}
-                                    {{ entry | string }}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                            {% if section.entries|length > 10 %}
-                            <tr>
-                                <td colspan="2" class="text-muted text-center">
-                                    ... and {{ section.entries|length - 10 }} more entries
-                                </td>
-                            </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <p class="text-muted">No original clinical data available for this section.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div> {% elif section.has_entries %}
-    <!-- Fallback to simple list display if no clinical table -->
-    <div class="card-body p-0">
-        <!-- Section Tabs -->
-        <div class="section-tabs">
-            <button class="tab-button active" onclick="showTab('section_{{ loop.index0 }}', 'structured')">
-                📊 Structured View
-            </button>
-            <button class="tab-button" onclick="showTab('section_{{ loop.index0 }}', 'original')">
-                📄 Original Content
-            </button>
-        </div>
-
-        <!-- Structured View Tab Content -->
-        <div id="section_{{ loop.index0 }}_structured" class="tab-content active">
-            {% for entry in section.entries %}
-            <div class="medical-entry">
-                <div class="row">
-                    <div class="col-md-8">
-                        <h6
-                            class="mb-1 {% if entry.display_name == 'Unknown Item' or entry.display_name == 'Unknown Condition' or entry.display_name == 'Unknown Procedure' or entry.display_name == 'Unknown Medication' or entry.display_name == 'Unknown Allergen' %}text-muted fst-italic{% endif %}">
-                            {{ entry.display_name }}
-                        </h6>
-                        {% if entry.get('reaction') %}
-                        <p class="mb-1"><strong>Reaction:</strong> {{ entry.reaction }}</p>
-                        {% endif %}
-                        {% if entry.get('dosage') %}
-                        <p class="mb-1"><strong>Dosage:</strong> {{ entry.dosage }}</p>
-                        {% endif %}
-                        {% if entry.get('status') %}
-                        <p class="mb-1"><strong>Status:</strong> {{ entry.status }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-4 text-end">
-                        {% if entry.has_medical_terminology %}
-                        <span class="badge bg-success">
-                            <i class="fas fa-check"></i> Medical Term
-                        </span>
-                        {% else %}
-                        <span class="badge bg-secondary">
-                            <i class="fas fa-question"></i> Basic Text
-                        </span>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <!-- Original Content Tab -->
-        <div id="section_{{ loop.index0 }}_original" class="tab-content">
-            <div class="original-content">
-                <h4>Original Clinical Data from NCPeH-A{% if section.title %} - {{ section.title }}{% endif %}</h4>
-                {% if section.structured_data %}
-                <div class="alert alert-info mb-3">
-                    <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical
-                            data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
-                        mapping.</small>
-                </div>
-
-                <!-- Original Clinical Data Table -->
-                <div class="original-clinical-table">
-                    <table class="table table-bordered table-hover">
-                        <thead class="table-primary">
-                            <tr>
-                                <th style="width: 25%;">Field</th>
-                                <th style="width: 40%;">Original Value (NCPeH-A)</th>
-                                <th style="width: 35%;">Context & Metadata</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for entry in section.structured_data %}
-                            {% if entry.fields %}
-                            {% for field_name, field_data in entry.fields.items() %}
-                            <tr>
-                                <td class="fw-bold text-primary">{{ field_name }}</td>
-                                <td>
-                                    <span class="original-value">{{ field_data.value or 'N/A' }}</span>
-                                    {% if field_data.xpath %}
-                                    <br><small class="text-muted">
-                                        <i class="fas fa-code me-1"></i>XPath: <code>{{ field_data.xpath }}</code>
                                     </small>
                                     {% endif %}
-                                </td>
-                                <td>
-                                    {% if field_data.has_valueset %}
-                                    <span class="badge bg-success me-1">
-                                        <i class="fas fa-database"></i> Value Set
-                                    </span>
-                                    {% endif %}
-                                    {% if field_data.needs_translation %}
-                                    <span class="badge bg-warning me-1">
-                                        <i class="fas fa-language"></i> Translatable
-                                    </span>
-                                    {% endif %}
-                                    {% if entry.section_code %}
-                                    <br><small class="text-muted">
-                                        <i class="fas fa-tag me-1"></i>Section:
-                                        <code>{{ entry.section_code }}</code>
-                                    </small>
-                                    {% endif %}
-                                    {% if entry.section_type %}
-                                    <br><small class="text-muted">
-                                        <i class="fas fa-folder me-1"></i>Type: {{ entry.section_type }}
-                                    </small>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                            {% else %}
-                            <!-- Fallback for entries without structured fields -->
-                            <tr>
-                                <td class="fw-bold text-secondary">Entry {{ loop.index }}</td>
-                                <td colspan="2">
-                                    <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
-                                </td>
-                            </tr>
-                            {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
 
-                    <!-- Table Summary -->
-                    <div class="card-footer bg-light">
-                        <div class="row text-center">
-                            <div class="col-md-4">
-                                <small class="text-muted">
-                                    <strong>{{ section.structured_data | length }}</strong> original entries
-                                </small>
-                            </div>
-                            <div class="col-md-4">
-                                <small class="text-muted">
-                                    <strong>NCPeH-A</strong> source data
-                                </small>
-                            </div>
-                            <div class="col-md-4">
-                                <small class="text-muted">
-                                    <strong>{{ section.title or 'Clinical Section' }}</strong>
-                                </small>
+                                    {% if medication.fields.get('Package Quantity', {}).get('value') and
+                                    medication.fields.get('Package Unit', {}).get('value') %}
+                                    <small class="text-muted d-block">
+                                        <strong>Package:</strong>
+                                        {{ medication.fields.get('Package Quantity', {}).get('value') }}
+                                        {{ medication.fields.get('Package Unit', {}).get('value') }}
+                                    </small>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    {% if medication.fields.get('Medication Code', {}).get('value') %}
+                                    <small class="text-muted d-block">
+                                        <strong>Code:</strong> {{ medication.fields.get('Medication Code',
+                                        {}).get('value') }}
+                                    </small>
+                                    {% endif %}
+
+                                    {% if medication.fields.get('Indication Code', {}).get('value') %}
+                                    <small class="text-muted d-block">
+                                        <strong>Indication:</strong> {{ medication.fields.get('Indication Code',
+                                        {}).get('value') }}
+                                    </small>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                {% elif section.content and section.content.original %}
-                <div class="alert alert-warning mb-3">
-                    <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing
-                        raw XML content.</small>
-                </div>
-                <pre
-                    class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
-                {% elif section.content %}
-                <div class="alert alert-warning mb-3">
-                    <small><i class="fas fa-file-text me-1"></i>Structured data not available. Showing
-                        original text/table content.</small>
-                </div>
-                <div class="original-text-content">
-                    {% if section.content is string %}
-                    <pre
-                        class="text-content">{{ section.content[:3000] }}{% if section.content|length > 3000 %}...{% endif %}</pre>
-                    {% else %}
-                    <pre class="xml-content">{{ section.content | string }}</pre>
-                    {% endif %}
-                </div>
-                {% elif section.entries and section.entries|length > 0 %}
-                <div class="alert alert-info mb-3">
-                    <small><i class="fas fa-table me-1"></i>Structured data not available. Showing
-                        original table entries.</small>
-                </div>
-                <div class="original-entries-content">
-                    <table class="table table-sm table-bordered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Field</th>
-                                <th>Value</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for entry in section.entries[:10] %}
-                            <tr>
-                                <td><strong>Entry {{ loop.index }}</strong></td>
-                                <td>
-                                    {% if entry is mapping %}
-                                    <pre class="json-content">{{ entry | tojson(indent=2) }}</pre>
-                                    {% else %}
-                                    {{ entry | string }}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                            {% if section.entries|length > 10 %}
-                            <tr>
-                                <td colspan="2" class="text-muted text-center">
-                                    ... and {{ section.entries|length - 10 }} more entries
-                                </td>
-                            </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <p class="text-muted">No original clinical data available for this section.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    {% else %}
-    <div class="card-body">
-        <!-- Section Tabs (even for empty sections) -->
-        <div class="section-tabs">
-            <button class="tab-button active" onclick="showTab('section_{{ loop.index0 }}', 'structured')">
-                📊 Structured View
-            </button>
-            <button class="tab-button" onclick="showTab('section_{{ loop.index0 }}', 'original')">
-                📄 Original Content
-            </button>
-        </div>
-
-        <!-- Structured View Tab Content -->
-        <div id="section_{{ loop.index0 }}_structured" class="tab-content active">
-            {% if section.structured_data %}
-            <div class="clinical-table">
-                <!-- Check if we have data to display -->
-                {% set first_entry = section.structured_data[0] if section.structured_data|length > 0 else none %}
-                {% if first_entry and first_entry.fields and first_entry.fields|length > 1 %}
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            {% for field_name, field_data in first_entry.fields.items() %}
-                            <th scope="col" class="text-center">
-                                {{ field_name }}
-                                {% if 'code' in field_name.lower() %}
-                                <i class="fas fa-code ms-1 terminology-indicator" title="Medical Codes"></i>
-                                {% elif 'date' in field_name.lower() or 'time' in field_name.lower() %}
-                                <i class="fas fa-calendar ms-1 terminology-indicator" title="Date"></i>
-                                {% elif 'status' in field_name.lower() %}
-                                <i class="fas fa-info-circle ms-1 terminology-indicator" title="Status"></i>
-                                {% endif %}
-                            </th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entry in section.structured_data %}
-                        <tr>
-                            {% for field_name, field_data in entry.fields.items() %}
-                            <td class="text-center">
-                                {% if 'date' in field_name.lower() or 'time' in field_name.lower() %}
-                                <div class="structured-value">{{ format_medical_date(field_data.value) }}</div>
-                                {% else %}
-                                <div class="structured-value">{{ field_data.value or 'N/A' }}</div>
-                                {% endif %}
-
-                                {% if field_data.has_valueset %}
-                                <br><small class="text-success">
-                                    <i class="fas fa-database"></i> Value Set
-                                </small>
-                                {% endif %}
-                            </td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                <!-- Table Summary -->
-                <div class="card-footer bg-light">
-                    <div class="row text-center">
-                        <div class="col-md-6">
-                            <small class="text-muted">
-                                <strong>{{ section.structured_data | length }}</strong> entries
-                            </small>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-muted">
-                                <i class="fas fa-check text-success"></i> Structured data available
-                            </small>
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                <p class="text-muted mb-0">Data available but not in tabular format.</p>
-                {% endif %}
-            </div>
-            {% else %}
-            <p class="text-muted mb-0">No entries found in this section.</p>
-            {% endif %}
-        </div>
-
-        <!-- Original Content Tab -->
-        <div id="section_{{ loop.index0 }}_original" class="tab-content">
-            <div class="original-content">
-                <h4>Original Clinical Data from NCPeH-A{% if section.title %} - {{ section.title }}{% endif %}</h4>
-                {% if section.structured_data %}
-                <div class="alert alert-info mb-3">
-                    <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical
-                            data</strong> from the Country of Affiliation (NCPeH-A) before transformation and
-                        mapping.</small>
-                </div>
-
-                <!-- Original Clinical Data Table -->
-                <div class="original-clinical-table">
-                    <table class="table table-bordered table-hover">
-                        <thead class="table-primary">
-                            <tr>
-                                <th style="width: 25%;">Field</th>
-                                <th style="width: 40%;">Original Value (NCPeH-A)</th>
-                                <th style="width: 35%;">Context & Metadata</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for entry in section.structured_data %}
-                            {% if entry.fields %}
-                            {% for field_name, field_data in entry.fields.items() %}
-                            <tr>
-                                <td class="fw-bold text-primary">{{ field_name }}</td>
-                                <td>
-                                    <span class="original-value">{{ field_data.value or 'N/A' }}</span>
-                                    {% if field_data.xpath %}
-                                    <br><small class="text-muted">
-                                        <i class="fas fa-code me-1"></i>XPath: <code>{{ field_data.xpath }}</code>
-                                    </small>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if field_data.has_valueset %}
-                                    <span class="badge bg-success me-1">
-                                        <i class="fas fa-database"></i> Value Set
-                                    </span>
-                                    {% endif %}
-                                    {% if field_data.needs_translation %}
-                                    <span class="badge bg-warning me-1">
-                                        <i class="fas fa-language"></i> Translatable
-                                    </span>
-                                    {% endif %}
-                                    {% if entry.section_code %}
-                                    <br><small class="text-muted">
-                                        <i class="fas fa-tag me-1"></i>Section:
-                                        <code>{{ entry.section_code }}</code>
-                                    </small>
-                                    {% endif %}
-                                    {% if entry.section_type %}
-                                    <br><small class="text-muted">
-                                        <i class="fas fa-folder me-1"></i>Type: {{ entry.section_type }}
-                                    </small>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                            {% else %}
-                            <!-- Fallback for entries without structured fields -->
-                            <tr>
-                                <td class="fw-bold text-secondary">Entry {{ loop.index }}</td>
-                                <td colspan="2">
-                                    <pre class="json-content mb-0">{{ entry | tojson(indent=2) }}</pre>
-                                </td>
-                            </tr>
-                            {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-
-                    <!-- Table Summary -->
-                    <div class="card-footer bg-light">
-                        <div class="row text-center">
-                            <div class="col-md-4">
-                                <small class="text-muted">
-                                    <strong>{{ section.structured_data | length }}</strong> original entries
-                                </small>
-                            </div>
-                            <div class="col-md-4">
-                                <small class="text-muted">
-                                    <strong>NCPeH-A</strong> source data
-                                </small>
-                            </div>
-                            <div class="col-md-4">
-                                <small class="text-muted">
-                                    <strong>{{ section.title or 'Clinical Section' }}</strong>
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% elif section.content and section.content.original %}
-                <div class="alert alert-warning mb-3">
-                    <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing
-                        raw XML content.</small>
-                </div>
-                <pre
-                    class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
-                {% elif section.content %}
-                <div class="alert alert-warning mb-3">
-                    <small><i class="fas fa-file-text me-1"></i>Structured data not available. Showing
-                        original text/table content.</small>
-                </div>
-                <div class="original-text-content">
-                    {% if section.content is string %}
-                    <pre
-                        class="text-content">{{ section.content[:3000] }}{% if section.content|length > 3000 %}...{% endif %}</pre>
-                    {% else %}
-                    <pre class="xml-content">{{ section.content | string }}</pre>
-                    {% endif %}
-                </div>
-                {% elif section.entries and section.entries|length > 0 %}
-                <div class="alert alert-info mb-3">
-                    <small><i class="fas fa-table me-1"></i>Structured data not available. Showing
-                        original table entries.</small>
-                </div>
-                <div class="original-entries-content">
-                    <table class="table table-sm table-bordered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Field</th>
-                                <th>Value</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for entry in section.entries[:10] %}
-                            <tr>
-                                <td><strong>Entry {{ loop.index }}</strong></td>
-                                <td>
-                                    {% if entry is mapping %}
-                                    <pre class="json-content">{{ entry | tojson(indent=2) }}</pre>
-                                    {% else %}
-                                    {{ entry | string }}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                            {% if section.entries|length > 10 %}
-                            <tr>
-                                <td colspan="2" class="text-muted text-center">
-                                    ... and {{ section.entries|length - 10 }} more entries
-                                </td>
-                            </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <p class="text-muted">No original clinical data available for this section.</p>
-                {% endif %}
+                {% endfor %}
             </div>
         </div>
     </div>
     {% endif %}
-</div>
-</div>
-{% endfor %}
-{% else %}
-<div class="alert alert-warning">
-    <h4>No Medical Data Available</h4>
-    <p>No clinical sections could be processed from the CDA document.</p>
-</div>
-{% endif %}
 
-<!-- Summary Stats -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h4>Processing Summary</h4>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-3">
-                        <div class="h2 text-primary">{{ sections_count }}</div>
-                        <div>Total Sections</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="h2 text-success">{{ medical_terms_count }}</div>
-                        <div>Medical Terms</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="h2 text-info">{{ coded_sections_count }}</div>
-                        <div>Coded Sections</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="h2 text-warning">{{ coded_sections_percentage|round }}%</div>
-                        <div>Terminology Coverage</div>
+    <!-- Medical Sections with Clinical Tables -->
+    {% if processed_sections %}
+    {% for section in processed_sections %}
+    {% set section_index = loop.index0 %}
+    {% include 'patient_data/sections/medical_section.html' %}
+    {% endfor %}
+    {% else %}
+    <div class="alert alert-warning">
+        <h4>No Medical Data Available</h4>
+        <p>No clinical sections could be processed from the CDA document.</p>
+    </div>
+    {% endif %}
+
+    <!-- Summary Stats -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Processing Summary</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="h2 text-primary">{{ sections_count }}</div>
+                            <div>Total Sections</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="h2 text-success">{{ medical_terms_count }}</div>
+                            <div>Medical Terms</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="h2 text-info">{{ coded_sections_count }}</div>
+                            <div>Coded Sections</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="h2 text-warning">{{ coded_sections_percentage|round }}%</div>
+                            <div>Terminology Coverage</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </div>
 {% endblock %}
 
