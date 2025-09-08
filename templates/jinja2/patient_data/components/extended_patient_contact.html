@@ -1,0 +1,147 @@
+<!-- Extended Patient Contact Information Component -->
+<div class="tab-pane fade {{ 'show active' if first_tab == 'contact' else '' }}" id="contact" role="tabpanel"
+    aria-labelledby="contact-tab">
+    <h5><i class="fas fa-address-card me-2"></i>Patient Contact Information</h5>
+
+    {% if patient_extended_data %}
+    {% set contact_data = patient_extended_data.get('patient_contact', patient_extended_data.get('contact_info', {})) %}
+
+    <!-- Primary Contact Summary -->
+    {% if contact_data.get('primary_phone') or contact_data.get('primary_email') or contact_data.get('primary_address')
+    %}
+    <div class="alert alert-primary mb-4">
+        <h6 class="alert-heading"><i class="fas fa-star me-2"></i>Primary Contact Information</h6>
+        <div class="row">
+            {% if contact_data.get('primary_phone') %}
+            <div class="col-md-4">
+                <strong>{{ contact_data.primary_phone.get('display_label', 'Primary Phone:') }}</strong><br>
+                <a href="tel:{{ contact_data.primary_phone.get('number', '') }}" class="contact-link phone-link">
+                    {{ contact_data.primary_phone.get('number', '') }}
+                </a>
+            </div>
+            {% endif %}
+
+            {% if contact_data.get('primary_email') %}
+            <div class="col-md-4">
+                <strong>{{ contact_data.primary_email.get('display_label', 'Primary Email:') }}</strong><br>
+                <a href="mailto:{{ contact_data.primary_email.get('email', '') }}" class="contact-link email-link">
+                    {{ contact_data.primary_email.get('email', '') }}
+                </a>
+            </div>
+            {% endif %}
+
+            {% if contact_data.get('primary_address') %}
+            <div class="col-md-4">
+                <strong>{{ contact_data.primary_address.get('display_label', 'Primary Address:') }}</strong><br>
+                <address class="mb-0">
+                    {{ contact_data.primary_address.get('street', '') }}<br>
+                    {{ contact_data.primary_address.get('city', '') }} {{
+                    contact_data.primary_address.get('postal_code', '') }}<br>
+                    {{ contact_data.primary_address.get('country', '') }}
+                </address>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Debug Contact Data -->
+    <div class="alert alert-success mb-3">
+        <h6>DEBUG: Contact Data Available</h6>
+        <p><strong>Contact Data Keys:</strong> {{ contact_data.keys() | list if contact_data else 'No contact data' }}
+        </p>
+        <p><strong>Has contact info:</strong> {{ contact_data.get('has_contact_info', False) }}</p>
+    </div>
+
+    <!-- Addresses -->
+    {% if contact_data.get('addresses') %}
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <h6><i class="fas fa-map-marker-alt me-1"></i>Addresses</h6>
+            {% for address in contact_data.addresses %}
+            <div class="contact-info-card">
+                <div class="contact-type">
+                    {{ address.get('display_label', address.get('use_label', address.get('use', 'Address'))) }}
+                    {% if address.get('is_primary') %}
+                    <span class="badge bg-primary ms-1">Primary</span>
+                    {% endif %}
+                </div>
+                <div class="contact-details">
+                    <div>{{ address.get('street', '') }}</div>
+                    <div>{{ address.get('city', '') }} {{ address.get('postal_code', '') }}</div>
+                    <div>{{ address.get('country', '') }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Phone Numbers -->
+    {% if contact_data.get('phone_numbers') %}
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h6><i class="fas fa-phone me-1"></i>Phone Numbers</h6>
+            {% for phone in contact_data.phone_numbers %}
+            <div class="contact-info-card">
+                <div class="contact-type">
+                    {{ phone.get('display_label', phone.get('use_label', phone.get('use', 'Phone'))) }}
+                    {% if phone.get('is_primary') %}
+                    <span class="badge bg-success ms-1">Primary</span>
+                    {% endif %}
+                    {% if phone.get('priority_score') %}
+                    <small class="text-muted ms-1">(Priority: {{ phone.priority_score }})</small>
+                    {% endif %}
+                </div>
+                <div class="contact-details">
+                    <a href="tel:{{ phone.get('number', '') }}" class="contact-link phone-link">
+                        {{ phone.get('number', '') }}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Email Addresses -->
+    {% if contact_data.get('email_addresses') %}
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h6><i class="fas fa-envelope me-1"></i>Email Addresses</h6>
+            {% for email in contact_data.email_addresses %}
+            <div class="contact-info-card">
+                <div class="contact-type">
+                    {{ email.get('display_label', email.get('use_label', email.get('use', 'Email'))) }}
+                    {% if email.get('is_primary') %}
+                    <span class="badge bg-success ms-1">Primary</span>
+                    {% endif %}
+                    {% if email.get('priority_score') %}
+                    <small class="text-muted ms-1">(Priority: {{ email.priority_score }})</small>
+                    {% endif %}
+                </div>
+                <div class="contact-details">
+                    <a href="mailto:{{ email.get('email', '') }}" class="contact-link email-link">
+                        {{ email.get('email', '') }}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Show message if no contact info -->
+    {% if not contact_data.get('addresses') and not contact_data.get('phone_numbers') and not
+    contact_data.get('email_addresses') %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>No contact information available in the CDA document.
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>No extended patient data available.
+    </div>
+    {% endif %}
+</div>
