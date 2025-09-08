@@ -314,9 +314,11 @@ class EnhancedAdministrativeExtractor:
         # Format times if date formatter is available
         for author in authors:
             if author.get("time") and self.date_formatter:
-                author["time"] = self.date_formatter.format_document_date(
+                author["time"] = self.date_formatter.format_clinical_datetime(
                     author["time"]
                 )
+                # Add display_time for better template labeling
+                author["display_time"] = author["time"]
 
         logger.info(f"Authors extracted: {len(authors)} found")
         return authors
@@ -357,9 +359,11 @@ class EnhancedAdministrativeExtractor:
 
         # Format time if date formatter is available
         if auth_info.get("time") and self.date_formatter:
-            auth_info["time"] = self.date_formatter.format_document_date(
-                auth_info["time"]
+            auth_info["authentication_time"] = (
+                self.date_formatter.format_clinical_datetime(auth_info["time"])
             )
+            # Keep the original time field for compatibility
+            auth_info["time"] = auth_info["authentication_time"]
 
         logger.info(
             f"Legal authenticator extracted: {auth_info.get('full_name') or 'Unknown'}"
