@@ -3078,6 +3078,34 @@ def patient_cda_view(request, patient_id, cda_type=None):
                                 "No processor available for extended header extraction"
                             )
 
+                        # ENHANCEMENT: If processor extraction failed or returned empty, try direct XML parsing
+                        if not extended_header_data or extended_header_data == {}:
+                            logger.info(
+                                "🔄 Processor extraction returned empty, trying direct XML parsing..."
+                            )
+                            try:
+                                from cda_extended_header_integration import (
+                                    CDAExtendedHeaderIntegration,
+                                )
+
+                                direct_integration = CDAExtendedHeaderIntegration()
+                                extended_header_data = direct_integration.extract_extended_patient_header_for_processor(
+                                    cda_content
+                                )
+
+                                if extended_header_data:
+                                    logger.info(
+                                        f"✅ Direct XML parsing successful: extracted {len(extended_header_data)} sections"
+                                    )
+                                else:
+                                    logger.warning(
+                                        "❌ Direct XML parsing also returned empty"
+                                    )
+
+                            except Exception as e:
+                                logger.error(f"Direct XML parsing failed: {e}")
+                                extended_header_data = {}
+
                     except Exception as e:
                         logger.error(f"Error extracting extended header data: {e}")
                         extended_header_data = {}
@@ -3394,65 +3422,176 @@ def patient_cda_view(request, patient_id, cda_type=None):
         context["debug_message"] = "✅ Template context is being set correctly!"
         logger.info("🔧 DEBUG: Added debug_message to context")
 
-        # ADD MOCK EXTENDED DATA FOR TESTING TEMPLATE
-        if not extended_header_data or patient_id in ["271867", "221935"]:
-            mock_extended_data = {
-                "patient_contact": {
-                    "has_contact_info": True,
-                    "addresses": [
-                        {
-                            "street": "123 Triq il-Kbira",
-                            "city": "Valletta",
-                            "postal_code": "VLT 1234",
-                            "country": "Malta",
-                            "use": "Home",
-                        }
-                    ],
-                    "phone_numbers": [
-                        {"number": "+356 2123 4567", "use": "Home"},
-                        {"number": "+356 7912 3456", "use": "Mobile"},
-                    ],
-                    "email_addresses": [
-                        {"email": "mario.borg@email.mt", "use": "Personal"}
-                    ],
-                },
-                "healthcare_team": {
-                    "has_healthcare_team": True,
-                    "total_count": 3,
-                    "authors": [
-                        {
-                            "name": "Dr. Sarah Mifsud",
-                            "role": "Primary Care Physician",
-                            "organization": "Mater Dei Hospital",
-                            "time": "2025-03-18",
-                        }
-                    ],
-                    "legal_authenticator": {
-                        "name": "Dr. Joseph Borg",
-                        "role": "Legal Authenticator",
-                        "organization": "Malta Health Authority",
-                        "authentication_time": "2025-03-18T15:30:00",
+        # ADD MOCK EXTENDED DATA ONLY WHEN REAL DATA IS INSUFFICIENT
+        # Check if we have meaningful real data first
+        has_real_data = False
+        if extended_header_data:
+            # Check if we have meaningful content (not just empty structures)
+            doc_info = extended_header_data.get("document_info", {})
+            healthcare_team = extended_header_data.get("healthcare_team", {})
+            patient_contact = extended_header_data.get("patient_contact", {})
+
+            has_real_data = (
+                (doc_info.get("title") and doc_info.get("title") != "Patient Summary")
+                or healthcare_team.get("has_healthcare_team", False)
+                or patient_contact.get("has_contact_info", False)
+            )
+
+            logger.info(f"🔍 REAL DATA CHECK for patient {patient_id}:")
+            logger.info(f"   Document title: {doc_info.get('title', 'None')}")
+            logger.info(
+                f"   Has healthcare team: {healthcare_team.get('has_healthcare_team', False)}"
+            )
+            logger.info(
+                f"   Has contact info: {patient_contact.get('has_contact_info', False)}"
+            )
+            logger.info(f"   Real data sufficient: {has_real_data}")
+
+        # Only add mock data if no meaningful real data AND it's a test patient
+        if not has_real_data and (
+            not extended_header_data or patient_id in ["271867", "221935", "607669"]
+        ):
+            # Get patient's country from session data to create appropriate mock data
+            session_key = f"patient_match_{patient_id}"
+            match_data = request.session.get(session_key)
+            patient_country_code = (
+                match_data.get("country_code", "MT") if match_data else "MT"
+            )
+
+            # DEBUG: Log the country detection
+            logger.info(f"🌍 COUNTRY DEBUG for patient {patient_id}:")
+            logger.info(f"   Session key: {session_key}")
+            logger.info(f"   Match data found: {match_data is not None}")
+            logger.info(f"   Country code: {patient_country_code}")
+
+            # Create country-specific mock data
+            if patient_country_code == "IE":
+                logger.info(f"🇮🇪 Creating IRISH mock data for patient {patient_id}")
+                # Irish patient mock data
+                mock_extended_data = {
+                    "patient_contact": {
+                        "has_contact_info": True,
+                        "addresses": [
+                            {
+                                "street": "45 O'Connell Street",
+                                "city": "Dublin",
+                                "postal_code": "D01 F5P2",
+                                "country": "Ireland",
+                                "use": "Home",
+                            }
+                        ],
+                        "phone_numbers": [
+                            {"number": "+353 1 555 1234", "use": "Home"},
+                            {"number": "+353 87 123 4567", "use": "Mobile"},
+                        ],
+                        "email_addresses": [
+                            {"email": "patrick.murphy@email.ie", "use": "Personal"}
+                        ],
                     },
-                    "custodian_organization": {
-                        "name": "Ministry for Health, Malta",
-                        "contact_info": {
-                            "addresses": [
-                                "Palazzo Castelletti, 15, Merchants Street, Valletta VLT 1444"
-                            ],
-                            "phone_numbers": ["+356 2599 7000"],
+                    "healthcare_team": {
+                        "has_healthcare_team": True,
+                        "total_count": 3,
+                        "authors": [
+                            {
+                                "name": "Dr. Sinead O'Brien",
+                                "role": "General Practitioner",
+                                "organization": "St. James's Hospital",
+                                "time": "2025-03-18",
+                            }
+                        ],
+                        "legal_authenticator": {
+                            "name": "Dr. Michael Kelly",
+                            "role": "Legal Authenticator",
+                            "organization": "Health Service Executive",
+                            "authentication_time": "2025-03-18T15:30:00",
+                        },
+                        "custodian_organization": {
+                            "name": "Department of Health, Ireland",
+                            "contact_info": {
+                                "addresses": [
+                                    "Miesian Plaza, 50-58 Baggot Street Lower, Dublin 2, D02 XW14"
+                                ],
+                                "phone_numbers": ["+353 1 635 4000"],
+                            },
                         },
                     },
-                },
-                "document_info": {
-                    "title": "Patient Summary - Malta",
-                    "creation_date": "2025-03-18",
-                    "language": "en-GB",
-                    "document_id": {"extension": "MT-PS-271867-2025"},
-                    "version": "1.0",
-                },
-            }
+                    "document_info": {
+                        "title": "Patient Summary - Ireland",
+                        "creation_date": "2025-03-18",
+                        "language": "en-IE",
+                        "document_id": {"extension": f"IE-PS-{patient_id}-2025"},
+                        "version": "1.0",
+                    },
+                }
+            else:
+                logger.info(
+                    f"🇲🇹 Creating MALTA mock data for patient {patient_id} (country: {patient_country_code})"
+                )
+                # Default Malta patient mock data (for backwards compatibility)
+                mock_extended_data = {
+                    "patient_contact": {
+                        "has_contact_info": True,
+                        "addresses": [
+                            {
+                                "street": "123 Triq il-Kbira",
+                                "city": "Valletta",
+                                "postal_code": "VLT 1234",
+                                "country": "Malta",
+                                "use": "Home",
+                            }
+                        ],
+                        "phone_numbers": [
+                            {"number": "+356 2123 4567", "use": "Home"},
+                            {"number": "+356 7912 3456", "use": "Mobile"},
+                        ],
+                        "email_addresses": [
+                            {"email": "mario.borg@email.mt", "use": "Personal"}
+                        ],
+                    },
+                    "healthcare_team": {
+                        "has_healthcare_team": True,
+                        "total_count": 3,
+                        "authors": [
+                            {
+                                "name": "Dr. Sarah Mifsud",
+                                "role": "Primary Care Physician",
+                                "organization": "Mater Dei Hospital",
+                                "time": "2025-03-18",
+                            }
+                        ],
+                        "legal_authenticator": {
+                            "name": "Dr. Joseph Borg",
+                            "role": "Legal Authenticator",
+                            "organization": "Malta Health Authority",
+                            "authentication_time": "2025-03-18T15:30:00",
+                        },
+                        "custodian_organization": {
+                            "name": "Ministry for Health, Malta",
+                            "contact_info": {
+                                "addresses": [
+                                    "Palazzo Castelletti, 15, Merchants Street, Valletta VLT 1444"
+                                ],
+                                "phone_numbers": ["+356 2599 7000"],
+                            },
+                        },
+                    },
+                    "document_info": {
+                        "title": "Patient Summary - Malta",
+                        "creation_date": "2025-03-18",
+                        "language": "en-GB",
+                        "document_id": {"extension": f"MT-PS-{patient_id}-2025"},
+                        "version": "1.0",
+                    },
+                }
+
             context["patient_extended_data"] = mock_extended_data
-            logger.info("🧪 ADDED MOCK EXTENDED DATA for testing template rendering")
+            logger.info(
+                f"🧪 ADDED COUNTRY-SPECIFIC MOCK EXTENDED DATA for {patient_country_code} patient {patient_id}"
+            )
+        else:
+            logger.info(
+                f"✅ USING REAL XML DATA for patient {patient_id} - no mock data needed"
+            )
 
         # FORCE MOCK PROCESSED SECTIONS for testing template rendering
         if not context.get("processed_sections") or patient_id in ["271867", "221935"]:
