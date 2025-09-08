@@ -4533,6 +4533,18 @@ select:focus {
 .role-badge.contact-ind {
   background: #6c757d;
 }
+.role-badge.emergency-contact {
+  background: #dc3545;
+  color: #fff;
+}
+.role-badge.next-of-kin {
+  background: #6f42c1;
+  color: #fff;
+}
+.role-badge.doctor {
+  background: #28a745;
+  color: #fff;
+}
 
 .patient-contact {
   border-left: 4px solid #17a2b8;
