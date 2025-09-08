@@ -1,0 +1,156 @@
+{# Original Content Template - Shared by all section types #}
+<div class="original-content">
+    <h4>Original Clinical Data from NCPeH-A{% if section.title %} - {{ section.title }}{% endif %}</h4>
+
+    {% if section.structured_data %}
+    <div class="alert alert-info mb-3">
+        <small><i class="fas fa-info-circle me-1"></i><strong>This shows the original clinical data</strong> extracted
+            from the CDA document structure. Data may include coded values, timestamps, and hierarchical medical
+            information.</small>
+    </div>
+
+    {% set first_entry = section.structured_data[0] if section.structured_data|length > 0 else none %}
+    {% if first_entry and first_entry.fields and first_entry.fields|length > 1 %}
+    <!-- Original Clinical Data Table -->
+    <div class="original-clinical-table">
+        <table class="table table-bordered table-hover">
+            <thead class="table-primary">
+                <tr>
+                    {% for field_name, field_data in first_entry.fields.items() %}
+                    <th class="text-center">
+                        {{ field_name }}
+                        {% if field_data.has_valueset %}
+                        <span class="badge bg-warning ms-1">Coded</span>
+                        {% endif %}
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in section.structured_data %}
+                <tr>
+                    {% for field_name, field_data in entry.fields.items() %}
+                    <td>
+                        {% if 'date' in field_name.lower() or 'time' in field_name.lower() %}
+                        <div class="original-value">{{ format_medical_date(field_data.value) }}</div>
+                        {% else %}
+                        <div class="original-value">{{ field_data.value or 'N/A' }}</div>
+                        {% endif %}
+
+                        {% if field_data.xpath %}
+                        <div class="text-muted mt-1">
+                            <small><strong>XPath:</strong> <code>{{ field_data.xpath }}</code></small>
+                        </div>
+                        {% endif %}
+
+                        {% if field_data.has_valueset %}
+                        <div class="text-muted mt-1">
+                            <small><i class="fas fa-code"></i> Coded value available</small>
+                        </div>
+                        {% endif %}
+
+                        {% if field_data.needs_translation %}
+                        <div class="text-muted mt-1">
+                            <small><i class="fas fa-language"></i> Translation needed</small>
+                        </div>
+                        {% endif %}
+
+                        {% if entry.section_code %}
+                        <div class="text-muted mt-1">
+                            <small><strong>Section:</strong> <code>{{ entry.section_code }}</code></small>
+                        </div>
+                        {% endif %}
+
+                        {% if entry.section_type %}
+                        <div class="text-muted mt-1">
+                            <small><strong>Type:</strong> {{ entry.section_type }}</small>
+                        </div>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Table Summary -->
+        <div class="card-footer bg-light">
+            <div class="row text-center">
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        <i class="fas fa-database me-1"></i>
+                        <strong>{{ section.structured_data|length }}</strong> original entries
+                    </small>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        <i class="fas fa-file-code me-1"></i>
+                        Direct CDA extraction
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% elif section.content and section.content.original %}
+    <div class="alert alert-warning mb-3">
+        <small><i class="fas fa-exclamation-triangle me-1"></i>Structured data not available. Showing raw XML content
+            from the CDA document.</small>
+    </div>
+    <pre
+        class="xml-content">{{ section.content.original[:2000] }}{% if section.content.original|length > 2000 %}...{% endif %}</pre>
+
+    {% elif section.content %}
+    <div class="alert alert-warning mb-3">
+        <small><i class="fas fa-file-text me-1"></i>Structured data not available. Showing processed content from the
+            CDA document.</small>
+    </div>
+    <div class="original-text-content">
+        {% if section.content is string %}
+        <pre class="text-content">{{ section.content[:3000] }}{% if section.content|length > 3000 %}...{% endif %}</pre>
+        {% else %}
+        <pre class="xml-content">{{ section.content | string }}</pre>
+        {% endif %}
+    </div>
+
+    {% elif section.entries and section.entries|length > 0 %}
+    <div class="alert alert-info mb-3">
+        <small><i class="fas fa-table me-1"></i>Structured data not available. Showing entry-level information.</small>
+    </div>
+    <div class="original-entries-content">
+        <table class="table table-sm table-bordered">
+            <thead>
+                <tr>
+                    <th>Entry #</th>
+                    <th>Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in section.entries[:10] %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        {% if entry is mapping %}
+                        <pre class="json-content">{{ entry | tojson(indent=2) }}</pre>
+                        {% else %}
+                        {{ entry | string }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if section.entries|length > 10 %}
+                <tr>
+                    <td colspan="2" class="text-muted text-center">
+                        ... and {{ section.entries|length - 10 }} more entries
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <p class="text-muted">No original clinical data available for this section.</p>
+    {% endif %}
+</div>
