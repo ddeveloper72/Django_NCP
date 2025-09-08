@@ -3033,7 +3033,14 @@ def patient_cda_view(request, patient_id, cda_type=None):
                         logger.error(f"Error applying Malta CDA enhancements: {e}")
 
                 # Extract extended header data if enhanced processing was successful
-                extended_header_data = {}
+                # First check if we have cached enhanced data in session
+                cached_extended_data = request.session.get("patient_extended_data")
+                if cached_extended_data:
+                    extended_header_data = cached_extended_data
+                    logger.info("✅ USING CACHED EXTENDED HEADER DATA from session")
+                else:
+                    extended_header_data = {}
+                    logger.info("🔄 GENERATING NEW EXTENDED HEADER DATA")
 
                 # DEBUG: Log the enhanced processing result status
                 logger.info(
@@ -3044,8 +3051,8 @@ def patient_cda_view(request, patient_id, cda_type=None):
                     f"🔍 DEBUG: CDA content length = {len(cda_content) if cda_content else 0}"
                 )
 
-                # Attempt extended header extraction if we have CDA content
-                if cda_content:
+                # Attempt extended header extraction if we have CDA content AND no cached data
+                if cda_content and not cached_extended_data:
                     try:
                         logger.info(
                             f"🚀 Extracting extended header data for patient viewer... CDA length: {len(cda_content)}"
@@ -3084,12 +3091,12 @@ def patient_cda_view(request, patient_id, cda_type=None):
                                 "🔄 Processor extraction returned empty, trying direct XML parsing..."
                             )
                             try:
-                                from cda_extended_header_integration import (
-                                    CDAExtendedHeaderIntegration,
+                                from patient_data.utils.administrative_extractor import (
+                                    CDAAdministrativeExtractor,
                                 )
 
-                                direct_integration = CDAExtendedHeaderIntegration()
-                                extended_header_data = direct_integration.extract_extended_patient_header_for_processor(
+                                administrative_extractor = CDAAdministrativeExtractor()
+                                extended_header_data = administrative_extractor.extract_administrative_data(
                                     cda_content
                                 )
 
@@ -3109,7 +3116,7 @@ def patient_cda_view(request, patient_id, cda_type=None):
                     except Exception as e:
                         logger.error(f"Error extracting extended header data: {e}")
                         extended_header_data = {}
-                else:
+                elif not cda_content and not cached_extended_data:
                     logger.warning(
                         f"Skipping extended header extraction - no CDA content available (Enhanced processing success: {enhanced_processing_result.get('success')})"
                     )
@@ -3408,8 +3415,10 @@ def patient_cda_view(request, patient_id, cda_type=None):
         # Add extended header data to context for enhanced patient information display
         if extended_header_data:
             context["patient_extended_data"] = extended_header_data
+            # Store enhanced data in session for persistence across page loads
+            request.session["patient_extended_data"] = extended_header_data
             logger.info(
-                f"✅ SUCCESSFULLY Added extended header data to context - Contact info: {extended_header_data.get('patient_contact', {}).get('has_contact_info', False)}, "
+                f"✅ SUCCESSFULLY Added extended header data to context AND SESSION - Contact info: {extended_header_data.get('patient_contact', {}).get('has_contact_info', False)}, "
                 f"Emergency contacts: {extended_header_data.get('emergency_contacts', {}).get('total_count', 0)}, "
                 f"Healthcare team: {extended_header_data.get('healthcare_team', {}).get('total_count', 0)}, "
                 f"Dependants: {extended_header_data.get('dependants', {}).get('total_count', 0)}"
@@ -3431,14 +3440,19 @@ def patient_cda_view(request, patient_id, cda_type=None):
             healthcare_team = extended_header_data.get("healthcare_team", {})
             patient_contact = extended_header_data.get("patient_contact", {})
 
-            has_real_data = (
-                (doc_info.get("title") and doc_info.get("title") != "Patient Summary")
-                or healthcare_team.get("has_healthcare_team", False)
-                or patient_contact.get("has_contact_info", False)
+            # Real data is sufficient only if we have actual healthcare team OR contact info
+            # Document title alone is not sufficient
+            healthcare_team_sufficient = healthcare_team.get(
+                "has_healthcare_team", False
             )
+            contact_info_sufficient = patient_contact.get("has_contact_info", False)
+
+            has_real_data = healthcare_team_sufficient or contact_info_sufficient
 
             logger.info(f"🔍 REAL DATA CHECK for patient {patient_id}:")
             logger.info(f"   Document title: {doc_info.get('title', 'None')}")
+            logger.info(f"   Healthcare team sufficient: {healthcare_team_sufficient}")
+            logger.info(f"   Contact info sufficient: {contact_info_sufficient}")
             logger.info(
                 f"   Has healthcare team: {healthcare_team.get('has_healthcare_team', False)}"
             )
@@ -3446,17 +3460,41 @@ def patient_cda_view(request, patient_id, cda_type=None):
                 f"   Has contact info: {patient_contact.get('has_contact_info', False)}"
             )
             logger.info(f"   Real data sufficient: {has_real_data}")
+            logger.info(f"   Should use mock data: {not has_real_data}")
 
-        # Only add mock data if no meaningful real data AND it's a test patient
-        if not has_real_data and (
-            not extended_header_data or patient_id in ["271867", "221935", "607669"]
+        # DISABLED: Mock data generation for testing real XML data extraction
+        # Only add mock data if no meaningful real data AND it's a test patient OR known patient
+        mock_data_disabled = True  # Set to False to re-enable mock data
+        if (
+            not mock_data_disabled
+            and not has_real_data
+            and (
+                not extended_header_data
+                or patient_id in ["271867", "221935", "607669", "887817", "186887"]
+            )
         ):
             # Get patient's country from session data to create appropriate mock data
             session_key = f"patient_match_{patient_id}"
             match_data = request.session.get(session_key)
-            patient_country_code = (
-                match_data.get("country_code", "MT") if match_data else "MT"
-            )
+
+            # Hardcode known patients for testing
+            known_irish_patients = ["887817"]  # Patrick Murphy
+            known_malta_patients = ["186887"]  # Known Malta patients
+
+            if patient_id in known_irish_patients:
+                patient_country_code = "IE"
+                logger.info(
+                    f"🔧 HARDCODED: Patient {patient_id} recognized as Irish patient"
+                )
+            elif patient_id in known_malta_patients:
+                patient_country_code = "MT"
+                logger.info(
+                    f"🔧 HARDCODED: Patient {patient_id} recognized as Malta patient"
+                )
+            else:
+                patient_country_code = (
+                    match_data.get("country_code", "MT") if match_data else "MT"
+                )
 
             # DEBUG: Log the country detection
             logger.info(f"🌍 COUNTRY DEBUG for patient {patient_id}:")
@@ -3473,20 +3511,80 @@ def patient_cda_view(request, patient_id, cda_type=None):
                         "has_contact_info": True,
                         "addresses": [
                             {
-                                "street": "45 O'Connell Street",
-                                "city": "Dublin",
-                                "postal_code": "D01 F5P2",
-                                "country": "Ireland",
-                                "use": "Home",
+                                "street": "New Vista, Prosperous Road",
+                                "city": "Clane",
+                                "postal_code": "W91 XP83",
+                                "country": "IE",
+                                "use": "H",
+                                "use_code": "H",
+                                "use_label": "Home",
+                                "display_label": "Home:",
+                                "is_primary": True,
                             }
                         ],
                         "phone_numbers": [
-                            {"number": "+353 1 555 1234", "use": "Home"},
-                            {"number": "+353 87 123 4567", "use": "Mobile"},
+                            {
+                                "number": "+353-87-34376462",
+                                "use": "HP",
+                                "use_code": "HP",
+                                "use_label": "Home",
+                                "display_label": "Home:",
+                                "type": "phone",
+                                "priority_score": 100,
+                                "is_primary": True,
+                            },
+                            {
+                                "number": "+353-87-9875465",
+                                "use": "MC",
+                                "use_code": "MC",
+                                "use_label": "Mobile",
+                                "display_label": "Mobile:",
+                                "type": "phone",
+                                "priority_score": 80,
+                                "is_primary": False,
+                            },
                         ],
                         "email_addresses": [
-                            {"email": "patrick.murphy@email.ie", "use": "Personal"}
+                            {
+                                "email": "patrick.murphy@email.ie",
+                                "use": "H",
+                                "use_code": "H",
+                                "use_label": "Home",
+                                "display_label": "Home:",
+                                "type": "email",
+                                "priority_score": 90,
+                                "is_primary": True,
+                            }
                         ],
+                        "primary_phone": {
+                            "number": "+353-87-34376462",
+                            "use": "HP",
+                            "use_code": "HP",
+                            "use_label": "Home",
+                            "display_label": "Home:",
+                            "type": "phone",
+                            "is_primary": True,
+                        },
+                        "primary_email": {
+                            "email": "patrick.murphy@email.ie",
+                            "use": "H",
+                            "use_code": "H",
+                            "use_label": "Home",
+                            "display_label": "Home:",
+                            "type": "email",
+                            "is_primary": True,
+                        },
+                        "primary_address": {
+                            "street": "New Vista, Prosperous Road",
+                            "city": "Clane",
+                            "postal_code": "W91 XP83",
+                            "country": "IE",
+                            "use": "H",
+                            "use_code": "H",
+                            "use_label": "Home",
+                            "display_label": "Home:",
+                            "is_primary": True,
+                        },
                     },
                     "healthcare_team": {
                         "has_healthcare_team": True,
@@ -3515,6 +3613,67 @@ def patient_cda_view(request, patient_id, cda_type=None):
                             },
                         },
                     },
+                    "emergency_contacts": {
+                        "total_count": 1,
+                        "contacts": [
+                            {
+                                "name": "Mary Murphy",
+                                "relationship": "Spouse",
+                                "phone_numbers": [
+                                    {
+                                        "number": "+353-87-1234567",
+                                        "use": "MC",
+                                        "use_code": "MC",
+                                        "use_label": "Mobile",
+                                        "display_label": "Mobile:",
+                                        "type": "phone",
+                                        "is_primary": True,
+                                    }
+                                ],
+                            }
+                        ],
+                    },
+                    "next_of_kin": {
+                        "total_count": 1,
+                        "contacts": [
+                            {
+                                "name": "Sean Murphy",
+                                "relationship": "Son",
+                                "phone_numbers": [
+                                    {
+                                        "number": "+353-87-7654321",
+                                        "use": "MC",
+                                        "use_code": "MC",
+                                        "use_label": "Mobile",
+                                        "display_label": "Mobile:",
+                                        "type": "phone",
+                                        "is_primary": True,
+                                    }
+                                ],
+                            }
+                        ],
+                    },
+                    "performers": {
+                        "medical_doctors": [
+                            {
+                                "name": "Dr. Sinead O'Brien",
+                                "role": "General Practitioner",
+                                "organization": "St. James's Hospital",
+                                "phone_numbers": [
+                                    {
+                                        "number": "+353-1-4103000",
+                                        "use": "WP",
+                                        "use_code": "WP",
+                                        "use_label": "Work",
+                                        "display_label": "Work:",
+                                        "type": "phone",
+                                        "is_primary": True,
+                                    }
+                                ],
+                            }
+                        ]
+                    },
+                    "dependants": {"total_count": 0, "contacts": []},
                     "document_info": {
                         "title": "Patient Summary - Ireland",
                         "creation_date": "2025-03-18",
@@ -3584,9 +3743,12 @@ def patient_cda_view(request, patient_id, cda_type=None):
                     },
                 }
 
-            context["patient_extended_data"] = mock_extended_data
+            # DISABLED: Mock data application - testing real XML data extraction
+            # context["patient_extended_data"] = mock_extended_data
+            # Store mock enhanced data in session for persistence across page loads
+            # request.session["patient_extended_data"] = mock_extended_data
             logger.info(
-                f"🧪 ADDED COUNTRY-SPECIFIC MOCK EXTENDED DATA for {patient_country_code} patient {patient_id}"
+                f"🧪 MOCK DATA DISABLED - Testing real XML data extraction for {patient_country_code} patient {patient_id}"
             )
         else:
             logger.info(
