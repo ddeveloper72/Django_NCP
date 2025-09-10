@@ -466,7 +466,11 @@
 
       .btn-logout {
         @include button-base;
-        background: linear-gradient(135deg, rgba(#ff6b6b, 0.8), rgba(#e74c3c, 0.9));
+        background: linear-gradient(
+          135deg,
+          rgba(#ff6b6b, 0.8),
+          rgba(#e74c3c, 0.9)
+        );
         border: 1px solid rgba(#ff6b6b, 0.6);
         color: $white;
         padding: $space-sm $space-md;
@@ -478,7 +482,11 @@
         box-shadow: 0 2px 4px rgba(#ff6b6b, 0.2);
 
         &:hover {
-          background: linear-gradient(135deg, rgba(#ff6b6b, 0.9), rgba(#e74c3c, 1));
+          background: linear-gradient(
+            135deg,
+            rgba(#ff6b6b, 0.9),
+            rgba(#e74c3c, 1)
+          );
           border-color: rgba(#ff6b6b, 0.8);
           transform: translateY(-1px);
           box-shadow: 0 4px 8px rgba(#ff6b6b, 0.3);
