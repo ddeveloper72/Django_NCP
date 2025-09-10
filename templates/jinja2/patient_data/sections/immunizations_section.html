@@ -1,0 +1,151 @@
+{# Immunizations Section Template #}
+<!-- Immunizations Section -->
+<div class="medical-section" id="immunizations-section">
+    <div class="card">
+        <!-- Section Header -->
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-syringe me-2"></i>
+                {{ section.title or 'Immunizations' }}
+                {% if section.code %}
+                <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
+                {% endif %}
+                {% if section.has_entries %}
+                <span class="badge bg-info ms-2">{{ section.entries|length if section.entries else 0 }} vaccines</span>
+                {% endif %}
+            </h5>
+        </div>
+
+        <!-- Clinical Section Content with Tabs -->
+        {% if section.has_entries and section.clinical_table %}
+        <!-- Clinical Table Section -->
+        <div class="card-body p-0">
+            <!-- Section Tabs -->
+            <div class="section-tabs">
+                <button class="tab-button active"
+                    onclick="showClinicalTab('immunizations_{{ section_index }}', 'structured')">
+                    📊 Structured Immunization Data
+                </button>
+                <button class="tab-button" onclick="showClinicalTab('immunizations_{{ section_index }}', 'original')">
+                    📄 Original Content
+                </button>
+            </div>
+
+            <!-- Structured View Tab Content -->
+            <div id="immunizations_{{ section_index }}_structured" class="clinical-tab-content active">
+                <div class="clinical-table">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-success">
+                            <tr>
+                                {% for header in section.clinical_table.headers %}
+                                <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
+                                    {{ header.label }}
+                                    {% if header.type == 'vaccine' %}
+                                    <i class="fas fa-shield-virus ms-1 terminology-indicator" title="Vaccine"></i>
+                                    {% elif header.type == 'date' %}
+                                    <i class="fas fa-calendar-alt ms-1 terminology-indicator"
+                                        title="Administration Date"></i>
+                                    {% elif header.type == 'dose' %}
+                                    <i class="fas fa-vial ms-1 terminology-indicator" title="Dose Number"></i>
+                                    {% elif header.type == 'status' %}
+                                    <i class="fas fa-check-circle ms-1 terminology-indicator"
+                                        title="Vaccination Status"></i>
+                                    {% elif header.type == 'manufacturer' %}
+                                    <i class="fas fa-industry ms-1 terminology-indicator" title="Manufacturer"></i>
+                                    {% endif %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in section.clinical_table.rows %}
+                            <tr>
+                                {% for header in section.clinical_table.headers %}
+                                {% set cell_data = row.data[header.key] %}
+                                <td>
+                                    {% if header.primary %}
+                                    <div class="primary-field">
+                                        <strong class="text-success">{{ cell_data.display_value or cell_data.value or
+                                            'N/A' }}</strong>
+                                        {% if cell_data.has_terminology %}
+                                        <div class="medical-terminology mt-1">
+                                            {% for term in cell_data.terminology %}
+                                            <span class="badge bg-success me-1"
+                                                title="{{ term.system }}: {{ term.code }}">
+                                                {{ term.display_name or term.code }}
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <div class="cell-content">
+                                        {% if cell_data.has_codes %}
+                                        <div class="medical-codes-container">
+                                            {% for code in cell_data.codes %}
+                                            <span class="badge bg-success me-1 mb-1"
+                                                title="{{ code.system }}: {{ code.code }}">
+                                                {{ code.display_name or code.code }}
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                        {% else %}
+                                        {{ cell_data.display_value or cell_data.value or 'N/A' }}
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Immunizations Table Summary -->
+                <div class="card-footer bg-light border-success">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-syringe me-1 text-success"></i>
+                                <strong>{{ section.clinical_table.rows|length }}</strong> immunizations
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt me-1 text-info"></i>
+                                Protective immunity
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-check me-1 text-warning"></i>
+                                Schedule up to date
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Original Content Tab -->
+            <div id="immunizations_{{ section_index }}_original" class="clinical-tab-content">
+                {% include 'patient_data/sections/original_content.html' %>
+            </div>
+        </div>
+
+        {% elif section.has_entries %}
+        <!-- Simple List Section for immunizations without clinical tables -->
+        {% include 'patient_data/sections/simple_list_section.html' %}
+
+        {% else %}
+        <!-- Empty Immunizations Section -->
+        <div class="card-body text-center py-5">
+            <div class="text-warning">
+                <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                <h6 class="text-warning">No Immunization Records</h6>
+                <p class="text-muted">No vaccination records available for this patient</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
