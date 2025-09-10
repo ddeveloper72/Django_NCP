@@ -7,7 +7,7 @@
     <title>{% block title %}EU NCP Portal{% endblock %}</title>
 
     <!-- DMZ-Compatible CSS (no external CDNs) -->
-    <link href="{{ static('css/main.css') }}?v=20250903" rel="stylesheet" media="screen">
+    <link href="{{ static('css/main.css') }}?v=20250910" rel="stylesheet" media="screen">
     <link href="{{ static('rest_framework/css/font-awesome-4.0.3.css') }}" rel="stylesheet" media="screen">
 
     {% block extra_css %}{% endblock %}
@@ -67,20 +67,29 @@
                 </li>
             </ul>
 
-            <!-- Login Status Indicator -->
+            <!-- Enhanced Login Status Indicator -->
             <div class="login-status">
                 {% if request.user.is_authenticated %}
                 <div class="user-info">
-                    <i class="fa fa-user-circle"></i>
-                    <span class="username">{{ request.user.username }}</span>
-                    <a href="/accounts/logout/" class="logout-link" title="Logout">
+                    <span class="user-welcome">
+                        <i class="fa fa-user-circle"></i>
+                        Welcome, {{ request.user.username }}
+                    </span>
+                    <a href="/accounts/logout/" class="btn btn-logout" title="Logout">
                         <i class="fa fa-sign-out"></i>
+                        Logout
                     </a>
                 </div>
                 {% else %}
                 <div class="login-prompt">
-                    <i class="fa fa-user-o"></i>
-                    <a href="/accounts/login/" class="login-link">Login</a>
+                    <span class="login-message">
+                        <i class="fa fa-user-o"></i>
+                        Not logged in
+                    </span>
+                    <a href="/accounts/login/" class="btn btn-login">
+                        <i class="fa fa-sign-in"></i>
+                        Login
+                    </a>
                 </div>
                 {% endif %}
             </div>
