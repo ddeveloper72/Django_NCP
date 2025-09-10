@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     "ehealth_portal",
     "smp_client",
     "fhir_services",
+    # Authentication and User Management
+    "authentication",
     # Patient Data and Translation Services
     "patient_data",
     "translation_manager",
@@ -316,6 +318,16 @@ LOGGING = {
         "ehealth": {
             "handlers": ["console", "file"],
             "level": "INFO",
+            "propagate": False,
+        },
+        "django.template": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "jinja2": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
             "propagate": False,
         },
     },

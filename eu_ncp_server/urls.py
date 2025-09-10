@@ -14,6 +14,7 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth import logout
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 import json
 
 
@@ -116,8 +117,15 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # Custom logout view for regular users
     path("accounts/logout/", custom_logout_view, name="logout"),
-    # Authentication URLs (login, password reset, etc.)
-    path("accounts/", include("django.contrib.auth.urls")),
+    # Custom authentication URLs with HSE theming
+    path("accounts/", include("authentication.urls")),
+    # Redirects for old auth URLs to new accounts URLs
+    path("auth/login/", RedirectView.as_view(url="/accounts/login/", permanent=True)),
+    path(
+        "auth/register/",
+        RedirectView.as_view(url="/accounts/register/", permanent=True),
+    ),
+    path("auth/", RedirectView.as_view(url="/accounts/login/", permanent=True)),
     # Option 1: API endpoints for Java portal integration
     path("api/", include("ncp_gateway.urls")),
     # Option 2: Django frontend portal (replicating Java portal)
