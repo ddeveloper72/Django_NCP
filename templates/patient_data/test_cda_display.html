@@ -24,12 +24,12 @@
 {% block content %}
 <div class="test-container">
     <h1>🧪 Django Template Syntax Test</h1>
-    
+
     <div class="test-success">
         <h4>✅ Template Loading Successfully</h4>
         <p>This template is using pure Django syntax and loading without errors.</p>
     </div>
-    
+
     <!-- Test basic Django template features -->
     {% if patient_identity %}
         <h3>Patient Information Available</h3>
@@ -42,32 +42,32 @@
             <p>No patient identity data available for testing.</p>
         </div>
     {% endif %}
-    
+
     <!-- Test administrative data -->
     {% if administrative_data %}
         <h3>Administrative Data Available</h3>
         <p>✅ Administrative data is present in context</p>
-        
+
         <!-- Test Django-compatible syntax -->
         {% if administrative_data.authors %}
             <p><strong>Authors Count:</strong> {{ administrative_data.authors|length }}</p>
         {% endif %}
-        
+
         {% if administrative_data.custodians %}
             <p><strong>Custodians Count:</strong> {{ administrative_data.custodians|length }}</p>
         {% endif %}
-        
+
     {% else %}
         <div class="alert alert-info">
             <p>No administrative data available for testing.</p>
         </div>
     {% endif %}
-    
+
     <!-- Test clinical sections -->
     {% if clinical_sections_list %}
         <h3>Clinical Sections Available</h3>
         <p><strong>Total Sections:</strong> {{ clinical_sections_list|length }}</p>
-        
+
         {% for section in clinical_sections_list %}
             {% if forloop.counter <= 3 %}
                 <div class="card mb-2">
@@ -81,7 +81,7 @@
                 </div>
             {% endif %}
         {% endfor %}
-        
+
         {% if clinical_sections_list|length > 3 %}
             <p><em>... and {{ clinical_sections_list|length|add:"-3" }} more sections</em></p>
         {% endif %}
@@ -90,14 +90,14 @@
             <p>No clinical sections available for testing.</p>
         </div>
     {% endif %}
-    
+
     <hr>
     <div class="test-success">
         <h4>🎉 Django Template Syntax Validation Complete</h4>
         <p>If you can see this page, the basic Django template syntax is working correctly!</p>
         <p><strong>Next Step:</strong> Debug any remaining component template issues</p>
     </div>
-    
+
     <p><a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-primary">← Back to Patient Search</a></p>
 </div>
 {% endblock %}

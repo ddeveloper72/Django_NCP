@@ -9,7 +9,7 @@
     <!-- Debug Document Data -->
     <div class="alert alert-success mb-3">
         <h6>DEBUG: Document Info Data Available</h6>
-        <p><strong>Document Data Keys:</strong> 
+        <p><strong>Document Data Keys:</strong>
             {% if patient_extended_data.document_info %}
                 {% for key, value in patient_extended_data.document_info.items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
             {% elif patient_extended_data.metadata %}

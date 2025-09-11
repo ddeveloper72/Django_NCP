@@ -1,34 +1,8 @@
 {% extends "base.html" %}
+{% load patient_date_filters %}
 
-{# Jinja2 macro for formatting medical dates #}
-{% macro format_medical_date(date_string) %}
-{% if date_string and date_string != 'N/A' %}
-{% set clean_date = date_string|string|trim %}
-{% if clean_date|length == 14 and clean_date.isdigit() %}
-{# Format: YYYYMMDDHHMMSS #}
-{% set year = clean_date[0:4] %}
-{% set month = clean_date[4:6] %}
-{% set day = clean_date[6:8] %}
-{% set hour = clean_date[8:10] %}
-{% set minute = clean_date[10:12] %}
-<span class="formatted-date" title="Original: {{ clean_date }}">
-    {{ month }}/{{ day }}/{{ year }} {{ hour }}:{{ minute }}
-</span>
-{% elif clean_date|length == 8 and clean_date.isdigit() %}
-{# Format: YYYYMMDD #}
-{% set year = clean_date[0:4] %}
-{% set month = clean_date[4:6] %}
-{% set day = clean_date[6:8] %}
-<span class="formatted-date" title="Original: {{ clean_date }}">
-    {{ month }}/{{ day }}/{{ year }}
-</span>
-{% else %}
-{{ date_string }}
-{% endif %}
-{% else %}
-{{ date_string }}
-{% endif %}
-{% endmacro %}
+{# Django replacement for Jinja2 macro - use |document_date filter instead #}
+{# format_medical_date functionality moved to patient_date_filters.py #}
 
 {% block title %}Enhanced CDA Display - {{ patient_identity.given_name }} {{ patient_identity.family_name }}{% endblock
 %}
@@ -1159,7 +1133,7 @@
                                 {% if patient_identity.birth_date_formatted %}
                                 {{ patient_identity.birth_date_formatted }}
                                 {% elif patient_identity.birth_date %}
-                                {{ format_medical_date(patient_identity.birth_date) }}
+                                {{ patient_identity.birth_date|document_date }}
                                 {% else %}
                                 Unknown
                                 {% endif %}
@@ -1179,12 +1153,12 @@
                                 <span class="badge bg-success">{{ translation_quality }}</span>
                             </p>
                             {% if patient_identity.document_metadata %}
-                            {% set doc_meta = patient_identity.document_metadata %}
-                            {% if doc_meta.title %}
-                            <p><strong>Document:</strong> {{ doc_meta.title }}</p>
+                            {# Django: Use direct access instead of {% set %} #}
+                            {% if patient_identity.document_metadata.title %}
+                            <p><strong>Document:</strong> {{ patient_identity.document_metadata.title }}</p>
                             {% endif %}
-                            {% if doc_meta.language_code %}
-                            <p><strong>Language:</strong> {{ doc_meta.language_code }}</p>
+                            {% if patient_identity.document_metadata.language_code %}
+                            <p><strong>Language:</strong> {{ patient_identity.document_metadata.language_code }}</p>
                             {% endif %}
                             {% endif %}
                         </div>
@@ -1194,29 +1168,15 @@
                     <div class="row mt-3">
                         <div class="col-12">
                             <div class="btn-group" role="group" aria-label="CDA Type Selection">
-                                {% if cda_type == 'L1' %}
-                                {% set l1_btn_class = "btn btn-primary" %}
-                                {% else %}
-                                {% set l1_btn_class = "btn btn-outline-primary" %}
-                                {% endif %}
-                                {% if not has_l1_cda %}
-                                {% set l1_btn_class = l1_btn_class + " disabled" %}
-                                {% endif %}
+                                {# Django: Replace {% set %} with conditional class assignment #}
                                 <a href="{{ url('patient_data:patient_cda_view_typed', patient_identity.url_patient_id|default:patient_identity.patient_id, 'L1') }}"
-                                    class="{{ l1_btn_class }}">
+                                    class="{% if cda_type == 'L1' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %}{% if not has_l1_cda %} disabled{% endif %}">
                                     <i class="fas fa-file-medical me-1"></i>L1 Original Document
                                     {% if not has_l1_cda %}<small>(Not Available)</small>{% endif %}
                                 </a>
-                                {% if cda_type == 'L3' %}
-                                {% set l3_btn_class = "btn btn-primary" %}
-                                {% else %}
-                                {% set l3_btn_class = "btn btn-outline-primary" %}
-                                {% endif %}
-                                {% if not has_l3_cda %}
-                                {% set l3_btn_class = l3_btn_class + " disabled" %}
-                                {% endif %}
+                                {# Django: Replace {% set %} with conditional class assignment #}
                                 <a href="{{ url('patient_data:patient_cda_view_typed', patient_identity.url_patient_id|default:patient_identity.patient_id, 'L3') }}"
-                                    class="{{ l3_btn_class }}">
+                                    class="{% if cda_type == 'L3' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %}{% if not has_l3_cda %} disabled{% endif %}">
                                     <i class="fas fa-language me-1"></i>L3 Patient Summary
                                     {% if not has_l3_cda %}<small>(Not Available)</small>{% endif %}
                                 </a>
@@ -1301,29 +1261,23 @@
                                 </p>
                                 {% endif %}
 
-                                {% if medication.fields.get('Treatment Start Date', {}).get('value') %}
+                                {% if medication.fields.Treatment_Start_Date.value %}
                                 <p class="mb-2"><strong>Start Date:</strong>
-                                    {{ format_medical_date(medication.fields.get('Treatment Start Date',
-                                    {}).get('value')) }}
+                                    {{ medication.fields.Treatment_Start_Date.value|document_date }}
                                 </p>
                                 {% endif %}
 
-                                {% if medication.fields.get('Treatment End Date', {}).get('value') %}
+                                {% if medication.fields.Treatment_End_Date.value %}
                                 <p class="mb-2"><strong>End Date:</strong>
-                                    {{ format_medical_date(medication.fields.get('Treatment End Date', {}).get('value'))
-                                    }}
+                                    {{ medication.fields.Treatment_End_Date.value|document_date }}
                                 </p>
                                 {% endif %}
 
-                                {% if medication.fields.get('Status Code', {}).get('value') %}
-                                {% if medication.fields.get('Status Code', {}).get('value') == 'Active' %}
-                                {% set status_class = 'bg-success' %}
-                                {% else %}
-                                {% set status_class = 'bg-secondary' %}
-                                {% endif %}
+                                {% if medication.fields.Status_Code.value %}
+                                {# Django: Replace {% set %} with conditional class assignment #}
                                 <p class="mb-2"><strong>Status:</strong>
-                                    <span class="badge {{ status_class }}">
-                                        {{ medication.fields.get('Status Code', {}).get('value') }}
+                                    <span class="badge {% if medication.fields.Status_Code.value == 'Active' %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ medication.fields.Status_Code.value }}
                                     </span>
                                 </p>
                                 {% endif %}
@@ -1398,8 +1352,8 @@
     <!-- Medical Sections with Clinical Tables -->
     {% if processed_sections %}
     {% for section in processed_sections %}
-    {% set section_index = loop.index0 %}
-    {% include 'patient_data/sections/medical_section.html' %}
+    {# Django: Use forloop.counter0 instead of {% set %} #}
+    {% include 'patient_data/sections/medical_section.html' with section_index=forloop.counter0 %}
     {% endfor %}
     {% else %}
     <div class="alert alert-warning">
