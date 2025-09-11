@@ -1077,7 +1077,7 @@
         </li>
         {% if patient_identity.patient_id %}
         <li class="breadcrumb-item">
-            <a href="{{ url('patient_data:patient_details', patient_identity.url_patient_id|default:patient_identity.patient_id) }}"
+            <a href="{% url 'patient_data:patient_details' patient_identity.url_patient_id|default:patient_identity.patient_id %}"
                 class="text-decoration-none">
                 <i class="fas fa-user me-1"></i>{{ patient_identity.given_name }} {{
                 patient_identity.family_name }}
@@ -1100,7 +1100,7 @@
     </div>
     <div class="page-actions">
         {% if patient_identity.patient_id %}
-        <a href="{{ url('patient_data:patient_details', patient_identity.url_patient_id|default:patient_identity.patient_id) }}"
+        <a href="{% url 'patient_data:patient_details' patient_identity.url_patient_id|default:patient_identity.patient_id %}"
             class="btn btn-outline-secondary btn-sm">
             <i class="fa fa-arrow-left"></i> Back to Patient
         </a>
@@ -1122,8 +1122,14 @@
                 <div class="card-header bg-primary text-white">
                     <h2 class="mb-0">
                         <i class="fas fa-user-injured me-2"></i>
-                        {{ patient_identity.full_name|default(patient_identity.given_name ~ ' ' ~
-                        patient_identity.family_name) or 'Patient' }}
+                        {# Django: Fix Jinja2 syntax - no ~ concatenation or |default() with args #}
+                        {% if patient_identity.full_name %}
+                        {{ patient_identity.full_name }}
+                        {% elif patient_identity.given_name or patient_identity.family_name %}
+                        {{ patient_identity.given_name|default:"" }} {{ patient_identity.family_name|default:"" }}
+                        {% else %}
+                        Patient
+                        {% endif %}
                     </h2>
                 </div>
                 <div class="card-body">
@@ -1169,13 +1175,13 @@
                         <div class="col-12">
                             <div class="btn-group" role="group" aria-label="CDA Type Selection">
                                 {# Django: Replace {% set %} with conditional class assignment #}
-                                <a href="{{ url('patient_data:patient_cda_view_typed', patient_identity.url_patient_id|default:patient_identity.patient_id, 'L1') }}"
+                                <a href="{% url 'patient_data:patient_cda_view_typed' patient_identity.url_patient_id|default:patient_identity.patient_id 'L1' %}"
                                     class="{% if cda_type == 'L1' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %}{% if not has_l1_cda %} disabled{% endif %}">
                                     <i class="fas fa-file-medical me-1"></i>L1 Original Document
                                     {% if not has_l1_cda %}<small>(Not Available)</small>{% endif %}
                                 </a>
                                 {# Django: Replace {% set %} with conditional class assignment #}
-                                <a href="{{ url('patient_data:patient_cda_view_typed', patient_identity.url_patient_id|default:patient_identity.patient_id, 'L3') }}"
+                                <a href="{% url 'patient_data:patient_cda_view_typed' patient_identity.url_patient_id|default:patient_identity.patient_id 'L3' %}"
                                     class="{% if cda_type == 'L3' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %}{% if not has_l3_cda %} disabled{% endif %}">
                                     <i class="fas fa-language me-1"></i>L3 Patient Summary
                                     {% if not has_l3_cda %}<small>(Not Available)</small>{% endif %}
@@ -1219,26 +1225,26 @@
                         <div class="col-lg-6">
                             <h5 class="text-primary mb-2">
                                 <i class="fas fa-prescription-bottle me-2"></i>
-                                {{ medication.fields.get('Medication Name', {}).get('value', 'Unknown Medication')
-                                }}
+                                {# Django: Convert .get() calls to attribute access #}
+                                {{ medication.fields.Medication_Name.value|default:"Unknown Medication" }}
                             </h5>
 
                             <div class="medication-details">
-                                {% if medication.fields.get('Active Ingredient Name', {}).get('value') %}
+                                {% if medication.fields.Active_Ingredient_Name.value %}
                                 <p class="mb-2"><strong>Active Ingredient:</strong>
-                                    {{ medication.fields.get('Active Ingredient Name', {}).get('value') }}
+                                    {{ medication.fields.Active_Ingredient_Name.value }}
                                 </p>
                                 {% endif %}
 
-                                {% if medication.fields.get('Dose Form Name', {}).get('value') %}
+                                {% if medication.fields.Dose_Form_Name.value %}
                                 <p class="mb-2"><strong>Dose Form:</strong>
-                                    {{ medication.fields.get('Dose Form Name', {}).get('value') }}
+                                    {{ medication.fields.Dose_Form_Name.value }}
                                 </p>
                                 {% endif %}
 
-                                {% if medication.fields.get('Route Name', {}).get('value') %}
+                                {% if medication.fields.Route_Name.value %}
                                 <p class="mb-2"><strong>Route:</strong>
-                                    {{ medication.fields.get('Route Name', {}).get('value') }}
+                                    {{ medication.fields.Route_Name.value }}
                                 </p>
                                 {% endif %}
                             </div>
@@ -1252,11 +1258,11 @@
                             </h6>
 
                             <div class="dosing-info">
-                                {% if medication.fields.get('Frequency Period Value', {}).get('value') and
-                                medication.fields.get('Frequency Period Unit', {}).get('value') %}
+                                {% if medication.fields.Frequency_Period_Value.value and
+                                medication.fields.Frequency_Period_Unit.value %}
                                 <p class="mb-2"><strong>Frequency:</strong>
-                                    {{ medication.fields.get('Frequency Period Value', {}).get('value') }}
-                                    time(s) per {{ medication.fields.get('Frequency Period Unit', {}).get('value')
+                                    {{ medication.fields.Frequency_Period_Value.value }}
+                                    time(s) per {{ medication.fields.Frequency_Period_Unit.value
                                     }}
                                 </p>
                                 {% endif %}
@@ -1295,47 +1301,41 @@
 
                             <div class="row">
                                 <div class="col-md-6">
-                                    {% if medication.fields.get('Ingredient Strength Numerator', {}).get('value') and
-                                    medication.fields.get('Ingredient Strength Numerator Unit', {}).get('value') %}
+                                    {% if medication.fields.Ingredient_Strength_Numerator.value and
+                                    medication.fields.Ingredient_Strength_Numerator_Unit.value %}
                                     <small class="text-muted d-block">
                                         <strong>Strength:</strong>
-                                        {{ medication.fields.get('Ingredient Strength Numerator', {}).get('value')
+                                        {{ medication.fields.Ingredient_Strength_Numerator.value
                                         }}
-                                        {{ medication.fields.get('Ingredient Strength Numerator Unit',
-                                        {}).get('value') }}
-                                        {% if medication.fields.get('Ingredient Strength Denominator', {}).get('value')
-                                        and medication.fields.get('Ingredient Strength Denominator Unit',
-                                        {}).get('value') %}
-                                        / {{ medication.fields.get('Ingredient Strength Denominator',
-                                        {}).get('value') }}
-                                        {{ medication.fields.get('Ingredient Strength Denominator Unit',
-                                        {}).get('value') }}
+                                        {{ medication.fields.Ingredient_Strength_Numerator_Unit.value }}
+                                        {% if medication.fields.Ingredient_Strength_Denominator.value
+                                        and medication.fields.Ingredient_Strength_Denominator_Unit.value %}
+                                        / {{ medication.fields.Ingredient_Strength_Denominator.value }}
+                                        {{ medication.fields.Ingredient_Strength_Denominator_Unit.value }}
                                         {% endif %}
                                     </small>
                                     {% endif %}
 
-                                    {% if medication.fields.get('Package Quantity', {}).get('value') and
-                                    medication.fields.get('Package Unit', {}).get('value') %}
+                                    {% if medication.fields.Package_Quantity.value and
+                                    medication.fields.Package_Unit.value %}
                                     <small class="text-muted d-block">
                                         <strong>Package:</strong>
-                                        {{ medication.fields.get('Package Quantity', {}).get('value') }}
-                                        {{ medication.fields.get('Package Unit', {}).get('value') }}
+                                        {{ medication.fields.Package_Quantity.value }}
+                                        {{ medication.fields.Package_Unit.value }}
                                     </small>
                                     {% endif %}
                                 </div>
 
                                 <div class="col-md-6">
-                                    {% if medication.fields.get('Medication Code', {}).get('value') %}
+                                    {% if medication.fields.Medication_Code.value %}
                                     <small class="text-muted d-block">
-                                        <strong>Code:</strong> {{ medication.fields.get('Medication Code',
-                                        {}).get('value') }}
+                                        <strong>Code:</strong> {{ medication.fields.Medication_Code.value }}
                                     </small>
                                     {% endif %}
 
-                                    {% if medication.fields.get('Indication Code', {}).get('value') %}
+                                    {% if medication.fields.Indication_Code.value %}
                                     <small class="text-muted d-block">
-                                        <strong>Indication:</strong> {{ medication.fields.get('Indication Code',
-                                        {}).get('value') }}
+                                        <strong>Indication:</strong> {{ medication.fields.Indication_Code.value }}
                                     </small>
                                     {% endif %}
                                 </div>
