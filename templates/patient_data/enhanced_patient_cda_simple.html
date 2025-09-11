@@ -237,8 +237,8 @@
             {% include 'patient_data/components/debug_modal.html' %}
 
             {% include 'patient_data/components/extended_patient_info.html' %}
-            {% if false %}
-            {# OLD INLINE IMPLEMENTATION REPLACED WITH MODULAR COMPONENTS - NEVER EXECUTED #}
+            {# OLD INLINE IMPLEMENTATION REPLACED WITH MODULAR COMPONENTS - COMMENTED OUT
+            {% comment %}
             {% if patient_extended_data %}
             <div class="card mt-4">
                 <div class="card-header bg-info text-white">
@@ -648,8 +648,7 @@
                     <p class="text-muted">No extended patient data available</p>
                 </div>
             </div>
-            {% endif %}
-            {% endif %}
+            {% endcomment %}
             <!-- END OF OLD INLINE EXTENDED HEADER IMPLEMENTATION -->
 
             <!-- STEP 3: Enhanced Clinical Sections with Dual-Language Support -->
