@@ -184,7 +184,8 @@
                         <i class="icon-download"></i>
                         CDA Download
                         <span class="button-subtitle">
-                            {% if l1_available %}L1 Document (PDF Structure){% else %}{{ preferred_cda_type|default:"L3" }} Document{% endif %}
+                            {% if l1_available %}L1 Document (PDF Structure){% else %}{{ preferred_cda_type|default:"L3"
+                            }} Document{% endif %}
                         </span>
                     </a>
 
@@ -233,7 +234,8 @@
                     </div>
                     <div class="metadata-item">
                         <i class="icon-eye"></i>
-                        <span>Rendering: {{ preferred_cda_type }} CDA ({% if preferred_cda_type == 'L3' %}Structured Clinical Content{% else %}Unstructured Document Content{% endif %})</span>
+                        <span>Rendering: {{ preferred_cda_type }} CDA ({% if preferred_cda_type == 'L3' %}Structured
+                            Clinical Content{% else %}Unstructured Document Content{% endif %})</span>
                     </div>
                 </div>
                 <span>Document Type: {{ preferred_cda_type }} CDA {% if l1_available %}with L1 ORCD{% endif %}</span>
