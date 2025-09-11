@@ -70,9 +70,7 @@ def _render_document_request_page(request, patient_data):
         ],
     }
 
-    return render(
-        request, "patient_data/request_clinical_documents.html", context
-    )
+    return render(request, "patient_data/request_clinical_documents.html", context)
 
 
 def _handle_document_request(request, patient_data):

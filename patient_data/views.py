@@ -6196,9 +6196,7 @@ def patient_orcd_view(request, patient_id):
             "l3_available": bool(l3_cda_content),
         }
 
-        return render(
-            request, "patient_data/patient_orcd.html", context
-        )
+        return render(request, "patient_data/patient_orcd.html", context)
 
     except PatientData.DoesNotExist:
         messages.error(request, "Patient data not found.")
@@ -7071,9 +7069,7 @@ def enhanced_cda_display(request):
             "default_target_language": "en",
         }
 
-        return render(
-            request, "patient_data/enhanced_patient_cda.html", context
-        )
+        return render(request, "patient_data/enhanced_patient_cda.html", context)
 
 
 def _create_dual_language_sections(original_result, translated_result, source_language):
@@ -7305,9 +7301,7 @@ def uploaded_documents_view(request):
         "total_documents": len(uploaded_docs),
     }
 
-    return render(
-        request, "patient_data/uploaded_documents.html", context
-    )
+    return render(request, "patient_data/uploaded_documents.html", context)
 
 
 def process_uploaded_document(request, doc_index):
@@ -7410,9 +7404,7 @@ def view_uploaded_document(request, doc_index):
             "is_single_language": processing_result.get("is_single_language", False),
         }
 
-        return render(
-            request, "patient_data/view_uploaded_document.html", context
-        )
+        return render(request, "patient_data/view_uploaded_document.html", context)
 
     except Exception as e:
         logger.error(f"Error viewing uploaded document: {str(e)}")
@@ -7770,9 +7762,7 @@ def select_document_view(request, patient_id):
             "available_document_types": match_data.get("available_document_types", []),
         }
 
-        return render(
-            request, "patient_data/select_document.html", context
-        )
+        return render(request, "patient_data/select_document.html", context)
 
     except Exception as e:
         logger.error(f"Error in select_document_view: {e}")

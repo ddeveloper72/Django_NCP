@@ -90,9 +90,7 @@ def participant_search(request):
         "domain_filter": domain_filter,
         "country_filter": country_filter,
     }
-    return render(
-        request, "smp_client/participant_search.html", context
-    )
+    return render(request, "smp_client/participant_search.html", context)
 
 
 @login_required
