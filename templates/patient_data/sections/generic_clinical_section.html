@@ -4,7 +4,7 @@
     id="{% if generic_config %}{% firstof generic_config.section_id }}{% else %}{{ section.section_id  generic-section %}{% endif %}">
     <div class="card">
         <!-- Section Header -->
-        <div class="card-header {% if generic_config %}{% firstof generic_config.header_class }}{% else %}{{ section.header_class 
+        <div class="card-header {% if generic_config %}{% firstof generic_config.header_class }}{% else %}{{ section.header_class
             bg-secondary %}{% endif %} text-white">
             <h5 class="mb-0">
                 <i class="{% if generic_config %}{% firstof generic_config.icon }}{% else %}{{ section.icon  fas
@@ -40,7 +40,7 @@
                 <div class="clinical-table">
                     <table class="table table-striped table-hover">
                         <thead
-                            class="{% if generic_config %}{{ generic_config.table_header_class }}{% else %}{{ section.table_header_class 
+                            class="{% if generic_config %}{{ generic_config.table_header_class }}{% else %}{{ section.table_header_class
                             table-secondary %}{% endif %}">
                             <tr>
                                 {% for header in section.clinical_table.headers %}
@@ -63,13 +63,13 @@
                                     {% if header.primary %}
                                     <div class="primary-field">
                                         <strong
-                                            class="{% if generic_config %}{% firstof generic_config.text_class }}{% else %}{{ section.text_class 
+                                            class="{% if generic_config %}{% firstof generic_config.text_class }}{% else %}{{ section.text_class
                                             text-secondary %}{% endif %}">{% firstof cell_data.display_value cell_data.value "N/A" %}</strong>
                                         {% if cell_data.has_terminology %}
                                         <div class="medical-terminology mt-1">
                                             {% for term in cell_data.terminology %}
                                             <span
-                                                class="badge {% if generic_config %}{% firstof generic_config.badge_class }}{% else %}{{ section.badge_class 
+                                                class="badge {% if generic_config %}{% firstof generic_config.badge_class }}{% else %}{{ section.badge_class
                                                 bg-secondary %}{% endif %} me-1"
                                                 title="{% firstof term.system }}: {{ term.code }}">
                                                 {{ term.display_name term.code %}
@@ -84,7 +84,7 @@
                                         <div class="medical-codes-container">
                                             {% for code in cell_data.codes %}
                                             <span
-                                                class="badge {% if generic_config %}{% firstof generic_config.badge_class }}{% else %}{{ section.badge_class 
+                                                class="badge {% if generic_config %}{% firstof generic_config.badge_class }}{% else %}{{ section.badge_class
                                                 bg-secondary %}{% endif %} me-1 mb-1"
                                                 title="{% firstof code.system }}: {{ code.code }}">
                                                 {{ code.display_name code.code %}
@@ -110,12 +110,12 @@
                 </div>
 
                 <!-- Generic Table Summary -->
-                <div class="card-footer bg-light {% if generic_config %}{% firstof generic_config.border_class }}{% else %}{{ section.border_class 
+                <div class="card-footer bg-light {% if generic_config %}{% firstof generic_config.border_class }}{% else %}{{ section.border_class
                     border-secondary %}{% endif %}">
                     <div class="row text-center">
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="{% if generic_config %}{% firstof generic_config.icon }}{% else %}{{ section.icon 
+                                <i class="{% if generic_config %}{% firstof generic_config.icon }}{% else %}{{ section.icon
                                     fas fa-file-medical %}{% endif %} me-1 {% if generic_config %}{% firstof generic_config.text_class }}{% else %}{{ section.text_class text-secondary %}{% endif %}"></i>
                                 <strong>{{ section.clinical_table.rows|length }}</strong> {% if generic_config %}{% firstof generic_config.entries_label }}{% else %}{{ section.entries_label entries %}{%
                                 endif %}
@@ -151,11 +151,11 @@
             {% else %}
             <!-- Empty Section -->
             <div class="card-body text-center py-5">
-                <div class="{% if generic_config %}{{ generic_config.empty_class }}{% else %}{{ section.empty_class 
+                <div class="{% if generic_config %}{{ generic_config.empty_class }}{% else %}{{ section.empty_class
                     text-info %}{% endif %}">
-                    <i class="{% if generic_config %}{% firstof generic_config.empty_icon }}{% else %}{{ section.empty_icon 
+                    <i class="{% if generic_config %}{% firstof generic_config.empty_icon }}{% else %}{{ section.empty_icon
                         fas fa-info-circle %}{% endif %} fa-3x mb-3"></i>
-                    <h6 class="{% if generic_config %}{% firstof generic_config.empty_class }}{% else %}{{ section.empty_class 
+                    <h6 class="{% if generic_config %}{% firstof generic_config.empty_class }}{% else %}{{ section.empty_class
                         text-info %}{% endif %}">
                         {% if generic_config %}{% firstof generic_config.empty_title }}{% else %}{{
                         section.empty_title No Data Available %}{% endif %}</h6>

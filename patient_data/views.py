@@ -7085,6 +7085,193 @@ def enhanced_cda_display(request):
             "description": "Multi-European Language CDA Document Processor with CTS Compliance",
             "supported_languages": supported_languages,
             "default_target_language": "en",
+            # TEST: Inject sample allergies section for template testing
+            "processed_sections": [
+                {
+                    'section_id': 'psAllergiesAndOtherAdverseReactions',
+                    'section_title': 'Allergies and Other Adverse Reactions',
+                    'title': 'Allergies and Other Adverse Reactions',
+                    'code': 'ALLERGIES',
+                    'has_entries': True,
+                    'entries': [
+                        {
+                            'display_name': 'Penicillin Allergy',
+                            'allergen': 'Penicillin',
+                            'reaction': 'Skin rash, hives',
+                            'severity': 'Moderate',
+                            'status': 'Active',
+                            'medical_terminology': [
+                                {
+                                    'system': 'SNOMED CT',
+                                    'code': '294505008',
+                                    'display_name': 'Allergy to penicillin'
+                                }
+                            ],
+                            'has_medical_terminology': True
+                        },
+                        {
+                            'display_name': 'Shellfish Allergy',
+                            'allergen': 'Shellfish',
+                            'reaction': 'Anaphylaxis',
+                            'severity': 'Severe',
+                            'status': 'Active',
+                            'medical_terminology': [
+                                {
+                                    'system': 'SNOMED CT',
+                                    'code': '300913006',
+                                    'display_name': 'Shellfish allergy'
+                                }
+                            ],
+                            'has_medical_terminology': True
+                        }
+                    ],
+                    'clinical_table': {
+                        'headers': [
+                            {
+                                'key': 'allergen',
+                                'label': 'Allergen',
+                                'type': 'allergen',
+                                'primary': True,
+                                'icon': 'fas fa-bug',
+                                'tooltip': 'Allergen substance'
+                            },
+                            {
+                                'key': 'reaction',
+                                'label': 'Reaction',
+                                'type': 'reaction',
+                                'primary': False,
+                                'icon': 'fas fa-fire',
+                                'tooltip': 'Allergic reaction'
+                            },
+                            {
+                                'key': 'severity',
+                                'label': 'Severity',
+                                'type': 'severity',
+                                'primary': False,
+                                'icon': 'fas fa-thermometer-full',
+                                'tooltip': 'Severity level'
+                            },
+                            {
+                                'key': 'status',
+                                'label': 'Status',
+                                'type': 'status',
+                                'primary': False
+                            }
+                        ],
+                        'rows': [
+                            {
+                                'data': {
+                                    'allergen': {
+                                        'display_value': 'Penicillin',
+                                        'value': 'Penicillin',
+                                        'has_terminology': True,
+                                        'terminology': [
+                                            {
+                                                'system': 'SNOMED CT',
+                                                'code': '294505008',
+                                                'display_name': 'Allergy to penicillin'
+                                            }
+                                        ],
+                                        'has_codes': False,
+                                        'codes': []
+                                    },
+                                    'reaction': {
+                                        'display_value': 'Skin rash, hives',
+                                        'value': 'Skin rash, hives',
+                                        'has_terminology': False,
+                                        'terminology': [],
+                                        'has_codes': False,
+                                        'codes': []
+                                    },
+                                    'severity': {
+                                        'display_value': 'Moderate',
+                                        'value': 'Moderate',
+                                        'has_terminology': False,
+                                        'terminology': [],
+                                        'has_codes': True,
+                                        'codes': [
+                                            {
+                                                'system': 'SNOMED CT',
+                                                'code': '6736007',
+                                                'display_name': 'Moderate severity'
+                                            }
+                                        ]
+                                    },
+                                    'status': {
+                                        'display_value': 'Active',
+                                        'value': 'Active',
+                                        'has_terminology': False,
+                                        'terminology': [],
+                                        'has_codes': False,
+                                        'codes': []
+                                    }
+                                }
+                            },
+                            {
+                                'data': {
+                                    'allergen': {
+                                        'display_value': 'Shellfish',
+                                        'value': 'Shellfish',
+                                        'has_terminology': True,
+                                        'terminology': [
+                                            {
+                                                'system': 'SNOMED CT',
+                                                'code': '300913006',
+                                                'display_name': 'Shellfish allergy'
+                                            }
+                                        ],
+                                        'has_codes': False,
+                                        'codes': []
+                                    },
+                                    'reaction': {
+                                        'display_value': 'Anaphylaxis',
+                                        'value': 'Anaphylaxis',
+                                        'has_terminology': True,
+                                        'terminology': [
+                                            {
+                                                'system': 'SNOMED CT',
+                                                'code': '39579001',
+                                                'display_name': 'Anaphylaxis'
+                                            }
+                                        ],
+                                        'has_codes': False,
+                                        'codes': []
+                                    },
+                                    'severity': {
+                                        'display_value': 'Severe',
+                                        'value': 'Severe',
+                                        'has_terminology': False,
+                                        'terminology': [],
+                                        'has_codes': True,
+                                        'codes': [
+                                            {
+                                                'system': 'SNOMED CT',
+                                                'code': '24484000',
+                                                'display_name': 'Severe'
+                                            }
+                                        ]
+                                    },
+                                    'status': {
+                                        'display_value': 'Active',
+                                        'value': 'Active',
+                                        'has_terminology': False,
+                                        'terminology': [],
+                                        'has_codes': False,
+                                        'codes': []
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
+            # TEST: Add sample patient identity for breadcrumb and header
+            "patient_identity": {
+                "given_name": "John",
+                "family_name": "Doe",
+                "patient_id": "TEST123",
+                "url_patient_id": "TEST123"
+            }
         }
 
         return render(request, "patient_data/enhanced_patient_cda.html", context)
