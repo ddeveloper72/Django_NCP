@@ -2199,13 +2199,27 @@ def patient_details_view(request, patient_id):
         )
 
         # Create a temporary patient object (not saved to DB)
+        # Convert birth_date string to proper date object for template formatting
+        birth_date_value = patient_info.get("birth_date")
+        if birth_date_value and isinstance(birth_date_value, str):
+            try:
+                from datetime import datetime
+                birth_date_value = datetime.strptime(birth_date_value, "%Y-%m-%d").date()
+            except (ValueError, TypeError):
+                birth_date_value = None
+
         patient_data = PatientData(
             id=patient_id,
             given_name=patient_info.get("given_name", "Unknown"),
             family_name=patient_info.get("family_name", "Patient"),
-            birth_date=patient_info.get("birth_date") or None,
+            birth_date=birth_date_value,
             gender=patient_info.get("gender", ""),
         )
+        
+        # Set access_timestamp for session-based patients to current time
+        # This ensures the "Submitted" field shows a proper timestamp
+        from django.utils import timezone
+        patient_data.access_timestamp = timezone.now()
 
         logger.info(
             f"Created temporary patient object: {patient_data.given_name} {patient_data.family_name} for NCP query result: {patient_id}"
