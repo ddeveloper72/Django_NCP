@@ -1,3 +1,4 @@
+{% load patient_filters %}
 {# Allergies and Other Adverse Reactions Section Template #}
 <!-- Allergies and Intolerances Section -->
 <div class="medical-section" id="allergies-section">
@@ -57,13 +58,12 @@
                             {% for row in section.clinical_table.rows %}
                             <tr class="table-warning">
                                 {% for header in section.clinical_table.headers %}
-                                {% set cell_data = row.data[header.key] %}
+                                {# Django: Use {% with %} instead of {% set %} #}
+                                {% with cell_data=row.data|lookup:header.key %}
                                 <td>
                                     {% if header.primary %}
                                     <div class="primary-field">
-                                        <strong class="text-danger">{{ cell_data.display_value|default:cell_data.value
-                                            or
-                                            'N/A' }}</strong>
+                                        <strong class="text-danger">{{ cell_data.display_value|default:cell_data.value|default:'N/A' }}</strong>
                                         {% if cell_data.has_terminology %}
                                         <div class="medical-terminology mt-1">
                                             {% for term in cell_data.terminology %}
@@ -92,6 +92,7 @@
                                     </div>
                                     {% endif %}
                                 </td>
+                                {% endwith %}
                                 {% endfor %}
                             </tr>
                             {% endfor %}

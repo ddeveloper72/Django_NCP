@@ -1,3 +1,4 @@
+{% load patient_filters %}
 {# Active Problems Section Template #}
 <!-- Active Problems/Conditions Section -->
 <div class="medical-section" id="problems-section">
@@ -59,7 +60,7 @@
                             {% for row in section.clinical_table.rows %}
                             <tr>
                                 {% for header in section.clinical_table.headers %}
-                                {% set cell_data = row.data[header.key] %}
+                                {% with cell_data=row.data|lookup:header.key %}
                                 <td>
                                     {% if header.primary %}
                                     <div class="primary-field">
@@ -92,8 +93,8 @@
                                         {{ cell_data.display_value|default:cell_data.value or 'N/A' }}
                                         {% endif %}
                                     </div>
-                                    {% endif %}
-                                </td>
+                                    {% endif %}                                </td>
+                                {% endwith %}
                                 {% endfor %}
                             </tr>
                             {% endfor %}
