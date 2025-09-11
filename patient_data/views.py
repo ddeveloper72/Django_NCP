@@ -2164,9 +2164,7 @@ def patient_data_view(request):
 
         form = PatientDataForm(initial=initial_data)
 
-    return render(
-        request, "patient_data/patient_form.html", {"form": form}, using="jinja2"
-    )
+    return render(request, "patient_data/patient_form.html", {"form": form})
 
 
 def patient_details_view(request, patient_id):
@@ -2176,7 +2174,12 @@ def patient_details_view(request, patient_id):
     session_key = f"patient_match_{patient_id}"
     match_data = request.session.get(session_key)
 
-    if match_data and not PatientData.objects.filter(id=patient_id).exists():
+    if (
+        match_data
+        and not PatientData.objects.filter(
+            patient_identifier__patient_id=patient_id
+        ).exists()
+    ):
         # This is an NCP query result - create temp patient from session data
         patient_info = match_data["patient_data"]
 
@@ -2210,7 +2213,11 @@ def patient_details_view(request, patient_id):
     else:
         # Standard database lookup
         try:
-            patient_data = PatientData.objects.get(id=patient_id)
+            patient_data = PatientData.objects.filter(
+                patient_identifier__patient_id=patient_id
+            ).first()
+            if not patient_data:
+                raise PatientData.DoesNotExist
         except PatientData.DoesNotExist:
             messages.error(request, "Patient data not found.")
             return redirect("patient_data:patient_data_form")
@@ -2356,9 +2363,7 @@ def patient_details_view(request, patient_id):
             }
         )
 
-        return render(
-            request, "patient_data/patient_details.html", context, using="jinja2"
-        )
+        return render(request, "patient_data/patient_details.html", context)
     else:
         # Session data is missing - provide fallback with clear message
         logger.warning(
@@ -2381,9 +2386,7 @@ def patient_details_view(request, patient_id):
             }
         )
 
-        return render(
-            request, "patient_data/patient_details.html", context, using="jinja2"
-        )
+        return render(request, "patient_data/patient_details.html", context)
 
 
 def patient_cda_view(request, patient_id, cda_type=None):
@@ -3853,7 +3856,6 @@ def patient_cda_view(request, patient_id, cda_type=None):
             request,
             "patient_data/enhanced_patient_cda_simple.html",
             context,
-            using="jinja2",
         )
 
     except Exception as e:
@@ -3906,7 +3908,6 @@ def patient_cda_view(request, patient_id, cda_type=None):
                 request,
                 "patient_data/enhanced_patient_cda.html",
                 context,
-                using="jinja2",
             )
 
         except Exception as render_error:
@@ -6196,7 +6197,7 @@ def patient_orcd_view(request, patient_id):
         }
 
         return render(
-            request, "patient_data/patient_orcd.html", context, using="jinja2"
+            request, "patient_data/patient_orcd.html", context
         )
 
     except PatientData.DoesNotExist:
@@ -6697,7 +6698,6 @@ def patient_search_results(request):
         request,
         "patient_data/search_results.html",
         {"message": "Please use the new patient search form."},
-        using="jinja2",
     )
 
 
@@ -7072,7 +7072,7 @@ def enhanced_cda_display(request):
         }
 
         return render(
-            request, "patient_data/enhanced_patient_cda.html", context, using="jinja2"
+            request, "patient_data/enhanced_patient_cda.html", context
         )
 
 
@@ -7306,7 +7306,7 @@ def uploaded_documents_view(request):
     }
 
     return render(
-        request, "patient_data/uploaded_documents.html", context, using="jinja2"
+        request, "patient_data/uploaded_documents.html", context
     )
 
 
@@ -7411,7 +7411,7 @@ def view_uploaded_document(request, doc_index):
         }
 
         return render(
-            request, "patient_data/view_uploaded_document.html", context, using="jinja2"
+            request, "patient_data/view_uploaded_document.html", context
         )
 
     except Exception as e:
@@ -7771,7 +7771,7 @@ def select_document_view(request, patient_id):
         }
 
         return render(
-            request, "patient_data/select_document.html", context, using="jinja2"
+            request, "patient_data/select_document.html", context
         )
 
     except Exception as e:

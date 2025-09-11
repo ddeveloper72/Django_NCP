@@ -1,0 +1,318 @@
+// ========================================
+// Contact Components - Patient Contact Information Cards
+// Styles for contact-info-card, contact-type, contact-details, etc.
+// ========================================
+
+@import '../utils/variables';
+@import '../utils/mixins';
+
+// Admin Section Styles (from working administrative_section.html)
+.admin-section {
+  margin-bottom: 2rem;
+}
+
+.admin-contact-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.admin-card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin: -1.5rem -1.5rem 1rem -1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+
+  i {
+    margin-right: 0.5rem;
+  }
+}
+
+.admin-info-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.admin-label {
+  flex: 0 0 120px;
+  font-weight: 600;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+
+  i {
+    margin-right: 0.5rem;
+    color: #667eea;
+  }
+}
+
+.admin-value {
+  flex: 1;
+  color: #2d3748;
+  line-height: 1.5;
+}
+
+// Contact Information Card Base
+.contact-info-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  position: relative;
+
+  // Hover effect
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: #007b7f;
+  }
+
+  // Contact type header
+  .contact-type {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #007b7f, #4fd1c7);
+      border-radius: 12px 12px 0 0;
+    }
+  }
+
+  // Contact details content
+  .contact-details {
+    color: #2d3748;
+    line-height: 1.6;
+
+    strong {
+      color: #1a202c;
+      font-weight: 600;
+    }
+
+    .text-muted {
+      color: #718096;
+      font-size: 0.875rem;
+    }
+
+    // Spacing for multiple details
+    &.mt-2 {
+      margin-top: 0.5rem;
+    }
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+
+    .contact-type {
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .contact-details {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// Contact Links (phone, email)
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  color: #007b7f;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+
+  &:hover {
+    color: #065f63;
+    background-color: rgba(0, 123, 127, 0.1);
+    text-decoration: none;
+    transform: translateX(2px);
+  }
+
+  i {
+    margin-right: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  // Phone link specific styles
+  &.phone-link {
+    &:before {
+      content: '📞';
+      margin-right: 0.25rem;
+    }
+  }
+
+  // Email link specific styles
+  &.email-link {
+    &:before {
+      content: '✉️';
+      margin-right: 0.25rem;
+    }
+  }
+}
+
+// Professional card variant
+.professional-card {
+  .contact-details {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #007b7f;
+  }
+}
+
+// Administrative contact cards
+.admin-contact-card {
+  .admin-info-row {
+    .admin-value {
+      .contact-item {
+        .contact-type {
+          background: #edf2f7;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 576px) {
+  .contact-info-card {
+    margin-bottom: 1rem;
+
+    .contact-link {
+      display: block;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+  }
+}
+
+// Specific card variants for different contact types
+.admin-contact-card {
+  &.patient-contact .admin-card-header {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: white;
+  }
+
+  &.guardian-contact .admin-card-header {
+    background: linear-gradient(135deg, #8e7cc3 0%, #7b68a9 100%);
+    color: white;
+  }
+
+  &.other-contact .admin-card-header {
+    background: linear-gradient(135deg, #4db6ac 0%, #42a29a 100%);
+    color: white;
+  }
+
+  &.hcp-contact .admin-card-header {
+    background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+    color: white;
+  }
+
+  &.legal-contact .admin-card-header {
+    background: linear-gradient(135deg, #fa8c16 0%, #d46b08 100%);
+    color: white;
+  }
+
+  &.custodian-contact .admin-card-header {
+    background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
+    color: white;
+  }
+
+  &.preferred-hcp-contact .admin-card-header {
+    background: linear-gradient(135deg, #eb2f96 0%, #c41d7f 100%);
+    color: white;
+  }
+}
+
+// Enhanced admin info rows for better mobile display
+.admin-info-row {
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-label {
+    @media (max-width: 768px) {
+      flex: none;
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  .admin-value {
+    @media (max-width: 768px) {
+      margin-left: 1.5rem;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+
+      &.bg-info {
+        background-color: #36b9cc !important;
+      }
+
+      &.bg-secondary {
+        background-color: #858796 !important;
+      }
+
+      &.bg-primary {
+        background-color: #4e73df !important;
+      }
+
+      &.bg-warning {
+        background-color: #f6c23e !important;
+        color: #333 !important;
+      }
+    }
+  }
+}
+
+// Section spacing
+.admin-section {
+  &.mb-4 {
+    margin-bottom: 1.5rem !important;
+  }
+}

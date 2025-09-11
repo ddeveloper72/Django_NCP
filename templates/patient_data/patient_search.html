@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Search - EU eHealth NCP{% endblock %}
+
+
+{% block content %}
+<div class="patient-search-page">
+    <div class="country-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>
+                <span class="country-flag country-flag-de">DE</span>
+                Patient Search
+            </h1>
+            <div class="header-actions">
+                <a href="/" class="btn btn-light ms-2">
+                    ← Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-form">
+        <!-- Display Django messages -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="ism-info">
+            <h4>🇪🇺 EU Patient Search</h4>
+            <p class="mb-1">
+                <strong>Search for patient records across EU member states using the patient's credentials</strong>
+            </p>
+            <p class="mb-0">
+                <small>You can find the patient using the following criteria</small>
+            </p>
+        </div>
+
+        <form method="post" id="patientSearchForm" novalidate>
+            {% csrf_token %}
+
+            <div class="field-group">
+                <h5 class="field-group-title">Patient Information</h5>
+
+                <div class="form-group">
+                    <label for="member_state_id" class="form-label">
+                        Member State <span class="required">*</span>
+                    </label>
+                    <select name="member_state_id" id="member_state_id" class="form-control" required>
+                        <option value="">Select Member State</option>
+                        {% for state in member_states %}
+                        <option value="{{ state.id }}" {% if state.id|string==member_state_id|string %}selected{% endif
+                            %}>
+                            {{ state.country_name }} ({{ state.country_code }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Local CDA Search Option -->
+                <div class="local-search-section">
+                    <div class="local-search-option">
+                        <input type="checkbox" name="use_local_search" id="use_local_search" {% if use_local_search
+                            %}checked{% endif %} class="local-search-checkbox">
+                        <div class="local-search-content">
+                            <label for="use_local_search" class="local-search-label">
+                                🏠 Search Local CDA Documents
+                            </label>
+                            <div class="local-search-description">
+                                Search Patient Summary documents in local test data following PS Display Guidelines
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="national_person_id" class="form-label">
+                        National Person Identifier <span class="required">*</span>
+                    </label>
+                    <input type="text" name="national_person_id" id="national_person_id" class="form-control"
+                        value="{{ national_person_id|default:"" }}" placeholder="Enter patient's national identifier"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="birthdate" class="form-label">
+                        Birthdate <span class="required">*</span>
+                    </label>
+                    <input type="text" name="birthdate" id="birthdate" class="form-control"
+                        value="{{ birthdate|default:"" }}" placeholder="yyyy/MM/dd" pattern="\d{4}/\d{2}/\d{2}"
+                        required>
+                    <small class="form-text text-muted">(yyyy/MM/dd)</small>
+                </div>
+            </div>
+
+            <!-- Break Glass Section -->
+            <div class="break-glass-section">
+                <h5 class="break-glass-title">🚨 Emergency Access</h5>
+                <div class="break-glass-checkbox">
+                    <input type="checkbox" name="break_glass" id="break_glass" {% if break_glass %}checked{% endif %}
+                        onchange="toggleBreakGlassReason()">
+                    <label for="break_glass" class="break-glass-label">
+                        Break the glass - Emergency access without patient consent
+                    </label>
+                </div>
+                <p class="break-glass-explanation">
+                    Check this box only in medical emergencies where patient consent cannot be obtained.
+                    This action will be logged and audited.
+                </p>
+
+                <div class="break-glass-reason" id="breakGlassReason" {% if not break_glass %}style="display: none;" {%
+                    endif %}>
+                    <label for="break_glass_reason_text" class="form-label">
+                        Emergency Reason <span class="required">*</span>
+                    </label>
+                    <textarea name="break_glass_reason" id="break_glass_reason_text" class="form-control" rows="3"
+                        placeholder="Please provide a detailed explanation of the medical emergency...">{{ break_glass_reason|default:"" }}</textarea>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    🔍 Search Patient
+                </button>
+            </div>
+        </form>
+
+        <!-- CDA Document Upload Section -->
+        <div class="cda-upload-section">
+            <h5 class="upload-section-title">📄 Upload CDA Document</h5>
+            <p class="upload-description">
+                Upload a CDA (Clinical Document Architecture) file to add it to the searchable database.
+                Supported formats: XML files containing Patient Summary documents.
+            </p>
+
+            <form method="post" enctype="multipart/form-data" action="{% url 'patient_data:upload_cda_document' %}"
+                class="upload-form">
+                {% csrf_token %}
+
+                <div class="upload-field-group">
+                    <div class="file-upload-wrapper">
+                        <input type="file" name="cda_file" id="cda_file" class="file-upload-input" accept=".xml,.cda"
+                            required>
+                        <label for="cda_file" class="file-upload-label">
+                            <span class="upload-icon">📁</span>
+                            <span class="upload-text">Choose CDA File</span>
+                            <span class="upload-subtext">Click to browse or drag & drop</span>
+                        </label>
+                        <div class="file-upload-feedback" id="fileUploadFeedback"></div>
+                    </div>
+
+                    <div class="upload-options">
+                        <div class="form-group-inline">
+                            <label for="auto_process" class="checkbox-label">
+                                <input type="checkbox" name="auto_process" id="auto_process" checked>
+                                <span class="checkmark"></span>
+                                Process immediately after upload
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="upload-actions">
+                    <button type="submit" class="btn btn-secondary">
+                        📤 Upload Document
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleBreakGlassReason() {
+        const checkbox = document.getElementById('break_glass');
+        const reasonSection = document.getElementById('breakGlassReason');
+        const reasonTextarea = document.getElementById('break_glass_reason_text');
+
+        if (checkbox.checked) {
+            reasonSection.style.display = 'block';
+            reasonTextarea.required = true;
+        } else {
+            reasonSection.style.display = 'none';
+            reasonTextarea.required = false;
+            reasonTextarea.value = '';
+        }
+    }
+
+    // Date input formatting
+    document.getElementById('birthdate').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 4) {
+            value = value.substring(0, 4) + '/' + value.substring(4);
+        }
+        if (value.length >= 7) {
+            value = value.substring(0, 7) + '/' + value.substring(7, 9);
+        }
+        e.target.value = value;
+    });
+
+    // Initialize break glass reason visibility
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleBreakGlassReason();
+        initializeFileUpload();
+    });
+
+    // File upload functionality
+    function initializeFileUpload() {
+        const fileInput = document.getElementById('cda_file');
+        const fileLabel = document.querySelector('.file-upload-label');
+        const feedback = document.getElementById('fileUploadFeedback');
+
+        fileInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Update label text
+                const uploadText = fileLabel.querySelector('.upload-text');
+                uploadText.textContent = file.name;
+
+                // Validate file type
+                const validExtensions = ['.xml', '.cda'];
+                const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+
+                if (!validExtensions.includes(fileExtension)) {
+                    feedback.innerHTML = '<span class="text-error">⚠️ Please select an XML or CDA file</span>';
+                    feedback.style.display = 'block';
+                    fileLabel.classList.add('upload-error');
+                } else {
+                    feedback.innerHTML = '<span class="text-success">✅ File ready for upload</span>';
+                    feedback.style.display = 'block';
+                    fileLabel.classList.remove('upload-error');
+                    fileLabel.classList.add('upload-ready');
+                }
+            } else {
+                // Reset to original state
+                const uploadText = fileLabel.querySelector('.upload-text');
+                uploadText.textContent = 'Choose CDA File';
+                feedback.style.display = 'none';
+                fileLabel.classList.remove('upload-error', 'upload-ready');
+            }
+        });
+
+        // Drag and drop functionality
+        fileLabel.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            fileLabel.classList.add('upload-dragover');
+        });
+
+        fileLabel.addEventListener('dragleave', function (e) {
+            e.preventDefault();
+            fileLabel.classList.remove('upload-dragover');
+        });
+
+        fileLabel.addEventListener('drop', function (e) {
+            e.preventDefault();
+            fileLabel.classList.remove('upload-dragover');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+</script>
+{% endblock %}

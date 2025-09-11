@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Logged Out - EU NCP Portal{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="container">
+        <div class="auth-card">
+            <div class="auth-header auth-header-success">
+                <div class="auth-logo">
+                    <i class="fa fa-check-circle"></i>
+                </div>
+                <h1 class="auth-title">Logged Out</h1>
+                <p class="auth-subtitle">You have been successfully logged out</p>
+            </div>
+
+            <div class="auth-body">
+                <div class="success-message">
+                    <i class="fa fa-sign-out"></i>
+                    <strong>Logout Successful</strong>
+                    <p>Thank you for using the EU NCP Portal. You have been securely logged out of your account.</p>
+                </div>
+
+                <a href="{% url 'login' %}" class="btn-auth">
+                    <i class="fa fa-sign-in"></i> Sign In Again
+                </a>
+
+                <a href="/" class="btn-auth btn-secondary">
+                    <i class="fa fa-home"></i> Go to Home
+                </a>
+
+                <div class="auth-footer">
+                    <i class="fa fa-shield"></i>
+                    Your session has been securely terminated
+                    <br>
+                    <span>For your security, please close your browser if you're on a shared computer</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

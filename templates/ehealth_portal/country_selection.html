@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<!-- Country selection styles are handled by SASS compilation in main.css -->
+<link href="{% static 'css/patient_cda_ps_guidelines.css' %}?v=20250804" rel="stylesheet" media="screen">
+{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb breadcrumb-enhanced">
+        <li class="breadcrumb-item">
+            <a href="/" class="breadcrumb-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-globe"></i> Country Selection
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="country-selection-page">
+    <!-- Quick Actions moved to top of content -->
+    <div class="mb-4 text-end">
+        <a href="/" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <a href="/patients/" class="btn btn-secondary btn-sm">
+            <i class="fas fa-search-plus"></i> Advanced Search
+        </a>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="container">
+        <div class="country-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>
+                    🏥 {{ page_title }}
+                </h1>
+            </div>
+            <p class="page-subtitle">Select a country to search for patient records using their International Search
+                Mask (ISM)</p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" placeholder="Search countries..." id="countrySearch" class="search-input">
+            </div>
+        </div>
+
+        <!-- Country Grid -->
+        <div class="country-grid">
+            {% for country in countries %}
+            <div class="country-card{% if not country.available %} unavailable{% endif %}" {% if country.available
+                %}onclick="selectCountry('{{ country.code }}')" {% endif %}>
+                <div class="country-flag">
+                    <img src="{{ static('flags/' + country.code + '.webp') }}" alt="{{ country.name }} flag" />
+                </div>
+                <div class="country-name">{{ country.name }}</div>
+                <div class="country-status {% if country.available %}available{% else %}unavailable{% endif %}">
+                    {% if country.available %}✅ Available{% else %}❌ Unavailable{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectCountry(countryCode) {
+        window.location.href = `/portal/country/${countryCode}/search/`;
+    }
+
+    // Country search functionality
+    document.getElementById('countrySearch').addEventListener('input', function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.country-card');
+
+        cards.forEach(card => {
+            const countryName = card.querySelector('.country-name').textContent.toLowerCase();
+            if (countryName.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // Add hover sound effect (optional)
+    document.querySelectorAll('.country-card').forEach(card => {
+        card.addEventListener('mouseenter', function () {
+            if (!this.classList.contains('unavailable')) {
+                // Could add sound effect here
+            }
+        });
+    });
+</script>
+{% endblock %}

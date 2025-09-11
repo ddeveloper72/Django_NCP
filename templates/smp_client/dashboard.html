@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}SMP Dashboard - EU eHealth NCP{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <!-- Dashboard Header -->
+    <div class="page-header">
+        <h1>🔗 SMP Dashboard</h1>
+        <p class="page-subtitle">Service Metadata Publisher Management Console</p>
+    </div>
+
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="dashboard-stats">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-content">
+                    <div class="stat-label">Total Participants</div>
+                    <div class="stat-value">{{ total_participants|default:"0" }}</div>
+                    <div class="stat-change positive">+12% from last month</div>
+                </div>
+                <div class="stat-icon">👥</div>
+            </div>
+
+            <div class="stat-card stat-card-success">
+                <div class="stat-content">
+                    <div class="stat-label">Active Services</div>
+                    <div class="stat-value">{{ active_services|default:"0" }}</div>
+                    <div class="stat-change positive">+5% from last month</div>
+                </div>
+                <div class="stat-icon">🔧</div>
+            </div>
+
+            <div class="stat-card stat-card-warning">
+                <div class="stat-content">
+                    <div class="stat-label">Documents</div>
+                    <div class="stat-value">{{ total_documents|default:"0" }}</div>
+                    <div class="stat-change positive">+8% from last month</div>
+                </div>
+                <div class="stat-icon">📄</div>
+            </div>
+
+            <div class="stat-card stat-card-info">
+                <div class="stat-content">
+                    <div class="stat-label">Countries</div>
+                    <div class="stat-value">{{ country_count|default:"0" }}</div>
+                </div>
+                <div class="stat-icon">🌍</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="content-section">
+            <h2 class="section-title">Quick Actions</h2>
+
+            <div class="actions-grid">
+                <div class="action-card">
+                    <div class="action-icon">👥</div>
+                    <h3>Manage Participants</h3>
+                    <p>Add, edit, or remove SMP participants and their metadata.</p>
+                    <a href="{% url 'smp_client:participant_search' %}" class="btn btn-primary">
+                        View Participants
+                    </a>
+                </div>
+
+                <div class="action-card">
+                    <div class="action-icon">📄</div>
+                    <h3>Document Services</h3>
+                    <p>Configure and manage document service endpoints.</p>
+                    <a href="{% url 'smp_client:list_documents' %}" class="btn btn-primary">
+                        Manage Documents
+                    </a>
+                </div>
+
+                <div class="action-card">
+                    <div class="action-icon">🔄</div>
+                    <h3>European SMP Sync</h3>
+                    <p>Synchronize with the European SMP registry for cross-border services.</p>
+                    <button onclick="syncWithEuropeanSMP()" class="btn btn-primary">
+                        🔄 Sync with European SMP
+                    </button>
+                    <div id="sync-result" class="sync-result"></div>
+                </div>
+
+                <div class="action-card">
+                    <div class="action-icon">⚙️</div>
+                    <h3>System Configuration</h3>
+                    <p>Configure SMP server settings and preferences.</p>
+                    <a href="/admin/" class="btn btn-primary">
+                        Admin Panel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <div class="content-section">
+            <h2 class="section-title">Recent Activity</h2>
+
+            {% if recent_activities %}
+            <div class="activity-list">
+                {% for activity in recent_activities %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        {% if activity.type == 'participant_added' %}
+                        👥
+                        {% elif activity.type == 'document_updated' %}
+                        📄
+                        {% elif activity.type == 'sync_completed' %}
+                        🔄
+                        {% else %}
+                        📝
+                        {% endif %}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-description">{{ activity.description }}</div>
+                        <div class="activity-timestamp">{{ activity.timestamp }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="activity-footer">
+                <a href="{% url 'smp_client:activity_log' %}" class="btn btn-outline-primary">
+                    View All Activity
+                </a>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <h3>No Recent Activity</h3>
+                <p>There has been no recent activity on this SMP server.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- System Status Section -->
+        <div class="content-section">
+            <h2 class="section-title">System Status</h2>
+
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-label">SMP Server</div>
+                    <div class="status-value status-online">
+                        <span class="status-indicator"></span>
+                        Online
+                    </div>
+                </div>
+
+                <div class="status-item">
+                    <div class="status-label">Database</div>
+                    <div class="status-value status-online">
+                        <span class="status-indicator"></span>
+                        Connected
+                    </div>
+                </div>
+
+                <div class="status-item">
+                    <div class="status-label">European SMP</div>
+                    <div class="status-value {{ european_smp_status|lower }}">
+                        <span class="status-indicator"></span>
+                        {{ european_smp_status|default:"Unknown" }}
+                    </div>
+                </div>
+
+                <div class="status-item">
+                    <div class="status-label">Last Sync</div>
+                    <div class="status-value">
+                        {{ last_sync_time|default:"Never" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get CSRF token from cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function syncWithEuropeanSMP() {
+        const resultDiv = document.getElementById('sync-result');
+        const button = event.target;
+
+        button.textContent = '🔄 Syncing...';
+        button.disabled = true;
+
+        try {
+            const response = await fetch('{% url 'smp_client:european_smp_sync' %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        ✅ Sync completed! Synced ${data.synced_participants} participants.
+                    </div>
+                `;
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        ❌ Sync failed: ${data.error}
+                    </div>
+                `;
+            }
+        } catch (error) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    ❌ Network error: ${error.message}
+                </div>
+            `;
+        }
+
+        button.textContent = '🔄 Sync with European SMP';
+        button.disabled = false;
+    }
+</script>
+{% endblock %}

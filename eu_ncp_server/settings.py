@@ -25,7 +25,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-me-in-production")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",")
 
 
 # Application definition
@@ -79,23 +79,6 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.csrf",
-            ],
-        },
-    },
-    {
-        "BACKEND": "django.template.backends.jinja2.Jinja2",
-        "DIRS": [
-            BASE_DIR / "templates" / "jinja2",
-            BASE_DIR / "ehealth_portal" / "templates" / "jinja2",
-        ],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "environment": "eu_ncp_server.jinja2.environment",
-            "context_processors": [
-                "django.template.context_processors.request",
-                "django.template.context_processors.csrf",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
             ],
         },
     },

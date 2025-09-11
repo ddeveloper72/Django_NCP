@@ -1,0 +1,173 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EU NCP Portal{% endblock %}</title>
+
+    <!-- DMZ-Compatible CSS (no external CDNs) -->
+    <link href="{% static 'css/main.css' %}?v=20250910" rel="stylesheet" media="screen">
+    <link href="{% static 'rest_framework/css/font-awesome-4.0.3.css' %}" rel="stylesheet" media="screen">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Navigation Header - HSE-Inspired Design -->
+    {% if request.resolver_match.url_name == 'home' %}
+    <!-- Homepage Hero Header -->
+    <header class="hero-header">
+        <div class="hero-container">
+            <div class="hero-branding">
+                <div class="hero-logo">
+                    <i class="fa fa-hospital-o"></i>
+                </div>
+                <div class="hero-title">
+                    <h1>EU eHealth NCP Portal</h1>
+                    <p class="hero-subtitle">Cross-Border Healthcare Document Exchange Platform</p>
+                </div>
+            </div>
+        </div>
+    </header>
+    {% else %}
+    <!-- Standard Navigation Bar for other pages -->
+    <nav class="navbar navbar-main">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                <span class="brand-logo"><i class="fa fa-hospital-o"></i></span>
+                <span class="brand-text">EU NCP Portal</span>
+            </a>
+
+            <!-- Main Navigation -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a href="/" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                        <i class="fa fa-home"></i>
+                        Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/patients/search/" class="nav-link {% if 'patients' in request.path %}active{% endif %}">
+                        <i class="fa fa-search"></i>
+                        Patient Search
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/portal/" class="nav-link {% if 'portal' in request.path %}active{% endif %}">
+                        <i class="fa fa-globe"></i>
+                        Portal
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/" class="nav-link {% if 'admin' in request.path %}active{% endif %}">
+                        <i class="fa fa-cog"></i>
+                        Admin
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Enhanced Login Status Indicator -->
+            <div class="login-status">
+                {% if request.user.is_authenticated %}
+                <div class="user-info">
+                    <span class="user-welcome">
+                        <i class="fa fa-user-circle"></i>
+                        Welcome, {{ request.user.username }}
+                    </span>
+                    <a href="/accounts/logout/" class="btn btn-logout" title="Logout">
+                        <i class="fa fa-sign-out"></i>
+                        Logout
+                    </a>
+                </div>
+                {% else %}
+                <div class="login-prompt">
+                    <span class="login-message">
+                        <i class="fa fa-user-o"></i>
+                        Not logged in
+                    </span>
+                    <a href="/accounts/login/" class="btn btn-login">
+                        <i class="fa fa-sign-in"></i>
+                        Login
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Page Context Area -->
+            <div class="page-context">
+                {% block page_context %}{% endblock %}
+            </div>
+
+            <button class="navbar-toggle" type="button">
+                <span>☰</span>
+            </button>
+        </div>
+    </nav>
+    {% endif %}
+
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        {% if messages %}
+        <div class="container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible">
+                {{ message }}
+                <button type="button" class="alert-close">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>EU eHealth NCP Portal</h3>
+                <p>Cross-border healthcare document exchange system built with Django and powered by secure medical data
+                    standards.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/patients/search/">Patient Search</a></li>
+                    <li><a href="/portal/">Portal</a></li>
+                    <li><a href="/admin/">Administration</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Technical Info</h3>
+                <p class="tech-info">Django {{ django_version }} | Python {{ python_version }}</p>
+                <p class="build-info">Built for DMZ deployment</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 EU eHealth NCP Portal. Compliant with European Cross-Border Healthcare Standards.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        document.querySelector('.navbar-toggle').addEventListener('click', function () {
+            document.querySelector('.navbar-nav').classList.toggle('active');
+        });
+
+        // Alert dismissal
+        document.querySelectorAll('.alert-close').forEach(button => {
+            button.addEventListener('click', function () {
+                this.parentElement.style.display = 'none';
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

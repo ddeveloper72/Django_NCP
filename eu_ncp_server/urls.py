@@ -43,7 +43,7 @@ def home_view(request):
         "current_smp_ui_url": current_smp_ui_url,
         "current_smp_api_url": current_smp_api_url,
     }
-    return render(request, "home.html", context, using="jinja2")
+    return render(request, "home.html", context)
 
 
 @csrf_exempt

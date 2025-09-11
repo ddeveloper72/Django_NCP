@@ -1,4 +1,4 @@
-{% extends "base_jinja2.html" %}
+{% extends "base.html" %}
 
 {% block title %}Select Document - EU NCP Portal{% endblock %}
 
@@ -60,17 +60,17 @@
 
                                         {% for doc in l1_documents %}
                                         <div
-                                            class="form-check mb-3 p-3 border rounded {% if loop.index0 == selected_l1_index %}bg-light border-primary{% endif %}">
+                                            class="form-check mb-3 p-3 border rounded {% if forloop.counter0 == selected_l1_index %}bg-light border-primary{% endif %}">
                                             <input class="form-check-input" type="radio" name="document_index"
-                                                value="{{ loop.index0 }}" id="l1_doc_{{ loop.index0 }}" {% if
-                                                loop.index0==selected_l1_index %}checked{% endif %}>
-                                            <label class="form-check-label w-100" for="l1_doc_{{ loop.index0 }}">
+                                                value="{{ forloop.counter0 }}" id="l1_doc_{{ forloop.counter0 }}" {% if
+                                                forloop.counter0==selected_l1_index %}checked{% endif %}>
+                                            <label class="form-check-label w-100" for="l1_doc_{{ forloop.counter0 }}">
                                                 <div class="d-flex justify-content-between align-items-start">
                                                     <div>
-                                                        <strong>L1 Document {{ loop.index }}</strong>
+                                                        <strong>L1 Document {{ forloop.counter }}</strong>
                                                         <br>
                                                         <small class="text-muted">{{ doc.file_path | basename }}</small>
-                                                        {% if loop.index0 == selected_l1_index %}
+                                                        {% if forloop.counter0 == selected_l1_index %}
                                                         <br><small class="text-primary"><i class="fas fa-check"></i>
                                                             Currently Selected</small>
                                                         {% endif %}
@@ -111,17 +111,17 @@
 
                                         {% for doc in l3_documents %}
                                         <div
-                                            class="form-check mb-3 p-3 border rounded {% if loop.index0 == selected_l3_index %}bg-light border-success{% endif %}">
+                                            class="form-check mb-3 p-3 border rounded {% if forloop.counter0 == selected_l3_index %}bg-light border-success{% endif %}">
                                             <input class="form-check-input" type="radio" name="document_index"
-                                                value="{{ loop.index0 }}" id="l3_doc_{{ loop.index0 }}" {% if
-                                                loop.index0==selected_l3_index %}checked{% endif %}>
-                                            <label class="form-check-label w-100" for="l3_doc_{{ loop.index0 }}">
+                                                value="{{ forloop.counter0 }}" id="l3_doc_{{ forloop.counter0 }}" {% if
+                                                forloop.counter0==selected_l3_index %}checked{% endif %}>
+                                            <label class="form-check-label w-100" for="l3_doc_{{ forloop.counter0 }}">
                                                 <div class="d-flex justify-content-between align-items-start">
                                                     <div>
-                                                        <strong>L3 Document {{ loop.index }}</strong>
+                                                        <strong>L3 Document {{ forloop.counter }}</strong>
                                                         <br>
                                                         <small class="text-muted">{{ doc.file_path | basename }}</small>
-                                                        {% if loop.index0 == selected_l3_index %}
+                                                        {% if forloop.counter0 == selected_l3_index %}
                                                         <br><small class="text-success"><i class="fas fa-check"></i>
                                                             Currently Selected</small>
                                                         {% endif %}

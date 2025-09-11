@@ -1,0 +1,182 @@
+<!-- Extended Patient Document Information Component -->
+<div class="tab-pane fade {% if first_tab == 'document' %}show active{% endif %}" id="document" role="tabpanel"
+  aria-labelledby="document-tab">
+  {% if administrative_data %}
+  <!-- Document Status -->
+  <div class="row mb-3">
+    <div class="col-md-12">
+      <h6><i class="fas fa-info-circle me-1"></i>CDA Document Status</h6>
+      <div class="contact-info-card">
+        <div class="contact-details">
+          <span class="badge bg-success me-2"><i class="fas fa-check me-1"></i>Active</span>
+          <span class="badge bg-info me-2"><i class="fas fa-lock me-1"></i>Secure</span>
+          {% if administrative_data and administrative_data.get('document')
+          and administrative_data.document.get('confidentiality') %}
+          <span class="badge bg-warning"><i class="fas fa-shield-alt me-1"></i>{{
+            administrative_data.document.confidentiality }}</span>
+          {% else %}
+          <span class="badge bg-secondary"><i class="fas fa-eye me-1"></i>Normal Confidentiality</span>
+          {% endif %}
+          <br /><small class="text-muted mt-2 d-block">Document confidentialityCode and status indicators</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  <h5>
+    <i class="fas fa-file-medical-alt me-2"></i>Extended Document
+    Information
+  </h5>
+  <p class="text-muted mb-3">
+    Complete document metadata and administrative details from CDA header
+  </p>
+
+  {% if administrative_data %}
+
+  <!-- Debug Document Data -->
+  <div class="alert alert-success mb-3">
+    <h6>DEBUG: Administrative Data Available</h6>
+    <p>
+      <strong>Authors Count:</strong> {{ administrative_data.get('authors',
+      []) | length }}
+    </p>
+    <p>
+      <strong>Custodians Count:</strong> {{
+      administrative_data.get('custodians', []) | length }}
+    </p>
+  </div>
+
+  <!-- Document Custodians -->
+  {% if administrative_data.get('custodians') %}
+  <div class="row mb-3">
+    <div class="col-md-12">
+      <h6><i class="fas fa-shield-alt me-1"></i>Document Custodians</h6>
+      {% for custodian in administrative_data.custodians %}
+      <div class="contact-info-card">
+        <div class="contact-type">Custodian Organization</div>
+        <div class="contact-details">
+          <strong>{{ custodian.get('organization', {}).get('name', 'Unknown
+            Organization') }}</strong>
+          {% if custodian.get('organization', {}).get('id') %}
+          <br /><small class="text-muted">ID: {{ custodian.organization.id }}</small>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Document Authors -->
+  {% if administrative_data.get('authors') %}
+  <div class="row mb-3">
+    <div class="col-md-12">
+      <h6><i class="fas fa-user-edit me-1"></i>Document Authors</h6>
+      {% for author in administrative_data.authors %}
+      <div class="contact-info-card">
+        <div class="contact-type">Author</div>
+        <div class="contact-details">
+          {{ author.get('full_name', 'Unknown Author') }} {% if
+          author.get('organization') %}
+          <br /><small class="text-muted">{{ author.organization.get('name', 'Unknown Organization')
+            }}</small>
+          {% endif %} {% if author.get('time') %}
+          <br /><small class="text-muted">Authored: {{ author.time }}</small>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Document Information -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <div class="contact-info-card">
+        <div class="contact-type">
+          <i class="fas fa-barcode me-1"></i>Document Identifier
+        </div>
+        <div class="contact-details">
+          {% if doc_data and doc_data.get('document_id',
+          {}).get('extension') %} {{ doc_data.document_id.extension }} {%
+          elif patient_identity and patient_identity.get('patient_id') %} {{
+          patient_identity.patient_id }} {% else %} Not available {% endif
+          %}
+          <br /><small class="text-muted">CDA Document Reference ID</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="contact-info-card">
+        <div class="contact-type">
+          <i class="fas fa-calendar-plus me-1"></i>Creation Date
+        </div>
+        <div class="contact-details">
+          {% if doc_data and doc_data.get('creation_time') %} {{
+          doc_data.creation_time }} {% else %} Not available {% endif %}
+          <br /><small class="text-muted">Document effectiveTime</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <div class="contact-info-card">
+        <div class="contact-type">
+          <i class="fas fa-language me-1"></i>Primary Language
+        </div>
+        <div class="contact-details">
+          {% if doc_data and doc_data.get('language') %} {{
+          doc_data.language }} {% elif source_language %} {{ source_language
+          }} {% else %} en-GB {% endif %}
+          <br /><small class="text-muted">CDA languageCode</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="contact-info-card">
+        <div class="contact-type">
+          <i class="fas fa-code-branch me-1"></i>Document Version
+        </div>
+        <div class="contact-details">
+          {% if doc_data and doc_data.get('version') %} {{ doc_data.version
+          }} {% else %} 1.0 {% endif %}
+          <br /><small class="text-muted">Document versionNumber</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Document Status -->
+  <div class="row mb-3">
+    <div class="col-md-12">
+      <h6><i class="fas fa-info-circle me-1"></i>Document Status</h6>
+      <div class="contact-info-card">
+        <div class="contact-details">
+          <span class="badge bg-success me-2">Active</span>
+          <span class="badge bg-info me-2">Encrypted</span>
+          {% if doc_data and doc_data.get('confidentiality') %}
+          <span class="badge bg-warning">{{ doc_data.confidentiality }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Show message if no document info -->
+  {% if not administrative_data.get('authors') and not
+  administrative_data.get('custodians') %}
+  <div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i>Limited document information
+    available.
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="alert alert-warning">
+    <i class="fas fa-exclamation-triangle me-2"></i>No administrative data
+    available.
+  </div>
+  {% endif %}
+</div>
+<!-- End tab-pane -->

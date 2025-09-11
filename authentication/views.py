@@ -177,7 +177,7 @@ class CustomLoginView(LoginView):
 class CustomLogoutView(LogoutView):
     """Custom logout view"""
 
-    template_name = "jinja2/registration/logout.html"
+    template_name = "registration/logout.html"
 
     def dispatch(self, request, *args, **kwargs):
         """Add logout message"""

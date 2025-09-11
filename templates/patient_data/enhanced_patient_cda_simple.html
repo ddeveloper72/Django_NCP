@@ -1,0 +1,813 @@
+{% extends "base.html" %}
+
+{# Jinja2 macro for formatting medical dates #}
+{% macro format_medical_date(date_string) %}
+{% if date_string and date_string != 'N/A' %}
+{% set clean_date = date_string|string|trim %}
+{% if clean_date|length == 14 and clean_date.isdigit() %}
+{# Format: YYYYMMDDHHMMSS #}
+{% set year = clean_date[0:4] %}
+{% set month = clean_date[4:6] %}
+{% set day = clean_date[6:8] %}
+{% set hour = clean_date[8:10] %}
+{% set minute = clean_date[10:12] %}
+<span class="formatted-date" title="Original: {{ clean_date }}">
+    {{ month }}/{{ day }}/{{ year }} {{ hour }}:{{ minute }}
+</span>
+{% elif clean_date|length == 8 and clean_date.isdigit() %}
+{# Format: YYYYMMDD #}
+{% set year = clean_date[0:4] %}
+{% set month = clean_date[4:6] %}
+{% set day = clean_date[6:8] %}
+<span class="formatted-date" title="Original: {{ clean_date }}">
+    {{ month }}/{{ day }}/{{ year }}
+</span>
+{% else %}
+{{ date_string }}
+{% endif %}
+{% else %}
+{{ date_string }}
+{% endif %}
+{% endmacro %}
+
+{% block title %}Enhanced CDA Display - {{ patient_identity.given_name }} {{ patient_identity.family_name }}{% endblock
+%}
+
+{% block extra_css %}
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    .patient-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .debug-info {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 1rem;
+        margin: 1rem 0;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+    }
+
+    .success-badge {
+        background: #d4edda;
+        color: #155724;
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        font-weight: bold;
+    }
+
+    .data-field {
+        margin-bottom: 0.5rem;
+    }
+
+    .data-field strong {
+        color: #495057;
+        font-weight: 600;
+    }
+
+    /* Clinical Section Styles - Migrated from enhanced_patient_cda.html */
+    .medical-section {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        margin-bottom: 1.5rem;
+        height: auto;
+        min-height: fit-content;
+    }
+
+    .medical-section .card {
+        height: auto;
+        min-height: fit-content;
+    }
+
+    .medical-section .card-body {
+        height: auto;
+        min-height: fit-content;
+        overflow: visible;
+    }
+
+    /* Clinical table styles for medical data */
+    .clinical-table {
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .clinical-table .table {
+        margin-bottom: 0;
+    }
+
+    .clinical-table .table th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        color: #495057;
+        padding: 0.75rem;
+    }
+
+    .clinical-table .table td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .clinical-table .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .primary-field {
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .medical-code {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        background-color: #e9ecef;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        margin: 0.125rem;
+        display: inline-block;
+    }
+
+    /* Medical terminology styling */
+    .medical-terminology .badge {
+        font-size: 0.75rem;
+        margin: 0.125rem;
+    }
+
+    /* Section Tabs Styles */
+    .section-tabs {
+        display: flex;
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 0.375rem 0.375rem 0 0;
+    }
+
+    .tab-button {
+        background: none;
+        border: none;
+        padding: 12px 20px;
+        cursor: pointer;
+        font-size: 0.9em;
+        color: #6c757d;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .tab-button:hover {
+        background: #e9ecef;
+        color: #495057;
+    }
+
+    .tab-button.active {
+        color: #0d6efd;
+        border-bottom-color: #0d6efd;
+        background: white;
+        font-weight: 600;
+    }
+
+    .clinical-tab-content {
+        display: none;
+        padding: 20px;
+        background: white;
+        border-radius: 0 0 0.375rem 0.375rem;
+        height: auto;
+        min-height: fit-content;
+        overflow: visible;
+    }
+
+    .clinical-tab-content.active {
+        display: block;
+        height: auto;
+        min-height: fit-content;
+        overflow: visible;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- STEP 1: Basic Patient Header Information -->
+            <div class="patient-header">
+                <h1 class="mb-3">
+                    <i class="fas fa-user-injured me-2 text-primary"></i>
+                    Patient CDA Display Tool
+                </h1>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <h2 class="text-primary mb-3">
+                            {{ patient_identity.given_name }} {{ patient_identity.family_name }}
+                        </h2>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="data-field">
+                                    <strong>Patient ID:</strong>
+                                    <span class="success-badge">{{ patient_identity.patient_id }}</span>
+                                </div>
+                                <div class="data-field">
+                                    <strong>Birth Date:</strong> {{ patient_identity.birth_date_formatted|default:patient_identity.birth_date }}
+                                </div>
+                                <div class="data-field">
+                                    <strong>Gender:</strong> {{ patient_identity.gender }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="data-field">
+                                    <strong>Primary Patient ID:</strong> {{ patient_identity.primary_patient_id }}
+                                </div>
+                                <div class="data-field">
+                                    <strong>Full Name:</strong> {{ patient_identity.get('full_name',
+                                    (patient_identity.given_name ~ ' ' ~ patient_identity.family_name) if
+                                    patient_identity.given_name and patient_identity.family_name else 'Not Available')
+                                    }}
+                                </div>
+                                <div class="data-field">
+                                    <strong>URL Patient ID:</strong> {{ patient_identity.get('url_patient_id',
+                                    patient_identity.patient_id) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="text-end">
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Patient Header Loaded
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Include Debug Modal Component -->
+            {% include 'patient_data/components/debug_modal.html' %}
+
+            {% include 'patient_data/components/extended_patient_info.html' %}
+            {% if false %}
+            {# OLD INLINE IMPLEMENTATION REPLACED WITH MODULAR COMPONENTS - NEVER EXECUTED #}
+            {% if patient_extended_data %}
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-address-book me-2"></i>
+                        Extended Header Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Extended Info Navigation Tabs -->
+                    <ul class="nav nav-tabs" id="extendedInfoTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="document-tab" data-bs-toggle="tab"
+                                data-bs-target="#document" type="button" role="tab" aria-controls="document"
+                                aria-selected="true">
+                                <i class="fas fa-file-medical me-1"></i>Document Info
+                                {% if patient_extended_data.document_info %}
+                                <span class="badge bg-primary ms-1">Available</span>
+                                {% endif %}
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact"
+                                type="button" role="tab" aria-controls="contact" aria-selected="false">
+                                <i class="fas fa-address-card me-1"></i>Contact Details
+                                {% if patient_extended_data.patient_contact and
+                                patient_extended_data.patient_contact.has_contact_info %}
+                                <span class="badge bg-success ms-1">Available</span>
+                                {% else %}
+                                <span class="badge bg-secondary ms-1">N/A</span>
+                                {% endif %}
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="healthcare-tab" data-bs-toggle="tab"
+                                data-bs-target="#healthcare" type="button" role="tab" aria-controls="healthcare"
+                                aria-selected="false">
+                                <i class="fas fa-user-md me-1"></i>Healthcare Team
+                                {% if patient_extended_data.healthcare_team and
+                                patient_extended_data.healthcare_team.has_healthcare_team %}
+                                <span class="badge bg-success ms-1">{{ patient_extended_data.healthcare_team.total_count|default:"0" }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary ms-1">N/A</span>
+                                {% endif %}
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content mt-3" id="extendedInfoContent">
+
+                        <!-- Document Information Tab -->
+                        <div class="tab-pane fade show active" id="document" role="tabpanel"
+                            aria-labelledby="document-tab">
+                            {% if patient_extended_data.document_info %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="data-field">
+                                        <strong><i class="fas fa-file-signature me-2"></i>Document Title:</strong>
+                                        {{ patient_extended_data.document_info.title }}
+                                    </div>
+                                    <div class="data-field">
+                                        <strong><i class="fas fa-calendar me-2"></i>Creation Date:</strong>
+                                        {{ patient_extended_data.document_info.creation_date }}
+                                    </div>
+                                    <div class="data-field">
+                                        <strong><i class="fas fa-language me-2"></i>Language:</strong>
+                                        {{ patient_extended_data.document_info.language|default:"N/A" }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    {% if patient_extended_data.document_info.document_id %}
+                                    <div class="data-field">
+                                        <strong><i class="fas fa-barcode me-2"></i>Document ID:</strong>
+                                        {{ patient_extended_data.document_info.document_id.extension }}
+                                    </div>
+                                    {% endif %}
+                                    <div class="data-field">
+                                        <strong><i class="fas fa-code-branch me-2"></i>Version:</strong>
+                                        {{ patient_extended_data.document_info.version|default:"N/A" }}
+                                    </div>
+                                    <div class="data-field">
+                                        <strong><i class="fas fa-check-circle me-2 text-success"></i>Status:</strong>
+                                        <span class="badge bg-success">Active Document</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>No document information available
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Contact Details Tab -->
+                        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                            {% if patient_extended_data.patient_contact and
+                            patient_extended_data.patient_contact.has_contact_info %}
+                            <div class="row">
+                                <!-- Addresses -->
+                                <div class="col-md-4">
+                                    <h6><i class="fas fa-map-marker-alt me-2"></i>Addresses</h6>
+                                    {% if patient_extended_data.patient_contact.addresses %}
+                                    {% for address in patient_extended_data.patient_contact.addresses %}
+                                    <div class="card mb-2">
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title mb-1">{{ address.get('display_label',
+                                                address.get('use_label', address.get('use', 'Address'))) }}</h6>
+                                            <p class="card-text small mb-0">
+                                                {{ address.get('street', '') }}<br>
+                                                {{ address.get('city', '') }}{% if address.get('postal_code') %}, {{
+                                                address.get('postal_code') }}{% endif %}<br>
+                                                {{ address.get('country', '') }}
+                                            </p>
+                                            {% if address.get('is_primary') %}
+                                            <span class="badge bg-primary">Primary</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% else %}
+                                    <p class="text-muted">No addresses available</p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Phone Numbers -->
+                                <div class="col-md-4">
+                                    <h6><i class="fas fa-phone me-2"></i>Phone Numbers</h6>
+                                    {% if patient_extended_data.patient_contact.phone_numbers %}
+                                    {% for phone in patient_extended_data.patient_contact.phone_numbers %}
+                                    <div class="card mb-2">
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title mb-1">{{ phone.get('display_label',
+                                                phone.get('use_label', phone.get('use', 'Phone'))) }}</h6>
+                                            <p class="card-text small mb-0">{{ phone.get('number', '') }}</p>
+                                            {% if phone.get('is_primary') %}
+                                            <span class="badge bg-primary">Primary</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% else %}
+                                    <p class="text-muted">No phone numbers available</p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Email Addresses -->
+                                <div class="col-md-4">
+                                    <h6><i class="fas fa-envelope me-2"></i>Email Addresses</h6>
+                                    {% if patient_extended_data.patient_contact.email_addresses %}
+                                    {% for email in patient_extended_data.patient_contact.email_addresses %}
+                                    <div class="card mb-2">
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title mb-1">{{ email.get('display_label',
+                                                email.get('use_label', email.get('use', 'Email'))) }}</h6>
+                                            <p class="card-text small mb-0">{{ email.get('email', '') }}</p>
+                                            {% if email.get('is_primary') %}
+                                            <span class="badge bg-primary">Primary</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% else %}
+                                    <p class="text-muted">No email addresses available</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>No contact information available
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Healthcare Team Tab -->
+                        <div class="tab-pane fade" id="healthcare" role="tabpanel" aria-labelledby="healthcare-tab">
+                            {% if patient_extended_data.healthcare_team and
+                            patient_extended_data.healthcare_team.has_healthcare_team %}
+                            <div class="row">
+                                <!-- Authors/Physicians -->
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-user-md me-2"></i>Care Team Members</h6>
+                                    {% if patient_extended_data.healthcare_team.authors %}
+                                    {% for author in patient_extended_data.healthcare_team.authors %}
+                                    <div class="card mb-2">
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title mb-1">{{ author.get('name', 'Unknown Author') }}</h6>
+                                            <p class="card-text small mb-0">
+                                                <strong>Role:</strong> {{ author.get('role', 'Not specified') }}<br>
+                                                <strong>Organization:</strong> {{ author.get('organization', 'Not
+                                                specified') }}<br>
+                                                {% if author.get('time') %}
+                                                <strong>Date/Time:</strong> {{ author.get('time', 'Not specified') }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% endif %}
+
+                                    <!-- Legal Authenticator -->
+                                    {% if patient_extended_data.healthcare_team.legal_authenticator %}
+                                    <div class="card mb-2 border-primary">
+                                        <div class="card-header bg-primary text-white p-2">
+                                            <h6 class="mb-0"><i class="fas fa-gavel me-2"></i>Legal Authenticator</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title mb-1">{{
+                                                patient_extended_data.healthcare_team.legal_authenticator.get('name',
+                                                'Unknown Legal Authenticator') }}</h6>
+                                            <p class="card-text small mb-0">
+                                                <strong>Role:</strong> {{
+                                                patient_extended_data.healthcare_team.legal_authenticator.get('role',
+                                                'Legal Authenticator') }}<br>
+                                                <strong>Organization:</strong> {{
+                                                patient_extended_data.healthcare_team.legal_authenticator.get('organization',
+                                                'Not specified')
+                                                }}<br>
+                                                {% if
+                                                patient_extended_data.healthcare_team.legal_authenticator.get('authentication_time')
+                                                %}
+                                                <strong>Authentication Date/Time:</strong> {{
+                                                patient_extended_data.healthcare_team.legal_authenticator.get('authentication_time')
+                                                }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Emergency Contacts -->
+                                <div class="col-md-6">
+                                    {% if patient_extended_data.emergency_contacts and
+                                    patient_extended_data.emergency_contacts.contacts %}
+                                    <h6><i class="fas fa-ambulance me-2"></i>Emergency Contacts</h6>
+                                    {% for contact in patient_extended_data.emergency_contacts.contacts %}
+                                    <div class="card mb-2 border-danger">
+                                        <div class="card-header bg-danger text-white p-2">
+                                            <h6 class="mb-0">{{ contact.get('name', 'Unknown Contact') }}</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <p class="card-text small mb-1">
+                                                <strong>Relationship:</strong> {{ contact.get('relationship', 'Not
+                                                specified') }}<br>
+                                                {% if contact.get('phone_numbers') %}
+                                                {% for phone in contact.phone_numbers %}
+                                                <strong>{{ phone.get('display_label', phone.get('use_label', 'Phone:'))
+                                                    }}</strong>
+                                                <a href="tel:{{ phone.get('number', '') }}"
+                                                    class="text-decoration-none">{{
+                                                    phone.get('number', '') }}</a>
+                                                {% if phone.get('is_primary') %}<span
+                                                    class="badge bg-success ms-1">Primary</span>{% endif %}
+                                                <br>
+                                                {% endfor %}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% else %}
+                                    <h6><i class="fas fa-ambulance me-2"></i>Emergency Contacts</h6>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>No emergency contact information
+                                        available
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Next of Kin -->
+                                <div class="col-md-6">
+                                    {% if patient_extended_data.next_of_kin and
+                                    patient_extended_data.next_of_kin.contacts %}
+                                    <h6><i class="fas fa-users me-2"></i>Next of Kin</h6>
+                                    {% for contact in patient_extended_data.next_of_kin.contacts %}
+                                    <div class="card mb-2 border-warning">
+                                        <div class="card-header bg-warning text-dark p-2">
+                                            <h6 class="mb-0">{{ contact.get('name', 'Unknown Contact') }}</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <p class="card-text small mb-1">
+                                                <strong>Relationship:</strong> {{ contact.get('relationship', 'Not
+                                                specified') }}<br>
+                                                {% if contact.get('phone_numbers') %}
+                                                {% for phone in contact.phone_numbers %}
+                                                <strong>{{ phone.get('display_label', phone.get('use_label', 'Phone:'))
+                                                    }}</strong>
+                                                <a href="tel:{{ phone.get('number', '') }}"
+                                                    class="text-decoration-none">{{
+                                                    phone.get('number', '') }}</a>
+                                                {% if phone.get('is_primary') %}<span
+                                                    class="badge bg-success ms-1">Primary</span>{% endif %}
+                                                <br>
+                                                {% endfor %}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% else %}
+                                    <h6><i class="fas fa-users me-2"></i>Next of Kin</h6>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>No next of kin information available
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Medical Performers Section -->
+                            {% if patient_extended_data.performers and patient_extended_data.performers.medical_doctors
+                            %}
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h6><i class="fas fa-user-md me-2"></i>Medical Performers</h6>
+                                    {% for doctor in patient_extended_data.performers.medical_doctors %}
+                                    <div class="card mb-2 border-info">
+                                        <div class="card-header bg-info text-white p-2">
+                                            <h6 class="mb-0">{{ doctor.get('name', 'Unknown Doctor') }}</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <p class="card-text small mb-1">
+                                                <strong>Role:</strong> {{ doctor.get('role', 'Medical Doctor') }}<br>
+                                                <strong>Organization:</strong> {{ doctor.get('organization', 'Not
+                                                specified') }}<br>
+                                                {% if doctor.get('phone_numbers') %}
+                                                {% for phone in doctor.phone_numbers %}
+                                                <strong>{{ phone.get('display_label', phone.get('use_label', 'Phone:'))
+                                                    }}</strong>
+                                                <a href="tel:{{ phone.get('number', '') }}"
+                                                    class="text-decoration-none">{{
+                                                    phone.get('number', '') }}</a>
+                                                {% if phone.get('is_primary') %}<span
+                                                    class="badge bg-success ms-1">Primary</span>{% endif %}
+                                                <br>
+                                                {% endfor %}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="row mt-3">
+                                <!-- Custodian Organization -->
+                                <div class="col-md-6">
+                                    {% if patient_extended_data.healthcare_team.custodian_organization %}
+                                    <h6><i class="fas fa-building me-2"></i>Custodian Organization</h6>
+                                    <div class="card mb-2 border-success">
+                                        <div class="card-header bg-success text-white p-2">
+                                            <h6 class="mb-0">{{
+                                                patient_extended_data.healthcare_team.custodian_organization.name }}
+                                            </h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            {% if
+                                            patient_extended_data.healthcare_team.custodian_organization.contact_info %}
+                                            <p class="card-text small mb-1">
+                                                <strong><i class="fas fa-map-marker-alt me-1"></i>Address:</strong><br>
+                                                {% for address in
+                                                patient_extended_data.healthcare_team.custodian_organization.contact_info.addresses
+                                                %}
+                                                {{ address }}<br>
+                                                {% endfor %}
+                                            </p>
+                                            <p class="card-text small mb-0">
+                                                <strong><i class="fas fa-phone me-1"></i>Phone:</strong><br>
+                                                {% for phone in
+                                                patient_extended_data.healthcare_team.custodian_organization.contact_info.phone_numbers
+                                                %}
+                                                {{ phone }}<br>
+                                                {% endfor %}
+                                            </p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>No healthcare team information available
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-3">
+                        <span class="badge bg-info fs-6">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Extended Header Loaded
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Extended Header Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">No extended patient data available</p>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+            <!-- END OF OLD INLINE EXTENDED HEADER IMPLEMENTATION -->
+
+            <!-- STEP 3: Enhanced Clinical Sections with Dual-Language Support -->
+            {% if processed_sections and processed_sections|length > 0 %}
+            <div class="card mt-4">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-clipboard-list me-2"></i>
+                        Clinical Sections ({{ processed_sections|length }} sections)
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% for section in processed_sections %}
+                    {% set section_index = loop.index0 %}
+
+                    <!-- Modular Clinical Section Router - Re-enabled after fixing format_medical_date -->
+                    {% include 'patient_data/sections/clinical_section_router.html' %}
+
+                    {% endfor %}
+
+                    <div class="text-end mt-3">
+                        <span class="badge bg-success fs-6">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Enhanced Clinical Sections Loaded ({{ processed_sections|length }})
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Clinical Sections
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">No clinical sections available</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- DEBUG INFORMATION -->
+            <div class="debug-info">
+                <h4><i class="fas fa-bug me-2"></i>Debug Information</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Patient Identity Keys:</strong></p>
+                        <ul>
+                            {% for key in patient_identity.keys() %}
+                            <li>{{ key }}: {{ patient_identity[key] }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Context Variables Available:</strong></p>
+                        <ul>
+                            <li>patient_identity: {% if patient_identity %}✅ Available{% else %}❌ Missing{% endif %}
+                            </li>
+                            <li>patient_extended_data: {% if patient_extended_data %}✅ Available{% else %}❌ Missing{%
+                                endif %}</li>
+                            <li>processed_sections: {% if processed_sections %}✅ Available ({{ processed_sections|length
+                                }} sections){% else %}❌ Missing{% endif %}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PLACEHOLDER FOR NEXT STEPS -->
+            <div class="card mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-road me-2"></i>
+                        Next Steps
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li><strong>✅ Step 1:</strong> Basic Patient Header Information (Complete)</li>
+                        <li><strong>✅ Step 2:</strong> Extended Header Information (Complete)</li>
+                        <li><strong>✅ Step 3:</strong> Clinical Sections (Complete)</li>
+                        <li><strong>🎉 Status:</strong> All core components working! Ready to enhance further.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Enhanced Clinical Section Tabs JavaScript -->
+<script>
+    // Function to show clinical tabs for enhanced medical sections
+    function showClinicalTab(sectionId, tabType) {
+        // Hide all tab contents for this section
+        const allTabs = document.querySelectorAll(`[id^="${sectionId}_"]`);
+        allTabs.forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Remove active class from all tab buttons for this section
+        const sectionContainer = document.querySelector(`[id*="${sectionId}"]`).closest('.medical-section');
+        const allButtons = sectionContainer.querySelectorAll('.tab-button');
+        allButtons.forEach(button => {
+            button.classList.remove('active');
+        });
+
+        // Show the selected tab content
+        const selectedTab = document.getElementById(`${sectionId}_${tabType}`);
+        if (selectedTab) {
+            selectedTab.classList.add('active');
+        }
+
+        // Add active class to the clicked button
+        const clickedButton = event.target;
+        clickedButton.classList.add('active');
+
+        console.log(`Switched to ${tabType} tab for ${sectionId}`);
+    }
+
+    // Initialize enhanced clinical sections on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('Enhanced Clinical Sections with tabs initialized successfully');
+
+        // Initialize any tooltips or other Bootstrap components
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        console.log('Enhanced CDA Display with clinical tables and dual-language support ready');
+    });
+</script>
+{% endblock %}

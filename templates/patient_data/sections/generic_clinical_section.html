@@ -1,0 +1,174 @@
+{# Generic Clinical Section Template - for other section types #}
+<!-- Generic Clinical Section -->
+<div class="medical-section"
+    id="{% if generic_config %}{{ generic_config.section_id }}{% else %}{{ section.section_id|default:" generic-section"
+    }}{% endif %}">
+    <div class="card">
+        <!-- Section Header -->
+        <div class="card-header {% if generic_config %}{{ generic_config.header_class }}{% else %}{{ section.header_class|default:"
+            bg-secondary" }}{% endif %} text-white">
+            <h5 class="mb-0">
+                <i class="{% if generic_config %}{{ generic_config.icon }}{% else %}{{ section.icon|default:" fas
+                    fa-file-medical" }}{% endif %} me-2"></i>
+                {{ section.title|default:"Clinical Section" }}
+                {% if section.code %}
+                <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
+                {% endif %}
+                {% if section.has_entries %}
+                <span class="badge bg-info ms-2">{% if section.entries %}{{ section.entries|length }}{% else %}0{% endif
+                    %} {% if generic_config %}{{ generic_config.entries_label }}{% else %}entries{% endif %}</span>
+                {% endif %}
+            </h5>
+        </div>
+
+        <!-- Clinical Section Content with Tabs -->
+        {% if section.has_entries and section.clinical_table %}
+        <!-- Clinical Table Section -->
+        <div class="card-body p-0">
+            <!-- Section Tabs -->
+            <div class="section-tabs">
+                <button class="tab-button active"
+                    onclick="showClinicalTab('generic_{{ section_index }}', 'structured')">
+                    📊 Structured Data
+                </button>
+                <button class="tab-button" onclick="showClinicalTab('generic_{{ section_index }}', 'original')">
+                    📄 Original Content
+                </button>
+            </div>
+
+            <!-- Structured View Tab Content -->
+            <div id="generic_{{ section_index }}_structured" class="clinical-tab-content active">
+                <div class="clinical-table">
+                    <table class="table table-striped table-hover">
+                        <thead
+                            class="{% if generic_config %}{{ generic_config.table_header_class }}{% else %}{{ section.table_header_class|default:"
+                            table-secondary" }}{% endif %}">
+                            <tr>
+                                {% for header in section.clinical_table.headers %}
+                                <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
+                                    {{ header.label }}
+                                    {% if header.icon %}
+                                    <i class="{{ header.icon }} ms-1 terminology-indicator"
+                                        title="{{ header.tooltip|default:header.label }}"></i>
+                                    {% endif %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in section.clinical_table.rows %}
+                            <tr>
+                                {% for header in section.clinical_table.headers %}
+                                {% with row.data|get_item:header.key as cell_data %}
+                                <td>
+                                    {% if header.primary %}
+                                    <div class="primary-field">
+                                        <strong
+                                            class="{% if generic_config %}{{ generic_config.text_class }}{% else %}{{ section.text_class|default:"
+                                            text-secondary" }}{% endif %}">{{
+                                            cell_data.display_value|default:cell_data.value|default:"N/A" }}</strong>
+                                        {% if cell_data.has_terminology %}
+                                        <div class="medical-terminology mt-1">
+                                            {% for term in cell_data.terminology %}
+                                            <span
+                                                class="badge {% if generic_config %}{{ generic_config.badge_class }}{% else %}{{ section.badge_class|default:"
+                                                bg-secondary" }}{% endif %} me-1"
+                                                title="{{ term.system }}: {{ term.code }}">
+                                                {{ term.display_name|default:term.code }}
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <div class="cell-content">
+                                        {% if cell_data.has_codes %}
+                                        <div class="medical-codes-container">
+                                            {% for code in cell_data.codes %}
+                                            <span
+                                                class="badge {% if generic_config %}{{ generic_config.badge_class }}{% else %}{{ section.badge_class|default:"
+                                                bg-secondary" }}{% endif %} me-1 mb-1"
+                                                title="{{ code.system }}: {{ code.code }}">
+                                                {{ code.display_name|default:code.code }}
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                        {% elif cell_data.is_abnormal %}
+                                        <span class="text-danger fw-bold">{{
+                                            cell_data.display_value|default:cell_data.value|default:"N/A" }}</span>
+                                        <i class="fas fa-exclamation-triangle text-danger ms-1"
+                                            title="Abnormal Value"></i>
+                                        {% else %}
+                                        {{ cell_data.display_value|default:cell_data.value|default:"N/A" }}
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                {% endwith %}
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Generic Table Summary -->
+                <div class="card-footer bg-light {% if generic_config %}{{ generic_config.border_class }}{% else %}{{ section.border_class|default:"
+                    border-secondary" }}{% endif %}">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="{% if generic_config %}{{ generic_config.icon }}{% else %}{{ section.icon|default:"
+                                    fas fa-file-medical" }}{% endif %} me-1 {% if generic_config %}{{
+                                    generic_config.text_class }}{% else %}{{ section.text_class|default:"text-secondary"
+                                    }}{% endif %}"></i>
+                                <strong>{{ section.clinical_table.rows|length }}</strong> {% if generic_config %}{{
+                                generic_config.entries_label }}{% else %}{{ section.entries_label|default:"entries" }}{%
+                                endif %}
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1 text-info"></i>
+                                Clinical data available
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-check-circle me-1 text-success"></i>
+                                Validated content
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Original Content Tab -->
+            <div id="generic_{{ section_index }}_original" class="clinical-tab-content">
+                <div id="{{ section.section_id }}_{{ section_index }}_original" class="clinical-tab-content">
+                    {% include 'patient_data/sections/original_content.html' %}
+                </div>
+            </div>
+
+            {% elif section.has_entries %}
+            <!-- Simple List Section for entries without clinical tables -->
+            {% include 'patient_data/sections/simple_list_section.html' %}
+
+            {% else %}
+            <!-- Empty Section -->
+            <div class="card-body text-center py-5">
+                <div class="{% if generic_config %}{{ generic_config.empty_class }}{% else %}{{ section.empty_class|default:"
+                    text-info" }}{% endif %}">
+                    <i class="{% if generic_config %}{{ generic_config.empty_icon }}{% else %}{{ section.empty_icon|default:"
+                        fas fa-info-circle" }}{% endif %} fa-3x mb-3"></i>
+                    <h6 class="{% if generic_config %}{{ generic_config.empty_class }}{% else %}{{ section.empty_class|default:"
+                        text-info" }}{% endif %}">
+                        {% if generic_config %}{{ generic_config.empty_title }}{% else %}{{
+                        section.empty_title|default:"No Data Available" }}{% endif %}</h6>
+                    <p class="text-muted">{% if generic_config %}{{ generic_config.empty_message }}{% else %}{{
+                        section.empty_message|default:"No entries available for this section" }}{% endif %}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>

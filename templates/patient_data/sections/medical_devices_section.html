@@ -1,0 +1,150 @@
+{# Medical Devices Section Template #}
+<!-- Medical Devices Section -->
+<div class="medical-section" id="medical-devices-section">
+    <div class="card">
+        <!-- Section Header -->
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-cogs me-2"></i>
+                {{ section.title|default:"Medical Devices" }}
+                {% if section.code %}
+                <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
+                {% endif %}
+                {% if section.has_entries %}
+                <span class="badge bg-warning ms-2">{% if section.entries %}{{ section.entries|length }}{% else %}0{%
+                    endif %}
+                    devices</span>
+                {% endif %}
+            </h5>
+        </div>
+
+        <!-- Clinical Section Content with Tabs -->
+        {% if section.has_entries and section.clinical_table %}
+        <!-- Clinical Table Section -->
+        <div class="card-body p-0">
+            <!-- Section Tabs -->
+            <div class="section-tabs">
+                <button class="tab-button active"
+                    onclick="showClinicalTab('medical_devices_{{ section_index }}', 'structured')">
+                    📊 Structured Device Data
+                </button>
+                <button class="tab-button" onclick="showClinicalTab('medical_devices_{{ section_index }}', 'original')">
+                    📄 Original Content
+                </button>
+            </div>
+
+            <!-- Structured View Tab Content -->
+            <div id="medical_devices_{{ section_index }}_structured" class="clinical-tab-content active">
+                <div class="clinical-table">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-info">
+                            <tr>
+                                {% for header in section.clinical_table.headers %}
+                                <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
+                                    {{ header.label }}
+                                    {% if header.type == 'device' %}
+                                    <i class="fas fa-microchip ms-1 terminology-indicator" title="Medical Device"></i>
+                                    {% elif header.type == 'type' %}
+                                    <i class="fas fa-cogs ms-1 terminology-indicator" title="Device Type"></i>
+                                    {% elif header.type == 'status' %}
+                                    <i class="fas fa-power-off ms-1 terminology-indicator" title="Device Status"></i>
+                                    {% elif header.type == 'implant_date' %}
+                                    <i class="fas fa-calendar-plus ms-1 terminology-indicator" title="Implant Date"></i>
+                                    {% elif header.type == 'manufacturer' %}
+                                    <i class="fas fa-industry ms-1 terminology-indicator" title="Manufacturer"></i>
+                                    {% endif %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in section.clinical_table.rows %}
+                            <tr>
+                                {% for header in section.clinical_table.headers %}
+                                {% set cell_data = row.data[header.key] %}
+                                <td>
+                                    {% if header.primary %}
+                                    <div class="primary-field">
+                                        <strong class="text-info">{{ cell_data.display_value|default:cell_data.value or
+                                            'N/A' }}</strong>
+                                        {% if cell_data.has_terminology %}
+                                        <div class="medical-terminology mt-1">
+                                            {% for term in cell_data.terminology %}
+                                            <span class="badge bg-info me-1" title="{{ term.system }}: {{ term.code }}">
+                                                {{ term.display_name|default:term.code }}
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <div class="cell-content">
+                                        {% if cell_data.has_codes %}
+                                        <div class="medical-codes-container">
+                                            {% for code in cell_data.codes %}
+                                            <span class="badge bg-info me-1 mb-1"
+                                                title="{{ code.system }}: {{ code.code }}">
+                                                {{ code.display_name|default:code.code }}
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                        {% else %}
+                                        {{ cell_data.display_value|default:cell_data.value or 'N/A' }}
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Medical Devices Table Summary -->
+                <div class="card-footer bg-light border-info">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-cogs me-1 text-info"></i>
+                                <strong>{{ section.clinical_table.rows|length }}</strong> medical devices
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt me-1 text-success"></i>
+                                Device safety monitoring
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-tools me-1 text-warning"></i>
+                                Maintenance scheduled
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Original Content Tab -->
+            <div id="medical_devices_{{ section_index }}_original" class="clinical-tab-content">
+                {% include 'patient_data/sections/original_content.html' %}
+            </div>
+        </div>
+
+        {% elif section.has_entries %}
+        <!-- Simple List Section for medical devices without clinical tables -->
+        {% include 'patient_data/sections/simple_list_section.html' %}
+
+        {% else %}
+        <!-- Empty Medical Devices Section -->
+        <div class="card-body text-center py-5">
+            <div class="text-success">
+                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                <h6 class="text-success">No Medical Devices</h6>
+                <p class="text-muted">No medical devices reported for this patient</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>

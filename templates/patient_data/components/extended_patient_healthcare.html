@@ -1,0 +1,232 @@
+<!-- Extended Patient Healthcare Team Component -->
+<div class="tab-pane fade {% if first_tab == 'healthcare' %}show active{% endif %}" id="healthcare" role="tabpanel"
+    aria-labelledby="healthcare-tab">
+    <h5><i class="fas fa-stethoscope me-2"></i>Healthcare Team</h5>
+
+    {% if patient_extended_data %}
+    {% set healthcare_data = patient_extended_data.get('healthcare_team', {}) %}
+
+    <!-- Debug Healthcare Data -->
+    <div class="alert alert-success mb-3">
+        <h6>DEBUG: Healthcare Team Data Available</h6>
+        <p><strong>Healthcare Data Keys:</strong> {{ healthcare_data.keys() | list if healthcare_data else 'No
+            healthcare data' }}</p>
+        <p><strong>Has healthcare team:</strong> {{ healthcare_data.get('has_healthcare_team', False) }}</p>
+        <p><strong>Total count:</strong> {{ healthcare_data.get('total_count', 0) }}</p>
+    </div>
+
+    <!-- Document Authors -->
+    {% if patient_extended_data.get('authors') or healthcare_data.get('authors') %}
+    <div class="mb-4">
+        <h6><i class="fas fa-user-md me-1"></i>Document Authors</h6>
+        {% set authors = patient_extended_data.get('authors', healthcare_data.get('authors', [])) %}
+        {% for author in authors %}
+        <div class="healthcare-member-card">
+            <div class="card-body">
+                <h6 class="card-title">
+                    {{ author.get('name', author.get('person', {}).get('full_name', 'Unknown Author')) }}
+                </h6>
+                <div class="mb-2">
+                    <span class="role-badge">{{ author.get('role', author.get('type', 'Author')) }}</span>
+                </div>
+                {% if author.get('organization') %}
+                <div class="organization-info mb-2">
+                    <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{ author.organization }}
+                </div>
+                {% endif %}
+                {% if author.get('time') %}
+                <div class="contact-details">
+                    <strong><i class="fas fa-clock me-1"></i>Authored:</strong>
+                    <span class="date-value">{{ author.time }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Legal Authenticator -->
+    {% if patient_extended_data.get('legal_authenticator') or healthcare_data.get('legal_authenticator') %}
+    {% set legal_auth = patient_extended_data.get('legal_authenticator', healthcare_data.get('legal_authenticator')) %}
+    <div class="mb-4">
+        <h6><i class="fas fa-gavel me-1"></i>Legal Authenticator</h6>
+        <div class="healthcare-member-card">
+            <div class="card-body">
+                <h6 class="card-title">{{ legal_auth.get('name', 'Unknown Authenticator') }}</h6>
+                <div class="mb-2">
+                    <span class="role-badge">{{ legal_auth.get('role', 'Legal Authenticator') }}</span>
+                </div>
+                {% if legal_auth.get('organization') %}
+                <div class="organization-info mb-2">
+                    <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{ legal_auth.organization }}
+                </div>
+                {% endif %}
+                {% if legal_auth.get('authentication_time') %}
+                <div class="contact-details">
+                    <strong><i class="fas fa-clock me-1"></i>Authenticated:</strong>
+                    <span class="date-value">{{ legal_auth.authentication_time }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Emergency Contacts -->
+    {% if patient_extended_data.get('emergency_contacts', {}).get('contacts') %}
+    <div class="mb-4">
+        <h6><i class="fas fa-ambulance me-1"></i>Emergency Contacts</h6>
+        {% for contact in patient_extended_data.emergency_contacts.contacts %}
+        <div class="healthcare-member-card">
+            <div class="card-body">
+                <h6 class="card-title">{{ contact.get('name', 'Unknown Contact') }}</h6>
+                <div class="mb-2">
+                    <span class="role-badge emergency-contact">Emergency Contact</span>
+                </div>
+
+                <!-- Phone Numbers -->
+                {% if contact.get('phone_numbers') %}
+                <div class="contact-details mb-2">
+                    {% for phone in contact.phone_numbers %}
+                    <div class="contact-item">
+                        <strong>{{ phone.get('display_label', phone.get('use_label', 'Phone:')) }}</strong>
+                        <a href="tel:{{ phone.get('number', '') }}" class="contact-link phone-link ms-2">
+                            {{ phone.get('number', '') }}
+                        </a>
+                        {% if phone.get('is_primary') %}
+                        <span class="badge bg-success ms-1">Primary</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Email Addresses -->
+                {% if contact.get('email_addresses') %}
+                <div class="contact-details mb-2">
+                    {% for email in contact.email_addresses %}
+                    <div class="contact-item">
+                        <strong>{{ email.get('display_label', email.get('use_label', 'Email:')) }}</strong>
+                        <a href="mailto:{{ email.get('email', '') }}" class="contact-link email-link ms-2">
+                            {{ email.get('email', '') }}
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Next of Kin -->
+    {% if patient_extended_data.get('next_of_kin', {}).get('contacts') %}
+    <div class="mb-4">
+        <h6><i class="fas fa-users me-1"></i>Next of Kin</h6>
+        {% for contact in patient_extended_data.next_of_kin.contacts %}
+        <div class="healthcare-member-card">
+            <div class="card-body">
+                <h6 class="card-title">{{ contact.get('name', 'Unknown Contact') }}</h6>
+                <div class="mb-2">
+                    <span class="role-badge next-of-kin">{{ contact.get('relationship', 'Next of Kin') }}</span>
+                </div>
+
+                <!-- Phone Numbers -->
+                {% if contact.get('phone_numbers') %}
+                <div class="contact-details mb-2">
+                    {% for phone in contact.phone_numbers %}
+                    <div class="contact-item">
+                        <strong>{{ phone.get('display_label', phone.get('use_label', 'Phone:')) }}</strong>
+                        <a href="tel:{{ phone.get('number', '') }}" class="contact-link phone-link ms-2">
+                            {{ phone.get('number', '') }}
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Medical Performers -->
+    {% if patient_extended_data.get('performers', {}).get('medical_doctors') %}
+    <div class="mb-4">
+        <h6><i class="fas fa-user-md me-1"></i>Medical Doctors</h6>
+        {% for doctor in patient_extended_data.performers.medical_doctors %}
+        <div class="healthcare-member-card">
+            <div class="card-body">
+                <h6 class="card-title">{{ doctor.get('name', 'Unknown Doctor') }}</h6>
+                <div class="mb-2">
+                    <span class="role-badge doctor">{{ doctor.get('role', 'Medical Doctor') }}</span>
+                </div>
+                {% if doctor.get('organization') %}
+                <div class="organization-info mb-2">
+                    <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{ doctor.organization }}
+                </div>
+                {% endif %}
+
+                <!-- Contact Information -->
+                {% if doctor.get('phone_numbers') %}
+                <div class="contact-details mb-2">
+                    {% for phone in doctor.phone_numbers %}
+                    <div class="contact-item">
+                        <strong>{{ phone.get('display_label', phone.get('use_label', 'Phone:')) }}</strong>
+                        <a href="tel:{{ phone.get('number', '') }}" class="contact-link phone-link ms-2">
+                            {{ phone.get('number', '') }}
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Custodian Organization -->
+    {% if patient_extended_data.get('custodian_organization') or healthcare_data.get('custodian_organization') %}
+    {% set custodian = patient_extended_data.get('custodian_organization',
+    healthcare_data.get('custodian_organization')) %}
+    <div class="mb-4">
+        <h6><i class="fas fa-building me-1"></i>Custodian Organization</h6>
+        <div class="healthcare-member-card">
+            <div class="card-body">
+                <h6 class="card-title">{{ custodian.get('name', 'Unknown Organization') }}</h6>
+                {% if custodian.get('contact_info', {}).get('addresses') %}
+                <div class="contact-details mb-2">
+                    <strong><i class="fas fa-map-marker-alt me-1"></i>Address:</strong>
+                    {{ custodian.contact_info.addresses[0] }}
+                </div>
+                {% endif %}
+                {% if custodian.get('contact_info', {}).get('phone_numbers') %}
+                <div class="contact-details">
+                    <strong><i class="fas fa-phone me-1"></i>Phone:</strong>
+                    <a href="tel:{{ custodian.contact_info.phone_numbers[0] }}" class="contact-link phone-link">
+                        {{ custodian.contact_info.phone_numbers[0] }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Show message if no healthcare team info -->
+    {% if not healthcare_data.get('authors') and not healthcare_data.get('legal_authenticator') and not
+    healthcare_data.get('custodian_organization') %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>No healthcare team information available in the CDA document.
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>No extended patient data available.
+    </div>
+    {% endif %}
+</div>

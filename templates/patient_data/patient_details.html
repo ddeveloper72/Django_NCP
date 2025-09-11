@@ -124,7 +124,15 @@
 
                     <div class="info-item">
                         <label class="info-label">Submitted:</label>
-                        <span class="info-value">{{ patient_data.created_at|date:"d F Y H:i" }}</span>
+                        <span class="info-value">
+                            {% if patient_data.access_timestamp %}
+                            {{ patient_data.access_timestamp|date:"j F Y, g:i:s A O" }}
+                            {% elif patient_data.patient_identifier.created_at %}
+                            {{ patient_data.patient_identifier.created_at|date:"j F Y, g:i:s A O" }}
+                            {% else %}
+                            Not available
+                            {% endif %}
+                        </span>
                     </div>
 
                     {% if has_cda_match and patient_summary.file_path %}
