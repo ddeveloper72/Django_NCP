@@ -28,19 +28,24 @@
                     <h6><i class="fas fa-database me-2"></i>Administrative Data Available</h6>
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>Data Keys:</strong> {{ administrative_data.keys() | list }}</p>
-                            <p><strong>Type:</strong> {{ administrative_data.__class__.__name__ }}</p>
+                            <p><strong>Data Keys:</strong> 
+                                {% if administrative_data.keys %}
+                                    {% for key in administrative_data.keys %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                {% else %}
+                                    {% for key, value in administrative_data.items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                {% endif %}
+                            </p>
+                            <p><strong>Type:</strong> {{ administrative_data|slugify|title }}</p>
                         </div>
                         <div class="col-md-6">
-                            {% if administrative_data.get('authors') %}
-                            <p><strong>Authors Count:</strong> {{ administrative_data.authors | length }}</p>
+                            {% if administrative_data.authors %}
+                            <p><strong>Authors Count:</strong> {{ administrative_data.authors|length }}</p>
                             {% endif %}
-                            {% if administrative_data.get('custodians') %}
-                            <p><strong>Custodians Count:</strong> {{ administrative_data.custodians | length }}</p>
+                            {% if administrative_data.custodians %}
+                            <p><strong>Custodians Count:</strong> {{ administrative_data.custodians|length }}</p>
                             {% endif %}
-                            {% if administrative_data.get('legal_authenticators') %}
-                            <p><strong>Legal Authenticators Count:</strong> {{ administrative_data.legal_authenticators
-                                | length }}</p>
+                            {% if administrative_data.legal_authenticators %}
+                            <p><strong>Legal Authenticators Count:</strong> {{ administrative_data.legal_authenticators|length }}</p>
                             {% endif %}
                         </div>
                     </div>
@@ -48,14 +53,16 @@
                 {% endif %}
 
                 <!-- Patient Data Debug -->
-                {% if administrative_data and administrative_data.get('patient') %}
+                {% if administrative_data and administrative_data.patient %}
                 <div class="alert alert-info mb-3">
                     <h6><i class="fas fa-user me-2"></i>Patient Data Available</h6>
-                    <p><strong>Patient Keys:</strong> {{ administrative_data.patient.keys() | list }}</p>
-                    {% if administrative_data.patient.get('full_name') %}
+                    <p><strong>Patient Keys:</strong> 
+                        {% for key, value in administrative_data.patient.items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    </p>
+                    {% if administrative_data.patient.full_name %}
                     <p><strong>Patient Name:</strong> {{ administrative_data.patient.full_name }}</p>
                     {% endif %}
-                    {% if administrative_data.patient.get('patient_id') %}
+                    {% if administrative_data.patient.patient_id %}
                     <p><strong>Patient ID:</strong> {{ administrative_data.patient.patient_id }}</p>
                     {% endif %}
                 </div>
@@ -65,8 +72,10 @@
                 {% if extended_header_data %}
                 <div class="alert alert-primary mb-3">
                     <h6><i class="fas fa-file-medical me-2"></i>Extended Header Data</h6>
-                    <p><strong>Data Keys:</strong> {{ extended_header_data.keys() | list }}</p>
-                    <p><strong>Type:</strong> {{ extended_header_data.__class__.__name__ }}</p>
+                    <p><strong>Data Keys:</strong> 
+                        {% for key, value in extended_header_data.items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    </p>
+                    <p><strong>Type:</strong> {{ extended_header_data|slugify|title }}</p>
                 </div>
                 {% endif %}
 
@@ -93,14 +102,14 @@
                         <div id="adminDataCollapse" class="accordion-collapse collapse"
                             aria-labelledby="adminDataHeading" data-bs-parent="#debugAccordion">
                             <div class="accordion-body">
-                                <pre class="bg-light p-3 rounded"><code>{{ administrative_data | pprint }}</code></pre>
+                                <pre class="bg-light p-3 rounded"><code>{{ administrative_data }}</code></pre>
                             </div>
                         </div>
                     </div>
                     {% endif %}
 
                     <!-- Patient Data Detail -->
-                    {% if administrative_data and administrative_data.get('patient') %}
+                    {% if administrative_data and administrative_data.patient %}
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="patientDataHeading">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -112,8 +121,7 @@
                         <div id="patientDataCollapse" class="accordion-collapse collapse"
                             aria-labelledby="patientDataHeading" data-bs-parent="#debugAccordion">
                             <div class="accordion-body">
-                                <pre
-                                    class="bg-light p-3 rounded"><code>{{ administrative_data.patient | pprint }}</code></pre>
+                                <pre class="bg-light p-3 rounded"><code>{{ administrative_data.patient }}</code></pre>
                             </div>
                         </div>
                     </div>

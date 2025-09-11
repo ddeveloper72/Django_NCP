@@ -14,17 +14,23 @@
                 <!-- DEBUG: Show what data is available -->
                 <div class="alert alert-info mb-3">
                     <h6><i class="fas fa-bug me-2"></i>DEBUG: Available Extended Data</h6>
-                    <p><strong>Data Keys:</strong> {{ patient_extended_data.keys() | list }}</p>
-                    {% if patient_extended_data.get('patient_contact') %}
-                    <p><strong>Patient Contact Keys:</strong> {{ patient_extended_data.patient_contact.keys() | list }}
+                    <p><strong>Data Keys:</strong> 
+                        {% for key, value in patient_extended_data.items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    </p>
+                    {% if patient_extended_data.patient_contact %}
+                    <p><strong>Patient Contact Keys:</strong> 
+                        {% for key, value in patient_extended_data.patient_contact.items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
                     </p>
                     {% endif %}
-                    {% if patient_extended_data.get('healthcare_team') %}
-                    <p><strong>Healthcare Team Keys:</strong> {{ patient_extended_data.healthcare_team.keys() | list }}
+                    {% if patient_extended_data.healthcare_team %}
+                    <p><strong>Healthcare Team Keys:</strong> 
+                        {% for key, value in patient_extended_data.healthcare_team.items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
                     </p>
                     {% endif %}
-                    {% if patient_extended_data.get('document_info') %}
-                    <p><strong>Document Info Keys:</strong> {{ patient_extended_data.document_info.keys() | list }}</p>
+                    {% if patient_extended_data.document_info %}
+                    <p><strong>Document Info Keys:</strong> 
+                        {% for key, value in patient_extended_data.document_info.items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    </p>
                     {% endif %}
                 </div>
 

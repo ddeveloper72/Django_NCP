@@ -1167,7 +1167,7 @@
                             <p><strong>Gender:</strong> {{ patient_identity.gender|default:"Unknown" }}</p>
                             <p><strong>Patient ID:</strong> {{ patient_identity.patient_id }}</p>
                             <!-- DEBUG: Raw patient_identity.patient_id = "{{ patient_identity.patient_id }}" -->
-                            <!-- DEBUG: All patient_identity keys: {{ patient_identity.keys() | list }} -->
+                            <!-- DEBUG: Patient identity keys available via debug tools -->
                             {% if patient_identity.secondary_patient_id %}
                             <p><strong>Secondary ID:</strong> {{ patient_identity.secondary_patient_id }}</p>
                             {% endif %}

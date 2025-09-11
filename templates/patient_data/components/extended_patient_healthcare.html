@@ -9,10 +9,15 @@
     <!-- Debug Healthcare Data -->
     <div class="alert alert-success mb-3">
         <h6>DEBUG: Healthcare Team Data Available</h6>
-        <p><strong>Healthcare Data Keys:</strong> {{ healthcare_data.keys() | list if healthcare_data else 'No
-            healthcare data' }}</p>
-        <p><strong>Has healthcare team:</strong> {{ healthcare_data.get('has_healthcare_team', False) }}</p>
-        <p><strong>Total count:</strong> {{ healthcare_data.get('total_count', 0) }}</p>
+        <p><strong>Healthcare Data Keys:</strong> 
+            {% if healthcare_data %}
+                {% for key, value in healthcare_data.items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            {% else %}
+                No healthcare data
+            {% endif %}
+        </p>
+        <p><strong>Has healthcare team:</strong> {{ healthcare_data.has_healthcare_team|default:False }}</p>
+        <p><strong>Total count:</strong> {{ healthcare_data.total_count|default:0 }}</p>
     </div>
 
     <!-- Document Authors -->
