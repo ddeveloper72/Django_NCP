@@ -7,7 +7,7 @@
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">
                 <i class="fas fa-pills me-2"></i>
-                {{ section.title|default:"Medication Summary" }}
+                {% firstof section.title Medication Summary %}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
                 {% endif %}
@@ -68,15 +68,15 @@
                                 <td>
                                     {% if header.primary %}
                                     <div class="primary-field">
-                                        <strong class="text-primary">{{ cell_data.display_value|default:cell_data.value
+                                        <strong class="text-primary">{% firstof cell_data.display_value cell_data.value
                                             or
-                                            'N/A' }}</strong>
+                                            'N/A %}</strong>
                                         {% if cell_data.has_terminology %}
                                         <div class="medical-terminology mt-1">
                                             {% for term in cell_data.terminology %}
                                             <span class="badge bg-primary me-1"
-                                                title="{{ term.system }}: {{ term.code }}">
-                                                {{ term.display_name|default:term.code }}
+                                                title="{% firstof term.system }}: {{ term.code }}">
+                                                {{ term.display_name term.code %}
                                             </span>
                                             {% endfor %}
                                         </div>
@@ -88,13 +88,13 @@
                                         <div class="medical-codes-container">
                                             {% for code in cell_data.codes %}
                                             <span class="badge bg-primary me-1 mb-1"
-                                                title="{{ code.system }}: {{ code.code }}">
-                                                {{ code.display_name|default:code.code }}
+                                                title="{% firstof code.system }}: {{ code.code }}">
+                                                {{ code.display_name code.code %}
                                             </span>
                                             {% endfor %}
                                         </div>
                                         {% else %}
-                                        {{ cell_data.display_value|default:cell_data.value or 'N/A' }}
+                                        {% firstof cell_data.display_value cell_data.value or 'N/A %}
                                         {% endif %}
                                     </div>
                                     {% endif %}                                </td>

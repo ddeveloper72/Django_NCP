@@ -26,7 +26,7 @@
                             {% if 'code' in field_name.lower() %}
                             <i class="fas fa-code me-1"></i>
                             {% endif %}
-                            {{ field_name }}
+                            {% firstof field_name }}
                         </th>
                         {% endfor %}
                     </tr>
@@ -39,7 +39,7 @@
                             {% if 'date' in field_name.lower() or 'time' in field_name.lower() %}
                             {{ format_medical_date(field_data.value) }}
                             {% else %}
-                            {{ field_data.value|default:"N/A" }}
+                            {{ field_data.value N/A %}
                             {% endif %}
                             {% if field_data.has_valueset %}
                             <span class="badge bg-info ms-1">Coded</span>

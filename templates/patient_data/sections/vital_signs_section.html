@@ -7,7 +7,7 @@
         <div class="card-header bg-secondary text-white">
             <h5 class="mb-0">
                 <i class="fas fa-heartbeat me-2"></i>
-                {{ section.title|default:"Vital Signs" }}
+                {% firstof section.title Vital Signs %}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
                 {% endif %}
@@ -68,15 +68,14 @@
                                 <td>
                                     {% if header.primary %}
                                     <div class="primary-field">
-                                        <strong class="text-secondary">{{
-                                            cell_data.display_value|default:cell_data.value or
-                                            'N/A' }}</strong>
+                                        <strong class="text-secondary">{% firstof cell_data.display_value cell_data.value or
+                                            'N/A %}</strong>
                                         {% if cell_data.has_terminology %}
                                         <div class="medical-terminology mt-1">
                                             {% for term in cell_data.terminology %}
                                             <span class="badge bg-secondary me-1"
-                                                title="{{ term.system }}: {{ term.code }}">
-                                                {{ term.display_name|default:term.code }}
+                                                title="{% firstof term.system }}: {{ term.code }}">
+                                                {{ term.display_name term.code %}
                                             </span>
                                             {% endfor %}
                                         </div>
@@ -88,19 +87,18 @@
                                         <div class="medical-codes-container">
                                             {% for code in cell_data.codes %}
                                             <span class="badge bg-secondary me-1 mb-1"
-                                                title="{{ code.system }}: {{ code.code }}">
-                                                {{ code.display_name|default:code.code }}
+                                                title="{% firstof code.system }}: {{ code.code }}">
+                                                {{ code.display_name code.code %}
                                             </span>
                                             {% endfor %}
                                         </div>
                                         {% elif cell_data.is_abnormal %}
-                                        <span class="text-danger fw-bold">{{
-                                            cell_data.display_value|default:cell_data.value
-                                            or 'N/A' }}</span>
+                                        <span class="text-danger fw-bold">{% firstof cell_data.display_value cell_data.value
+                                            or 'N/A %}</span>
                                         <i class="fas fa-exclamation-triangle text-danger ms-1"
                                             title="Abnormal Vital Sign"></i>
                                         {% else %}
-                                        {{ cell_data.display_value|default:cell_data.value or 'N/A' }}
+                                        {% firstof cell_data.display_value cell_data.value or 'N/A %}
                                         {% endif %}
                                     </div>
                                     {% endif %}                                </td>

@@ -37,7 +37,7 @@
         <div class="info-item">
             <span class="info-label">Marital Status</span>
             <span class="info-value">
-                {{ data.marital_status.text|default:data.marital_status.coding.0.display|default:"Not specified" }}
+                {% firstof data.marital_status.text data.marital_status.coding.0.display "Not specified" %}
             </span>
         </div>
         {% endif %}
@@ -66,7 +66,7 @@
         {% if data.address %}
         {% for addr in data.address %}
         <div class="info-item">
-            <span class="info-label">{{ addr.use|title|default:"Address" }}</span>
+            <span class="info-label">{% firstof addr.use|title "Address" %}</span>
             <span class="info-value">
                 {% if addr.line %}
                 {% for line in addr.line %}{{ line }}<br>{% endfor %}
@@ -97,13 +97,13 @@
                 {% elif identifier.type.coding.0.display %}
                 {{ identifier.type.coding.0.display }}
                 {% elif identifier.system %}
-                {{ identifier.system|slice:":"|join:" "|title }}
+                {{ identifier.system|title }}
                 {% else %}
                 Identifier
                 {% endif %}
             </span>
             <span class="info-value">
-                {{ identifier.value }}
+                {% firstof identifier.value }}
                 {% if identifier.system %}
                 <br><small class="code-display">{{ identifier.system }}</small>
                 {% endif %}
@@ -121,7 +121,7 @@
         <div class="info-item">
             <span class="info-label">Language</span>
             <span class="info-value">
-                {{ comm.language.text|default:comm.language.coding.0.display }}
+                {{ comm.language.text comm.language.coding.0.display %}
                 {% if comm.preferred %}(Preferred){% endif %}
             </span>
         </div>

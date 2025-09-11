@@ -7,7 +7,7 @@
         <div class="card-header bg-info text-white">
             <h5 class="mb-0">
                 <i class="fas fa-flask me-2"></i>
-                {{ section.title|default:"Laboratory Results" }}
+                {% firstof section.title Laboratory Results %}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
                 {% endif %}
@@ -66,13 +66,12 @@
                                 <td>
                                     {% if header.primary %}
                                     <div class="primary-field">
-                                        <strong class="text-info">{{ cell_data.display_value|default:cell_data.value or
-                                            'N/A' }}</strong>
+                                        <strong class="text-info">{% firstof cell_data.display_value cell_data.value "N/A" %}</strong>
                                         {% if cell_data.has_terminology %}
                                         <div class="medical-terminology mt-1">
                                             {% for term in cell_data.terminology %}
                                             <span class="badge bg-info me-1" title="{{ term.system }}: {{ term.code }}">
-                                                {{ term.display_name|default:term.code }}
+                                                {% firstof term.display_name term.code %}
                                             </span>
                                             {% endfor %}
                                         </div>
@@ -85,18 +84,16 @@
                                             {% for code in cell_data.codes %}
                                             <span class="badge bg-info me-1 mb-1"
                                                 title="{{ code.system }}: {{ code.code }}">
-                                                {{ code.display_name|default:code.code }}
+                                                {% firstof code.display_name code.code %}
                                             </span>
                                             {% endfor %}
                                         </div>
                                         {% elif cell_data.is_abnormal %}
-                                        <span class="text-warning fw-bold">{{
-                                            cell_data.display_value|default:cell_data.value
-                                            or 'N/A' }}</span>
+                                        <span class="text-warning fw-bold">{% firstof cell_data.display_value cell_data.value "N/A" %}</span>
                                         <i class="fas fa-exclamation-triangle text-warning ms-1"
                                             title="Abnormal Result"></i>
                                         {% else %}
-                                        {{ cell_data.display_value|default:cell_data.value or 'N/A' }}
+                                        {% firstof cell_data.display_value cell_data.value "N/A" %}
                                         {% endif %}
                                     </div>
                                     {% endif %}                                </td>

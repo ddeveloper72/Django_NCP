@@ -39,12 +39,12 @@
                         <td>
                             {% if header.primary %}
                             <div class="primary-field">
-                                <strong>{{ cell_data.display_value|default:cell_data.value or 'N/A' }}</strong>
+                                <strong>{% firstof cell_data.display_value cell_data.value or 'N/A %}</strong>
                                 {% if cell_data.has_terminology %}
                                 <div class="medical-terminology mt-1">
                                     {% for term in cell_data.terminology %}
-                                    <span class="badge bg-success me-1" title="{{ term.system }}: {{ term.code }}">
-                                        {{ term.display_name|default:term.code }}
+                                    <span class="badge bg-success me-1" title="{% firstof term.system }}: {{ term.code }}">
+                                        {{ term.display_name term.code %}
                                     </span>
                                     {% endfor %}
                                 </div>
@@ -57,25 +57,25 @@
                                     <div class="medical-code-item d-flex flex-wrap align-items-center">
                                         {% for code in cell_data.codes %}
                                         {% if code.badge %}
-                                        <span class="badge {{ code.badge }} me-1 mb-1"
+                                        <span class="badge {% firstof code.badge }} me-1 mb-1"
                                             title="{{ code.system }}: {{ code.code }}">
-                                            {{ code.display_name|default:code.code }}
+                                            {{ code.display_name code.code %}
                                         </span>
                                         {% else %}
-                                        <code class="me-1 mb-1">{{ code.code }}</code>
+                                        <code class="me-1 mb-1">{% firstof code.code }}</code>
                                         {% endif %}
                                         {% endfor %}
                                     </div>
                                 </div>
                                 {% else %}
-                                {{ cell_data.display_value|default:cell_data.value or 'N/A' }}
+                                {{ cell_data.display_value cell_data.value or 'N/A %}
                                 {% endif %}
 
                                 {% if cell_data.has_terminology %}
                                 <div class="medical-terminology mt-1">
                                     {% for term in cell_data.terminology %}
-                                    <span class="badge bg-info me-1" title="{{ term.system }}: {{ term.code }}">
-                                        <i class="fas fa-tag me-1"></i>{{ term.display_name|default:term.code }}
+                                    <span class="badge bg-info me-1" title="{% firstof term.system }}: {{ term.code }}">
+                                        <i class="fas fa-tag me-1"></i>{{ term.display_name term.code %}
                                     </span>
                                     {% endfor %}
                                 </div>

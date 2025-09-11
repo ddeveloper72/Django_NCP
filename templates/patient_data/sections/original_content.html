@@ -19,7 +19,7 @@
                 <tr>
                     {% for field_name, field_data in first_entry.fields.items() %}
                     <th class="text-center">
-                        {{ field_name }}
+                        {% firstof field_name }}
                         {% if field_data.has_valueset %}
                         <span class="badge bg-warning ms-1">Coded</span>
                         {% endif %}
@@ -35,7 +35,7 @@
                         {% if 'date' in field_name.lower() or 'time' in field_name.lower() %}
                         <div class="original-value">{{ format_medical_date(field_data.value) }}</div>
                         {% else %}
-                        <div class="original-value">{{ field_data.value|default:"N/A" }}</div>
+                        <div class="original-value">{{ field_data.value N/A %}</div>
                         {% endif %}
 
                         {% if field_data.xpath %}
@@ -111,7 +111,7 @@
         {% if section.content is string %}
         <pre class="text-content">{{ section.content[:3000] }}{% if section.content|length > 3000 %}...{% endif %}</pre>
         {% else %}
-        <pre class="xml-content">{{ section.content | string }}</pre>
+        <pre class="xml-content">{{ section.content }}</pre>
         {% endif %}
     </div>
 
@@ -133,9 +133,9 @@
                     <td>{{ loop.index }}</td>
                     <td>
                         {% if entry is mapping %}
-                        <pre class="json-content">{{ entry | tojson(indent=2) }}</pre>
+                        <pre class="json-content">{{ entry }}</pre>
                         {% else %}
-                        {{ entry | string }}
+                        {{ entry }}
                         {% endif %}
                     </td>
                 </tr>
