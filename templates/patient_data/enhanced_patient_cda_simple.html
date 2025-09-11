@@ -192,8 +192,7 @@
                                     <span class="success-badge">{{ patient_identity.patient_id }}</span>
                                 </div>
                                 <div class="data-field">
-                                    <strong>Birth Date:</strong> {{
-                                    patient_identity.birth_date_formatted|default:patient_identity.birth_date }}
+                                    <strong>Birth Date:</strong> {% firstof patient_identity.birth_date_formatted patient_identity.birth_date "Unknown" %}
                                 </div>
                                 <div class="data-field">
                                     <strong>Gender:</strong> {{ patient_identity.gender }}
@@ -214,8 +213,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="data-field">
-                                    <strong>URL Patient ID:</strong> {{
-                                    patient_identity.url_patient_id|default:patient_identity.patient_id }}
+                                    <strong>URL Patient ID:</strong> {% firstof patient_identity.url_patient_id patient_identity.patient_id "Unknown" %}
                                 </div>
                             </div>
                         </div>

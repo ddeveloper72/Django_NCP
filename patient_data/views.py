@@ -3872,7 +3872,7 @@ def patient_cda_view(request, patient_id, cda_type=None):
 
         return render(
             request,
-            "patient_data/enhanced_patient_cda_simple.html",
+            "patient_data/enhanced_patient_cda.html",
             context,
         )
 

@@ -4,8 +4,7 @@
 {# Django replacement for Jinja2 macro - use |document_date filter instead #}
 {# format_medical_date functionality moved to patient_date_filters.py #}
 
-{% block title %}Enhanced CDA Display - {{ patient_identity.given_name }} {{ patient_identity.family_name }}{% endblock
-%}
+{% block title %}Enhanced CDA Display - {{ patient_identity.given_name }} {{ patient_identity.family_name }}{% endblock %}
 
 {% block extra_css %}
 <!-- Bootstrap CSS -->
@@ -1203,6 +1202,9 @@
         </div>
     </div>
 
+    <!-- Include Debug Modal Component -->
+    {% include 'patient_data/components/debug_modal.html' %}
+
     <!-- Extended Header Information Section -->
     {% include 'patient_data/components/extended_patient_info.html' %}
 
@@ -1258,8 +1260,7 @@
                             </h6>
 
                             <div class="dosing-info">
-                                {% if medication.fields.Frequency_Period_Value.value and
-                                medication.fields.Frequency_Period_Unit.value %}
+                                {% if medication.fields.Frequency_Period_Value.value and medication.fields.Frequency_Period_Unit.value %}
                                 <p class="mb-2"><strong>Frequency:</strong>
                                     {{ medication.fields.Frequency_Period_Value.value }}
                                     time(s) per {{ medication.fields.Frequency_Period_Unit.value
@@ -1301,23 +1302,20 @@
 
                             <div class="row">
                                 <div class="col-md-6">
-                                    {% if medication.fields.Ingredient_Strength_Numerator.value and
-                                    medication.fields.Ingredient_Strength_Numerator_Unit.value %}
+                                    {% if medication.fields.Ingredient_Strength_Numerator.value and medication.fields.Ingredient_Strength_Numerator_Unit.value %}
                                     <small class="text-muted d-block">
                                         <strong>Strength:</strong>
                                         {{ medication.fields.Ingredient_Strength_Numerator.value
                                         }}
                                         {{ medication.fields.Ingredient_Strength_Numerator_Unit.value }}
-                                        {% if medication.fields.Ingredient_Strength_Denominator.value
-                                        and medication.fields.Ingredient_Strength_Denominator_Unit.value %}
+                                        {% if medication.fields.Ingredient_Strength_Denominator.value and medication.fields.Ingredient_Strength_Denominator_Unit.value %}
                                         / {{ medication.fields.Ingredient_Strength_Denominator.value }}
                                         {{ medication.fields.Ingredient_Strength_Denominator_Unit.value }}
                                         {% endif %}
                                     </small>
                                     {% endif %}
 
-                                    {% if medication.fields.Package_Quantity.value and
-                                    medication.fields.Package_Unit.value %}
+                                    {% if medication.fields.Package_Quantity.value and medication.fields.Package_Unit.value %}
                                     <small class="text-muted d-block">
                                         <strong>Package:</strong>
                                         {{ medication.fields.Package_Quantity.value }}
@@ -1350,11 +1348,31 @@
     {% endif %}
 
     <!-- Medical Sections with Clinical Tables -->
-    {% if processed_sections %}
-    {% for section in processed_sections %}
-    {# Django: Use forloop.counter0 instead of {% set %} #}
-    {% include 'patient_data/sections/medical_section.html' with section_index=forloop.counter0 %}
-    {% endfor %}
+    {% if processed_sections and processed_sections|length > 0 %}
+    <div class="card mt-4">
+        <div class="card-header bg-success text-white">
+            <h3 class="mb-0">
+                <i class="fas fa-clipboard-list me-2"></i>
+                Clinical Sections ({{ processed_sections|length }} sections)
+            </h3>
+        </div>
+        <div class="card-body">
+            {% for section in processed_sections %}
+            {# Django: Use forloop.counter0 instead of {% set %} #}
+
+            <!-- Modular Clinical Section Router - Enhanced Version -->
+            {% include 'patient_data/sections/clinical_section_router.html' %}
+
+            {% endfor %}
+
+            <div class="text-end mt-3">
+                <span class="badge bg-success fs-6">
+                    <i class="fas fa-check-circle me-1"></i>
+                    Enhanced Clinical Sections Loaded ({{ processed_sections|length }})
+                </span>
+            </div>
+        </div>
+    </div>
     {% else %}
     <div class="alert alert-warning">
         <h4>No Medical Data Available</h4>
@@ -1384,7 +1402,7 @@
                             <div>Coded Sections</div>
                         </div>
                         <div class="col-md-3">
-                            <div class="h2 text-warning">{{ coded_sections_percentage|round }}%</div>
+                            <div class="h2 text-warning">{{ coded_sections_percentage|floatformat:0 }}%</div>
                             <div>Terminology Coverage</div>
                         </div>
                     </div>
