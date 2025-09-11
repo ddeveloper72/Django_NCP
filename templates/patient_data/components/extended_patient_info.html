@@ -40,8 +40,7 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link {% if first_tab == 'contact' %}active{% endif %}" id="contact-tab"
                             data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab"
-                            aria-controls="contact" {% if first_tab=='contact' %}aria-selected="true" {% else
-                            %}aria-selected="false" {% endif %}>
+                            aria-controls="contact" {% if first_tab == 'contact' %}aria-selected="true"{% else %}aria-selected="false"{% endif %}>
                             <i class="fas fa-address-card me-1"></i>Contact Details
                             {% if contact_tab_available %}
                             <span class="badge bg-primary ms-1">1</span>
@@ -53,8 +52,7 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link {% if first_tab == 'healthcare' %}active{% endif %}" id="healthcare-tab"
                             data-bs-toggle="tab" data-bs-target="#healthcare" type="button" role="tab"
-                            aria-controls="healthcare" {% if first_tab=='healthcare' %}aria-selected="true" {% else
-                            %}aria-selected="false" {% endif %}>
+                            aria-controls="healthcare" {% if first_tab == 'healthcare' %}aria-selected="true"{% else %}aria-selected="false"{% endif %}>
                             <i class="fas fa-stethoscope me-1"></i>Healthcare Team
                             {% if healthcare_tab_available %}
                             <span class="badge bg-success ms-1">
@@ -75,8 +73,7 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link {% if first_tab == 'document' %}active{% endif %}" id="document-tab"
                             data-bs-toggle="tab" data-bs-target="#document" type="button" role="tab"
-                            aria-controls="document" {% if first_tab=='document' %}aria-selected="true" {% else
-                            %}aria-selected="false" {% endif %}>
+                            aria-controls="document" {% if first_tab == 'document' %}aria-selected="true"{% else %}aria-selected="false"{% endif %}>
                             <i class="fas fa-file-medical-alt me-1"></i>Document Info
                         </button>
                     </li>

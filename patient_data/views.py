@@ -4474,7 +4474,7 @@ def generate_structured_cda_html(
                         <small class="section-info">({len(section_entries)} entries)</small>
                     </h2>
                 </div>
-                
+
                 <div class="section-content expanded" id="{section_id}_content">
                     <div class="section-tabs">
                         <button class="tab-button active" onclick="showTab('{section_id}', 'structured')">
@@ -4484,7 +4484,7 @@ def generate_structured_cda_html(
                             📄 Original Content
                         </button>
                     </div>
-                    
+
                     <div id="{section_id}_structured" class="tab-content active">
             """
 
@@ -4518,7 +4518,7 @@ def generate_structured_cda_html(
 
             sections_html += f"""
                     </div>
-                    
+
                     <div id="{section_id}_original" class="tab-content">
                         <div class="original-content">
                             <h4>Original CDA Content (Code: {section_code})</h4>
@@ -4560,7 +4560,7 @@ def generate_structured_cda_html(
             margin: 0;
             padding: 0;
         }}
-        
+
         body {{
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f7fa;
@@ -4568,7 +4568,7 @@ def generate_structured_cda_html(
             line-height: 1.6;
             padding: 20px;
         }}
-        
+
         .document-container {{
             max-width: 1200px;
             margin: 0 auto;
@@ -4577,38 +4577,38 @@ def generate_structured_cda_html(
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }}
-        
+
         .patient-header {{
             background: linear-gradient(135deg, #4a90e2, #357abd);
             color: white;
             padding: 30px;
             text-align: center;
         }}
-        
+
         .patient-header h1 {{
             font-size: 2.5em;
             margin-bottom: 15px;
             font-weight: 300;
         }}
-        
+
         .patient-info {{
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }}
-        
+
         .info-card {{
             background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             border-radius: 5px;
             border-left: 4px solid #fff;
         }}
-        
+
         .clinical-section {{
             border-bottom: 1px solid #e9ecef;
         }}
-        
+
         .section-header {{
             background: #f8f9fa;
             padding: 20px;
@@ -4616,11 +4616,11 @@ def generate_structured_cda_html(
             transition: background-color 0.3s;
             border-left: 4px solid #4a90e2;
         }}
-        
+
         .section-header:hover {{
             background: #e9ecef;
         }}
-        
+
         .section-title {{
             display: flex;
             align-items: center;
@@ -4628,40 +4628,40 @@ def generate_structured_cda_html(
             font-weight: 600;
             color: #2c3e50;
         }}
-        
+
         .toggle-icon {{
             margin-right: 12px;
             transition: transform 0.3s;
             font-size: 0.8em;
         }}
-        
+
         .section-header.collapsed .toggle-icon {{
             transform: rotate(-90deg);
         }}
-        
+
         .section-info {{
             margin-left: auto;
             font-size: 0.9em;
             color: #6c757d;
             font-weight: 400;
         }}
-        
+
         .section-content {{
             max-height: 1000px;
             overflow: hidden;
             transition: max-height 0.3s ease-in-out;
         }}
-        
+
         .section-content.collapsed {{
             max-height: 0;
         }}
-        
+
         .section-tabs {{
             display: flex;
             background: #f8f9fa;
             border-bottom: 1px solid #dee2e6;
         }}
-        
+
         .tab-button {{
             background: none;
             border: none;
@@ -4672,27 +4672,27 @@ def generate_structured_cda_html(
             border-bottom: 3px solid transparent;
             transition: all 0.3s;
         }}
-        
+
         .tab-button:hover {{
             background: #e9ecef;
             color: #495057;
         }}
-        
+
         .tab-button.active {{
             color: #4a90e2;
             border-bottom-color: #4a90e2;
             background: white;
         }}
-        
+
         .tab-content {{
             display: none;
             padding: 25px;
         }}
-        
+
         .tab-content.active {{
             display: block;
         }}
-        
+
         .clinical-table {{
             width: 100%;
             border-collapse: collapse;
@@ -4702,7 +4702,7 @@ def generate_structured_cda_html(
             overflow: hidden;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }}
-        
+
         .clinical-table th {{
             background: #4a90e2;
             color: white;
@@ -4713,21 +4713,21 @@ def generate_structured_cda_html(
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }}
-        
+
         .clinical-table td {{
             padding: 15px;
             border-bottom: 1px solid #e9ecef;
             vertical-align: top;
         }}
-        
+
         .clinical-table tr:nth-child(even) {{
             background: #f8f9fa;
         }}
-        
+
         .clinical-table tr:hover {{
             background: #e3f2fd;
         }}
-        
+
         .status-badge {{
             padding: 4px 12px;
             border-radius: 20px;
@@ -4736,22 +4736,22 @@ def generate_structured_cda_html(
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }}
-        
+
         .status-active {{
             background: #d4edda;
             color: #155724;
         }}
-        
+
         .status-completed {{
             background: #d1ecf1;
             color: #0c5460;
         }}
-        
+
         .status-inactive {{
             background: #f8d7da;
             color: #721c24;
         }}
-        
+
         .medical-code {{
             background: #e9ecef;
             padding: 2px 8px;
@@ -4763,19 +4763,19 @@ def generate_structured_cda_html(
             margin: 2px;
             display: inline-block;
         }}
-        
+
         .medical-code:hover {{
             background: #4a90e2;
             color: white;
         }}
-        
+
         .original-content {{
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 5px;
             padding: 20px;
         }}
-        
+
         .xml-content {{
             background: #2d3748;
             color: #e2e8f0;
@@ -4789,7 +4789,7 @@ def generate_structured_cda_html(
             line-height: 1.4;
             margin-top: 10px;
         }}
-        
+
         .document-footer {{
             background: #f8f9fa;
             padding: 20px;
@@ -4798,24 +4798,24 @@ def generate_structured_cda_html(
             font-size: 0.9em;
             border-top: 1px solid #dee2e6;
         }}
-        
+
         @media print {{
-            body {{ 
-                background: white; 
-                padding: 0; 
+            body {{
+                background: white;
+                padding: 0;
             }}
-            .document-container {{ 
-                box-shadow: none; 
-                border-radius: 0; 
+            .document-container {{
+                box-shadow: none;
+                border-radius: 0;
             }}
-            .section-content {{ 
-                max-height: none !important; 
+            .section-content {{
+                max-height: none !important;
             }}
-            .tab-content {{ 
-                display: block !important; 
+            .tab-content {{
+                display: block !important;
             }}
         }}
-        
+
         @media (max-width: 768px) {{
             .patient-info {{
                 grid-template-columns: 1fr;
@@ -4834,7 +4834,7 @@ def generate_structured_cda_html(
     <div class="document-container">
         <div class="patient-header">
             <h1>👤 {patient_given_name} {patient_family_name}</h1>
-            
+
             <div class="patient-info">
                 <div class="info-card">
                     <strong>Birth Date:</strong> {patient_data.get('dob') if isinstance(patient_data, dict) else getattr(patient_data, 'birth_date', None) or 'Not specified'}
@@ -4850,24 +4850,24 @@ def generate_structured_cda_html(
                 </div>
             </div>
         </div>
-        
+
         <div class="document-body">
             {sections_html}
         </div>
-        
+
         <div class="document-footer">
-            <p><strong>Generated:</strong> {timezone.now().strftime('%Y-%m-%d %H:%M')} | 
-            <strong>Source:</strong> EU NCP Portal | 
+            <p><strong>Generated:</strong> {timezone.now().strftime('%Y-%m-%d %H:%M')} |
+            <strong>Source:</strong> EU NCP Portal |
             <strong>Document Type:</strong> L3 CDA with Structured Clinical Content</p>
         </div>
     </div>
-    
+
     <script>
         // Self-contained JavaScript for interactivity
         function toggleSection(sectionId) {{
             const content = document.getElementById(sectionId + '_content');
             const header = document.querySelector('#' + sectionId + ' .section-header');
-            
+
             if (content.classList.contains('collapsed')) {{
                 content.classList.remove('collapsed');
                 header.classList.remove('collapsed');
@@ -4876,17 +4876,17 @@ def generate_structured_cda_html(
                 header.classList.add('collapsed');
             }}
         }}
-        
+
         function showTab(sectionId, tabType) {{
             // Hide all tab contents for this section
             const structuredTab = document.getElementById(sectionId + '_structured');
             const originalTab = document.getElementById(sectionId + '_original');
             const buttons = document.querySelectorAll('#' + sectionId + ' .tab-button');
-            
+
             structuredTab.classList.remove('active');
             originalTab.classList.remove('active');
             buttons.forEach(btn => btn.classList.remove('active'));
-            
+
             // Show selected tab
             if (tabType === 'structured') {{
                 structuredTab.classList.add('active');
@@ -4896,7 +4896,7 @@ def generate_structured_cda_html(
                 buttons[1].classList.add('active');
             }}
         }}
-        
+
         // Add tooltips for medical codes
         document.addEventListener('DOMContentLoaded', function() {{
             const codes = document.querySelectorAll('.medical-code');
@@ -4989,7 +4989,7 @@ def generate_structured_cda_html(
                     size: A4;
                     margin: 1.5cm;
                 }}
-                
+
                 body {{
                     font-family: Arial, sans-serif;
                     font-size: 9pt;
@@ -4998,31 +4998,31 @@ def generate_structured_cda_html(
                     margin: 0;
                     padding: 0;
                 }}
-                
+
                 .patient-header {{
                     background-color: #4a90e2;
                     color: white;
                     padding: 15px;
                     margin-bottom: 20px;
                 }}
-                
+
                 .patient-header h1 {{
                     margin: 0;
                     font-size: 18pt;
                 }}
-                
+
                 .patient-info {{
                     display: flex;
                     justify-content: space-between;
                     margin-top: 10px;
                     font-size: 10pt;
                 }}
-                
+
                 .clinical-section {{
                     margin-bottom: 25px;
                     page-break-inside: avoid;
                 }}
-                
+
                 .section-title {{
                     background-color: #f8f9fa;
                     padding: 10px;
@@ -5031,14 +5031,14 @@ def generate_structured_cda_html(
                     color: #2c3e50;
                     border-left: 4px solid #4a90e2;
                 }}
-                
+
                 table {{
                     width: 100%;
                     border-collapse: collapse;
                     margin: 10px 0;
                     font-size: 8pt;
                 }}
-                
+
                 th {{
                     background-color: #e8f4f8;
                     padding: 8px 6px;
@@ -5047,13 +5047,13 @@ def generate_structured_cda_html(
                     border: 1px solid #ddd;
                     font-size: 8pt;
                 }}
-                
+
                 td {{
                     padding: 6px;
                     border: 1px solid #ddd;
                     vertical-align: top;
                 }}
-                
+
                 .status-active {{
                     background-color: #d4edda;
                     color: #155724;
@@ -5061,7 +5061,7 @@ def generate_structured_cda_html(
                     border-radius: 3px;
                     font-size: 7pt;
                 }}
-                
+
                 .status-completed {{
                     background-color: #cce5ff;
                     color: #004085;
@@ -5069,7 +5069,7 @@ def generate_structured_cda_html(
                     border-radius: 3px;
                     font-size: 7pt;
                 }}
-                
+
                 .medical-code {{
                     background-color: #e9ecef;
                     padding: 2px 4px;
@@ -5078,7 +5078,7 @@ def generate_structured_cda_html(
                     font-size: 7pt;
                     margin: 1px;
                 }}
-                
+
                 .footer {{
                     margin-top: 30px;
                     padding-top: 15px;
@@ -5102,9 +5102,9 @@ def generate_structured_cda_html(
                     </div>
                 </div>
             </div>
-            
+
             {sections_html}
-            
+
             <div class="footer">
                 <p><strong>Generated:</strong> {timezone.now().strftime('%Y-%m-%d %H:%M')} | <strong>Source:</strong> EU NCP Portal | <strong>Document Type:</strong> L3 CDA with Structured Clinical Content</p>
             </div>
@@ -5618,7 +5618,7 @@ def generate_pdf_from_html(request, patient_id, patient_data, match_data):
                     size: A4;
                     margin: 2cm;
                 }}
-                
+
                 body {{
                     font-family: Arial, sans-serif;
                     font-size: 10pt;
@@ -5627,43 +5627,43 @@ def generate_pdf_from_html(request, patient_id, patient_data, match_data):
                     margin: 0;
                     padding: 0;
                 }}
-                
+
                 h1, h2, h3, h4, h5, h6 {{
                     color: #2c3e50;
                     margin-top: 1.5em;
                     margin-bottom: 0.5em;
                 }}
-                
+
                 h1 {{ font-size: 16pt; }}
                 h2 {{ font-size: 14pt; }}
                 h3 {{ font-size: 12pt; }}
-                
+
                 table {{
                     width: 100%;
                     border-collapse: collapse;
                     margin: 1em 0;
                 }}
-                
+
                 th, td {{
                     border: 1px solid #ddd;
                     padding: 8px;
                     text-align: left;
                     vertical-align: top;
                 }}
-                
+
                 th {{
                     background-color: #f8f9fa;
                     font-weight: bold;
                     color: #2c3e50;
                 }}
-                
+
                 .patient-header {{
                     background-color: #e8f4f8;
                     padding: 15px;
                     border-radius: 5px;
                     margin-bottom: 20px;
                 }}
-                
+
                 .section {{
                     margin-bottom: 20px;
                 }}
@@ -5687,7 +5687,7 @@ def generate_pdf_from_html(request, patient_id, patient_data, match_data):
                 {f'<p><strong>Secondary Patient ID:</strong> {patient_summary.get("secondary_patient_id")}</p>' if patient_summary.get('secondary_patient_id') else ''}
                 <p><strong>Generated:</strong> {timezone.now().strftime('%Y-%m-%d %H:%M')}</p>
             </div>
-            
+
             <div class="content">
                 {sections_html}
             </div>
@@ -5998,7 +5998,7 @@ def generate_pdf_file_from_html(request, patient_id, patient_data, match_data):
                     size: A4;
                     margin: 2cm;
                 }}
-                
+
                 body {{
                     font-family: Arial, sans-serif;
                     font-size: 10pt;
@@ -6007,43 +6007,43 @@ def generate_pdf_file_from_html(request, patient_id, patient_data, match_data):
                     margin: 0;
                     padding: 0;
                 }}
-                
+
                 h1, h2, h3, h4, h5, h6 {{
                     color: #2c3e50;
                     margin-top: 1.5em;
                     margin-bottom: 0.5em;
                 }}
-                
+
                 h1 {{ font-size: 16pt; }}
                 h2 {{ font-size: 14pt; }}
                 h3 {{ font-size: 12pt; }}
-                
+
                 table {{
                     width: 100%;
                     border-collapse: collapse;
                     margin: 1em 0;
                 }}
-                
+
                 th, td {{
                     border: 1px solid #ddd;
                     padding: 8px;
                     text-align: left;
                     vertical-align: top;
                 }}
-                
+
                 th {{
                     background-color: #f8f9fa;
                     font-weight: bold;
                     color: #2c3e50;
                 }}
-                
+
                 .patient-header {{
                     background-color: #e8f4f8;
                     padding: 15px;
                     border-radius: 5px;
                     margin-bottom: 20px;
                 }}
-                
+
                 .section {{
                     margin-bottom: 20px;
                 }}
@@ -6067,7 +6067,7 @@ def generate_pdf_file_from_html(request, patient_id, patient_data, match_data):
                 {f'<p><strong>Secondary Patient ID:</strong> {patient_summary.get("secondary_patient_id")}</p>' if patient_summary.get('secondary_patient_id') else ''}
                 <p><strong>Generated:</strong> {timezone.now().strftime('%Y-%m-%d %H:%M')}</p>
             </div>
-            
+
             <div class="content">
                 {sections_html}
             </div>
@@ -6599,16 +6599,16 @@ def orcd_pdf_base64(request, patient_id, attachment_index=0):
             <head>
                 <title>ORCD PDF - {patient_data.given_name} {patient_data.family_name}</title>
                 <style>
-                    body {{ 
-                        margin: 0; 
-                        padding: 20px; 
-                        font-family: Arial, sans-serif; 
+                    body {{
+                        margin: 0;
+                        padding: 20px;
+                        font-family: Arial, sans-serif;
                         background: #f5f5f5;
                     }}
-                    .pdf-container {{ 
-                        background: white; 
-                        border-radius: 8px; 
-                        padding: 20px; 
+                    .pdf-container {{
+                        background: white;
+                        border-radius: 8px;
+                        padding: 20px;
                         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                     }}
                     .pdf-header {{
@@ -6652,20 +6652,20 @@ def orcd_pdf_base64(request, patient_id, attachment_index=0):
                         <a href="javascript:history.back()" class="btn">← Back</a>
                         <a href="/patients/orcd/{patient_id}/download/" class="btn">Download PDF</a>
                     </div>
-                    
+
                     <!-- Primary: Object with data URL -->
-                    <object 
-                        class="pdf-viewer" 
-                        data="data:application/pdf;base64,{pdf_base64}" 
+                    <object
+                        class="pdf-viewer"
+                        data="data:application/pdf;base64,{pdf_base64}"
                         type="application/pdf">
-                        
+
                         <!-- Fallback: Embed with data URL -->
-                        <embed 
-                            src="data:application/pdf;base64,{pdf_base64}" 
-                            type="application/pdf" 
-                            width="100%" 
+                        <embed
+                            src="data:application/pdf;base64,{pdf_base64}"
+                            type="application/pdf"
+                            width="100%"
                             height="800px" />
-                        
+
                         <!-- Final fallback -->
                         <div class="fallback">
                             <h3>PDF Preview Not Available</h3>
@@ -6674,7 +6674,7 @@ def orcd_pdf_base64(request, patient_id, attachment_index=0):
                         </div>
                     </object>
                 </div>
-                
+
                 <script>
                     // Try to detect if PDF loaded successfully
                     setTimeout(function() {{
