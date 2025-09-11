@@ -193,7 +193,8 @@
                                     <span class="success-badge">{{ patient_identity.patient_id }}</span>
                                 </div>
                                 <div class="data-field">
-                                    <strong>Birth Date:</strong> {{ patient_identity.birth_date_formatted|default:patient_identity.birth_date }}
+                                    <strong>Birth Date:</strong> {{
+                                    patient_identity.birth_date_formatted|default:patient_identity.birth_date }}
                                 </div>
                                 <div class="data-field">
                                     <strong>Gender:</strong> {{ patient_identity.gender }}
@@ -204,17 +205,18 @@
                                     <strong>Primary Patient ID:</strong> {{ patient_identity.primary_patient_id }}
                                 </div>
                                 <div class="data-field">
-                                    <strong>Full Name:</strong> 
+                                    <strong>Full Name:</strong>
                                     {% if patient_identity.full_name %}
-                                        {{ patient_identity.full_name }}
+                                    {{ patient_identity.full_name }}
                                     {% elif patient_identity.given_name and patient_identity.family_name %}
-                                        {{ patient_identity.given_name }} {{ patient_identity.family_name }}
+                                    {{ patient_identity.given_name }} {{ patient_identity.family_name }}
                                     {% else %}
-                                        Not Available
+                                    Not Available
                                     {% endif %}
                                 </div>
                                 <div class="data-field">
-                                    <strong>URL Patient ID:</strong> {{ patient_identity.url_patient_id|default:patient_identity.patient_id }}
+                                    <strong>URL Patient ID:</strong> {{
+                                    patient_identity.url_patient_id|default:patient_identity.patient_id }}
                                 </div>
                             </div>
                         </div>
@@ -277,7 +279,8 @@
                                 <i class="fas fa-user-md me-1"></i>Healthcare Team
                                 {% if patient_extended_data.healthcare_team and
                                 patient_extended_data.healthcare_team.has_healthcare_team %}
-                                <span class="badge bg-success ms-1">{{ patient_extended_data.healthcare_team.total_count|default:"0" }}</span>
+                                <span class="badge bg-success ms-1">{{
+                                    patient_extended_data.healthcare_team.total_count|default:"0" }}</span>
                                 {% else %}
                                 <span class="badge bg-secondary ms-1">N/A</span>
                                 {% endif %}
@@ -333,7 +336,8 @@
 
                         <!-- Contact Details Tab -->
                         <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-                            {% if patient_extended_data.patient_contact and patient_extended_data.patient_contact.has_contact_info %}
+                            {% if patient_extended_data.patient_contact and
+                            patient_extended_data.patient_contact.has_contact_info %}
                             <div class="row">
                                 <!-- Addresses -->
                                 <div class="col-md-4">
@@ -342,7 +346,9 @@
                                     {% for address in patient_extended_data.patient_contact.addresses %}
                                     <div class="card mb-2">
                                         <div class="card-body p-2">
-                                            <h6 class="card-title mb-1">{{ address.display_label|default:address.use_label|default:address.use|default:"Address" }}</h6>
+                                            <h6 class="card-title mb-1">{{
+                                                address.display_label|default:address.use_label|default:address.use|default:"Address"
+                                                }}</h6>
                                             <p class="card-text small mb-0">
                                                 {{ address.street|default:"" }}<br>
                                                 {{ address.city|default:"" }}{% if address.postal_code %}, {{
@@ -367,7 +373,9 @@
                                     {% for phone in patient_extended_data.patient_contact.phone_numbers %}
                                     <div class="card mb-2">
                                         <div class="card-body p-2">
-                                            <h6 class="card-title mb-1">{{ phone.display_label|default:phone.use_label|default:phone.use|default:"Phone" }}</h6>
+                                            <h6 class="card-title mb-1">{{
+                                                phone.display_label|default:phone.use_label|default:phone.use|default:"Phone"
+                                                }}</h6>
                                             <p class="card-text small mb-0">{{ phone.number|default:"" }}</p>
                                             {% if phone.is_primary %}
                                             <span class="badge bg-primary">Primary</span>
@@ -387,7 +395,9 @@
                                     {% for email in patient_extended_data.patient_contact.email_addresses %}
                                     <div class="card mb-2">
                                         <div class="card-body p-2">
-                                            <h6 class="card-title mb-1">{{ email.display_label|default:email.use_label|default:email.use|default:"Email" }}</h6>
+                                            <h6 class="card-title mb-1">{{
+                                                email.display_label|default:email.use_label|default:email.use|default:"Email"
+                                                }}</h6>
                                             <p class="card-text small mb-0">{{ email.email|default:"" }}</p>
                                             {% if email.is_primary %}
                                             <span class="badge bg-primary">Primary</span>
@@ -409,7 +419,8 @@
 
                         <!-- Healthcare Team Tab -->
                         <div class="tab-pane fade" id="healthcare" role="tabpanel" aria-labelledby="healthcare-tab">
-                            {% if patient_extended_data.healthcare_team and patient_extended_data.healthcare_team.has_healthcare_team %}
+                            {% if patient_extended_data.healthcare_team and
+                            patient_extended_data.healthcare_team.has_healthcare_team %}
                             <div class="row">
                                 <!-- Authors/Physicians -->
                                 <div class="col-md-6">
@@ -421,7 +432,8 @@
                                             <h6 class="card-title mb-1">{{ author.name|default:"Unknown Author" }}</h6>
                                             <p class="card-text small mb-0">
                                                 <strong>Role:</strong> {{ author.role|default:"Not specified" }}<br>
-                                                <strong>Organization:</strong> {{ author.organization|default:"Not specified" }}<br>
+                                                <strong>Organization:</strong> {{ author.organization|default:"Not
+                                                specified" }}<br>
                                                 {% if author.time %}
                                                 <strong>Date/Time:</strong> {{ author.time|default:"Not specified" }}
                                                 {% endif %}
@@ -442,10 +454,18 @@
                                                 patient_extended_data.healthcare_team.legal_authenticator.get('name',
                                                 'Unknown Legal Authenticator') }}</h6>
                                             <p class="card-text small mb-0">
-                                                <strong>Role:</strong> {{ patient_extended_data.healthcare_team.legal_authenticator.role|default:"Legal Authenticator" }}<br>
-                                                <strong>Organization:</strong> {{ patient_extended_data.healthcare_team.legal_authenticator.organization|default:"Not specified" }}<br>
-                                                {% if patient_extended_data.healthcare_team.legal_authenticator.authentication_time %}
-                                                <strong>Authentication Date/Time:</strong> {{ patient_extended_data.healthcare_team.legal_authenticator.authentication_time }}
+                                                <strong>Role:</strong> {{
+                                                patient_extended_data.healthcare_team.legal_authenticator.role|default:"Legal
+                                                Authenticator" }}<br>
+                                                <strong>Organization:</strong> {{
+                                                patient_extended_data.healthcare_team.legal_authenticator.organization|default:"Not
+                                                specified" }}<br>
+                                                {% if
+                                                patient_extended_data.healthcare_team.legal_authenticator.authentication_time
+                                                %}
+                                                <strong>Authentication Date/Time:</strong> {{
+                                                patient_extended_data.healthcare_team.legal_authenticator.authentication_time
+                                                }}
                                                 {% endif %}
                                             </p>
                                         </div>
@@ -455,7 +475,8 @@
 
                                 <!-- Emergency Contacts -->
                                 <div class="col-md-6">
-                                    {% if patient_extended_data.emergency_contacts and patient_extended_data.emergency_contacts.contacts %}
+                                    {% if patient_extended_data.emergency_contacts and
+                                    patient_extended_data.emergency_contacts.contacts %}
                                     <h6><i class="fas fa-ambulance me-2"></i>Emergency Contacts</h6>
                                     {% for contact in patient_extended_data.emergency_contacts.contacts %}
                                     <div class="card mb-2 border-danger">
@@ -464,12 +485,16 @@
                                         </div>
                                         <div class="card-body p-2">
                                             <p class="card-text small mb-1">
-                                                <strong>Relationship:</strong> {{ contact.relationship|default:"Not specified" }}<br>
+                                                <strong>Relationship:</strong> {{ contact.relationship|default:"Not
+                                                specified" }}<br>
                                                 {% if contact.phone_numbers %}
                                                 {% for phone in contact.phone_numbers %}
-                                                <strong>{{ phone.display_label|default:phone.use_label|default:"Phone:" }}</strong>
-                                                <a href="tel:{{ phone.number|default:"" }}" class="text-decoration-none">{{ phone.number|default:"" }}</a>
-                                                {% if phone.is_primary %}<span class="badge bg-success ms-1">Primary</span>{% endif %}
+                                                <strong>{{ phone.display_label|default:phone.use_label|default:"Phone:"
+                                                    }}</strong>
+                                                <a href="tel:{{ phone.number|default:"" }}"
+                                                    class="text-decoration-none">{{ phone.number|default:"" }}</a>
+                                                {% if phone.is_primary %}<span
+                                                    class="badge bg-success ms-1">Primary</span>{% endif %}
                                                 <br>
                                                 {% endfor %}
                                                 {% endif %}
@@ -488,7 +513,8 @@
 
                                 <!-- Next of Kin -->
                                 <div class="col-md-6">
-                                    {% if patient_extended_data.next_of_kin and patient_extended_data.next_of_kin.contacts %}
+                                    {% if patient_extended_data.next_of_kin and
+                                    patient_extended_data.next_of_kin.contacts %}
                                     <h6><i class="fas fa-users me-2"></i>Next of Kin</h6>
                                     {% for contact in patient_extended_data.next_of_kin.contacts %}
                                     <div class="card mb-2 border-warning">
@@ -497,12 +523,16 @@
                                         </div>
                                         <div class="card-body p-2">
                                             <p class="card-text small mb-1">
-                                                <strong>Relationship:</strong> {{ contact.relationship|default:"Not specified" }}<br>
+                                                <strong>Relationship:</strong> {{ contact.relationship|default:"Not
+                                                specified" }}<br>
                                                 {% if contact.phone_numbers %}
                                                 {% for phone in contact.phone_numbers %}
-                                                <strong>{{ phone.display_label|default:phone.use_label|default:"Phone:" }}</strong>
-                                                <a href="tel:{{ phone.number|default:"" }}" class="text-decoration-none">{{ phone.number|default:"" }}</a>
-                                                {% if phone.is_primary %}<span class="badge bg-success ms-1">Primary</span>{% endif %}
+                                                <strong>{{ phone.display_label|default:phone.use_label|default:"Phone:"
+                                                    }}</strong>
+                                                <a href="tel:{{ phone.number|default:"" }}"
+                                                    class="text-decoration-none">{{ phone.number|default:"" }}</a>
+                                                {% if phone.is_primary %}<span
+                                                    class="badge bg-success ms-1">Primary</span>{% endif %}
                                                 <br>
                                                 {% endfor %}
                                                 {% endif %}
@@ -520,7 +550,8 @@
                             </div>
 
                             <!-- Medical Performers Section -->
-                            {% if patient_extended_data.performers and patient_extended_data.performers.medical_doctors %}
+                            {% if patient_extended_data.performers and patient_extended_data.performers.medical_doctors
+                            %}
                             <div class="row mt-3">
                                 <div class="col-12">
                                     <h6><i class="fas fa-user-md me-2"></i>Medical Performers</h6>
@@ -532,12 +563,16 @@
                                         <div class="card-body p-2">
                                             <p class="card-text small mb-1">
                                                 <strong>Role:</strong> {{ doctor.role|default:"Medical Doctor" }}<br>
-                                                <strong>Organization:</strong> {{ doctor.organization|default:"Not specified" }}<br>
+                                                <strong>Organization:</strong> {{ doctor.organization|default:"Not
+                                                specified" }}<br>
                                                 {% if doctor.phone_numbers %}
                                                 {% for phone in doctor.phone_numbers %}
-                                                <strong>{{ phone.display_label|default:phone.use_label|default:"Phone:" }}</strong>
-                                                <a href="tel:{{ phone.number|default:"" }}" class="text-decoration-none">{{ phone.number|default:"" }}</a>
-                                                {% if phone.is_primary %}<span class="badge bg-success ms-1">Primary</span>{% endif %}
+                                                <strong>{{ phone.display_label|default:phone.use_label|default:"Phone:"
+                                                    }}</strong>
+                                                <a href="tel:{{ phone.number|default:"" }}"
+                                                    class="text-decoration-none">{{ phone.number|default:"" }}</a>
+                                                {% if phone.is_primary %}<span
+                                                    class="badge bg-success ms-1">Primary</span>{% endif %}
                                                 <br>
                                                 {% endfor %}
                                                 {% endif %}
@@ -561,16 +596,21 @@
                                             </h6>
                                         </div>
                                         <div class="card-body p-2">
-                                            {% if patient_extended_data.healthcare_team.custodian_organization.contact_info %}
+                                            {% if
+                                            patient_extended_data.healthcare_team.custodian_organization.contact_info %}
                                             <p class="card-text small mb-1">
                                                 <strong><i class="fas fa-map-marker-alt me-1"></i>Address:</strong><br>
-                                                {% for address in patient_extended_data.healthcare_team.custodian_organization.contact_info.addresses %}
+                                                {% for address in
+                                                patient_extended_data.healthcare_team.custodian_organization.contact_info.addresses
+                                                %}
                                                 {{ address }}<br>
                                                 {% endfor %}
                                             </p>
                                             <p class="card-text small mb-0">
                                                 <strong><i class="fas fa-phone me-1"></i>Phone:</strong><br>
-                                                {% for phone in patient_extended_data.healthcare_team.custodian_organization.contact_info.phone_numbers %}
+                                                {% for phone in
+                                                patient_extended_data.healthcare_team.custodian_organization.contact_info.phone_numbers
+                                                %}
                                                 {{ phone }}<br>
                                                 {% endfor %}
                                             </p>
@@ -659,8 +699,8 @@
                     <div class="col-md-6">
                         <p><strong>Patient Identity Keys:</strong></p>
                         <ul>
-                            {% for key in patient_identity.keys() %}
-                            <li>{{ key }}: {{ patient_identity[key] }}</li>
+                            {% for key, value in patient_identity.items %}
+                            <li>{{ key }}: {{ value }}</li>
                             {% endfor %}
                         </ul>
                     </div>

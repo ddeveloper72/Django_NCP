@@ -1,0 +1,40 @@
+# Django Template Best Practices - Editor Configuration
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Django HTML Templates
+[*.html]
+indent_style = space
+indent_size = 4
+max_line_length = 200
+# Disable auto-formatting for Django templates
+ij_html_do_not_indent_children_of = html,body,thead,tbody,tfoot
+ij_html_keep_line_breaks = true
+ij_html_keep_line_breaks_in_text = true
+
+# Python files
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 88
+
+# CSS/SCSS files
+[*.{css,scss}]
+indent_style = space
+indent_size = 2
+
+# JavaScript files
+[*.{js,ts}]
+indent_style = space
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_style = space
+indent_size = 2

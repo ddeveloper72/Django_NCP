@@ -1,0 +1,41 @@
+{
+    // Django Template Configuration
+    "[html]": {
+        "editor.formatOnSave": false,
+        "editor.wordWrap": "off",
+        "editor.rulers": [120, 200],
+        "prettier.enable": false
+    },
+    
+    // Increase line length limits for HTML files
+    "html.format.enable": false,
+    "html.format.wrapLineLength": 200,
+    "html.format.wrapAttributes": "preserve",
+    
+    // Django-specific settings
+    "emmet.includeLanguages": {
+        "django-html": "html"
+    },
+    
+    // Disable auto-formatting for Django templates
+    "files.associations": {
+        "*.html": "html",
+        "**/templates/**/*.html": "django-html"
+    },
+    
+    // Editor settings for long lines
+    "editor.wordWrapColumn": 200,
+    "editor.accessibilitySupport": "off",
+    
+    // Prevent automatic line breaks in template tags
+    "html.format.extraLiners": "",
+    "html.format.indentInnerHtml": false,
+    "html.format.preserveNewLines": true,
+    
+    // Language-specific settings
+    "django-html.format.enable": false,
+    
+    // Line length and wrapping
+    "rewrap.wrappingColumn": 200,
+    "rewrap.doubleSentenceSpacing": false
+}

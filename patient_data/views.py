@@ -2204,7 +2204,10 @@ def patient_details_view(request, patient_id):
         if birth_date_value and isinstance(birth_date_value, str):
             try:
                 from datetime import datetime
-                birth_date_value = datetime.strptime(birth_date_value, "%Y-%m-%d").date()
+
+                birth_date_value = datetime.strptime(
+                    birth_date_value, "%Y-%m-%d"
+                ).date()
             except (ValueError, TypeError):
                 birth_date_value = None
 
@@ -2215,10 +2218,11 @@ def patient_details_view(request, patient_id):
             birth_date=birth_date_value,
             gender=patient_info.get("gender", ""),
         )
-        
+
         # Set access_timestamp for session-based patients to current time
         # This ensures the "Submitted" field shows a proper timestamp
         from django.utils import timezone
+
         patient_data.access_timestamp = timezone.now()
 
         logger.info(
