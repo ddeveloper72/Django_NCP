@@ -12,9 +12,7 @@
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
                 {% endif %}
                 {% if section.has_entries %}
-                <span class="badge bg-success ms-2">{% if section.entries %}{{ section.entries|length }}{% else %}0{%
-                    endif %}
-                    results</span>
+                <span class="badge bg-success ms-2">{% if section.entries %}{{ section.entries|length }}{% else %}0{% endif %} results</span>
                 {% endif %}
             </h5>
         </div>
@@ -66,10 +64,10 @@
                                 <td>
                                     {% if header.primary %}
                                     <div class="primary-field">
-                                        <strong class="text-info">{% firstof cell_data.display_value cell_data.value "N/A" %}</strong>
-                                        {% if cell_data.has_terminology %}
+                                        <strong class="text-info">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</strong>
+                                        {% if cell_data|safe_get:"has_terminology" %}
                                         <div class="medical-terminology mt-1">
-                                            {% for term in cell_data.terminology %}
+                                            {% for term in cell_data|safe_get:"terminology" %}
                                             <span class="badge bg-info me-1" title="{{ term.system }}: {{ term.code }}">
                                                 {% firstof term.display_name term.code %}
                                             </span>
@@ -79,21 +77,21 @@
                                     </div>
                                     {% else %}
                                     <div class="cell-content">
-                                        {% if cell_data.has_codes %}
+                                        {% if cell_data|safe_get:"has_codes" %}
                                         <div class="medical-codes-container">
-                                            {% for code in cell_data.codes %}
+                                            {% for code in cell_data|safe_get:"codes" %}
                                             <span class="badge bg-info me-1 mb-1"
                                                 title="{{ code.system }}: {{ code.code }}">
                                                 {% firstof code.display_name code.code %}
                                             </span>
                                             {% endfor %}
                                         </div>
-                                        {% elif cell_data.is_abnormal %}
-                                        <span class="text-warning fw-bold">{% firstof cell_data.display_value cell_data.value "N/A" %}</span>
+                                        {% elif cell_data|safe_get:"is_abnormal" %}
+                                        <span class="text-warning fw-bold">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</span>
                                         <i class="fas fa-exclamation-triangle text-warning ms-1"
                                             title="Abnormal Result"></i>
                                         {% else %}
-                                        {% firstof cell_data.display_value cell_data.value "N/A" %}
+                                        {% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}
                                         {% endif %}
                                     </div>
                                     {% endif %}                                </td>

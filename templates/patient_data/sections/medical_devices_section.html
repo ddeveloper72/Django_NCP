@@ -66,11 +66,11 @@
                                 <td>
                                     {% if header.primary %}
                                     <div class="primary-field">
-                                        <strong class="text-info">{% firstof cell_data.display_value cell_data.value or
+                                        <strong class="text-info">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" or
                                             'N/A %}</strong>
-                                        {% if cell_data.has_terminology %}
+                                        {% if cell_data|safe_get:"has_terminology" %}
                                         <div class="medical-terminology mt-1">
-                                            {% for term in cell_data.terminology %}
+                                            {% for term in cell_data|safe_get:"terminology" %}
                                             <span class="badge bg-info me-1" title="{% firstof term.system }}: {{ term.code }}">
                                                 {{ term.display_name term.code %}
                                             </span>
@@ -80,9 +80,9 @@
                                     </div>
                                     {% else %}
                                     <div class="cell-content">
-                                        {% if cell_data.has_codes %}
+                                        {% if cell_data|safe_get:"has_codes" %}
                                         <div class="medical-codes-container">
-                                            {% for code in cell_data.codes %}
+                                            {% for code in cell_data|safe_get:"codes" %}
                                             <span class="badge bg-info me-1 mb-1"
                                                 title="{% firstof code.system }}: {{ code.code }}">
                                                 {{ code.display_name code.code %}
@@ -90,7 +90,7 @@
                                             {% endfor %}
                                         </div>
                                         {% else %}
-                                        {% firstof cell_data.display_value cell_data.value or 'N/A %}
+                                        {% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" or 'N/A %}
                                         {% endif %}
                                     </div>
                                     {% endif %}                                </td>

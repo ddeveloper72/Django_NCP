@@ -2,9 +2,9 @@
 {# Django-compatible version - no {% set %} variables allowed #}
 
 <!-- Render individual clinical section (called within loop from main template) -->
-{% if section and section.section_title %}
+{% if section and section.title %}
     <!-- Route to specialized section templates based on section type -->
-    {% if section.section_id == 'psAllergiesAndOtherAdverseReactions' or section.section_id == 'allergies' or section.section_id == 'allergies_and_intolerances' %}
+    {% if section.section_id == 'psAllergiesAndOtherAdverseReactions' or section.section_id == 'allergies' or section.section_id == 'allergies_and_intolerances' or 'allergies' in section.title|lower or 'adverse' in section.title|lower %}
         {% with section_index=forloop.counter0 %}
             {% include 'patient_data/sections/allergies_section.html' %}
         {% endwith %}

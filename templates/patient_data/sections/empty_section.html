@@ -1,3 +1,5 @@
+{% load patient_filters %}
+{% load patient_date_filters %}
 {# Empty Section Template - For sections without entries #}
 <div class="card-body">
     <!-- Section Tabs (even for empty sections) -->
@@ -21,12 +23,12 @@
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
-                        {% for field_name, field_data in first_entry.fields.items() %}
+                        {% for field_name, field_data in first_entry.fields|dict_items %}
                         <th>
-                            {% if 'code' in field_name.lower() %}
+                            {% if 'code' in field_name|lower %}
                             <i class="fas fa-code me-1"></i>
                             {% endif %}
-                            {% firstof field_name }}
+                            {{ field_name|default:"Field" }}
                         </th>
                         {% endfor %}
                     </tr>
@@ -34,14 +36,14 @@
                 <tbody>
                     {% for entry in section.structured_data %}
                     <tr>
-                        {% for field_name, field_data in entry.fields.items() %}
+                        {% for field_name, field_data in entry.fields|dict_items %}
                         <td>
-                            {% if 'date' in field_name.lower() or 'time' in field_name.lower() %}
-                            {{ format_medical_date(field_data.value) }}
+                            {% if 'date' in field_name|lower or 'time' in field_name|lower %}
+                            {{ field_data|safe_get:"value"|default:"N/A"|document_date }}
                             {% else %}
-                            {{ field_data.value N/A %}
+                            {{ field_data|safe_get:"value"|default:"N/A" }}
                             {% endif %}
-                            {% if field_data.has_valueset %}
+                            {% if field_data|safe_get:"has_valueset" %}
                             <span class="badge bg-info ms-1">Coded</span>
                             {% endif %}
                         </td>

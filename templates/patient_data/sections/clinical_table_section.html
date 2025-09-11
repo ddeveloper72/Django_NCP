@@ -1,3 +1,4 @@
+{% load patient_filters %}
 {# Clinical Table Section Template - For sections with clinical tables #}
 <!-- Clinical Table Display with Tabs -->
 <div class="card-body p-0">
@@ -39,10 +40,10 @@
                         <td>
                             {% if header.primary %}
                             <div class="primary-field">
-                                <strong>{% firstof cell_data.display_value cell_data.value or 'N/A %}</strong>
-                                {% if cell_data.has_terminology %}
+                                <strong>{{ cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:'N/A' }}</strong>
+                                {% if cell_data|safe_get:"has_terminology" %}
                                 <div class="medical-terminology mt-1">
-                                    {% for term in cell_data.terminology %}
+                                    {% for term in cell_data|safe_get:"terminology" %}
                                     <span class="badge bg-success me-1" title="{% firstof term.system }}: {{ term.code }}">
                                         {{ term.display_name term.code %}
                                     </span>
@@ -52,10 +53,10 @@
                             </div>
                             {% else %}
                             <div class="cell-content">
-                                {% if cell_data.has_codes %}
+                                {% if cell_data|safe_get:"has_codes" %}
                                 <div class="medical-codes-container">
                                     <div class="medical-code-item d-flex flex-wrap align-items-center">
-                                        {% for code in cell_data.codes %}
+                                        {% for code in cell_data|safe_get:"codes" %}
                                         {% if code.badge %}
                                         <span class="badge {% firstof code.badge }} me-1 mb-1"
                                             title="{{ code.system }}: {{ code.code }}">
@@ -68,12 +69,12 @@
                                     </div>
                                 </div>
                                 {% else %}
-                                {{ cell_data.display_value cell_data.value or 'N/A %}
+                                {{ cell_data|safe_get:"display_value" cell_data|safe_get:"value" or 'N/A %}
                                 {% endif %}
 
-                                {% if cell_data.has_terminology %}
+                                {% if cell_data|safe_get:"has_terminology" %}
                                 <div class="medical-terminology mt-1">
-                                    {% for term in cell_data.terminology %}
+                                    {% for term in cell_data|safe_get:"terminology" %}
                                     <span class="badge bg-info me-1" title="{% firstof term.system }}: {{ term.code }}">
                                         <i class="fas fa-tag me-1"></i>{{ term.display_name term.code %}
                                     </span>
