@@ -1,3 +1,4 @@
+{% load patient_filters %}
 <!-- Extended Patient Healthcare Team Component -->
 <div class="tab-pane fade {% if first_tab == 'healthcare' %}show active{% endif %}" id="healthcare" role="tabpanel"
     aria-labelledby="healthcare-tab">
@@ -5,28 +6,28 @@
 
     {% if patient_extended_data %}
     {# Django: Use direct access instead of {% set %} #}
-    {% with healthcare_data=patient_extended_data.healthcare_team|default_if_none:patient_extended_data %}
+    {% with healthcare_data=patient_extended_data|safe_get:"healthcare_team"|default_if_none:patient_extended_data %}
 
     <!-- Debug Healthcare Data -->
     <div class="alert alert-success mb-3">
         <h6>DEBUG: Healthcare Team Data Available</h6>
         <p><strong>Healthcare Data Keys:</strong>
-            {% if patient_extended_data.healthcare_team %}
-                {% for key, value in patient_extended_data.healthcare_team.items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            {% if patient_extended_data|safe_get:"healthcare_team" %}
+                {% for key, value in patient_extended_data|safe_get:"healthcare_team".items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
             {% else %}
                 No healthcare data
             {% endif %}
         </p>
-        <p><strong>Has healthcare team:</strong> {{ patient_extended_data.healthcare_team.has_healthcare_team|default:False }}</p>
-        <p><strong>Total count:</strong> {{ patient_extended_data.healthcare_team.total_count|default:0 }}</p>
+        <p><strong>Has healthcare team:</strong> {{ patient_extended_data|safe_get:"healthcare_team".has_healthcare_team|default:False }}</p>
+        <p><strong>Total count:</strong> {{ patient_extended_data|safe_get:"healthcare_team".total_count|default:0 }}</p>
     </div>
 
     <!-- Document Authors -->
-    {% if patient_extended_data.authors %}
+    {% if patient_extended_data|safe_get:"authors" %}
     <div class="mb-4">
         <h6><i class="fas fa-user-md me-1"></i>Document Authors</h6>
         {# Django: Use direct access instead of {% set %} #}
-        {% for author in patient_extended_data.authors %}
+        {% for author in patient_extended_data|safe_get:"authors" %}
         <div class="healthcare-member-card">
             <div class="card-body">
                 <h6 class="card-title">
@@ -53,19 +54,19 @@
     {% endif %}
 
     <!-- Legal Authenticator -->
-    {% if patient_extended_data.legal_authenticator %}
+    {% if patient_extended_data|safe_get:"legal_authenticator" %}
     {# Django: Use direct access instead of {% set %} #}
     <div class="mb-4">
         <h6><i class="fas fa-gavel me-1"></i>Legal Authenticator</h6>
         <div class="healthcare-member-card">
             <div class="card-body">
-                <h6 class="card-title">{{ patient_extended_data.legal_authenticator.name|default:"Unknown Authenticator" }}</h6>
+                <h6 class="card-title">{{ patient_extended_data|safe_get:"legal_authenticator".name|default:"Unknown Authenticator" }}</h6>
                 <div class="mb-2">
-                    <span class="role-badge">{{ patient_extended_data.legal_authenticator.role|default:"Legal Authenticator" }}</span>
+                    <span class="role-badge">{{ patient_extended_data|safe_get:"legal_authenticator".role|default:"Legal Authenticator" }}</span>
                 </div>
-                {% if patient_extended_data.legal_authenticator.organization %}
+                {% if patient_extended_data|safe_get:"legal_authenticator".organization %}
                 <div class="organization-info mb-2">
-                    <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{ patient_extended_data.legal_authenticator.organization }}
+                    <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{ patient_extended_data|safe_get:"legal_authenticator".organization }}
                 </div>
                 {% endif %}
                 {% if legal_auth.get('authentication_time') %}
@@ -195,17 +196,17 @@
     {% endif %}
 
     <!-- Custodian Organization -->
-    {% if patient_extended_data.custodian_organization %}
+    {% if patient_extended_data|safe_get:"custodian_organization" %}
     {# Django: Use direct access instead of {% set %} #}
     <div class="mb-4">
         <h6><i class="fas fa-building me-1"></i>Custodian Organization</h6>
         <div class="healthcare-member-card">
             <div class="card-body">
-                <h6 class="card-title">{{ patient_extended_data.custodian_organization.name|default:"Unknown Organization" }}</h6>
-                {% if patient_extended_data.custodian_organization.contact_info.addresses %}
+                <h6 class="card-title">{{ patient_extended_data|safe_get:"custodian_organization".name|default:"Unknown Organization" }}</h6>
+                {% if patient_extended_data|safe_get:"custodian_organization".contact_info.addresses %}
                 <div class="contact-details mb-2">
                     <strong><i class="fas fa-map-marker-alt me-1"></i>Address:</strong>
-                    {{ patient_extended_data.custodian_organization.contact_info.addresses.0 }}
+                    {{ patient_extended_data|safe_get:"custodian_organization".contact_info.addresses.0 }}
                 </div>
                 {% endif %}
                 {% if custodian.get('contact_info', {}).get('phone_numbers') %}

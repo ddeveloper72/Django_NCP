@@ -1,3 +1,4 @@
+{% load patient_filters %}
 <!-- Extended Patient Document Information Component -->
 <div class="tab-pane fade {% if first_tab == 'document' %}show active{% endif %}" id="document" role="tabpanel"
     aria-labelledby="document-tab">
@@ -10,16 +11,16 @@
     <div class="alert alert-success mb-3">
         <h6>DEBUG: Document Info Data Available</h6>
         <p><strong>Document Data Keys:</strong>
-            {% if patient_extended_data.document_info %}
-                {% for key, value in patient_extended_data.document_info.items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
-            {% elif patient_extended_data.metadata %}
-                {% for key, value in patient_extended_data.metadata.items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            {% if patient_extended_data|safe_get:"document_info" %}
+                {% for key, value in patient_extended_data|safe_get:"document_info"|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            {% elif patient_extended_data|safe_get:"metadata" %}
+                {% for key, value in patient_extended_data|safe_get:"metadata"|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
             {% else %}
                 No document data
             {% endif %}
         </p>
-        <p><strong>Title:</strong> {{ patient_extended_data.document_info.title|default:"No title" }}</p>
-        <p><strong>Creation Date:</strong> {{ patient_extended_data.document_info.creation_date|default:"No date" }}</p>
+        <p><strong>Title:</strong> {{ patient_extended_data|safe_get:"document_info"|safe_get:"title"|default:"No title" }}</p>
+        <p><strong>Creation Date:</strong> {{ patient_extended_data|safe_get:"document_info"|safe_get:"creation_date"|default:"No date" }}</p>
     </div>
 
     <!-- Document Metadata -->
@@ -28,7 +29,7 @@
             <div class="contact-info-card">
                 <div class="contact-type">Document Title</div>
                 <div class="contact-details">
-                    {{ patient_extended_data.document_info.title|default:patient_extended_data.document_title|default:"Patient Summary" }}
+                    {{ patient_extended_data|safe_get:"document_info"|safe_get:"title"|default:patient_extended_data|safe_get:"document_title"|default:"Patient Summary" }}
                 </div>
             </div>
         </div>
@@ -36,7 +37,7 @@
             <div class="contact-info-card">
                 <div class="contact-type">Document Type</div>
                 <div class="contact-details">
-                    {{ patient_extended_data.document_info.type|default:cda_type|default:"CDA Document" }}
+                    {{ patient_extended_data|safe_get:"document_info"|safe_get:"type"|default:cda_type|default:"CDA Document" }}
                 </div>
             </div>
         </div>
@@ -47,7 +48,7 @@
             <div class="contact-info-card">
                 <div class="contact-type">Creation Date</div>
                 <div class="contact-details">
-                    {{ patient_extended_data.document_info.creation_date|default:patient_extended_data.document_info.effective_time|default:"Not specified" }}
+                    {{ patient_extended_data|safe_get:"document_info"|safe_get:"creation_date"|default:patient_extended_data|safe_get:"document_info"|safe_get:"effective_time"|default:"Not specified" }}
                 </div>
             </div>
         </div>
@@ -55,8 +56,8 @@
             <div class="contact-info-card">
                 <div class="contact-type">Document ID</div>
                 <div class="contact-details">
-                    {% if patient_extended_data.document_info.document_id.extension %}
-                    {{ patient_extended_data.document_info.document_id.extension }}
+                    {% if patient_extended_data|safe_get:"document_info"|safe_get:"document_id"|safe_get:"extension" %}
+                    {{ patient_extended_data|safe_get:"document_info"|safe_get:"document_id"|safe_get:"extension" }}
                     {% else %}
                     {{ patient_identity.patient_id|default:"Not available" }}
                     {% endif %}
@@ -70,7 +71,7 @@
             <div class="contact-info-card">
                 <div class="contact-type">Language</div>
                 <div class="contact-details">
-                    {{ patient_extended_data.document_info.language|default:source_language|default:"en-GB" }}
+                    {{ patient_extended_data|safe_get:"document_info"|safe_get:"language"|default:source_language|default:"en-GB" }}
                 </div>
             </div>
         </div>
@@ -78,7 +79,7 @@
             <div class="contact-info-card">
                 <div class="contact-type">Version</div>
                 <div class="contact-details">
-                    {{ patient_extended_data.document_info.version|default:"1.0" }}
+                    {{ patient_extended_data|safe_get:"document_info"|safe_get:"version"|default:"1.0" }}
                 </div>
             </div>
         </div>
@@ -92,8 +93,8 @@
                 <div class="contact-details">
                     <span class="badge bg-success me-2">Active</span>
                     <span class="badge bg-info me-2">Encrypted</span>
-                    {% if patient_extended_data.document_info.confidentiality %}
-                    <span class="badge bg-warning">{{ patient_extended_data.document_info.confidentiality }}</span>
+                    {% if patient_extended_data|safe_get:"document_info"|safe_get:"confidentiality" %}
+                    <span class="badge bg-warning">{{ patient_extended_data|safe_get:"document_info"|safe_get:"confidentiality" }}</span>
                     {% endif %}
                 </div>
             </div>
@@ -101,7 +102,7 @@
     </div>
 
     <!-- Show message if no document info -->
-    {% if not patient_extended_data.document_info and not patient_extended_data.document_title %}
+    {% if not patient_extended_data|safe_get:"document_info" and not patient_extended_data|safe_get:"document_title" %}
     <div class="alert alert-info">
         <i class="fas fa-info-circle me-2"></i>Limited document information available.
     </div>
