@@ -38,11 +38,11 @@
                 <ul class="nav nav-tabs" id="extendedInfoTabs" role="tablist">
                     <!-- Contact Details Tab -->
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link {% if first_tab == 'contact' %}active{% endif %}" id="contact-tab"
+                        <button class="nav-link active" id="contact-tab"
                             data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab"
-                            aria-controls="contact" {% if first_tab == 'contact' %}aria-selected="true"{% else %}aria-selected="false"{% endif %}>
+                            aria-controls="contact" aria-selected="true">
                             <i class="fas fa-address-card me-1"></i>Contact Details
-                            {% if contact_tab_available %}
+                            {% if patient_extended_data and patient_extended_data.patient_contact %}
                             <span class="badge bg-primary ms-1">1</span>
                             {% endif %}
                         </button>
@@ -50,20 +50,16 @@
 
                     <!-- Healthcare Team Tab -->
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link {% if first_tab == 'healthcare' %}active{% endif %}" id="healthcare-tab"
+                        <button class="nav-link" id="healthcare-tab"
                             data-bs-toggle="tab" data-bs-target="#healthcare" type="button" role="tab"
-                            aria-controls="healthcare" {% if first_tab == 'healthcare' %}aria-selected="true"{% else %}aria-selected="false"{% endif %}>
+                            aria-controls="healthcare" aria-selected="false">
                             <i class="fas fa-stethoscope me-1"></i>Healthcare Team
-                            {% if healthcare_tab_available %}
+                            {% if patient_extended_data and patient_extended_data.authors %}
                             <span class="badge bg-success ms-1">
-                                {% set team_count = 0 %}
-                                {% if patient_extended_data.get('authors') %}{% set team_count = team_count +
-                                patient_extended_data.authors|length %}{% endif %}
-                                {% if patient_extended_data.get('legal_authenticator') %}{% set team_count =
-                                team_count + 1 %}{% endif %}
-                                {% if patient_extended_data.get('custodian') %}{% set team_count = team_count + 1
-                                %}{% endif %}
-                                {{ team_count }}
+                                {# Django: Calculate team count using template logic #}
+                                {% if patient_extended_data.authors %}{{ patient_extended_data.authors|length }}{% else %}0{% endif %}
+                                {% if patient_extended_data.legal_authenticator %}+1{% endif %}
+                                {% if patient_extended_data.custodian %}+1{% endif %}
                             </span>
                             {% endif %}
                         </button>
@@ -71,9 +67,9 @@
 
                     <!-- Document Info Tab -->
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link {% if first_tab == 'document' %}active{% endif %}" id="document-tab"
+                        <button class="nav-link" id="document-tab"
                             data-bs-toggle="tab" data-bs-target="#document" type="button" role="tab"
-                            aria-controls="document" {% if first_tab == 'document' %}aria-selected="true"{% else %}aria-selected="false"{% endif %}>
+                            aria-controls="document" aria-selected="false">
                             <i class="fas fa-file-medical-alt me-1"></i>Document Info
                         </button>
                     </li>
@@ -82,29 +78,13 @@
                 <!-- Extended Info Tab Content -->
                 <div class="tab-content mt-3" id="extendedInfoTabContent">
 
-                    {% set tabs_available = [] %}
-                    {% set contact_tab_available = patient_extended_data and (
-                    patient_extended_data.get('patient_contact') or
-                    patient_extended_data.get('contact_info')
-                    ) %}
-                    {% set healthcare_tab_available = patient_extended_data and (
-                    patient_extended_data.get('healthcare_team') or
-                    patient_extended_data.get('authors') or
-                    patient_extended_data.get('legal_authenticator') or
-                    patient_extended_data.get('custodian')
-                    ) %}
-                    {% set document_tab_available = patient_extended_data and (
-                    patient_extended_data.get('document_info') or
-                    patient_extended_data.get('metadata')
-                    ) %}
-
-                    {% if contact_tab_available %}{% set tabs_available = tabs_available + ['contact'] %}{% endif %}
-                    {% if healthcare_tab_available %}{% set tabs_available = tabs_available + ['healthcare'] %}{%
-                    endif %}
-                    {% if document_tab_available %}{% set tabs_available = tabs_available + ['document'] %}{% endif
-                    %}
-
-                    {% set first_tab = tabs_available[0] if tabs_available else 'contact' %}
+                    {# Django: Replace {% set %} with conditional logic #}
+                    {# Tab availability checks - Django compatible #}
+                    {% comment %}
+                    Django doesn't support {% set %} variables.
+                    Instead, use direct conditional checks in template logic.
+                    Tab order: contact -> healthcare -> document
+                    {% endcomment %}
 
                     <!-- Include Child Components with Error Handling -->
                     {% include 'patient_data/components/extended_patient_contact.html' %}
