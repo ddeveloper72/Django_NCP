@@ -23,24 +23,22 @@
       </div>
 
       <!-- Address Information -->
-      {% if administrative_data|safe_get:"patient_contact_info"|safe_get:"addresses" %} {% for address
-      in administrative_data|safe_get:"patient_contact_info"|safe_get:"addresses" %}
+      {% if administrative_data|safe_get:"patient_contact_info"|safe_get:"addresses" %}
+      {% for address in administrative_data|safe_get:"patient_contact_info"|safe_get:"addresses" %}
       <div class="admin-info-row">
         <div class="admin-label">
           <i class="fas fa-map-marker-alt"></i> Address:
         </div>
         <div class="admin-value">
-          {% if address.street %}{{ address.street }}{% endif %} {% if
-          address.city %}, {{ address.city }}{% endif %} {% if
-          address.postalCode %} {{ address.postalCode }}{% endif %} {% if
-          address.country %}, {{ address.country }}{% endif %}
+          {% if address.street %}{{ address.street }}{% endif %}{% if address.city %}, {{ address.city }}{% endif %}{% if address.postalCode %} {{ address.postalCode }}{% endif %}{% if address.country %}, {{ address.country }}{% endif %}
         </div>
       </div>
-      {% endfor %} {% endif %}
+      {% endfor %}
+      {% endif %}
 
       <!-- Contact Methods -->
-      {% if administrative_data|safe_get:"patient_contact_info".telecoms %} {% for telecom
-      in administrative_data|safe_get:"patient_contact_info".telecoms %}
+      {% if administrative_data|safe_get:"patient_contact_info"|safe_get:"telecoms" %}
+      {% for telecom in administrative_data|safe_get:"patient_contact_info"|safe_get:"telecoms" %}
       <div class="admin-info-row">
         <div class="admin-label">
           {% if telecom.type == 'email' %}
@@ -84,9 +82,9 @@
       {% endif %}
 
       <!-- Guardian Contact Information -->
-      {% if administrative_data|safe_get:"guardian".contact_info %} {% if
-      administrative_data|safe_get:"guardian".contact_info.addresses %} {% for address in
-      administrative_data|safe_get:"guardian".contact_info.addresses %}
+      {% if administrative_data|safe_get:"guardian"|safe_get:"contact_info" %}
+      {% if administrative_data|safe_get:"guardian"|safe_get:"contact_info"|safe_get:"addresses" %}
+      {% for address in administrative_data|safe_get:"guardian"|safe_get:"contact_info"|safe_get:"addresses" %}
       <div class="admin-info-row">
         <div class="admin-label">
           <i class="fas fa-map-marker-alt"></i> Address:
@@ -98,9 +96,10 @@
           address.country %}, {{ address.country }}{% endif %}
         </div>
       </div>
-      {% endfor %} {% endif %} {% if
-      administrative_data|safe_get:"guardian".contact_info.telecoms %} {% for telecom in
-      administrative_data|safe_get:"guardian".contact_info.telecoms %}
+      {% endfor %}
+      {% endif %}
+      {% if administrative_data|safe_get:"guardian"|safe_get:"contact_info"|safe_get:"telecoms" %}
+      {% for telecom in administrative_data|safe_get:"guardian"|safe_get:"contact_info"|safe_get:"telecoms" %}
       <div class="admin-info-row">
         <div class="admin-label">
           {% if telecom.type == 'email' %}
