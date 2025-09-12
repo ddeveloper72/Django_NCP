@@ -1191,13 +1191,13 @@
                             <div class="btn-group" role="group" aria-label="CDA Type Selection">
                                 {# Django: Replace {% set %} with conditional class assignment #}
                                 <a href="{% url 'patient_data:patient_cda_view_typed' patient_identity.url_patient_id|default:patient_identity.patient_id 'L1' %}"
-                                    class="{% if cda_type == 'L1' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %}{% if not has_l1_cda %} disabled{% endif %}">
+                                    class="{% if cda_type == 'L1' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %} {% if not has_l1_cda %} disabled{% endif %}">
                                     <i class="fas fa-file-medical me-1"></i>L1 Original Document
                                     {% if not has_l1_cda %}<small>(Not Available)</small>{% endif %}
                                 </a>
                                 {# Django: Replace {% set %} with conditional class assignment #}
                                 <a href="{% url 'patient_data:patient_cda_view_typed' patient_identity.url_patient_id|default:patient_identity.patient_id 'L3' %}"
-                                    class="{% if cda_type == 'L3' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %}{% if not has_l3_cda %} disabled{% endif %}">
+                                    class="{% if cda_type == 'L3' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %} {% if not has_l3_cda %} disabled{% endif %}">
                                     <i class="fas fa-language me-1"></i>L3 Patient Summary
                                     {% if not has_l3_cda %}<small>(Not Available)</small>{% endif %}
                                 </a>

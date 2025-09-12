@@ -19,12 +19,12 @@
                     <p><strong>Administrative Data:</strong> {{ administrative_data|default:"None" }}</p>
                     {% if patient_extended_data %}
                     <p><strong>Patient Extended Keys:</strong>
-                        {% for key, value in patient_extended_data|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                        {% for key, value in patient_extended_data|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
                     </p>
                     {% endif %}
                     {% if administrative_data %}
                     <p><strong>Administrative Data Keys:</strong>
-                        {% for key, value in administrative_data|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                        {% for key, value in administrative_data|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
                     </p>
                     {% endif %}
                 </div>

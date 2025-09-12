@@ -12,9 +12,9 @@
         <h6>DEBUG: Document Info Data Available</h6>
         <p><strong>Document Data Keys:</strong>
             {% if patient_extended_data|safe_get:"document_info" %}
-                {% for key, value in patient_extended_data|safe_get:"document_info"|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                {% for key, value in patient_extended_data|safe_get:"document_info"|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
             {% elif patient_extended_data|safe_get:"metadata" %}
-                {% for key, value in patient_extended_data|safe_get:"metadata"|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                {% for key, value in patient_extended_data|safe_get:"metadata"|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
             {% else %}
                 No document data
             {% endif %}

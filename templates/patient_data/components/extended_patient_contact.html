@@ -30,7 +30,7 @@
           <i class="fas fa-map-marker-alt"></i> Address:
         </div>
         <div class="admin-value">
-          {% if address.street %}{{ address.street }}{% endif %}{% if address.city %}, {{ address.city }}{% endif %}{% if address.postalCode %} {{ address.postalCode }}{% endif %}{% if address.country %}, {{ address.country }}{% endif %}
+          {% if address.street %}{{ address.street }}{% endif %} {% if address.city %}, {{ address.city }}{% endif %} {% if address.postalCode %} {{ address.postalCode }}{% endif %} {% if address.country %}, {{ address.country }}{% endif %}
         </div>
       </div>
       {% endfor %}
@@ -51,7 +51,8 @@
           {{ telecom.value|clean_telecom }}
         </div>
       </div>
-      {% endfor %} {% endif %}
+      {% endfor %}
+      {% endif %}
     </div>
   </div>
   {% endif %}
@@ -112,7 +113,8 @@
           {{ telecom.value|clean_telecom }}
         </div>
       </div>
-      {% endfor %} {% endif %} {% endif %}
+      {% endfor %}
+      {% endif %} {% endif %}
     </div>
   </div>
   {% endif %}
@@ -157,7 +159,8 @@
           address.country %}, {{ address.country }}{% endif %}
         </div>
       </div>
-      {% endfor %} {% endif %} {% if contact.contact_info.telecoms %} {% for
+      {% endfor %}
+      {% endif %} {% if contact.contact_info.telecoms %} {% for
       telecom in contact.contact_info.telecoms %}
       <div class="admin-info-row">
         <div class="admin-label">
@@ -171,7 +174,8 @@
           {{ telecom.value|clean_telecom }}
         </div>
       </div>
-      {% endfor %} {% endif %} {% endif %}
+      {% endfor %}
+      {% endif %} {% endif %}
     </div>
     {% endif %} {% endfor %}
   </div>
@@ -215,7 +219,8 @@
           address.country %}, {{ address.country }}{% endif %}
         </div>
       </div>
-      {% endfor %} {% endif %} {% if
+      {% endfor %}
+      {% endif %} {% if
       administrative_data|safe_get:"author_hcp".contact_info.telecoms %} {% for telecom in
       administrative_data|safe_get:"author_hcp".contact_info.telecoms %}
       <div class="admin-info-row">
@@ -230,7 +235,8 @@
           {{ telecom.value|clean_telecom }}
         </div>
       </div>
-      {% endfor %} {% endif %} {% endif %}
+      {% endfor %}
+      {% endif %} {% endif %}
     </div>
   </div>
   {% endif %}
@@ -276,7 +282,8 @@
           address.country %}, {{ address.country }}{% endif %}
         </div>
       </div>
-      {% endfor %} {% endif %} {% if
+      {% endfor %}
+      {% endif %} {% if
       administrative_data|safe_get:"legal_authenticator".contact_info.telecoms %} {% for
       telecom in administrative_data|safe_get:"legal_authenticator".contact_info.telecoms
       %}
@@ -292,7 +299,8 @@
           {{ telecom.value|clean_telecom }}
         </div>
       </div>
-      {% endfor %} {% endif %} {% endif %}
+      {% endfor %}
+      {% endif %} {% endif %}
     </div>
   </div>
   {% endif %}
@@ -333,7 +341,8 @@
           address.country %}, {{ address.country }}{% endif %}
         </div>
       </div>
-      {% endfor %} {% endif %} {% if
+      {% endfor %}
+      {% endif %} {% if
       administrative_data|safe_get:"custodian_organization".contact_info.telecoms %} {% for
       telecom in
       administrative_data|safe_get:"custodian_organization".contact_info.telecoms %}
@@ -349,7 +358,8 @@
           {{ telecom.value|clean_telecom }}
         </div>
       </div>
-      {% endfor %} {% endif %} {% endif %}
+      {% endfor %}
+      {% endif %} {% endif %}
     </div>
   </div>
   {% endif %}
@@ -389,7 +399,8 @@
           address.country %}, {{ address.country }}{% endif %}
         </div>
       </div>
-      {% endfor %} {% endif %} {% if
+      {% endfor %}
+      {% endif %} {% if
       administrative_data|safe_get:"preferred_hcp".contact_info.telecoms %} {% for telecom
       in administrative_data|safe_get:"preferred_hcp".contact_info.telecoms %}
       <div class="admin-info-row">
@@ -404,7 +415,8 @@
           {{ telecom.value|clean_telecom }}
         </div>
       </div>
-      {% endfor %} {% endif %} {% endif %}
+      {% endfor %}
+      {% endif %} {% endif %}
     </div>
   </div>
   {% endif %} {% else %}

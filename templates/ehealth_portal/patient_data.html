@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% load static %}
-{% block title %}Patient Data - {% if patient %}{{ patient.name }}{% else %}Unknown Patient{% endif %}{% endblock %}
+{% block title %}Patient Data - {% if patient %}{{ patient.name }}{% else %}Unknown Patient{% endif %} {% endblock %}
 
 {% block extra_css %}
 <link href="{% static 'css/patient_cda_ps_guidelines.css' %}?v=20250804" rel="stylesheet" media="screen">
