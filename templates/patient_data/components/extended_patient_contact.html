@@ -48,7 +48,7 @@
           %}
         </div>
         <div class="admin-value">
-          {{ telecom.value|replace("mailto:","") |replace("tel:","") }}
+          {{ telecom.value|clean_telecom }}
         </div>
       </div>
       {% endfor %} {% endif %}
@@ -109,7 +109,7 @@
           %}
         </div>
         <div class="admin-value">
-          {{ telecom.value|replace("mailto:","") |replace("tel:","") }}
+          {{ telecom.value|clean_telecom }}
         </div>
       </div>
       {% endfor %} {% endif %} {% endif %}
@@ -168,7 +168,7 @@
           %}
         </div>
         <div class="admin-value">
-          {{ telecom.value|replace("mailto:","") |replace("tel:","") }}
+          {{ telecom.value|clean_telecom }}
         </div>
       </div>
       {% endfor %} {% endif %} {% endif %}
@@ -227,7 +227,7 @@
           %}
         </div>
         <div class="admin-value">
-          {{ telecom.value|replace("mailto:","") |replace("tel:","") }}
+          {{ telecom.value|clean_telecom }}
         </div>
       </div>
       {% endfor %} {% endif %} {% endif %}
@@ -289,7 +289,7 @@
           %}
         </div>
         <div class="admin-value">
-          {{ telecom.value|replace("mailto:","") |replace("tel:","") }}
+          {{ telecom.value|clean_telecom }}
         </div>
       </div>
       {% endfor %} {% endif %} {% endif %}
@@ -346,7 +346,7 @@
           %}
         </div>
         <div class="admin-value">
-          {{ telecom.value|replace("mailto:","") |replace("tel:","") }}
+          {{ telecom.value|clean_telecom }}
         </div>
       </div>
       {% endfor %} {% endif %} {% endif %}
@@ -401,7 +401,7 @@
           %}
         </div>
         <div class="admin-value">
-          {{ telecom.value|replace("mailto:","") |replace("tel:","") }}
+          {{ telecom.value|clean_telecom }}
         </div>
       </div>
       {% endfor %} {% endif %} {% endif %}
