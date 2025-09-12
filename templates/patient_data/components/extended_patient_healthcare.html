@@ -13,13 +13,13 @@
         <h6>DEBUG: Healthcare Team Data Available</h6>
         <p><strong>Healthcare Data Keys:</strong>
             {% if patient_extended_data|safe_get:"healthcare_team" %}
-                {% for key, value in patient_extended_data|safe_get:"healthcare_team".items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                {% for key, value in patient_extended_data|safe_get:"healthcare_team"|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
             {% else %}
                 No healthcare data
             {% endif %}
         </p>
-        <p><strong>Has healthcare team:</strong> {{ patient_extended_data|safe_get:"healthcare_team".has_healthcare_team|default:False }}</p>
-        <p><strong>Total count:</strong> {{ patient_extended_data|safe_get:"healthcare_team".total_count|default:0 }}</p>
+        <p><strong>Has healthcare team:</strong> {{ patient_extended_data|safe_get:"healthcare_team"|safe_get:"has_healthcare_team"|default:False }}</p>
+        <p><strong>Total count:</strong> {{ patient_extended_data|safe_get:"healthcare_team"|safe_get:"total_count"|default:0 }}</p>
     </div>
 
     <!-- Document Authors -->
@@ -33,18 +33,18 @@
                 <h6 class="card-title">
                     {{ author.name|default:author.person.full_name|default:"Unknown Author" }}
                 </h6>
-                <div class="mb-2">
-                    <span class="role-badge">{{ author.get('role', author.get('type', 'Author')) }}</span>
+                                <div class="mb-2">
+                    <span class="role-badge">{{ author|safe_get:"role"|default:author|safe_get:"type"|default:"Author" }}</span>
                 </div>
-                {% if author.get('organization') %}
+                {% if author|safe_get:"organization" %}
                 <div class="organization-info mb-2">
-                    <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{ author.organization }}
+                    <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{ author|safe_get:"organization" }}
                 </div>
                 {% endif %}
-                {% if author.get('time') %}
+                {% if author|safe_get:"time" %}
                 <div class="contact-details">
                     <strong><i class="fas fa-clock me-1"></i>Authored:</strong>
-                    <span class="date-value">{{ author.time }}</span>
+                    <span class="date-value">{{ author|safe_get:"time" }}</span>
                 </div>
                 {% endif %}
             </div>
@@ -81,27 +81,27 @@
     {% endif %}
 
     <!-- Emergency Contacts -->
-    {% if patient_extended_data.get('emergency_contacts', {}).get('contacts') %}
+    {% if patient_extended_data|safe_get:"emergency_contacts"|safe_get:"contacts" %}
     <div class="mb-4">
         <h6><i class="fas fa-ambulance me-1"></i>Emergency Contacts</h6>
-        {% for contact in patient_extended_data.emergency_contacts.contacts %}
+        {% for contact in patient_extended_data|safe_get:"emergency_contacts"|safe_get:"contacts" %}
         <div class="healthcare-member-card">
             <div class="card-body">
-                <h6 class="card-title">{{ contact.get('name', 'Unknown Contact') }}</h6>
+                <h6 class="card-title">{{ contact|safe_get:"name"|default:"Unknown Contact" }}</h6>
                 <div class="mb-2">
                     <span class="role-badge emergency-contact">Emergency Contact</span>
                 </div>
 
                 <!-- Phone Numbers -->
-                {% if contact.get('phone_numbers') %}
+                {% if contact|safe_get:"phone_numbers" %}
                 <div class="contact-details mb-2">
-                    {% for phone in contact.phone_numbers %}
+                    {% for phone in contact|safe_get:"phone_numbers" %}
                     <div class="contact-item">
-                        <strong>{{ phone.get('display_label', phone.get('use_label', 'Phone:')) }}</strong>
-                        <a href="tel:{{ phone.get('number', '') }}" class="contact-link phone-link ms-2">
-                            {{ phone.get('number', '') }}
+                        <strong>{{ phone|safe_get:"display_label"|default:phone|safe_get:"use_label"|default:"Phone:" }}</strong>
+                        <a href="tel:{{ phone|safe_get:"number"|default:"" }}" class="contact-link phone-link ms-2">
+                            {{ phone|safe_get:"number"|default:"" }}
                         </a>
-                        {% if phone.get('is_primary') %}
+                        {% if phone|safe_get:"is_primary" %}
                         <span class="badge bg-success ms-1">Primary</span>
                         {% endif %}
                     </div>
@@ -110,13 +110,13 @@
                 {% endif %}
 
                 <!-- Email Addresses -->
-                {% if contact.get('email_addresses') %}
+                {% if contact|safe_get:"email_addresses" %}
                 <div class="contact-details mb-2">
-                    {% for email in contact.email_addresses %}
+                    {% for email in contact|safe_get:"email_addresses" %}
                     <div class="contact-item">
-                        <strong>{{ email.get('display_label', email.get('use_label', 'Email:')) }}</strong>
-                        <a href="mailto:{{ email.get('email', '') }}" class="contact-link email-link ms-2">
-                            {{ email.get('email', '') }}
+                        <strong>{{ email|safe_get:"display_label"|default:email|safe_get:"use_label"|default:"Email:" }}</strong>
+                        <a href="mailto:{{ email|safe_get:"email"|default:"" }}" class="contact-link email-link ms-2">
+                            {{ email|safe_get:"email"|default:"" }}
                         </a>
                     </div>
                     {% endfor %}
@@ -129,19 +129,19 @@
     {% endif %}
 
     <!-- Next of Kin -->
-    {% if patient_extended_data.get('next_of_kin', {}).get('contacts') %}
+    {% if patient_extended_data|safe_get:"next_of_kin"|safe_get:"contacts" %}
     <div class="mb-4">
         <h6><i class="fas fa-users me-1"></i>Next of Kin</h6>
-        {% for contact in patient_extended_data.next_of_kin.contacts %}
+        {% for contact in patient_extended_data|safe_get:"next_of_kin"|safe_get:"contacts" %}
         <div class="healthcare-member-card">
             <div class="card-body">
-                <h6 class="card-title">{{ contact.get('name', 'Unknown Contact') }}</h6>
+                <h6 class="card-title">{{ contact|safe_get:"name"|default:"Unknown Contact" }}</h6>
                 <div class="mb-2">
-                    <span class="role-badge next-of-kin">{{ contact.get('relationship', 'Next of Kin') }}</span>
+                    <span class="role-badge next-of-kin">{{ contact|safe_get:"relationship"|default:"Next of Kin" }}</span>
                 </div>
 
                 <!-- Phone Numbers -->
-                {% if contact.get('phone_numbers') %}
+                {% if contact|safe_get:"phone_numbers" %}
                 <div class="contact-details mb-2">
                     {% for phone in contact.phone_numbers %}
                     <div class="contact-item">
@@ -160,19 +160,19 @@
     {% endif %}
 
     <!-- Medical Performers -->
-    {% if patient_extended_data.get('performers', {}).get('medical_doctors') %}
+    {% if patient_extended_data|safe_get:"performers"|safe_get:"medical_doctors" %}
     <div class="mb-4">
         <h6><i class="fas fa-user-md me-1"></i>Medical Doctors</h6>
-        {% for doctor in patient_extended_data.performers.medical_doctors %}
+        {% for doctor in patient_extended_data|safe_get:"performers"|safe_get:"medical_doctors" %}
         <div class="healthcare-member-card">
             <div class="card-body">
-                <h6 class="card-title">{{ doctor.get('name', 'Unknown Doctor') }}</h6>
+                <h6 class="card-title">{{ doctor|safe_get:"name"|default:"Unknown Doctor" }}</h6>
                 <div class="mb-2">
-                    <span class="role-badge doctor">{{ doctor.get('role', 'Medical Doctor') }}</span>
+                    <span class="role-badge doctor">{{ doctor|safe_get:"role"|default:"Medical Doctor" }}</span>
                 </div>
-                {% if doctor.get('organization') %}
+                {% if doctor|safe_get:"organization" %}
                 <div class="organization-info mb-2">
-                    <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{ doctor.organization }}
+                    <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{ doctor|safe_get:"organization" }}
                 </div>
                 {% endif %}
 
