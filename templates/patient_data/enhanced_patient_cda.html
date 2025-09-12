@@ -1163,8 +1163,6 @@
                             </p>
                             <p><strong>Gender:</strong> {{ patient_identity.gender|default:"Unknown" }}</p>
                             <p><strong>Patient ID:</strong> {{ patient_identity.patient_id }}</p>
-                            <!-- DEBUG: Raw patient_identity.patient_id = "{{ patient_identity.patient_id }}" -->
-                            <!-- DEBUG: Patient identity keys available via debug tools -->
                             {% if patient_identity.secondary_patient_id %}
                             <p><strong>Secondary ID:</strong> {{ patient_identity.secondary_patient_id }}</p>
                             {% endif %}
@@ -1365,7 +1363,7 @@
     </div>
     {% endif %}
 
-    <!-- Medical Sections with Clinical Tables -->
+    <!-- Clinical Sections -->
     {% if processed_sections and processed_sections|length > 0 %}
     <div class="card mt-4">
         <div class="card-header bg-success text-white">
