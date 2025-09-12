@@ -14,29 +14,29 @@ find templates/ -name "*.html" -type f -exec sed -i '
     s/%} *\n* *{% *elif/%} {% elif/g
     s/%} *\n* *{% *else/%} {% else/g
     s/%} *\n* *{% *endif/%} {% endif/g
-    
+
     # Fix broken {% for statements
     s/%} *\n* *{% *for/%} {% for/g
     s/%} *\n* *{% *endfor/%} {% endfor/g
-    
+
     # Fix broken {% with statements
     s/%} *\n* *{% *with/%} {% with/g
     s/%} *\n* *{% *endwith/%} {% endwith/g
-    
+
     # Fix broken {% comment statements
     s/%} *\n* *{% *comment/%} {% comment/g
     s/%} *\n* *{% *endcomment/%} {% endcomment/g
-    
+
     # Fix broken {% load statements
     s/%} *\n* *{% *load/%} {% load/g
-    
+
     # Fix broken {% block statements
     s/%} *\n* *{% *block/%} {% block/g
     s/%} *\n* *{% *endblock/%} {% endblock/g
-    
+
     # Fix broken {% include statements
     s/%} *\n* *{% *include/%} {% include/g
-    
+
     # Fix broken {% extends statements
     s/%} *\n* *{% *extends/%} {% extends/g
 ' {} \;

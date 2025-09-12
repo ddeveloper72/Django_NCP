@@ -79,18 +79,18 @@ def replace(value, args):
     """Template filter to replace strings - equivalent to value.replace(old, new)"""
     if value is None:
         return value
-    
+
     try:
         # Parse comma-separated arguments
-        if isinstance(args, str) and ',' in args:
-            old, new = args.split(',', 1)
-            old = old.strip().strip('"\'')
-            new = new.strip().strip('"\'')
+        if isinstance(args, str) and "," in args:
+            old, new = args.split(",", 1)
+            old = old.strip().strip("\"'")
+            new = new.strip().strip("\"'")
         else:
             # Single argument - replace with empty string
-            old = str(args).strip('"\'')
-            new = ''
-        
+            old = str(args).strip("\"'")
+            new = ""
+
         return str(value).replace(old, new)
     except (ValueError, AttributeError):
         return value
@@ -101,7 +101,7 @@ def clean_telecom(value):
     """Template filter to clean telecom values by removing mailto: and tel: prefixes"""
     if value is None:
         return value
-    
+
     cleaned = str(value)
     cleaned = cleaned.replace("mailto:", "")
     cleaned = cleaned.replace("tel:", "")
