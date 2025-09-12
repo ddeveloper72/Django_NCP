@@ -3764,12 +3764,12 @@ def patient_cda_view(request, patient_id, cda_type=None):
                     },
                 }
 
-            # DISABLED: Mock data application - testing real XML data extraction
-            # context["patient_extended_data"] = mock_extended_data
+            # TEMPORARILY ENABLED: Mock data application - testing extended patient templates
+            context["patient_extended_data"] = mock_extended_data
             # Store mock enhanced data in session for persistence across page loads
-            # request.session["patient_extended_data"] = mock_extended_data
+            request.session["patient_extended_data"] = mock_extended_data
             logger.info(
-                f"🧪 MOCK DATA DISABLED - Testing real XML data extraction for {patient_country_code} patient {patient_id}"
+                f"🧪 MOCK DATA ENABLED - Testing extended patient templates for {patient_country_code} patient {patient_id}"
             )
         else:
             logger.info(

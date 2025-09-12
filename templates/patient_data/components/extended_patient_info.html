@@ -1,6 +1,6 @@
 <!-- Extended Patient Information Main Component -->
 {% load patient_filters %}
-{% if patient_extended_data %}
+{% if patient_extended_data or administrative_data %}
 <div class="row mb-4">
     <div class="col-12">
         <div class="card extended-patient-info">
@@ -15,24 +15,19 @@
                 <!-- DEBUG: Show what data is available -->
                 <div class="alert alert-info mb-3">
                     <h6><i class="fas fa-bug me-2"></i>DEBUG: Available Extended Data</h6>
-                    <p><strong>Data Keys:</strong>
+                    <p><strong>Patient Extended Data:</strong> {{ patient_extended_data|default:"None" }}</p>
+                    <p><strong>Administrative Data:</strong> {{ administrative_data|default:"None" }}</p>
+                    {% if patient_extended_data %}
+                    <p><strong>Patient Extended Keys:</strong>
                         {% for key, value in patient_extended_data|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
                     </p>
-                    {% if patient_extended_data|safe_get:"patient_contact" %}
-                    <p><strong>Patient Contact Keys:</strong>
-                        {% for key, value in patient_extended_data|safe_get:"patient_contact"|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    {% endif %}
+                    {% if administrative_data %}
+                    <p><strong>Administrative Data Keys:</strong>
+                        {% for key, value in administrative_data|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
                     </p>
                     {% endif %}
-                    {% if patient_extended_data|safe_get:"healthcare_team" %}
-                    <p><strong>Healthcare Team Keys:</strong>
-                        {% for key, value in patient_extended_data|safe_get:"healthcare_team"|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                    </p>
-                    {% endif %}
-                    {% if patient_extended_data|safe_get:"document_info" %}
-                    <p><strong>Document Info Keys:</strong>
-                        {% for key, value in patient_extended_data|safe_get:"document_info"|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                    </p>
-                    {% endif %}
+                </div>
                 </div>
 
                 <!-- Extended Info Navigation Tabs -->
@@ -43,7 +38,7 @@
                             data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab"
                             aria-controls="contact" aria-selected="true">
                             <i class="fas fa-address-card me-1"></i>Contact Details
-                            {% if patient_extended_data and patient_extended_data|safe_get:"patient_contact" %}
+                            {% if patient_extended_data|safe_get:"patient_contact" or administrative_data|safe_get:"patient_contact_info" %}
                             <span class="badge bg-primary ms-1">1</span>
                             {% endif %}
                         </button>
@@ -55,12 +50,12 @@
                             data-bs-toggle="tab" data-bs-target="#healthcare" type="button" role="tab"
                             aria-controls="healthcare" aria-selected="false">
                             <i class="fas fa-stethoscope me-1"></i>Healthcare Team
-                            {% if patient_extended_data and patient_extended_data|safe_get:"authors" %}
+                            {% if patient_extended_data|safe_get:"authors" or administrative_data|safe_get:"authors" %}
                             <span class="badge bg-success ms-1">
                                 {# Django: Calculate team count using template logic #}
-                                {% if patient_extended_data|safe_get:"authors" %}{{ patient_extended_data|safe_get:"authors"|length }}{% else %}0{% endif %}
-                                {% if patient_extended_data|safe_get:"legal_authenticator" %}+1{% endif %}
-                                {% if patient_extended_data|safe_get:"custodian" %}+1{% endif %}
+                                {% if patient_extended_data|safe_get:"authors" %}{{ patient_extended_data|safe_get:"authors"|length }}{% elif administrative_data|safe_get:"authors" %}{{ administrative_data|safe_get:"authors"|length }}{% else %}0{% endif %}
+                                {% if patient_extended_data|safe_get:"legal_authenticator" or administrative_data|safe_get:"legal_authenticator" %}+1{% endif %}
+                                {% if patient_extended_data|safe_get:"custodian" or administrative_data|safe_get:"custodians" %}+1{% endif %}
                             </span>
                             {% endif %}
                         </button>
@@ -105,9 +100,13 @@
     <div class="col-12">
         <div class="alert alert-warning">
             <h6><i class="fas fa-info-circle me-2"></i>Extended Patient Information</h6>
-            <p>No extended patient data available for this patient. The system attempted to extract extended information
+            <p>No extended patient data or administrative data available for this patient. The system attempted to extract extended information
                 from the CDA document but none was found.</p>
-            <p><strong>Debug Info:</strong> patient_extended_data = {{ patient_extended_data }}</p>
+            <p><strong>Debug Info:</strong></p>
+            <ul>
+                <li>patient_extended_data = {{ patient_extended_data|default:"None" }}</li>
+                <li>administrative_data = {{ administrative_data|default:"None" }}</li>
+            </ul>
         </div>
     </div>
 </div>
