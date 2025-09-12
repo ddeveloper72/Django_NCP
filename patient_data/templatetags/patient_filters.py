@@ -43,7 +43,7 @@ def dict_items(dictionary):
     """Template filter to get dictionary items - equivalent to dictionary.items()"""
     if isinstance(dictionary, dict):
         return dictionary.items()
-    elif hasattr(dictionary, 'items'):
+    elif hasattr(dictionary, "items"):
         return dictionary.items()
     return []
 
@@ -64,10 +64,10 @@ def safe_get(data, key):
         if key in data:
             return data[key]
         # Handle different data structures
-        if key == 'value' and 'count' in data:
-            return data['count']
-        elif key == 'count' and 'value' in data:
-            return data['value']
+        if key == "value" and "count" in data:
+            return data["count"]
+        elif key == "count" and "value" in data:
+            return data["value"]
         return None
     elif hasattr(data, key):
         return getattr(data, key, None)
