@@ -15,16 +15,27 @@
                 <!-- DEBUG: Show what data is available -->
                 <div class="alert alert-info mb-3">
                     <h6><i class="fas fa-bug me-2"></i>DEBUG: Available Extended Data</h6>
-                    <p><strong>Patient Extended Data:</strong> {{ patient_extended_data|default:"None" }}</p>
-                    <p><strong>Administrative Data:</strong> {{ administrative_data|default:"None" }}</p>
+                    <p><strong>Patient Extended Data:</strong>
+                        {{ patient_extended_data|default:"None" }}
+                    </p>
+                    <p><strong>Administrative Data:</strong>
+                        {{ administrative_data|default:"None" }}</p>
                     {% if patient_extended_data %}
                     <p><strong>Patient Extended Keys:</strong>
-                        {% for key, value in patient_extended_data|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
+                        {% for key, value in patient_extended_data|dict_items %}
+                        {{ key }}
+                        {% if not forloop.last %},
+                        {% endif %}
+                        {% endfor %}
                     </p>
                     {% endif %}
                     {% if administrative_data %}
                     <p><strong>Administrative Data Keys:</strong>
-                        {% for key, value in administrative_data|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
+                        {% for key, value in administrative_data|dict_items %}
+                        {{ key }}
+                        {% if not forloop.last %},
+                        {% endif %}
+                        {% endfor %}
                     </p>
                     {% endif %}
                 </div>
@@ -53,9 +64,19 @@
                             {% if patient_extended_data|safe_get:"authors" or administrative_data|safe_get:"authors" %}
                             <span class="badge bg-success ms-1">
                                 {# Django: Calculate team count using template logic #}
-                                {% if patient_extended_data|safe_get:"authors" %}{{ patient_extended_data|safe_get:"authors"|length }}{% elif administrative_data|safe_get:"authors" %}{{ administrative_data|safe_get:"authors"|length }}{% else %}0{% endif %}
-                                {% if patient_extended_data|safe_get:"legal_authenticator" or administrative_data|safe_get:"legal_authenticator" %}+1{% endif %}
-                                {% if patient_extended_data|safe_get:"custodian" or administrative_data|safe_get:"custodians" %}+1{% endif %}
+                                {% if patient_extended_data|safe_get:"authors" %}
+                                {{ patient_extended_data|safe_get:"authors"|length }}
+                                {% elif administrative_data|safe_get:"authors" %}
+                                {{ administrative_data|safe_get:"authors"|length }}
+                                {% else %}
+                                0
+                                {% endif %}
+                                {% if patient_extended_data|safe_get:"legal_authenticator" or administrative_data|safe_get:"legal_authenticator" %}
+                                +1
+                                {% endif %}
+                                {% if patient_extended_data|safe_get:"custodian" or administrative_data|safe_get:"custodians" %}
+                                +1
+                                {% endif %}
                             </span>
                             {% endif %}
                         </button>
