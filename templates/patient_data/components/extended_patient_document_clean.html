@@ -1,13 +1,15 @@
 <!-- Extended Patient Document Information Component -->
-<div class="tab-pane fade {% if first_tab == 'document' %}show active{% endif %}" id="document" role="tabpanel"
+<div class="tab-pane fade {{ document_tab_active_class }}" id="document" role="tabpanel"
     aria-labelledby="document-tab">
     {% if administrative_data %}
 
     <!-- Debug Document Data -->
     <div class="alert alert-success mb-3">
         <h6>DEBUG: Administrative Data Available</h6>
-        <p><strong>Authors Count:</strong> {{ administrative_data.get('authors', []) | length }}</p>
-        <p><strong>Custodians Count:</strong> {{ administrative_data.get('custodians', []) | length }}</p>
+        <p><strong>Authors Count:</strong>
+            {{ administrative_data.get('authors', []) | length }}</p>
+        <p><strong>Custodians Count:</strong>
+            {{ administrative_data.get('custodians', []) | length }}</p>
     </div>
 
     <!-- Document Status -->
@@ -35,9 +37,11 @@
             <div class="contact-info-card">
                 <div class="contact-type">Custodian Organization</div>
                 <div class="contact-details">
-                    <strong>{{ custodian.get('organization', {}).get('name', 'Unknown Organization') }}</strong>
+                    <strong>
+                        {{ custodian.get('organization', {}).get('name', 'Unknown Organization') }}</strong>
                     {% if custodian.get('organization', {}).get('id') %}
-                    <br><small class="text-muted">ID: {{ custodian.organization.id }}</small>
+                    <br><small class="text-muted">ID:
+                        {{ custodian.organization.id }}</small>
                     {% endif %}
                 </div>
             </div>
@@ -55,12 +59,14 @@
             <div class="contact-info-card">
                 <div class="contact-type">Document Author</div>
                 <div class="contact-details">
-                    <strong>{{ author.get('family_name', 'Unknown') }}</strong>
-                    {% if author.get('given_name') %}
-                    , {{ author.given_name }}
+                    <strong>
+                        {{ author.get('family_name', 'Unknown') }}</strong>
+                    {% if author.get('given_name') %},
+                    {{ author.given_name }}
                     {% endif %}
                     {% if author.get('time') %}
-                    <br><small class="text-muted">Author Time: {{ author.time }}</small>
+                    <br><small class="text-muted">Author Time:
+                        {{ author.time }}</small>
                     {% endif %}
                 </div>
             </div>
