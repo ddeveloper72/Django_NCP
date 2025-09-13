@@ -13,13 +13,19 @@
         <h6>DEBUG: Healthcare Team Data Available</h6>
         <p><strong>Healthcare Data Keys:</strong>
             {% if patient_extended_data|safe_get:"healthcare_team" %}
-                {% for key, value in patient_extended_data|safe_get:"healthcare_team"|dict_items %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
+                {% for key, value in patient_extended_data|safe_get:"healthcare_team"|dict_items %}
+                {{ key }}
+                {% if not forloop.last %},
+                {% endif %}
+                {% endfor %}
             {% else %}
                 No healthcare data
             {% endif %}
         </p>
-        <p><strong>Has healthcare team:</strong> {{ patient_extended_data|safe_get:"healthcare_team"|safe_get:"has_healthcare_team"|default:False }}</p>
-        <p><strong>Total count:</strong> {{ patient_extended_data|safe_get:"healthcare_team"|safe_get:"total_count"|default:0 }}</p>
+        <p><strong>Has healthcare team:</strong>
+            {{ patient_extended_data|safe_get:"healthcare_team"|safe_get:"has_healthcare_team"|default:False }}</p>
+        <p><strong>Total count:</strong>
+            {{ patient_extended_data|safe_get:"healthcare_team"|safe_get:"total_count"|default:0 }}</p>
     </div>
 
     <!-- Document Authors -->
@@ -34,17 +40,20 @@
                     {{ author.name|default:author.person.full_name|default:"Unknown Author" }}
                 </h6>
                                 <div class="mb-2">
-                    <span class="role-badge">{{ author|safe_get:"role"|default:author|safe_get:"type"|default:"Author" }}</span>
+                    <span class="role-badge">
+                        {{ author|safe_get:"role"|default:author|safe_get:"type"|default:"Author" }}</span>
                 </div>
                 {% if author|safe_get:"organization" %}
                 <div class="organization-info mb-2">
-                    <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{ author|safe_get:"organization" }}
+                    <strong><i class="fas fa-building me-1"></i>Organization:</strong>
+                    {{ author|safe_get:"organization" }}
                 </div>
                 {% endif %}
                 {% if author|safe_get:"time" %}
                 <div class="contact-details">
                     <strong><i class="fas fa-clock me-1"></i>Authored:</strong>
-                    <span class="date-value">{{ author|safe_get:"time" }}</span>
+                    <span class="date-value">
+                        {{ author|safe_get:"time" }}</span>
                 </div>
                 {% endif %}
             </div>
@@ -60,19 +69,23 @@
         <h6><i class="fas fa-gavel me-1"></i>Legal Authenticator</h6>
         <div class="healthcare-member-card">
             <div class="card-body">
-                <h6 class="card-title">{{ patient_extended_data|safe_get:"legal_authenticator".name|default:"Unknown Authenticator" }}</h6>
+                <h6 class="card-title">
+                    {{ patient_extended_data|safe_get:"legal_authenticator".name|default:"Unknown Authenticator" }}</h6>
                 <div class="mb-2">
-                    <span class="role-badge">{{ patient_extended_data|safe_get:"legal_authenticator".role|default:"Legal Authenticator" }}</span>
+                    <span class="role-badge">
+                        {{ patient_extended_data|safe_get:"legal_authenticator".role|default:"Legal Authenticator" }}</span>
                 </div>
                 {% if patient_extended_data|safe_get:"legal_authenticator".organization %}
                 <div class="organization-info mb-2">
-                    <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{ patient_extended_data|safe_get:"legal_authenticator".organization }}
+                    <strong><i class="fas fa-building me-1"></i>Organization:</strong>
+                    {{ patient_extended_data|safe_get:"legal_authenticator".organization }}
                 </div>
                 {% endif %}
                 {% if legal_auth.get('authentication_time') %}
                 <div class="contact-details">
                     <strong><i class="fas fa-clock me-1"></i>Authenticated:</strong>
-                    <span class="date-value">{{ legal_auth.authentication_time }}</span>
+                    <span class="date-value">
+                        {{ legal_auth.authentication_time }}</span>
                 </div>
                 {% endif %}
             </div>
@@ -87,7 +100,8 @@
         {% for contact in patient_extended_data|safe_get:"emergency_contacts"|safe_get:"contacts" %}
         <div class="healthcare-member-card">
             <div class="card-body">
-                <h6 class="card-title">{{ contact|safe_get:"name"|default:"Unknown Contact" }}</h6>
+                <h6 class="card-title">
+                    {{ contact|safe_get:"name"|default:"Unknown Contact" }}</h6>
                 <div class="mb-2">
                     <span class="role-badge emergency-contact">Emergency Contact</span>
                 </div>
@@ -97,7 +111,8 @@
                 <div class="contact-details mb-2">
                     {% for phone in contact|safe_get:"phone_numbers" %}
                     <div class="contact-item">
-                        <strong>{{ phone|safe_get:"display_label"|default:phone|safe_get:"use_label"|default:"Phone:" }}</strong>
+                        <strong>
+                            {{ phone|safe_get:"display_label"|default:phone|safe_get:"use_label"|default:"Phone:" }}</strong>
                         <a href="tel:{{ phone|safe_get:"number"|default:"" }}" class="contact-link phone-link ms-2">
                             {{ phone|safe_get:"number"|default:"" }}
                         </a>
@@ -114,7 +129,8 @@
                 <div class="contact-details mb-2">
                     {% for email in contact|safe_get:"email_addresses" %}
                     <div class="contact-item">
-                        <strong>{{ email|safe_get:"display_label"|default:email|safe_get:"use_label"|default:"Email:" }}</strong>
+                        <strong>
+                            {{ email|safe_get:"display_label"|default:email|safe_get:"use_label"|default:"Email:" }}</strong>
                         <a href="mailto:{{ email|safe_get:"email"|default:"" }}" class="contact-link email-link ms-2">
                             {{ email|safe_get:"email"|default:"" }}
                         </a>
@@ -135,9 +151,11 @@
         {% for contact in patient_extended_data|safe_get:"next_of_kin"|safe_get:"contacts" %}
         <div class="healthcare-member-card">
             <div class="card-body">
-                <h6 class="card-title">{{ contact|safe_get:"name"|default:"Unknown Contact" }}</h6>
+                <h6 class="card-title">
+                    {{ contact|safe_get:"name"|default:"Unknown Contact" }}</h6>
                 <div class="mb-2">
-                    <span class="role-badge next-of-kin">{{ contact|safe_get:"relationship"|default:"Next of Kin" }}</span>
+                    <span class="role-badge next-of-kin">
+                        {{ contact|safe_get:"relationship"|default:"Next of Kin" }}</span>
                 </div>
 
                 <!-- Phone Numbers -->
@@ -145,7 +163,8 @@
                 <div class="contact-details mb-2">
                     {% for phone in contact.phone_numbers %}
                     <div class="contact-item">
-                        <strong>{{ phone.get('display_label', phone.get('use_label', 'Phone:')) }}</strong>
+                        <strong>
+                            {{ phone.get('display_label', phone.get('use_label', 'Phone:')) }}</strong>
                         <a href="tel:{{ phone.get('number', '') }}" class="contact-link phone-link ms-2">
                             {{ phone.get('number', '') }}
                         </a>
@@ -166,13 +185,16 @@
         {% for doctor in patient_extended_data|safe_get:"performers"|safe_get:"medical_doctors" %}
         <div class="healthcare-member-card">
             <div class="card-body">
-                <h6 class="card-title">{{ doctor|safe_get:"name"|default:"Unknown Doctor" }}</h6>
+                <h6 class="card-title">
+                    {{ doctor|safe_get:"name"|default:"Unknown Doctor" }}</h6>
                 <div class="mb-2">
-                    <span class="role-badge doctor">{{ doctor|safe_get:"role"|default:"Medical Doctor" }}</span>
+                    <span class="role-badge doctor">
+                        {{ doctor|safe_get:"role"|default:"Medical Doctor" }}</span>
                 </div>
                 {% if doctor|safe_get:"organization" %}
                 <div class="organization-info mb-2">
-                    <strong><i class="fas fa-building me-1"></i>Organization:</strong> {{ doctor|safe_get:"organization" }}
+                    <strong><i class="fas fa-building me-1"></i>Organization:</strong>
+                    {{ doctor|safe_get:"organization" }}
                 </div>
                 {% endif %}
 
@@ -181,7 +203,8 @@
                 <div class="contact-details mb-2">
                     {% for phone in doctor.phone_numbers %}
                     <div class="contact-item">
-                        <strong>{{ phone.get('display_label', phone.get('use_label', 'Phone:')) }}</strong>
+                        <strong>
+                            {{ phone.get('display_label', phone.get('use_label', 'Phone:')) }}</strong>
                         <a href="tel:{{ phone.get('number', '') }}" class="contact-link phone-link ms-2">
                             {{ phone.get('number', '') }}
                         </a>
@@ -202,7 +225,8 @@
         <h6><i class="fas fa-building me-1"></i>Custodian Organization</h6>
         <div class="healthcare-member-card">
             <div class="card-body">
-                <h6 class="card-title">{{ patient_extended_data|safe_get:"custodian_organization".name|default:"Unknown Organization" }}</h6>
+                <h6 class="card-title">
+                    {{ patient_extended_data|safe_get:"custodian_organization".name|default:"Unknown Organization" }}</h6>
                 {% if patient_extended_data|safe_get:"custodian_organization".contact_info.addresses %}
                 <div class="contact-details mb-2">
                     <strong><i class="fas fa-map-marker-alt me-1"></i>Address:</strong>
@@ -223,8 +247,7 @@
     {% endif %}
 
     <!-- Show message if no healthcare team info -->
-    {% if not healthcare_data.get('authors') and not healthcare_data.get('legal_authenticator') and not
-    healthcare_data.get('custodian_organization') %}
+    {% if not healthcare_data.get('authors') and not healthcare_data.get('legal_authenticator') and not healthcare_data.get('custodian_organization') %}
     <div class="alert alert-info">
         <i class="fas fa-info-circle me-2"></i>No healthcare team information available in the CDA document.
     </div>
