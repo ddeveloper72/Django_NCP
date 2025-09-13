@@ -15,10 +15,12 @@
             <!-- Debug Healthcare Data -->
             <div class="alert alert-success mb-3">
                 <h6>DEBUG: Administrative Data Available</h6>
-                <p><strong>Authors Count:</strong> {{ administrative_data.get('authors', []) | length }}</p>
-                <p><strong>Custodians Count:</strong> {{ administrative_data.get('custodians', []) | length }}</p>
-                <p><strong>Legal Authenticators Count:</strong> {{ administrative_data.get('legal_authenticators', []) |
-                    length }}</p>
+                <p><strong>Authors Count:</strong>
+                    {{ administrative_data.get('authors', []) | length }}</p>
+                <p><strong>Custodians Count:</strong>
+                    {{ administrative_data.get('custodians', []) | length }}</p>
+                <p><strong>Legal Authenticators Count:</strong>
+                    {{ administrative_data.get('legal_authenticators', []) | length }}</p>
             </div>
 
             <!-- Document Authors -->
@@ -48,7 +50,8 @@
                     </div>
                     {% if author.get('time') %}
                     <div class="contact-details mt-2">
-                        <strong><i class="fas fa-clock me-1"></i>Author Time:</strong> {{ author.time }}
+                        <strong><i class="fas fa-clock me-1"></i>Author Time:</strong>
+                        {{ author.time }}
                     </div>
                     {% endif %}
                 </div>
@@ -83,7 +86,8 @@
                     </div>
                     {% if authenticator.get('time') %}
                     <div class="contact-details mt-2">
-                        <strong><i class="fas fa-clock me-1"></i>Authentication Time:</strong> {{ authenticator.time }}
+                        <strong><i class="fas fa-clock me-1"></i>Authentication Time:</strong>
+                        {{ authenticator.time }}
                     </div>
                     {% endif %}
                 </div>
@@ -103,7 +107,8 @@
                         <strong><i class="fas fa-building me-1"></i>Organization:</strong>
                         {{ custodian.get('organization', {}).get('name', 'Unknown Organization') }}
                         {% if custodian.get('organization', {}).get('id') %}
-                        <br><small class="text-muted">ID: {{ custodian.organization.id }}</small>
+                        <br><small class="text-muted">ID:
+                            {{ custodian.organization.id }}</small>
                         {% endif %}
                     </div>
                     {% if custodian.get('address') %}
@@ -118,8 +123,7 @@
             {% endif %}
 
             <!-- Show message if no healthcare data -->
-            {% if not administrative_data.get('authors') and not administrative_data.get('custodians') and not
-            administrative_data.get('legal_authenticators') %}
+            {% if not administrative_data.get('authors') and not administrative_data.get('custodians') and not administrative_data.get('legal_authenticators') %}
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>No healthcare team information available in the CDA document.
             </div>
