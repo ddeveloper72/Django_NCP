@@ -130,45 +130,6 @@
   </div>
 </div>
 {% endif %}
-                      <p class="mb-2">
-                        <strong><i class="fas fa-map-marker-alt me-1"></i>Address:</strong><br>
-                        {% for line in address.streetAddressLine %}{{ line }}<br>{% endfor %}
-                        {% if address.city %}{{ address.city }}{% endif %}
-                        {% if address.postalCode %} {{ address.postalCode }}{% endif %}
-                        {% if address.country %}<br>{{ address.country }}{% endif %}
-                      </p>
-                    {% endfor %}
-                  </div>
-                  <div class="col-md-6">
-                    {% for telecom in guardian.contact_info.telecoms %}
-                      <p class="mb-2">
-                        <strong>
-                          {% if 'tel:' in telecom.value %}
-                            <i class="fas fa-phone me-1"></i>Phone:
-                          {% elif 'mailto:' in telecom.value %}
-                            <i class="fas fa-envelope me-1"></i>Email:
-                          {% else %}
-                            <i class="fas fa-phone-alt me-1"></i>Contact:
-                          {% endif %}
-                        </strong><br>
-                        {% if 'tel:' in telecom.value %}
-                          <a href="{{ telecom.value }}">{{ telecom.value|slice:"4:" }}</a>
-                        {% elif 'mailto:' in telecom.value %}
-                          <a href="{{ telecom.value }}">{{ telecom.value|slice:"7:" }}</a>
-                        {% else %}
-                          {{ telecom.value }}
-                        {% endif %}
-                      </p>
-                    {% endfor %}
-                  </div>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-        </div>
-      {% endif %}
-    {% endwith %}
-  {% endif %}
 
   <!-- No Contact Information Message -->
   {% if not contact_data or not contact_data.addresses and not contact_data.telecoms %}
