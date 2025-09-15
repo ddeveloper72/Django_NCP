@@ -17,7 +17,7 @@ from django.conf import settings
 from collections import defaultdict, Counter
 import hashlib
 
-from patient_data.models.session_management import PatientSession, SessionAuditLog
+from patient_data.models import PatientSession, SessionAuditLog
 
 logger = logging.getLogger(__name__)
 

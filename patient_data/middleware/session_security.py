@@ -20,7 +20,7 @@ from django.conf import settings
 from django.urls import reverse
 from datetime import timedelta
 
-from patient_data.models.session_management import PatientSession, SessionAuditLog
+from patient_data.models import PatientSession, SessionAuditLog
 
 logger = logging.getLogger(__name__)
 
@@ -189,14 +189,14 @@ class PatientSessionMiddleware(MiddlewareMixin):
 
         # Redirect to patient search if possible
         if "patients" in request.path:
-            return redirect(reverse("ehealth_portal:patient_search"))
+            return redirect(reverse("patient_data:patient_search"))
 
         # Return JSON error for API requests
         if request.content_type == "application/json" or "api" in request.path:
             return JsonResponse(
                 {
                     "error": "Session required",
-                    "redirect_url": reverse("ehealth_portal:patient_search"),
+                    "redirect_url": reverse("patient_data:patient_search"),
                 },
                 status=401,
             )
@@ -231,12 +231,12 @@ class PatientSessionMiddleware(MiddlewareMixin):
             return JsonResponse(
                 {
                     "error": "Session expired or invalid",
-                    "redirect_url": reverse("ehealth_portal:patient_search"),
+                    "redirect_url": reverse("patient_data:patient_search"),
                 },
                 status=401,
             )
 
-        return redirect(reverse("ehealth_portal:patient_search"))
+        return redirect(reverse("patient_data:patient_search"))
 
     def _is_rate_limited(self, session: PatientSession, request: HttpRequest) -> bool:
         """Check if session has exceeded rate limits."""
@@ -396,7 +396,7 @@ class SessionCleanupMiddleware(MiddlewareMixin):
                 logger.info(f"Cleaned up {expired_count} expired patient sessions")
 
             # Clean up expired cache entries
-            from patient_data.models.session_management import PatientDataCache
+            from patient_data.models import PatientDataCache
 
             expired_cache = PatientDataCache.objects.filter(
                 expires_at__lt=timezone.now()
