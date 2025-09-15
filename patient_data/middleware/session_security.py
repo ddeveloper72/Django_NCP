@@ -127,7 +127,7 @@ class PatientSessionMiddleware(MiddlewareMixin):
                 success=False,
                 error_message=f"User {request.user} attempted to access session owned by {patient_session.user}",
                 client_ip=self._get_client_ip(request),
-                request_path=request.path,
+                resource=request.path,
             )
             raise PermissionDenied("Session access denied")
 
