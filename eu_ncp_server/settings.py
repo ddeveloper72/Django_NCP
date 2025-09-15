@@ -68,6 +68,9 @@ MIDDLEWARE = [
     "patient_data.middleware.session_security.SessionSecurityMiddleware",
     "patient_data.middleware.session_security.SessionCleanupMiddleware",
     "patient_data.middleware.session_security.AuditLoggingMiddleware",
+    # NEW: Patient Session Security Middleware for automatic cleanup
+    "patient_data.middleware.patient_session_security.PatientSessionSecurityMiddleware",
+    "patient_data.middleware.patient_session_security.PatientSessionCleanupMiddleware",
 ]
 
 ROOT_URLCONF = "eu_ncp_server.urls"
