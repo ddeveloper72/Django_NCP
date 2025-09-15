@@ -12,35 +12,6 @@
             </div>
             <div class="card-body">
 
-                <!-- DEBUG: Show what data is available -->
-                <div class="alert alert-info mb-3">
-                    <h6><i class="fas fa-bug me-2"></i>DEBUG: Available Extended Data</h6>
-                    <p><strong>Patient Extended Data:</strong>
-                        {{ patient_extended_data|default:"None" }}
-                    </p>
-                    <p><strong>Administrative Data:</strong>
-                        {{ administrative_data|default:"None" }}</p>
-                    {% if patient_extended_data %}
-                    <p><strong>Patient Extended Keys:</strong>
-                        {% for key, value in patient_extended_data|dict_items %}
-                        {{ key }}
-                        {% if not forloop.last %},
-                        {% endif %}
-                        {% endfor %}
-                    </p>
-                    {% endif %}
-                    {% if administrative_data %}
-                    <p><strong>Administrative Data Keys:</strong>
-                        {% for key, value in administrative_data|dict_items %}
-                        {{ key }}
-                        {% if not forloop.last %},
-                        {% endif %}
-                        {% endfor %}
-                    </p>
-                    {% endif %}
-                </div>
-                </div>
-
                 <!-- Extended Info Navigation Tabs -->
                 <ul class="nav nav-tabs" id="extendedInfoTabs" role="tablist">
                     <!-- Contact Details Tab -->
@@ -119,15 +90,9 @@
 <!-- No Extended Data Available -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="alert alert-warning">
+        <div class="alert alert-info">
             <h6><i class="fas fa-info-circle me-2"></i>Extended Patient Information</h6>
-            <p>No extended patient data or administrative data available for this patient. The system attempted to extract extended information
-                from the CDA document but none was found.</p>
-            <p><strong>Debug Info:</strong></p>
-            <ul>
-                <li>patient_extended_data = {{ patient_extended_data|default:"None" }}</li>
-                <li>administrative_data = {{ administrative_data|default:"None" }}</li>
-            </ul>
+            <p>Extended patient information is not available for this document. The system was unable to extract additional patient data from the CDA content.</p>
         </div>
     </div>
 </div>
