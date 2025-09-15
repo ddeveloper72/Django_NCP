@@ -524,7 +524,7 @@ class PatientSession(models.Model):
         """Mark session as expired and inactive."""
         self.is_active = False
         self.status = "expired"
-        self.save(update_fields=["is_active", "status"])
+        self.save()  # Save all fields to avoid any update_fields issues
 
     def record_access(
         self, action: str = "", client_ip: str = "", user_agent: str = ""
@@ -552,9 +552,7 @@ class PatientSession(models.Model):
         old_session_id = self.session_id
         self.session_id = secrets.token_urlsafe(32)
         self.requires_rotation = False
-        self.save(
-            update_fields=["requires_rotation"]
-        )  # Fixed: Removed session_id from update_fields
+        self.save()  # Save all fields to avoid any update_fields issues
 
         # Log the rotation
         SessionAuditLog.log_action(
@@ -656,7 +654,7 @@ class PatientDataCache(models.Model):
         # Update access tracking
         self.access_count += 1
         self.last_accessed = timezone.now()
-        self.save(update_fields=["access_count", "last_accessed"])
+        self.save()  # Save all fields to avoid any update_fields issues
 
         # Decrypt and return data
         encrypted_bytes = self.encrypted_content.encode("utf-8")
