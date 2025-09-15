@@ -26,16 +26,16 @@ class PatientSessionSecurityMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         # Patient session timeout (in minutes)
-        self.patient_session_timeout = getattr(settings, 'PATIENT_SESSION_TIMEOUT', 30)
+        self.patient_session_timeout = getattr(settings, "PATIENT_SESSION_TIMEOUT", 30)
         # Maximum inactive time before forced cleanup (in minutes)
-        self.max_inactive_time = getattr(settings, 'PATIENT_MAX_INACTIVE_TIME', 60)
+        self.max_inactive_time = getattr(settings, "PATIENT_MAX_INACTIVE_TIME", 60)
 
     def __call__(self, request):
         # Check session security before processing request
         cleanup_result = self.enforce_patient_session_security(request)
-        
+
         # If we performed cleanup due to timeout, log it
-        if cleanup_result.get('cleaned_due_to_timeout'):
+        if cleanup_result.get("cleaned_due_to_timeout"):
             logger.warning(
                 f"Patient session timeout cleanup: {cleanup_result.get('cleaned_keys', 0)} items removed "
                 f"from session {request.session.session_key[:20] if hasattr(request, 'session') else 'unknown'}"
@@ -54,7 +54,7 @@ class PatientSessionSecurityMiddleware:
 
         # Update patient session activity tracking
         if self.has_patient_data(request) and self.is_patient_data_request(request):
-            request.session['patient_last_activity'] = timezone.now().isoformat()
+            request.session["patient_last_activity"] = timezone.now().isoformat()
             request.session.save()
 
         return response
@@ -62,7 +62,7 @@ class PatientSessionSecurityMiddleware:
     def enforce_patient_session_security(self, request):
         """Enforce security policies for patient session data"""
         if not hasattr(request, "session"):
-            return {'action': 'no_session'}
+            return {"action": "no_session"}
 
         # Get patient-related session keys
         patient_keys = [
@@ -70,36 +70,40 @@ class PatientSessionSecurityMiddleware:
         ]
 
         if not patient_keys:
-            return {'action': 'no_patient_data'}
+            return {"action": "no_patient_data"}
 
         # Check for timeout conditions
         cleanup_reasons = []
         should_cleanup = False
 
         # Check if user is no longer authenticated but has patient data
-        if patient_keys and not (hasattr(request, 'user') and request.user.is_authenticated):
-            cleanup_reasons.append('unauthenticated_with_patient_data')
+        if patient_keys and not (
+            hasattr(request, "user") and request.user.is_authenticated
+        ):
+            cleanup_reasons.append("unauthenticated_with_patient_data")
             should_cleanup = True
 
         # Check for session timeout based on last activity
-        if 'patient_last_activity' in request.session:
+        if "patient_last_activity" in request.session:
             try:
-                last_activity = timezone.datetime.fromisoformat(request.session['patient_last_activity'])
+                last_activity = timezone.datetime.fromisoformat(
+                    request.session["patient_last_activity"]
+                )
                 if timezone.is_naive(last_activity):
                     last_activity = timezone.make_aware(last_activity)
-                
+
                 inactive_time = timezone.now() - last_activity
-                
+
                 if inactive_time > timedelta(minutes=self.patient_session_timeout):
-                    cleanup_reasons.append('patient_session_timeout')
+                    cleanup_reasons.append("patient_session_timeout")
                     should_cleanup = True
                 elif inactive_time > timedelta(minutes=self.max_inactive_time):
-                    cleanup_reasons.append('max_inactive_time_exceeded')
+                    cleanup_reasons.append("max_inactive_time_exceeded")
                     should_cleanup = True
-                    
+
             except (ValueError, TypeError) as e:
                 logger.error(f"Error parsing patient_last_activity: {e}")
-                cleanup_reasons.append('invalid_activity_timestamp')
+                cleanup_reasons.append("invalid_activity_timestamp")
                 should_cleanup = True
 
         # Perform cleanup if needed
@@ -110,19 +114,19 @@ class PatientSessionSecurityMiddleware:
                 f"Cleared {cleaned_keys} patient data items."
             )
             return {
-                'action': 'cleanup_performed',
-                'reasons': cleanup_reasons,
-                'cleaned_keys': cleaned_keys,
-                'cleaned_due_to_timeout': 'timeout' in ' '.join(cleanup_reasons)
+                "action": "cleanup_performed",
+                "reasons": cleanup_reasons,
+                "cleaned_keys": cleaned_keys,
+                "cleaned_due_to_timeout": "timeout" in " ".join(cleanup_reasons),
             }
 
-        return {'action': 'no_cleanup_needed'}
+        return {"action": "no_cleanup_needed"}
 
     def has_patient_data(self, request):
         """Check if the session contains any patient data"""
         if not hasattr(request, "session"):
             return False
-        
+
         patient_keys = [
             key for key in request.session.keys() if "patient" in key.lower()
         ]
