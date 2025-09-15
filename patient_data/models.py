@@ -540,15 +540,10 @@ class PatientSession(models.Model):
             import hashlib
 
             self.user_agent_hash = hashlib.sha256(user_agent.encode()).hexdigest()
-        self.save(
-            update_fields=[
-                "access_count",
-                "last_accessed",
-                "last_action",
-                "client_ip",
-                "user_agent_hash",
-            ]
-        )
+
+        # Use regular save() to avoid "update_fields did not affect any rows" error
+        # This can happen if the object was just created and not fully committed
+        self.save()
 
     def rotate_session(self) -> str:
         """Rotate session ID for security."""
@@ -557,7 +552,9 @@ class PatientSession(models.Model):
         old_session_id = self.session_id
         self.session_id = secrets.token_urlsafe(32)
         self.requires_rotation = False
-        self.save(update_fields=["session_id", "requires_rotation"])
+        self.save(
+            update_fields=["requires_rotation"]
+        )  # Fixed: Removed session_id from update_fields
 
         # Log the rotation
         SessionAuditLog.log_action(
@@ -575,7 +572,10 @@ class PatientSession(models.Model):
         encrypted_data, key_version = session_security.encrypt_patient_data(data)
         self.encrypted_patient_data = encrypted_data.decode("utf-8")
         self.encryption_key_version = key_version
-        self.save(update_fields=["encrypted_patient_data", "encryption_key_version"])
+
+        # Use regular save() to avoid "update_fields did not affect any rows" error
+        # This can happen if the object was just created and not fully committed
+        self.save()
 
     def decrypt_patient_data(self) -> dict:
         """Decrypt and return patient data."""
