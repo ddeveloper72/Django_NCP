@@ -2705,17 +2705,17 @@ def _format_telecom_display(telecom):
         return value
 
 
-def patient_cda_view(request, session_id, cda_type=None):
+def patient_cda_view(request, patient_id, cda_type=None):
     """View for displaying CDA document with structured clinical data extraction
 
-    IMPORTANT: The 'session_id' parameter is the web application session ID, not the patient's
-    government ID from the CDA. This is a legacy naming issue that needs to be addressed.
+    IMPORTANT: The 'patient_id' parameter is the patient ID from the URL, which can be either:
+    - A web application session ID for session-based data
+    - A patient database ID for NCP gateway patients
 
     Real patient government ID (aGVhbHRoY2FyZUlkMTIz) should be extracted from CDA content.
-    Session ID (418650) is used for session-based data storage and retrieval.
 
     Args:
-        session_id: Web application session ID (e.g., 418650) - NOT the patient's government ID!
+        patient_id: Patient or session ID from URL (e.g., 1983153969 or 418650)
         cda_type: Optional CDA type ('L1' or 'L3'). If None, defaults to L3 preference.
     """
 
@@ -2731,7 +2731,7 @@ def patient_cda_view(request, session_id, cda_type=None):
         else:
             return obj
 
-    logger.info(f"PATIENT_CDA_VIEW CALLED for session_id: {session_id}")
+    logger.info(f"PATIENT_CDA_VIEW CALLED for patient_id: {patient_id}")
 
     try:
         # Import the new CDA display service
@@ -2743,18 +2743,18 @@ def patient_cda_view(request, session_id, cda_type=None):
 
         # Check if this is a database patient (from NCP gateway) or session patient
         try:
-            patient_data = Patient.objects.get(id=session_id)
+            patient_data = Patient.objects.get(id=patient_id)
             logger.info(
                 f"Found NCP database patient: {patient_data.first_name} {patient_data.last_name}"
             )
 
             # Try to extract clinical data from structured CDA
-            clinical_data = display_service.extract_patient_clinical_data(session_id)
+            clinical_data = display_service.extract_patient_clinical_data(patient_id)
 
             if clinical_data:
                 # Structured CDA found - create enhanced context with both new and existing data
                 logger.info(
-                    f"Successfully extracted clinical data for session {session_id}"
+                    f"Successfully extracted clinical data for session {patient_id}"
                 )
 
                 # Convert our structured clinical data to the existing template format
@@ -2879,18 +2879,18 @@ def patient_cda_view(request, session_id, cda_type=None):
             else:
                 # Fall back to existing logic for non-structured CDAs
                 logger.info(
-                    f"No structured clinical data available for session {session_id}, using fallback"
+                    f"No structured clinical data available for session {patient_id}, using fallback"
                 )
 
         except (Patient.DoesNotExist, ValueError, ValidationError) as e:
             # This is a session-based patient from EU search or invalid UUID format
             logger.info(
-                f"Session-based patient {session_id}, checking session data (reason: {type(e).__name__})"
+                f"Session-based patient {patient_id}, checking session data (reason: {type(e).__name__})"
             )
 
         # Existing session-based patient logic continues here:
         # Debug: Check what's in the session
-        session_key = f"patient_match_{session_id}"
+        session_key = f"patient_match_{patient_id}"
         match_data = request.session.get(session_key)
 
         logger.info(f"DEBUG: Looking for session key: {session_key}")
@@ -2898,7 +2898,7 @@ def patient_cda_view(request, session_id, cda_type=None):
         logger.info(f"DEBUG: All session keys: {list(request.session.keys())}")
 
         # EXTRACT PATIENT GOVERNMENT ID FROM SESSION TOKEN
-        # Session stores patient_id (aGVhbHRoY2FyZUlkMTIz) mapped to session_id (418650)
+        # Session stores patient_id (aGVhbHRoY2FyZUlkMTIz) mapped to patient_id (418650)
         patient_government_id = None
         if match_data and "patient_data" in match_data:
             # Try to get the real patient government ID from session data
@@ -2912,15 +2912,15 @@ def patient_cda_view(request, session_id, cda_type=None):
             )
 
         if not patient_government_id:
-            # Fallback: use session_id if no government ID found
-            patient_government_id = session_id
+            # Fallback: use patient_id if no government ID found
+            patient_government_id = patient_id
             logger.info(
-                f"⚠️ No government ID in session, using session_id as fallback: {patient_government_id}"
+                f"⚠️ No government ID in session, using patient_id as fallback: {patient_government_id}"
             )
 
         # Check if this is an NCP query result (session data exists but no DB record)
         try:
-            db_patient_exists = PatientData.objects.filter(id=session_id).exists()
+            db_patient_exists = PatientData.objects.filter(id=patient_id).exists()
         except (ValueError, TypeError):
             # Non-numeric session IDs (like Malta's 9999002M) can't exist in DB
             db_patient_exists = False
@@ -2931,7 +2931,7 @@ def patient_cda_view(request, session_id, cda_type=None):
 
             # Create a temporary patient object (not saved to DB)
             patient_data = PatientData(
-                id=session_id,
+                id=patient_id,
                 given_name=patient_info.get("given_name", "Unknown"),
                 family_name=patient_info.get("family_name", "Patient"),
                 birth_date=patient_info.get("birth_date") or None,
@@ -2939,25 +2939,25 @@ def patient_cda_view(request, session_id, cda_type=None):
             )
 
             logger.info(
-                f"Created temporary patient object for CDA display: session_id={session_id}, government_id={patient_government_id}"
+                f"Created temporary patient object for CDA display: patient_id={patient_id}, government_id={patient_government_id}"
             )
         else:
             # Standard database lookup
             try:
                 # Try database lookup only for numeric IDs
-                if session_id.isdigit():
-                    patient_data = PatientData.objects.get(id=session_id)
+                if patient_id.isdigit():
+                    patient_data = PatientData.objects.get(id=patient_id)
                     logger.info(
                         f"Found database patient: {patient_data.given_name} {patient_data.family_name}"
                     )
                 else:
                     # Non-numeric session IDs (like Malta 9999002M) are session-only
                     logger.info(
-                        f"Non-numeric session ID {session_id}, skipping database lookup"
+                        f"Non-numeric session ID {patient_id}, skipping database lookup"
                     )
                     patient_data = None
             except PatientData.DoesNotExist:
-                logger.warning(f"Session {session_id} not found in database")
+                logger.warning(f"Session {patient_id} not found in database")
                 # Don't redirect immediately - check for session data first
                 patient_data = None
 
@@ -2972,7 +2972,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                 # This allows viewing of database patients with basic info
                 if not match_data and patient_data is not None:
                     logger.info(
-                        f"Creating session data for database patient {session_id} with raw_patient_summary"
+                        f"Creating session data for database patient {patient_id} with raw_patient_summary"
                     )
 
                     # Check if patient has raw CDA content in database
@@ -2986,12 +2986,12 @@ def patient_cda_view(request, session_id, cda_type=None):
                     )
 
                     logger.info(
-                        f"Database patient {session_id} has CDA content: {has_cda_content} (length: {len(cda_content) if cda_content else 0})"
+                        f"Database patient {patient_id} has CDA content: {has_cda_content} (length: {len(cda_content) if cda_content else 0})"
                     )
 
                     # Create match data for database patients with CDA content
                     match_data = {
-                        "file_path": f"database_patient_{session_id}.xml",
+                        "file_path": f"database_patient_{patient_id}.xml",
                         "country_code": "TEST",
                         "confidence_score": 1.0,
                         "patient_data": {
@@ -3008,12 +3008,12 @@ def patient_cda_view(request, session_id, cda_type=None):
                         "l1_cda_content": cda_content if has_cda_content else None,
                         "l3_cda_content": cda_content if has_cda_content else None,
                         "l1_cda_path": (
-                            f"database_patient_{session_id}_L1.xml"
+                            f"database_patient_{patient_id}_L1.xml"
                             if has_cda_content
                             else None
                         ),
                         "l3_cda_path": (
-                            f"database_patient_{session_id}_L3.xml"
+                            f"database_patient_{patient_id}_L3.xml"
                             if has_cda_content
                             else None
                         ),
@@ -3044,11 +3044,11 @@ def patient_cda_view(request, session_id, cda_type=None):
         if not match_data:
             # Final fallback: create minimal session data for any patient ID
             # This allows the CDA view to display even without proper session data
-            logger.info(f"Creating minimal session data for session {session_id}")
+            logger.info(f"Creating minimal session data for session {patient_id}")
             from datetime import date
 
             match_data = {
-                "file_path": f"fallback_patient_{session_id}.xml",
+                "file_path": f"fallback_patient_{patient_id}.xml",
                 "country_code": "MT",  # Default to Malta since many test patients are Maltese
                 "confidence_score": 0.5,
                 "patient_data": {
@@ -3121,8 +3121,8 @@ def patient_cda_view(request, session_id, cda_type=None):
         </structuredBody>
     </component>
 </ClinicalDocument>""",
-                "l1_cda_path": f"test_data/patient_l1_{session_id}.xml",
-                "l3_cda_path": f"test_data/patient_l3_{session_id}.xml",
+                "l1_cda_path": f"test_data/patient_l1_{patient_id}.xml",
+                "l3_cda_path": f"test_data/patient_l3_{patient_id}.xml",
                 "preferred_cda_type": "L3",
                 "has_l1": True,
                 "has_l3": True,
@@ -3133,7 +3133,7 @@ def patient_cda_view(request, session_id, cda_type=None):
             # Show warning message but continue to display page
             messages.warning(
                 request,
-                f"No CDA document data available for session {session_id}. "
+                f"No CDA document data available for session {patient_id}. "
                 "Displaying basic patient information only.",
             )
 
@@ -3209,7 +3209,7 @@ def patient_cda_view(request, session_id, cda_type=None):
         # This provides the translation service with the proper search result context
         patient_info = match_data.get("patient_data", {})
         search_result = PatientMatch(
-            patient_id=session_id,
+            patient_id=patient_id,
             given_name=patient_info.get(
                 "given_name", patient_data.given_name if patient_data else "Unknown"
             ),
@@ -3259,7 +3259,7 @@ def patient_cda_view(request, session_id, cda_type=None):
 
         # IMPLEMENT GOVERNMENT ID-BASED CDA LOOKUP
         # Search all session data for CDA documents matching the patient government ID
-        if patient_government_id and patient_government_id != session_id:
+        if patient_government_id and patient_government_id != patient_id:
             logger.info(
                 f"🔍 Searching for additional CDA content by government ID: {patient_government_id}"
             )
@@ -3280,7 +3280,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                     # If we find a session with matching government ID but different session
                     if (
                         session_gov_id == patient_government_id
-                        and session_key != f"patient_match_{session_id}"
+                        and session_key != f"patient_match_{patient_id}"
                     ):
                         logger.info(
                             f"📋 Found additional CDA data in session: {session_key}"
@@ -3375,7 +3375,7 @@ def patient_cda_view(request, session_id, cda_type=None):
         ):
             try:
                 logger.info(
-                    f"Processing {actual_cda_type} CDA content with Enhanced CDA Processor (length: {len(cda_content)}, session: {session_id}, government_id: {patient_government_id})"
+                    f"Processing {actual_cda_type} CDA content with Enhanced CDA Processor (length: {len(cda_content)}, session: {patient_id}, government_id: {patient_government_id})"
                 )
 
                 # Check if document needs dual language processing
@@ -3723,7 +3723,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                 medical_terms_count = 0
         else:
             logger.warning(
-                f"No CDA content available for session {session_id} (government_id: {patient_government_id}) - search result may be incomplete"
+                f"No CDA content available for session {patient_id} (government_id: {patient_government_id}) - search result may be incomplete"
             )
 
         # Initialize variables that might not be set if processing fails
@@ -3736,7 +3736,7 @@ def patient_cda_view(request, session_id, cda_type=None):
         context = {
             "patient_identity": {
                 "patient_id": patient_government_id,  # Display the government ID
-                "session_id": session_id,  # Keep session ID for URL routing
+                "patient_id": patient_id,  # Keep session ID for URL routing
                 "given_name": (
                     patient_data.given_name
                     if patient_data
@@ -3797,7 +3797,7 @@ def patient_cda_view(request, session_id, cda_type=None):
         }
 
         # ADD MOCK ENHANCED PROCESSING RESULT FOR TESTING PATIENT IDENTITY
-        if session_id in ["221935", "271867"] or patient_government_id in [
+        if patient_id in ["221935", "271867"] or patient_government_id in [
             "9999002M",
             "aGVhbHRoY2FyZUlkMTIz",
         ]:
@@ -3826,7 +3826,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                 "sections": [],
             }
             logger.info(
-                f"🧪 ADDED MOCK ENHANCED PROCESSING with national ID 9999002M for session {session_id}, government_id {patient_government_id}"
+                f"🧪 ADDED MOCK ENHANCED PROCESSING with national ID 9999002M for session {patient_id}, government_id {patient_government_id}"
             )
 
         # Override with Enhanced CDA Processor data if available
@@ -3846,10 +3846,10 @@ def patient_cda_view(request, session_id, cda_type=None):
                     "Using separately extracted header data as administrative data"
                 )
 
-            # Update patient identity with enhanced data while preserving session_id for routing
+            # Update patient identity with enhanced data while preserving patient_id for routing
             if enhanced_patient_identity:
-                url_session_id = context["patient_identity"][
-                    "session_id"
+                url_patient_id = context["patient_identity"][
+                    "patient_id"
                 ]  # Keep for URL routing
                 xml_patient_id = enhanced_patient_identity.get(
                     "patient_id"
@@ -3863,12 +3863,12 @@ def patient_cda_view(request, session_id, cda_type=None):
                         "patient_id"
                     ] = xml_patient_id  # Display the XML patient ID
                     context["patient_identity"][
-                        "session_id"
-                    ] = url_session_id  # Keep session ID for navigation
+                        "patient_id"
+                    ] = url_patient_id  # Keep session ID for navigation
                 else:
                     context["patient_identity"][
-                        "session_id"
-                    ] = url_session_id  # Ensure session ID is preserved
+                        "patient_id"
+                    ] = url_patient_id  # Ensure session ID is preserved
 
             # Update administrative data with enhanced data
             if enhanced_admin_data:
