@@ -366,42 +366,62 @@
 <!-- Extended Patient Info Tabs Enhancement -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Initialize Bootstrap tabs for extended patient info
+        console.log('🔍 Initializing Extended Patient Info Tabs...');
+        
+        // Check if the tab container exists
+        const tabContainer = document.querySelector('#extendedInfoTabs');
+        if (!tabContainer) {
+            console.warn('❌ Tab container #extendedInfoTabs not found');
+            return;
+        }
+        
+        // Find all tab buttons
         const extendedInfoTabs = document.querySelectorAll('#extendedInfoTabs button[data-bs-toggle="tab"]');
+        console.log(`🔍 Found ${extendedInfoTabs.length} tab buttons`);
+        
+        if (extendedInfoTabs.length === 0) {
+            console.warn('❌ No tab buttons found');
+            return;
+        }
 
-        extendedInfoTabs.forEach(function (tab) {
-            const tabInstance = new bootstrap.Tab(tab);
-
-            // Add click event listener for enhanced UX
-            tab.addEventListener('click', function (e) {
-                e.preventDefault();
-                tabInstance.show();
+        // Simple Bootstrap 5 tab initialization
+        extendedInfoTabs.forEach(function (tabButton, index) {
+            console.log(`🔍 Initializing tab ${index}: ${tabButton.id}`);
+            
+            // Let Bootstrap handle the tab switching automatically
+            tabButton.addEventListener('click', function (e) {
+                console.log(`🔍 Tab clicked: ${this.id} -> ${this.getAttribute('data-bs-target')}`);
             });
-
-            // Add shown.bs.tab event listener for animations
-            tab.addEventListener('shown.bs.tab', function (e) {
+            
+            // Log when tab is shown
+            tabButton.addEventListener('shown.bs.tab', function (e) {
+                console.log(`✅ Tab shown: ${e.target.id} -> ${e.target.getAttribute('data-bs-target')}`);
+                
+                // Verify the correct tab pane is visible
                 const targetPane = document.querySelector(e.target.getAttribute('data-bs-target'));
                 if (targetPane) {
-                    // Add a subtle animation effect
-                    targetPane.style.opacity = '0';
-                    targetPane.style.transform = 'translateY(10px)';
-
-                    setTimeout(function () {
-                        targetPane.style.transition = 'all 0.3s ease';
-                        targetPane.style.opacity = '1';
-                        targetPane.style.transform = 'translateY(0)';
-                    }, 50);
+                    console.log(`✅ Target pane found and should be visible: ${targetPane.id}`);
+                    // Check if it has the correct classes
+                    console.log(`🔍 Target pane classes: ${targetPane.className}`);
+                } else {
+                    console.error(`❌ Target pane not found for: ${e.target.getAttribute('data-bs-target')}`);
                 }
             });
         });
 
-        // Auto-activate first available tab if none is active
+        // Verify initial state
         const activeTab = document.querySelector('#extendedInfoTabs .nav-link.active');
-        if (!activeTab && extendedInfoTabs.length > 0) {
-            const firstTab = extendedInfoTabs[0];
-            const firstTabInstance = new bootstrap.Tab(firstTab);
-            firstTabInstance.show();
-        }
+        const activePane = document.querySelector('.tab-pane.show.active');
+        
+        console.log(`🔍 Initial active tab: ${activeTab ? activeTab.id : 'none'}`);
+        console.log(`🔍 Initial active pane: ${activePane ? activePane.id : 'none'}`);
+        
+        // List all tab panes for debugging
+        const allPanes = document.querySelectorAll('#extendedInfoTabContent .tab-pane');
+        console.log(`🔍 Found ${allPanes.length} tab panes:`);
+        allPanes.forEach(function(pane, index) {
+            console.log(`  [${index}] ${pane.id}: ${pane.className}`);
+        });
 
         // Enhanced hover effects for contact links
         const contactLinks = document.querySelectorAll('.contact-link');
@@ -415,7 +435,7 @@
             });
         });
 
-        console.log('Extended Patient Info tabs initialized successfully');
+        console.log('✅ Extended Patient Info tabs initialized successfully');
     });
 </script>
 
