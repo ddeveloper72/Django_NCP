@@ -202,12 +202,16 @@ def process_demo_document(request, demo_type):
         if processing_result["success"] and processing_result["epsos_compliant"]:
             try:
                 # Create a dummy patient for demo
+                from datetime import date
+
                 patient_data, created = PatientData.objects.get_or_create(
                     patient_id="DEMO_EADC_001",
                     defaults={
                         "given_name": "EADC",
                         "family_name": "Demo Patient",
-                        "date_of_birth": "1980-01-01",
+                        "date_of_birth": date.today().strftime(
+                            "%Y-%m-%d"
+                        ),  # Use current date instead of hardcoded
                         "gender": "U",
                         "country_code": "GR",
                         "original_filename": "eadc_demo.properties",

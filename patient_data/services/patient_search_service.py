@@ -136,6 +136,9 @@ class PatientMatch:
             return self.l3_cda_content, "L3"
         elif self.l1_cda_content:
             return self.l1_cda_content, "L1"
+        elif self.cda_content:
+            # Legacy fallback for old session format - assume L3 if no type specified
+            return self.cda_content, "L3"
         return None, "None"
 
     def get_orcd_cda(self) -> Optional[str]:
@@ -541,19 +544,24 @@ class EUPatientSearchService:
         )
 
         # Mock document list
+        from datetime import date, timedelta
+
+        recent_date = (date.today() - timedelta(days=5)).strftime("%Y-%m-%d")
+        older_date = (date.today() - timedelta(days=10)).strftime("%Y-%m-%d")
+
         documents = [
             {
                 "type": "CDA",
                 "id": f"cda_{patient_id}",
                 "title": "Clinical Document Architecture",
-                "date": "2024-01-15",
+                "date": recent_date,
                 "status": "available",
             },
             {
                 "type": "ePS",
                 "id": f"eps_{patient_id}",
                 "title": "Electronic Prescription",
-                "date": "2024-01-10",
+                "date": older_date,
                 "status": "available",
             },
         ]
@@ -570,6 +578,8 @@ class EUPatientSearchService:
         Returns:
             Dictionary with patient summary data structured for template access
         """
+        from datetime import date
+
         self.logger.info(f"Getting patient summary for {match.patient_id}")
 
         # Create a comprehensive patient summary with nested structure for template
@@ -587,7 +597,7 @@ class EUPatientSearchService:
             },
             "document_info": {
                 "title": f"Clinical Document Architecture ({cda_type})",
-                "date": "2024-01-15",  # Mock date
+                "date": date.today().strftime("%Y-%m-%d"),  # Use current date
                 "type": cda_type,
                 "file_path": match.file_path,
                 "status": "available",
@@ -608,7 +618,7 @@ class EUPatientSearchService:
             "edispensation_available": "eDispensation"
             in (match.available_documents or []),
             "document_count": len(match.available_documents or []),
-            "last_updated": "2024-01-15",  # Mock date
+            "last_updated": date.today().strftime("%Y-%m-%d"),  # Use current date
         }
 
         return summary

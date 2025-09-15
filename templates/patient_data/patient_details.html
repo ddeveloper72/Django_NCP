@@ -3,21 +3,21 @@
 {% load static %}
 {% block title %}Patient Details - EU NCP Portal{% endblock %}
 
-{% block extra_css %}
-<link href="{% static 'css/patient_cda_ps_guidelines.css' %}?v=20250804" rel="stylesheet" media="screen">
-{% endblock %}
-
 {% block page_context %}
-<div class="page-context-content">
-    <div class="page-info">
-        <span class="page-location">
-            <i class="fa fa-user"></i> Patient Details
-        </span>
-    </div>
-    <div class="page-actions">
-        <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-outline-secondary btn-sm">
-            <i class="fa fa-arrow-left"></i> Back to Search
-        </a>
+<div class="page-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-content">
+            <div class="page-info">
+                <span class="page-location">
+                    <i class="fa fa-user"></i> Patient Details
+                </span>
+            </div>
+            <div class="page-actions">
+                <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fa fa-arrow-left"></i> Back to Search
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

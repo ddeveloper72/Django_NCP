@@ -1,533 +1,182 @@
 {% load patient_filters %}
+
 <!-- Extended Patient Contact Information Component -->
-<div class="tab-pane fade {% if first_tab == 'contact' %}show active{% endif %}" id="contact" role="tabpanel"
-  aria-labelledby="contact-tab">
-  {% if administrative_data and ( (administrative_data|safe_get:"patient_contact_info" and
-  (administrative_data|safe_get:"patient_contact_info"|safe_get:"addresses" or
-  administrative_data|safe_get:"patient_contact_info"|safe_get:"telecoms")) or
-  administrative_data|safe_get:"guardian" or administrative_data|safe_get:"other_contacts" or
-  administrative_data|safe_get:"author_hcp" or administrative_data|safe_get:"legal_authenticator" or
-  administrative_data|safe_get:"custodian_organization" or
-  administrative_data|safe_get:"preferred_hcp" ) %}
+<h5><i class="fas fa-address-book me-2"></i>Contact Information</h5>
 
-  <!-- Patient Contact Information -->
-  {% if administrative_data|safe_get:"patient_contact_info" and
-  (administrative_data|safe_get:"patient_contact_info"|safe_get:"addresses" or
-  administrative_data|safe_get:"patient_contact_info"|safe_get:"telecoms") %}
-  <div class="admin-section mb-4">
-    <h6><i class="fas fa-user me-2"></i>Patient Contact Information</h6>
-
-    <div class="admin-contact-card patient-contact">
-      <div class="admin-card-header">
-        <i class="fas fa-user"></i> Contact Details
-      </div>
-
-      <!-- Address Information -->
-      {% if administrative_data|safe_get:"patient_contact_info"|safe_get:"addresses" %}
-      {% for address in administrative_data|safe_get:"patient_contact_info"|safe_get:"addresses" %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          <i class="fas fa-map-marker-alt"></i> Address:
-        </div>
-        <div class="admin-value">
-          {% if address.street %}
-          {{ address.street }}
-          {% endif %}
-          {% if address.city %},
-          {{ address.city }}
-          {% endif %}
-          {% if address.postalCode %}
-          {{ address.postalCode }}
-          {% endif %}
-          {% if address.country %},
-          {{ address.country }}
-          {% endif %}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %}
-
-      <!-- Contact Methods -->
-      {% if administrative_data|safe_get:"patient_contact_info"|safe_get:"telecoms" %}
-      {% for telecom in administrative_data|safe_get:"patient_contact_info"|safe_get:"telecoms" %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          {% if telecom.type == 'email' %}
-          <i class="fas fa-envelope"></i> Email:
-          {% elif telecom.type == 'phone' %}
-          <i class="fas fa-phone"></i> Phone:
-          {% else %}
-          <i class="fas fa-info-circle"></i>
-          {{ telecom.type|title }}:
-          {% endif %}
-        </div>
-        <div class="admin-value">
-          {{ telecom.value|clean_telecom }}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %}
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Guardian Information -->
-  {% if administrative_data|safe_get:"guardian" and (administrative_data|safe_get:"guardian".full_name or administrative_data|safe_get:"guardian".family_name) %}
-  <div class="admin-section mb-4">
-    <h6><i class="fas fa-user-shield me-2"></i>Guardian Information</h6>
-
-    <div class="admin-contact-card guardian-contact">
-      <div class="admin-card-header">
-        <i class="fas fa-user-shield"></i> Guardian
-      </div>
-
-      {% if administrative_data|safe_get:"guardian".full_name or administrative_data|safe_get:"guardian".family_name %}
-      <div class="admin-info-row">
-        <div class="admin-label"><i class="fas fa-user"></i> Name:</div>
-        <div class="admin-value">
-          {{ administrative_data|safe_get:"guardian".full_name|default:"" }}
-          {% if not administrative_data|safe_get:"guardian".full_name %}
-            {{ administrative_data|safe_get:"guardian".given_name|default:"" }}
-            {{ administrative_data|safe_get:"guardian".family_name|default:"" }}
-          {% endif %}
-          {% if administrative_data|safe_get:"guardian".role %}
-          <span class="badge bg-info ms-2">
-            {{ administrative_data|safe_get:"guardian".role }}
-        </span>
-          {% endif %}
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- Guardian Contact Information -->
-      {% if administrative_data|safe_get:"guardian"|safe_get:"contact_info" %}
-      {% if administrative_data|safe_get:"guardian"|safe_get:"contact_info"|safe_get:"addresses" %}
-      {% for address in administrative_data|safe_get:"guardian"|safe_get:"contact_info"|safe_get:"addresses" %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          <i class="fas fa-map-marker-alt"></i> Address:
-        </div>
-        <div class="admin-value">
-          {% if address.street %}
-          {{ address.street }}
-          {% endif %}
-          {% if address.city %},
-          {{ address.city }}
-          {% endif %}
-          {% if address.postalCode %}
-          {{ address.postalCode }}
-          {% endif %}
-          {% if address.country %},
-          {{ address.country }}
-          {% endif %}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %}
-      {% if administrative_data|safe_get:"guardian"|safe_get:"contact_info"|safe_get:"telecoms" %}
-      {% for telecom in administrative_data|safe_get:"guardian"|safe_get:"contact_info"|safe_get:"telecoms" %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          {% if telecom.type == 'email' %}
-          <i class="fas fa-envelope"></i> Email:
-          {% elif telecom.type == 'phone' %}
-          <i class="fas fa-phone"></i> Phone:
-          {% else %}
-          <i class="fas fa-info-circle"></i>
-          {{ telecom.type|title }}:
-          {% endif %}
-        </div>
-        <div class="admin-value">
-          {{ telecom.value|clean_telecom }}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %}
-      {% endif %}
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Other Contacts (Emergency Contacts, Next of Kin, etc.) -->
-  {% if administrative_data|safe_get:"other_contacts" and administrative_data|safe_get:"other_contacts"|length > 0 %}
-  <div class="admin-section mb-4">
-    <h6>
-      <i class="fas fa-users me-2"></i>Emergency Contacts & Other Contacts
-    </h6>
-
-    {% for contact in administrative_data|safe_get:"other_contacts" %}
-    {% if contact.full_name or contact.family_name %}
-    <div class="admin-contact-card other-contact mb-3">
-      <div class="admin-card-header">
-        <i class="fas fa-user-plus"></i>
-        {% if contact.role %}
-        {{ contact.role }}
-        {% else %}
-        Contact
-        {% endif %}
-      </div>
-
-      <div class="admin-info-row">
-        <div class="admin-label"><i class="fas fa-user"></i> Name:</div>
-        <div class="admin-value">
-          {{ contact.full_name|default:"" }}
-          {% if not contact.full_name %}
-            {{ contact.given_name|default:"" }}
-            {{ contact.family_name|default:"" }}
-          {% endif %}
-          {% if contact.specialty %}
-          <span class="badge bg-secondary ms-2">
-            {{ contact.specialty }}
-        </span>
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- Contact Information -->
-      {% if contact.contact_info %}
-      {% if contact.contact_info.addresses %}
-      {% for address in contact.contact_info.addresses %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          <i class="fas fa-map-marker-alt"></i> Address:
-        </div>
-        <div class="admin-value">
-          {% if address.street %}
-          {{ address.street }}
-          {% endif %}
-          {% if address.city %},
-          {{ address.city }}
-          {% endif %}
-          {% if address.postalCode %}
-          {{ address.postalCode }}
-          {% endif %}
-          {% if address.country %},
-          {{ address.country }}
-          {% endif %}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %} {% if contact.contact_info.telecoms %} {% for
-      telecom in contact.contact_info.telecoms %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          {% if telecom.type == 'email' %}
-          <i class="fas fa-envelope"></i> Email:
-          {% elif telecom.type == 'phone' %}
-          <i class="fas fa-phone"></i> Phone:
-          {% else %}
-          <i class="fas fa-info-circle"></i>
-          {{ telecom.type|title }}:
-          {% endif %}
-        </div>
-        <div class="admin-value">
-          {{ telecom.value|clean_telecom }}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %} {% endif %}
-    </div>
-    {% endif %} {% endfor %}
-  </div>
-  {% endif %}
-
-  <!-- Healthcare Team Information -->
-  {% if administrative_data|safe_get:"author_hcp" and
-  (administrative_data|safe_get:"author_hcp".full_name or
-  administrative_data|safe_get:"author_hcp".family_name) %}
-  <div class="admin-section mb-4">
-    <h6><i class="fas fa-user-md me-2"></i>Healthcare Team</h6>
-
-    <div class="admin-contact-card hcp-contact">
-      <div class="admin-card-header">
-        <i class="fas fa-user-md"></i> Author/Healthcare Professional
-      </div>
-
-      <div class="admin-info-row">
-        <div class="admin-label"><i class="fas fa-user"></i> Name:</div>
-        <div class="admin-value">
-          {{ administrative_data|safe_get:"author_hcp".full_name|default:"" }}
-          {% if not administrative_data|safe_get:"author_hcp".full_name %}
-            {{ administrative_data|safe_get:"author_hcp".given_name|default:"" }}
-            {{ administrative_data|safe_get:"author_hcp".family_name|default:"" }}
-          {% endif %}
-          {% if administrative_data|safe_get:"author_hcp".role %}
-          <span class="badge bg-primary ms-2">
-            {{ administrative_data|safe_get:"author_hcp".role }}
-        </span>
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- HCP Contact Information -->
-      {% if administrative_data|safe_get:"author_hcp".contact_info %}
-      {% if administrative_data|safe_get:"author_hcp".contact_info.addresses %}
-      {% for address in
-      administrative_data|safe_get:"author_hcp".contact_info.addresses %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          <i class="fas fa-map-marker-alt"></i> Address:
-        </div>
-        <div class="admin-value">
-          {% if address.street %}
-          {{ address.street }}
-          {% endif %}
-          {% if  address.city %},
-          {{ address.city }}
-          {% endif %}
-          {% if address.postalCode %}
-          {{ address.postalCode }}
-          {% endif %}
-          {% if address.country %},
-          {{ address.country }}
-          {% endif %}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %} {% if
-      administrative_data|safe_get:"author_hcp".contact_info.telecoms %} {% for telecom in
-      administrative_data|safe_get:"author_hcp".contact_info.telecoms %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          {% if telecom.type == 'email' %}
-          <i class="fas fa-envelope"></i> Email:
-          {% elif telecom.type == 'phone' %}
-          <i class="fas fa-phone"></i> Phone:
-          {% else %}
-          <i class="fas fa-info-circle"></i>
-          {{ telecom.type|title }}:
-          {% endif %}
-        </div>
-        <div class="admin-value">
-          {{ telecom.value|clean_telecom }}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %} {% endif %}
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Legal Authenticator -->
-  {% if administrative_data|safe_get:"legal_authenticator" and (administrative_data|safe_get:"legal_authenticator".full_name or administrative_data|safe_get:"legal_authenticator".family_name) %}
-  <div class="admin-section mb-4">
-    <h6><i class="fas fa-certificate me-2"></i>Legal Authenticator</h6>
-
-    <div class="admin-contact-card legal-contact">
-      <div class="admin-card-header">
-        <i class="fas fa-certificate"></i> Legal Authenticator
-      </div>
-
-      <div class="admin-info-row">
-        <div class="admin-label"><i class="fas fa-user"></i> Name:</div>
-        <div class="admin-value">
-          {{ administrative_data|safe_get:"legal_authenticator".full_name|default:"" }}
-          {% if not administrative_data|safe_get:"legal_authenticator".full_name %}
-            {{ administrative_data|safe_get:"legal_authenticator".given_name|default:"" }}
-            {{ administrative_data|safe_get:"legal_authenticator".family_name|default:"" }}
-          {% endif %}
-          {% if administrative_data|safe_get:"legal_authenticator".role %}
-          <span class="badge bg-warning ms-2">
-            {{ administrative_data|safe_get:"legal_authenticator".role }}
-        </span>
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- Legal Authenticator Contact Information -->
-      {% if administrative_data|safe_get:"legal_authenticator".contact_info %} {% if
-      administrative_data|safe_get:"legal_authenticator".contact_info.addresses %} {% for
-      address in administrative_data|safe_get:"legal_authenticator".contact_info.addresses
-      %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          <i class="fas fa-map-marker-alt"></i> Address:
-        </div>
-        <div class="admin-value">
-          {% if address.street %}
-          {{ address.street }}
-          {% endif %}
-          {% if address.city %},
-          {{ address.city }}
-          {% endif %}
-          {% if address.city %},
-          {{ address.city }}
-          {% endif %}
-          {% if  address.postalCode %}
-          {{ address.postalCode }}
-          {% endif %}
-          {% if address.country %},
-          {{ address.country }}
-          {% endif %}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %}
-      {% if administrative_data|safe_get:"legal_authenticator".contact_info.telecoms %}
-      {% for telecom in administrative_data|safe_get:"legal_authenticator".contact_info.telecoms %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          {% if telecom.type == 'email' %}
-          <i class="fas fa-envelope"></i> Email:
-          {% elif telecom.type == 'phone' %}
-          <i class="fas fa-phone"></i> Phone:
-          {% else %}
-          <i class="fas fa-info-circle"></i>
-          {{ telecom.type|title }}:
-          {% endif %}
-        </div>
-        <div class="admin-value">
-          {{ telecom.value|clean_telecom }}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %}
-      {% endif %}
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Custodian Organization -->
-  {% if administrative_data|safe_get:"custodian_organization" and administrative_data|safe_get:"custodian_organization".name %}
-  <div class="admin-section mb-4">
-    <h6><i class="fas fa-building me-2"></i>Custodian Organization</h6>
-
-    <div class="admin-contact-card custodian-contact">
-      <div class="admin-card-header">
-        <i class="fas fa-building"></i> Document Custodian
-      </div>
-
-      <div class="admin-info-row">
-        <div class="admin-label">
-          <i class="fas fa-building"></i> Organization:
-        </div>
-        <div class="admin-value">
-          {{ administrative_data|safe_get:"custodian_organization".name }}
-        </div>
-      </div>
-
-      <!-- Custodian Contact Information -->
-      {% if administrative_data|safe_get:"custodian_organization".contact_info %}
-      {% if administrative_data|safe_get:"custodian_organization".contact_info.addresses %}
-      {% for address in administrative_data|safe_get:"custodian_organization".contact_info.addresses %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          <i class="fas fa-map-marker-alt"></i> Address:
-        </div>
-        <div class="admin-value">
-          {% if address.street %}
-          {{ address.street }}
-          {% endif %}
-          {% if address.city %},
-          {{ address.city }}
-          {% endif %}
-          {% if address.postalCode %}
-          {{ address.postalCode }}
-          {% endif %}
-          {% if address.country %},
-          {{ address.country }}
-          {% endif %}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %}
-      {% if administrative_data|safe_get:"custodian_organization".contact_info.telecoms %}
-      {% for telecom in administrative_data|safe_get:"custodian_organization".contact_info.telecoms %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          {% if telecom.type == 'email' %}
-          <i class="fas fa-envelope"></i> Email:
-          {% elif telecom.type == 'phone' %}
-          <i class="fas fa-phone"></i> Phone:
-          {% else %}
-          <i class="fas fa-info-circle"></i>
-          {{ telecom.type|title }}:
-          {% endif %}
-        </div>
-        <div class="admin-value">
-          {{ telecom.value|clean_telecom }}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %}
-      {% endif %}
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Preferred Healthcare Provider -->
-  {% if administrative_data|safe_get:"preferred_hcp" and administrative_data|safe_get:"preferred_hcp".name %}
-  <div class="admin-section mb-4">
-    <h6><i class="fas fa-heart me-2"></i>Preferred Healthcare Provider</h6>
-
-    <div class="admin-contact-card preferred-hcp-contact">
-      <div class="admin-card-header">
-        <i class="fas fa-heart"></i> Preferred HCP/Cabinet Medicale
-      </div>
-
-      <div class="admin-info-row">
-        <div class="admin-label">
-          <i class="fas fa-building"></i> Organization:
-        </div>
-        <div class="admin-value">
-          {{ administrative_data|safe_get:"preferred_hcp".name }}
-        </div>
-      </div>
-
-      <!-- Preferred HCP Contact Information -->
-      {% if administrative_data|safe_get:"preferred_hcp".contact_info %}
-      {% if administrative_data|safe_get:"preferred_hcp".contact_info.addresses %}
-      {% for address in administrative_data|safe_get:"preferred_hcp".contact_info.addresses %}
-      <div class="admin-info-row">
-        <div class="admin-label">
-          <i class="fas fa-map-marker-alt"></i> Address:
-        </div>
-        <div class="admin-value">
-          {% if address.street %}
-          {{ address.street }}
-          {% endif %}
-          {% if address.city %},
-          {{ address.city }}
-          {% endif %}
-          {% if address.postalCode %}
-          {{ address.postalCode }}
-          {% endif %}
-          {% if address.country %},
-          {{ address.country }}
-          {% endif %}
-        </div>
-      </div>
-      {% endfor %}
-      {% endif %}
-      {% if administrative_data|safe_get:"preferred_hcp".contact_info.telecoms %}
-        {% for telecom in administrative_data|safe_get:"preferred_hcp".contact_info.telecoms %}
-        <div class="admin-info-row">
-          <div class="admin-label">
-            {% if telecom.type == 'email' %}
-            <i class="fas fa-envelope"></i> Email:
-            {% elif telecom.type == 'phone' %}
-            <i class="fas fa-phone"></i> Phone:
-            {% else %}
-            <i class="fas fa-info-circle"></i>
-            {{ telecom.type|title }}:
+{% if contact_data and contact_data.addresses %}
+  <!-- Patient Address Cards -->
+  <div class="row">
+    {% for address in contact_data.addresses %}
+      <div class="col-md-6 mb-3">
+        <div class="card contact-info-card h-100">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">
+              <i class="fas fa-map-marker-alt me-2"></i>
+              {% if address.use %}
+                {{ address.use|title }} Address
+              {% else %}
+                Address {{ forloop.counter }}
+              {% endif %}
+            </h6>
+          </div>
+          <div class="card-body">
+            {% if address.street_lines %}
+              <p class="mb-2">
+                <strong><i class="fas fa-road me-1"></i>Street:</strong><br>
+                {% for line in address.street_lines %}
+                  {{ line }}<br>
+                {% endfor %}
+              </p>
             {% endif %}
+
+            <div class="row">
+              {% if address.city %}
+                <div class="col-sm-6">
+                  <p class="mb-2">
+                    <strong><i class="fas fa-city me-1"></i>City:</strong><br>
+                    {{ address.city }}
+                  </p>
+                </div>
+              {% endif %}
+              {% if address.postal_code %}
+                <div class="col-sm-6">
+                  <p class="mb-2">
+                    <strong><i class="fas fa-mail-bulk me-1"></i>Postal Code:</strong><br>
+                    {{ address.postal_code }}
+                  </p>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="row">
+              {% if address.state %}
+                <div class="col-sm-6">
+                  <p class="mb-2">
+                    <strong><i class="fas fa-map me-1"></i>State:</strong><br>
+                    {{ address.state }}
+                  </p>
+                </div>
+              {% endif %}
+              {% if address.country %}
+                <div class="col-sm-6">
+                  <p class="mb-0">
+                    <strong><i class="fas fa-flag me-1"></i>Country:</strong><br>
+                    {{ address.country }}
+                  </p>
+                </div>
+              {% endif %}
+            </div>
           </div>
         </div>
-        <div class="admin-value">
-          {{ telecom.value|clean_telecom }}
-        </div>
       </div>
-      {% endfor %}
-      {% endif %}
-      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- Patient Telecom Cards -->
+{% if contact_data and contact_data.telecoms %}
+  <div class="row mt-4">
+    {% for telecom in contact_data.telecoms %}
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card contact-info-card h-100">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">
+              {% if telecom.system == 'phone' or 'tel:' in telecom.value %}
+                <i class="fas fa-phone me-2"></i>Phone
+              {% elif telecom.system == 'email' or 'mailto:' in telecom.value %}
+                <i class="fas fa-envelope me-2"></i>Email
+              {% elif telecom.system == 'fax' or 'fax:' in telecom.value %}
+                <i class="fas fa-fax me-2"></i>Fax
+              {% else %}
+                <i class="fas fa-phone-alt me-2"></i>Contact
+              {% endif %}
+              {% if telecom.use %}({{ telecom.use|title }}){% endif %}
+            </h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-2">
+              <strong>Contact:</strong><br>
+              {% if 'tel:' in telecom.value %}
+                <a href="{{ telecom.value }}" class="text-decoration-none">
+              {{ telecom.value|slice:"4:" }}
+            </a>
+          {% elif 'mailto:' in telecom.value %}
+            <a href="{{ telecom.value }}" class="text-decoration-none">
+              {{ telecom.value|slice:"7:" }}
+            </a>
+          {% else %}
+            {{ telecom.value }}
+          {% endif %}
+        </p>
+        {% if telecom.use %}
+          <span class="badge bg-secondary">{{ telecom.use|title }}</span>
+        {% endif %}
+      </div>
     </div>
   </div>
-  {% endif %}
-  {% else %}
-  <div class="alert alert-info">
-    <i class="fas fa-info-circle me-2"></i>No extended contact information
-    available in the CDA document.
-  </div>
-  {% endif %}
+{% endfor %}
 </div>
-<!-- End tab-pane -->
+{% endif %}
+
+<!-- Fallback content when no contact data is available -->
+{% if not contact_data or not contact_data.addresses and not contact_data.telecoms %}
+<div class="alert alert-info">
+  <div class="d-flex align-items-center">
+    <i class="fas fa-info-circle fa-2x me-3"></i>
+    <div>
+      <h6 class="mb-1">No Contact Information Available</h6>
+      <p class="mb-0">Contact details are not available in the current document or have not been extracted.</p>
+    </div>
+  </div>
+</div>
+{% endif %}
+                      <p class="mb-2">
+                        <strong><i class="fas fa-map-marker-alt me-1"></i>Address:</strong><br>
+                        {% for line in address.streetAddressLine %}{{ line }}<br>{% endfor %}
+                        {% if address.city %}{{ address.city }}{% endif %}
+                        {% if address.postalCode %} {{ address.postalCode }}{% endif %}
+                        {% if address.country %}<br>{{ address.country }}{% endif %}
+                      </p>
+                    {% endfor %}
+                  </div>
+                  <div class="col-md-6">
+                    {% for telecom in guardian.contact_info.telecoms %}
+                      <p class="mb-2">
+                        <strong>
+                          {% if 'tel:' in telecom.value %}
+                            <i class="fas fa-phone me-1"></i>Phone:
+                          {% elif 'mailto:' in telecom.value %}
+                            <i class="fas fa-envelope me-1"></i>Email:
+                          {% else %}
+                            <i class="fas fa-phone-alt me-1"></i>Contact:
+                          {% endif %}
+                        </strong><br>
+                        {% if 'tel:' in telecom.value %}
+                          <a href="{{ telecom.value }}">{{ telecom.value|slice:"4:" }}</a>
+                        {% elif 'mailto:' in telecom.value %}
+                          <a href="{{ telecom.value }}">{{ telecom.value|slice:"7:" }}</a>
+                        {% else %}
+                          {{ telecom.value }}
+                        {% endif %}
+                      </p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+  {% endif %}
+
+  <!-- No Contact Information Message -->
+  {% if not contact_data or not contact_data.addresses and not contact_data.telecoms %}
+    <div class="empty-state text-center py-4">
+      <i class="fas fa-address-card fa-3x text-muted mb-3"></i>
+      <h6>No Contact Information</h6>
+      <p class="text-muted">No contact information is available for this patient.</p>
+    </div>
+  {% endif %}
+
+</div>

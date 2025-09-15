@@ -44,8 +44,8 @@ Uses standardized contact cards for all administrative contacts
         {% endif %}
 
         {% comment %} Fallback for missing administrative info {% endcomment %}
-        {% if not administrative_info.patient_contact and not administrative_info.legal_authenticator and not
-        administrative_info.custodian and not administrative_info.authors %}
+        {% comment %} Use pre-calculated boolean from view instead of complex template logic {% endcomment %}
+        {% if not has_administrative_data %}
         <div class="administrative-info__empty">
             <i class="fas fa-info-circle"></i>
             <p>No administrative information available for this document.</p>

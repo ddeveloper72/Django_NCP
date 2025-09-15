@@ -63,6 +63,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Patient Session Management Middleware
+    "patient_data.middleware.session_security.PatientSessionMiddleware",
+    "patient_data.middleware.session_security.SessionSecurityMiddleware",
+    "patient_data.middleware.session_security.SessionCleanupMiddleware",
+    "patient_data.middleware.session_security.AuditLoggingMiddleware",
 ]
 
 ROOT_URLCONF = "eu_ncp_server.urls"
@@ -303,6 +308,16 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "patient_data.session": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "patient_data.security": {
+            "handlers": ["console", "file"],
+            "level": "WARNING",
+            "propagate": False,
+        },
         "django.template": {
             "handlers": ["console", "file"],
             "level": "DEBUG",
@@ -363,3 +378,54 @@ API_RATE_LIMIT = int(os.getenv("API_RATE_LIMIT", "1000"))
 LOGOUT_REDIRECT_URL = "/"  # Redirect to home/welcome page
 LOGIN_REDIRECT_URL = "/"  # Redirect to home page after login
 LOGIN_URL = "/accounts/login/"  # Use our custom login page
+
+# ==============================================================================
+# Patient Session Management Configuration
+# ==============================================================================
+
+# Patient Session Security Settings
+PATIENT_SESSION_TIMEOUT = int(os.getenv("PATIENT_SESSION_TIMEOUT", "30"))  # minutes
+PATIENT_SESSION_ROTATION_THRESHOLD = int(
+    os.getenv("PATIENT_SESSION_ROTATION_THRESHOLD", "100")
+)
+MAX_CONCURRENT_PATIENT_SESSIONS = int(os.getenv("MAX_CONCURRENT_PATIENT_SESSIONS", "3"))
+PATIENT_SESSION_RATE_LIMIT = int(
+    os.getenv("PATIENT_SESSION_RATE_LIMIT", "60")
+)  # requests per minute
+
+# Session Encryption Configuration
+SESSION_ENCRYPTION_ALGORITHM = "Fernet"
+SESSION_KEY_ROTATION_HOURS = int(os.getenv("SESSION_KEY_ROTATION_HOURS", "24"))
+PATIENT_SESSION_MASTER_KEY = os.getenv("PATIENT_SESSION_MASTER_KEY", "")
+
+# Session Cleanup Configuration
+SESSION_CLEANUP_INTERVAL = int(
+    os.getenv("SESSION_CLEANUP_INTERVAL", "300")
+)  # 5 minutes
+
+# Security Alert Configuration
+SECURITY_ALERT_RECIPIENTS = (
+    os.getenv("SECURITY_ALERT_RECIPIENTS", "").split(",")
+    if os.getenv("SECURITY_ALERT_RECIPIENTS")
+    else []
+)
+
+# PHI Protection Settings
+PHI_ENCRYPTION_ENABLED = os.getenv("PHI_ENCRYPTION_ENABLED", "True") == "True"
+PHI_AUDIT_LOGGING = os.getenv("PHI_AUDIT_LOGGING", "True") == "True"
+
+# Session Cache Configuration
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "patient-session-cache",
+        "TIMEOUT": 3600,  # 1 hour
+        "OPTIONS": {
+            "MAX_ENTRIES": 1000,
+        },
+    }
+}
+
+# Session Management API Configuration
+SESSION_API_ENABLED = os.getenv("SESSION_API_ENABLED", "True") == "True"
+SESSION_MONITORING_ENABLED = os.getenv("SESSION_MONITORING_ENABLED", "True") == "True"

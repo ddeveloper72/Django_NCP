@@ -3,11 +3,6 @@
 {% load static %}
 {% block title %}{{ page_title }}{% endblock %}
 
-{% block extra_css %}
-<!-- Country selection styles are handled by SASS compilation in main.css -->
-<link href="{% static 'css/patient_cda_ps_guidelines.css' %}?v=20250804" rel="stylesheet" media="screen">
-{% endblock %}
-
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb breadcrumb-enhanced">

@@ -1,126 +1,126 @@
 {% load patient_filters %}
+
 <!-- Extended Patient Document Information Component -->
-<div class="tab-pane fade {% if first_tab == 'document' %}show active{% endif %}" id="document" role="tabpanel"
-    aria-labelledby="document-tab">
-    <h5><i class="fas fa-file-medical-alt me-2"></i>Document Information</h5>
+<h5><i class="fas fa-file-medical-alt me-2"></i>Document Information</h5>
 
-    {% if patient_extended_data %}
-    <!-- Django doesn't support {% set %} - using direct access -->
-
-    <!-- Debug Document Data -->
-    <div class="alert alert-success mb-3">
-        <h6>DEBUG: Document Info Data Available</h6>
-        <p><strong>Document Data Keys:</strong>
-            {% if patient_extended_data|safe_get:"document_info" %}
-                {% for key, value in patient_extended_data|safe_get:"document_info"|dict_items %}
-                {{ key }}
-                {% if not forloop.last %},
-                {% endif %}
-                {% endfor %}
-            {% elif patient_extended_data|safe_get:"metadata" %}
-                {% for key, value in patient_extended_data|safe_get:"metadata"|dict_items %}
-                {{ key }}
-                {% if not forloop.last %},
-                {% endif %}
-                {% endfor %}
-            {% else %}
-                No document data
-            {% endif %}
-        </p>
-        <p><strong>Title:</strong>
-            {{ patient_extended_data|safe_get:"document_info"|safe_get:"title"|default:"No title" }}</p>
-        <p><strong>Creation Date:</strong>
-            {{ patient_extended_data|safe_get:"document_info"|safe_get:"creation_date"|default:"No date" }}</p>
+<!-- Document Metadata Card -->
+<div class="card document-info-card mb-4">
+    <div class="card-header bg-info text-white">
+        <h6 class="mb-0">
+            <i class="fas fa-file-medical me-2"></i>
+            CDA Document Metadata
+        </h6>
     </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Document Status -->
+                <div class="mb-3">
+                    <h6 class="text-muted"><i class="fas fa-info-circle me-1"></i>Document Status</h6>
+                    <div class="mb-2">
+                        <span class="badge bg-success me-2"><i class="fas fa-check me-1"></i>Active</span>
+                        <span class="badge bg-info me-2"><i class="fas fa-lock me-1"></i>Secure</span>
+                        <span class="badge bg-secondary"><i class="fas fa-eye me-1"></i>Normal Confidentiality</span>
+                    </div>
+                    <small class="text-muted">Document confidentialityCode and status indicators</small>
+                </div>
 
-    <!-- Document Metadata -->
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <div class="contact-info-card">
-                <div class="contact-type">Document Title</div>
-                <div class="contact-details">
-                    {{ patient_extended_data|safe_get:"document_info"|safe_get:"title"|default:patient_extended_data|safe_get:"document_title"|default:"Patient Summary" }}
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="contact-info-card">
-                <div class="contact-type">Document Type</div>
-                <div class="contact-details">
-                    {{ patient_extended_data|safe_get:"document_info"|safe_get:"type"|default:cda_type|default:"CDA Document" }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <div class="contact-info-card">
-                <div class="contact-type">Creation Date</div>
-                <div class="contact-details">
-                    {{ patient_extended_data|safe_get:"document_info"|safe_get:"creation_date"|default:patient_extended_data|safe_get:"document_info"|safe_get:"effective_time"|default:"Not specified" }}
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="contact-info-card">
-                <div class="contact-type">Document ID</div>
-                <div class="contact-details">
-                    {% if patient_extended_data|safe_get:"document_info"|safe_get:"document_id"|safe_get:"extension" %}
-                    {{ patient_extended_data|safe_get:"document_info"|safe_get:"document_id"|safe_get:"extension" }}
-                    {% else %}
-                    {{ patient_identity.patient_id|default:"Not available" }}
+                <!-- Document Dates -->
+                {% if document_data %}
+                    {% if document_data.document_creation_date %}
+                        <div class="mb-3">
+                            <h6 class="text-muted"><i class="fas fa-calendar-plus me-1"></i>Creation Date</h6>
+                            <p class="mb-0">{{ document_data.document_creation_date }}</p>
+                        </div>
                     {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <div class="contact-info-card">
-                <div class="contact-type">Language</div>
-                <div class="contact-details">
-                    {{ patient_extended_data|safe_get:"document_info"|safe_get:"language"|default:source_language|default:"en-GB" }}
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="contact-info-card">
-                <div class="contact-type">Version</div>
-                <div class="contact-details">
-                    {{ patient_extended_data|safe_get:"document_info"|safe_get:"version"|default:"1.0" }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Document Status -->
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <h6><i class="fas fa-info-circle me-1"></i>Document Status</h6>
-            <div class="contact-info-card">
-                <div class="contact-details">
-                    <span class="badge bg-success me-2">Active</span>
-                    <span class="badge bg-info me-2">Encrypted</span>
-                    {% if patient_extended_data|safe_get:"document_info"|safe_get:"confidentiality" %}
-                    <span class="badge bg-warning">{{ patient_extended_data|safe_get:"document_info"|safe_get:"confidentiality" }}</span>
+                    {% if document_data.document_last_update_date and document_data.document_last_update_date != 'Unknown' %}
+                        <div class="mb-3">
+                            <h6 class="text-muted"><i class="fas fa-calendar-check me-1"></i>Last Updated</h6>
+                            <p class="mb-0">{{ document_data.document_last_update_date }}</p>
+                        </div>
                     {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="col-md-6">
+                <!-- Document Identifiers -->
+                {% if document_data %}
+                    {% if document_data.document_version_number %}
+                        <div class="mb-3">
+                            <h6 class="text-muted"><i class="fas fa-code-branch me-1"></i>Version</h6>
+                            <p class="mb-0">
+                                <span class="badge bg-primary">v{{ document_data.document_version_number }}</span>
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    {% if document_data.document_set_id %}
+                        <div class="mb-3">
+                            <h6 class="text-muted"><i class="fas fa-barcode me-1"></i>Document Set ID</h6>
+                            <p class="mb-0">
+                                <code class="text-muted">{{ document_data.document_set_id }}</code>
+                            </p>
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                <!-- Document Type Info -->
+                <div class="mb-3">
+                    <h6 class="text-muted"><i class="fas fa-file-alt me-1"></i>Document Type</h6>
+                    <p class="mb-0">Patient Summary (PS) - European eHealth Standard</p>
+                    <small class="text-muted">HL7 CDA R2 Implementation Guide</small>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Show message if no document info -->
-    {% if not patient_extended_data|safe_get:"document_info" and not patient_extended_data|safe_get:"document_title" %}
-    <div class="alert alert-info">
-        <i class="fas fa-info-circle me-2"></i>Limited document information available.
-    </div>
-    {% endif %}
+<!-- Custodian Organization Card -->
+{% if document_data and document_data.custodian_organization %}
+    {% with custodian=document_data.custodian_organization %}
+        <div class="card document-info-card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    Document Custodian
+                    <span class="badge bg-dark text-white ms-2">Legal Responsibility</span>
+                </h6>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title text-warning">
+                    {{ custodian.name|default:"Document Custodian Organization" }}
+                </h6>
+                {% if custodian.organization_type %}
+                    <p class="mb-3">
+                        <span class="badge bg-warning text-dark">{{ custodian.organization_type }}</span>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    {% endwith %}
+{% endif %}
 
-    {% else %}
-    <div class="alert alert-warning">
-        <i class="fas fa-exclamation-triangle me-2"></i>No extended patient data available.
+<!-- Fallback content when no document data is available -->
+{% if not document_data or not document_data.document_creation_date and not document_data.custodian_organization %}
+<div class="alert alert-info">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-info-circle fa-2x me-3"></i>
+        <div>
+            <h6 class="mb-1">Limited Document Information</h6>
+            <p class="mb-0">Document metadata is not available or has not been extracted from the current CDA document.</p>
+        </div>
     </div>
-    {% endif %}
+</div>
+{% endif %}
+
+<!-- No Document Information Message -->
+{% if not document_data %}
+    <div class="empty-state text-center py-4">
+        <i class="fas fa-file-medical fa-3x text-muted mb-3"></i>
+        <h6>No Document Information</h6>
+        <p class="text-muted">No document metadata is available.</p>
+    </div>
+{% endif %}
+
 </div>

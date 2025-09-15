@@ -58,8 +58,7 @@ Used for all types of contacts: patient, legal authenticator, custodian, authors
 
                 <div class="contact-card__address-line">
                     {% if contact.address.city %}{{ contact.address.city }}{% endif %}
-                    {% if contact.address.state %}{% if contact.address.city %}, {% endif %}{{ contact.address.state
-                    }}{% endif %}
+                    {% if contact.address.state %}{% if contact.address.city %}, {% endif %}{{ contact.address.state }}{% endif %}
                     {% if contact.address.postal_code %} {{ contact.address.postal_code }}{% endif %}
                 </div>
 

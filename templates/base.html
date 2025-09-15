@@ -8,7 +8,7 @@
     <title>{% block title %}EU NCP Portal{% endblock %}</title>
 
     <!-- DMZ-Compatible CSS (no external CDNs) -->
-    <link href="{% static 'css/main.css' %}?v=20250910" rel="stylesheet" media="screen">
+    <link href="{% static 'css/main.css' %}?v={% now 'U' %}" rel="stylesheet" media="screen">
     <link href="{% static 'rest_framework/css/font-awesome-4.0.3.css' %}" rel="stylesheet" media="screen">
 
     {% block extra_css %} {% endblock %}
@@ -41,7 +41,7 @@
             </a>
 
             <!-- Main Navigation -->
-            <ul class="navbar-nav">
+            <ul class="navbar-nav" id="navbar-nav">
                 <li class="nav-item">
                     <a href="/" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
                         <i class="fa fa-home"></i>
@@ -95,16 +95,15 @@
                 {% endif %}
             </div>
 
-            <!-- Page Context Area -->
-            <div class="page-context">
-                {% block page_context %} {% endblock %}
-            </div>
-
             <button class="navbar-toggle" type="button">
                 <span>☰</span>
             </button>
         </div>
     </nav>
+
+    <!-- Page Breadcrumb/Context Area -->
+    {% block page_context %}{% endblock %}
+
     {% endif %}
 
 
@@ -153,11 +152,78 @@
     </footer>
 
     <!-- JavaScript -->
+    <!-- Navigation JavaScript -->
+    <script src="{% static 'js/navigation.js' %}"></script>
+
+    <!-- Bootstrap JavaScript for tab functionality -->
     <script>
-        // Mobile menu toggle
-        document.querySelector('.navbar-toggle').addEventListener('click', function () {
-            document.querySelector('.navbar-nav').classList.toggle('active');
+        // Simple tab functionality for Bootstrap-style tabs
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle tab clicks
+            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function(tab) {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Tab clicked:', this.getAttribute('data-bs-target'));
+
+                    // Remove active class from all tabs and panes
+                    document.querySelectorAll('.nav-link').forEach(function(link) {
+                        link.classList.remove('active');
+                    });
+                    document.querySelectorAll('.tab-pane').forEach(function(pane) {
+                        pane.classList.remove('show', 'active');
+                    });
+
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    console.log('Tab set to active:', this.id);
+
+                    // Show corresponding tab pane
+                    const targetId = this.getAttribute('data-bs-target');
+                    const targetPane = document.querySelector(targetId);
+                    if (targetPane) {
+                        targetPane.classList.add('show', 'active');
+                        console.log('Tab pane activated:', targetId);
+                    } else {
+                        console.error('Tab pane not found:', targetId);
+                    }
+                });
+            });
         });
+
+        // Mobile menu toggle
+        const navbarToggle = document.querySelector('.navbar-toggle');
+        const navbarNav = document.querySelector('.navbar-nav');
+
+        if (navbarToggle && navbarNav) {
+            navbarToggle.addEventListener('click', function() {
+                navbarNav.classList.toggle('navbar-nav-open');
+                navbarToggle.classList.toggle('navbar-toggle-active');
+
+                const isOpen = navbarNav.classList.contains('navbar-nav-open');
+                navbarToggle.setAttribute('aria-expanded', isOpen);
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.navbar-main')) {
+                    navbarNav.classList.remove('navbar-nav-open');
+                    navbarToggle.classList.remove('navbar-toggle-active');
+                    navbarToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Close mobile menu on window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    navbarNav.classList.remove('navbar-nav-open');
+                    navbarToggle.classList.remove('navbar-toggle-active');
+                    navbarToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            navbarToggle.setAttribute('aria-expanded', 'false');
+            navbarToggle.setAttribute('aria-controls', 'navbar-nav');
+        }
 
         // Alert dismissal
         document.querySelectorAll('.alert-close').forEach(button => {

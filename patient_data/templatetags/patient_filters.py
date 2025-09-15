@@ -106,3 +106,71 @@ def clean_telecom(value):
     cleaned = cleaned.replace("mailto:", "")
     cleaned = cleaned.replace("tel:", "")
     return cleaned
+
+
+@register.filter
+def count_contact_items(administrative_data):
+    """Count total contact items (addresses + telecoms) from administrative data"""
+    if not administrative_data:
+        return 0
+
+    contact_info = safe_get(administrative_data, "patient_contact_info")
+    if not contact_info:
+        return 0
+
+    addresses = safe_get(contact_info, "addresses") or []
+    telecoms = safe_get(contact_info, "telecoms") or []
+
+    return len(addresses) + len(telecoms)
+
+
+@register.filter
+def count_healthcare_team(administrative_data):
+    """Count healthcare team members from administrative data"""
+    if not administrative_data:
+        return 0
+
+    count = 0
+
+    # Check author HCP
+    author_hcp = safe_get(administrative_data, "author_hcp")
+    if author_hcp:
+        given_name = safe_get(author_hcp, "given_name") or ""
+        family_name = safe_get(author_hcp, "family_name") or ""
+        if given_name.strip() or family_name.strip():
+            count += 1
+
+    # Check legal authenticator
+    legal_auth = safe_get(administrative_data, "legal_authenticator")
+    if legal_auth:
+        given_name = safe_get(legal_auth, "given_name") or ""
+        family_name = safe_get(legal_auth, "family_name") or ""
+        if given_name.strip() or family_name.strip():
+            count += 1
+
+    # Check custodian organization
+    custodian = safe_get(administrative_data, "custodian_organization")
+    if custodian:
+        name = safe_get(custodian, "name") or ""
+        if name.strip():
+            count += 1
+
+    return count
+
+
+@register.filter
+def has_administrative_data(administrative_info):
+    """
+    Check if administrative_info has any meaningful data
+    Returns True if any of the key administrative fields have data
+    """
+    if not administrative_info:
+        return False
+
+    # Check for any of the main administrative data fields
+    return (
+        administrative_info.get("patient_contact")
+        or administrative_info.get("legal_authenticator")
+        or administrative_info.get("custodian")
+        or administrative_info.get("authors")
+    )

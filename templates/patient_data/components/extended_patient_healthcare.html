@@ -1,262 +1,367 @@
 {% load patient_filters %}
+
 <!-- Extended Patient Healthcare Team Component -->
-<div class="tab-pane fade {% if first_tab == 'healthcare' %}show active{% endif %}" id="healthcare" role="tabpanel"
-    aria-labelledby="healthcare-tab">
-    <h5><i class="fas fa-stethoscope me-2"></i>Healthcare Team</h5>
+<h5><i class="fas fa-stethoscope me-2"></i>Healthcare Team</h5>
 
-    {% if patient_extended_data %}
-    {# Django: Use direct access instead of {% set %} #}
-    {% with healthcare_data=patient_extended_data|safe_get:"healthcare_team"|default_if_none:patient_extended_data %}
+<!-- Document Author HCP -->
+{% if healthcare_data and healthcare_data.author_hcp %}
+    {% with author_hcp=healthcare_data.author_hcp %}
+        <div class="mb-4">
+            <div class="card healthcare-team-card">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-user-md me-2"></i>
+                        Document Author
+                        <span class="badge bg-light text-primary ms-2">Primary HCP</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="card-title text-primary">
+                                {% if author_hcp.title %}{{ author_hcp.title }} {% endif %}
+                                {{ author_hcp.given_name|default:"" }} {{ author_hcp.family_name|default:"" }}
+                                {% if not author_hcp.given_name and not author_hcp.family_name %}
+                                    Document Author
+                                {% endif %}
+                            </h6>
 
-    <!-- Debug Healthcare Data -->
-    <div class="alert alert-success mb-3">
-        <h6>DEBUG: Healthcare Team Data Available</h6>
-        <p><strong>Healthcare Data Keys:</strong>
-            {% if patient_extended_data|safe_get:"healthcare_team" %}
-                {% for key, value in patient_extended_data|safe_get:"healthcare_team"|dict_items %}
-                {{ key }}
-                {% if not forloop.last %},
-                {% endif %}
-                {% endfor %}
-            {% else %}
-                No healthcare data
-            {% endif %}
-        </p>
-        <p><strong>Has healthcare team:</strong>
-            {{ patient_extended_data|safe_get:"healthcare_team"|safe_get:"has_healthcare_team"|default:False }}</p>
-        <p><strong>Total count:</strong>
-            {{ patient_extended_data|safe_get:"healthcare_team"|safe_get:"total_count"|default:0 }}</p>
-    </div>
+                            {% if author_hcp.role %}
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-user-tag me-1"></i>Role:</strong>
+                                    <span class="badge bg-success">{{ author_hcp.role }}</span>
+                                </p>
+                            {% endif %}
 
-    <!-- Document Authors -->
-    {% if patient_extended_data|safe_get:"authors" %}
-    <div class="mb-4">
-        <h6><i class="fas fa-user-md me-1"></i>Document Authors</h6>
-        {# Django: Use direct access instead of {% set %} #}
-        {% for author in patient_extended_data|safe_get:"authors" %}
-        <div class="healthcare-member-card">
-            <div class="card-body">
-                <h6 class="card-title">
-                    {{ author.name|default:author.person.full_name|default:"Unknown Author" }}
-                </h6>
-                                <div class="mb-2">
-                    <span class="role-badge">
-                        {{ author|safe_get:"role"|default:author|safe_get:"type"|default:"Author" }}</span>
+                            {% if author_hcp.specialty %}
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-stethoscope me-1"></i>Specialty:</strong>
+                                    {{ author_hcp.specialty }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            {% if author_hcp.organization and author_hcp.organization.name %}
+                                <div class="organization-info">
+                                    <h6 class="text-muted">
+                                        <i class="fas fa-building me-1"></i>Organization
+                                    </h6>
+                                    <p class="mb-1">{{ author_hcp.organization.name }}</p>
+                                    {% if author_hcp.organization.organization_type %}
+                                        <small class="text-muted">{{ author_hcp.organization.organization_type }}</small>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                {% if author|safe_get:"organization" %}
-                <div class="organization-info mb-2">
-                    <strong><i class="fas fa-building me-1"></i>Organization:</strong>
-                    {{ author|safe_get:"organization" }}
-                </div>
-                {% endif %}
-                {% if author|safe_get:"time" %}
-                <div class="contact-details">
-                    <strong><i class="fas fa-clock me-1"></i>Authored:</strong>
-                    <span class="date-value">
-                        {{ author|safe_get:"time" }}</span>
-                </div>
-                {% endif %}
             </div>
         </div>
-        {% endfor %}
+    {% endwith %}
+{% endif %}
+
+<!-- Legal Authenticator -->
+{% if healthcare_data and healthcare_data.legal_authenticator %}
+    {% with legal_auth=healthcare_data.legal_authenticator %}
+        <div class="mb-4">
+            <div class="card healthcare-team-card">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="fas fa-stamp me-2"></i>
+                        Legal Authenticator
+                        <span class="badge bg-dark text-white ms-2">Document Validator</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title text-warning">
+                        {{ legal_auth.given_name|default:"" }} {{ legal_auth.family_name|default:"Legal Authenticator" }}
+                    </h6>
+                    {% if legal_auth.role %}
+                        <p class="mb-2">
+                            <strong><i class="fas fa-user-tag me-1"></i>Role:</strong>
+                            <span class="badge bg-warning text-dark">{{ legal_auth.role }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endwith %}
+{% endif %}
+
+<!-- Fallback content when no healthcare team data is available -->
+{% if not healthcare_data or not healthcare_data.author_hcp and not healthcare_data.legal_authenticator and not healthcare_data.preferred_hcp %}
+<div class="alert alert-info">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-info-circle fa-2x me-3"></i>
+        <div>
+            <h6 class="mb-1">No Healthcare Team Information</h6>
+            <p class="mb-0">Healthcare provider details are not available in the current document or have not been extracted.</p>
+        </div>
     </div>
+</div>
+{% endif %}
+                                <hr>
+                                <h6 class="text-muted mb-3"><i class="fas fa-address-book me-1"></i>Contact Information</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {% for address in author_hcp.contact_info.addresses %}
+                                            <p class="mb-2">
+                                                <strong>Personal Address:</strong><br>
+                                                <small>
+                                                    {% for line in address.streetAddressLine %}{{ line }}<br>{% endfor %}
+                                                    {% if address.city %}{{ address.city }}{% endif %}
+                                                    {% if address.postalCode %} {{ address.postalCode }}{% endif %}
+                                                    {% if address.country %}<br>{{ address.country }}{% endif %}
+                                                </small>
+                                            </p>
+                                        {% endfor %}
+
+                                        {% for address in author_hcp.organization.addresses %}
+                                            <p class="mb-2">
+                                                <strong>Office Address:</strong><br>
+                                                <small>
+                                                    {% for line in address.streetAddressLine %}{{ line }}<br>{% endfor %}
+                                                    {% if address.city %}{{ address.city }}{% endif %}
+                                                    {% if address.postalCode %} {{ address.postalCode }}{% endif %}
+                                                    {% if address.country %}<br>{{ address.country }}{% endif %}
+                                                </small>
+                                            </p>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        {% for telecom in author_hcp.contact_info.telecoms %}
+                                            <p class="mb-1">
+                                                <strong>
+                                                    {% if 'tel:' in telecom.value %}
+                                                        <i class="fas fa-phone me-1"></i>Personal:
+                                                    {% elif 'mailto:' in telecom.value %}
+                                                        <i class="fas fa-envelope me-1"></i>Personal:
+                                                    {% else %}
+                                                        <i class="fas fa-phone-alt me-1"></i>Personal:
+                                                    {% endif %}
+                                                </strong>
+                                                {% if 'tel:' in telecom.value %}
+                                                    <a href="{{ telecom.value }}">{{ telecom.value|slice:"4:" }}</a>
+                                                {% elif 'mailto:' in telecom.value %}
+                                                    <a href="{{ telecom.value }}">{{ telecom.value|slice:"7:" }}</a>
+                                                {% else %}
+                                                    {{ telecom.value }}
+                                                {% endif %}
+                                            </p>
+                                        {% endfor %}
+
+                                        {% for telecom in author_hcp.organization.telecoms %}
+                                            <p class="mb-1">
+                                                <strong>
+                                                    {% if 'tel:' in telecom.value %}
+                                                        <i class="fas fa-phone me-1"></i>Office:
+                                                    {% elif 'mailto:' in telecom.value %}
+                                                        <i class="fas fa-envelope me-1"></i>Office:
+                                                    {% else %}
+                                                        <i class="fas fa-phone-alt me-1"></i>Office:
+                                                    {% endif %}
+                                                </strong>
+                                                {% if 'tel:' in telecom.value %}
+                                                    <a href="{{ telecom.value }}">{{ telecom.value|slice:"4:" }}</a>
+                                                {% elif 'mailto:' in telecom.value %}
+                                                    <a href="{{ telecom.value }}">{{ telecom.value|slice:"7:" }}</a>
+                                                {% else %}
+                                                    {{ telecom.value }}
+                                                {% endif %}
+                                            </p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
     {% endif %}
 
     <!-- Legal Authenticator -->
-    {% if patient_extended_data|safe_get:"legal_authenticator" %}
-    {# Django: Use direct access instead of {% set %} #}
-    <div class="mb-4">
-        <h6><i class="fas fa-gavel me-1"></i>Legal Authenticator</h6>
-        <div class="healthcare-member-card">
-            <div class="card-body">
-                <h6 class="card-title">
-                    {{ patient_extended_data|safe_get:"legal_authenticator".name|default:"Unknown Authenticator" }}</h6>
-                <div class="mb-2">
-                    <span class="role-badge">
-                        {{ patient_extended_data|safe_get:"legal_authenticator".role|default:"Legal Authenticator" }}</span>
-                </div>
-                {% if patient_extended_data|safe_get:"legal_authenticator".organization %}
-                <div class="organization-info mb-2">
-                    <strong><i class="fas fa-building me-1"></i>Organization:</strong>
-                    {{ patient_extended_data|safe_get:"legal_authenticator".organization }}
-                </div>
-                {% endif %}
-                {% if legal_auth.get('authentication_time') %}
-                <div class="contact-details">
-                    <strong><i class="fas fa-clock me-1"></i>Authenticated:</strong>
-                    <span class="date-value">
-                        {{ legal_auth.authentication_time }}</span>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
+    {% if healthcare_data.legal_authenticator %}
+        {% with legal_auth=healthcare_data.legal_authenticator %}
+            {% if legal_auth.given_name or legal_auth.family_name or legal_auth.role %}
+                <div class="mb-4">
+                    <div class="card healthcare-team-card">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">
+                                <i class="fas fa-gavel me-2"></i>
+                                Legal Authenticator
+                                <span class="badge bg-dark text-white ms-2">Legal Authority</span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="card-title text-warning">
+                                        {% if legal_auth.title %}{{ legal_auth.title }} {% endif %}
+                                        {{ legal_auth.given_name|default:"" }} {{ legal_auth.family_name|default:"" }}
+                                        {% if not legal_auth.given_name and not legal_auth.family_name %}
+                                            Legal Authenticator
+                                        {% endif %}
+                                    </h6>
 
-    <!-- Emergency Contacts -->
-    {% if patient_extended_data|safe_get:"emergency_contacts"|safe_get:"contacts" %}
-    <div class="mb-4">
-        <h6><i class="fas fa-ambulance me-1"></i>Emergency Contacts</h6>
-        {% for contact in patient_extended_data|safe_get:"emergency_contacts"|safe_get:"contacts" %}
-        <div class="healthcare-member-card">
-            <div class="card-body">
-                <h6 class="card-title">
-                    {{ contact|safe_get:"name"|default:"Unknown Contact" }}</h6>
-                <div class="mb-2">
-                    <span class="role-badge emergency-contact">Emergency Contact</span>
-                </div>
+                                    {% if legal_auth.role %}
+                                        <p class="mb-2">
+                                            <strong><i class="fas fa-user-tag me-1"></i>Role:</strong>
+                                            <span class="badge bg-warning text-dark">{{ legal_auth.role }}</span>
+                                        </p>
+                                    {% endif %}
 
-                <!-- Phone Numbers -->
-                {% if contact|safe_get:"phone_numbers" %}
-                <div class="contact-details mb-2">
-                    {% for phone in contact|safe_get:"phone_numbers" %}
-                    <div class="contact-item">
-                        <strong>
-                            {{ phone|safe_get:"display_label"|default:phone|safe_get:"use_label"|default:"Phone:" }}</strong>
-                        <a href="tel:{{ phone|safe_get:"number"|default:"" }}" class="contact-link phone-link ms-2">
-                            {{ phone|safe_get:"number"|default:"" }}
-                        </a>
-                        {% if phone|safe_get:"is_primary" %}
-                        <span class="badge bg-success ms-1">Primary</span>
-                        {% endif %}
+                                    {% if legal_auth.specialty %}
+                                        <p class="mb-2">
+                                            <strong><i class="fas fa-certificate me-1"></i>Specialty:</strong>
+                                            {{ legal_auth.specialty }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-4">
+                                    {% if legal_auth.organization.name %}
+                                        <div class="organization-info">
+                                            <h6 class="text-muted">
+                                                <i class="fas fa-building me-1"></i>Organization
+                                            </h6>
+                                            <p class="mb-1">{{ legal_auth.organization.name }}</p>
+                                            {% if legal_auth.organization.organization_type %}
+                                                <small class="text-muted">{{ legal_auth.organization.organization_type }}</small>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Contact Information for Legal Authenticator -->
+                            {% if legal_auth.contact_info.addresses or legal_auth.contact_info.telecoms %}
+                                <hr>
+                                <h6 class="text-muted mb-3"><i class="fas fa-address-book me-1"></i>Contact Information</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {% for address in legal_auth.contact_info.addresses %}
+                                            <p class="mb-2">
+                                                <strong>Address:</strong><br>
+                                                <small>
+                                                    {% for line in address.streetAddressLine %}{{ line }}<br>{% endfor %}
+                                                    {% if address.city %}{{ address.city }}{% endif %}
+                                                    {% if address.postalCode %} {{ address.postalCode }}{% endif %}
+                                                    {% if address.country %}<br>{{ address.country }}{% endif %}
+                                                </small>
+                                            </p>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        {% for telecom in legal_auth.contact_info.telecoms %}
+                                            <p class="mb-1">
+                                                <strong>
+                                                    {% if 'tel:' in telecom.value %}
+                                                        <i class="fas fa-phone me-1"></i>Contact:
+                                                    {% elif 'mailto:' in telecom.value %}
+                                                        <i class="fas fa-envelope me-1"></i>Email:
+                                                    {% else %}
+                                                        <i class="fas fa-phone-alt me-1"></i>Contact:
+                                                    {% endif %}
+                                                </strong>
+                                                {% if 'tel:' in telecom.value %}
+                                                    <a href="{{ telecom.value }}">{{ telecom.value|slice:"4:" }}</a>
+                                                {% elif 'mailto:' in telecom.value %}
+                                                    <a href="{{ telecom.value }}">{{ telecom.value|slice:"7:" }}</a>
+                                                {% else %}
+                                                    {{ telecom.value }}
+                                                {% endif %}
+                                            </p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    {% endfor %}
                 </div>
-                {% endif %}
+            {% endif %}
+        {% endwith %}
+    {% endif %}
 
-                <!-- Email Addresses -->
-                {% if contact|safe_get:"email_addresses" %}
-                <div class="contact-details mb-2">
-                    {% for email in contact|safe_get:"email_addresses" %}
-                    <div class="contact-item">
-                        <strong>
-                            {{ email|safe_get:"display_label"|default:email|safe_get:"use_label"|default:"Email:" }}</strong>
-                        <a href="mailto:{{ email|safe_get:"email"|default:"" }}" class="contact-link email-link ms-2">
-                            {{ email|safe_get:"email"|default:"" }}
-                        </a>
+    <!-- Preferred HCP Organization -->
+    {% if healthcare_data.preferred_hcp %}
+        {% with preferred_hcp=healthcare_data.preferred_hcp %}
+            {% if preferred_hcp.name or preferred_hcp.addresses or preferred_hcp.telecoms %}
+                <div class="mb-4">
+                    <div class="card healthcare-team-card">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-star me-2"></i>
+                                Preferred Healthcare Provider
+                                <span class="badge bg-light text-info ms-2">Primary Care</span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-info">
+                                {{ preferred_hcp.name|default:"Preferred Healthcare Organization" }}
+                            </h6>
+
+                            {% if preferred_hcp.organization_type %}
+                                <p class="mb-3">
+                                    <span class="badge bg-info">{{ preferred_hcp.organization_type }}</span>
+                                </p>
+                            {% endif %}
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {% for address in preferred_hcp.addresses %}
+                                        <p class="mb-2">
+                                            <strong><i class="fas fa-map-marker-alt me-1"></i>Address:</strong><br>
+                                            <small>
+                                                {% for line in address.streetAddressLine %}{{ line }}<br>{% endfor %}
+                                                {% if address.city %}{{ address.city }}{% endif %}
+                                                {% if address.postalCode %} {{ address.postalCode }}{% endif %}
+                                                {% if address.country %}<br>{{ address.country }}{% endif %}
+                                            </small>
+                                        </p>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    {% for telecom in preferred_hcp.telecoms %}
+                                        <p class="mb-1">
+                                            <strong>
+                                                {% if 'tel:' in telecom.value %}
+                                                    <i class="fas fa-phone me-1"></i>Phone:
+                                                {% elif 'mailto:' in telecom.value %}
+                                                    <i class="fas fa-envelope me-1"></i>Email:
+                                                {% else %}
+                                                    <i class="fas fa-phone-alt me-1"></i>Contact:
+                                                {% endif %}
+                                            </strong>
+                                            {% if 'tel:' in telecom.value %}
+                                                <a href="{{ telecom.value }}">{{ telecom.value|slice:"4:" }}</a>
+                                            {% elif 'mailto:' in telecom.value %}
+                                                <a href="{{ telecom.value }}">{{ telecom.value|slice:"7:" }}</a>
+                                            {% else %}
+                                                {{ telecom.value }}
+                                            {% endif %}
+                                        </p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    {% endfor %}
                 </div>
-                {% endif %}
-            </div>
+            {% endif %}
+        {% endwith %}
+    {% endif %}
+
+    <!-- No Healthcare Team Message -->
+    {% if not healthcare_data or not healthcare_data.author_hcp and not healthcare_data.legal_authenticator %}
+        <div class="empty-state text-center py-4">
+            <i class="fas fa-user-md fa-3x text-muted mb-3"></i>
+            <h6>No Healthcare Team Information</h6>
+            <p class="text-muted">No healthcare team information is available.</p>
         </div>
-        {% endfor %}
-    </div>
     {% endif %}
 
-    <!-- Next of Kin -->
-    {% if patient_extended_data|safe_get:"next_of_kin"|safe_get:"contacts" %}
-    <div class="mb-4">
-        <h6><i class="fas fa-users me-1"></i>Next of Kin</h6>
-        {% for contact in patient_extended_data|safe_get:"next_of_kin"|safe_get:"contacts" %}
-        <div class="healthcare-member-card">
-            <div class="card-body">
-                <h6 class="card-title">
-                    {{ contact|safe_get:"name"|default:"Unknown Contact" }}</h6>
-                <div class="mb-2">
-                    <span class="role-badge next-of-kin">
-                        {{ contact|safe_get:"relationship"|default:"Next of Kin" }}</span>
-                </div>
-
-                <!-- Phone Numbers -->
-                {% if contact|safe_get:"phone_numbers" %}
-                <div class="contact-details mb-2">
-                    {% for phone in contact.phone_numbers %}
-                    <div class="contact-item">
-                        <strong>
-                            {{ phone.get('display_label', phone.get('use_label', 'Phone:')) }}</strong>
-                        <a href="tel:{{ phone.get('number', '') }}" class="contact-link phone-link ms-2">
-                            {{ phone.get('number', '') }}
-                        </a>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- Medical Performers -->
-    {% if patient_extended_data|safe_get:"performers"|safe_get:"medical_doctors" %}
-    <div class="mb-4">
-        <h6><i class="fas fa-user-md me-1"></i>Medical Doctors</h6>
-        {% for doctor in patient_extended_data|safe_get:"performers"|safe_get:"medical_doctors" %}
-        <div class="healthcare-member-card">
-            <div class="card-body">
-                <h6 class="card-title">
-                    {{ doctor|safe_get:"name"|default:"Unknown Doctor" }}</h6>
-                <div class="mb-2">
-                    <span class="role-badge doctor">
-                        {{ doctor|safe_get:"role"|default:"Medical Doctor" }}</span>
-                </div>
-                {% if doctor|safe_get:"organization" %}
-                <div class="organization-info mb-2">
-                    <strong><i class="fas fa-building me-1"></i>Organization:</strong>
-                    {{ doctor|safe_get:"organization" }}
-                </div>
-                {% endif %}
-
-                <!-- Contact Information -->
-                {% if doctor.get('phone_numbers') %}
-                <div class="contact-details mb-2">
-                    {% for phone in doctor.phone_numbers %}
-                    <div class="contact-item">
-                        <strong>
-                            {{ phone.get('display_label', phone.get('use_label', 'Phone:')) }}</strong>
-                        <a href="tel:{{ phone.get('number', '') }}" class="contact-link phone-link ms-2">
-                            {{ phone.get('number', '') }}
-                        </a>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- Custodian Organization -->
-    {% if patient_extended_data|safe_get:"custodian_organization" %}
-    {# Django: Use direct access instead of {% set %} #}
-    <div class="mb-4">
-        <h6><i class="fas fa-building me-1"></i>Custodian Organization</h6>
-        <div class="healthcare-member-card">
-            <div class="card-body">
-                <h6 class="card-title">
-                    {{ patient_extended_data|safe_get:"custodian_organization".name|default:"Unknown Organization" }}</h6>
-                {% if patient_extended_data|safe_get:"custodian_organization".contact_info.addresses %}
-                <div class="contact-details mb-2">
-                    <strong><i class="fas fa-map-marker-alt me-1"></i>Address:</strong>
-                    {{ patient_extended_data|safe_get:"custodian_organization".contact_info.addresses.0 }}
-                </div>
-                {% endif %}
-                {% if custodian.get('contact_info', {}).get('phone_numbers') %}
-                <div class="contact-details">
-                    <strong><i class="fas fa-phone me-1"></i>Phone:</strong>
-                    <a href="tel:{{ custodian.contact_info.phone_numbers[0] }}" class="contact-link phone-link">
-                        {{ custodian.contact_info.phone_numbers[0] }}
-                    </a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Show message if no healthcare team info -->
-    {% if not healthcare_data.get('authors') and not healthcare_data.get('legal_authenticator') and not healthcare_data.get('custodian_organization') %}
-    <div class="alert alert-info">
-        <i class="fas fa-info-circle me-2"></i>No healthcare team information available in the CDA document.
-    </div>
-    {% endif %}
-
-    {% endwith %}
-    {% else %}
-    <div class="alert alert-warning">
-        <i class="fas fa-exclamation-triangle me-2"></i>No extended patient data available.
-    </div>
-    {% endif %}
 </div>

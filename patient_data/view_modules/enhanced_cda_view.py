@@ -64,6 +64,30 @@ class EnhancedCDADocumentView(View):
                 cda_document, source_language
             )
 
+            # Extract comprehensive patient summary including extended header data
+            comprehensive_summary = cda_processor.get_comprehensive_patient_summary(
+                cda_document
+            )
+
+            # Ensure the comprehensive summary is JSON serializable by converting any non-serializable objects
+            def make_serializable(obj):
+                """Recursively convert objects to JSON-serializable format"""
+                if hasattr(obj, "__dict__"):
+                    # Convert custom objects to dictionaries
+                    return {
+                        key: make_serializable(value)
+                        for key, value in vars(obj).items()
+                    }
+                elif isinstance(obj, dict):
+                    return {key: make_serializable(value) for key, value in obj.items()}
+                elif isinstance(obj, (list, tuple)):
+                    return [make_serializable(item) for item in obj]
+                else:
+                    return obj
+
+            # Make comprehensive summary JSON serializable
+            serializable_summary = make_serializable(comprehensive_summary)
+
             # Extract medications specifically for enhanced display and create clinical tables
             medications = []
             if clinical_sections and "sections" in clinical_sections:
@@ -104,13 +128,18 @@ class EnhancedCDADocumentView(View):
                 "view_mode": request.GET.get(
                     "view", "side-by-side"
                 ),  # 'side-by-side', 'toggle', 'translated-only'
+                # Extended patient data for Extended Patient Information tabs
+                "patient_extended_data": serializable_summary,
+                "administrative_data": serializable_summary,
+                # Additional context for template compatibility
+                "patient_id": patient_id,
+                "has_extended_data": bool(serializable_summary),
             }
 
             return render(
                 request,
-                "jinja2/patient_data/enhanced_patient_cda.html",
+                "patient_data/enhanced_patient_cda.html",
                 context,
-                using="jinja2",
             )
 
         except Exception as e:
