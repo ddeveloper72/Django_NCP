@@ -2105,21 +2105,16 @@ def patient_data_view(request):
                 # Get the first (best) match
                 match = matches[0]
 
-                # Create a temporary PatientData record for session storage
-                # In real NCP workflow, this would be extracted from CDA response
-                from .models import PatientData
+                # Create a PatientSession record for the new session management system
+                from .models import PatientSession
+                import uuid
+                from datetime import timedelta
 
-                temp_patient = PatientData(
-                    given_name=match.given_name,
-                    family_name=match.family_name,
-                    birth_date=match.birth_date,
-                    gender=match.gender,
-                )
-                # Don't save to database - just use for ID generation
-                temp_patient.id = hash(f"{country_code}_{patient_id}") % 1000000
+                # Generate a unique session ID
+                session_id = str(uuid.uuid4().int)[:10]  # 10-digit session ID
 
-                # Store the CDA match in session for later use with L1/L3 support
-                request.session[f"patient_match_{temp_patient.id}"] = {
+                # Prepare patient data for secure storage
+                patient_session_data = {
                     "file_path": match.file_path,
                     "country_code": match.country_code,
                     "confidence_score": match.confidence_score,
@@ -2142,16 +2137,33 @@ def patient_data_view(request):
                     "available_document_types": match.get_available_document_types(),
                 }
 
+                # Create PatientSession for secure session management
+                patient_session = PatientSession.objects.create(
+                    session_id=session_id,
+                    user=request.user,
+                    country_code=country_code,
+                    search_criteria_hash=hash(f"{country_code}_{patient_id}"),
+                    status="active",
+                    expires_at=timezone.now() + timedelta(hours=8),
+                    client_ip=request.META.get("REMOTE_ADDR", ""),
+                    last_action="patient_search_successful",
+                    encryption_key_version=1,  # Set default encryption version
+                )
+
+                # Encrypt and store patient data
+                patient_session.encrypt_patient_data(patient_session_data)
+
+                # Also keep traditional session storage for backward compatibility
+                request.session[f"patient_match_{session_id}"] = patient_session_data
+
                 # Add success message
                 messages.success(
                     request,
                     f"Patient documents found with {match.confidence_score*100:.1f}% confidence in {match.country_code} NCP!",
                 )
 
-                # Redirect to patient details view
-                return redirect(
-                    "patient_data:patient_details", patient_id=temp_patient.id
-                )
+                # Redirect to patient details view with the session ID
+                return redirect("patient_data:patient_details", patient_id=session_id)
             else:
                 # No match found
                 messages.warning(
@@ -2253,16 +2265,37 @@ def patient_details_view(request, patient_id):
     View for displaying patient details and CDA documents
 
     IDENTIFIER NOTE:
-    - patient_id parameter: Temporary session ID from URL (e.g., 549316)
+    - patient_id parameter: Session ID from URL (e.g., 549316 or UUID-based)
     - This is NOT the actual patient identifier from the CDA document
     - Real patient IDs from CDA are larger numbers (e.g., aGVhbHRoY2FyZUlkMTIz)
     - Session IDs are safe for logging, real patient IDs must be protected
     """
 
-    # Check if this is an NCP query result (session data exists but no DB record)
-    session_key = f"patient_match_{patient_id}"
-    match_data = request.session.get(session_key)
+    # First check for PatientSession record (new session management)
+    from .models import PatientSession
 
+    patient_session = None
+    match_data = None
+
+    try:
+        patient_session = PatientSession.objects.get_active_session(patient_id)
+        if patient_session:
+            # Get patient data from the secure session
+            match_data = patient_session.get_patient_data()
+            logger.info(f"Found PatientSession record for session {patient_id}")
+        else:
+            logger.info(f"No active PatientSession found for session {patient_id}")
+    except Exception as e:
+        logger.warning(f"Error retrieving PatientSession for {patient_id}: {e}")
+
+    # Fallback to traditional session storage if no PatientSession found
+    if not match_data:
+        session_key = f"patient_match_{patient_id}"
+        match_data = request.session.get(session_key)
+        if match_data:
+            logger.info(f"Found traditional session data for patient {patient_id}")
+
+    # Check if this is an NCP query result (session data exists but no DB record)
     if (
         match_data
         and not PatientData.objects.filter(
@@ -2329,14 +2362,7 @@ def patient_details_view(request, patient_id):
             messages.error(request, "Patient data not found.")
             return redirect("patient_data:patient_data_form")
 
-    # Debug session data
-    logger.info("Looking for session data with key: %s", session_key)
-    logger.info("Available session keys: %s", list(request.session.keys()))
-
-    # Get CDA match from session
-    if not match_data:
-        match_data = request.session.get(session_key)
-
+    # Log session data status
     if match_data:
         logger.info("Found session data for patient %s", patient_id)
     else:
