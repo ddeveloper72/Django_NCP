@@ -4644,6 +4644,24 @@ def patient_cda_view(request, patient_id, cda_type=None):
                     f"🔍 FINAL TEMPLATE DATA - is_primary: {first_telecom.get('is_primary')}"
                 )
 
+        # Map administrative data to template variables for component compatibility
+        if 'administrative_data' in context and context['administrative_data']:
+            admin_data = context['administrative_data']
+            
+            # Map contact data from administrative_data.patient_contact_info
+            if admin_data.get('patient_contact_info'):
+                context['contact_data'] = admin_data['patient_contact_info']
+                logger.info(f"✅ Mapped contact_data with addresses: {len(admin_data['patient_contact_info'].get('addresses', []))}")
+                logger.info(f"✅ Mapped contact_data with telecoms: {len(admin_data['patient_contact_info'].get('telecoms', []))}")
+            
+            # Map healthcare data from administrative_data
+            if admin_data.get('author_hcp') or admin_data.get('organization'):
+                context['healthcare_data'] = {
+                    'author_hcp': admin_data.get('author_hcp'),
+                    'organization': admin_data.get('organization')
+                }
+                logger.info(f"✅ Mapped healthcare_data with author_hcp: {bool(admin_data.get('author_hcp'))}")
+
         return render(
             request,
             "patient_data/enhanced_patient_cda.html",
