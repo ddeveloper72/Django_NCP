@@ -271,7 +271,7 @@ class PatientSessionMiddleware(MiddlewareMixin):
         # Check if session should be rotated based on security flags
         if self._should_rotate_session(session, request, response):
             session.requires_rotation = True
-            session.save(update_fields=["requires_rotation"])
+            session.save()  # Save without update_fields to avoid database constraint issues
 
     def _should_rotate_session(
         self, session: PatientSession, request: HttpRequest, response: HttpResponse
