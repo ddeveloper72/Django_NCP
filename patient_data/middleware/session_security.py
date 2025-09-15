@@ -445,7 +445,7 @@ class AuditLoggingMiddleware(MiddlewareMixin):
             resource=request.path,
             client_ip=self._get_client_ip(request),
             method=request.method,
-            status_code=response.status_code,
+            response_status=response.status_code,  # Fixed: Changed from status_code to response_status
             duration_ms=int(duration * 1000),
             user_agent_hash=hashlib.sha256(
                 request.META.get("HTTP_USER_AGENT", "").encode()
