@@ -394,7 +394,7 @@ class PatientSessionManager(models.Manager):
         """Get active session by ID, returning None if expired or invalid."""
         try:
             session = self.get(session_id=session_id, is_active=True)
-            if session.is_expired():
+            if session.is_expired:  # Fixed: is_expired is a property, not a method
                 session.mark_expired()
                 return None
             return session
