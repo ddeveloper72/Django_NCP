@@ -66,20 +66,20 @@
                 <!-- Extended Info Tab Content -->
                 <div class="tab-content mt-3" id="extendedInfoTabContent">
 
-                    {# Django: Replace {% set %} with conditional logic #}
-                    {# Tab availability checks - Django compatible #}
-                    {% comment %}
-                    Django doesn't support {% set %} variables.
-                    Instead, use direct conditional checks in template logic.
-                    Tab order: contact -> healthcare -> document
-                    {% endcomment %}
+                    <!-- Contact Details Tab Pane -->
+                    <div class="tab-pane fade show active" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                        {% include 'patient_data/components/extended_patient_contact.html' %}
+                    </div>
 
-                    <!-- Include Child Components with Error Handling -->
-                    {% include 'patient_data/components/extended_patient_contact.html' %}
+                    <!-- Healthcare Team Tab Pane -->
+                    <div class="tab-pane fade" id="healthcare" role="tabpanel" aria-labelledby="healthcare-tab">
+                        {% include 'patient_data/components/extended_patient_healthcare.html' %}
+                    </div>
 
-                    {% include 'patient_data/components/extended_patient_healthcare.html' %}
-
-                    {% include 'patient_data/components/extended_patient_document.html' %}
+                    <!-- Document Info Tab Pane -->
+                    <div class="tab-pane fade" id="document" role="tabpanel" aria-labelledby="document-tab">
+                        {% include 'patient_data/components/extended_patient_document.html' %}
+                    </div>
 
                 </div>
             </div>

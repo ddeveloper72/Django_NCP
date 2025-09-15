@@ -4645,22 +4645,80 @@ def patient_cda_view(request, patient_id, cda_type=None):
                 )
 
         # Map administrative data to template variables for component compatibility
-        if 'administrative_data' in context and context['administrative_data']:
-            admin_data = context['administrative_data']
-            
+        logger.info(f"🔍 Starting data mapping for extended patient cards...")
+        
+        if "administrative_data" in context and context["administrative_data"]:
+            admin_data = context["administrative_data"]
+            logger.info(f"🔍 ADMIN DATA STRUCTURE: {list(admin_data.keys())}")
+
             # Map contact data from administrative_data.patient_contact_info
-            if admin_data.get('patient_contact_info'):
-                context['contact_data'] = admin_data['patient_contact_info']
-                logger.info(f"✅ Mapped contact_data with addresses: {len(admin_data['patient_contact_info'].get('addresses', []))}")
-                logger.info(f"✅ Mapped contact_data with telecoms: {len(admin_data['patient_contact_info'].get('telecoms', []))}")
-            
+            if admin_data.get("patient_contact_info"):
+                contact_info = admin_data["patient_contact_info"]
+                context["contact_data"] = contact_info
+                
+                # Log detailed structure for debugging
+                if hasattr(contact_info, 'addresses') or (isinstance(contact_info, dict) and 'addresses' in contact_info):
+                    addresses_count = len(contact_info.get('addresses', []))
+                    logger.info(f"✅ Mapped contact_data with addresses: {addresses_count}")
+                
+                if hasattr(contact_info, 'telecoms') or (isinstance(contact_info, dict) and 'telecoms' in contact_info):
+                    telecoms_count = len(contact_info.get('telecoms', []))
+                    logger.info(f"✅ Mapped contact_data with telecoms: {telecoms_count}")
+                    
+                logger.info(f"🔍 CONTACT DATA TYPE: {type(contact_info)}")
+                if isinstance(contact_info, dict):
+                    logger.info(f"🔍 CONTACT DATA KEYS: {list(contact_info.keys())}")
+                else:
+                    logger.info(f"🔍 CONTACT DATA ATTRIBUTES: {dir(contact_info)}")
+                    
+            else:
+                logger.warning(f"❌ NO patient_contact_info found in administrative_data")
+                logger.info(f"🔍 Available admin_data keys: {list(admin_data.keys())}")
+
             # Map healthcare data from administrative_data
-            if admin_data.get('author_hcp') or admin_data.get('organization'):
-                context['healthcare_data'] = {
-                    'author_hcp': admin_data.get('author_hcp'),
-                    'organization': admin_data.get('organization')
-                }
-                logger.info(f"✅ Mapped healthcare_data with author_hcp: {bool(admin_data.get('author_hcp'))}")
+            if admin_data.get("author_hcp") or admin_data.get("organization") or admin_data.get("author_information"):
+                healthcare_data = {}
+                if admin_data.get("author_hcp"):
+                    healthcare_data["author_hcp"] = admin_data.get("author_hcp")
+                elif admin_data.get("author_information"):
+                    # Handle case where author data is in author_information
+                    healthcare_data["author_hcp"] = admin_data.get("author_information")
+                
+                if admin_data.get("organization"):
+                    healthcare_data["organization"] = admin_data.get("organization")
+                
+                context["healthcare_data"] = healthcare_data
+                logger.info(f"✅ Mapped healthcare_data: {list(healthcare_data.keys())}")
+            else:
+                logger.warning(f"❌ NO author_hcp or organization found in administrative_data")
+                
+        else:
+            logger.warning(f"❌ NO administrative_data found in context")
+            
+        # Also check patient_extended_data for contact information
+        if "patient_extended_data" in context and context["patient_extended_data"]:
+            extended_data = context["patient_extended_data"]
+            logger.info(f"🔍 EXTENDED DATA STRUCTURE: {list(extended_data.keys())}")
+            
+            # Check if contact data is in extended data
+            if extended_data.get("patient_contact"):
+                logger.info(f"🔍 Found patient_contact in extended_data")
+                if not context.get("contact_data"):  # Only map if we don't already have contact_data
+                    context["contact_data"] = extended_data["patient_contact"]
+                    logger.info(f"✅ Mapped contact_data from patient_extended_data")
+            
+        # Final verification
+        final_context_keys = list(context.keys())
+        logger.info(f"🔍 Final context keys: {final_context_keys}")
+        logger.info(f"🔍 Has contact_data: {'contact_data' in context}")
+        logger.info(f"🔍 Has healthcare_data: {'healthcare_data' in context}")
+        
+        if 'contact_data' in context:
+            contact_data = context['contact_data']
+            if isinstance(contact_data, dict):
+                logger.info(f"🔍 Contact data final check - addresses: {len(contact_data.get('addresses', []))}, telecoms: {len(contact_data.get('telecoms', []))}")
+            else:
+                logger.info(f"🔍 Contact data is not a dict: {type(contact_data)}")
 
         return render(
             request,
