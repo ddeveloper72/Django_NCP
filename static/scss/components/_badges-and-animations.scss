@@ -1,0 +1,55 @@
+// Badge Colors - System badge colors consistent with backend mapping
+.badge {
+  &.bg-primary {
+    background-color: #0d6efd !important;
+  }
+
+  // SNOMED CT
+  &.bg-success {
+    background-color: #198754 !important;
+  }
+
+  // LOINC
+  &.bg-warning {
+    background-color: #fd7e14 !important;
+  }
+
+  // RxNorm
+  &.bg-danger {
+    background-color: #dc3545 !important;
+  }
+
+  // ICD
+  &.bg-info {
+    background-color: #0dcaf0 !important;
+  }
+
+  // UCUM
+  &.bg-secondary {
+    background-color: #6c757d !important;
+  }
+
+  // Legacy
+  &.bg-dark {
+    background-color: #212529 !important;
+  }
+
+  // ATC
+  &.bg-outline-secondary {
+    color: #6c757d !important;
+    border-color: #6c757d !important;
+  }
+}
+
+// Animation keyframes
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

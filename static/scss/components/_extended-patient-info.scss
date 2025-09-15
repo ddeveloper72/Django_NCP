@@ -1,0 +1,252 @@
+// Extended Patient Information Components
+.extended-patient-info {
+  .card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .card-header {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    border-bottom: none;
+    padding: 1.5rem;
+
+    h4 {
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+  }
+
+  .card-body {
+    padding: 2rem;
+    background: #f8f9fa;
+  }
+
+  // Tab navigation styling
+  .nav-tabs {
+    border-bottom: 2px solid #e9ecef;
+    margin-bottom: 0;
+
+    .nav-link {
+      border: none;
+      border-radius: 8px 8px 0 0;
+      color: #6c757d;
+      font-weight: 500;
+      padding: 1rem 1.5rem;
+      transition: all 0.3s ease;
+      position: relative;
+
+      &:hover {
+        border-color: transparent;
+        color: #495057;
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+      }
+
+      &.active {
+        background-color: #fff;
+        border-color: #e9ecef #e9ecef #fff;
+        color: #495057;
+        border-bottom: 2px solid #17a2b8;
+
+        &::after {
+          content: "";
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: linear-gradient(90deg, #17a2b8 0%, #20c997 100%);
+        }
+      }
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 0.25rem 0.5rem;
+    }
+  }
+
+  // Tab content styling
+  .tab-content {
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+    padding: 2rem;
+    min-height: 300px;
+  }
+
+  .tab-pane {
+    animation: fadeIn 0.3s ease-in-out;
+
+    h5 {
+      color: #495057;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    h6 {
+      color: #6c757d;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+  }
+
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    .nav-tabs .nav-link {
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .nav-tabs .badge {
+      font-size: 0.7rem;
+    }
+
+    .tab-content {
+      padding: 1rem;
+    }
+  }
+}
+
+// Contact information cards
+.contact-info-card {
+  border-left: 4px solid #17a2b8;
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.contact-type {
+  font-weight: 600;
+  color: #17a2b8;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.contact-details {
+  color: #495057;
+  line-height: 1.6;
+}
+
+// Emergency contacts styling
+.emergency-contact-card {
+  border: 1px solid #dc3545;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(220, 53, 69, 0.2);
+  }
+
+  .card-body {
+    background: linear-gradient(135deg, #fff 0%, #fdf2f2 100%);
+  }
+
+  .card-title {
+    color: #dc3545;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+}
+
+.relationship-badge {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+// Healthcare team styling
+.healthcare-member-card {
+  border: 1px solid #28a745;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(40, 167, 69, 0.2);
+  }
+
+  .card-body {
+    background: linear-gradient(135deg, #fff 0%, #f1f8f4 100%);
+  }
+
+  .card-title {
+    color: #28a745;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+}
+
+.role-badge {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.organization-info {
+  background: rgba(40, 167, 69, 0.1);
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+// Dependants styling
+.dependant-card {
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 193, 7, 0.2);
+  }
+
+  .card-body {
+    background: linear-gradient(135deg, #fff 0%, #fffbf0 100%);
+  }
+
+  .card-title {
+    color: #856404;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+}
+
+// Responsive adjustments for cards
+@media (max-width: 768px) {
+  .contact-info-card,
+  .emergency-contact-card,
+  .healthcare-member-card {
+    margin-bottom: 0.75rem;
+  }
+}

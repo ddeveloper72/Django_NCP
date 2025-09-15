@@ -1,0 +1,347 @@
+// ========================================
+// Healthcare Team Component
+// Styles for healthcare team cards in extended patient info
+// ========================================
+
+@import "../utils/variables";
+@import "../utils/mixins";
+
+// Healthcare Team Card Base
+.healthcare-team-card {
+  background: rgba(255, 255, 255, 0.98);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+
+  // Card Headers with Role-Based Styling
+  .card-header {
+    border: none;
+    padding: 1.5rem;
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
+      pointer-events: none;
+    }
+
+    // Primary HCP (Document Author)
+    &.bg-primary {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+
+      .badge.bg-light {
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #007bff !important;
+        font-weight: 600;
+      }
+    }
+
+    // Legal Authenticator
+    &.bg-warning {
+      background: linear-gradient(135deg, #ffc107, #e0a800);
+
+      .badge.bg-dark {
+        background: rgba(33, 37, 41, 0.9) !important;
+        color: #ffc107 !important;
+        font-weight: 600;
+      }
+    }
+
+    // Preferred HCP
+    &.bg-info {
+      background: linear-gradient(135deg, #17a2b8, #138496);
+
+      .badge.bg-light {
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #17a2b8 !important;
+        font-weight: 600;
+      }
+    }
+
+    // Team Members
+    &.bg-secondary {
+      background: linear-gradient(135deg, #6c757d, #545b62);
+
+      .badge {
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #6c757d !important;
+        font-weight: 600;
+      }
+    }
+
+    h6 {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      margin-bottom: 0;
+
+      i {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.4rem;
+        border-radius: 6px;
+        margin-right: 0.75rem;
+        font-size: 0.9rem;
+      }
+
+      .badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        margin-left: auto;
+      }
+    }
+  }
+
+  // Card Body Styling
+  .card-body {
+    padding: 1.5rem;
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+
+      &.text-primary {
+        color: #007bff !important;
+      }
+
+      &.text-warning {
+        color: #ffc107 !important;
+      }
+
+      &.text-info {
+        color: #17a2b8 !important;
+      }
+    }
+
+    // Role and Specialty Badges
+    .badge {
+      &.bg-success {
+        background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+        color: white !important;
+        padding: 0.4rem 0.8rem;
+        border-radius: 16px;
+      }
+
+      &.bg-info {
+        background: linear-gradient(135deg, #17a2b8, #138496) !important;
+        color: white !important;
+        padding: 0.4rem 0.8rem;
+        border-radius: 16px;
+      }
+
+      &.bg-secondary {
+        background: linear-gradient(135deg, #6c757d, #545b62) !important;
+        color: white !important;
+        padding: 0.4rem 0.8rem;
+        border-radius: 16px;
+      }
+
+      &.bg-warning {
+        background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+        color: #212529 !important;
+        padding: 0.4rem 0.8rem;
+        border-radius: 16px;
+        font-weight: 600;
+      }
+    }
+
+    // Organization Info Section
+    .organization-info {
+      background: rgba(248, 249, 250, 0.8);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 0.5rem;
+
+      h6 {
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+
+        i {
+          color: #007bff;
+          margin-right: 0.5rem;
+        }
+      }
+
+      p {
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+      }
+
+      small {
+        color: #6c757d;
+        font-style: italic;
+      }
+    }
+
+    // Contact Information Styling
+    hr {
+      border-color: rgba(0, 0, 0, 0.08);
+      margin: 1.5rem 0;
+    }
+
+    h6.text-muted {
+      color: #6c757d !important;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+
+      i {
+        color: #007bff;
+        margin-right: 0.5rem;
+      }
+    }
+
+    // Contact Links
+    a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #0056b3;
+        text-decoration: underline;
+      }
+    }
+
+    // Contact Information Grid
+    .row {
+      margin-bottom: 0;
+
+      .col-md-6 {
+        padding-bottom: 0.5rem;
+
+        p {
+          margin-bottom: 0.75rem;
+
+          strong {
+            color: #495057;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.25rem;
+
+            i {
+              color: #007bff;
+              margin-right: 0.5rem;
+              width: 16px;
+              text-align: center;
+            }
+          }
+
+          small {
+            color: #6c757d;
+            line-height: 1.4;
+          }
+        }
+      }
+    }
+  }
+
+  // Height utility for equal height cards
+  &.h-100 {
+    height: 100%;
+
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+  }
+}
+
+// Team Members Grid Layout
+.healthcare-team-members {
+  .row {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+
+    .col-md-6 {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .healthcare-team-card {
+    .card-header {
+      padding: 1rem;
+
+      h6 {
+        font-size: 0.95rem;
+        flex-direction: column;
+        align-items: flex-start;
+
+        .badge {
+          margin-left: 0;
+          margin-top: 0.5rem;
+        }
+      }
+    }
+
+    .card-body {
+      padding: 1rem;
+
+      .row {
+        .col-md-4,
+        .col-md-6,
+        .col-md-8 {
+          margin-bottom: 1rem;
+        }
+      }
+
+      .organization-info {
+        margin-top: 1rem;
+      }
+    }
+  }
+}
+
+// Animation for card reveals
+@keyframes cardReveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.healthcare-team-card {
+  animation: cardReveal 0.4s ease-out;
+
+  &:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+
+  &:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+}
