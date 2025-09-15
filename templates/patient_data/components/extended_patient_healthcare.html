@@ -1,13 +1,16 @@
 {% load patient_filters %}
 
 <!-- Extended Patient Healthcare Team Component -->
-<div class="tab-content-debug-header bg-success text-white p-2 mb-3 rounded">
-  <i class="fas fa-stethoscope me-2"></i>
-  <strong>HEALTHCARE TEAM TAB CONTENT</strong>
-  <small class="ms-2">(This should only show when Healthcare Team tab is active)</small>
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h5 class="mb-0"><i class="fas fa-stethoscope me-2"></i>Healthcare Team</h5>
+  {% if healthcare_data %}
+    <span class="badge bg-success">
+      {% if healthcare_data.author_hcp %}Primary Author{% endif %}
+      {% if healthcare_data.author_hcp and healthcare_data.organization %} • {% endif %}
+      {% if healthcare_data.organization %}{{ healthcare_data.organization.name|default:"Healthcare Organization" }}{% endif %}
+    </span>
+  {% endif %}
 </div>
-
-<h5><i class="fas fa-stethoscope me-2"></i>Healthcare Team</h5>
 
 <!-- Document Author HCP -->
 {% if healthcare_data and healthcare_data.author_hcp %}

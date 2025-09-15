@@ -16,8 +16,8 @@
                 <ul class="nav nav-tabs" id="extendedInfoTabs" role="tablist">
                     <!-- Contact Details Tab -->
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="contact-tab"
-                            data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab"
+                        <button class="nav-link tab-button active" id="contact-tab"
+                            onclick="showExtendedPatientTab('contact')" type="button" role="tab"
                             aria-controls="contact" aria-selected="true">
                             <i class="fas fa-address-card me-1"></i>Contact Details
                             {% if patient_extended_data|safe_get:"patient_contact" or administrative_data|safe_get:"patient_contact_info" %}
@@ -28,8 +28,8 @@
 
                     <!-- Healthcare Team Tab -->
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="healthcare-tab"
-                            data-bs-toggle="tab" data-bs-target="#healthcare" type="button" role="tab"
+                        <button class="nav-link tab-button" id="healthcare-tab"
+                            onclick="showExtendedPatientTab('healthcare')" type="button" role="tab"
                             aria-controls="healthcare" aria-selected="false">
                             <i class="fas fa-stethoscope me-1"></i>Healthcare Team
                             {% if patient_extended_data|safe_get:"authors" or administrative_data|safe_get:"authors" %}
@@ -55,8 +55,8 @@
 
                     <!-- Document Info Tab -->
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="document-tab"
-                            data-bs-toggle="tab" data-bs-target="#document" type="button" role="tab"
+                        <button class="nav-link tab-button" id="document-tab"
+                            onclick="showExtendedPatientTab('document')" type="button" role="tab"
                             aria-controls="document" aria-selected="false">
                             <i class="fas fa-file-medical-alt me-1"></i>Document Info
                         </button>
@@ -67,17 +67,17 @@
                 <div class="tab-content mt-3" id="extendedInfoTabContent">
 
                     <!-- Contact Details Tab Pane -->
-                    <div class="tab-pane fade show active" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                    <div class="tab-pane active" id="extended-contact" style="display: block;">
                         {% include 'patient_data/components/extended_patient_contact.html' %}
                     </div>
 
                     <!-- Healthcare Team Tab Pane -->
-                    <div class="tab-pane fade" id="healthcare" role="tabpanel" aria-labelledby="healthcare-tab">
+                    <div class="tab-pane" id="extended-healthcare" style="display: none;">
                         {% include 'patient_data/components/extended_patient_healthcare.html' %}
                     </div>
 
                     <!-- Document Info Tab Pane -->
-                    <div class="tab-pane fade" id="document" role="tabpanel" aria-labelledby="document-tab">
+                    <div class="tab-pane" id="extended-document" style="display: none;">
                         {% include 'patient_data/components/extended_patient_document.html' %}
                     </div>
 

@@ -1,13 +1,12 @@
 {% load patient_filters %}
 
 <!-- Extended Patient Document Information Component -->
-<div class="tab-content-debug-header bg-info text-white p-2 mb-3 rounded">
-  <i class="fas fa-file-medical-alt me-2"></i>
-  <strong>DOCUMENT INFO TAB CONTENT</strong>
-  <small class="ms-2">(This should only show when Document Info tab is active)</small>
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h5 class="mb-0"><i class="fas fa-file-medical-alt me-2"></i>Document Information</h5>
+  <span class="badge bg-info">
+    Patient Summary (PS) - European eHealth Standard
+  </span>
 </div>
-
-<h5><i class="fas fa-file-medical-alt me-2"></i>Document Information</h5>
 
 <!-- Document Metadata Card -->
 <div class="card document-info-card mb-4">
@@ -32,18 +31,25 @@
                 </div>
 
                 <!-- Document Dates -->
-                {% if document_data %}
-                    {% if document_data.document_creation_date %}
+                {% if administrative_data %}
+                    {% if administrative_data.document_creation_time %}
                         <div class="mb-3">
                             <h6 class="text-muted"><i class="fas fa-calendar-plus me-1"></i>Creation Date</h6>
-                            <p class="mb-0">{{ document_data.document_creation_date }}</p>
+                            <p class="mb-0">{{ administrative_data.document_creation_time }}</p>
                         </div>
                     {% endif %}
 
-                    {% if document_data.document_last_update_date and document_data.document_last_update_date != 'Unknown' %}
+                    {% if administrative_data.last_modified_time and administrative_data.last_modified_time != 'Unknown' %}
                         <div class="mb-3">
                             <h6 class="text-muted"><i class="fas fa-calendar-check me-1"></i>Last Updated</h6>
-                            <p class="mb-0">{{ document_data.document_last_update_date }}</p>
+                            <p class="mb-0">{{ administrative_data.last_modified_time }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if administrative_data.document_version %}
+                        <div class="mb-3">
+                            <h6 class="text-muted"><i class="fas fa-code-branch me-1"></i>Version</h6>
+                            <p class="mb-0">{{ administrative_data.document_version }}</p>
                         </div>
                     {% endif %}
                 {% endif %}
@@ -51,21 +57,30 @@
 
             <div class="col-md-6">
                 <!-- Document Identifiers -->
-                {% if document_data %}
-                    {% if document_data.document_version_number %}
+                {% if administrative_data %}
+                    {% if administrative_data.document_version_number %}
                         <div class="mb-3">
                             <h6 class="text-muted"><i class="fas fa-code-branch me-1"></i>Version</h6>
                             <p class="mb-0">
-                                <span class="badge bg-primary">v{{ document_data.document_version_number }}</span>
+                                <span class="badge bg-primary">v{{ administrative_data.document_version_number }}</span>
                             </p>
                         </div>
                     {% endif %}
 
-                    {% if document_data.document_set_id %}
+                    {% if administrative_data.document_set_id %}
                         <div class="mb-3">
                             <h6 class="text-muted"><i class="fas fa-barcode me-1"></i>Document Set ID</h6>
                             <p class="mb-0">
-                                <code class="text-muted">{{ document_data.document_set_id }}</code>
+                                <code class="text-muted">{{ administrative_data.document_set_id }}</code>
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    {% if administrative_data.document_id %}
+                        <div class="mb-3">
+                            <h6 class="text-muted"><i class="fas fa-fingerprint me-1"></i>Document ID</h6>
+                            <p class="mb-0">
+                                <code class="text-muted">{{ administrative_data.document_id|truncatechars:40 }}</code>
                             </p>
                         </div>
                     {% endif %}
@@ -83,8 +98,8 @@
 </div>
 
 <!-- Custodian Organization Card -->
-{% if document_data and document_data.custodian_organization %}
-    {% with custodian=document_data.custodian_organization %}
+{% if administrative_data and administrative_data.custodian_organization %}
+    {% with custodian=administrative_data.custodian_organization %}
         <div class="card document-info-card mb-4">
             <div class="card-header bg-warning text-dark">
                 <h6 class="mb-0">
@@ -102,9 +117,44 @@
                         <span class="badge bg-warning text-dark">{{ custodian.organization_type }}</span>
                     </p>
                 {% endif %}
+                {% if custodian.id %}
+                    <p class="mb-0">
+                        <small class="text-muted">Organization ID: {{ custodian.id|truncatechars:30 }}</small>
+                    </p>
+                {% endif %}
             </div>
         </div>
     {% endwith %}
+{% endif %}
+
+<!-- Document Summary -->
+{% if administrative_data %}
+    <div class="card document-info-card">
+        <div class="card-header bg-secondary text-white">
+            <h6 class="mb-0">
+                <i class="fas fa-file-medical me-2"></i>
+                Document Summary
+            </h6>
+        </div>
+        <div class="card-body">
+            <p class="mb-0">
+                This European Patient Summary document contains essential health information extracted from 
+                healthcare systems to support continuity of care. The document follows HL7 CDA R2 
+                implementation guidelines and European eHealth interoperability standards.
+            </p>
+        </div>
+    </div>
+{% else %}
+    <!-- Fallback content when no document data is available -->
+    <div class="alert alert-info">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-info-circle fa-2x me-3"></i>
+            <div>
+                <h6 class="mb-1">Limited Document Information</h6>
+                <p class="mb-0">Document metadata is not available or has not been extracted from the current CDA document.</p>
+            </div>
+        </div>
+    </div>
 {% endif %}
 
 <!-- Fallback content when no document data is available -->

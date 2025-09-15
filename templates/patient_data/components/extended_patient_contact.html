@@ -1,13 +1,16 @@
 {% load patient_filters %}
 
 <!-- Extended Patient Contact Information Component -->
-<div class="tab-content-debug-header bg-primary text-white p-2 mb-3 rounded">
-  <i class="fas fa-address-book me-2"></i>
-  <strong>CONTACT DETAILS TAB CONTENT</strong>
-  <small class="ms-2">(This should only show when Contact Details tab is active)</small>
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h5 class="mb-0"><i class="fas fa-address-book me-2"></i>Contact Information</h5>
+  {% if contact_data and contact_data.addresses or contact_data.telecoms %}
+    <span class="badge bg-primary">
+      {% if contact_data.addresses %}{{ contact_data.addresses|length }} Address{% if contact_data.addresses|length != 1 %}es{% endif %}{% endif %}
+      {% if contact_data.addresses and contact_data.telecoms %} • {% endif %}
+      {% if contact_data.telecoms %}{{ contact_data.telecoms|length }} Contact{% if contact_data.telecoms|length != 1 %}s{% endif %}{% endif %}
+    </span>
+  {% endif %}
 </div>
-
-<h5><i class="fas fa-address-book me-2"></i>Contact Information</h5>
 
 {% if contact_data and contact_data.addresses %}
   <!-- Patient Address Cards -->
