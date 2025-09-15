@@ -3736,7 +3736,7 @@ def patient_cda_view(request, patient_id, cda_type=None):
         context = {
             "patient_identity": {
                 "patient_id": patient_government_id,  # Display the government ID
-                "patient_id": patient_id,  # Keep session ID for URL routing
+                "url_patient_id": patient_id,  # Keep session ID for URL routing
                 "given_name": (
                     patient_data.given_name
                     if patient_data
@@ -3863,7 +3863,7 @@ def patient_cda_view(request, patient_id, cda_type=None):
                         "patient_id"
                     ] = xml_patient_id  # Display the XML patient ID
                     context["patient_identity"][
-                        "patient_id"
+                        "url_patient_id"
                     ] = url_patient_id  # Keep session ID for navigation
                 else:
                     context["patient_identity"][
