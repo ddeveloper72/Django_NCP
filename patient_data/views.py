@@ -8144,6 +8144,106 @@ def enhanced_cda_display(request):
                 "patient_id": "TEST123",
                 "url_patient_id": "TEST123",
             },
+            # TEST: Add sample extended patient data for Extended Patient Information tabs
+            "contact_data": {
+                "addresses": [
+                    {
+                        "type": "Physical",
+                        "use": "Primary Residence",
+                        "street": "123 Main Street",
+                        "city": "Dublin",
+                        "state": "Leinster",
+                        "postal_code": "D02 XY45",
+                        "country": "Ireland",
+                        "country_code": "IE",
+                    },
+                    {
+                        "type": "Postal",
+                        "use": "Mailing Address",
+                        "street": "P.O. Box 456",
+                        "city": "Cork",
+                        "state": "Munster",
+                        "postal_code": "T12 AB78",
+                        "country": "Ireland",
+                        "country_code": "IE",
+                    },
+                ],
+                "telecoms": [
+                    {"type": "Phone", "use": "Mobile", "value": "+353 86 123 4567"},
+                    {"type": "Email", "use": "Primary", "value": "john.doe@email.ie"},
+                    {"type": "Phone", "use": "Home", "value": "+353 21 456 7890"},
+                ],
+            },
+            "healthcare_data": {
+                "author_hcp": {
+                    "name": "Dr. Sarah O'Connor",
+                    "role": "General Practitioner",
+                    "organization": "Dublin Primary Care Centre",
+                    "specialty": "Family Medicine",
+                    "phone": "+353 1 234 5678",
+                    "email": "sarah.oconnor@dublinpcc.ie",
+                },
+                "organization": {
+                    "name": "Dublin Primary Care Centre",
+                    "address": "456 Healthcare Avenue, Dublin 4, Ireland",
+                    "phone": "+353 1 234 5678",
+                    "type": "Primary Care Practice",
+                    "identifier": "IE-HCP-001234",
+                },
+                "legal_authenticator": {
+                    "name": "Dr. Michael Walsh",
+                    "role": "Medical Director",
+                    "organization": "Dublin Primary Care Centre",
+                    "specialty": "Internal Medicine",
+                    "authentication_time": "2024-01-15T14:30:00Z",
+                },
+            },
+            "administrative_data": {
+                "document_id": "IE-CDA-2024-001234",
+                "creation_time": "2024-01-15T14:30:00Z",
+                "language_code": "en-IE",
+                "confidentiality": "Normal",
+                "version": "1.0",
+                "template_id": "2.16.840.1.113883.10.20.22.1.1",
+                "custodian": {
+                    "organization": "Health Service Executive (HSE)",
+                    "identifier": "IE-HSE-CUSTODIAN",
+                },
+            },
+            "patient_extended_data": {
+                "birth_details": {
+                    "birth_date": "1985-03-20",
+                    "birth_place": "Dublin, Ireland",
+                    "multiple_birth": False,
+                },
+                "demographics": {
+                    "gender": "Male",
+                    "marital_status": "Married",
+                    "race": "Caucasian",
+                    "ethnicity": "Irish",
+                    "language": "English (Ireland)",
+                },
+                "identifiers": [
+                    {
+                        "type": "National Health Number",
+                        "value": "IE123456789",
+                        "system": "HSE Patient ID",
+                    },
+                    {
+                        "type": "Social Security Number",
+                        "value": "IE-SSN-123456789",
+                        "system": "Revenue Ireland",
+                    },
+                ],
+                "emergency_contacts": [
+                    {
+                        "name": "Jane Doe",
+                        "relationship": "Spouse",
+                        "phone": "+353 86 987 6543",
+                        "email": "jane.doe@email.ie",
+                    }
+                ],
+            },
         }
 
         return render(request, "patient_data/enhanced_patient_cda.html", context)

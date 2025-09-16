@@ -1,54 +1,70 @@
 {% load patient_filters %}
 
 <!-- Extended Patient Document Information Component -->
+<!-- Temporary Debug Section -->
+{% if 0 %}
+<div class="alert alert-warning mb-3">
+    <strong>Document Data Debug:</strong><br>
+    administrative_data exists: {% if administrative_data %}Yes{% else %}No{% endif %}<br>
+    {% if administrative_data %}
+    administrative_data keys: {{ administrative_data.keys|join:", " }}<br>
+    {% if administrative_data.custodian_organization %}
+    custodian_organization exists: Yes<br>
+    custodian name: {{ administrative_data.custodian_organization.name|default:"None" }}<br>
+    custodian addresses: {% if administrative_data.custodian_organization.addresses %}{{ administrative_data.custodian_organization.addresses|length }}{% else %}0{% endif %}<br>
+    custodian telecoms: {% if administrative_data.custodian_organization.telecoms %}{{ administrative_data.custodian_organization.telecoms|length }}{% else %}0{% endif %}<br>
+    custodian contact_info: {% if administrative_data.custodian_organization.contact_info %}Yes{% else %}No{% endif %}
+    {% else %}
+    custodian_organization: No
+    {% endif %}
+    {% endif %}
+</div>
+{% endif %}
+
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h5 class="mb-0"><i class="fas fa-file-medical-alt me-2"></i>Document Information</h5>
-  <span class="badge bg-info">
+  <h5 class="mb-0"><i class="fas fa-file-medical-alt me-2 text-primary"></i>Document Information</h5>
+  <span class="badge bg-light text-dark border">
     Patient Summary (PS) - European eHealth Standard
   </span>
 </div>
 
-<!-- Document Metadata Card -->
-<div class="card document-info-card mb-4">
-    <div class="card-header bg-info text-white">
-        <h6 class="mb-0">
-            <i class="fas fa-file-medical me-2"></i>
-            CDA Document Metadata
-        </h6>
-    </div>
+<!-- Document Metadata -->
+<div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
+        <h5 class="card-title mb-3">CDA Document Metadata</h5>
+
         <div class="row">
             <div class="col-md-6">
                 <!-- Document Status -->
                 <div class="mb-3">
-                    <h6 class="text-muted"><i class="fas fa-info-circle me-1"></i>Document Status</h6>
+                    <label class="form-label text-muted fw-bold">Document Status</label>
                     <div class="mb-2">
-                        <span class="badge bg-success me-2"><i class="fas fa-check me-1"></i>Active</span>
-                        <span class="badge bg-info me-2"><i class="fas fa-lock me-1"></i>Secure</span>
-                        <span class="badge bg-secondary"><i class="fas fa-eye me-1"></i>Normal Confidentiality</span>
+                        <span class="badge bg-success me-2">Active</span>
+                        <span class="badge bg-primary me-2">Secure</span>
+                        <span class="badge bg-light text-dark border">Normal Confidentiality</span>
                     </div>
-                    <small class="text-muted">Document confidentialityCode and status indicators</small>
+                    <small class="text-muted">Document confidentiality code and status indicators</small>
                 </div>
 
                 <!-- Document Dates -->
                 {% if administrative_data %}
                     {% if administrative_data.document_creation_time %}
                         <div class="mb-3">
-                            <h6 class="text-muted"><i class="fas fa-calendar-plus me-1"></i>Creation Date</h6>
+                            <label class="form-label text-muted fw-bold">Creation Date</label>
                             <p class="mb-0">{{ administrative_data.document_creation_time }}</p>
                         </div>
                     {% endif %}
 
                     {% if administrative_data.last_modified_time and administrative_data.last_modified_time != 'Unknown' %}
                         <div class="mb-3">
-                            <h6 class="text-muted"><i class="fas fa-calendar-check me-1"></i>Last Updated</h6>
+                            <label class="form-label text-muted fw-bold">Last Updated</label>
                             <p class="mb-0">{{ administrative_data.last_modified_time }}</p>
                         </div>
                     {% endif %}
 
                     {% if administrative_data.document_version %}
                         <div class="mb-3">
-                            <h6 class="text-muted"><i class="fas fa-code-branch me-1"></i>Version</h6>
+                            <label class="form-label text-muted fw-bold">Version</label>
                             <p class="mb-0">{{ administrative_data.document_version }}</p>
                         </div>
                     {% endif %}
@@ -60,7 +76,7 @@
                 {% if administrative_data %}
                     {% if administrative_data.document_version_number %}
                         <div class="mb-3">
-                            <h6 class="text-muted"><i class="fas fa-code-branch me-1"></i>Version</h6>
+                            <label class="form-label text-muted fw-bold">Version</label>
                             <p class="mb-0">
                                 <span class="badge bg-primary">v{{ administrative_data.document_version_number }}</span>
                             </p>
@@ -69,18 +85,18 @@
 
                     {% if administrative_data.document_set_id %}
                         <div class="mb-3">
-                            <h6 class="text-muted"><i class="fas fa-barcode me-1"></i>Document Set ID</h6>
+                            <label class="form-label text-muted fw-bold">Document Set ID</label>
                             <p class="mb-0">
-                                <code class="text-muted">{{ administrative_data.document_set_id }}</code>
+                                <code class="text-muted small">{{ administrative_data.document_set_id }}</code>
                             </p>
                         </div>
                     {% endif %}
 
                     {% if administrative_data.document_id %}
                         <div class="mb-3">
-                            <h6 class="text-muted"><i class="fas fa-fingerprint me-1"></i>Document ID</h6>
+                            <label class="form-label text-muted fw-bold">Document ID</label>
                             <p class="mb-0">
-                                <code class="text-muted">{{ administrative_data.document_id|truncatechars:40 }}</code>
+                                <code class="text-muted small">{{ administrative_data.document_id|truncatechars:40 }}</code>
                             </p>
                         </div>
                     {% endif %}
@@ -88,7 +104,7 @@
 
                 <!-- Document Type Info -->
                 <div class="mb-3">
-                    <h6 class="text-muted"><i class="fas fa-file-alt me-1"></i>Document Type</h6>
+                    <label class="form-label text-muted fw-bold">Document Type</label>
                     <p class="mb-0">Patient Summary (PS) - European eHealth Standard</p>
                     <small class="text-muted">HL7 CDA R2 Implementation Guide</small>
                 </div>
@@ -100,27 +116,129 @@
 <!-- Custodian Organization Card -->
 {% if administrative_data and administrative_data.custodian_organization %}
     {% with custodian=administrative_data.custodian_organization %}
-        <div class="card document-info-card mb-4">
-            <div class="card-header bg-warning text-dark">
-                <h6 class="mb-0">
-                    <i class="fas fa-shield-alt me-2"></i>
-                    Document Custodian
-                    <span class="badge bg-dark text-white ms-2">Legal Responsibility</span>
-                </h6>
-            </div>
+        <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
-                <h6 class="card-title text-warning">
-                    {{ custodian.name|default:"Document Custodian Organization" }}
-                </h6>
+                <h5 class="card-title mb-3">
+                    Document Custodian
+                </h5>
+
+                <div class="mb-3">
+                    <label class="form-label text-muted fw-bold">Organization</label>
+                    <p class="mb-1 fw-medium">{{ custodian.name|default:"Document Custodian Organization" }}</p>
+                    {% if custodian.id %}
+                        <small class="text-muted">ID: {{ custodian.id|truncatechars:30 }}</small>
+                    {% endif %}
+                </div>
+
                 {% if custodian.organization_type %}
-                    <p class="mb-3">
-                        <span class="badge bg-warning text-dark">{{ custodian.organization_type }}</span>
-                    </p>
+                    <div class="mb-3">
+                        <label class="form-label text-muted fw-bold">Organization Type</label>
+                        <p class="mb-0">
+                            <span class="badge bg-light text-dark border">{{ custodian.organization_type }}</span>
+                        </p>
+                    </div>
                 {% endif %}
-                {% if custodian.id %}
-                    <p class="mb-0">
-                        <small class="text-muted">Organization ID: {{ custodian.id|truncatechars:30 }}</small>
-                    </p>
+
+                <!-- Custodian Contact Information -->
+                {% if custodian.addresses or custodian.telecoms %}
+                    <div class="row mt-3">
+                        <!-- Addresses -->
+                        {% if custodian.addresses %}
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted fw-bold">Address</label>
+                                    {% for address in custodian.addresses %}
+                                        <address class="mb-1">
+                                            {% if address.street %}{{ address.street }}{% endif %}
+                                            {% if address.city %}, {{ address.city }}{% endif %}
+                                            {% if address.state %}, {{ address.state }}{% endif %}
+                                            {% if address.postal_code %} {{ address.postal_code }}{% endif %}
+                                            {% if address.country %}, {{ address.country }}{% endif %}
+                                        </address>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Telecoms -->
+                        {% if custodian.telecoms %}
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted fw-bold">Contact</label>
+                                    {% for telecom in custodian.telecoms %}
+                                        <div class="mb-2">
+                                            {% if telecom.system == 'phone' or 'tel:' in telecom.value %}
+                                                <div>
+                                                    <span class="badge bg-light text-dark border me-1">Phone</span>
+                                                    <a href="tel:{{ telecom.value }}" class="text-decoration-none">{{ telecom.value }}</a>
+                                                </div>
+                                            {% elif telecom.system == 'email' or 'mailto:' in telecom.value %}
+                                                <div>
+                                                    <span class="badge bg-light text-dark border me-1">Email</span>
+                                                    <a href="mailto:{{ telecom.value }}" class="text-decoration-none">{{ telecom.value }}</a>
+                                                </div>
+                                            {% else %}
+                                                <div>
+                                                    <span class="badge bg-light text-dark border me-1">Contact</span>
+                                                    <span>{{ telecom.value }}</span>
+                                                </div>
+                                            {% endif %}
+                                            {% if telecom.use %}<small class="text-muted">({{ telecom.use }})</small>{% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <!-- Fallback to mock contact_info structure if available -->
+                {% if custodian.contact_info and not custodian.addresses and not custodian.telecoms %}
+                    {% with contact=custodian.contact_info %}
+                        <div class="row mt-3">
+                            <!-- Addresses -->
+                            {% if contact.addresses %}
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted fw-bold">Address</label>
+                                        {% for address in contact.addresses %}
+                                            <address class="mb-1">{{ address }}</address>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <!-- Phone Numbers -->
+                            {% if contact.phone_numbers %}
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted fw-bold">Phone</label>
+                                        {% for phone in contact.phone_numbers %}
+                                            <div class="mb-1">
+                                                <a href="tel:{{ phone }}" class="text-decoration-none">{{ phone }}</a>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email addresses if available -->
+                        {% if contact.email_addresses %}
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted fw-bold">Email</label>
+                                        {% for email in contact.email_addresses %}
+                                            <div class="mb-1">
+                                                <a href="mailto:{{ email }}" class="text-decoration-none">{{ email }}</a>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
                 {% endif %}
             </div>
         </div>
@@ -129,26 +247,21 @@
 
 <!-- Document Summary -->
 {% if administrative_data %}
-    <div class="card document-info-card">
-        <div class="card-header bg-secondary text-white">
-            <h6 class="mb-0">
-                <i class="fas fa-file-medical me-2"></i>
-                Document Summary
-            </h6>
-        </div>
+    <div class="card border-0 shadow-sm">
         <div class="card-body">
-            <p class="mb-0">
-                This European Patient Summary document contains essential health information extracted from 
-                healthcare systems to support continuity of care. The document follows HL7 CDA R2 
+            <h5 class="card-title mb-3">Document Summary</h5>
+            <p class="mb-0 text-muted">
+                This European Patient Summary document contains essential health information extracted from
+                healthcare systems to support continuity of care. The document follows HL7 CDA R2
                 implementation guidelines and European eHealth interoperability standards.
             </p>
         </div>
     </div>
 {% else %}
     <!-- Fallback content when no document data is available -->
-    <div class="alert alert-info">
+    <div class="alert alert-info border-0">
         <div class="d-flex align-items-center">
-            <i class="fas fa-info-circle fa-2x me-3"></i>
+            <i class="fas fa-info-circle fa-2x me-3 text-info"></i>
             <div>
                 <h6 class="mb-1">Limited Document Information</h6>
                 <p class="mb-0">Document metadata is not available or has not been extracted from the current CDA document.</p>

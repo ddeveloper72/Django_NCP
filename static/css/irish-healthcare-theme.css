@@ -1,0 +1,746 @@
+/*
+Irish Healthcare Bootstrap Theme for EU NCP Portal
+Based on Irish Healthcare Digital Design Standards
+Generated: September 16, 2025
+*/
+
+/* Irish Healthcare Official Color Palette */
+:root {
+  /* Primary Healthcare Colors */
+  --healthcare-blue: #0078d4; /* Primary Blue */
+  --healthcare-dark-blue: #005a9f; /* Dark Blue */
+  --healthcare-light-blue: #e6f3ff; /* Light Blue */
+  --healthcare-navy: #1c3a56; /* Navy */
+
+  /* Secondary Colors */
+  --healthcare-green: #00a651; /* Success Green */
+  --healthcare-orange: #ff8c00; /* Warning Orange */
+  --healthcare-red: #d92b3a; /* Error Red */
+
+  /* Neutral Colors */
+  --healthcare-white: #ffffff;
+  --healthcare-light-grey: #f8f9fa;
+  --healthcare-grey: #6c757d;
+  --healthcare-dark-grey: #495057;
+  --healthcare-charcoal: #212529;
+
+  /* Typography */
+  --healthcare-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --healthcare-heading-weight: 600;
+  --healthcare-body-weight: 400;
+}
+
+/* Global Bootstrap Overrides */
+body {
+  font-family: var(--healthcare-font-family);
+  color: var(--healthcare-charcoal);
+  background-color: var(--healthcare-white);
+  line-height: 1.6;
+}
+
+/* Healthcare Primary Colors - Override Bootstrap Primary */
+.btn-primary,
+.bg-primary {
+  background-color: var(--healthcare-blue) !important;
+  border-color: var(--healthcare-blue) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--healthcare-dark-blue) !important;
+  border-color: var(--healthcare-dark-blue) !important;
+}
+
+.text-primary {
+  color: var(--healthcare-blue) !important;
+}
+
+.border-primary {
+  border-color: var(--healthcare-blue) !important;
+}
+
+/* Healthcare Success Colors */
+.btn-success,
+.bg-success {
+  background-color: var(--healthcare-green) !important;
+  border-color: var(--healthcare-green) !important;
+}
+
+.text-success {
+  color: var(--healthcare-green) !important;
+}
+
+/* Healthcare Warning Colors */
+.btn-warning,
+.bg-warning {
+  background-color: var(--healthcare-orange) !important;
+  border-color: var(--healthcare-orange) !important;
+  color: var(--healthcare-white) !important;
+}
+
+.text-warning {
+  color: var(--healthcare-orange) !important;
+}
+
+/* Healthcare Danger Colors */
+.btn-danger,
+.bg-danger {
+  background-color: var(--healthcare-red) !important;
+  border-color: var(--healthcare-red) !important;
+}
+
+.text-danger {
+  color: var(--healthcare-red) !important;
+}
+
+/* Healthcare Navigation Styling */
+.navbar {
+  background-color: var(--healthcare-white) !important;
+  border-bottom: 3px solid var(--healthcare-blue);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+  color: var(--healthcare-blue) !important;
+  font-weight: var(--healthcare-heading-weight);
+  font-size: 1.5rem;
+}
+
+.navbar-brand:hover {
+  color: var(--healthcare-dark-blue) !important;
+}
+
+.nav-link {
+  color: var(--healthcare-dark-grey) !important;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin: 0 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--healthcare-white) !important;
+  background-color: var(--healthcare-blue);
+}
+
+.nav-link i {
+  margin-right: 0.5rem;
+  width: 16px;
+}
+
+/* Healthcare Card Styling */
+.card {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background-color: var(--healthcare-light-blue);
+  border-bottom: 1px solid var(--healthcare-blue);
+  color: var(--healthcare-navy);
+  font-weight: var(--healthcare-heading-weight);
+}
+
+/* Healthcare Button Styling */
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 0.6rem 1.2rem;
+  transition: all 0.2s ease;
+  border-width: 2px;
+}
+
+.btn-outline-primary {
+  color: var(--healthcare-blue);
+  border-color: var(--healthcare-blue);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--healthcare-blue);
+  border-color: var(--healthcare-blue);
+  color: var(--healthcare-white);
+}
+
+/* Healthcare Table Styling */
+.table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table thead th {
+  background-color: var(--healthcare-blue);
+  color: var(--healthcare-white);
+  border: none;
+  font-weight: var(--healthcare-heading-weight);
+  letter-spacing: 0.5px;
+}
+
+.table tbody tr:hover {
+  background-color: var(--healthcare-light-blue);
+}
+
+/* Healthcare Alert Styling */
+.alert {
+  border-radius: 8px;
+  border-width: 1px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+/* Alert with Icons */
+.alert::before {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  position: absolute;
+  left: 1rem;
+  top: 1.2rem;
+  font-size: 1.1rem;
+}
+
+.alert.alert-primary {
+  background-color: var(--healthcare-light-blue);
+  border-color: var(--healthcare-blue);
+  color: var(--healthcare-navy);
+  padding-left: 3rem;
+}
+
+.alert.alert-primary::before {
+  content: "\f05a"; /* info-circle */
+  color: var(--healthcare-blue);
+}
+
+.alert.alert-success {
+  background-color: #e8f8f0;
+  border-color: var(--healthcare-green);
+  color: #155724;
+  padding-left: 3rem;
+}
+
+.alert.alert-success::before {
+  content: "\f058"; /* check-circle */
+  color: var(--healthcare-green);
+}
+
+.alert.alert-warning {
+  background-color: #fff3e0;
+  border-color: var(--healthcare-orange);
+  color: #856404;
+  padding-left: 3rem;
+}
+
+.alert.alert-warning::before {
+  content: "\f071"; /* exclamation-triangle */
+  color: var(--healthcare-orange);
+}
+
+.alert.alert-danger,
+.alert.alert-error {
+  background-color: #f8e8e9;
+  border-color: var(--healthcare-red);
+  color: #721c24;
+  padding-left: 3rem;
+}
+
+.alert.alert-danger::before,
+.alert.alert-error::before {
+  content: "\f06a"; /* exclamation-circle */
+  color: var(--healthcare-red);
+}
+
+.alert.alert-info {
+  background-color: #e1f5fe;
+  border-color: #0288d1;
+  color: #01579b;
+  padding-left: 3rem;
+}
+
+.alert.alert-info::before {
+  content: "\f05a"; /* info-circle */
+  color: #0288d1;
+}
+
+/* Alternative: Use actual Font Awesome icons instead of pseudo-elements */
+.alert .alert-icon {
+  font-size: 1.1rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.alert.alert-primary .alert-icon {
+  color: var(--healthcare-blue);
+}
+
+.alert.alert-success .alert-icon {
+  color: var(--healthcare-green);
+}
+
+.alert.alert-warning .alert-icon {
+  color: var(--healthcare-orange);
+}
+
+.alert.alert-danger .alert-icon,
+.alert.alert-error .alert-icon {
+  color: var(--healthcare-red);
+}
+
+.alert.alert-info .alert-icon {
+  color: #0288d1;
+}
+
+/* Alert Headings */
+.alert-heading {
+  font-weight: var(--healthcare-heading-weight);
+  margin-bottom: 0.5rem;
+  color: inherit;
+  font-size: 1rem;
+}
+
+/* Alert Close Button Styling */
+.alert .btn-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  z-index: 2;
+  padding: 0.375rem;
+}
+
+.alert .btn-close:focus {
+  box-shadow: 0 0 0 0.25rem rgba(0, 120, 212, 0.25);
+}
+
+/* Flash Message Specific Styling */
+.flash-messages {
+  position: relative;
+  z-index: 1050;
+}
+
+.flash-messages .alert {
+  animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Alert Styling */
+@media (max-width: 768px) {
+  .alert {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    padding-left: 2.5rem;
+  }
+
+  .alert::before {
+    left: 0.75rem;
+    font-size: 1rem;
+    top: 1rem;
+  }
+
+  .alert .btn-close {
+    top: 0.5rem;
+    right: 0.75rem;
+  }
+}
+
+/* Healthcare Navigation Tabs */
+.nav-tabs-healthcare {
+  border-bottom: 2px solid var(--healthcare-blue);
+  margin-bottom: 0;
+}
+
+.nav-tabs-healthcare .nav-link {
+  color: var(--healthcare-navy);
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.5rem 0.5rem 0 0;
+  font-weight: 500;
+  padding: 1rem 1.5rem;
+  margin-bottom: -2px;
+  transition: all 0.3s ease;
+}
+
+.nav-tabs-healthcare .nav-link:hover {
+  color: var(--healthcare-blue);
+  background-color: var(--healthcare-light-blue);
+  border-color: var(--healthcare-blue) var(--healthcare-blue) transparent;
+}
+
+.nav-tabs-healthcare .nav-link.active {
+  color: white;
+  background-color: var(--healthcare-blue);
+  border-color: var(--healthcare-blue);
+  font-weight: 600;
+}
+
+.nav-tabs-healthcare .nav-link.active:hover {
+  color: white;
+  background-color: var(--healthcare-blue);
+}
+
+.nav-tabs-healthcare .nav-link i {
+  margin-right: 0.5rem;
+  font-size: 1rem;
+}
+
+.nav-tabs-healthcare .badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Integrated Patient Header Tabs */
+.card .nav-tabs-healthcare {
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 0;
+  background-color: #f8f9fa;
+  border-radius: 0;
+  padding: 0 1rem;
+}
+
+.card .nav-tabs-healthcare .nav-link {
+  color: var(--healthcare-navy);
+  background-color: transparent;
+  border: none;
+  border-radius: 0.5rem 0.5rem 0 0;
+  padding: 1rem 1.5rem;
+  font-weight: 500;
+  margin-bottom: -1px;
+  margin-right: 0.5rem;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.card .nav-tabs-healthcare .nav-link:hover {
+  color: var(--healthcare-blue);
+  background-color: rgba(0, 120, 212, 0.1);
+  border-color: var(--healthcare-blue) var(--healthcare-blue) #dee2e6;
+}
+
+.card .nav-tabs-healthcare .nav-link.active {
+  color: var(--healthcare-blue);
+  background-color: white;
+  border-color: var(--healthcare-blue) var(--healthcare-blue) white;
+  font-weight: 600;
+}
+
+.card .nav-tabs-healthcare .nav-link.active:hover {
+  color: var(--healthcare-blue);
+  background-color: white;
+  border-color: var(--healthcare-blue) var(--healthcare-blue) white;
+}
+
+/* Tab Content Styling */
+.tab-content {
+  background-color: transparent;
+  border: none;
+  min-height: 200px;
+}
+
+.tab-pane {
+  padding: 0;
+}
+
+/* Integrated Patient Header Tab Content */
+#patientTabContent .tab-pane {
+  background-color: white;
+}
+
+#patientTabContent .tab-pane .p-4 {
+  border-top: 1px solid #dee2e6;
+}
+
+/* Primary Tab Content - Full Width Cards */
+#primaryTabContent .tab-pane .card {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+#primaryTabContent .tab-pane .card-body {
+  padding: 2rem;
+}
+
+/* Secondary Tab Content (Extended Patient Info) */
+#extendedInfoTabContent .tab-pane {
+  padding: 1.5rem;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-top: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* Extended Patient Information Cards */
+.card.border-primary {
+  border-color: var(--healthcare-blue) !important;
+}
+
+.card.border-success {
+  border-color: var(--healthcare-green) !important;
+}
+
+.card.border-info {
+  border-color: #0dcaf0 !important;
+}
+
+.card.border-warning {
+  border-color: var(--healthcare-orange) !important;
+}
+
+.card.border-secondary {
+  border-color: #6c757d !important;
+}
+
+.card.border-dark {
+  border-color: var(--healthcare-navy) !important;
+}
+
+/* Card Header Styling for Extended Patient Info */
+.card-header.bg-primary {
+  background-color: var(--healthcare-blue) !important;
+}
+
+.card-header.bg-success {
+  background-color: var(--healthcare-green) !important;
+}
+
+.card-header.bg-info {
+  background-color: #0dcaf0 !important;
+}
+
+.card-header.bg-warning {
+  background-color: var(--healthcare-orange) !important;
+  color: var(--healthcare-navy) !important;
+}
+
+.card-header.bg-secondary {
+  background-color: #6c757d !important;
+}
+
+.card-header.bg-dark {
+  background-color: var(--healthcare-navy) !important;
+}
+
+/* Responsive Tab Design */
+@media (max-width: 768px) {
+  .nav-tabs-healthcare .nav-link {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .nav-tabs-healthcare .nav-link i {
+    font-size: 0.9rem;
+    margin-right: 0.25rem;
+  }
+
+  #primaryTabContent .tab-pane .card-body {
+    padding: 1.5rem;
+  }
+
+  #extendedInfoTabContent .tab-pane {
+    padding: 1rem;
+  }
+
+  .nav-tabs-healthcare .badge {
+    font-size: 0.6rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  /* Stack patient info cards vertically on mobile */
+  #primaryTabContent .row .col-lg-6 {
+    margin-bottom: 1.5rem;
+  }
+} /* Healthcare Form Styling */
+.form-control {
+  border-radius: 6px;
+  border: 2px solid #dee2e6;
+  transition: border-color 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: var(--healthcare-blue);
+  box-shadow: 0 0 0 0.2rem rgba(0, 120, 212, 0.25);
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--healthcare-navy);
+  margin-bottom: 0.5rem;
+}
+
+/* Healthcare Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--healthcare-navy);
+  font-weight: var(--healthcare-heading-weight);
+  line-height: 1.3;
+}
+
+.display-1,
+.display-2,
+.display-3,
+.display-4,
+.display-5,
+.display-6 {
+  color: var(--healthcare-navy);
+  font-weight: var(--healthcare-heading-weight);
+}
+
+/* Healthcare Badge Styling */
+.badge {
+  border-radius: 4px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.badge.bg-primary {
+  background-color: var(--healthcare-blue) !important;
+}
+
+.badge.bg-success {
+  background-color: var(--healthcare-green) !important;
+}
+
+.badge.bg-warning {
+  background-color: var(--healthcare-orange) !important;
+}
+
+.badge.bg-danger {
+  background-color: var(--healthcare-red) !important;
+}
+
+/* Healthcare Loading and Status Indicators */
+.spinner-border-primary {
+  color: var(--healthcare-blue);
+}
+
+/* Healthcare Patient Portal Specific Styling */
+.patient-header {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-blue),
+    var(--healthcare-dark-blue)
+  );
+  color: var(--healthcare-white);
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
+
+.patient-card {
+  border-left: 4px solid var(--healthcare-blue);
+}
+
+.patient-card .card-header {
+  background-color: var(--healthcare-light-blue);
+  color: var(--healthcare-navy);
+}
+
+/* Healthcare Footer Styling */
+.footer {
+  background-color: var(--healthcare-navy);
+  color: var(--healthcare-white);
+  padding: 2rem 0;
+  margin-top: 3rem;
+}
+
+.footer a {
+  color: var(--healthcare-light-blue);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: var(--healthcare-white);
+  text-decoration: underline;
+}
+
+/* Healthcare Responsive Design */
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+
+  .nav-link {
+    padding: 0.5rem;
+    margin: 0.1rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Healthcare Accessibility Enhancements */
+.btn:focus,
+.form-control:focus,
+.nav-link:focus {
+  outline: 2px solid var(--healthcare-blue);
+  outline-offset: 2px;
+}
+
+/* Healthcare Print Styles */
+@media print {
+  .navbar,
+  .footer,
+  .btn {
+    display: none !important;
+  }
+
+  .card {
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+  }
+
+  body {
+    color: #000 !important;
+    background: #fff !important;
+  }
+}
+
+/* Healthcare High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --healthcare-blue: #003366;
+    --healthcare-dark-blue: #001122;
+    --healthcare-light-blue: #f0f8ff;
+  }
+}
+
+/* Healthcare Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --healthcare-white: #1a1a1a;
+    --healthcare-light-grey: #2d2d2d;
+    --healthcare-charcoal: #e8e8e8;
+  }
+
+  body {
+    background-color: var(--healthcare-white);
+    color: var(--healthcare-charcoal);
+  }
+
+  .card {
+    background-color: var(--healthcare-light-grey);
+    border-color: #444;
+  }
+}

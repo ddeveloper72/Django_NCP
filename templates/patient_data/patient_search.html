@@ -4,50 +4,51 @@
 
 
 {% block content %}
-<div class="patient-search-page">
-    <div class="country-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1>
-                <span class="country-flag country-flag-de">DE</span>
-                Patient Search
-            </h1>
-            <div class="header-actions">
-                <a href="/" class="btn btn-light ms-2">
-                    ← Back to Home
-                </a>
-            </div>
-        </div>
-    </div>
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Country Header -->
+            <div class="card mb-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <span class="badge bg-light text-primary me-2">DE</span>
+                            Patient Search
+                        </h3>
+                        <a href="/" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
 
-    <div class="search-form">
-        <!-- Display Django messages -->
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            {{ message }}
-        </div>
-        {% endfor %}
-        {% endif %}
+                <div class="card-body bg-light">
+                    <!-- Display Django messages -->
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
 
-        <div class="ism-info">
-            <h4>🇪🇺 EU Patient Search</h4>
-            <p class="mb-1">
-                <strong>Search for patient records across EU member states using the patient's credentials</strong>
-            </p>
-            <p class="mb-0">
-                <small>You can find the patient using the following criteria</small>
-            </p>
-        </div>
+                    <div class="text-center mb-4">
+                        <h4 class="text-primary">🇪🇺 EU Patient Search</h4>
+                        <p class="fw-bold">Search for patient records across EU member states using the patient's credentials</p>
+                        <p class="text-muted small">You can find the patient using the following criteria</p>
+                    </div>
 
-        <form method="post" id="patientSearchForm" novalidate>
-            {% csrf_token %}
+                    <form method="post" id="patientSearchForm" novalidate>
+                        {% csrf_token %}
 
-            <div class="field-group">
-                <h5 class="field-group-title">Patient Information</h5>
-
-                <div class="form-group">
-                    <label for="member_state_id" class="form-label">
-                        Member State <span class="required">*</span>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Patient Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="member_state_id" class="form-label">
+                                        Member State <span class="text-danger">*</span>
                     </label>
                     <select name="member_state_id" id="member_state_id" class="form-control" required>
                         <option value="">Select Member State</option>

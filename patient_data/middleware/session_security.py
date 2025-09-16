@@ -333,13 +333,14 @@ class SessionSecurityMiddleware(MiddlewareMixin):
         if not hasattr(request, "patient_session"):
             return response
 
-        # Strict CSP for patient data pages
+        # Strict CSP for patient data pages - Updated for Bootstrap CDN
         response["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline'; "
-            "style-src 'self' 'unsafe-inline'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+            "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
             "img-src 'self' data:; "
-            "connect-src 'self'; "
+            "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
             "frame-ancestors 'none';"
         )
 

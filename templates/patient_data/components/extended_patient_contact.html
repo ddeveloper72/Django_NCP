@@ -1,152 +1,462 @@
 {% load patient_filters %}
 
 <!-- Extended Patient Contact Information Component -->
-<div class="d-flex align-items-center justify-content-between mb-3">
-  <h5 class="mb-0"><i class="fas fa-address-book me-2"></i>Contact Information</h5>
-  {% if contact_data and contact_data.addresses or contact_data.telecoms %}
-    <span class="badge bg-primary">
-      {% if contact_data.addresses %}{{ contact_data.addresses|length }} Address{% if contact_data.addresses|length != 1 %}es{% endif %}{% endif %}
-      {% if contact_data.addresses and contact_data.telecoms %} • {% endif %}
-      {% if contact_data.telecoms %}{{ contact_data.telecoms|length }} Contact{% if contact_data.telecoms|length != 1 %}s{% endif %}{% endif %}
-    </span>
-  {% endif %}
-</div>
 
-{% if contact_data and contact_data.addresses %}
-  <!-- Patient Address Cards -->
-  <div class="row">
-    {% for address in contact_data.addresses %}
-      <div class="col-md-6 mb-3">
-        <div class="card contact-info-card h-100">
-          <div class="card-header bg-primary text-white">
-            <h6 class="mb-0">
-              <i class="fas fa-map-marker-alt me-2"></i>
-              {% if address.use %}
-                {{ address.use|title }} Address
-              {% else %}
-                Address {{ forloop.counter }}
-              {% endif %}
-            </h6>
-          </div>
-          <div class="card-body">
-            {% if address.street_lines %}
-              <p class="mb-2">
-                <strong><i class="fas fa-road me-1"></i>Street:</strong><br>
-                {% for line in address.street_lines %}
-                  {{ line }}<br>
-                {% endfor %}
-              </p>
-            {% endif %}
-
-            <div class="row">
-              {% if address.city %}
-                <div class="col-sm-6">
-                  <p class="mb-2">
-                    <strong><i class="fas fa-city me-1"></i>City:</strong><br>
-                    {{ address.city }}
-                  </p>
+<!-- Patient Contact Information -->
+{% if contact_data and contact_data.addresses or contact_data.telecoms %}
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <!-- Card Header with Modern Design -->
+            <div class="card-header bg-gradient bg-primary text-white border-0 py-3">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-circle bg-white bg-opacity-20 rounded-circle p-2 me-3">
+                                <i class="fas fa-user fa-lg text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="card-title mb-1 fw-bold">Patient Contact Information</h5>
+                                <small class="opacity-85">Primary contact details and addresses</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="d-flex gap-2">
+                            {% if contact_data.addresses %}
+                            <span class="badge bg-white bg-opacity-20 text-white">
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                {{ contact_data.addresses|length }} Address{{ contact_data.addresses|length|pluralize:"es" }}
+                            </span>
+                            {% endif %}
+                            {% if contact_data.telecoms %}
+                            <span class="badge bg-white bg-opacity-20 text-white">
+                                <i class="fas fa-phone me-1"></i>
+                                {{ contact_data.telecoms|length }} Contact{{ contact_data.telecoms|length|pluralize }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-              {% endif %}
-              {% if address.postal_code %}
-                <div class="col-sm-6">
-                  <p class="mb-2">
-                    <strong><i class="fas fa-mail-bulk me-1"></i>Postal Code:</strong><br>
-                    {{ address.postal_code }}
-                  </p>
-                </div>
-              {% endif %}
             </div>
 
-            <div class="row">
-              {% if address.state %}
-                <div class="col-sm-6">
-                  <p class="mb-2">
-                    <strong><i class="fas fa-map me-1"></i>State:</strong><br>
-                    {{ address.state }}
-                  </p>
+            <!-- Card Body with Improved Layout -->
+            <div class="card-body p-0">
+                <div class="row g-0">
+                    <!-- Address Information Section -->
+                    {% if contact_data.addresses %}
+                    <div class="col-lg-8 border-end">
+                        <div class="p-4">
+                            <div class="section-header mb-4">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h6 class="text-primary fw-bold mb-0 d-flex align-items-center">
+                                        <div class="icon-circle bg-danger bg-opacity-10 rounded-circle p-2 me-3">
+                                            <i class="fas fa-map-marker-alt text-danger"></i>
+                                        </div>
+                                        Patient Address Information
+                                    </h6>
+                                    <span class="badge bg-light text-dark border">{{ contact_data.addresses|length }} location{{ contact_data.addresses|length|pluralize }}</span>
+                                </div>
+                            </div>
+
+                            <div class="addresses-container">
+                                {% for address in contact_data.addresses %}
+                                <div class="address-card mb-3 p-3 border border-2 rounded-4 bg-light bg-opacity-50 position-relative">
+                                    {% if address.use %}
+                                    <div class="position-absolute top-0 end-0 mt-2 me-2">
+                                        <span class="badge bg-primary">{{ address.use|title }}</span>
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="address-content pt-2">
+                                        {% if address.street %}
+                                        <div class="address-line d-flex align-items-start mb-3">
+                                            <div class="icon-wrapper me-3">
+                                                <i class="fas fa-road text-muted fa-fw"></i>
+                                            </div>
+                                            <div class="address-text">
+                                                <span class="fw-semibold text-dark">{{ address.street }}</span>
+                                                {% if address.use %}
+                                                <small class="d-block text-muted">{{ address.use|title }} Address</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <div class="row g-2">
+                                            {% if address.city %}
+                                            <div class="col-md-6">
+                                                <div class="info-item d-flex align-items-center p-2 rounded bg-white">
+                                                    <i class="fas fa-city text-info me-2 fa-fw"></i>
+                                                    <span class="text-dark">{{ address.city }}</span>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if address.postal_code %}
+                                            <div class="col-md-6">
+                                                <div class="info-item d-flex align-items-center p-2 rounded bg-white">
+                                                    <i class="fas fa-mail-bulk text-secondary me-2 fa-fw"></i>
+                                                    <span class="text-dark">{{ address.postal_code }}</span>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if address.state %}
+                                            <div class="col-md-6">
+                                                <div class="info-item d-flex align-items-center p-2 rounded bg-white">
+                                                    <i class="fas fa-map text-success me-2 fa-fw"></i>
+                                                    <span class="text-dark">{{ address.state }}</span>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if address.country %}
+                                            <div class="col-md-6">
+                                                <div class="info-item d-flex align-items-center p-2 rounded bg-white">
+                                                    <i class="fas fa-flag text-warning me-2 fa-fw"></i>
+                                                    <span class="fw-semibold text-dark">{{ address.country }}</span>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Contact Methods -->
+                    {% if contact_data.telecoms %}
+                    <div class="col-lg-4">
+                        <div class="p-4">
+                            <div class="section-header mb-4">
+                                <h6 class="text-success fw-bold mb-0 d-flex align-items-center">
+                                    <div class="icon-circle bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                        <i class="fas fa-phone text-success"></i>
+                                    </div>
+                                    Patient Contact Methods
+                                </h6>
+                            </div>
+
+                            <div class="contact-methods-container">
+                                {% for telecom in contact_data.telecoms %}
+                                <div class="contact-method-card mb-3 p-3 border rounded-4 bg-white shadow-sm">
+                                    {% if telecom.system == 'phone' or 'tel:' in telecom.value %}
+                                    <div class="method-header d-flex align-items-center mb-3">
+                                        <div class="icon-circle bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3 contact-icon">
+                                            <i class="fas fa-phone"></i>
+                                        </div>
+                                        <div class="method-info flex-grow-1">
+                                            <div class="method-type fw-bold text-success">Phone</div>
+                                            {% if telecom.use %}<small class="text-muted">{{ telecom.use|title }}</small>{% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="method-value ms-5">
+                                        <a href="tel:{{ telecom.value }}" class="btn btn-outline-success btn-sm w-100 d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-phone me-2"></i>
+                                            {{ telecom.value }}
+                                        </a>
+                                    </div>
+
+                                    {% elif telecom.system == 'email' or 'mailto:' in telecom.value %}
+                                    <div class="method-header d-flex align-items-center mb-3">
+                                        <div class="icon-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 contact-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div class="method-info flex-grow-1">
+                                            <div class="method-type fw-bold text-primary">Email</div>
+                                            {% if telecom.use %}<small class="text-muted">{{ telecom.use|title }}</small>{% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="method-value ms-5">
+                                        <a href="mailto:{{ telecom.value }}" class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-envelope me-2"></i>
+                                            {{ telecom.value }}
+                                        </a>
+                                    </div>
+
+                                    {% else %}
+                                    <div class="method-header d-flex align-items-center mb-3">
+                                        <div class="icon-circle bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3 contact-icon">
+                                            <i class="fas fa-address-card"></i>
+                                        </div>
+                                        <div class="method-info flex-grow-1">
+                                            <div class="method-type fw-bold text-secondary">Contact</div>
+                                            {% if telecom.use %}<small class="text-muted">{{ telecom.use|title }}</small>{% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="method-value ms-5">
+                                        <div class="contact-display p-2 bg-light rounded text-center">
+                                            <span class="fw-medium text-dark">{{ telecom.value }}</span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
-              {% endif %}
-              {% if address.country %}
-                <div class="col-sm-6">
-                  <p class="mb-0">
-                    <strong><i class="fas fa-flag me-1"></i>Country:</strong><br>
-                    {{ address.country }}
-                  </p>
-                </div>
-              {% endif %}
             </div>
-          </div>
         </div>
-      </div>
-    {% endfor %}
-  </div>
+    </div>
+</div>
+{% else %}
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="alert alert-info d-flex align-items-center">
+            <i class="fas fa-info-circle fa-2x me-3 text-info"></i>
+            <div>
+                <h6 class="alert-heading mb-1">No Contact Information Available</h6>
+                <p class="mb-0">Contact information not available for this patient</p>
+            </div>
+        </div>
+    </div>
+</div>
 {% endif %}
 
-<!-- Patient Telecom Cards -->
-{% if contact_data and contact_data.telecoms %}
-  <div class="row mt-4">
-    {% for telecom in contact_data.telecoms %}
-      <div class="col-md-6 col-lg-4 mb-3">
-        <div class="card contact-info-card h-100">
-          <div class="card-header bg-success text-white">
-            <h6 class="mb-0">
-              {% if telecom.system == 'phone' or 'tel:' in telecom.value %}
-                <i class="fas fa-phone me-2"></i>Phone
-              {% elif telecom.system == 'email' or 'mailto:' in telecom.value %}
-                <i class="fas fa-envelope me-2"></i>Email
-              {% elif telecom.system == 'fax' or 'fax:' in telecom.value %}
-                <i class="fas fa-fax me-2"></i>Fax
-              {% else %}
-                <i class="fas fa-phone-alt me-2"></i>Contact
-              {% endif %}
-              {% if telecom.use %}({{ telecom.use|title }}){% endif %}
-            </h6>
-          </div>
-          <div class="card-body">
-            <p class="mb-2">
-              <strong>Contact:</strong><br>
-              {% if 'tel:' in telecom.value %}
-                <a href="{{ telecom.value }}" class="text-decoration-none">
-              {{ telecom.value|slice:"4:" }}
-            </a>
-          {% elif 'mailto:' in telecom.value %}
-            <a href="{{ telecom.value }}" class="text-decoration-none">
-              {{ telecom.value|slice:"7:" }}
-            </a>
-          {% else %}
-            {{ telecom.value }}
-          {% endif %}
-        </p>
-        {% if telecom.use %}
-          <span class="badge bg-secondary">{{ telecom.use|title }}</span>
+<!-- Guardian/Next of Kin Information -->
+{% if administrative_data and administrative_data.guardian %}
+    {% with guardian=administrative_data.guardian %}
+        {% if guardian.given_name or guardian.family_name or guardian.contact_info.addresses or guardian.contact_info.telecoms %}
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <!-- Guardian Card Header -->
+                    <div class="card-header bg-gradient bg-info text-white border-0 py-3">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-circle bg-white bg-opacity-20 rounded-circle p-2 me-3">
+                                        <i class="fas fa-users fa-lg text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-1 fw-bold">
+                                            {% if guardian.given_name or guardian.family_name %}
+                                                {{ guardian.given_name }} {{ guardian.family_name }}
+                                            {% else %}
+                                                Guardian/Next of Kin
+                                            {% endif %}
+                                        </h5>
+                                        <small class="opacity-85">{{ guardian.role|default:"Guardian" }} contact information</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="d-flex gap-2">
+                                    {% if guardian.contact_info.addresses %}
+                                    <span class="badge bg-white bg-opacity-20 text-white">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        {{ guardian.contact_info.addresses|length }} Address{{ guardian.contact_info.addresses|length|pluralize:"es" }}
+                                    </span>
+                                    {% endif %}
+                                    {% if guardian.contact_info.telecoms %}
+                                    <span class="badge bg-white bg-opacity-20 text-white">
+                                        <i class="fas fa-phone me-1"></i>
+                                        {{ guardian.contact_info.telecoms|length }} Contact{{ guardian.contact_info.telecoms|length|pluralize }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guardian Card Body -->
+                    <div class="card-body p-0">
+                        {% if guardian.contact_info.addresses or guardian.contact_info.telecoms %}
+                            <div class="row g-0">
+                                <!-- Guardian Address Information -->
+                                {% if guardian.contact_info.addresses %}
+                                <div class="col-lg-8 border-end">
+                                    <div class="p-4">
+                                        <div class="section-header mb-4">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <h6 class="text-info fw-bold mb-0 d-flex align-items-center">
+                                                    <div class="icon-circle bg-danger bg-opacity-10 rounded-circle p-2 me-3">
+                                                        <i class="fas fa-map-marker-alt text-danger"></i>
+                                                    </div>
+                                                    Guardian Address Information
+                                                </h6>
+                                                <span class="badge bg-light text-dark border">{{ guardian.contact_info.addresses|length }} location{{ guardian.contact_info.addresses|length|pluralize }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="addresses-container">
+                                            {% for address in guardian.contact_info.addresses %}
+                                            <div class="address-card mb-3 p-3 border border-2 rounded-4 bg-light bg-opacity-50 position-relative">
+                                                {% if address.use %}
+                                                <div class="position-absolute top-0 end-0 mt-2 me-2">
+                                                    <span class="badge bg-info">{{ address.use|title }}</span>
+                                                </div>
+                                                {% endif %}
+
+                                                <div class="address-content pt-2">
+                                                    {% if address.street %}
+                                                    <div class="address-line d-flex align-items-start mb-3">
+                                                        <div class="icon-wrapper me-3">
+                                                            <i class="fas fa-road text-muted fa-fw"></i>
+                                                        </div>
+                                                        <div class="address-text">
+                                                            <span class="fw-semibold text-dark">{{ address.street }}</span>
+                                                            {% if address.use %}
+                                                            <small class="d-block text-muted">{{ address.use|title }} Address</small>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+
+                                                    <div class="row g-2">
+                                                        {% if address.city %}
+                                                        <div class="col-md-6">
+                                                            <div class="info-item d-flex align-items-center p-2 rounded bg-white">
+                                                                <i class="fas fa-city text-info me-2 fa-fw"></i>
+                                                                <span class="text-dark">{{ address.city }}</span>
+                                                            </div>
+                                                        </div>
+                                                        {% endif %}
+
+                                                        {% if address.postal_code %}
+                                                        <div class="col-md-6">
+                                                            <div class="info-item d-flex align-items-center p-2 rounded bg-white">
+                                                                <i class="fas fa-mail-bulk text-secondary me-2 fa-fw"></i>
+                                                                <span class="text-dark">{{ address.postal_code }}</span>
+                                                            </div>
+                                                        </div>
+                                                        {% endif %}
+
+                                                        {% if address.state %}
+                                                        <div class="col-md-6">
+                                                            <div class="info-item d-flex align-items-center p-2 rounded bg-white">
+                                                                <i class="fas fa-map text-success me-2 fa-fw"></i>
+                                                                <span class="text-dark">{{ address.state }}</span>
+                                                            </div>
+                                                        </div>
+                                                        {% endif %}
+
+                                                        {% if address.country %}
+                                                        <div class="col-md-6">
+                                                            <div class="info-item d-flex align-items-center p-2 rounded bg-white">
+                                                                <i class="fas fa-flag text-warning me-2 fa-fw"></i>
+                                                                <span class="fw-semibold text-dark">{{ address.country }}</span>
+                                                            </div>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Guardian Contact Methods -->
+                                {% if guardian.contact_info.telecoms %}
+                                <div class="col-lg-4">
+                                    <div class="p-4">
+                                        <div class="section-header mb-4">
+                                            <h6 class="text-success fw-bold mb-0 d-flex align-items-center">
+                                                <div class="icon-circle bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                                    <i class="fas fa-phone text-success"></i>
+                                                </div>
+                                                Guardian Contact Methods
+                                            </h6>
+                                        </div>
+
+                                        <div class="contact-methods-container">
+                                            {% for telecom in guardian.contact_info.telecoms %}
+                                            <div class="contact-method-card mb-3 p-3 border rounded-4 bg-white shadow-sm">
+                                                {% if telecom.system == 'phone' or 'tel:' in telecom.value %}
+                                                <div class="method-header d-flex align-items-center mb-3">
+                                                    <div class="icon-circle bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3 contact-icon">
+                                                        <i class="fas fa-phone"></i>
+                                                    </div>
+                                                    <div class="method-info flex-grow-1">
+                                                        <div class="method-type fw-bold text-success">Phone</div>
+                                                        {% if telecom.use %}<small class="text-muted">{{ telecom.use|title }}</small>{% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="method-value ms-5">
+                                                    <a href="tel:{{ telecom.value }}" class="btn btn-outline-success btn-sm w-100 d-flex align-items-center justify-content-center">
+                                                        <i class="fas fa-phone me-2"></i>
+                                                        {{ telecom.value }}
+                                                    </a>
+                                                </div>
+
+                                                {% elif telecom.system == 'email' or 'mailto:' in telecom.value %}
+                                                <div class="method-header d-flex align-items-center mb-3">
+                                                    <div class="icon-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 contact-icon">
+                                                        <i class="fas fa-envelope"></i>
+                                                    </div>
+                                                    <div class="method-info flex-grow-1">
+                                                        <div class="method-type fw-bold text-primary">Email</div>
+                                                        {% if telecom.use %}<small class="text-muted">{{ telecom.use|title }}</small>{% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="method-value ms-5">
+                                                    <a href="mailto:{{ telecom.value }}" class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center">
+                                                        <i class="fas fa-envelope me-2"></i>
+                                                        {{ telecom.value }}
+                                                    </a>
+                                                </div>
+
+                                                {% else %}
+                                                <div class="method-header d-flex align-items-center mb-3">
+                                                    <div class="icon-circle bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3 contact-icon">
+                                                        <i class="fas fa-address-card"></i>
+                                                    </div>
+                                                    <div class="method-info flex-grow-1">
+                                                        <div class="method-type fw-bold text-secondary">Contact</div>
+                                                        {% if telecom.use %}<small class="text-muted">{{ telecom.use|title }}</small>{% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="method-value ms-5">
+                                                    <div class="contact-display p-2 bg-light rounded text-center">
+                                                        <span class="fw-medium text-dark">{{ telecom.value }}</span>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="p-4 text-center">
+                                <div class="text-muted">
+                                    <i class="fas fa-info-circle fa-3x mb-3"></i>
+                                    <h6>No Contact Information Available</h6>
+                                    <p class="mb-0">Contact information not available for guardian</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endif %}
-      </div>
-    </div>
-  </div>
-{% endfor %}
-</div>
+    {% endwith %}
 {% endif %}
 
 <!-- Fallback content when no contact data is available -->
 {% if not contact_data or not contact_data.addresses and not contact_data.telecoms %}
-<div class="alert alert-info">
-  <div class="d-flex align-items-center">
-    <i class="fas fa-info-circle fa-2x me-3"></i>
-    <div>
-      <h6 class="mb-1">No Contact Information Available</h6>
-      <p class="mb-0">Contact details are not available in the current document or have not been extracted.</p>
-    </div>
-  </div>
-</div>
+    {% if not administrative_data.patient_contact_info or not administrative_data.patient_contact_info.addresses and not administrative_data.patient_contact_info.telecoms %}
+        {% if not administrative_data.guardian or not administrative_data.guardian.contact_info.addresses and not administrative_data.guardian.contact_info.telecoms %}
+            <div class="alert alert-info">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-info-circle fa-2x me-3"></i>
+                    <div>
+                        <h6 class="mb-1">No Contact Information Available</h6>
+                        <p class="mb-0">Contact details are not available in the current document or have not been extracted from the CDA.</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
 {% endif %}
-
-  <!-- No Contact Information Message -->
-  {% if not contact_data or not contact_data.addresses and not contact_data.telecoms %}
-    <div class="empty-state text-center py-4">
-      <i class="fas fa-address-card fa-3x text-muted mb-3"></i>
-      <h6>No Contact Information</h6>
-      <p class="text-muted">No contact information is available for this patient.</p>
-    </div>
-  {% endif %}
-
-</div>

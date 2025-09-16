@@ -1,99 +1,157 @@
 <!-- Extended Patient Information Main Component -->
 {% load patient_filters %}
-{% if patient_extended_data or administrative_data %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card extended-patient-info">
-            <div class="card-header bg-info text-white">
-                <h4 class="mb-0">
-                    <i class="fas fa-address-book me-2"></i>
-                    Extended Patient Information
-                </h4>
-            </div>
-            <div class="card-body">
+{% if patient_extended_data or administrative_data or contact_data or healthcare_data %}
+<h4 class="card-title mb-4">
+    <i class="fas fa-user-plus me-2"></i>Extended Patient Information
+</h4>
 
-                <!-- Extended Info Navigation Tabs -->
-                <ul class="nav nav-tabs" id="extendedInfoTabs" role="tablist">
-                    <!-- Contact Details Tab -->
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link tab-button active" id="contact-tab"
-                            onclick="showExtendedPatientTab('contact')" type="button" role="tab"
-                            aria-controls="contact" aria-selected="true">
-                            <i class="fas fa-address-card me-1"></i>Contact Details
-                            {% if patient_extended_data|safe_get:"patient_contact" or administrative_data|safe_get:"patient_contact_info" %}
-                            <span class="badge bg-primary ms-1">1</span>
-                            {% endif %}
-                        </button>
-                    </li>
+<!-- Clinical-style Tab Navigation -->
+<div class="clinical-section" id="extendedPatientSection">
+    <!-- Tab Navigation Buttons -->
+    <div class="tab-navigation mb-3">
+        <button class="tab-button active" onclick="showExtendedTab('extended_patient', 'personal')"
+                type="button">
+            <i class="fas fa-user me-1"></i>Personal Information
+            {% if contact_data and contact_data.addresses or contact_data.telecoms %}
+            <span class="badge bg-primary ms-2">
+                {{ contact_data.addresses|length|add:contact_data.telecoms|length }}
+            </span>
+            {% endif %}
+        </button>
 
-                    <!-- Healthcare Team Tab -->
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link tab-button" id="healthcare-tab"
-                            onclick="showExtendedPatientTab('healthcare')" type="button" role="tab"
-                            aria-controls="healthcare" aria-selected="false">
-                            <i class="fas fa-stethoscope me-1"></i>Healthcare Team
-                            {% if patient_extended_data|safe_get:"authors" or administrative_data|safe_get:"authors" %}
-                            <span class="badge bg-success ms-1">
-                                {# Django: Calculate team count using template logic #}
-                                {% if patient_extended_data|safe_get:"authors" %}
-                                {{ patient_extended_data|safe_get:"authors"|length }}
-                                {% elif administrative_data|safe_get:"authors" %}
-                                {{ administrative_data|safe_get:"authors"|length }}
-                                {% else %}
-                                0
-                                {% endif %}
-                                {% if patient_extended_data|safe_get:"legal_authenticator" or administrative_data|safe_get:"legal_authenticator" %}
-                                +1
-                                {% endif %}
-                                {% if patient_extended_data|safe_get:"custodian" or administrative_data|safe_get:"custodians" %}
-                                +1
-                                {% endif %}
-                            </span>
-                            {% endif %}
-                        </button>
-                    </li>
+        <button class="tab-button" onclick="showExtendedTab('extended_patient', 'healthcare')"
+                type="button">
+            <i class="fas fa-stethoscope me-1"></i>Healthcare Team
+            {% if healthcare_data %}
+            <span class="badge bg-success ms-2">
+                {% if healthcare_data.author_hcp %}1{% endif %}{% if healthcare_data.organization %}{% if healthcare_data.author_hcp %}+{% endif %}1{% endif %}{% if healthcare_data.legal_authenticator %}{% if healthcare_data.author_hcp or healthcare_data.organization %}+{% endif %}1{% endif %}
+            </span>
+            {% endif %}
+        </button>
 
-                    <!-- Document Info Tab -->
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link tab-button" id="document-tab"
-                            onclick="showExtendedPatientTab('document')" type="button" role="tab"
-                            aria-controls="document" aria-selected="false">
-                            <i class="fas fa-file-medical-alt me-1"></i>Document Info
-                        </button>
-                    </li>
-                </ul>
+        <button class="tab-button" onclick="showExtendedTab('extended_patient', 'system')"
+                type="button">
+            <i class="fas fa-server me-1"></i>System & Documentation
+            <span class="badge bg-info ms-2">3</span>
+        </button>
+    </div>
 
-                <!-- Extended Info Tab Content -->
-                <div class="tab-content mt-3" id="extendedInfoTabContent">
+    <!-- Tab Content Containers -->
+    <div class="extended-tab-content-container">
 
-                    <!-- Contact Details Tab Pane -->
-                    <div class="tab-pane active" id="extended-contact" style="display: block;">
-                        {% include 'patient_data/components/extended_patient_contact.html' %}
+    <!-- Personal Information Tab Content -->
+    <div class="clinical-tab-content active" id="extended_patient_personal">
+        <div class="row g-3">
+            <!-- Patient Contact Information Card -->
+            <div class="col-12">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-address-book me-2"></i>Contact Information
+                        </h5>
                     </div>
-
-                    <!-- Healthcare Team Tab Pane -->
-                    <div class="tab-pane" id="extended-healthcare" style="display: none;">
-                        {% include 'patient_data/components/extended_patient_healthcare.html' %}
+                    <div class="card-body">
+                        {% include 'patient_data/components/extended_patient_contact_clean.html' %}
                     </div>
-
-                    <!-- Document Info Tab Pane -->
-                    <div class="tab-pane" id="extended-document" style="display: none;">
-                        {% include 'patient_data/components/extended_patient_document.html' %}
-                    </div>
-
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% else %}
-<!-- No Extended Data Available -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="alert alert-info">
-            <h6><i class="fas fa-info-circle me-2"></i>Extended Patient Information</h6>
-            <p>Extended patient information is not available for this document. The system was unable to extract additional patient data from the CDA content.</p>
+
+    <!-- Healthcare Team Tab Content -->
+    <div class="clinical-tab-content" id="extended_patient_healthcare">
+        <div class="row g-3">
+            <!-- Healthcare Provider Information Card -->
+            <div class="col-12">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-md me-2"></i>Healthcare Provider Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% include 'patient_data/components/extended_patient_healthcare_clean.html' %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- System & Documentation Tab Content -->
+    <div class="clinical-tab-content" id="extended_patient_system">
+        <div class="row g-3">
+            <!-- Administrative Information Card -->
+            <div class="col-12">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cogs me-2"></i>Administrative & System Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% include 'patient_data/components/extended_patient_document_clean.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- End Clinical Section -->
+
+<script>
+// Extended Patient Tab Management Function
+function showExtendedTab(sectionId, tabType) {
+    // Hide all tab contents for the extended patient section
+    const personalTab = document.getElementById(sectionId + '_personal');
+    const healthcareTab = document.getElementById(sectionId + '_healthcare');
+    const systemTab = document.getElementById(sectionId + '_system');
+
+    // Find the parent extended patient container
+    const extendedContainer = personalTab ? personalTab.closest('.clinical-section') :
+        (healthcareTab ? healthcareTab.closest('.clinical-section') :
+        (systemTab ? systemTab.closest('.clinical-section') : null));
+
+    if (!extendedContainer) {
+        console.log('Extended patient container not found for:', sectionId);
+        return;
+    }
+
+    const buttons = extendedContainer.querySelectorAll('.tab-button');
+
+    // Remove active class from all tabs and buttons in this section
+    if (personalTab) personalTab.classList.remove('active');
+    if (healthcareTab) healthcareTab.classList.remove('active');
+    if (systemTab) systemTab.classList.remove('active');
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    // Show selected tab and activate corresponding button
+    if (tabType === 'personal') {
+        if (personalTab) {
+            personalTab.classList.add('active');
+            personalTab.style.display = 'block';
+        }
+        if (buttons[0]) buttons[0].classList.add('active');
+    } else if (tabType === 'healthcare') {
+        if (healthcareTab) {
+            healthcareTab.classList.add('active');
+            healthcareTab.style.display = 'block';
+        }
+        if (buttons[1]) buttons[1].classList.add('active');
+    } else if (tabType === 'system') {
+        if (systemTab) {
+            systemTab.classList.add('active');
+            systemTab.style.display = 'block';
+        }
+        if (buttons[2]) buttons[2].classList.add('active');
+    }
+
+    console.log('Extended patient tab switched:', sectionId, tabType);
+}
+</script>
+
+{% else %}
+<!-- No Extended Data Available -->
+<div class="alert alert-info">
+    <h6><i class="fas fa-info-circle me-2"></i>Extended Patient Information</h6>
+    <p class="mb-0">Extended patient information is not available for this document. The system was unable to extract additional patient data from the CDA content.</p>
 </div>
 {% endif %}

@@ -1,0 +1,205 @@
+{% load patient_filters %}
+
+<!-- Extended Patient Healthcare Team Component -->
+<!-- This component provides content for the Healthcare Team tab -->
+
+{% if healthcare_data and healthcare_data.author_hcp or healthcare_data.organization %}
+<!-- Single Unified Healthcare Information Section -->
+<div class="healthcare-info-unified">
+    <div class="row g-3">
+        <!-- Healthcare Provider Information -->
+        {% if healthcare_data.author_hcp %}
+        {% with author_hcp=healthcare_data.author_hcp %}
+        <div class="col-md-6">
+            <div class="healthcare-card h-100">
+                <div class="healthcare-header">
+                    <i class="fas fa-user-md me-2"></i>
+                    <strong>Healthcare Provider</strong>
+                </div>
+                <div class="healthcare-content">
+                    <div class="provider-name">
+                        {% if author_hcp.title %}{{ author_hcp.title }} {% endif %}
+                        {{ author_hcp.given_name|default:"" }} {{ author_hcp.family_name|default:"" }}
+                        {% if not author_hcp.given_name and not author_hcp.family_name %}Document Author{% endif %}
+                    </div>
+
+                    {% if author_hcp.ids %}
+                    <div class="provider-details mt-3">
+                        <div class="detail-section-title">Professional Identifiers</div>
+                        {% for id_info in author_hcp.ids %}
+                        <div class="id-item">
+                            <i class="fas fa-id-card text-secondary me-2"></i>
+                            <span class="id-value">{{ id_info.extension|default:"ID" }}</span>
+                            {% if id_info.root %}
+                            <span class="id-system">({{ id_info.root }})</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if author_hcp.code %}
+                    <div class="provider-details mt-3">
+                        <div class="detail-section-title">Professional Code</div>
+                        <span class="provider-code">{{ author_hcp.code }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if author_hcp.telecoms %}
+                    <div class="provider-details mt-3">
+                        <div class="detail-section-title">Contact Information</div>
+                        {% for telecom in author_hcp.telecoms %}
+                        <div class="d-flex align-items-center mb-2">
+                            {% if telecom.system == 'phone' %}
+                            <i class="fas fa-phone text-success me-2"></i>
+                            {% elif telecom.system == 'email' %}
+                            <i class="fas fa-envelope text-primary me-2"></i>
+                            {% else %}
+                            <i class="fas fa-address-book text-info me-2"></i>
+                            {% endif %}
+                            <small>{{ telecom.value }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if author_hcp.addresses %}
+                    <div class="provider-details mt-3">
+                        <div class="detail-section-title">Professional Address</div>
+                        {% for address in author_hcp.addresses %}
+                        <div class="address-display">
+                            {% if address.street_lines %}
+                                {% for line in address.street_lines %}
+                                <div class="address-line">{{ line }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            <div class="address-location">
+                                {% if address.city %}{{ address.city }}{% endif %}
+                                {% if address.postal_code %} {{ address.postal_code }}{% endif %}
+                                {% if address.country %}, {{ address.country }}{% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% endif %}
+
+        <!-- Healthcare Organization Information -->
+        {% if healthcare_data.organization %}
+        {% with org=healthcare_data.organization %}
+        <div class="col-md-6">
+            <div class="healthcare-card h-100">
+                <div class="healthcare-header">
+                    <i class="fas fa-hospital me-2"></i>
+                    <strong>Healthcare Organization</strong>
+                </div>
+                <div class="healthcare-content">
+                    <div class="organization-name">
+                        {{ org.name|default:"Healthcare Organization" }}
+                    </div>
+
+                    {% if org.ids %}
+                    <div class="organization-details mt-3">
+                        <div class="detail-section-title">Organization Identifiers</div>
+                        {% for id_info in org.ids %}
+                        <div class="id-item">
+                            <i class="fas fa-building text-secondary me-2"></i>
+                            <span class="id-value">{{ id_info.extension|default:"ID" }}</span>
+                            {% if id_info.root %}
+                            <span class="id-system">({{ id_info.root }})</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if org.telecoms %}
+                    <div class="organization-details mt-3">
+                        <div class="detail-section-title">Contact Information</div>
+                        {% for telecom in org.telecoms %}
+                        <div class="provider-telecom">
+                            {% if telecom.system == 'phone' %}
+                            <i class="fas fa-phone text-success me-2"></i>
+                            {% elif telecom.system == 'email' %}
+                            <i class="fas fa-envelope text-primary me-2"></i>
+                            {% else %}
+                            <i class="fas fa-globe text-info me-2"></i>
+                            {% endif %}
+                            <span class="telecom-value">{{ telecom.value }}</span>
+                            <span class="telecom-type">({{ telecom.system|capfirst }})</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if org.addresses %}
+                    <div class="organization-details mt-3">
+                        <div class="detail-section-title">Organization Address</div>
+                        {% for address in org.addresses %}
+                        <div class="address-display">
+                            {% if address.street_lines %}
+                                {% for line in address.street_lines %}
+                                <div class="address-line">{{ line }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            <div class="address-location">
+                                {% if address.city %}{{ address.city }}{% endif %}
+                                {% if address.postal_code %} {{ address.postal_code }}{% endif %}
+                                {% if address.country %}, {{ address.country }}{% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% endif %}
+    </div>
+
+    <!-- Additional Healthcare Information -->
+    {% if healthcare_data.legal_authenticator %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="healthcare-card">
+                <div class="healthcare-header">
+                    <i class="fas fa-certificate me-2"></i>
+                    <strong>Legal Authenticator</strong>
+                </div>
+                {% with auth=healthcare_data.legal_authenticator %}
+                <div class="healthcare-content">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="detail-section-title">Authenticator</div>
+                            <div class="fw-medium">
+                                {% if auth.title %}{{ auth.title }} {% endif %}
+                                {{ auth.given_name|default:"" }} {{ auth.family_name|default:"" }}
+                                {% if not auth.given_name and not auth.family_name %}Legal Authenticator{% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            {% if auth.time %}
+                            <div class="detail-section-title">Authentication Time</div>
+                            <div class="small">{{ auth.time }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-stethoscope fa-3x text-muted mb-3"></i>
+    <h6 class="text-muted">No Healthcare Team Information Available</h6>
+    <p class="text-muted small">No healthcare provider or organization details were found in the patient record.</p>
+</div>
+{% endif %}

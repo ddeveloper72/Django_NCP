@@ -1,0 +1,416 @@
+{% load patient_filters %}
+
+<!-- Extended Patient Document Information Component -->
+<!-- This component provides content for the Document Info tab -->
+
+<!-- Single Unified Document Information Section -->
+<div class="document-info-unified">
+    <div class="row g-3">
+        <!-- Document Metadata Section -->
+        <div class="col-md-6">
+            <div class="document-card h-100">
+                <div class="document-header">
+                    <i class="fas fa-file-medical-alt me-2"></i>
+                    <strong>Document Information</strong>
+                </div>
+                <div class="document-content">
+                    <div class="document-type">
+                        Patient Summary (PS)
+                        <span class="document-standard">European eHealth Standard</span>
+                    </div>
+
+                    <div class="document-details mt-3">
+                        <div class="detail-section-title">Document Status</div>
+                        <div class="status-badges">
+                            <span class="status-badge status-active">Active</span>
+                            <span class="status-badge status-secure">Secure</span>
+                            <span class="status-badge status-normal">Normal Confidentiality</span>
+                        </div>
+                    </div>
+
+                    {% if administrative_data %}
+                    <div class="document-details mt-3">
+                        <div class="detail-item">
+                            <span class="detail-label">Creation Date:</span>
+                            <span class="detail-value">{{ administrative_data.effective_time|default:"Not specified" }}</span>
+                        </div>
+
+                        {% if administrative_data.version_number %}
+                        <div class="detail-item">
+                            <span class="detail-label">Document Version:</span>
+                            <span class="detail-value">{{ administrative_data.version_number }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+                            <!-- Document Custodian Section -->
+        <div class="col-md-6">
+            <div class="document-card h-100">
+                <div class="document-header">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    <strong>Document Custodian</strong>
+                </div>
+                <div class="document-content">
+                    {% if administrative_data and administrative_data.custodian_organization %}
+                    {% with custodian=administrative_data.custodian_organization %}
+                    <div class="custodian-name">
+                        {{ custodian.name|default:"Health Service Executive" }}
+                    </div>
+
+                    {% if custodian.ids %}
+                    <div class="custodian-details mt-3">
+                        <div class="detail-section-title">Organization Identifiers</div>
+                        {% for id_info in custodian.ids %}
+                        <div class="id-item">
+                            <i class="fas fa-building text-secondary me-2"></i>
+                            <span class="id-value">{{ id_info.extension|default:"ID" }}</span>
+                            {% if id_info.root %}
+                            <span class="id-system">({{ id_info.root }})</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if custodian.telecoms %}
+                    <div class="custodian-details mt-3">
+                        <div class="detail-section-title">Contact Information</div>
+                        {% for telecom in custodian.telecoms %}
+                        <div class="custodian-telecom">
+                            {% if telecom.system == 'phone' %}
+                            <i class="fas fa-phone text-success me-2"></i>
+                            {% elif telecom.system == 'email' %}
+                            <i class="fas fa-envelope text-primary me-2"></i>
+                            {% else %}
+                            <i class="fas fa-globe text-info me-2"></i>
+                            {% endif %}
+                            <span class="telecom-value">{{ telecom.value }}</span>
+                            <span class="telecom-type">({{ telecom.system|capfirst }})</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if custodian.addresses %}
+                    <div class="custodian-details mt-3">
+                        <div class="detail-section-title">Organization Address</div>
+                        {% for address in custodian.addresses %}
+                        <div class="address-display">
+                            {% if address.street_lines %}
+                                {% for line in address.street_lines %}
+                                <div class="address-line">{{ line }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            <div class="address-location">
+                                {% if address.city %}{{ address.city }}{% endif %}
+                                {% if address.postal_code %} {{ address.postal_code }}{% endif %}
+                                {% if address.country %}, {{ address.country }}{% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% endwith %}
+                    {% else %}
+                    <div class="custodian-name">
+                        Health Service Executive
+                    </div>
+                    <div class="custodian-details mt-3">
+                        <div class="detail-item">
+                            <span class="detail-label">Organization:</span>
+                            <span class="detail-value">Health Service Executive</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if administrative_data and administrative_data.document_id %}
+                    <div class="custodian-details mt-3">
+                        <div class="detail-section-title">Document Identifiers</div>
+                        <div class="id-item">
+                            <i class="fas fa-fingerprint text-secondary me-2"></i>
+                            <span class="id-value">{{ administrative_data.document_id.extension|default:"Not specified" }}</span>
+                            {% if administrative_data.document_id.root %}
+                            <span class="id-system">({{ administrative_data.document_id.root }})</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.document-info-unified {
+    padding: 0;
+}
+
+.document-card {
+    background: #ffffff;
+    border: 1px solid #e1f5fe;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.document-header {
+    color: #0277bd;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e1f5fe;
+}
+
+.document-content {
+    color: #333;
+}
+
+.document-type, .custodian-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.document-standard {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 400;
+    margin-top: 0.25rem;
+}
+
+.document-details, .custodian-details {
+    margin-top: 1rem;
+}
+
+.detail-section-title {
+    font-weight: 500;
+    color: #0277bd;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-item {
+    display: flex;
+    margin-bottom: 0.5rem;
+    align-items: center;
+}
+
+.detail-label {
+    font-weight: 500;
+    color: #666;
+    min-width: 120px;
+    margin-right: 0.5rem;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.status-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-active {
+    background: #e8f5e8;
+    color: #2e7d32;
+    border: 1px solid #4caf50;
+}
+
+.status-secure {
+    background: #e3f2fd;
+    color: #1565c0;
+    border: 1px solid #2196f3;
+}
+
+.status-normal {
+    background: #f3e5f5;
+    color: #7b1fa2;
+    border: 1px solid #9c27b0;
+}
+
+.id-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.id-value {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-right: 0.5rem;
+    font-family: 'Courier New', monospace;
+}
+
+.id-system {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.custodian-telecom {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border-left: 3px solid #0277bd;
+}
+
+.telecom-value {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-right: 0.5rem;
+}
+
+.telecom-type {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.address-display {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 4px;
+    border-left: 3px solid #0277bd;
+}
+
+.address-line {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: #2c3e50;
+}
+
+.address-location {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-top: 0.5rem;
+}
+</style>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Custodian Organization Section -->
+            {% if administrative_data and administrative_data.custodian_organization %}
+            <div class="col-md-4">
+                {% with custodian=administrative_data.custodian_organization %}
+                <h6 class="fw-bold text-success mb-3">
+                    <i class="fas fa-shield-alt me-2"></i>Document Custodian
+                </h6>
+
+                <div class="bg-white rounded p-3 border">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Organization</small>
+                        <div class="fw-medium">{{ custodian.name|default:"Healthcare Organization" }}</div>
+                    </div>
+
+                    {% if custodian.ids %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Organization ID</small>
+                        {% for id_info in custodian.ids %}
+                        <div class="font-monospace small">{{ id_info.extension|default:"ID" }}</div>
+                        {% if id_info.root %}
+                        <small class="text-muted">{{ id_info.root }}</small>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if custodian.telecoms %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Contact</small>
+                        {% for telecom in custodian.telecoms %}
+                        <div class="d-flex align-items-center mb-1">
+                            {% if telecom.system == 'phone' %}
+                            <i class="fas fa-phone text-success me-2"></i>
+                            {% elif telecom.system == 'email' %}
+                            <i class="fas fa-envelope text-primary me-2"></i>
+                            {% else %}
+                            <i class="fas fa-globe text-info me-2"></i>
+                            {% endif %}
+                            <small>{{ telecom.value }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if custodian.addresses %}
+                    <div>
+                        <small class="text-muted d-block mb-2">Address</small>
+                        {% for address in custodian.addresses %}
+                        <div class="small">
+                            {% if address.street_lines %}
+                                {% for line in address.street_lines %}{{ line }}{% if not forloop.last %}<br>{% endif %}{% endfor %}<br>
+                            {% endif %}
+                            {% if address.city %}{{ address.city }}{% endif %}
+                            {% if address.postal_code %} {{ address.postal_code }}{% endif %}
+                            {% if address.country %}<br>{{ address.country }}{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endwith %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Technical Document Information Footer -->
+        <div class="border-top mt-4 pt-3">
+            <h6 class="fw-bold text-secondary mb-3">
+                <i class="fas fa-cogs me-2"></i>Technical Information
+            </h6>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="text-center p-3 bg-white rounded border">
+                        <div class="h6 text-primary mb-1">L3</div>
+                        <small class="text-muted">CDA Type</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 bg-white rounded border">
+                        <div class="h6 text-success mb-1">High</div>
+                        <small class="text-muted">Translation Quality</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 bg-white rounded border">
+                        <div class="h6 text-info mb-1">IE</div>
+                        <small class="text-muted">Source Country</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3 bg-white rounded border">
+                        <div class="h6 text-warning mb-1">en-IE</div>
+                        <small class="text-muted">Language</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

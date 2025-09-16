@@ -1,0 +1,184 @@
+{% load patient_filters %}
+
+<!-- CLEAN TEMPLATE LOADED - September 16, 2025 -->
+<!-- Extended Patient Contact Information Component -->
+<!-- This component provides content for the Contact Details tab -->
+
+{% if contact_data and contact_data.addresses or contact_data.telecoms %}
+<!-- Single Unified Contact Information Section -->
+<div class="contact-info-unified">
+    <div class="row g-3">
+        <!-- Address Information -->
+        {% if contact_data.addresses %}
+        {% for address in contact_data.addresses %}
+        <div class="col-md-6">
+            <div class="contact-card h-100">
+                <div class="contact-header">
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    <strong>Address{% if address.use %} ({{ address.use|capfirst }}){% endif %}</strong>
+                </div>
+                <div class="contact-content">
+                    {% if address.street_lines %}
+                        {% for line in address.street_lines %}
+                        <div class="address-line">{{ line }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="address-details mt-2">
+                        {% if address.city %}
+                        <div class="detail-item">
+                            <span class="detail-label">City:</span>
+                            <span class="detail-value">{{ address.city }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if address.postal_code %}
+                        <div class="detail-item">
+                            <span class="detail-label">Postal Code:</span>
+                            <span class="detail-value">{{ address.postal_code }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if address.country %}
+                        <div class="detail-item">
+                            <span class="detail-label">Country:</span>
+                            <span class="detail-value">{{ address.country }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Contact Methods -->
+        {% if contact_data.telecoms %}
+        <div class="col-md-6">
+            <div class="contact-card h-100">
+                <div class="contact-header">
+                    <i class="fas fa-phone me-2"></i>
+                    <strong>Contact Methods</strong>
+                </div>
+                <div class="contact-content">
+                    {% for telecom in contact_data.telecoms %}
+                    <div class="telecom-item">
+                        <div class="telecom-icon">
+                            {% if telecom.system == 'phone' %}
+                            <i class="fas fa-phone text-success"></i>
+                            {% elif telecom.system == 'email' %}
+                            <i class="fas fa-envelope text-primary"></i>
+                            {% elif telecom.system == 'fax' %}
+                            <i class="fas fa-fax text-secondary"></i>
+                            {% else %}
+                            <i class="fas fa-address-book text-info"></i>
+                            {% endif %}
+                        </div>
+                        <div class="telecom-details">
+                            <div class="telecom-value">{{ telecom.value }}</div>
+                            <div class="telecom-meta">
+                                {{ telecom.system|capfirst }}
+                                {% if telecom.use %} • {{ telecom.use|capfirst }}{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.contact-info-unified {
+    padding: 0;
+}
+
+.contact-card {
+    background: #ffffff;
+    border: 1px solid #e3f2fd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.contact-header {
+    color: #1976d2;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e3f2fd;
+}
+
+.contact-content {
+    color: #333;
+}
+
+.address-line {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: #2c3e50;
+}
+
+.address-details {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 0.75rem;
+}
+
+.detail-item {
+    display: flex;
+    margin-bottom: 0.5rem;
+    align-items: center;
+}
+
+.detail-label {
+    font-weight: 500;
+    color: #666;
+    min-width: 100px;
+    margin-right: 0.5rem;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.telecom-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 3px solid #1976d2;
+}
+
+.telecom-icon {
+    margin-right: 1rem;
+    font-size: 1.1rem;
+}
+
+.telecom-details {
+    flex-grow: 1;
+}
+
+.telecom-value {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.telecom-meta {
+    font-size: 0.85rem;
+    color: #666;
+}
+</style>
+
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-address-card fa-3x text-muted mb-3"></i>
+    <h6 class="text-muted">No Contact Information Available</h6>
+    <p class="text-muted small">No contact details or addresses were found in the patient record.</p>
+</div>
+{% endif %}

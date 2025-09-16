@@ -7,6 +7,104 @@
 {% block title %}Enhanced CDA Display - {{ patient_identity.given_name }} {{ patient_identity.family_name }}{% endblock %}
 
 {% block extra_css %}
+<!-- Bootstrap 5.3 handles all styling - no inline CSS needed -->
+<style>
+/* Extended Patient Tab Navigation Styles */
+.tab-navigation {
+    display: flex;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+    gap: 0;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: #6c757d;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    border-radius: 8px 8px 0 0;
+    margin-right: 0.25rem;
+    position: relative;
+}
+
+.tab-button:hover {
+    color: #495057;
+    background: #f8f9fa;
+    transform: translateY(-1px);
+}
+
+.tab-button.active {
+    color: #ffffff !important;
+    border-bottom-color: #0066cc;
+    background: linear-gradient(135deg, #0066cc 0%, #004499 100%) !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.3);
+}
+
+.tab-button.active:hover {
+    background: linear-gradient(135deg, #0052a3 0%, #003d7a 100%) !important;
+    transform: translateY(-1px);
+}
+
+.tab-button .badge {
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Clinical Tab Content Styles */
+.clinical-tab-content {
+    display: none;
+    padding: 20px;
+    background: white;
+    border-radius: 0 0 0.375rem 0.375rem;
+    height: auto;
+    min-height: fit-content;
+    overflow: visible;
+}
+
+.clinical-tab-content.active {
+    display: block !important;
+    height: auto;
+    min-height: fit-content;
+    overflow: visible;
+}
+
+/* Extended Patient Section Styling */
+.clinical-section {
+    background: white;
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+    margin-bottom: 1.5rem;
+}
+
+.extended-tab-content-container {
+    background: white;
+    border-radius: 0 0 0.375rem 0.375rem;
+}
+
+/* Responsive design for tabs */
+@media (max-width: 768px) {
+    .tab-navigation {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .tab-button {
+        border-radius: 0.375rem;
+        margin-right: 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .tab-button.active {
+        border-bottom-color: #0066cc;
+    }
+}
+</style>
 {% endblock %}
 
 {% block breadcrumb %}
@@ -61,12 +159,13 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Patient Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
+<div class="container-fluid p-0">
+    <!-- Patient Header with Tabbed Interface -->
+    <div class="section-wrapper">
+        <!-- Main Patient Header Card with Integrated Tabs -->
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">
                         <i class="fas fa-user-injured me-2"></i>
                         {# Django: Fix Jinja2 syntax - no ~ concatenation or |default() with args #}
@@ -78,91 +177,129 @@
                         Patient
                         {% endif %}
                     </h2>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Birth Date:</strong>
-                                {% if patient_identity.birth_date_formatted %}
-                                {{ patient_identity.birth_date_formatted }}
-                                {% elif patient_identity.birth_date %}
-                                {{ patient_identity.birth_date|document_date }}
-                                {% else %}
-                                Unknown
-                                {% endif %}
-                            </p>
-                            <p><strong>Gender:</strong> {{ patient_identity.gender|default:"Unknown" }}</p>
-                            <p><strong>Patient ID:</strong> {{ patient_identity.patient_id }}</p>
-                            {% if patient_identity.secondary_patient_id %}
-                            <p><strong>Secondary ID:</strong> {{ patient_identity.secondary_patient_id }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Source Country:</strong> {{ source_country }}</p>
-                            <p><strong>CDA Type:</strong> {{ cda_type }}</p>
-                            <p><strong>Translation Quality:</strong>
-                                <span class="badge bg-success">{{ translation_quality }}</span>
-                            </p>
-                            {% if patient_identity.document_metadata %}
-                            {# Django: Use direct access instead of {% set %} #}
-                            {% if patient_identity.document_metadata.title %}
-                            <p><strong>Document:</strong> {{ patient_identity.document_metadata.title }}</p>
-                            {% endif %}
-                            {% if patient_identity.document_metadata.language_code %}
-                            <p><strong>Language:</strong> {{ patient_identity.document_metadata.language_code }}</p>
-                            {% endif %}
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- CDA Type Toggle Buttons -->
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="btn-group" role="group" aria-label="CDA Type Selection">
-                                {# Django: Replace {% set %} with conditional class assignment #}
-                                <a href="{% url 'patient_data:patient_cda_view_typed' patient_identity.url_patient_id|default:patient_identity.patient_id 'L1' %}"
-                                    class="{% if cda_type == 'L1' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %} {% if not has_l1_cda %} disabled{% endif %}">
-                                    <i class="fas fa-file-medical me-1"></i>L1 Original Document
-                                    {% if not has_l1_cda %}<small>(Not Available)</small>{% endif %}
-                                </a>
-                                {# Django: Replace {% set %} with conditional class assignment #}
-                                <a href="{% url 'patient_data:patient_cda_view_typed' patient_identity.url_patient_id|default:patient_identity.patient_id 'L3' %}"
-                                    class="{% if cda_type == 'L3' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %} {% if not has_l3_cda %} disabled{% endif %}">
-                                    <i class="fas fa-language me-1"></i>L3 Patient Summary
-                                    {% if not has_l3_cda %}<small>(Not Available)</small>{% endif %}
-                                </a>
-                            </div>
-                            <small class="text-muted d-block mt-1">
-                                <strong>L1:</strong> Original clinical document from source country |
-                                <strong>L3:</strong> Standardized European Patient Summary
-                                {% if cda_type == 'L1' and has_l1_cda %}
-                                | Currently viewing: <strong>Original clinical data</strong>
-                                {% elif cda_type == 'L3' and has_l3_cda %}
-                                | Currently viewing: <strong>European Patient Summary</strong>
-                                {% endif %}
-                            </small>
-                        </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-light text-primary me-2">
+                            <i class="fas fa-flag me-1"></i>{{ source_country }}
+                        </span>
+                        <span class="badge bg-success">
+                            <i class="fas fa-check-circle me-1"></i>{{ translation_quality }}
+                        </span>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Include Debug Modal Component -->
-    {% include 'patient_data/components/debug_modal.html' %}
+            <!-- Integrated Navigation Tabs -->
+            <div class="card-body p-0">
+                <ul class="nav nav-tabs nav-tabs-healthcare border-0" id="patientTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab"
+                            data-bs-target="#overview-content" type="button" role="tab"
+                            aria-controls="overview-content" aria-selected="true">
+                            <i class="fas fa-user me-2"></i>
+                            Patient Overview
+                        </button>
+                    </li>
 
-    <!-- Extended Header Information Section -->
-    {% include 'patient_data/components/extended_patient_info.html' %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="extended-tab" data-bs-toggle="tab"
+                            data-bs-target="#extended-content" type="button" role="tab"
+                            aria-controls="extended-content" aria-selected="false">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Extended Patient Information
+                        </button>
+                    </li>
+                </ul>
 
-    <!-- Enhanced Medication Information Section -->
+                <!-- Integrated Tab Content -->
+                <div class="tab-content" id="patientTabContent">
+                    <!-- Patient Overview Tab Content -->
+                    <div class="tab-pane fade show active" id="overview-content" role="tabpanel" aria-labelledby="overview-tab">
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Birth Date:</strong>
+                                        {% if patient_identity.birth_date_formatted %}
+                                        {{ patient_identity.birth_date_formatted }}
+                                        {% elif patient_identity.birth_date %}
+                                        {{ patient_identity.birth_date|document_date }}
+                                        {% else %}
+                                        Unknown
+                                        {% endif %}
+                                    </p>
+                                    <p><strong>Gender:</strong> {{ patient_identity.gender|default:"Unknown" }}</p>
+                                    <p><strong>Patient ID:</strong> {{ patient_identity.patient_id }}</p>
+                                    {% if patient_identity.secondary_patient_id %}
+                                    <p><strong>Secondary ID:</strong> {{ patient_identity.secondary_patient_id }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Source Country:</strong> {{ source_country }}</p>
+                                    <p><strong>CDA Type:</strong> {{ cda_type }}</p>
+                                    <p><strong>Translation Quality:</strong>
+                                        <span class="badge bg-success">{{ translation_quality }}</span>
+                                    </p>
+                                    {% if patient_identity.document_metadata %}
+                                    {# Django: Use direct access instead of {% set %} #}
+                                    {% if patient_identity.document_metadata.title %}
+                                    <p><strong>Document:</strong> {{ patient_identity.document_metadata.title }}</p>
+                                    {% endif %}
+                                    {% if patient_identity.document_metadata.language_code %}
+                                    <p><strong>Language:</strong> {{ patient_identity.document_metadata.language_code }}</p>
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- CDA Type Toggle Buttons -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="btn-group" role="group" aria-label="CDA Type Selection">
+                                        {# Django: Replace {% set %} with conditional class assignment #}
+                                        <a href="{% url 'patient_data:patient_cda_view_typed' patient_identity.url_patient_id|default:patient_identity.patient_id 'L1' %}"
+                                            class="{% if cda_type == 'L1' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %} {% if not has_l1_cda %} disabled{% endif %}">
+                                            <i class="fas fa-file-medical me-1"></i>L1 Original Document
+                                            {% if not has_l1_cda %}<small>(Not Available)</small>{% endif %}
+                                        </a>
+                                        {# Django: Replace {% set %} with conditional class assignment #}
+                                        <a href="{% url 'patient_data:patient_cda_view_typed' patient_identity.url_patient_id|default:patient_identity.patient_id 'L3' %}"
+                                            class="{% if cda_type == 'L3' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %} {% if not has_l3_cda %} disabled{% endif %}">
+                                            <i class="fas fa-language me-1"></i>L3 Patient Summary
+                                            {% if not has_l3_cda %}<small>(Not Available)</small>{% endif %}
+                                        </a>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        <strong>L1:</strong> Original clinical document from source country |
+                                        <strong>L3:</strong> Standardized European Patient Summary
+                                        {% if cda_type == 'L1' and has_l1_cda %}
+                                        | Currently viewing: <strong>Original clinical data</strong>
+                                        {% elif cda_type == 'L3' and has_l3_cda %}
+                                        | Currently viewing: <strong>European Patient Summary</strong>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Extended Patient Information Tab Content -->
+                    <div class="tab-pane fade" id="extended-content" role="tabpanel" aria-labelledby="extended-tab">
+                        <div class="p-4">
+                            {% include 'patient_data/components/extended_patient_info.html' %}
+                        </div>
+                    </div>
+
+                </div> <!-- End Integrated Tab Content -->
+            </div> <!-- End card-body -->
+        </div> <!-- End Main Patient Header Card -->
+    </div>    <!-- Enhanced Medication Information Section - Pure Bootstrap -->
     {% if medications and medications|length > 0 %}
-    <div class="medical-section">
-        <div class="card">
-            <div class="card-header">
+    <div class="section-wrapper">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
                 <h4 class="mb-0">
                     <i class="fas fa-pills me-2"></i>
                     Comprehensive Medication Analysis
-                    <span class="badge bg-primary ms-2">{{ medications|length }} medication(s)</span>
+                    <span class="badge bg-light text-dark ms-2">{{ medications|length }} medication(s)</span>
                 </h4>
             </div>
             <div class="card-body">
@@ -293,64 +430,68 @@
     </div>
     {% endif %}
 
-    <!-- Clinical Sections -->
+    <!-- Clinical Sections - Pure Bootstrap -->
     {% if processed_sections and processed_sections|length > 0 %}
-    <div class="card mt-4">
-        <div class="card-header bg-success text-white">
-            <h3 class="mb-0">
-                <i class="fas fa-clipboard-list me-2"></i>
-                Clinical Sections ({{ processed_sections|length }} sections)
-            </h3>
-        </div>
-        <div class="card-body">
-            {% for section in processed_sections %}
-            {# Django: Use forloop.counter0 instead of {% set %} #}
+    <div class="section-wrapper">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">
+                    <i class="fas fa-clipboard-list me-2"></i>
+                    Clinical Sections ({{ processed_sections|length }} sections)
+                </h3>
+            </div>
+            <div class="card-body">
+                {% for section in processed_sections %}
+                {# Django: Use forloop.counter0 instead of {% set %} #}
 
-            <!-- Modular Clinical Section Router - Enhanced Version -->
-            {% include 'patient_data/sections/clinical_section_router.html' %}
+                <!-- Modular Clinical Section Router - Enhanced Version -->
+                {% include 'patient_data/sections/clinical_section_router.html' %}
 
-            {% endfor %}
+                {% endfor %}
 
-            <div class="text-end mt-3">
-                <span class="badge bg-success fs-6">
-                    <i class="fas fa-check-circle me-1"></i>
-                    Enhanced Clinical Sections Loaded ({{ processed_sections|length }})
-                </span>
+                <div class="text-end mt-3">
+                    <span class="badge bg-success fs-6">
+                        <i class="fas fa-check-circle me-1"></i>
+                        Enhanced Clinical Sections Loaded ({{ processed_sections|length }})
+                    </span>
+                </div>
             </div>
         </div>
     </div>
     {% else %}
-    <div class="alert alert-warning">
-        <h4>No Medical Data Available</h4>
-        <p>No clinical sections could be processed from the CDA document.</p>
+    <div class="section-wrapper">
+        <div class="alert alert-warning">
+            <h4>No Medical Data Available</h4>
+            <p class="mb-0">No clinical sections could be processed from the CDA document.</p>
+        </div>
     </div>
     {% endif %}
 
-    <!-- Summary Stats -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Processing Summary</h4>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-md-3">
-                            <div class="h2 text-primary">{{ sections_count }}</div>
-                            <div>Total Sections</div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="h2 text-success">{{ medical_terms_count }}</div>
-                            <div>Medical Terms</div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="h2 text-info">{{ coded_sections_count }}</div>
-                            <div>Coded Sections</div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="h2 text-warning">{{ coded_sections_percentage|floatformat:0 }}%</div>
-                            <div>Terminology Coverage</div>
-                        </div>
+    <!-- Summary Stats - Pure Bootstrap -->
+    <div class="section-wrapper">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Processing Summary
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="h2 text-primary">{{ sections_count }}</div>
+                        <div>Total Sections</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="h2 text-success">{{ medical_terms_count }}</div>
+                        <div>Medical Terms</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="h2 text-info">{{ coded_sections_count }}</div>
+                        <div>Coded Sections</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="h2 text-warning">{{ coded_sections_percentage|floatformat:0 }}%</div>
+                        <div>Terminology Coverage</div>
                     </div>
                 </div>
             </div>
@@ -363,43 +504,44 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Extended Patient Info Tabs Enhancement -->
+<!-- Pure Bootstrap Tab Functionality -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        console.log('🔍 Initializing Extended Patient Info tabs with custom system...');
+        console.log('🎯 Initializing Pure Bootstrap Tabs...');
 
-        // Initialize with contact tab active by default
-        setTimeout(() => {
-            showExtendedPatientTab('contact');
-            console.log('🎯 Extended Patient Info tabs initialized with contact tab active');
-        }, 100);
+        // Initialize Bootstrap tabs for Extended Patient Info
+        const extendedInfoTabs = document.querySelectorAll('#extendedInfoTabs button[data-bs-toggle="tab"]');
+        extendedInfoTabs.forEach(tab => {
+            new bootstrap.Tab(tab);
+        });
 
-        // Enhanced hover effects for contact links
-        const contactLinks = document.querySelectorAll('.contact-link');
-        contactLinks.forEach(function (link) {
-            link.addEventListener('mouseenter', function () {
-                this.style.transform = 'scale(1.02)';
+        // Initialize Bootstrap tabs for Clinical Sections
+        const clinicalTabs = document.querySelectorAll('.clinical-tabs button[data-bs-toggle="tab"]');
+        clinicalTabs.forEach(tab => {
+            new bootstrap.Tab(tab);
+        });
+
+        // Enhanced hover effects for interactive elements
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.transition = 'transform 0.2s ease';
             });
 
-            link.addEventListener('mouseleave', function () {
-                this.style.transform = 'scale(1)';
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
             });
         });
 
-        console.log('✅ Extended Patient Info tabs initialized successfully');
+        console.log('✅ Pure Bootstrap functionality initialized successfully');
     });
-</script>
 
-<!-- Section Tabs JavaScript -->
-<script>
-    // Date formatting function for various medical date formats
+    // Date formatting utility function
     function formatMedicalDate(dateStr) {
         if (!dateStr || typeof dateStr !== 'string') return dateStr;
 
-        // Remove any whitespace
         dateStr = dateStr.trim();
-
-        // Handle various CDA date formats
         let parsedDate = null;
 
         // Format: YYYYMMDDHHMMSS (e.g., 20130317124500)
@@ -424,7 +566,6 @@
             parsedDate = new Date(dateStr);
         }
 
-        // If we successfully parsed a date, format it as MM/DD/YYYY HH:MM
         if (parsedDate && !isNaN(parsedDate.getTime())) {
             const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
             const day = String(parsedDate.getDate()).padStart(2, '0');
@@ -432,169 +573,13 @@
             const hour = String(parsedDate.getHours()).padStart(2, '0');
             const minute = String(parsedDate.getMinutes()).padStart(2, '0');
 
-            // If it's just a date (no time component), don't show time
             if (/^\d{8}$/.test(dateStr.trim()) || /^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
                 return `${month}/${day}/${year}`;
             } else {
                 return `${month}/${day}/${year} ${hour}:${minute}`;
             }
-        }        // Return original string if we couldn't parse it
+        }
         return dateStr;
     }
-
-    // Function to apply date formatting to elements with date-like content
-    function formatDateElements() {
-        // Format dates in original clinical data
-        document.querySelectorAll('.original-value').forEach(element => {
-            const text = element.textContent.trim();
-            if (text && text !== 'N/A') {
-                const formatted = formatMedicalDate(text);
-                if (formatted !== text) {
-                    element.innerHTML = `<span class="formatted-date" title="Original: ${text}">${formatted}</span>`;
-                }
-            }
-        });
-
-        // Format dates in structured data that contain date-like patterns
-        document.querySelectorAll('td, div').forEach(element => {
-            const text = element.textContent.trim();
-            // Look for date patterns in cells that might contain dates
-            if (/^\d{8,14}$/.test(text) || /^\d{4}-\d{2}-\d{2}/.test(text)) {
-                const formatted = formatMedicalDate(text);
-                if (formatted !== text && element.children.length === 0) {
-                    element.innerHTML = `<span class="formatted-date" title="Original: ${text}">${formatted}</span>`;
-                }
-            }
-        });
-    }
-
-    function showTab(sectionId, tabType) {
-        // Hide all tab contents for this section
-        const structuredTab = document.getElementById(sectionId + '_structured');
-        const originalTab = document.getElementById(sectionId + '_original');
-
-        // Find the parent container that contains the tabs
-        const tabContainer = structuredTab ? structuredTab.closest('.card-body') :
-            (originalTab ? originalTab.closest('.card-body') : null);
-
-        if (!tabContainer) return; // Exit if we can't find the container
-
-        const buttons = tabContainer.querySelectorAll('.tab-button');
-
-        // Remove active class from all tabs and buttons in this section
-        if (structuredTab) structuredTab.classList.remove('active');
-        if (originalTab) originalTab.classList.remove('active');
-        buttons.forEach(btn => btn.classList.remove('active'));
-
-        // Show selected tab and activate corresponding button
-        if (tabType === 'structured') {
-            if (structuredTab) structuredTab.classList.add('active');
-            if (buttons[0]) buttons[0].classList.add('active');
-        } else if (tabType === 'original') {
-            if (originalTab) originalTab.classList.add('active');
-            if (buttons[1]) buttons[1].classList.add('active');
-        }
-    }
-
-    // Enhanced function for clinical sections with more specific targeting
-    function showClinicalTab(sectionId, tabType) {
-        // Hide all tab contents for this specific clinical section
-        const structuredTab = document.getElementById(sectionId + '_structured');
-        const originalTab = document.getElementById(sectionId + '_original');
-
-        // Find the parent clinical section container
-        const clinicalContainer = structuredTab ? structuredTab.closest('.medical-section') :
-            (originalTab ? originalTab.closest('.medical-section') : null);
-
-        if (!clinicalContainer) {
-            console.log('Clinical container not found for:', sectionId);
-            return; // Exit if we can't find the container
-        }
-
-        const buttons = clinicalContainer.querySelectorAll('.tab-button');
-
-        // Remove active class from all clinical tabs and buttons in this section
-        if (structuredTab) structuredTab.classList.remove('active');
-        if (originalTab) originalTab.classList.remove('active');
-        buttons.forEach(btn => btn.classList.remove('active'));
-
-        // Show selected clinical tab and activate corresponding button
-        if (tabType === 'structured') {
-            if (structuredTab) {
-                structuredTab.classList.add('active');
-                structuredTab.style.display = 'block';
-            }
-            if (buttons[0]) buttons[0].classList.add('active');
-        } else if (tabType === 'original') {
-            if (originalTab) {
-                originalTab.classList.add('active');
-                originalTab.style.display = 'block';
-            }
-            if (buttons[1]) buttons[1].classList.add('active');
-        }
-
-        console.log('Clinical tab switched:', sectionId, tabType);
-    }
-
-    // Extended Patient Info tab switching function (matches clinical sections pattern)
-    function showExtendedPatientTab(tabType) {
-        console.log('🔍 Extended Patient Tab switching to:', tabType);
-
-        // Get all tab panes and buttons
-        const contactTab = document.getElementById('extended-contact');
-        const healthcareTab = document.getElementById('extended-healthcare');
-        const documentTab = document.getElementById('extended-document');
-
-        const contactButton = document.getElementById('contact-tab');
-        const healthcareButton = document.getElementById('healthcare-tab');
-        const documentButton = document.getElementById('document-tab');
-
-        // Hide all tabs and remove active classes
-        [contactTab, healthcareTab, documentTab].forEach(tab => {
-            if (tab) {
-                tab.classList.remove('active');
-                tab.style.display = 'none';
-            }
-        });
-
-        [contactButton, healthcareButton, documentButton].forEach(btn => {
-            if (btn) {
-                btn.classList.remove('active');
-                btn.setAttribute('aria-selected', 'false');
-            }
-        });
-
-        // Show selected tab and activate corresponding button
-        if (tabType === 'contact' && contactTab && contactButton) {
-            contactTab.classList.add('active');
-            contactTab.style.display = 'block';
-            contactButton.classList.add('active');
-            contactButton.setAttribute('aria-selected', 'true');
-            console.log('✅ Contact tab activated');
-        } else if (tabType === 'healthcare' && healthcareTab && healthcareButton) {
-            healthcareTab.classList.add('active');
-            healthcareTab.style.display = 'block';
-            healthcareButton.classList.add('active');
-            healthcareButton.setAttribute('aria-selected', 'true');
-            console.log('✅ Healthcare tab activated');
-        } else if (tabType === 'document' && documentTab && documentButton) {
-            documentTab.classList.add('active');
-            documentTab.style.display = 'block';
-            documentButton.classList.add('active');
-            documentButton.setAttribute('aria-selected', 'true');
-            console.log('✅ Document tab activated');
-        }
-    }
-
-    // Initialize tooltips and any other interactive elements
-    document.addEventListener('DOMContentLoaded', function () {
-        // Format dates throughout the document
-        formatDateElements();
-
-        // Add any other initialization code here
-        console.log('Enhanced CDA Display with tabs and date formatting initialized');
-    });
 </script>
 {% endblock %}
-
-</html>
