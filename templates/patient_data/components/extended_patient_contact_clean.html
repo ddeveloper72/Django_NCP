@@ -4,7 +4,14 @@
 <!-- Extended Patient Contact Information Component -->
 <!-- This component provides content for the Contact Details tab -->
 
-{% if contact_data and contact_data.addresses or contact_data.telecoms %}
+{% comment %}
+Note: Patient and guardian may share identical contact information in valid scenarios
+(e.g., parent and minor child, spouse caregivers, family members living together).
+This is not duplication but legitimate shared contact data that should be displayed
+separately to maintain clinical context and relationship clarity.
+{% endcomment %}
+
+{% if contact_data and contact_data.addresses or contact_data.telecoms or administrative_data %}
 <!-- Single Unified Contact Information Section -->
 <div class="contact-info-unified">
     <div class="row g-3">
@@ -18,10 +25,13 @@
                     <strong>Address{% if address.use %} ({{ address.use|capfirst }}){% endif %}</strong>
                 </div>
                 <div class="contact-content">
+                    <!-- Street Address Display - Handle both dict and object formats -->
                     {% if address.street_lines %}
                         {% for line in address.street_lines %}
                         <div class="address-line">{{ line }}</div>
                         {% endfor %}
+                    {% elif address.street %}
+                        <div class="address-line">{{ address.street }}</div>
                     {% endif %}
 
                     <div class="address-details mt-2">
@@ -32,10 +42,10 @@
                         </div>
                         {% endif %}
 
-                        {% if address.postal_code %}
+                        {% if address.postal_code or address.postalCode %}
                         <div class="detail-item">
                             <span class="detail-label">Postal Code:</span>
-                            <span class="detail-value">{{ address.postal_code }}</span>
+                            <span class="detail-value">{{ address.postal_code|default:address.postalCode }}</span>
                         </div>
                         {% endif %}
 
@@ -89,6 +99,207 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Patient Languages Section -->
+{% if administrative_data.patient_languages %}
+<div class="contact-section mt-4">
+    <h6 class="section-title">
+        <i class="fas fa-language me-2"></i>Patient Languages
+    </h6>
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="contact-card">
+                <div class="contact-header">
+                    <i class="fas fa-globe me-2"></i>
+                    <strong>Communication Languages</strong>
+                </div>
+                <div class="contact-content">
+                    {% for language in administrative_data.patient_languages %}
+                    <span class="language-badge">{{ language }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Guardian Information Section -->
+{% if administrative_data.guardian and administrative_data.guardian.contact_info %}
+    {% if administrative_data.guardian.contact_info.addresses or administrative_data.guardian.contact_info.telecoms %}
+<div class="contact-section mt-4">
+    <h6 class="section-title">
+        <i class="fas fa-user-shield me-2"></i>Guardian / Next of Kin
+    </h6>
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="contact-card guardian-card">
+                <div class="contact-header">
+                    <i class="fas fa-users me-2"></i>
+                    <strong>
+                        {% if administrative_data.guardian.given_name and administrative_data.guardian.family_name %}
+                            {{ administrative_data.guardian.given_name }} {{ administrative_data.guardian.family_name }}
+                        {% elif administrative_data.guardian.given_name %}
+                            {{ administrative_data.guardian.given_name }}
+                        {% elif administrative_data.guardian.family_name %}
+                            {{ administrative_data.guardian.family_name }}
+                        {% else %}
+                            Guardian / Next of Kin
+                        {% endif %}
+                    </strong>
+                    {% if administrative_data.guardian.role %}
+                    <span class="role-badge">{{ administrative_data.guardian.role }}</span>
+                    {% endif %}
+                </div>
+                <div class="contact-content">
+                    {% if administrative_data.guardian.contact_info %}
+                        <!-- Guardian Address -->
+                        {% if administrative_data.guardian.contact_info.addresses %}
+                        <div class="guardian-section">
+                            <h6 class="guardian-subtitle"><i class="fas fa-map-marker-alt me-2"></i>Address</h6>
+                            {% for address in administrative_data.guardian.contact_info.addresses %}
+                            <div class="address-block">
+                                <!-- Street Address Display - Handle both dict and object formats -->
+                                {% if address.street_lines %}
+                                    {% for line in address.street_lines %}
+                                    <div class="address-line">{{ line }}</div>
+                                    {% endfor %}
+                                {% elif address.street %}
+                                    <div class="address-line">{{ address.street }}</div>
+                                {% endif %}
+                                <div class="address-details mt-2">
+                                    {% if address.city %}
+                                    <span class="address-part">{{ address.city }}</span>
+                                    {% endif %}
+                                    {% if address.postal_code or address.postalCode %}
+                                    <span class="address-part">{{ address.postal_code|default:address.postalCode }}</span>
+                                    {% endif %}
+                                    {% if address.country %}
+                                    <span class="address-part">{{ address.country }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Guardian Contact Methods -->
+                        {% if administrative_data.guardian.contact_info.telecoms %}
+                        <div class="guardian-section">
+                            <h6 class="guardian-subtitle"><i class="fas fa-phone me-2"></i>Contact Information</h6>
+                            {% for telecom in administrative_data.guardian.contact_info.telecoms %}
+                            <div class="telecom-item guardian-telecom">
+                                <div class="telecom-icon">
+                                    {% if telecom.system == 'phone' %}
+                                    <i class="fas fa-phone text-success"></i>
+                                    {% elif telecom.system == 'email' %}
+                                    <i class="fas fa-envelope text-primary"></i>
+                                    {% elif telecom.system == 'fax' %}
+                                    <i class="fas fa-fax text-secondary"></i>
+                                    {% else %}
+                                    <i class="fas fa-address-book text-info"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="telecom-details">
+                                    <div class="telecom-value">{{ telecom.value }}</div>
+                                    <div class="telecom-meta">
+                                        {{ telecom.system|capfirst }}
+                                        {% if telecom.use %} • {{ telecom.use|capfirst }}{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    {% endif %}
+{% endif %}
+
+<!-- Other Contacts Section -->
+{% if administrative_data.other_contacts %}
+<div class="contact-section mt-4">
+    <h6 class="section-title">
+        <i class="fas fa-address-book me-2"></i>Other Contacts
+    </h6>
+    <div class="row g-3">
+        {% for contact in administrative_data.other_contacts %}
+        <div class="col-md-6">
+            <div class="contact-card other-contact-card">
+                <div class="contact-header">
+                    <i class="fas fa-user-md me-2"></i>
+                    <strong>{{ contact.given_name }} {{ contact.family_name }}</strong>
+                    {% if contact.role %}
+                    <span class="role-badge">{{ contact.role }}</span>
+                    {% endif %}
+                </div>
+                <div class="contact-content">
+                    {% if contact.specialty %}
+                    <div class="specialty-info">
+                        <i class="fas fa-stethoscope me-2"></i>{{ contact.specialty }}
+                    </div>
+                    {% endif %}
+
+                    {% if contact.contact_info %}
+                        <!-- Other Contact Address -->
+                        {% if contact.contact_info.addresses %}
+                        <div class="other-contact-section">
+                            <h6 class="other-contact-subtitle"><i class="fas fa-map-marker-alt me-1"></i>Address</h6>
+                            {% for address in contact.contact_info.addresses %}
+                            <div class="address-block compact">
+                                <!-- Street Address Display - Handle both dict and object formats -->
+                                {% if address.street_lines %}
+                                    {% for line in address.street_lines %}
+                                    <div class="address-line">{{ line }}</div>
+                                    {% endfor %}
+                                {% elif address.street %}
+                                    <div class="address-line">{{ address.street }}</div>
+                                {% endif %}
+                                <div class="address-details mt-1">
+                                    {% if address.city %}{{ address.city }}{% endif %}
+                                    {% if address.postal_code or address.postalCode %}, {{ address.postal_code|default:address.postalCode }}{% endif %}
+                                    {% if address.country %}, {{ address.country }}{% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Other Contact Methods -->
+                        {% if contact.contact_info.telecoms %}
+                        <div class="other-contact-section">
+                            <h6 class="other-contact-subtitle"><i class="fas fa-phone me-1"></i>Contact</h6>
+                            {% for telecom in contact.contact_info.telecoms %}
+                            <div class="telecom-item compact">
+                                <div class="telecom-icon">
+                                    {% if telecom.system == 'phone' %}
+                                    <i class="fas fa-phone text-success"></i>
+                                    {% elif telecom.system == 'email' %}
+                                    <i class="fas fa-envelope text-primary"></i>
+                                    {% else %}
+                                    <i class="fas fa-address-book text-info"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="telecom-details">
+                                    <div class="telecom-value">{{ telecom.value }}</div>
+                                    <div class="telecom-meta">{{ telecom.system|capfirst }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 
 <style>
 .contact-info-unified {
@@ -172,6 +383,124 @@
 .telecom-meta {
     font-size: 0.85rem;
     color: #666;
+}
+
+/* Section titles */
+.section-title {
+    color: #1976d2;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e3f2fd;
+}
+
+.contact-section {
+    margin-top: 2rem;
+    padding-top: 1rem;
+}
+
+/* Language badges */
+.language-badge {
+    display: inline-block;
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Guardian specific styles */
+.guardian-card {
+    border-left: 4px solid #28a745;
+}
+
+.guardian-card .contact-header {
+    color: #28a745;
+    border-bottom-color: #d4edda;
+}
+
+.role-badge {
+    background: #28a745;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-left: 1rem;
+}
+
+.guardian-section {
+    margin-bottom: 1.5rem;
+}
+
+.guardian-subtitle {
+    color: #28a745;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.address-block {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 6px;
+    border-left: 3px solid #28a745;
+}
+
+.address-block.compact {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.address-part {
+    margin-right: 0.5rem;
+    font-weight: 500;
+}
+
+.guardian-telecom {
+    background: #f8f9fa;
+    border-left-color: #28a745;
+}
+
+/* Other contacts specific styles */
+.other-contact-card {
+    border-left: 4px solid #17a2b8;
+}
+
+.other-contact-card .contact-header {
+    color: #17a2b8;
+    border-bottom-color: #d1ecf1;
+}
+
+.other-contact-card .role-badge {
+    background: #17a2b8;
+}
+
+.specialty-info {
+    color: #17a2b8;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: #d1ecf1;
+    border-radius: 4px;
+}
+
+.other-contact-section {
+    margin-bottom: 1rem;
+}
+
+.other-contact-subtitle {
+    color: #17a2b8;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.telecom-item.compact {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
 }
 </style>
 
