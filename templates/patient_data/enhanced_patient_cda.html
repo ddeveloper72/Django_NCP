@@ -106,11 +106,6 @@
 }
 
 /* Layout Controls - Force Vertical Stacking */
-.container-fluid {
-    overflow-x: hidden !important;
-    max-width: 100vw;
-}
-
 .section-wrapper {
     margin-bottom: 1.5rem;
     width: 100%;
@@ -123,6 +118,26 @@
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+}
+
+/* Fix for scrollbar issue - ensure parent containers grow to fit content */
+html, body {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+main {
+    height: auto !important;
+    min-height: unset !important;
+}
+
+/* Remove any viewport height constraints that might cause scrolling */
+.container-fluid {
+    height: auto !important;
+    min-height: unset !important;
+    overflow-x: hidden !important;
+    max-width: 100vw;
 }
 </style>
 {% endblock %}
@@ -179,7 +194,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid p-0">
+<div class="p-0">
     <!-- Patient Header with Tabbed Interface -->
     <div class="section-wrapper">
         <!-- Main Patient Header Card with Integrated Tabs -->
