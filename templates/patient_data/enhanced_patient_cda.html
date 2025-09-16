@@ -104,6 +104,26 @@
         border-bottom-color: #0066cc;
     }
 }
+
+/* Layout Controls - Force Vertical Stacking */
+.container-fluid {
+    overflow-x: hidden !important;
+    max-width: 100vw;
+}
+
+.section-wrapper {
+    margin-bottom: 1.5rem;
+    width: 100%;
+    display: block;
+    clear: both;
+}
+
+/* Ensure no horizontal scrolling or side-by-side layout */
+.card {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
 </style>
 {% endblock %}
 
