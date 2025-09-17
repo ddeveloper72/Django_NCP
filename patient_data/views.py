@@ -2718,6 +2718,7 @@ def patient_cda_view(request, patient_id, cda_type=None):
         patient_id: Patient or session ID from URL (e.g., 1983153969 or 418650)
         cda_type: Optional CDA type ('L1' or 'L3'). If None, defaults to L3 preference.
     """
+    from .ui_labels import get_ui_labels
 
     def make_serializable(obj):
         """Recursively convert objects to JSON-serializable format"""
@@ -4742,6 +4743,12 @@ def patient_cda_view(request, patient_id, cda_type=None):
             else:
                 logger.info(f"🔍 Contact data is not a dict: {type(contact_data)}")
 
+        # Add dynamic UI labels for internationalization
+        target_language = context.get("detected_source_language", "en")
+        if target_language not in ["en", "fr"]:  # Only support en/fr for now
+            target_language = "en"
+        context["ui_labels"] = get_ui_labels(target_language)
+
         return render(
             request,
             "patient_data/enhanced_patient_cda.html",
@@ -4790,6 +4797,7 @@ def patient_cda_view(request, patient_id, cda_type=None):
                 "error_traceback": full_traceback,
                 "template_translations": get_template_translations(),  # Default English translations for error page
                 "detected_source_language": "en",
+                "ui_labels": get_ui_labels("en"),  # Add UI labels to error context
             }
 
             messages.error(request, f"Technical error loading CDA document: {str(e)}")
@@ -7760,6 +7768,7 @@ def enhanced_cda_display(request):
 
     from .services.enhanced_cda_processor import EnhancedCDAProcessor
     from .translation_utils import detect_document_language
+    from .ui_labels import get_ui_labels
     import json
 
     if request.method == "POST":
@@ -7957,6 +7966,7 @@ def enhanced_cda_display(request):
             "description": "Multi-European Language CDA Document Processor with CTS Compliance",
             "supported_languages": supported_languages,
             "default_target_language": "en",
+            "ui_labels": get_ui_labels("en"),  # Add dynamic UI labels
             # TEST: Inject sample allergies section for template testing
             "processed_sections": [
                 {
