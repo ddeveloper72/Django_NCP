@@ -139,6 +139,308 @@ main {
     overflow-x: hidden !important;
     max-width: 100vw;
 }
+
+/* Fix specific tab content height constraint - User's targeted solution */
+.tab-content .tab-pane > div {
+    max-height: 100%;         /* Changed from 400px to 100% to prevent scrollbars */
+    overflow-y: visible;      /* Changed from auto to visible */
+}
+
+/* Disable card transform effects that might interfere with layout */
+.section-wrapper .card.shadow {
+    transform: none !important;
+    transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.section-wrapper .card.shadow:hover {
+    transform: none !important;
+}
+
+/* Admin-style contact cards aligned with System & Documentation styling */
+.admin-contact-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-card-header {
+    background: linear-gradient(135deg, #085a9f 0%, #064a8a 100%);
+    color: white;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.admin-card-header i {
+    margin-right: 0.5rem;
+    opacity: 0.9;
+}
+
+.admin-card-content {
+    padding: 1rem;
+}
+
+.admin-info-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.admin-info-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.admin-label {
+    min-width: 120px;
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.admin-label i {
+    color: #085a9f;
+    width: 16px;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+.admin-value {
+    color: #212529;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-left: 0.75rem;
+    flex: 1;
+}
+
+/* Role badges */
+.role-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.15rem 0.4rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+    font-weight: normal;
+}
+
+/* Language badges */
+.language-badge {
+    display: inline-block;
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+    border: 1px solid #bbdefb;
+}
+
+/* Special styling for guardian and other contact cards */
+.admin-contact-card.guardian-contact .admin-card-header {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+}
+
+.admin-contact-card.other-contact-card .admin-card-header {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+/* Combined contact card styling */
+.contact-section-item {
+    margin-bottom: 1.5rem !important;
+    padding-bottom: 1rem !important;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.contact-section-item:last-child {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: none;
+}
+
+.section-icon-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    color: #495057 !important;
+}
+
+.section-icon-header i {
+    color: #007bff !important;
+    margin-right: 0.5rem !important;
+}
+
+.telecom-container {
+    margin-top: 0.5rem;
+}
+
+/* Linear contact layout - streamlined and compact */
+.contact-info-unified {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.contact-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.contact-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 0.5rem 0.75rem !important;
+    margin: -0.75rem -0.75rem 0.75rem -0.75rem !important;
+    border-radius: 6px 6px 0 0;
+    font-size: 0.9rem !important;
+    font-weight: 500;
+}
+
+.contact-header i {
+    opacity: 0.9;
+}
+
+.contact-content {
+    padding: 0 !important;
+}
+
+/* Linear address layout - matching System & Documentation style */
+.address-inline {
+    font-size: 0.95rem !important;
+    color: #212529 !important;
+    margin-bottom: 0.5rem !important;
+    line-height: 1.4 !important;
+}
+
+.address-details-inline {
+    font-size: 0.85rem !important;
+    color: #495057 !important;
+    line-height: 1.4 !important;
+}
+
+.address-line {
+    display: inline-block;
+    margin-right: 0.5rem !important;
+    margin-bottom: 0.25rem !important;
+    font-size: 0.9rem !important;
+    line-height: 1.4 !important;
+}
+
+.address-line:after {
+    content: ", ";
+    color: #6c757d;
+}
+
+.address-line:last-child:after {
+    content: "";
+}
+
+.detail-item {
+    display: inline-block !important;
+    margin-right: 1rem !important;
+    margin-bottom: 0.25rem !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap;
+}
+
+.detail-label {
+    font-weight: 600 !important;
+    color: #495057 !important;
+    margin-right: 0.25rem !important;
+}
+
+.detail-value {
+    color: #212529 !important;
+}
+
+/* Linear telecom layout */
+.telecom-item {
+    display: flex !important;
+    align-items: center !important;
+    margin-bottom: 0.5rem !important;
+    padding: 0.25rem 0 !important;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.telecom-item:last-child {
+    border-bottom: none;
+}
+
+.telecom-icon {
+    margin-right: 0.75rem !important;
+    min-width: 20px;
+}
+
+.telecom-details {
+    flex: 1;
+    font-size: 0.9rem !important;
+}
+
+.telecom-value {
+    font-weight: 500;
+    color: #212529;
+}
+
+.telecom-meta {
+    font-size: 0.8rem !important;
+    color: #6c757d !important;
+    margin-top: 0.1rem !important;
+}
+
+/* Language badges - more linear */
+.language-badge {
+    display: inline-block;
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+    border: 1px solid #bbdefb;
+}
+
+/* Guardian section - streamlined */
+.guardian-card .contact-header {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+}
+
+.guardian-section {
+    margin-bottom: 1rem;
+}
+
+.guardian-subtitle {
+    font-size: 0.85rem;
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 0.25rem;
+}
+
+.role-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 0.15rem 0.4rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+}
 </style>
 {% endblock %}
 
