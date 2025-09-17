@@ -1,0 +1,439 @@
+<!-- Clinical Information Content Component -->
+{% load patient_filters %}
+{% load patient_date_filters %}
+
+<div class="clinical-information-container">
+    <!-- Check if we have any clinical data -->
+    {% if medications or allergies or problems or vital_signs or procedures or processed_sections %}
+
+    <!-- Enhanced Medication Information Section -->
+    {% if medications and medications|length > 0 %}
+    <div class="clinical-section-card mb-4">
+        <div class="section-header bg-info text-white p-3 rounded-top">
+            <h4 class="mb-0">
+                <i class="fas fa-pills me-2"></i>
+                Comprehensive Medication Analysis
+                <span class="badge bg-light text-dark ms-2">{{ medications|length }} medication(s)</span>
+            </h4>
+        </div>
+        <div class="section-content p-3 border border-top-0 rounded-bottom">
+            {% for medication in medications %}
+            <div class="medication-entry border-bottom pb-3 mb-3">
+                <div class="row">
+                    <!-- Main Medication Info -->
+                    <div class="col-lg-6">
+                        <h5 class="text-primary mb-2">
+                            <i class="fas fa-prescription-bottle me-2"></i>
+                            {# Django: Convert .get() calls to attribute access #}
+                            {{ medication.fields.Medication_Name.value|default:"Unknown Medication" }}
+                        </h5>
+
+                        <div class="medication-details">
+                            {% if medication.fields.Active_Ingredient_Name.value %}
+                            <p class="mb-2"><strong>Active Ingredient:</strong>
+                                {{ medication.fields.Active_Ingredient_Name.value }}
+                            </p>
+                            {% endif %}
+
+                            {% if medication.fields.Dose_Form_Name.value %}
+                            <p class="mb-2"><strong>Dose Form:</strong>
+                                {{ medication.fields.Dose_Form_Name.value }}
+                            </p>
+                            {% endif %}
+
+                            {% if medication.fields.Route_Name.value %}
+                            <p class="mb-2"><strong>Route:</strong>
+                                {{ medication.fields.Route_Name.value }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Dosing and Timing -->
+                    <div class="col-lg-6">
+                        <h6 class="text-secondary mb-2">
+                            <i class="fas fa-clock me-2"></i>
+                            Dosing & Timing
+                        </h6>
+
+                        <div class="dosing-info">
+                            {% if medication.fields.Frequency_Period_Value.value and medication.fields.Frequency_Period_Unit.value %}
+                            <p class="mb-2"><strong>Frequency:</strong>
+                                {{ medication.fields.Frequency_Period_Value.value }}
+                                time(s) per {{ medication.fields.Frequency_Period_Unit.value }}
+                            </p>
+                            {% endif %}
+
+                            {% if medication.fields.Treatment_Start_Date.value %}
+                            <p class="mb-2"><strong>Start Date:</strong>
+                                {{ medication.fields.Treatment_Start_Date.value|document_date }}
+                            </p>
+                            {% endif %}
+
+                            {% if medication.fields.Treatment_End_Date.value %}
+                            <p class="mb-2"><strong>End Date:</strong>
+                                {{ medication.fields.Treatment_End_Date.value|document_date }}
+                            </p>
+                            {% endif %}
+
+                            {% if medication.fields.Status_Code.value %}
+                            <p class="mb-2"><strong>Status:</strong>
+                                <span class="badge {% if medication.fields.Status_Code.value == 'Active' %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ medication.fields.Status_Code.value }}
+                                </span>
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Pharmaceutical Information -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6 class="text-secondary mb-2">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Pharmaceutical Details
+                        </h6>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {% if medication.fields.Ingredient_Strength_Numerator.value and medication.fields.Ingredient_Strength_Numerator_Unit.value %}
+                                <small class="text-muted d-block">
+                                    <strong>Strength:</strong>
+                                    {{ medication.fields.Ingredient_Strength_Numerator.value }}
+                                    {{ medication.fields.Ingredient_Strength_Numerator_Unit.value }}
+                                    {% if medication.fields.Ingredient_Strength_Denominator.value and medication.fields.Ingredient_Strength_Denominator_Unit.value %}
+                                    / {{ medication.fields.Ingredient_Strength_Denominator.value }}
+                                    {{ medication.fields.Ingredient_Strength_Denominator_Unit.value }}
+                                    {% endif %}
+                                </small>
+                                {% endif %}
+
+                                {% if medication.fields.Package_Quantity.value and medication.fields.Package_Unit.value %}
+                                <small class="text-muted d-block">
+                                    <strong>Package:</strong>
+                                    {{ medication.fields.Package_Quantity.value }}
+                                    {{ medication.fields.Package_Unit.value }}
+                                </small>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                {% if medication.fields.Medication_Code.value %}
+                                <small class="text-muted d-block">
+                                    <strong>Code:</strong> {{ medication.fields.Medication_Code.value }}
+                                </small>
+                                {% endif %}
+
+                                {% if medication.fields.Indication_Code.value %}
+                                <small class="text-muted d-block">
+                                    <strong>Indication:</strong> {{ medication.fields.Indication_Code.value }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Enhanced Clinical Sections -->
+    {% if processed_sections and processed_sections|length > 0 %}
+    <div class="clinical-section-card mb-4">
+        <div class="section-header bg-success text-white p-3 rounded-top">
+            <h3 class="mb-0">
+                <i class="fas fa-clipboard-list me-2"></i>
+                Clinical Sections
+                <span class="badge bg-light text-dark ms-2">{{ processed_sections|length }} sections</span>
+            </h3>
+        </div>
+        <div class="section-content p-3 border border-top-0 rounded-bottom">
+            {% for section in processed_sections %}
+                <!-- Modular Clinical Section Router - Enhanced Version -->
+                {% include 'patient_data/sections/clinical_section_router.html' %}
+            {% endfor %}
+
+            <div class="text-end mt-3">
+                <span class="badge bg-success fs-6">
+                    <i class="fas fa-check-circle me-1"></i>
+                    Enhanced Clinical Sections Loaded ({{ processed_sections|length }})
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Processing Summary Stats -->
+    <div class="clinical-section-card mb-4">
+        <div class="section-header bg-dark text-white p-3 rounded-top">
+            <h4 class="mb-0">
+                <i class="fas fa-chart-bar me-2"></i>Processing Summary
+            </h4>
+        </div>
+        <div class="section-content p-3 border border-top-0 rounded-bottom">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <div class="h2 text-primary">{{ sections_count }}</div>
+                    <div>Total Sections</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="h2 text-success">{{ medical_terms_count }}</div>
+                    <div>Medical Terms</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="h2 text-info">{{ coded_sections_count }}</div>
+                    <div>Coded Sections</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="h2 text-warning">{{ coded_sections_percentage|floatformat:0 }}%</div>
+                    <div>Terminology Coverage</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Allergies Section -->
+    {% if allergies and allergies|length > 0 %}
+    <div class="clinical-section-card mb-4">
+        <div class="section-header bg-danger text-white p-3 rounded-top">
+            <h6 class="mb-0">
+                <i class="fas fa-exclamation-triangle me-2"></i>Allergies & Adverse Reactions
+                <span class="badge bg-light text-dark ms-2">{{ allergies|length }}</span>
+            </h6>
+        </div>
+        <div class="section-content p-3 border border-top-0 rounded-bottom">
+            <div class="row g-3">
+                {% for allergy in allergies %}
+                <div class="col-md-6">
+                    <div class="allergy-item border rounded p-3 h-100 border-danger">
+                        <h6 class="text-danger mb-2">
+                            {% if allergy.agent_display %}
+                                {{ allergy.agent_display }}
+                            {% elif allergy.agent_code %}
+                                {{ allergy.agent_code }}
+                            {% else %}
+                                Allergy
+                            {% endif %}
+                        </h6>
+                        {% if allergy.reaction %}
+                        <p class="mb-1"><strong>Reaction:</strong> {{ allergy.reaction }}</p>
+                        {% endif %}
+                        {% if allergy.severity %}
+                        <p class="mb-1"><strong>Severity:</strong>
+                            <span class="badge bg-warning">{{ allergy.severity }}</span>
+                        </p>
+                        {% endif %}
+                        {% if allergy.status %}
+                        <p class="mb-0"><strong>Status:</strong> {{ allergy.status }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Problems/Conditions Section -->
+    {% if problems and problems|length > 0 %}
+    <div class="clinical-section-card mb-4">
+        <div class="section-header bg-warning text-dark p-3 rounded-top">
+            <h6 class="mb-0">
+                <i class="fas fa-notes-medical me-2"></i>Problems & Conditions
+                <span class="badge bg-dark text-light ms-2">{{ problems|length }}</span>
+            </h6>
+        </div>
+        <div class="section-content p-3 border border-top-0 rounded-bottom">
+            <div class="row g-3">
+                {% for problem in problems %}
+                <div class="col-md-6">
+                    <div class="problem-item border rounded p-3 h-100">
+                        <h6 class="text-warning mb-2">
+                            {% if problem.problem_display %}
+                                {{ problem.problem_display }}
+                            {% elif problem.problem_code %}
+                                {{ problem.problem_code }}
+                            {% else %}
+                                Condition
+                            {% endif %}
+                        </h6>
+                        {% if problem.onset_date %}
+                        <p class="mb-1"><strong>Onset:</strong> {{ problem.onset_date }}</p>
+                        {% endif %}
+                        {% if problem.status %}
+                        <p class="mb-1"><strong>Status:</strong> {{ problem.status }}</p>
+                        {% endif %}
+                        {% if problem.severity %}
+                        <p class="mb-0"><strong>Severity:</strong> {{ problem.severity }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Vital Signs Section -->
+    {% if vital_signs and vital_signs|length > 0 %}
+    <div class="clinical-section-card mb-4">
+        <div class="section-header bg-success text-white p-3 rounded-top">
+            <h6 class="mb-0">
+                <i class="fas fa-heartbeat me-2"></i>Vital Signs
+                <span class="badge bg-light text-dark ms-2">{{ vital_signs|length }}</span>
+            </h6>
+        </div>
+        <div class="section-content p-3 border border-top-0 rounded-bottom">
+            <div class="row g-3">
+                {% for vital in vital_signs %}
+                <div class="col-md-4">
+                    <div class="vital-item border rounded p-3 h-100">
+                        <h6 class="text-success mb-2">
+                            {% if vital.vital_display %}
+                                {{ vital.vital_display }}
+                            {% elif vital.vital_code %}
+                                {{ vital.vital_code }}
+                            {% else %}
+                                Vital Sign
+                            {% endif %}
+                        </h6>
+                        {% if vital.value %}
+                        <p class="mb-1"><strong>Value:</strong> {{ vital.value }}</p>
+                        {% endif %}
+                        {% if vital.unit %}
+                        <p class="mb-1"><strong>Unit:</strong> {{ vital.unit }}</p>
+                        {% endif %}
+                        {% if vital.date %}
+                        <p class="mb-0"><strong>Date:</strong> {{ vital.date }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Procedures Section -->
+    {% if procedures and procedures|length > 0 %}
+    <div class="clinical-section-card mb-4">
+        <div class="section-header bg-info text-white p-3 rounded-top">
+            <h6 class="mb-0">
+                <i class="fas fa-procedures me-2"></i>Procedures
+                <span class="badge bg-light text-dark ms-2">{{ procedures|length }}</span>
+            </h6>
+        </div>
+        <div class="section-content p-3 border border-top-0 rounded-bottom">
+            <div class="row g-3">
+                {% for procedure in procedures %}
+                <div class="col-md-6">
+                    <div class="procedure-item border rounded p-3 h-100">
+                        <h6 class="text-info mb-2">
+                            {% if procedure.procedure_display %}
+                                {{ procedure.procedure_display }}
+                            {% elif procedure.procedure_code %}
+                                {{ procedure.procedure_code }}
+                            {% else %}
+                                Procedure
+                            {% endif %}
+                        </h6>
+                        {% if procedure.date %}
+                        <p class="mb-1"><strong>Date:</strong> {{ procedure.date }}</p>
+                        {% endif %}
+                        {% if procedure.performer %}
+                        <p class="mb-1"><strong>Performer:</strong> {{ procedure.performer }}</p>
+                        {% endif %}
+                        {% if procedure.status %}
+                        <p class="mb-0"><strong>Status:</strong> {{ procedure.status }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Other Clinical Sections -->
+    {% if clinical_sections %}
+    <div class="clinical-section-card mb-4">
+        <div class="section-header bg-secondary text-white p-3 rounded-top">
+            <h6 class="mb-0">
+                <i class="fas fa-clipboard-list me-2"></i>Additional Clinical Information
+            </h6>
+        </div>
+        <div class="section-content p-3 border border-top-0 rounded-bottom">
+            {% for section in clinical_sections %}
+            <div class="clinical-section-item mb-3">
+                <h6 class="text-secondary">{{ section.title|default:"Clinical Section" }}</h6>
+                {% if section.content %}
+                <div class="section-text">{{ section.content|safe }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- No Clinical Data Available -->
+    <div class="alert alert-info">
+        <h6><i class="fas fa-info-circle me-2"></i>Clinical Information</h6>
+        <p class="mb-0">No clinical information (medications, allergies, problems, vital signs, or procedures) is available in this document.</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.clinical-information-container {
+    padding: 0;
+}
+
+.clinical-section-card {
+    border-radius: 0.375rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.section-content {
+    background: #f8f9fa;
+}
+
+.medication-item,
+.allergy-item,
+.problem-item,
+.vital-item,
+.procedure-item {
+    background: white;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.medication-item:hover,
+.allergy-item:hover,
+.problem-item:hover,
+.vital-item:hover,
+.procedure-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.clinical-section-item {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+}
+
+.section-text {
+    color: #495057;
+    line-height: 1.5;
+}
+</style>

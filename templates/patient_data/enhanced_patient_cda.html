@@ -628,14 +628,42 @@ main {
                 </div> <!-- End Integrated Tab Content -->
             </div> <!-- End card-body -->
         </div> <!-- End Main Patient Header Card -->
-    </div>    <!-- Enhanced Medication Information Section - Pure Bootstrap -->
-    {% if medications and medications|length > 0 %}
+    </div>
+
+    <!-- Main Clinical Content Display -->
+    {% if processed_sections and processed_sections|length > 0 %}
+    <div class="section-wrapper">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">
+                    <i class="fas fa-clipboard-list me-2"></i>
+                    Clinical Information
+                    <span class="badge bg-light text-dark ms-2">{{ processed_sections|length }} section(s)</span>
+                </h3>
+            </div>
+            <div class="card-body">
+                {% for section in processed_sections %}
+                    <!-- Modular Clinical Section Router -->
+                    {% include 'patient_data/sections/clinical_section_router.html' %}
+                {% endfor %}
+
+                <div class="text-end mt-3">
+                    <span class="badge bg-success fs-6">
+                        <i class="fas fa-check-circle me-1"></i>
+                        Clinical Sections Processed ({{ processed_sections|length }})
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif medications and medications|length > 0 %}
+    <!-- Enhanced Medication Information Section -->
     <div class="section-wrapper">
         <div class="card shadow">
             <div class="card-header bg-info text-white">
                 <h4 class="mb-0">
                     <i class="fas fa-pills me-2"></i>
-                    Comprehensive Medication Analysis
+                    Medication Information
                     <span class="badge bg-light text-dark ms-2">{{ medications|length }} medication(s)</span>
                 </h4>
             </div>
@@ -647,193 +675,29 @@ main {
                         <div class="col-lg-6">
                             <h5 class="text-primary mb-2">
                                 <i class="fas fa-prescription-bottle me-2"></i>
-                                {# Django: Convert .get() calls to attribute access #}
                                 {{ medication.fields.Medication_Name.value|default:"Unknown Medication" }}
                             </h5>
-
-                            <div class="medication-details">
-                                {% if medication.fields.Active_Ingredient_Name.value %}
-                                <p class="mb-2"><strong>Active Ingredient:</strong>
-                                    {{ medication.fields.Active_Ingredient_Name.value }}
-                                </p>
-                                {% endif %}
-
-                                {% if medication.fields.Dose_Form_Name.value %}
-                                <p class="mb-2"><strong>Dose Form:</strong>
-                                    {{ medication.fields.Dose_Form_Name.value }}
-                                </p>
-                                {% endif %}
-
-                                {% if medication.fields.Route_Name.value %}
-                                <p class="mb-2"><strong>Route:</strong>
-                                    {{ medication.fields.Route_Name.value }}
-                                </p>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Dosing and Timing -->
-                        <div class="col-lg-6">
-                            <h6 class="text-secondary mb-2">
-                                <i class="fas fa-clock me-2"></i>
-                                Dosing & Timing
-                            </h6>
-
-                            <div class="dosing-info">
-                                {% if medication.fields.Frequency_Period_Value.value and medication.fields.Frequency_Period_Unit.value %}
-                                <p class="mb-2"><strong>Frequency:</strong>
-                                    {{ medication.fields.Frequency_Period_Value.value }}
-                                    time(s) per {{ medication.fields.Frequency_Period_Unit.value
-                                    }}
-                                </p>
-                                {% endif %}
-
-                                {% if medication.fields.Treatment_Start_Date.value %}
-                                <p class="mb-2"><strong>Start Date:</strong>
-                                    {{ medication.fields.Treatment_Start_Date.value|document_date }}
-                                </p>
-                                {% endif %}
-
-                                {% if medication.fields.Treatment_End_Date.value %}
-                                <p class="mb-2"><strong>End Date:</strong>
-                                    {{ medication.fields.Treatment_End_Date.value|document_date }}
-                                </p>
-                                {% endif %}
-
-                                {% if medication.fields.Status_Code.value %}
-                                {# Django: Replace {% set %} with conditional class assignment #}
-                                <p class="mb-2"><strong>Status:</strong>
-                                    <span class="badge {% if medication.fields.Status_Code.value == 'Active' %}bg-success{% else %}bg-secondary{% endif %}">
-                                        {{ medication.fields.Status_Code.value }}
-                                    </span>
-                                </p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Detailed Pharmaceutical Information -->
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <h6 class="text-secondary mb-2">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Pharmaceutical Details
-                            </h6>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    {% if medication.fields.Ingredient_Strength_Numerator.value and medication.fields.Ingredient_Strength_Numerator_Unit.value %}
-                                    <small class="text-muted d-block">
-                                        <strong>Strength:</strong>
-                                        {{ medication.fields.Ingredient_Strength_Numerator.value
-                                        }}
-                                        {{ medication.fields.Ingredient_Strength_Numerator_Unit.value }}
-                                        {% if medication.fields.Ingredient_Strength_Denominator.value and medication.fields.Ingredient_Strength_Denominator_Unit.value %}
-                                        / {{ medication.fields.Ingredient_Strength_Denominator.value }}
-                                        {{ medication.fields.Ingredient_Strength_Denominator_Unit.value }}
-                                        {% endif %}
-                                    </small>
-                                    {% endif %}
-
-                                    {% if medication.fields.Package_Quantity.value and medication.fields.Package_Unit.value %}
-                                    <small class="text-muted d-block">
-                                        <strong>Package:</strong>
-                                        {{ medication.fields.Package_Quantity.value }}
-                                        {{ medication.fields.Package_Unit.value }}
-                                    </small>
-                                    {% endif %}
-                                </div>
-
-                                <div class="col-md-6">
-                                    {% if medication.fields.Medication_Code.value %}
-                                    <small class="text-muted d-block">
-                                        <strong>Code:</strong> {{ medication.fields.Medication_Code.value }}
-                                    </small>
-                                    {% endif %}
-
-                                    {% if medication.fields.Indication_Code.value %}
-                                    <small class="text-muted d-block">
-                                        <strong>Indication:</strong> {{ medication.fields.Indication_Code.value }}
-                                    </small>
-                                    {% endif %}
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Clinical Sections - Pure Bootstrap -->
-    {% if processed_sections and processed_sections|length > 0 %}
-    <div class="section-wrapper">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
-                <h3 class="mb-0">
-                    <i class="fas fa-clipboard-list me-2"></i>
-                    Clinical Sections ({{ processed_sections|length }} sections)
-                </h3>
-            </div>
-            <div class="card-body">
-                {% for section in processed_sections %}
-                {# Django: Use forloop.counter0 instead of {% set %} #}
-
-                <!-- Modular Clinical Section Router - Enhanced Version -->
-                {% include 'patient_data/sections/clinical_section_router.html' %}
-
-                {% endfor %}
-
-                <div class="text-end mt-3">
-                    <span class="badge bg-success fs-6">
-                        <i class="fas fa-check-circle me-1"></i>
-                        Enhanced Clinical Sections Loaded ({{ processed_sections|length }})
-                    </span>
-                </div>
             </div>
         </div>
     </div>
     {% else %}
+    <!-- No Clinical Data Available -->
     <div class="section-wrapper">
-        <div class="alert alert-warning">
-            <h4>No Medical Data Available</h4>
-            <p class="mb-0">No clinical sections could be processed from the CDA document.</p>
+        <div class="alert alert-info">
+            <h4><i class="fas fa-info-circle me-2"></i>Clinical Information</h4>
+            <p class="mb-0">No clinical sections could be processed from this CDA document. This may be because:</p>
+            <ul class="mb-0 mt-2">
+                <li>The document contains only administrative information</li>
+                <li>Clinical sections are not coded according to standard terminology</li>
+                <li>The document format requires additional processing</li>
+            </ul>
         </div>
     </div>
     {% endif %}
-
-    <!-- Summary Stats - Pure Bootstrap -->
-    <div class="section-wrapper">
-        <div class="card shadow">
-            <div class="card-header bg-dark text-white">
-                <h4 class="mb-0">
-                    <i class="fas fa-chart-bar me-2"></i>Processing Summary
-                </h4>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-3">
-                        <div class="h2 text-primary">{{ sections_count }}</div>
-                        <div>Total Sections</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="h2 text-success">{{ medical_terms_count }}</div>
-                        <div>Medical Terms</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="h2 text-info">{{ coded_sections_count }}</div>
-                        <div>Coded Sections</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="h2 text-warning">{{ coded_sections_percentage|floatformat:0 }}%</div>
-                        <div>Terminology Coverage</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 {% endblock %}
 

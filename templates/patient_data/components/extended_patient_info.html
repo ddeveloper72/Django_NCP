@@ -34,6 +34,18 @@
             <i class="fas fa-server me-1"></i>System & Documentation
             <span class="badge bg-info ms-2">3</span>
         </button>
+
+        <button class="tab-button" onclick="showExtendedTab('extended_patient', 'clinical')"
+                type="button">
+            <i class="fas fa-notes-medical me-1"></i>Clinical Information
+            {% if medications or allergies or problems or vital_signs or procedures %}
+            <span class="badge bg-warning ms-2">
+                {% with total_clinical=medications|length|add:allergies|length|add:problems|length|add:vital_signs|length|add:procedures|length %}
+                {{ total_clinical }}
+                {% endwith %}
+            </span>
+            {% endif %}
+        </button>
     </div>
 
     <!-- Tab Content Containers -->
@@ -95,22 +107,43 @@
             </div>
         </div>
     </div>
+
+    <!-- Clinical Information Tab Content -->
+    <div class="clinical-tab-content" id="extended_patient_clinical">
+        <div class="row g-3">
+            <!-- Clinical Data Card -->
+            <div class="col-12">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-notes-medical me-2"></i>Clinical Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% include 'patient_data/components/clinical_information_content.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div> <!-- End Clinical Section -->
 
 <script>
 // Extended Patient Tab Management Function
 function showExtendedTab(sectionId, tabType) {
     console.log('🎯 Switching Extended Patient tab:', sectionId, tabType);
-    
+
     // Hide all tab contents for the extended patient section
     const personalTab = document.getElementById(sectionId + '_personal');
     const healthcareTab = document.getElementById(sectionId + '_healthcare');
     const systemTab = document.getElementById(sectionId + '_system');
+    const clinicalTab = document.getElementById(sectionId + '_clinical');
 
     // Find the parent extended patient container
     const extendedContainer = personalTab ? personalTab.closest('.clinical-section') :
         (healthcareTab ? healthcareTab.closest('.clinical-section') :
-        (systemTab ? systemTab.closest('.clinical-section') : null));
+        (systemTab ? systemTab.closest('.clinical-section') :
+        (clinicalTab ? clinicalTab.closest('.clinical-section') : null)));
 
     if (!extendedContainer) {
         console.error('❌ Extended patient container not found for:', sectionId);
@@ -118,7 +151,7 @@ function showExtendedTab(sectionId, tabType) {
     }
 
     const buttons = extendedContainer.querySelectorAll('.tab-button');
-    const allTabs = [personalTab, healthcareTab, systemTab].filter(tab => tab !== null);
+    const allTabs = [personalTab, healthcareTab, systemTab, clinicalTab].filter(tab => tab !== null);
 
     // Remove active class and hide all tabs
     allTabs.forEach(tab => {
@@ -127,14 +160,14 @@ function showExtendedTab(sectionId, tabType) {
             tab.style.display = 'none';
         }
     });
-    
+
     // Remove active class from all buttons
     buttons.forEach(btn => btn.classList.remove('active'));
 
     // Show selected tab and activate corresponding button
     let activeTab = null;
     let activeButtonIndex = -1;
-    
+
     if (tabType === 'personal' && personalTab) {
         activeTab = personalTab;
         activeButtonIndex = 0;
@@ -144,6 +177,9 @@ function showExtendedTab(sectionId, tabType) {
     } else if (tabType === 'system' && systemTab) {
         activeTab = systemTab;
         activeButtonIndex = 2;
+    } else if (tabType === 'clinical' && clinicalTab) {
+        activeTab = clinicalTab;
+        activeButtonIndex = 3;
     }
 
     if (activeTab) {
@@ -163,7 +199,7 @@ function showExtendedTab(sectionId, tabType) {
 // Initialize Extended Patient Tabs on load
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🎯 Initializing Extended Patient tabs...');
-    
+
     // Ensure the first tab is properly displayed
     setTimeout(() => {
         const firstPersonalTab = document.getElementById('extended_patient_personal');
