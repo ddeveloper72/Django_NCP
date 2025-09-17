@@ -46,7 +46,11 @@ class PatientSessionSecurityMiddleware:
         # Add security headers for patient data pages
         if self.is_patient_data_request(request):
             response["X-Content-Type-Options"] = "nosniff"
-            response["X-Frame-Options"] = "DENY"
+            # Allow PDF endpoints to be embedded in iframes for viewing
+            if "/pdf/" in request.path.lower():
+                response["X-Frame-Options"] = "SAMEORIGIN"
+            else:
+                response["X-Frame-Options"] = "DENY"
             response["Cache-Control"] = "no-cache, no-store, must-revalidate"
             response["Pragma"] = "no-cache"
             response["Expires"] = "0"

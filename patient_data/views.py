@@ -9058,8 +9058,29 @@ def view_embedded_pdf(request, patient_id, pdf_index):
             logger.error(f"No session data found for patient {patient_id}")
             return HttpResponse("Session data not found", status=404)
 
-        # Get CDA content
-        search_result = PatientMatch.from_session_data(match_data)
+        # Get CDA content - reconstruct PatientMatch from session data
+        patient_info = match_data.get("patient_data", {})
+        search_result = PatientMatch(
+            patient_id=patient_id,
+            given_name=patient_info.get("given_name", "Unknown"),
+            family_name=patient_info.get("family_name", "Patient"),
+            birth_date=patient_info.get("birth_date", ""),
+            gender=patient_info.get("gender", ""),
+            country_code=match_data.get("country_code", "IE"),
+            confidence_score=match_data.get("confidence_score", 0.95),
+            file_path=match_data.get("file_path"),
+            l1_cda_content=match_data.get("l1_cda_content"),
+            l3_cda_content=match_data.get("l3_cda_content"),
+            l1_cda_path=match_data.get("l1_cda_path"),
+            l3_cda_path=match_data.get("l3_cda_path"),
+            cda_content=match_data.get("cda_content"),
+            patient_data=patient_info,
+            preferred_cda_type="L1",
+            l1_documents=match_data.get("l1_documents", []),
+            l3_documents=match_data.get("l3_documents", []),
+            selected_l1_index=match_data.get("selected_l1_index", 0),
+            selected_l3_index=match_data.get("selected_l3_index", 0),
+        )
         cda_content, actual_cda_type = search_result.get_rendering_cda("L1")
 
         if not cda_content:
@@ -9085,6 +9106,8 @@ def view_embedded_pdf(request, patient_id, pdf_index):
         response = HttpResponse(pdf_data, content_type="application/pdf")
         filename = pdf_info.get("filename", f"clinical_document_{pdf_index}.pdf")
         response["Content-Disposition"] = f'inline; filename="{filename}"'
+        # Allow iframe embedding for PDF viewing
+        response["X-Frame-Options"] = "SAMEORIGIN"
 
         logger.info(
             f"Serving embedded PDF {pdf_index} ({filename}) for patient {patient_id}"
@@ -9111,8 +9134,29 @@ def download_embedded_pdf(request, patient_id, pdf_index):
             logger.error(f"No session data found for patient {patient_id}")
             return HttpResponse("Session data not found", status=404)
 
-        # Get CDA content
-        search_result = PatientMatch.from_session_data(match_data)
+        # Get CDA content - reconstruct PatientMatch from session data
+        patient_info = match_data.get("patient_data", {})
+        search_result = PatientMatch(
+            patient_id=patient_id,
+            given_name=patient_info.get("given_name", "Unknown"),
+            family_name=patient_info.get("family_name", "Patient"),
+            birth_date=patient_info.get("birth_date", ""),
+            gender=patient_info.get("gender", ""),
+            country_code=match_data.get("country_code", "IE"),
+            confidence_score=match_data.get("confidence_score", 0.95),
+            file_path=match_data.get("file_path"),
+            l1_cda_content=match_data.get("l1_cda_content"),
+            l3_cda_content=match_data.get("l3_cda_content"),
+            l1_cda_path=match_data.get("l1_cda_path"),
+            l3_cda_path=match_data.get("l3_cda_path"),
+            cda_content=match_data.get("cda_content"),
+            patient_data=patient_info,
+            preferred_cda_type="L1",
+            l1_documents=match_data.get("l1_documents", []),
+            l3_documents=match_data.get("l3_documents", []),
+            selected_l1_index=match_data.get("selected_l1_index", 0),
+            selected_l3_index=match_data.get("selected_l3_index", 0),
+        )
         cda_content, actual_cda_type = search_result.get_rendering_cda("L1")
 
         if not cda_content:
