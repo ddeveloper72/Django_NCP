@@ -81,7 +81,7 @@
                             <i class="fas fa-file-alt me-2"></i>
                             {{ section.section_title }}
                         </h5>
-                        
+
                         <!-- Display section content based on available data -->
                         {% if section.entries %}
                             {% for entry in section.entries %}
@@ -118,7 +118,7 @@
         function toggleSection(sectionId) {
             const section = document.getElementById(sectionId);
             const button = document.querySelector(`[aria-controls="${sectionId}"]`);
-            
+
             if (section.classList.contains('show')) {
                 section.classList.remove('show');
                 button.setAttribute('aria-expanded', 'false');

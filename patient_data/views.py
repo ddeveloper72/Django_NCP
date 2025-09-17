@@ -4402,26 +4402,26 @@ def patient_cda_view(request, patient_id, cda_type=None):
                                 "label": "Allergen",
                                 "key": "allergen",
                                 "type": "allergen",
-                                "primary": True
+                                "primary": True,
                             },
                             {
                                 "label": "Reaction",
-                                "key": "reaction", 
+                                "key": "reaction",
                                 "type": "reaction",
-                                "primary": False
+                                "primary": False,
                             },
                             {
                                 "label": "Severity",
                                 "key": "severity",
-                                "type": "severity", 
-                                "primary": False
+                                "type": "severity",
+                                "primary": False,
                             },
                             {
                                 "label": "Status",
                                 "key": "status",
                                 "type": "status",
-                                "primary": False
-                            }
+                                "primary": False,
+                            },
                         ],
                         "rows": [
                             {
@@ -4434,53 +4434,53 @@ def patient_cda_view(request, patient_id, cda_type=None):
                                             {
                                                 "system": "SNOMED CT",
                                                 "code": "294505008",
-                                                "display_name": "Allergy to penicillin"
+                                                "display_name": "Allergy to penicillin",
                                             }
-                                        ]
+                                        ],
                                     },
                                     "reaction": {
                                         "display_value": "Skin rash, hives",
-                                        "value": "Skin rash, hives"
+                                        "value": "Skin rash, hives",
                                     },
                                     "severity": {
                                         "display_value": "Moderate",
-                                        "value": "Moderate"
+                                        "value": "Moderate",
                                     },
                                     "status": {
                                         "display_value": "Active",
-                                        "value": "Active"
-                                    }
+                                        "value": "Active",
+                                    },
                                 }
                             },
                             {
                                 "data": {
                                     "allergen": {
                                         "display_value": "Shellfish",
-                                        "value": "Shellfish", 
+                                        "value": "Shellfish",
                                         "has_terminology": True,
                                         "terminology": [
                                             {
                                                 "system": "SNOMED CT",
                                                 "code": "300913006",
-                                                "display_name": "Shellfish allergy"
+                                                "display_name": "Shellfish allergy",
                                             }
-                                        ]
+                                        ],
                                     },
                                     "reaction": {
                                         "display_value": "Anaphylaxis",
-                                        "value": "Anaphylaxis"
+                                        "value": "Anaphylaxis",
                                     },
                                     "severity": {
                                         "display_value": "Severe",
-                                        "value": "Severe"
+                                        "value": "Severe",
                                     },
                                     "status": {
                                         "display_value": "Active",
-                                        "value": "Active"
-                                    }
+                                        "value": "Active",
+                                    },
                                 }
-                            }
-                        ]
+                            },
+                        ],
                     },
                 }
                 # Insert at the beginning of the sections list

@@ -37,7 +37,7 @@
                         onclick="toggleSection('collapse-{{ section.code|default:forloop.counter }}')"
                         aria-expanded="true"
                         aria-controls="collapse-{{ section.code|default:forloop.counter }}">
-                    <i class="fas fa-stethoscope me-2 text-primary"></i>
+                    <i class="fas fa-stethoscope me-2"></i>
                     <strong>{% firstof section.title section.section_title "Clinical Section" %}</strong>
                     {% if section.code %}
                     <span class="badge bg-primary ms-2">{{ section.code }}</span>
@@ -63,7 +63,7 @@
                         onclick="toggleSection('collapseOtherClinical')"
                         aria-expanded="true"
                         aria-controls="collapseOtherClinical">
-                    <i class="fas fa-file-medical me-2 text-dark"></i>
+                    <i class="fas fa-file-medical me-2"></i>
                     <strong>Other Clinical Information</strong>
                 </button>
             </h2>
@@ -77,7 +77,7 @@
                             <i class="fas fa-file-alt me-2"></i>
                             {{ section.section_title }}
                         </h5>
-                        
+
                         <!-- Display section content based on available data -->
                         {% if section.entries %}
                             {% for entry in section.entries %}
@@ -114,7 +114,7 @@
         function toggleSection(sectionId) {
             const section = document.getElementById(sectionId);
             const button = document.querySelector(`[aria-controls="${sectionId}"]`);
-            
+
             if (section.classList.contains('show')) {
                 section.classList.remove('show');
                 button.setAttribute('aria-expanded', 'false');
