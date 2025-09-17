@@ -1,6 +1,20 @@
 {% load patient_filters %}
-{# Active Problems Section Template #}
-<!-- Active Problems/Conditions Section -->
+{# Active Problems Section Template #}                                        {% if cell_data|safe_get:"has_terminology" %}
+                                        {% with terminology_data=cell_data|safe_get:"terminology" %}
+                                        {% if terminology_data %}
+                                        <div class="medical-terminology mt-1">
+                                            {% for term in terminology_data %}
+                                            {% if term %}
+                                            <span class="badge bg-warning text-dark me-1"
+                                                title="{{ term.system|default:'' }}: {{ term.code|default:'' }}">
+                                                {% firstof term.display_name term.code "Unknown" %}
+                                            </span>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        {% endwith %}
+                                        {% endif %}ve Problems/Conditions Section -->
 <div class="medical-section" id="problems-section">
     <div class="card">
         <!-- Section Header -->

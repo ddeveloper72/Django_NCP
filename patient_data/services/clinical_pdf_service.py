@@ -88,6 +88,33 @@ class ClinicalDocumentPDFService:
 
         return pdf_attachments
 
+    def extract_all_pdfs_from_xml(self, xml_content: str) -> List[Dict]:
+        """
+        Alias for extract_pdfs_from_xml with enhanced data format for template use
+
+        Returns:
+            List of dictionaries with PDF info:
+            {'content': bytes, 'content_base64': str, 'filename': str, 'size': int, 'media_type': str}
+        """
+        pdfs = self.extract_pdfs_from_xml(xml_content)
+
+        # Enhance the data structure with base64 content for templates
+        enhanced_pdfs = []
+        for pdf in pdfs:
+            enhanced_pdf = {
+                "content": pdf["data"],  # Raw bytes
+                "content_base64": base64.b64encode(pdf["data"]).decode(
+                    "utf-8"
+                ),  # Base64 string for templates
+                "filename": pdf["filename"],
+                "size": pdf["size"],
+                "media_type": pdf.get("media_type", "application/pdf"),
+                "index": pdf.get("index", 0),
+            }
+            enhanced_pdfs.append(enhanced_pdf)
+
+        return enhanced_pdfs
+
     def _extract_pdf_from_element(self, element) -> Optional[bytes]:
         """Extract PDF data from an XML element"""
 

@@ -1,5 +1,19 @@
 {% load patient_filters %}
-{# Surgical Procedures / List of Surgeries Section Template #}
+{# Surgical Procedures / List of Surger                                        {% if cell_data|safe_get:"has_terminology" %}
+                                        {% with terminology_data=cell_data|safe_get:"terminology" %}
+                                        {% if terminology_data %}
+                                        <div class="medical-terminology mt-1">
+                                            {% for term in terminology_data %}
+                                            {% if term %}
+                                            <span class="badge bg-dark me-1" title="{{ term.system|default:'' }}: {{ term.code|default:'' }}">
+                                                {% firstof term.display_name term.code "Unknown" %}
+                                            </span>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        {% endwith %}
+                                        {% endif %}on Template #}
 <!-- Surgical Procedures Section -->
 <div class="medical-section" id="surgeries-section">
     <div class="card">

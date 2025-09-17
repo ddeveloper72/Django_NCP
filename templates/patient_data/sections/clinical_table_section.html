@@ -1,5 +1,5 @@
 {% load patient_filters %}
-{# Clinical Table Section Template - For sections with clinical tables #}
+{# Clinical Table Se                                                                       <i class="fas fa-tag me-1"></i>{{ term.display_name|default:term.code }}        {{ term.display_name|default:term.code }}tion Template - For sections with clinical tables #}
 <!-- Clinical Table Display with Tabs -->
 <div class="card-body p-0">
     <!-- Section Tabs -->
@@ -82,6 +82,7 @@
                                 </div>
                                 {% endif %}
                             </div>
+                            {% endif %}
                         </td>
                         {% endwith %}
                         {% endfor %}

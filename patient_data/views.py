@@ -3554,13 +3554,13 @@ def patient_cda_view(request, patient_id, cda_type=None):
                                 "🔄 Processor extraction returned empty, trying direct XML parsing..."
                             )
                             try:
-                                from patient_data.utils.administrative_extractor import (
-                                    CDAAdministrativeExtractor,
+                                from patient_data.services.cda_extractor_dispatcher import (
+                                    CDAExtractorDispatcher,
                                 )
 
-                                administrative_extractor = CDAAdministrativeExtractor()
-                                raw_extended_data = administrative_extractor.extract_administrative_data(
-                                    cda_content
+                                dispatcher = CDAExtractorDispatcher()
+                                raw_extended_data = (
+                                    dispatcher.extract_administrative_data(cda_content)
                                 )
 
                                 if raw_extended_data:
@@ -3733,6 +3733,27 @@ def patient_cda_view(request, patient_id, cda_type=None):
         if "extended_header_data" not in locals():
             extended_header_data = {}
 
+        # Check for embedded PDFs in L1 CDA documents
+        embedded_pdfs = []
+        has_embedded_pdfs = False
+        if cda_content and actual_cda_type == "L1":
+            try:
+                pdf_service = ClinicalDocumentPDFService()
+                embedded_pdfs = pdf_service.extract_all_pdfs_from_xml(cda_content)
+                has_embedded_pdfs = len(embedded_pdfs) > 0
+                if has_embedded_pdfs:
+                    logger.info(
+                        f"🔍 Found {len(embedded_pdfs)} embedded PDFs in L1 CDA document"
+                    )
+                    for i, pdf_info in enumerate(embedded_pdfs):
+                        logger.info(
+                            f"  PDF {i+1}: {pdf_info.get('filename', 'Unnamed')} ({pdf_info.get('size', 0)} bytes)"
+                        )
+                else:
+                    logger.info("🔍 No embedded PDFs found in L1 CDA document")
+            except Exception as pdf_error:
+                logger.warning(f"Failed to check for embedded PDFs: {pdf_error}")
+
         # Build complete context for Enhanced CDA Display
         context = {
             "patient_identity": {
@@ -3795,6 +3816,11 @@ def patient_cda_view(request, patient_id, cda_type=None):
                 "other_contacts": [],
             },
             "has_administrative_data": False,
+            # PDF content information for L1 CDAs
+            "embedded_pdfs": embedded_pdfs,
+            "has_embedded_pdfs": has_embedded_pdfs,
+            "is_pdf_only_cda": has_embedded_pdfs
+            and len(enhanced_processing_result.get("sections", [])) == 0,
         }
 
         # ADD MOCK ENHANCED PROCESSING RESULT FOR TESTING PATIENT IDENTITY
@@ -9016,3 +9042,105 @@ def select_document_view(request, patient_id):
         logger.error(f"Error in select_document_view: {e}")
         messages.error(request, "Error accessing document selection.")
         return redirect("patient_data:patient_data_form")
+
+
+def view_embedded_pdf(request, patient_id, pdf_index):
+    """View an embedded PDF from a CDA document"""
+    try:
+        # Get patient match data from session
+        session_key = f"patient_match_{patient_id}"
+        match_data = request.session.get(session_key)
+
+        if not match_data:
+            logger.error(f"No session data found for patient {patient_id}")
+            return HttpResponse("Session data not found", status=404)
+
+        # Get CDA content
+        search_result = PatientMatch.from_session_data(match_data)
+        cda_content, actual_cda_type = search_result.get_rendering_cda("L1")
+
+        if not cda_content:
+            logger.error(f"No L1 CDA content found for patient {patient_id}")
+            return HttpResponse("CDA content not found", status=404)
+
+        # Extract PDFs using the service
+        pdf_service = ClinicalDocumentPDFService()
+        embedded_pdfs = pdf_service.extract_all_pdfs_from_xml(cda_content)
+
+        if pdf_index >= len(embedded_pdfs):
+            logger.error(f"PDF index {pdf_index} out of range for patient {patient_id}")
+            return HttpResponse("PDF not found", status=404)
+
+        pdf_info = embedded_pdfs[pdf_index]
+        pdf_data = pdf_info.get("content")
+
+        if not pdf_data:
+            logger.error(f"No PDF data for index {pdf_index} for patient {patient_id}")
+            return HttpResponse("PDF data not found", status=404)
+
+        # Return PDF response
+        response = HttpResponse(pdf_data, content_type="application/pdf")
+        filename = pdf_info.get("filename", f"clinical_document_{pdf_index}.pdf")
+        response["Content-Disposition"] = f'inline; filename="{filename}"'
+
+        logger.info(
+            f"Serving embedded PDF {pdf_index} ({filename}) for patient {patient_id}"
+        )
+        return response
+
+    except Exception as e:
+        logger.error(
+            f"Error serving embedded PDF {pdf_index} for patient {patient_id}: {e}"
+        )
+        return HttpResponse("Error loading PDF", status=500)
+
+
+def download_embedded_pdf(request, patient_id, pdf_index):
+    """Download an embedded PDF from a CDA document"""
+    try:
+        # Get patient match data from session
+        session_key = f"patient_match_{patient_id}"
+        match_data = request.session.get(session_key)
+
+        if not match_data:
+            logger.error(f"No session data found for patient {patient_id}")
+            return HttpResponse("Session data not found", status=404)
+
+        # Get CDA content
+        search_result = PatientMatch.from_session_data(match_data)
+        cda_content, actual_cda_type = search_result.get_rendering_cda("L1")
+
+        if not cda_content:
+            logger.error(f"No L1 CDA content found for patient {patient_id}")
+            return HttpResponse("CDA content not found", status=404)
+
+        # Extract PDFs using the service
+        pdf_service = ClinicalDocumentPDFService()
+        embedded_pdfs = pdf_service.extract_all_pdfs_from_xml(cda_content)
+
+        if pdf_index >= len(embedded_pdfs):
+            logger.error(f"PDF index {pdf_index} out of range for patient {patient_id}")
+            return HttpResponse("PDF not found", status=404)
+
+        pdf_info = embedded_pdfs[pdf_index]
+        pdf_data = pdf_info.get("content")
+
+        if not pdf_data:
+            logger.error(f"No PDF data for index {pdf_index} for patient {patient_id}")
+            return HttpResponse("PDF data not found", status=404)
+
+        # Return PDF download response
+        response = HttpResponse(pdf_data, content_type="application/pdf")
+        filename = pdf_info.get("filename", f"clinical_document_{pdf_index}.pdf")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+        logger.info(
+            f"Downloaded embedded PDF {pdf_index} ({filename}) for patient {patient_id}"
+        )
+        return response
+
+    except Exception as e:
+        logger.error(
+            f"Error downloading embedded PDF {pdf_index} for patient {patient_id}: {e}"
+        )
+        return HttpResponse("Error downloading PDF", status=500)

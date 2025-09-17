@@ -65,6 +65,17 @@ urlpatterns = [
         main_views.download_cda_pdf,
         name="download_cda_pdf",
     ),
+    # PDF viewing endpoints for embedded PDFs
+    path(
+        "<str:patient_id>/pdf/<int:pdf_index>/",
+        main_views.view_embedded_pdf,
+        name="view_pdf",
+    ),
+    path(
+        "<str:patient_id>/pdf/<int:pdf_index>/download/",
+        main_views.download_embedded_pdf,
+        name="download_pdf",
+    ),
     # New CDA/ORCD views based on requirements
     path(
         "download/html/<str:patient_id>/",

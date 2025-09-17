@@ -63,14 +63,20 @@
                                     <div class="primary-field">
                                         <strong class="text-primary">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</strong>
                                         {% if cell_data|safe_get:"has_terminology" %}
+                                        {% with terminology_data=cell_data|safe_get:"terminology" %}
+                                        {% if terminology_data %}
                                         <div class="medical-terminology mt-1">
-                                            {% for term in cell_data|safe_get:"terminology" %}
+                                            {% for term in terminology_data %}
+                                            {% if term %}
                                             <span class="badge bg-primary me-1"
-                                                title="{{ term.system }}: {{ term.code }}">
-                                                {% firstof term.display_name term.code %}
+                                                title="{{ term.system|default:'' }}: {{ term.code|default:'' }}">
+                                                {% firstof term.display_name term.code "Unknown" %}
                                             </span>
+                                            {% endif %}
                                             {% endfor %}
                                         </div>
+                                        {% endif %}
+                                        {% endwith %}
                                         {% endif %}
                                     </div>
                                     {% else %}

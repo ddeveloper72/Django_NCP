@@ -1,5 +1,21 @@
 {% load patient_filters %}
-{# Generic Clinical Section Template - for other section types #}
+{# Generic Clinical Section Templ                                        {% if cell_data|safe_get:"has_terminology" %}
+                                        {% with terminology_data=cell_data|safe_get:"terminology" %}
+                                        {% if terminology_data %}
+                                        <div class="medical-terminology mt-1">
+                                            {% for term in terminology_data %}
+                                            {% if term %}
+                                            <span
+                                                class="badge {% if generic_config %}{{ generic_config.badge_class|default:'bg-secondary' }}{% else %}{{ section.badge_class|default:'bg-secondary' }}{% endif %} me-1"
+                                                title="{{ term.system|default:'' }}: {{ term.code|default:'' }}">
+                                                {% firstof term.display_name term.code "Unknown" %}
+                                            </span>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        {% endwith %}
+                                        {% endif %}other section types #}
 <!-- Generic Clinical Section -->
 <div class="medical-section"
     id="{% if generic_config %}{{ generic_config.section_id|default:'generic-section' }}{% else %}{{ section.section_id|default:'generic-section' }}{% endif %}">

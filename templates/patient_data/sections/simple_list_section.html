@@ -1,8 +1,4 @@
-{% load patient_filt                    <                        <span class="badge bg-success me-1 mb-1" title="{{ term.system }}: {{ term.code }}">
-                            {{ term.display_name|default:term.code }}
-                        </span>                        class="mb-1 {% if entry.display_name == 'Unknown Item' or entry.display_name == 'Unknown Condition' or entry.display_name == 'Unknown Procedure' or entry.display_name == 'Unknown Medication' or entry.display_name == 'Unknown Allergen' %}text-muted fst-italic{% endif %}">
-                        {{ entry.display_name|default:"Medical Entry" }}
-                    </h6>%}
+{% load patient_filters %}
 {# Simple List Section Template - For sections with entries but no clinical table #}
 <!-- Fallback to simple list display if no clinical table -->
 <div class="card-body p-0">

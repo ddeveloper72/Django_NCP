@@ -677,6 +677,78 @@ main {
         console.log('✅ Pure Bootstrap functionality initialized successfully');
     });
 
+    // Extended Patient Tab Management Function
+    function showExtendedTab(sectionId, tabType) {
+        console.log('🎯 Switching Extended Patient tab:', sectionId, tabType);
+
+        // Hide all tab contents for the extended patient section
+        const personalTab = document.getElementById(sectionId + '_personal');
+        const healthcareTab = document.getElementById(sectionId + '_healthcare');
+        const systemTab = document.getElementById(sectionId + '_system');
+        const clinicalTab = document.getElementById(sectionId + '_clinical');
+        const pdfsTab = document.getElementById(sectionId + '_pdfs');
+
+        // Find the parent extended patient container
+        const extendedContainer = personalTab ? personalTab.closest('.clinical-section') :
+            (healthcareTab ? healthcareTab.closest('.clinical-section') :
+            (systemTab ? systemTab.closest('.clinical-section') :
+            (clinicalTab ? clinicalTab.closest('.clinical-section') :
+            (pdfsTab ? pdfsTab.closest('.clinical-section') : null))));
+
+        if (!extendedContainer) {
+            console.error('❌ Extended patient container not found for:', sectionId);
+            return;
+        }
+
+        const buttons = extendedContainer.querySelectorAll('.tab-button');
+        const allTabs = [personalTab, healthcareTab, systemTab, clinicalTab, pdfsTab].filter(tab => tab !== null);
+
+        // Remove active class and hide all tabs
+        allTabs.forEach(tab => {
+            if (tab) {
+                tab.classList.remove('active');
+                tab.style.display = 'none';
+            }
+        });
+
+        // Remove active class from all buttons
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        // Show selected tab and activate corresponding button
+        let activeTab = null;
+        let activeButtonIndex = -1;
+
+        if (tabType === 'personal' && personalTab) {
+            activeTab = personalTab;
+            activeButtonIndex = 0;
+        } else if (tabType === 'healthcare' && healthcareTab) {
+            activeTab = healthcareTab;
+            activeButtonIndex = 1;
+        } else if (tabType === 'system' && systemTab) {
+            activeTab = systemTab;
+            activeButtonIndex = 2;
+        } else if (tabType === 'clinical' && clinicalTab) {
+            activeTab = clinicalTab;
+            activeButtonIndex = 3;
+        } else if (tabType === 'pdfs' && pdfsTab) {
+            activeTab = pdfsTab;
+            activeButtonIndex = pdfsTab ? 4 : -1;
+        }
+
+        if (activeTab) {
+            activeTab.classList.add('active');
+            activeTab.style.display = 'block';
+            console.log('✅ Activated tab:', activeTab.id);
+        }
+
+        if (activeButtonIndex >= 0 && buttons[activeButtonIndex]) {
+            buttons[activeButtonIndex].classList.add('active');
+            console.log('✅ Activated button:', activeButtonIndex);
+        }
+
+        console.log('✅ Extended patient tab switch completed:', sectionId, tabType);
+    }
+
     // Date formatting utility function
     function formatMedicalDate(dateStr) {
         if (!dateStr || typeof dateStr !== 'string') return dateStr;
