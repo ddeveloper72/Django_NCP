@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load patient_filters %}
+{% load patient_date_filters %}
 {% load tooltip_tags %}
 
 {# Django replacement for Jinja2 macro - use |document_date filter instead #}
@@ -517,7 +518,7 @@ main {
                         {% endif %}
                     </h2>
                     <div class="d-flex align-items-center">
-                        <span class="badge {% if source_country == 'IE' %}bg-success{% elif source_country == 'MT' %}bg-primary{% elif source_country == 'PT' %}bg-info{% elif source_country == 'LU' %}bg-warning{% elif source_country == 'UNKNOWN' or source_country == 'ERROR' %}bg-danger{% else %}bg-secondary{% endif %} text-white me-2" 
+                        <span class="badge {% if source_country == 'IE' %}bg-success{% elif source_country == 'MT' %}bg-primary{% elif source_country == 'PT' %}bg-info{% elif source_country == 'LU' %}bg-warning{% elif source_country == 'UNKNOWN' or source_country == 'ERROR' %}bg-danger{% else %}bg-secondary{% endif %} text-white me-2"
                               {% tooltip "source_country_flag" %}>
                             <i class="fas fa-flag me-1"></i>{{ source_country }}
                         </span>
