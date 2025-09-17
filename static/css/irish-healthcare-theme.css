@@ -843,6 +843,22 @@ h6 {
   background-color: var(--healthcare-red) !important;
 }
 
+/* Language Flag Badge Styling */
+.badge.bg-info {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  color: white !important;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.badge.bg-info:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+  transition: all 0.2s ease;
+}
+
 /* Healthcare Loading and Status Indicators */
 .spinner-border-primary {
   color: var(--healthcare-blue);
@@ -1066,39 +1082,285 @@ footer {
   color: var(--healthcare-text-light);
 }
 
-/* HSE Clinical Section Headers - Better Contrast */
-.clinical-section-card .section-header.bg-info {
-  background-color: var(--healthcare-blue) !important;
+/* HSE Clinical Section Headers - Enhanced Professional Styling */
+.clinical-section-card .section-header.bg-info,
+.card-header.bg-info,
+h4.bg-info,
+h5.bg-info,
+h6.bg-info,
+.section-header.bg-info {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-blue) 0%,
+    var(--healthcare-dark-blue) 100%
+  ) !important;
   color: var(--healthcare-text-light) !important;
+  border-bottom: 3px solid var(--healthcare-light-blue);
+  box-shadow: 0 2px 8px rgba(0, 94, 184, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
-.clinical-section-card .section-header.bg-success {
-  background-color: var(--healthcare-green) !important;
+.clinical-section-card .section-header.bg-success,
+.card-header.bg-success,
+h4.bg-success,
+h5.bg-success,
+h6.bg-success,
+.section-header.bg-success {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-green) 0%,
+    #218838 100%
+  ) !important;
   color: var(--healthcare-text-light) !important;
+  border-bottom: 3px solid #a3d977;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
-.clinical-section-card .section-header.bg-danger {
-  background-color: var(--healthcare-red) !important;
+.clinical-section-card .section-header.bg-danger,
+.card-header.bg-danger,
+h4.bg-danger,
+h5.bg-danger,
+h6.bg-danger,
+.section-header.bg-danger {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-red) 0%,
+    #c82333 100%
+  ) !important;
   color: var(--healthcare-text-light) !important;
+  border-bottom: 3px solid #f5c6cb;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
-.clinical-section-card .section-header.bg-warning {
-  background-color: var(--healthcare-orange) !important;
+.clinical-section-card .section-header.bg-warning,
+.card-header.bg-warning,
+h4.bg-warning,
+h5.bg-warning,
+h6.bg-warning,
+.section-header.bg-warning {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-orange) 0%,
+    #e0a800 100%
+  ) !important;
   color: var(--healthcare-text-light) !important;
+  border-bottom: 3px solid #fff3cd;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
-.clinical-section-card .section-header.bg-dark {
-  background-color: var(--healthcare-navy) !important;
+.clinical-section-card .section-header.bg-dark,
+.card-header.bg-dark,
+h4.bg-dark,
+h5.bg-dark,
+h6.bg-dark,
+.section-header.bg-dark {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-navy) 0%,
+    #1d1f21 100%
+  ) !important;
   color: var(--healthcare-text-light) !important;
+  border-bottom: 3px solid #6c757d;
+  box-shadow: 0 2px 8px rgba(52, 58, 64, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
-/* FontAwesome Icons in Section Headers */
+/* Enhanced Teal/Cyan Headers (for Other Contacts, etc.) */
+.card-header.bg-teal,
+.section-header.bg-teal,
+h4.bg-teal,
+h5.bg-teal,
+h6.bg-teal,
+.bg-teal {
+  background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%) !important;
+  color: var(--healthcare-text-light) !important;
+  border-bottom: 3px solid #b8daff;
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+/* Enhanced Secondary/Gray Headers */
+.card-header.bg-secondary,
+.section-header.bg-secondary,
+h4.bg-secondary,
+h5.bg-secondary,
+h6.bg-secondary {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+  color: var(--healthcare-text-light) !important;
+  border-bottom: 3px solid #c6c8ca;
+  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+/* Fix Blue Text on Colored Backgrounds - Force White Text for Better Contrast */
+.accordion-header h4,
+.accordion-header h5,
+.accordion-header h6,
+.accordion-button,
+.clinical-accordion-item .accordion-button,
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6,
+.section-header h1,
+.section-header h2,
+.section-header h3,
+.section-header h4,
+.section-header h5,
+.section-header h6,
+.bg-primary h1,
+.bg-primary h2,
+.bg-primary h3,
+.bg-primary h4,
+.bg-primary h5,
+.bg-primary h6,
+.bg-info h1,
+.bg-info h2,
+.bg-info h3,
+.bg-info h4,
+.bg-info h5,
+.bg-info h6,
+.bg-secondary h1,
+.bg-secondary h2,
+.bg-secondary h3,
+.bg-secondary h4,
+.bg-secondary h5,
+.bg-secondary h6 {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  font-weight: 700 !important;
+}
+
+/* FontAwesome Icons in All Section Headers - Enhanced Styling */
 .clinical-section-card .section-header i.fas,
 .clinical-section-card .section-header i.far,
-.clinical-section-card .section-header i.fab {
-  color: var(--healthcare-text-light);
+.clinical-section-card .section-header i.fab,
+.card-header i.fas,
+.card-header i.far,
+.card-header i.fab,
+.section-header i.fas,
+.section-header i.far,
+.section-header i.fab,
+h4 i.fas,
+h4 i.far,
+h4 i.fab,
+h5 i.fas,
+h5 i.far,
+h5 i.fab,
+h6 i.fas,
+h6 i.far,
+h6 i.fab {
+  color: var(--healthcare-text-light) !important;
+  margin-right: 0.75rem;
+  font-size: 1.1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+/* Icon hover effects for interactive headers */
+.card-header:hover i.fas,
+.card-header:hover i.far,
+.card-header:hover i.fab,
+.section-header:hover i.fas,
+.section-header:hover i.far,
+.section-header:hover i.fab {
+  transform: scale(1.1);
+}
+
+/* Enhanced Data Display Tabs (Structured Data, Original Content, etc.) */
+.nav-pills .nav-link,
+.nav-tabs .nav-link {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  color: var(--healthcare-navy);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
   margin-right: 0.5rem;
-  font-size: 1rem;
+}
+
+.nav-pills .nav-link:hover,
+.nav-tabs .nav-link:hover {
+  color: var(--healthcare-dark-blue);
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    var(--healthcare-light-blue) 100%
+  );
+  border-color: var(--healthcare-blue);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 94, 184, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.nav-pills .nav-link.active,
+.nav-tabs .nav-link.active {
+  color: var(--healthcare-text-light) !important;
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-blue) 0%,
+    var(--healthcare-dark-blue) 100%
+  ) !important;
+  border-color: var(--healthcare-blue) !important;
+  font-weight: 700;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 94, 184, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Specific styling for data display tabs to ensure white text on blue backgrounds */
+.nav-pills .nav-link[class*="bg-"],
+.nav-tabs .nav-link[class*="bg-"],
+.nav-link.bg-primary,
+.nav-link.bg-info,
+.nav-link.bg-blue {
+  color: var(--healthcare-text-light) !important;
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-blue) 0%,
+    var(--healthcare-dark-blue) 100%
+  ) !important;
+  border-color: var(--healthcare-blue) !important;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 94, 184, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.nav-pills .nav-link.active:hover,
+.nav-tabs .nav-link.active:hover {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-dark-blue) 0%,
+    var(--healthcare-blue) 100%
+  ) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 94, 184, 0.5), 0 3px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 /* FontAwesome Icons with Bootstrap Color Classes - Healthcare Context */
