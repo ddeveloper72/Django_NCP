@@ -1417,14 +1417,22 @@ footer {
 }
 
 .clinical-accordion-item .accordion-button.collapsed {
-  background: linear-gradient(135deg, var(--healthcare-blue) 0%, var(--healthcare-dark-blue) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-blue) 0%,
+    var(--healthcare-dark-blue) 100%
+  );
   color: var(--healthcare-text-light);
   border-radius: 8px !important;
   box-shadow: 0 2px 4px rgba(0, 94, 184, 0.1);
 }
 
 .clinical-accordion-item .accordion-button.collapsed:hover {
-  background: linear-gradient(135deg, var(--healthcare-dark-blue) 0%, #002952 100%);
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-dark-blue) 0%,
+    #002952 100%
+  );
   box-shadow: 0 4px 12px rgba(0, 94, 184, 0.25);
   transform: translateY(-1px);
 }
@@ -1441,112 +1449,197 @@ footer {
    ========================= */
 
 /* Medications Section - HSE Blue (Primary Medical) */
-.clinical-accordion-item:has(button[aria-controls*="Medications"]) .accordion-button:not(.collapsed),
-.clinical-accordion-item button[aria-controls*="collapseMedications"]:not(.collapsed) {
-  background: linear-gradient(135deg, var(--healthcare-blue) 0%, var(--healthcare-dark-blue) 100%) !important;
+.clinical-accordion-item:has(button[aria-controls*="Medications"])
+  .accordion-button:not(.collapsed),
+.clinical-accordion-item
+  button[aria-controls*="collapseMedications"]:not(.collapsed) {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-blue) 0%,
+    var(--healthcare-dark-blue) 100%
+  ) !important;
   color: var(--healthcare-text-light);
   box-shadow: 0 3px 8px rgba(0, 94, 184, 0.25);
 }
 
-.clinical-accordion-item:has(button[aria-controls*="Medications"]) .accordion-button.collapsed,
-.clinical-accordion-item button[aria-controls*="collapseMedications"].collapsed {
-  background: linear-gradient(135deg, #4a90e2 0%, var(--healthcare-blue) 100%) !important;
+.clinical-accordion-item:has(button[aria-controls*="Medications"])
+  .accordion-button.collapsed,
+.clinical-accordion-item
+  button[aria-controls*="collapseMedications"].collapsed {
+  background: linear-gradient(
+    135deg,
+    #4a90e2 0%,
+    var(--healthcare-blue) 100%
+  ) !important;
   color: var(--healthcare-text-light);
 }
 
 /* Allergies Section - HSE Red (Alert/Warning) */
-.clinical-accordion-item:has(button[aria-controls*="Allergies"]) .accordion-button:not(.collapsed),
-.clinical-accordion-item button[aria-controls*="collapseAllergies"]:not(.collapsed) {
-  background: linear-gradient(135deg, var(--healthcare-red) 0%, #a71e22 100%) !important;
+.clinical-accordion-item:has(button[aria-controls*="Allergies"])
+  .accordion-button:not(.collapsed),
+.clinical-accordion-item
+  button[aria-controls*="collapseAllergies"]:not(.collapsed) {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-red) 0%,
+    #a71e22 100%
+  ) !important;
   color: var(--healthcare-text-light);
   box-shadow: 0 3px 8px rgba(197, 40, 47, 0.25);
 }
 
-.clinical-accordion-item:has(button[aria-controls*="Allergies"]) .accordion-button.collapsed,
+.clinical-accordion-item:has(button[aria-controls*="Allergies"])
+  .accordion-button.collapsed,
 .clinical-accordion-item button[aria-controls*="collapseAllergies"].collapsed {
-  background: linear-gradient(135deg, #e74c3c 0%, var(--healthcare-red) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    #e74c3c 0%,
+    var(--healthcare-red) 100%
+  ) !important;
   color: var(--healthcare-text-light);
 }
 
 /* Problems/Conditions Section - HSE Orange (Medical Conditions) */
-.clinical-accordion-item:has(button[aria-controls*="Problems"]) .accordion-button:not(.collapsed),
-.clinical-accordion-item button[aria-controls*="collapseProblems"]:not(.collapsed) {
-  background: linear-gradient(135deg, var(--healthcare-orange) 0%, #b55a00 100%) !important;
+.clinical-accordion-item:has(button[aria-controls*="Problems"])
+  .accordion-button:not(.collapsed),
+.clinical-accordion-item
+  button[aria-controls*="collapseProblems"]:not(.collapsed) {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-orange) 0%,
+    #b55a00 100%
+  ) !important;
   color: var(--healthcare-text-light);
   box-shadow: 0 3px 8px rgba(225, 112, 0, 0.25);
 }
 
-.clinical-accordion-item:has(button[aria-controls*="Problems"]) .accordion-button.collapsed,
+.clinical-accordion-item:has(button[aria-controls*="Problems"])
+  .accordion-button.collapsed,
 .clinical-accordion-item button[aria-controls*="collapseProblems"].collapsed {
-  background: linear-gradient(135deg, #f39c12 0%, var(--healthcare-orange) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    #f39c12 0%,
+    var(--healthcare-orange) 100%
+  ) !important;
   color: var(--healthcare-text-light);
 }
 
 /* Vital Signs Section - HSE Green (Health/Wellness) */
-.clinical-accordion-item:has(button[aria-controls*="Vitals"]) .accordion-button:not(.collapsed),
-.clinical-accordion-item button[aria-controls*="collapseVitals"]:not(.collapsed) {
-  background: linear-gradient(135deg, var(--healthcare-green) 0%, #004d35 100%) !important;
+.clinical-accordion-item:has(button[aria-controls*="Vitals"])
+  .accordion-button:not(.collapsed),
+.clinical-accordion-item
+  button[aria-controls*="collapseVitals"]:not(.collapsed) {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-green) 0%,
+    #004d35 100%
+  ) !important;
   color: var(--healthcare-text-light);
   box-shadow: 0 3px 8px rgba(0, 103, 71, 0.25);
 }
 
-.clinical-accordion-item:has(button[aria-controls*="Vitals"]) .accordion-button.collapsed,
+.clinical-accordion-item:has(button[aria-controls*="Vitals"])
+  .accordion-button.collapsed,
 .clinical-accordion-item button[aria-controls*="collapseVitals"].collapsed {
-  background: linear-gradient(135deg, #27ae60 0%, var(--healthcare-green) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    #27ae60 0%,
+    var(--healthcare-green) 100%
+  ) !important;
   color: var(--healthcare-text-light);
 }
 
 /* Procedures Section - HSE Navy (Professional/Technical) */
-.clinical-accordion-item:has(button[aria-controls*="Procedures"]) .accordion-button:not(.collapsed),
-.clinical-accordion-item button[aria-controls*="collapseProcedures"]:not(.collapsed) {
-  background: linear-gradient(135deg, var(--healthcare-navy) 0%, #0f2a52 100%) !important;
+.clinical-accordion-item:has(button[aria-controls*="Procedures"])
+  .accordion-button:not(.collapsed),
+.clinical-accordion-item
+  button[aria-controls*="collapseProcedures"]:not(.collapsed) {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-navy) 0%,
+    #0f2a52 100%
+  ) !important;
   color: var(--healthcare-text-light);
   box-shadow: 0 3px 8px rgba(28, 61, 114, 0.25);
 }
 
-.clinical-accordion-item:has(button[aria-controls*="Procedures"]) .accordion-button.collapsed,
+.clinical-accordion-item:has(button[aria-controls*="Procedures"])
+  .accordion-button.collapsed,
 .clinical-accordion-item button[aria-controls*="collapseProcedures"].collapsed {
-  background: linear-gradient(135deg, #34495e 0%, var(--healthcare-navy) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    #34495e 0%,
+    var(--healthcare-navy) 100%
+  ) !important;
   color: var(--healthcare-text-light);
 }
 
 /* Enhanced Clinical Sections - HSE Primary Blue */
-.clinical-accordion-item:has(button[aria-controls*="collapse-"]) .accordion-button:not(.collapsed) {
-  background: linear-gradient(135deg, var(--healthcare-blue) 0%, var(--healthcare-dark-blue) 100%) !important;
+.clinical-accordion-item:has(button[aria-controls*="collapse-"])
+  .accordion-button:not(.collapsed) {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-blue) 0%,
+    var(--healthcare-dark-blue) 100%
+  ) !important;
   color: var(--healthcare-text-light);
   box-shadow: 0 3px 8px rgba(0, 94, 184, 0.25);
 }
 
-.clinical-accordion-item:has(button[aria-controls*="collapse-"]) .accordion-button.collapsed {
-  background: linear-gradient(135deg, #4a90e2 0%, var(--healthcare-blue) 100%) !important;
+.clinical-accordion-item:has(button[aria-controls*="collapse-"])
+  .accordion-button.collapsed {
+  background: linear-gradient(
+    135deg,
+    #4a90e2 0%,
+    var(--healthcare-blue) 100%
+  ) !important;
   color: var(--healthcare-text-light);
 }
 
 /* Additional Clinical Information - HSE Light Blue */
-.clinical-accordion-item:has(button[aria-controls*="OtherClinical"]) .accordion-button:not(.collapsed),
-.clinical-accordion-item button[aria-controls*="collapseOtherClinical"]:not(.collapsed) {
-  background: linear-gradient(135deg, #3498db 0%, var(--healthcare-blue) 100%) !important;
+.clinical-accordion-item:has(button[aria-controls*="OtherClinical"])
+  .accordion-button:not(.collapsed),
+.clinical-accordion-item
+  button[aria-controls*="collapseOtherClinical"]:not(.collapsed) {
+  background: linear-gradient(
+    135deg,
+    #3498db 0%,
+    var(--healthcare-blue) 100%
+  ) !important;
   color: var(--healthcare-text-light);
   box-shadow: 0 3px 8px rgba(52, 152, 219, 0.25);
 }
 
-.clinical-accordion-item:has(button[aria-controls*="OtherClinical"]) .accordion-button.collapsed,
-.clinical-accordion-item button[aria-controls*="collapseOtherClinical"].collapsed {
+.clinical-accordion-item:has(button[aria-controls*="OtherClinical"])
+  .accordion-button.collapsed,
+.clinical-accordion-item
+  button[aria-controls*="collapseOtherClinical"].collapsed {
   background: linear-gradient(135deg, #5dade2 0%, #3498db 100%) !important;
   color: var(--healthcare-text-light);
 }
 
 /* Processing Summary - HSE Dark Grey (Analytics) */
-.clinical-accordion-item:has(button[aria-controls*="Stats"]) .accordion-button:not(.collapsed),
-.clinical-accordion-item button[aria-controls*="collapseStats"]:not(.collapsed) {
-  background: linear-gradient(135deg, var(--healthcare-dark-grey) 0%, var(--healthcare-charcoal) 100%) !important;
+.clinical-accordion-item:has(button[aria-controls*="Stats"])
+  .accordion-button:not(.collapsed),
+.clinical-accordion-item
+  button[aria-controls*="collapseStats"]:not(.collapsed) {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-dark-grey) 0%,
+    var(--healthcare-charcoal) 100%
+  ) !important;
   color: var(--healthcare-text-light);
   box-shadow: 0 3px 8px rgba(73, 80, 87, 0.25);
 }
 
-.clinical-accordion-item:has(button[aria-controls*="Stats"]) .accordion-button.collapsed,
+.clinical-accordion-item:has(button[aria-controls*="Stats"])
+  .accordion-button.collapsed,
 .clinical-accordion-item button[aria-controls*="collapseStats"].collapsed {
-  background: linear-gradient(135deg, #6c757d 0%, var(--healthcare-dark-grey) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    #6c757d 0%,
+    var(--healthcare-dark-grey) 100%
+  ) !important;
   color: var(--healthcare-text-light);
 }
 

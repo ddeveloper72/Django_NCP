@@ -188,33 +188,144 @@
                  class="accordion-collapse collapse show"
                  aria-labelledby="headingAllergies">
                 <div class="accordion-body">
-                    <div class="row g-3">
-                        {% for allergy in allergies %}
-                        <div class="col-md-6">
-                            <div class="allergy-item border rounded p-3 h-100 border-danger">
-                                <h6 class="text-danger mb-2">
-                                    {% if allergy.agent_display %}
-                                        {{ allergy.agent_display }}
-                                    {% elif allergy.agent_code %}
-                                        {{ allergy.agent_code }}
-                                    {% else %}
-                                        Allergy
-                                    {% endif %}
-                                </h6>
-                                {% if allergy.reaction %}
-                                <p class="mb-1"><strong>Reaction:</strong> {{ allergy.reaction }}</p>
-                                {% endif %}
-                                {% if allergy.severity %}
-                                <p class="mb-1"><strong>Severity:</strong>
-                                    <span class="badge bg-warning">{{ allergy.severity }}</span>
-                                </p>
-                                {% endif %}
-                                {% if allergy.status %}
-                                <p class="mb-0"><strong>Status:</strong> {{ allergy.status }}</p>
-                                {% endif %}
+                    <!-- Mobile-Responsive Table Container -->
+                    <div class="table-responsive-wrapper">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover clinical-table table-danger">
+                                <thead class="table-danger">
+                                    <tr>
+                                        <th scope="col" class="primary-field">
+                                            <div class="th-content">
+                                                <span class="th-label">Allergen</span>
+                                                <i class="fas fa-exclamation-triangle ms-1 terminology-indicator" title="Allergy Agent"></i>
+                                            </div>
+                                        </th>
+                                        <th scope="col">
+                                            <div class="th-content">
+                                                <span class="th-label">Reaction</span>
+                                                <i class="fas fa-heartbeat ms-1 terminology-indicator" title="Reaction Type"></i>
+                                            </div>
+                                        </th>
+                                        <th scope="col">
+                                            <div class="th-content">
+                                                <span class="th-label">Severity</span>
+                                                <i class="fas fa-thermometer-half ms-1 terminology-indicator" title="Severity Level"></i>
+                                            </div>
+                                        </th>
+                                        <th scope="col">
+                                            <div class="th-content">
+                                                <span class="th-label">Status</span>
+                                                <i class="fas fa-info-circle ms-1 terminology-indicator" title="Current Status"></i>
+                                            </div>
+                                        </th>
+                                        <th scope="col">
+                                            <div class="th-content">
+                                                <span class="th-label">First Noted</span>
+                                                <i class="fas fa-calendar ms-1 terminology-indicator" title="Date First Recorded"></i>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for allergy in allergies %}
+                                    <tr>
+                                        <td>
+                                            <div class="primary-field">
+                                                <strong class="text-danger">
+                                                    {% if allergy.agent_display %}
+                                                        {{ allergy.agent_display }}
+                                                    {% elif allergy.agent_code %}
+                                                        {{ allergy.agent_code }}
+                                                    {% else %}
+                                                        Not specified
+                                                    {% endif %}
+                                                </strong>
+                                                {% if allergy.agent_code and allergy.agent_display %}
+                                                <div class="medical-codes-container mt-1">
+                                                    <span class="badge bg-danger me-1" title="Allergy Code: {{ allergy.agent_code }}">
+                                                        {{ allergy.agent_code }}
+                                                    </span>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="cell-content">
+                                                {% if allergy.reaction %}
+                                                    {{ allergy.reaction }}
+                                                {% else %}
+                                                    <span class="text-muted">Not specified</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="cell-content">
+                                                {% if allergy.severity %}
+                                                    <span class="badge 
+                                                        {% if allergy.severity|lower == 'severe' or allergy.severity|lower == 'high' %}bg-danger
+                                                        {% elif allergy.severity|lower == 'moderate' or allergy.severity|lower == 'medium' %}bg-warning
+                                                        {% elif allergy.severity|lower == 'mild' or allergy.severity|lower == 'low' %}bg-success
+                                                        {% else %}bg-secondary{% endif %}">
+                                                        {{ allergy.severity }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-muted">Not specified</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="cell-content">
+                                                {% if allergy.status %}
+                                                    <span class="badge 
+                                                        {% if allergy.status|lower == 'active' %}bg-danger
+                                                        {% elif allergy.status|lower == 'inactive' %}bg-secondary
+                                                        {% elif allergy.status|lower == 'resolved' %}bg-success
+                                                        {% else %}bg-info{% endif %}">
+                                                        {{ allergy.status }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-muted">Not specified</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="cell-content">
+                                                {% if allergy.first_noted %}
+                                                    {{ allergy.first_noted|date:"M d, Y" }}
+                                                {% else %}
+                                                    <span class="text-muted">Not specified</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div> <!-- End table-responsive-wrapper -->
+
+                    <!-- Allergy Table Summary -->
+                    <div class="card-footer bg-light border-danger">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <small class="text-muted">
+                                    <i class="fas fa-exclamation-triangle me-1 text-danger"></i>
+                                    <strong>{{ allergies|length }}</strong> known allergies
+                                </small>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">
+                                    <i class="fas fa-shield-alt me-1 text-warning"></i>
+                                    Critical allergy information
+                                </small>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">
+                                    <i class="fas fa-user-md me-1 text-info"></i>
+                                    Patient safety priority
+                                </small>
                             </div>
                         </div>
-                        {% endfor %}
                     </div>
                 </div>
             </div>
