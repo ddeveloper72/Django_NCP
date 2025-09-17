@@ -66,9 +66,7 @@
                                 <td>
                                     {% if header.primary %}
                                     <div class="primary-field">
-                                        <strong class="text-primary">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value"
-                                            or
-                                            'N/A %}</strong>
+                                        <strong class="text-primary">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</strong>
                                         {% if cell_data|safe_get:"has_terminology" %}
                                         <div class="medical-terminology mt-1">
                                             {% for term in cell_data|safe_get:"terminology" %}
@@ -92,7 +90,7 @@
                                             {% endfor %}
                                         </div>
                                         {% else %}
-                                        {% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" or 'N/A %}
+                                        {% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}
                                         {% endif %}
                                     </div>
                                     {% endif %}                                </td>

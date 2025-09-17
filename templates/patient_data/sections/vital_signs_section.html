@@ -93,7 +93,7 @@
                                         <i class="fas fa-exclamation-triangle text-danger ms-1"
                                             title="Abnormal Vital Sign"></i>
                                         {% else %}
-                                        {% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" or 'N/A %}
+                                        {% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}
                                         {% endif %}
                                     </div>
                                     {% endif %}                                </td>
