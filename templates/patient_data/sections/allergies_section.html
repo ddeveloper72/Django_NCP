@@ -4,15 +4,12 @@
 <div class="medical-section" id="allergies-section">
     <div class="card">
         <!-- Section Header -->
-        <div class="card-header bg-danger text-white">
+        <div class="card-header bg-primary text-white">
             <h5 class="mb-0">
                 <i class="fas fa-exclamation-triangle me-2"></i>
-                {% firstof section.title Allergies and Other Adverse Reactions %}
+                {% firstof section.title "Allergies and Other Adverse Reactions" %}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
-                {% endif %}
-                {% if section.has_entries %}
-                <span class="badge bg-warning ms-2">{% if section.entries %}{{ section.entries|length }}{% else %}0{% endif %} allergies</span>
                 {% endif %}
             </h5>
         </div>
@@ -38,7 +35,7 @@
                 <div class="table-responsive-wrapper">
                     <div class="table-responsive">
                         <table class="table table-striped table-hover clinical-table">
-                            <thead class="table-danger">
+                            <thead class="table-primary">
                                 <tr>
                                     {% for header in section.clinical_table.headers %}
                                     <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
@@ -57,18 +54,18 @@
                         </thead>
                         <tbody>
                             {% for row in section.clinical_table.rows %}
-                            <tr class="table-warning">
+                            <tr class="table-light">
                                 {% for header in section.clinical_table.headers %}
                                 {# Django: Use {% with %} instead of {% set %} #}
                                 {% with cell_data=row.data|lookup:header.key %}
                                 <td>
                                     {% if header.primary %}
                                     <div class="primary-field">
-                                        <strong class="text-danger">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</strong>
+                                        <strong class="text-primary">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</strong>
                                         {% if cell_data|safe_get:"has_terminology" %}
                                         <div class="medical-terminology mt-1">
                                             {% for term in cell_data|safe_get:"terminology" %}
-                                            <span class="badge bg-danger me-1"
+                                            <span class="badge bg-primary me-1"
                                                 title="{{ term.system }}: {{ term.code }}">
                                                 {% firstof term.display_name term.code %}
                                             </span>
@@ -81,7 +78,7 @@
                                         {% if cell_data|safe_get:"has_codes" %}
                                         <div class="medical-codes-container">
                                             {% for code in cell_data|safe_get:"codes" %}
-                                            <span class="badge bg-warning text-dark me-1 mb-1"
+                                            <span class="badge bg-secondary text-white me-1 mb-1"
                                                 title="{{ code.system }}: {{ code.code }}">
                                                 {% firstof code.display_name code.code %}
                                             </span>
@@ -103,17 +100,17 @@
                 </div> <!-- End table-responsive-wrapper -->
 
                 <!-- Allergy Table Summary -->
-                <div class="card-footer bg-light border-danger">
+                <div class="card-footer bg-light border-primary">
                     <div class="row text-center">
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-exclamation-triangle me-1 text-danger"></i>
+                                <i class="fas fa-exclamation-triangle me-1 text-primary"></i>
                                 <strong>{{ section.clinical_table.rows|length }}</strong> known allergies
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-fire me-1 text-warning"></i>
+                                <i class="fas fa-fire me-1 text-secondary"></i>
                                 Critical allergy information
                             </small>
                         </div>
