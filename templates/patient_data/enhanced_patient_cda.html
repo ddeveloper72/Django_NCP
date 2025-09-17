@@ -39,14 +39,14 @@
 
 .tab-button.active {
     color: #ffffff !important;
-    border-bottom-color: #0066cc;
-    background: linear-gradient(135deg, #0066cc 0%, #004499 100%) !important;
+    border-bottom-color: var(--healthcare-blue);
+    background: var(--healthcare-blue) !important;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 91, 184, 0.3);
 }
 
 .tab-button.active:hover {
-    background: linear-gradient(135deg, #0052a3 0%, #003d7a 100%) !important;
+    background: var(--healthcare-dark-blue) !important;
     transform: translateY(-1px);
 }
 
@@ -629,75 +629,6 @@ main {
             </div> <!-- End card-body -->
         </div> <!-- End Main Patient Header Card -->
     </div>
-
-    <!-- Main Clinical Content Display -->
-    {% if processed_sections and processed_sections|length > 0 %}
-    <div class="section-wrapper">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
-                <h3 class="mb-0">
-                    <i class="fas fa-clipboard-list me-2"></i>
-                    Clinical Information
-                    <span class="badge bg-light text-dark ms-2">{{ processed_sections|length }} section(s)</span>
-                </h3>
-            </div>
-            <div class="card-body">
-                {% for section in processed_sections %}
-                    <!-- Modular Clinical Section Router -->
-                    {% include 'patient_data/sections/clinical_section_router.html' %}
-                {% endfor %}
-
-                <div class="text-end mt-3">
-                    <span class="badge bg-success fs-6">
-                        <i class="fas fa-check-circle me-1"></i>
-                        Clinical Sections Processed ({{ processed_sections|length }})
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% elif medications and medications|length > 0 %}
-    <!-- Enhanced Medication Information Section -->
-    <div class="section-wrapper">
-        <div class="card shadow">
-            <div class="card-header bg-info text-white">
-                <h4 class="mb-0">
-                    <i class="fas fa-pills me-2"></i>
-                    Medication Information
-                    <span class="badge bg-light text-dark ms-2">{{ medications|length }} medication(s)</span>
-                </h4>
-            </div>
-            <div class="card-body">
-                {% for medication in medications %}
-                <div class="medication-entry border-bottom pb-3 mb-3">
-                    <div class="row">
-                        <!-- Main Medication Info -->
-                        <div class="col-lg-6">
-                            <h5 class="text-primary mb-2">
-                                <i class="fas fa-prescription-bottle me-2"></i>
-                                {{ medication.fields.Medication_Name.value|default:"Unknown Medication" }}
-                            </h5>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    {% else %}
-    <!-- No Clinical Data Available -->
-    <div class="section-wrapper">
-        <div class="alert alert-info">
-            <h4><i class="fas fa-info-circle me-2"></i>Clinical Information</h4>
-            <p class="mb-0">No clinical sections could be processed from this CDA document. This may be because:</p>
-            <ul class="mb-0 mt-2">
-                <li>The document contains only administrative information</li>
-                <li>Clinical sections are not coded according to standard terminology</li>
-                <li>The document format requires additional processing</li>
-            </ul>
-        </div>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
 

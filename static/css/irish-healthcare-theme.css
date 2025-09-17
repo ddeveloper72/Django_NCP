@@ -4,25 +4,32 @@ Based on Irish Healthcare Digital Design Standards
 Generated: September 16, 2025
 */
 
-/* Irish Healthcare Official Color Palette */
+/* Irish Healthcare Official Color Palette - HSE.ie Inspired */
 :root {
-  /* Primary Healthcare Colors */
-  --healthcare-blue: #0078d4; /* Primary Blue */
-  --healthcare-dark-blue: #005a9f; /* Dark Blue */
-  --healthcare-light-blue: #e6f3ff; /* Light Blue */
-  --healthcare-navy: #1c3a56; /* Navy */
+  /* HSE Primary Healthcare Colors */
+  --healthcare-blue: #005eb8; /* HSE Primary Blue */
+  --healthcare-dark-blue: #003d7a; /* HSE Dark Blue */
+  --healthcare-light-blue: #e8f4fd; /* HSE Light Blue */
+  --healthcare-navy: #1c3d72; /* HSE Navy */
 
-  /* Secondary Colors */
-  --healthcare-green: #00a651; /* Success Green */
-  --healthcare-orange: #ff8c00; /* Warning Orange */
-  --healthcare-red: #d92b3a; /* Error Red */
+  /* HSE Secondary Colors */
+  --healthcare-green: #006747; /* HSE Dark Green */
+  --healthcare-light-green: #e8f5f0; /* HSE Light Green */
+  --healthcare-orange: #e17000; /* HSE Orange - more muted */
+  --healthcare-red: #c5282f; /* HSE Red - less aggressive */
 
-  /* Neutral Colors */
+  /* HSE Neutral Colors */
   --healthcare-white: #ffffff;
   --healthcare-light-grey: #f8f9fa;
   --healthcare-grey: #6c757d;
   --healthcare-dark-grey: #495057;
   --healthcare-charcoal: #212529;
+
+  /* HSE Accessible Colors for Better Contrast */
+  --healthcare-text-dark: #1d1d1b; /* High contrast text */
+  --healthcare-text-light: #ffffff;
+  --healthcare-border: #d4d4d4;
+  --healthcare-background: #f7f7f7;
 
   /* Typography */
   --healthcare-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -131,9 +138,9 @@ body {
   width: 16px;
 }
 
-/* Healthcare Card Styling */
+/* Healthcare Card Styling - HSE Colors */
 .card {
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--healthcare-border);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.2s ease;
@@ -146,8 +153,51 @@ body {
 .card-header {
   background-color: var(--healthcare-light-blue);
   border-bottom: 1px solid var(--healthcare-blue);
-  color: var(--healthcare-navy);
+  color: var(--healthcare-text-dark);
   font-weight: var(--healthcare-heading-weight);
+}
+
+/* HSE Card Header Color Updates */
+.card-header.bg-primary {
+  background-color: var(--healthcare-blue) !important;
+  color: var(--healthcare-text-light) !important;
+  border-bottom-color: var(--healthcare-dark-blue);
+}
+
+.card-header.bg-success {
+  background-color: var(--healthcare-green) !important;
+  color: var(--healthcare-text-light) !important;
+  border-bottom-color: #004d35;
+}
+
+.card-header.bg-info {
+  background-color: var(--healthcare-blue) !important;
+  color: var(--healthcare-text-light) !important;
+  border-bottom-color: var(--healthcare-dark-blue);
+}
+
+.card-header.bg-warning {
+  background-color: var(--healthcare-orange) !important;
+  color: var(--healthcare-text-light) !important;
+  border-bottom-color: #b55a00;
+}
+
+.card-header.bg-danger {
+  background-color: var(--healthcare-red) !important;
+  color: var(--healthcare-text-light) !important;
+  border-bottom-color: #a71e22;
+}
+
+.card-header.bg-secondary {
+  background-color: var(--healthcare-grey) !important;
+  color: var(--healthcare-text-light) !important;
+  border-bottom-color: var(--healthcare-dark-grey);
+}
+
+.card-header.bg-dark {
+  background-color: var(--healthcare-navy) !important;
+  color: var(--healthcare-text-light) !important;
+  border-bottom-color: #0f2a52;
 }
 
 /* Healthcare Button Styling */
@@ -779,16 +829,73 @@ footer {
 }
 
 .clinical-table th.primary-field {
-  background-color: var(--healthcare-dark-blue) !important;
-  color: white;
+  background-color: var(--healthcare-blue) !important;
+  color: var(--healthcare-text-light);
   font-weight: 600;
   min-width: 200px;
 }
 
-/* Allergy tables - use danger styling for primary field */
+/* Allergy tables - use HSE red for primary field */
 .table-danger .clinical-table th.primary-field {
   background-color: var(--healthcare-red) !important;
-  color: white;
+  color: var(--healthcare-text-light);
+}
+
+/* HSE Clinical Section Headers - Better Contrast */
+.clinical-section-card .section-header.bg-info {
+  background-color: var(--healthcare-blue) !important;
+  color: var(--healthcare-text-light) !important;
+}
+
+.clinical-section-card .section-header.bg-success {
+  background-color: var(--healthcare-green) !important;
+  color: var(--healthcare-text-light) !important;
+}
+
+.clinical-section-card .section-header.bg-danger {
+  background-color: var(--healthcare-red) !important;
+  color: var(--healthcare-text-light) !important;
+}
+
+.clinical-section-card .section-header.bg-warning {
+  background-color: var(--healthcare-orange) !important;
+  color: var(--healthcare-text-light) !important;
+}
+
+.clinical-section-card .section-header.bg-dark {
+  background-color: var(--healthcare-navy) !important;
+  color: var(--healthcare-text-light) !important;
+}
+
+/* Clinical Table Headers - HSE Colors */
+.table-primary thead th {
+  background-color: var(--healthcare-blue) !important;
+  color: var(--healthcare-text-light) !important;
+  border-color: var(--healthcare-dark-blue) !important;
+}
+
+.table-danger thead th {
+  background-color: var(--healthcare-red) !important;
+  color: var(--healthcare-text-light) !important;
+  border-color: #a71e22 !important;
+}
+
+.table-success thead th {
+  background-color: var(--healthcare-green) !important;
+  color: var(--healthcare-text-light) !important;
+  border-color: #004d35 !important;
+}
+
+.table-warning thead th {
+  background-color: var(--healthcare-orange) !important;
+  color: var(--healthcare-text-light) !important;
+  border-color: #b55a00 !important;
+}
+
+.table-info thead th {
+  background-color: var(--healthcare-light-blue) !important;
+  color: var(--healthcare-text-dark) !important;
+  border-color: var(--healthcare-blue) !important;
 }
 
 .clinical-table .th-content {
@@ -844,10 +951,10 @@ footer {
     position: sticky;
     left: 0;
     z-index: 10;
-    background-color: var(--healthcare-dark-blue) !important;
+    background-color: var(--healthcare-blue) !important;
   }
   
-  /* Mobile allergy table primary field */
+  /* Mobile allergy table primary field - HSE red */
   .table-danger .clinical-table th.primary-field {
     background-color: var(--healthcare-red) !important;
   }
