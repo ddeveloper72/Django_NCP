@@ -843,9 +843,9 @@ footer {
   min-width: 200px;
 }
 
-/* Allergy tables - use HSE red for primary field */
-.table-danger .clinical-table th.primary-field {
-  background-color: var(--healthcare-red) !important;
+/* Clinical tables - consistent primary field styling */
+.table-primary .clinical-table th.primary-field {
+  background-color: var(--healthcare-blue) !important;
   color: var(--healthcare-text-light);
 }
 
@@ -962,9 +962,9 @@ footer {
     background-color: var(--healthcare-blue) !important;
   }
 
-  /* Mobile allergy table primary field - HSE red */
-  .table-danger .clinical-table th.primary-field {
-    background-color: var(--healthcare-red) !important;
+  /* Mobile clinical table primary field - consistent blue */
+  .table-primary .clinical-table th.primary-field {
+    background-color: var(--healthcare-blue) !important;
   }
 
   .clinical-table .th-label {
@@ -1230,12 +1230,12 @@ footer {
 
 /* Special Styling for Critical Sections */
 .clinical-accordion-item .allergy-item {
-  border-left: 4px solid var(--healthcare-red);
+  border-left: 4px solid var(--healthcare-blue);
 }
 
 .clinical-accordion-item .allergy-item:hover {
-  border-left-color: var(--healthcare-red);
-  box-shadow: 0 4px 12px rgba(197, 40, 47, 0.15);
+  border-left-color: var(--healthcare-blue);
+  box-shadow: 0 4px 12px rgba(0, 94, 184, 0.15);
 }
 
 /* Mobile Responsiveness for Accordions */
@@ -1474,18 +1474,18 @@ footer {
   color: var(--healthcare-text-light);
 }
 
-/* Allergies Section - HSE Red (Alert/Warning) */
+/* Allergies Section - HSE Blue (Consistent with other clinical sections) */
 .clinical-accordion-item:has(button[aria-controls*="Allergies"])
   .accordion-button:not(.collapsed),
 .clinical-accordion-item
   button[aria-controls*="collapseAllergies"]:not(.collapsed) {
   background: linear-gradient(
     135deg,
-    var(--healthcare-red) 0%,
-    #a71e22 100%
+    var(--healthcare-blue) 0%,
+    var(--healthcare-dark-blue) 100%
   ) !important;
   color: var(--healthcare-text-light);
-  box-shadow: 0 3px 8px rgba(197, 40, 47, 0.25);
+  box-shadow: 0 3px 8px rgba(0, 94, 184, 0.25);
 }
 
 .clinical-accordion-item:has(button[aria-controls*="Allergies"])
@@ -1493,8 +1493,8 @@ footer {
 .clinical-accordion-item button[aria-controls*="collapseAllergies"].collapsed {
   background: linear-gradient(
     135deg,
-    #e74c3c 0%,
-    var(--healthcare-red) 100%
+    #4a90e2 0%,
+    var(--healthcare-blue) 100%
   ) !important;
   color: var(--healthcare-text-light);
 }
