@@ -100,6 +100,8 @@
 <script>
 // Extended Patient Tab Management Function
 function showExtendedTab(sectionId, tabType) {
+    console.log('🎯 Switching Extended Patient tab:', sectionId, tabType);
+    
     // Hide all tab contents for the extended patient section
     const personalTab = document.getElementById(sectionId + '_personal');
     const healthcareTab = document.getElementById(sectionId + '_healthcare');
@@ -111,41 +113,66 @@ function showExtendedTab(sectionId, tabType) {
         (systemTab ? systemTab.closest('.clinical-section') : null));
 
     if (!extendedContainer) {
-        console.log('Extended patient container not found for:', sectionId);
+        console.error('❌ Extended patient container not found for:', sectionId);
         return;
     }
 
     const buttons = extendedContainer.querySelectorAll('.tab-button');
+    const allTabs = [personalTab, healthcareTab, systemTab].filter(tab => tab !== null);
 
-    // Remove active class from all tabs and buttons in this section
-    if (personalTab) personalTab.classList.remove('active');
-    if (healthcareTab) healthcareTab.classList.remove('active');
-    if (systemTab) systemTab.classList.remove('active');
+    // Remove active class and hide all tabs
+    allTabs.forEach(tab => {
+        if (tab) {
+            tab.classList.remove('active');
+            tab.style.display = 'none';
+        }
+    });
+    
+    // Remove active class from all buttons
     buttons.forEach(btn => btn.classList.remove('active'));
 
     // Show selected tab and activate corresponding button
-    if (tabType === 'personal') {
-        if (personalTab) {
-            personalTab.classList.add('active');
-            personalTab.style.display = 'block';
-        }
-        if (buttons[0]) buttons[0].classList.add('active');
-    } else if (tabType === 'healthcare') {
-        if (healthcareTab) {
-            healthcareTab.classList.add('active');
-            healthcareTab.style.display = 'block';
-        }
-        if (buttons[1]) buttons[1].classList.add('active');
-    } else if (tabType === 'system') {
-        if (systemTab) {
-            systemTab.classList.add('active');
-            systemTab.style.display = 'block';
-        }
-        if (buttons[2]) buttons[2].classList.add('active');
+    let activeTab = null;
+    let activeButtonIndex = -1;
+    
+    if (tabType === 'personal' && personalTab) {
+        activeTab = personalTab;
+        activeButtonIndex = 0;
+    } else if (tabType === 'healthcare' && healthcareTab) {
+        activeTab = healthcareTab;
+        activeButtonIndex = 1;
+    } else if (tabType === 'system' && systemTab) {
+        activeTab = systemTab;
+        activeButtonIndex = 2;
     }
 
-    console.log('Extended patient tab switched:', sectionId, tabType);
+    if (activeTab) {
+        activeTab.classList.add('active');
+        activeTab.style.display = 'block';
+        console.log('✅ Activated tab:', activeTab.id);
+    }
+
+    if (activeButtonIndex >= 0 && buttons[activeButtonIndex]) {
+        buttons[activeButtonIndex].classList.add('active');
+        console.log('✅ Activated button:', activeButtonIndex);
+    }
+
+    console.log('✅ Extended patient tab switch completed:', sectionId, tabType);
 }
+
+// Initialize Extended Patient Tabs on load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 Initializing Extended Patient tabs...');
+    
+    // Ensure the first tab is properly displayed
+    setTimeout(() => {
+        const firstPersonalTab = document.getElementById('extended_patient_personal');
+        if (firstPersonalTab && !firstPersonalTab.classList.contains('active')) {
+            console.log('🔧 Auto-activating first tab...');
+            showExtendedTab('extended_patient', 'personal');
+        }
+    }, 100);
+});
 </script>
 
 {% else %}
