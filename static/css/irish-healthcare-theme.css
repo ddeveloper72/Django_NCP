@@ -464,45 +464,201 @@ body {
   padding: 0.25rem 0.5rem;
 }
 
-/* Integrated Patient Header Tabs */
+/* Integrated Patient Header Tabs - Enhanced 3D Effects */
 .card .nav-tabs-healthcare {
   border-bottom: 1px solid #dee2e6;
   margin-bottom: 0;
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: 0;
-  padding: 0 1rem;
+  padding: 0.5rem 1rem;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .card .nav-tabs-healthcare .nav-link {
   color: var(--healthcare-navy);
-  background-color: transparent;
-  border: none;
-  border-radius: 0.5rem 0.5rem 0 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 0.75rem 0.75rem 0 0;
   padding: 1rem 1.5rem;
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: -1px;
   margin-right: 0.5rem;
-  border: 1px solid transparent;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
 }
 
 .card .nav-tabs-healthcare .nav-link:hover {
-  color: var(--healthcare-blue);
-  background-color: rgba(0, 120, 212, 0.1);
+  color: var(--healthcare-dark-blue);
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    var(--healthcare-light-blue) 100%
+  );
   border-color: var(--healthcare-blue) var(--healthcare-blue) #dee2e6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 94, 184, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
 }
 
 .card .nav-tabs-healthcare .nav-link.active {
-  color: var(--healthcare-blue);
-  background-color: white;
-  border-color: var(--healthcare-blue) var(--healthcare-blue) white;
-  font-weight: 600;
+  color: var(--healthcare-text-light);
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-blue) 0%,
+    var(--healthcare-dark-blue) 100%
+  );
+  border-color: var(--healthcare-blue) var(--healthcare-blue)
+    var(--healthcare-blue);
+  font-weight: 700;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 94, 184, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  position: relative;
 }
 
 .card .nav-tabs-healthcare .nav-link.active:hover {
-  color: var(--healthcare-blue);
-  background-color: white;
-  border-color: var(--healthcare-blue) var(--healthcare-blue) white;
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-dark-blue) 0%,
+    var(--healthcare-blue) 100%
+  );
+  border-color: var(--healthcare-dark-blue) var(--healthcare-dark-blue)
+    var(--healthcare-dark-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 94, 184, 0.5), 0 3px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Enhanced Badge Styling in Tabs */
+.card .nav-tabs-healthcare .nav-link .badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.card .nav-tabs-healthcare .nav-link.active .badge {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: var(--healthcare-blue) !important;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Tab Icons Enhancement */
+.card .nav-tabs-healthcare .nav-link i {
+  margin-right: 0.5rem;
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.card .nav-tabs-healthcare .nav-link:hover i,
+.card .nav-tabs-healthcare .nav-link.active i {
+  transform: scale(1.1);
+}
+
+/* Extended Patient Information Custom Tab Buttons - Enhanced 3D Design */
+.tab-navigation {
+  display: flex;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  gap: 0.25rem;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tab-button {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+  border: 1px solid #dee2e6 !important;
+  padding: 1rem 1.5rem !important;
+  cursor: pointer;
+  font-weight: 600 !important;
+  color: var(--healthcare-navy) !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+  margin-right: 0 !important;
+}
+
+.tab-button:hover {
+  color: var(--healthcare-dark-blue) !important;
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    var(--healthcare-light-blue) 100%
+  ) !important;
+  border-color: var(--healthcare-blue) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0, 94, 184, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6) !important;
+}
+
+.tab-button.active {
+  color: var(--healthcare-text-light) !important;
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-blue) 0%,
+    var(--healthcare-dark-blue) 100%
+  ) !important;
+  border-color: var(--healthcare-blue) !important;
+  font-weight: 700 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 94, 184, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  z-index: 10;
+}
+
+.tab-button.active:hover {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-dark-blue) 0%,
+    var(--healthcare-blue) 100%
+  ) !important;
+  border-color: var(--healthcare-dark-blue) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 94, 184, 0.5), 0 3px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Enhanced Badge Styling in Extended Patient Tabs */
+.tab-button .badge {
+  margin-left: 0.5rem !important;
+  font-size: 0.7rem !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.tab-button.active .badge {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: var(--healthcare-blue) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Tab Button Icons Enhancement */
+.tab-button i {
+  margin-right: 0.5rem !important;
+  font-size: 1rem !important;
+  transition: transform 0.3s ease !important;
+}
+
+.tab-button:hover i,
+.tab-button.active i {
+  transform: scale(1.1) !important;
 }
 
 /* Tab Content Styling */
@@ -704,6 +860,39 @@ h6 {
   margin-bottom: 2rem;
 }
 
+/* Enhanced Patient Banner Header - Better Text Contrast */
+.card-header.bg-primary {
+  background: linear-gradient(
+    135deg,
+    var(--healthcare-blue) 0%,
+    var(--healthcare-dark-blue) 100%
+  ) !important;
+  border-bottom: 3px solid var(--healthcare-light-blue);
+  box-shadow: 0 2px 8px rgba(0, 94, 184, 0.3);
+}
+
+.card-header.bg-primary h2 {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  font-size: 1.75rem;
+  letter-spacing: 0.5px;
+}
+
+.card-header.bg-primary h2 i {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  margin-right: 0.75rem;
+}
+
+.card-header.bg-primary .badge {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
 .patient-card {
   border-left: 4px solid var(--healthcare-blue);
 }
@@ -711,6 +900,34 @@ h6 {
 .patient-card .card-header {
   background-color: var(--healthcare-light-blue);
   color: var(--healthcare-navy);
+}
+
+/* Enhanced Card Background with Subtle Tint */
+.card.shadow {
+  background: linear-gradient(135deg, #ffffff 0%, #fdfdfd 50%, #f9f9f9 100%);
+  border: 1px solid rgba(0, 94, 184, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 94, 184, 0.05);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* Page Background Enhancement */
+body {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f4 100%);
+  min-height: 100vh;
+}
+
+/* Container Enhancement for Better Card Contrast */
+.container,
+.container-fluid {
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  border-radius: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 /* Healthcare Footer Styling */
