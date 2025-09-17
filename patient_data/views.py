@@ -9049,7 +9049,7 @@ def view_embedded_pdf(request, patient_id, pdf_index):
     """View an embedded PDF from a CDA document"""
     try:
         from .services.patient_search_service import PatientMatch
-        
+
         # Get patient match data from session
         session_key = f"patient_match_{patient_id}"
         match_data = request.session.get(session_key)
@@ -9125,7 +9125,7 @@ def download_embedded_pdf(request, patient_id, pdf_index):
     """Download an embedded PDF from a CDA document"""
     try:
         from .services.patient_search_service import PatientMatch
-        
+
         # Get patient match data from session
         session_key = f"patient_match_{patient_id}"
         match_data = request.session.get(session_key)
