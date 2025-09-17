@@ -194,6 +194,20 @@ separately to maintain clinical context and relationship clarity.
                         </div>
                     </div>
                     {% endif %}
+                    {% if administrative_data.guardian.specialty %}
+                    <div class="admin-info-row">
+                        <div class="admin-label">
+                            {% if "From:" in administrative_data.guardian.specialty or "To:" in administrative_data.guardian.specialty %}
+                            <i class="fas fa-calendar-alt"></i> {{ ui_labels.fields.effective_period|default:"Effective Period" }}:
+                            {% else %}
+                            <i class="fas fa-stethoscope"></i> {{ ui_labels.fields.specialty|default:"Specialty" }}:
+                            {% endif %}
+                        </div>
+                        <div class="admin-value">
+                            {{ administrative_data.guardian.specialty }}
+                        </div>
+                    </div>
+                    {% endif %}
                     {% if administrative_data.guardian.contact_info %}
                         <!-- Guardian Address -->
                         {% if administrative_data.guardian.contact_info.addresses %}
@@ -291,7 +305,11 @@ separately to maintain clinical context and relationship clarity.
                     {% if contact.specialty %}
                     <div class="admin-info-row">
                         <div class="admin-label">
-                            <i class="fas fa-stethoscope"></i> Specialty:
+                            {% if "From:" in contact.specialty or "To:" in contact.specialty %}
+                            <i class="fas fa-calendar-alt"></i> {{ ui_labels.fields.effective_period|default:"Effective Period" }}:
+                            {% else %}
+                            <i class="fas fa-stethoscope"></i> {{ ui_labels.fields.specialty|default:"Specialty" }}:
+                            {% endif %}
                         </div>
                         <div class="admin-value">
                             {{ contact.specialty }}
