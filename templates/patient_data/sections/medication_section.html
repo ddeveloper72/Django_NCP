@@ -36,18 +36,21 @@
 
             <!-- Structured View Tab Content -->
             <div id="medications_{{ section_index }}_structured" class="clinical-tab-content active">
-                <div class="clinical-table">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-primary">
-                            <tr>
-                                {% for header in section.clinical_table.headers %}
-                                <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
-                                    {{ header.label }}
-                                    {% if header.type == 'medication' %}
-                                    <i class="fas fa-pills ms-1 terminology-indicator" title="Medication"></i>
-                                    {% elif header.type == 'dosage' %}
-                                    <i class="fas fa-balance-scale ms-1 terminology-indicator" title="Dosage"></i>
-                                    {% elif header.type == 'frequency' %}
+                <!-- Mobile-Responsive Table Container -->
+                <div class="table-responsive-wrapper">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover clinical-table">
+                            <thead class="table-primary">
+                                <tr>
+                                    {% for header in section.clinical_table.headers %}
+                                    <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
+                                        <div class="th-content">
+                                            <span class="th-label">{{ header.label }}</span>
+                                            {% if header.type == 'medication' %}
+                                            <i class="fas fa-pills ms-1 terminology-indicator" title="Medication"></i>
+                                            {% elif header.type == 'dosage' %}
+                                            <i class="fas fa-balance-scale ms-1 terminology-indicator" title="Dosage"></i>
+                                            {% elif header.type == 'frequency' %}
                                     <i class="fas fa-clock ms-1 terminology-indicator" title="Frequency"></i>
                                     {% elif header.type == 'route' %}
                                     <i class="fas fa-syringe ms-1 terminology-indicator"
@@ -104,7 +107,8 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                </div>
+                    </div>
+                </div> <!-- End table-responsive-wrapper -->
 
                 <!-- Medication Table Summary -->
                 <div class="card-footer bg-light border-primary">

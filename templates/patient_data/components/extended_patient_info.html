@@ -110,21 +110,8 @@
 
     <!-- Clinical Information Tab Content -->
     <div class="clinical-tab-content" id="extended_patient_clinical">
-        <div class="row g-3">
-            <!-- Clinical Data Card -->
-            <div class="col-12">
-                <div class="card border-warning">
-                    <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0">
-                            <i class="fas fa-notes-medical me-2"></i>Clinical Information
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        {% include 'patient_data/components/clinical_information_content.html' %}
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Direct Clinical Content - No Wrapper Card -->
+        {% include 'patient_data/components/clinical_information_content.html' %}
     </div>
 </div> <!-- End Clinical Section -->
 
