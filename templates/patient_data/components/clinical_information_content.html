@@ -191,8 +191,8 @@
                     <!-- Mobile-Responsive Table Container -->
                     <div class="table-responsive-wrapper">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover clinical-table table-danger">
-                                <thead class="table-danger">
+                            <table class="table table-striped table-hover clinical-table">
+                                <thead class="table-primary">
                                     <tr>
                                         <th scope="col" class="primary-field">
                                             <div class="th-content">
@@ -231,7 +231,7 @@
                                     <tr>
                                         <td>
                                             <div class="primary-field">
-                                                <strong class="text-danger">
+                                                <strong class="text-primary">
                                                     {% if allergy.agent_display %}
                                                         {{ allergy.agent_display }}
                                                     {% elif allergy.agent_code %}
@@ -242,7 +242,7 @@
                                                 </strong>
                                                 {% if allergy.agent_code and allergy.agent_display %}
                                                 <div class="medical-codes-container mt-1">
-                                                    <span class="badge bg-danger me-1" title="Allergy Code: {{ allergy.agent_code }}">
+                                                    <span class="badge bg-primary me-1" title="Allergy Code: {{ allergy.agent_code }}">
                                                         {{ allergy.agent_code }}
                                                     </span>
                                                 </div>
@@ -261,7 +261,7 @@
                                         <td>
                                             <div class="cell-content">
                                                 {% if allergy.severity %}
-                                                    <span class="badge 
+                                                    <span class="badge
                                                         {% if allergy.severity|lower == 'severe' or allergy.severity|lower == 'high' %}bg-danger
                                                         {% elif allergy.severity|lower == 'moderate' or allergy.severity|lower == 'medium' %}bg-warning
                                                         {% elif allergy.severity|lower == 'mild' or allergy.severity|lower == 'low' %}bg-success
@@ -276,7 +276,7 @@
                                         <td>
                                             <div class="cell-content">
                                                 {% if allergy.status %}
-                                                    <span class="badge 
+                                                    <span class="badge
                                                         {% if allergy.status|lower == 'active' %}bg-danger
                                                         {% elif allergy.status|lower == 'inactive' %}bg-secondary
                                                         {% elif allergy.status|lower == 'resolved' %}bg-success
@@ -305,11 +305,11 @@
                     </div> <!-- End table-responsive-wrapper -->
 
                     <!-- Allergy Table Summary -->
-                    <div class="card-footer bg-light border-danger">
+                    <div class="card-footer bg-light border-primary">
                         <div class="row text-center">
                             <div class="col-md-4">
                                 <small class="text-muted">
-                                    <i class="fas fa-exclamation-triangle me-1 text-danger"></i>
+                                    <i class="fas fa-exclamation-triangle me-1 text-warning"></i>
                                     <strong>{{ allergies|length }}</strong> known allergies
                                 </small>
                             </div>
