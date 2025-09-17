@@ -1,5 +1,7 @@
-{% extends "base.html" %}
-{% load patient_date_filters %}
+{% extends 'base.html' %}
+{% load static %}
+{% load patient_filters %}
+{% load tooltip_tags %}
 
 {# Django replacement for Jinja2 macro - use |document_date filter instead #}
 {# format_medical_date functionality moved to patient_date_filters.py #}
@@ -503,7 +505,7 @@ main {
         <div class="card shadow">
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">
+                    <h2 class="mb-0" {% tooltip "patient_name_header" %}>
                         <i class="fas fa-user-injured me-2"></i>
                         {# Django: Fix Jinja2 syntax - no ~ concatenation or |default() with args #}
                         {% if patient_identity.full_name %}
@@ -516,15 +518,11 @@ main {
                     </h2>
                     <div class="d-flex align-items-center">
                         <span class="badge {% if source_country == 'IE' %}bg-success{% elif source_country == 'MT' %}bg-primary{% elif source_country == 'PT' %}bg-info{% elif source_country == 'LU' %}bg-warning{% elif source_country == 'UNKNOWN' or source_country == 'ERROR' %}bg-danger{% else %}bg-secondary{% endif %} text-white me-2" 
-                              data-bs-toggle="tooltip" 
-                              data-bs-placement="bottom" 
-                              title="Source Country: {{ source_country }} - The country where this Clinical Document Architecture (CDA) was originally created. Detected from document language code, custodian organization, or patient address.">
+                              {% tooltip "source_country_flag" %}>
                             <i class="fas fa-flag me-1"></i>{{ source_country }}
                         </span>
                         <span class="badge {% if 'High' in translation_quality %}bg-success{% elif 'Medium' in translation_quality %}bg-warning{% else %}bg-secondary{% endif %}"
-                              data-bs-toggle="tooltip" 
-                              data-bs-placement="bottom" 
-                              title="Translation Quality: {{ translation_quality }} - Indicates the level of structured data extraction success. 'High' means enhanced JSON field mapping is active and structured medical data was successfully extracted from the CDA document.">
+                              {% tooltip "translation_quality" %}>
                             <i class="fas fa-check-circle me-1"></i>{{ translation_quality }}
                         </span>
                     </div>
@@ -580,9 +578,7 @@ main {
                                     <p><strong>CDA Type:</strong> {{ cda_type }}</p>
                                     <p><strong>Translation Quality:</strong>
                                         <span class="badge {% if 'High' in translation_quality %}bg-success{% elif 'Medium' in translation_quality %}bg-warning{% else %}bg-secondary{% endif %}"
-                                              data-bs-toggle="tooltip" 
-                                              data-bs-placement="top" 
-                                              title="Translation Quality: {{ translation_quality }} - Indicates the level of structured data extraction success. 'High' means enhanced JSON field mapping is active and structured medical data was successfully extracted from the CDA document.">
+                                              {% tooltip "translation_quality" "top" %}>
                                             {{ translation_quality }}
                                         </span>
                                     </p>

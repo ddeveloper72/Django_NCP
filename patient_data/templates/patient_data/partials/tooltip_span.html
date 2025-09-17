@@ -1,0 +1,8 @@
+{% comment %}
+Tooltip Span Partial Template
+Renders a span element with optional tooltip
+{% endcomment %}
+
+<span class="{{ css_class }}"{% if has_tooltip %} data-bs-toggle="tooltip" data-bs-placement="{{ placement }}" title="{{ tooltip_content }}"{% endif %}>
+    {{ text }}
+</span>

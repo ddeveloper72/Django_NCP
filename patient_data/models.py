@@ -780,3 +780,126 @@ class SessionAuditLog(models.Model):
         status = "SUCCESS" if self.success else "FAILED"
         session_id = self.session.session_id[:8] if self.session else "NO-SESSION"
         return f"[{status}] {self.action} - {session_id}... ({self.timestamp})"
+
+
+class Tooltip(models.Model):
+    """
+    Centralized tooltip management for the healthcare interface
+    Allows dynamic management of tooltips through Django admin
+    """
+    
+    CATEGORY_CHOICES = [
+        ('patient_header', 'Patient Header'),
+        ('indicators', 'Status Indicators'),
+        ('navigation', 'Navigation Elements'),
+        ('clinical_data', 'Clinical Data'),
+        ('administrative', 'Administrative Data'),
+        ('translation', 'Translation Features'),
+        ('general', 'General Interface'),
+    ]
+    
+    AUDIENCE_CHOICES = [
+        ('technical', 'Technical Users'),
+        ('medical', 'Medical Professionals'),
+        ('general', 'General Users'),
+        ('admin', 'Administrators'),
+    ]
+    
+    key = models.CharField(
+        max_length=100,
+        unique=True,
+        help_text="Unique identifier for the tooltip (e.g., 'source_country_flag', 'translation_quality')"
+    )
+    
+    title = models.CharField(
+        max_length=200,
+        help_text="Short descriptive title for the tooltip"
+    )
+    
+    content = models.TextField(
+        help_text="The tooltip text content that will be displayed to users"
+    )
+    
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        default='general',
+        help_text="Category for organizing tooltips"
+    )
+    
+    target_audience = models.CharField(
+        max_length=20,
+        choices=AUDIENCE_CHOICES,
+        default='general',
+        help_text="Intended audience for this tooltip"
+    )
+    
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Whether this tooltip is currently active and should be displayed"
+    )
+    
+    placement = models.CharField(
+        max_length=20,
+        choices=[
+            ('top', 'Top'),
+            ('bottom', 'Bottom'),
+            ('left', 'Left'),
+            ('right', 'Right'),
+            ('auto', 'Auto'),
+        ],
+        default='bottom',
+        help_text="Bootstrap tooltip placement"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="User who created this tooltip"
+    )
+    
+    class Meta:
+        verbose_name = "Tooltip"
+        verbose_name_plural = "Tooltips"
+        ordering = ['category', 'key']
+        indexes = [
+            models.Index(fields=['key']),
+            models.Index(fields=['category', 'is_active']),
+            models.Index(fields=['target_audience', 'is_active']),
+        ]
+    
+    def __str__(self):
+        status = "✓" if self.is_active else "✗"
+        return f"[{status}] {self.title} ({self.key})"
+    
+    @classmethod
+    def get_tooltip(cls, key, default=""):
+        """
+        Retrieve tooltip content by key
+        Returns the tooltip content or default if not found/inactive
+        """
+        try:
+            tooltip = cls.objects.get(key=key, is_active=True)
+            return tooltip.content
+        except cls.DoesNotExist:
+            return default
+    
+    @classmethod
+    def get_tooltip_data(cls, key):
+        """
+        Retrieve complete tooltip data (content + placement) by key
+        Returns dict with content and placement or None if not found
+        """
+        try:
+            tooltip = cls.objects.get(key=key, is_active=True)
+            return {
+                'content': tooltip.content,
+                'placement': tooltip.placement,
+                'title': tooltip.title
+            }
+        except cls.DoesNotExist:
+            return None
