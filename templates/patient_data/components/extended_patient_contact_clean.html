@@ -276,7 +276,6 @@ separately to maintain clinical context and relationship clarity.
                     <strong>{{ ui_labels.sections.other_contacts|default:"Other Contacts" }}</strong>
                 </div>
                 <div class="admin-card-content">
-                    <!-- DEBUG: Contact fields for {{ contact.given_name }} {{ contact.family_name }}: role="{{ contact.role|default:'None' }}", relationship="{{ contact.relationship|default:'None' }}", contact_type="{{ contact.contact_type|default:'None' }}", specialty="{{ contact.specialty|default:'None' }}" -->
                     <div class="admin-info-row">
                         <div class="admin-label">
                             <i class="fas fa-user"></i> {{ ui_labels.fields.contact_name|default:"Contact Name" }}:
@@ -312,7 +311,6 @@ separately to maintain clinical context and relationship clarity.
                     </div>
                     {% endif %}
                     {% if contact.specialty %}
-                    <!-- DEBUG: specialty field = "{{ contact.specialty }}" -->
                     <div class="admin-info-row">
                         <div class="admin-label">
                             {% if "From:" in contact.specialty or "To:" in contact.specialty %}
@@ -325,8 +323,6 @@ separately to maintain clinical context and relationship clarity.
                             {{ contact.specialty }}
                         </div>
                     </div>
-                    {% else %}
-                    <!-- DEBUG: No specialty field found for {{ contact.given_name }} {{ contact.family_name }} -->
                     {% endif %}
 
                     {% if contact.contact_info %}
