@@ -169,7 +169,11 @@ separately to maintain clinical context and relationship clarity.
                                     {{ administrative_data.guardian.family_name }}
                                 {% endif %}
                             </strong>
-                            {% if administrative_data.guardian.role %}
+                            {% if administrative_data.guardian.relationship %}
+                            <span class="role-badge ms-2">{{ administrative_data.guardian.relationship }}</span>
+                            {% elif administrative_data.guardian.contact_type %}
+                            <span class="role-badge ms-2">{{ administrative_data.guardian.contact_type }}</span>
+                            {% elif administrative_data.guardian.role %}
                             <span class="role-badge ms-2">{{ administrative_data.guardian.role }}</span>
                             {% endif %}
                         </div>
@@ -272,13 +276,18 @@ separately to maintain clinical context and relationship clarity.
                     <strong>{{ ui_labels.sections.other_contacts|default:"Other Contacts" }}</strong>
                 </div>
                 <div class="admin-card-content">
+                    <!-- DEBUG: Contact fields for {{ contact.given_name }} {{ contact.family_name }}: role="{{ contact.role|default:'None' }}", relationship="{{ contact.relationship|default:'None' }}", contact_type="{{ contact.contact_type|default:'None' }}", specialty="{{ contact.specialty|default:'None' }}" -->
                     <div class="admin-info-row">
                         <div class="admin-label">
                             <i class="fas fa-user"></i> {{ ui_labels.fields.contact_name|default:"Contact Name" }}:
                         </div>
                         <div class="admin-value">
                             <strong>{{ contact.given_name }} {{ contact.family_name }}</strong>
-                            {% if contact.role %}
+                            {% if contact.relationship %}
+                            <span class="role-badge ms-2">{{ contact.relationship }}</span>
+                            {% elif contact.contact_type %}
+                            <span class="role-badge ms-2">{{ contact.contact_type }}</span>
+                            {% elif contact.role %}
                             <span class="role-badge ms-2">{{ contact.role }}</span>
                             {% endif %}
                         </div>
@@ -303,6 +312,7 @@ separately to maintain clinical context and relationship clarity.
                     </div>
                     {% endif %}
                     {% if contact.specialty %}
+                    <!-- DEBUG: specialty field = "{{ contact.specialty }}" -->
                     <div class="admin-info-row">
                         <div class="admin-label">
                             {% if "From:" in contact.specialty or "To:" in contact.specialty %}
@@ -315,6 +325,8 @@ separately to maintain clinical context and relationship clarity.
                             {{ contact.specialty }}
                         </div>
                     </div>
+                    {% else %}
+                    <!-- DEBUG: No specialty field found for {{ contact.given_name }} {{ contact.family_name }} -->
                     {% endif %}
 
                     {% if contact.contact_info %}
