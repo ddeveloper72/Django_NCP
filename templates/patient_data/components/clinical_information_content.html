@@ -42,9 +42,6 @@
                     {% if section.code %}
                     <span class="badge bg-primary ms-2">{{ section.code }}</span>
                     {% endif %}
-                    {% if section.entries and "allerg" not in section.title|lower %}
-                    <span class="badge bg-secondary ms-2">{{ section.entries|length }} entries</span>
-                    {% endif %}
                 </button>
             </h2>
             <div id="collapse-{{ section.code|default:forloop.counter }}"
@@ -68,7 +65,6 @@
                         aria-controls="collapseOtherClinical">
                     <i class="fas fa-file-medical me-2 text-dark"></i>
                     <strong>Other Clinical Information</strong>
-                    <span class="badge bg-dark ms-2">{{ clinical_sections|length }} section(s)</span>
                 </button>
             </h2>
             <div id="collapseOtherClinical"
