@@ -515,10 +515,16 @@ main {
                         {% endif %}
                     </h2>
                     <div class="d-flex align-items-center">
-                        <span class="badge bg-info text-white me-2">
+                        <span class="badge {% if source_country == 'IE' %}bg-success{% elif source_country == 'MT' %}bg-primary{% elif source_country == 'PT' %}bg-info{% elif source_country == 'LU' %}bg-warning{% elif source_country == 'UNKNOWN' or source_country == 'ERROR' %}bg-danger{% else %}bg-secondary{% endif %} text-white me-2" 
+                              data-bs-toggle="tooltip" 
+                              data-bs-placement="bottom" 
+                              title="Source Country: {{ source_country }} - The country where this Clinical Document Architecture (CDA) was originally created. Detected from document language code, custodian organization, or patient address.">
                             <i class="fas fa-flag me-1"></i>{{ source_country }}
                         </span>
-                        <span class="badge bg-success">
+                        <span class="badge {% if 'High' in translation_quality %}bg-success{% elif 'Medium' in translation_quality %}bg-warning{% else %}bg-secondary{% endif %}"
+                              data-bs-toggle="tooltip" 
+                              data-bs-placement="bottom" 
+                              title="Translation Quality: {{ translation_quality }} - Indicates the level of structured data extraction success. 'High' means enhanced JSON field mapping is active and structured medical data was successfully extracted from the CDA document.">
                             <i class="fas fa-check-circle me-1"></i>{{ translation_quality }}
                         </span>
                     </div>
@@ -573,7 +579,12 @@ main {
                                     <p><strong>Source Country:</strong> {{ source_country }}</p>
                                     <p><strong>CDA Type:</strong> {{ cda_type }}</p>
                                     <p><strong>Translation Quality:</strong>
-                                        <span class="badge bg-success">{{ translation_quality }}</span>
+                                        <span class="badge {% if 'High' in translation_quality %}bg-success{% elif 'Medium' in translation_quality %}bg-warning{% else %}bg-secondary{% endif %}"
+                                              data-bs-toggle="tooltip" 
+                                              data-bs-placement="top" 
+                                              title="Translation Quality: {{ translation_quality }} - Indicates the level of structured data extraction success. 'High' means enhanced JSON field mapping is active and structured medical data was successfully extracted from the CDA document.">
+                                            {{ translation_quality }}
+                                        </span>
                                     </p>
                                     {% if patient_identity.document_metadata %}
                                     {# Django: Use direct access instead of {% set %} #}
@@ -713,5 +724,13 @@ main {
         }
         return dateStr;
     }
+
+    // Initialize Bootstrap tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
 </script>
 {% endblock %}
