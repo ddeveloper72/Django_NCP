@@ -964,6 +964,30 @@ body {
   text-decoration: underline;
 }
 
+/* Footer Dark Background Enhancement */
+footer.bg-dark {
+  background-color: var(--healthcare-navy) !important;
+  color: var(--healthcare-white) !important;
+}
+
+footer.bg-dark .text-light {
+  color: var(--healthcare-white) !important;
+}
+
+footer.bg-dark .text-primary {
+  color: var(--healthcare-light-blue) !important;
+}
+
+footer.bg-dark a {
+  color: var(--healthcare-light-blue) !important;
+  text-decoration: none;
+}
+
+footer.bg-dark a:hover {
+  color: var(--healthcare-white) !important;
+  text-decoration: underline;
+}
+
 /* Healthcare Responsive Design */
 @media (max-width: 768px) {
   .navbar-brand {
