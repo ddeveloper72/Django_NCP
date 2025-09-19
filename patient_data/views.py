@@ -2282,7 +2282,9 @@ def direct_patient_view(request, patient_id):
             given_name: str = ""
             family_name: str = ""
             birth_date: str = ""
+            gender: str = ""
             country_code: str = ""
+            patient_id: str = ""
 
         indexer = get_cda_indexer()
         all_patients = indexer.get_all_patients()
@@ -2303,7 +2305,9 @@ def direct_patient_view(request, patient_id):
             given_name=target_patient["given_name"],
             family_name=target_patient["family_name"],
             birth_date=target_patient.get("birth_date", ""),
+            gender=target_patient.get("gender", ""),
             country_code=target_patient["country_code"],
+            patient_id=target_patient["patient_id"],
         )
 
         # Perform the search
