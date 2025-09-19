@@ -1277,14 +1277,30 @@ h6.bg-secondary {
 /* FontAwesome Icons - Enhanced Styling with Context-Aware Colors */
 
 /* Icons in dark backgrounds (headers with colored backgrounds) */
-.bg-primary i.fas, .bg-primary i.far, .bg-primary i.fab,
-.bg-secondary i.fas, .bg-secondary i.far, .bg-secondary i.fab,
-.bg-success i.fas, .bg-success i.far, .bg-success i.fab,
-.bg-info i.fas, .bg-info i.far, .bg-info i.fab,
-.bg-warning i.fas, .bg-warning i.far, .bg-warning i.fab,
-.bg-danger i.fas, .bg-danger i.far, .bg-danger i.fab,
-.bg-dark i.fas, .bg-dark i.far, .bg-dark i.fab,
-.card-header.bg-primary i.fas, .card-header.bg-primary i.far, .card-header.bg-primary i.fab,
+.bg-primary i.fas,
+.bg-primary i.far,
+.bg-primary i.fab,
+.bg-secondary i.fas,
+.bg-secondary i.far,
+.bg-secondary i.fab,
+.bg-success i.fas,
+.bg-success i.far,
+.bg-success i.fab,
+.bg-info i.fas,
+.bg-info i.far,
+.bg-info i.fab,
+.bg-warning i.fas,
+.bg-warning i.far,
+.bg-warning i.fab,
+.bg-danger i.fas,
+.bg-danger i.far,
+.bg-danger i.fab,
+.bg-dark i.fas,
+.bg-dark i.far,
+.bg-dark i.fab,
+.card-header.bg-primary i.fas,
+.card-header.bg-primary i.far,
+.card-header.bg-primary i.fab,
 .clinical-section-card .section-header i.fas,
 .clinical-section-card .section-header i.far,
 .clinical-section-card .section-header i.fab {
@@ -1296,42 +1312,105 @@ h6.bg-secondary {
 }
 
 /* Icons in light backgrounds (general usage) */
-.card-header i.fas:not(.bg-primary *):not(.bg-secondary *):not(.bg-success *):not(.bg-info *):not(.bg-warning *):not(.bg-danger *):not(.bg-dark *),
-.card-header i.far:not(.bg-primary *):not(.bg-secondary *):not(.bg-success *):not(.bg-info *):not(.bg-warning *):not(.bg-danger *):not(.bg-dark *),
-.card-header i.fab:not(.bg-primary *):not(.bg-secondary *):not(.bg-success *):not(.bg-info *):not(.bg-warning *):not(.bg-danger *):not(.bg-dark *),
-.card-body i.fas, .card-body i.far, .card-body i.fab,
-.breadcrumb i.fas, .breadcrumb i.far, .breadcrumb i.fab,
-.btn i.fas, .btn i.far, .btn i.fab,
-.alert i.fas, .alert i.far, .alert i.fab,
-h4 i.fas, h4 i.far, h4 i.fab,
-h5 i.fas, h5 i.far, h5 i.fab,
-h6 i.fas, h6 i.far, h6 i.fab,
-i.fas, i.far, i.fab {
+.card-header
+  i.fas:not(.bg-primary *):not(.bg-secondary *):not(.bg-success *):not(
+    .bg-info *
+  ):not(.bg-warning *):not(.bg-danger *):not(.bg-dark *),
+.card-header
+  i.far:not(.bg-primary *):not(.bg-secondary *):not(.bg-success *):not(
+    .bg-info *
+  ):not(.bg-warning *):not(.bg-danger *):not(.bg-dark *),
+.card-header
+  i.fab:not(.bg-primary *):not(.bg-secondary *):not(.bg-success *):not(
+    .bg-info *
+  ):not(.bg-warning *):not(.bg-danger *):not(.bg-dark *),
+.card-body i.fas,
+.card-body i.far,
+.card-body i.fab,
+.breadcrumb i.fas,
+.breadcrumb i.far,
+.breadcrumb i.fab,
+.btn i.fas,
+.btn i.far,
+.btn i.fab,
+.alert i.fas,
+.alert i.far,
+.alert i.fab,
+h4 i.fas,
+h4 i.far,
+h4 i.fab,
+h5 i.fas,
+h5 i.far,
+h5 i.fab,
+h6 i.fas,
+h6 i.far,
+h6 i.fab,
+i.fas,
+i.far,
+i.fab {
   color: var(--healthcare-blue) !important;
   margin-right: 0.5rem;
-  font-size: 1.0rem;
+  font-size: 1rem;
   transition: transform 0.3s ease, color 0.3s ease;
 }
 
 /* Color-specific icon styling */
-.text-info i.fas, .text-info i.far, .text-info i.fab,
-.card-title.text-info i.fas, .card-title.text-info i.far, .card-title.text-info i.fab {
+.text-info i.fas,
+.text-info i.far,
+.text-info i.fab,
+.card-title.text-info i.fas,
+.card-title.text-info i.far,
+.card-title.text-info i.fab {
   color: var(--healthcare-blue) !important;
 }
 
-.text-success i.fas, .text-success i.far, .text-success i.fab,
-.card-title.text-success i.fas, .card-title.text-success i.far, .card-title.text-success i.fab {
+.text-success i.fas,
+.text-success i.far,
+.text-success i.fab,
+.card-title.text-success i.fas,
+.card-title.text-success i.far,
+.card-title.text-success i.fab {
   color: var(--healthcare-green) !important;
 }
 
-.text-warning i.fas, .text-warning i.far, .text-warning i.fab,
-.card-title.text-warning i.fas, .card-title.text-warning i.far, .card-title.text-warning i.fab {
+.text-warning i.fas,
+.text-warning i.far,
+.text-warning i.fab,
+.card-title.text-warning i.fas,
+.card-title.text-warning i.far,
+.card-title.text-warning i.fab {
   color: var(--healthcare-orange) !important;
 }
 
-.text-danger i.fas, .text-danger i.far, .text-danger i.fab,
-.card-title.text-danger i.fas, .card-title.text-danger i.far, .card-title.text-danger i.fab {
+.text-danger i.fas,
+.text-danger i.far,
+.text-danger i.fab,
+.card-title.text-danger i.fas,
+.card-title.text-danger i.far,
+.card-title.text-danger i.fab {
   color: var(--healthcare-red) !important;
+}
+
+/* Specific styling for light background card headers */
+.bg-light i.fas,
+.bg-light i.far,
+.bg-light i.fab,
+.card-header.bg-light i.fas,
+.card-header.bg-light i.far,
+.card-header.bg-light i.fab {
+  color: var(--healthcare-blue) !important;
+  margin-right: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+/* Enhanced styling for country flag icons specifically */
+.card-header.bg-light .fas.fa-flag {
+  color: var(--healthcare-green) !important;
+  font-size: 1.2rem;
+  margin-right: 0.5rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Icon hover effects for interactive elements */
