@@ -1,0 +1,14 @@
+{
+  "templates": {},
+  "urls_tested": [
+    {
+      "url": "/",
+      "name": "home",
+      "status_code": 200,
+      "filename": "home_6666cd76.html",
+      "timestamp": "2025-09-10T16:44:09.830051",
+      "content_hash": "407829413b7eea7fd6a68df962affa76"
+    }
+  ],
+  "created_at": "2025-09-10T16:44:09.811679"
+}

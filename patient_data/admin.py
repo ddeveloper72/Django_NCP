@@ -22,6 +22,7 @@ from .models import (
     ClinicalSectionConfig,
     ColumnPreset,
     DataExtractionLog,
+    Tooltip,
 )
 
 # from . import test_data_views  # Temporarily disabled - needs fixing
@@ -530,3 +531,121 @@ patient_admin_site.register(PatientServiceRequest, PatientServiceRequestAdmin)
 
 # Enhance MemberState admin with services inline
 MemberStateAdmin.inlines = [AvailableServiceInline]
+
+
+@admin.register(Tooltip)
+class TooltipAdmin(admin.ModelAdmin):
+    """
+    Admin interface for managing tooltips
+    Provides easy editing and organization of tooltip content
+    """
+
+    list_display = [
+        "key",
+        "title",
+        "category",
+        "target_audience",
+        "is_active_display",
+        "placement",
+        "updated_at",
+    ]
+
+    list_filter = [
+        "category",
+        "target_audience",
+        "is_active",
+        "placement",
+        "created_at",
+    ]
+
+    search_fields = ["key", "title", "content"]
+
+    readonly_fields = ["created_at", "updated_at"]
+
+    fieldsets = (
+        (
+            "Tooltip Identification",
+            {"fields": ("key", "title", "category", "target_audience")},
+        ),
+        (
+            "Content",
+            {
+                "fields": ("content",),
+                "description": "The tooltip text that will be displayed to users",
+            },
+        ),
+        (
+            "Display Settings",
+            {
+                "fields": ("placement", "is_active"),
+                "description": "Control how and when the tooltip appears",
+            },
+        ),
+        (
+            "Metadata",
+            {
+                "fields": ("created_by", "created_at", "updated_at"),
+                "classes": ("collapse",),
+            },
+        ),
+    )
+
+    actions = ["make_active", "make_inactive", "duplicate_tooltip"]
+
+    def is_active_display(self, obj):
+        """Display active status with color coding"""
+        if obj.is_active:
+            return format_html(
+                '<span style="color: green; font-weight: bold;">✓ Active</span>'
+            )
+        else:
+            return format_html(
+                '<span style="color: red; font-weight: bold;">✗ Inactive</span>'
+            )
+
+    is_active_display.short_description = "Status"
+
+    def make_active(self, request, queryset):
+        """Bulk action to activate tooltips"""
+        count = queryset.update(is_active=True)
+        self.message_user(request, f"{count} tooltip(s) have been activated.")
+
+    make_active.short_description = "Activate selected tooltips"
+
+    def make_inactive(self, request, queryset):
+        """Bulk action to deactivate tooltips"""
+        count = queryset.update(is_active=False)
+        self.message_user(request, f"{count} tooltip(s) have been deactivated.")
+
+    make_inactive.short_description = "Deactivate selected tooltips"
+
+    def duplicate_tooltip(self, request, queryset):
+        """Bulk action to duplicate tooltips for different audiences"""
+        count = 0
+        for tooltip in queryset:
+            # Create a copy with modified key
+            new_key = f"{tooltip.key}_copy"
+            if not Tooltip.objects.filter(key=new_key).exists():
+                Tooltip.objects.create(
+                    key=new_key,
+                    title=f"{tooltip.title} (Copy)",
+                    content=tooltip.content,
+                    category=tooltip.category,
+                    target_audience=tooltip.target_audience,
+                    placement=tooltip.placement,
+                    is_active=False,  # Start inactive for review
+                    created_by=request.user,
+                )
+                count += 1
+
+        self.message_user(
+            request, f"{count} tooltip(s) have been duplicated for editing."
+        )
+
+    duplicate_tooltip.short_description = "Duplicate selected tooltips"
+
+    def save_model(self, request, obj, form, change):
+        """Auto-assign created_by when creating new tooltips"""
+        if not change:  # Only on creation
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)

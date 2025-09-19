@@ -1,0 +1,161 @@
+{% comment %}
+Patient Session Cleanup UI Components
+
+Include this template in patient data pages to provide manual cleanup options.
+Usage: {% include 'patient_session_cleanup_buttons.html' %}
+{% endcomment %}
+
+<div class="patient-session-controls mb-3">
+    <div class="card border-warning">
+        <div class="card-header bg-warning text-dark">
+            <h6 class="card-title mb-0">
+                <i class="fas fa-shield-alt"></i> Patient Data Security
+            </h6>
+        </div>
+        <div class="card-body">
+            <p class="small text-muted mb-3">
+                Patient session data is automatically cleared when you log out or close your browser.
+                You can also manually clear it at any time for additional security.
+            </p>
+
+            <div class="btn-group" role="group" aria-label="Session cleanup options">
+                <button type="button"
+                        class="btn btn-outline-warning btn-sm"
+                        data-action="clear-patient-session"
+                        title="Clear all patient data from your session">
+                    <i class="fas fa-eraser"></i> Clear Patient Data
+                </button>
+
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        data-action="emergency-session-cleanup"
+                        title="Emergency cleanup - clears ALL session data">
+                    <i class="fas fa-exclamation-triangle"></i> Emergency Cleanup
+                </button>
+            </div>
+
+            <div class="mt-2">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle"></i>
+                    Emergency cleanup will clear <strong>all</strong> session data and log you out.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Session Activity Monitor (optional) -->
+<div class="patient-session-monitor d-none" id="sessionMonitor">
+    <div class="alert alert-info alert-dismissible">
+        <i class="fas fa-clock"></i>
+        <span id="sessionActivityText">Patient session active</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+
+<!-- Success/Error Messages Container -->
+<div class="messages patient-cleanup-messages"></div>
+
+<style>
+.patient-session-controls {
+    position: sticky;
+    top: 20px;
+    z-index: 1000;
+}
+
+.patient-session-controls .card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.patient-session-controls .btn {
+    transition: all 0.2s ease;
+}
+
+.patient-session-controls .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.patient-cleanup-messages .alert {
+    margin-top: 10px;
+    animation: fadeInDown 0.3s ease;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<script>
+// Initialize cleanup functionality when this template is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Ensure the PatientSessionCleanup class is available
+    if (typeof PatientSessionCleanup === 'undefined') {
+        console.error('PatientSessionCleanup class not found. Please include patient_session_cleanup.js');
+        return;
+    }
+
+    // Session activity monitor
+    function updateSessionMonitor() {
+        const monitor = document.getElementById('sessionMonitor');
+        const activityText = document.getElementById('sessionActivityText');
+
+        if (monitor && activityText) {
+            const now = new Date();
+            activityText.textContent = `Patient session active - ${now.toLocaleTimeString()}`;
+            monitor.classList.remove('d-none');
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                monitor.classList.add('d-none');
+            }, 3000);
+        }
+    }
+
+    // Update monitor every 5 minutes for patient data pages
+    if (window.location.pathname.includes('/patients/') ||
+        window.location.pathname.includes('/cda/')) {
+        setInterval(updateSessionMonitor, 5 * 60 * 1000); // 5 minutes
+    }
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(event) {
+        // Ctrl+Shift+C for clear patient data
+        if (event.ctrlKey && event.shiftKey && event.key === 'C') {
+            event.preventDefault();
+            const clearBtn = document.querySelector('[data-action="clear-patient-session"]');
+            if (clearBtn) {
+                clearBtn.click();
+            }
+        }
+
+        // Ctrl+Shift+E for emergency cleanup
+        if (event.ctrlKey && event.shiftKey && event.key === 'E') {
+            event.preventDefault();
+            const emergencyBtn = document.querySelector('[data-action="emergency-session-cleanup"]');
+            if (emergencyBtn) {
+                emergencyBtn.click();
+            }
+        }
+    });
+});
+</script>
+
+{% comment %}
+Keyboard Shortcuts:
+- Ctrl+Shift+C: Clear patient data
+- Ctrl+Shift+E: Emergency cleanup
+
+To use this template:
+1. Include it in your patient data pages: {% include 'patient_session_cleanup_buttons.html' %}
+2. Make sure patient_session_cleanup.js is loaded in your base template
+3. Include Bootstrap 5 for styling (or adjust CSS as needed)
+4. Include Font Awesome for icons (or use different icons)
+{% endcomment %}

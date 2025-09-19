@@ -1,0 +1,142 @@
+<!-- Debug Modal Component -->
+<!-- Only visible in development mode -->
+<!-- Floating Debug Button -->
+<div class="debug-toggle-container">
+    <button type="button" class="btn btn-sm btn-outline-secondary debug-toggle-btn" data-bs-toggle="modal"
+        data-bs-target="#debugModal" title="Show Debug Information">
+        <i class="fas fa-bug me-1"></i>
+        <span class="d-none d-md-inline">Debug</span>
+        <span class="badge bg-danger ms-1">DEV</span>
+    </button>
+</div>
+
+<!-- Debug Information Modal -->
+<div class="modal fade debug-modal" id="debugModal" tabindex="-1" aria-labelledby="debugModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="debugModalLabel">
+                    <i class="fas fa-bug me-2"></i>Development Debug Information
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Administrative Data Debug -->
+                {% if administrative_data %}
+                <div class="alert alert-success mb-3">
+                    <h6><i class="fas fa-database me-2"></i>Administrative Data Available</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Data Keys:</strong>
+                                {% if administrative_data.keys %}
+                                    {% for key in administrative_data.keys %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
+                                {% else %}
+                                    {% for key, value in administrative_data.items %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
+                                {% endif %}
+                            </p>
+                            <p><strong>Type:</strong> {{ administrative_data|slugify|title }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            {% if administrative_data.authors %}
+                            <p><strong>Authors Count:</strong> {{ administrative_data.authors|length }}</p>
+                            {% endif %}
+                            {% if administrative_data.custodians %}
+                            <p><strong>Custodians Count:</strong> {{ administrative_data.custodians|length }}</p>
+                            {% endif %}
+                            {% if administrative_data.legal_authenticators %}
+                            <p><strong>Legal Authenticators Count:</strong> {{ administrative_data.legal_authenticators|length }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Patient Data Debug -->
+                {% if administrative_data and administrative_data.patient %}
+                <div class="alert alert-info mb-3">
+                    <h6><i class="fas fa-user me-2"></i>Patient Data Available</h6>
+                    <p><strong>Patient Keys:</strong>
+                        {% for key, value in administrative_data.patient.items %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
+                    </p>
+                    {% if administrative_data.patient.full_name %}
+                    <p><strong>Patient Name:</strong> {{ administrative_data.patient.full_name }}</p>
+                    {% endif %}
+                    {% if administrative_data.patient.patient_id %}
+                    <p><strong>Patient ID:</strong> {{ administrative_data.patient.patient_id }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Enhanced Header Data Debug -->
+                {% if extended_header_data %}
+                <div class="alert alert-primary mb-3">
+                    <h6><i class="fas fa-file-medical me-2"></i>Extended Header Data</h6>
+                    <p><strong>Data Keys:</strong>
+                        {% for key, value in extended_header_data.items %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
+                    </p>
+                    <p><strong>Type:</strong> {{ extended_header_data|slugify|title }}</p>
+                </div>
+                {% endif %}
+
+                <!-- CDA Processing Debug -->
+                <div class="alert alert-warning mb-3">
+                    <h6><i class="fas fa-cogs me-2"></i>Processing Information</h6>
+                    <p><strong>Mock Data Disabled:</strong> Yes (using real CDA processor data)</p>
+                    <p><strong>Template Engine:</strong> Jinja2</p>
+                    <p><strong>Environment:</strong> Development</p>
+                </div>
+
+                <!-- Template Context Debug -->
+                <div class="accordion" id="debugAccordion">
+                    <!-- Administrative Data Detail -->
+                    {% if administrative_data %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="adminDataHeading">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#adminDataCollapse" aria-expanded="false"
+                                aria-controls="adminDataCollapse">
+                                <i class="fas fa-database me-2"></i>Administrative Data Structure
+                            </button>
+                        </h2>
+                        <div id="adminDataCollapse" class="accordion-collapse collapse"
+                            aria-labelledby="adminDataHeading" data-bs-parent="#debugAccordion">
+                            <div class="accordion-body">
+                                <pre class="bg-light p-3 rounded"><code>{{ administrative_data }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Patient Data Detail -->
+                    {% if administrative_data and administrative_data.patient %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="patientDataHeading">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#patientDataCollapse" aria-expanded="false"
+                                aria-controls="patientDataCollapse">
+                                <i class="fas fa-user me-2"></i>Patient Data Structure
+                            </button>
+                        </h2>
+                        <div id="patientDataCollapse" class="accordion-collapse collapse"
+                            aria-labelledby="patientDataHeading" data-bs-parent="#debugAccordion">
+                            <div class="accordion-body">
+                                <pre class="bg-light p-3 rounded"><code>{{ administrative_data.patient }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Close
+                </button>
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    This debug information will be removed in production builds
+                </small>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,95 @@
+{# Clinical Section Router Template - Routes to appropriate child template based on section type #}
+{# Django-compatible version - no {% set %} variables allowed #}
+
+<!-- Render individual clinical section (called within loop from main template) -->
+{% if section and section.title %}
+    <!-- Route to specialized section templates based on section type -->
+    {% if section.section_id == 'psAllergiesAndOtherAdverseReactions' or section.section_id == 'allergies' or section.section_id == 'allergies_and_intolerances' or 'allergies' in section.title|lower or 'adverse' in section.title|lower %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/allergies_section.html' %}
+        {% endwith %}
+
+    {% elif section.section_id == 'psActiveProblems' or section.section_id == 'active_problems' or section.section_id == 'problems' or section.section_id == 'conditions' %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/problems_section.html' %}
+        {% endwith %}
+
+    {% elif section.section_id == 'psMedicationSummary' or section.section_id == 'medication_summary' or section.section_id == 'medications' %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/medication_section.html' %}
+        {% endwith %}
+
+    {% elif section.section_id == 'psCodedResults' or section.section_id == 'coded_results' or section.section_id == 'laboratory_results' or section.section_id == 'lab_results' or section.section_id == 'results' %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/lab_results_section.html' %}
+        {% endwith %}
+
+    {% elif section.section_id == 'psImmunizations' or section.section_id == 'immunizations' or section.section_id == 'vaccinations' %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/immunizations_section.html' %}
+        {% endwith %}
+
+    {% elif section.section_id == 'psListOfSurgeries' or section.section_id == 'list_of_surgeries' or section.section_id == 'surgeries' or section.section_id == 'surgical_procedures' or section.section_id == 'procedures' %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/surgeries_section.html' %}
+        {% endwith %}
+
+    {% elif section.section_id == 'psVitalSigns' or section.section_id == 'vital_signs' or section.section_id == 'vitals' %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/vital_signs_section.html' %}
+        {% endwith %}
+
+    {% elif section.section_id == 'psMedicalDevices' or section.section_id == 'medical_devices' or section.section_id == 'devices' %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/medical_devices_section.html' %}
+        {% endwith %}
+
+    <!-- Generic sections with predefined configurations -->
+    {% elif section.section_id == 'psHistoryOfPastIllnesses' %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='past_illnesses' section_icon='fas fa-history' header_class='bg-warning text-dark' table_header_class='table-warning' text_class='text-warning' badge_class='bg-warning text-dark' border_class='border-warning' entries_label='past illnesses' empty_title='No Past Illness History' empty_message='No history of past illnesses reported for this patient' %}
+        {% endwith %}
+
+    {% elif section.section_id == 'psHealthMaintenanceCarePlan' %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='health_maintenance' section_icon='fas fa-heart' header_class='bg-success' table_header_class='table-success' text_class='text-success' badge_class='bg-success' border_class='border-success' entries_label='care plans' empty_title='No Health Maintenance Plan' empty_message='No health maintenance care plan available for this patient' %}
+        {% endwith %}
+
+    {% elif section.section_id == 'psFunctionalStatus' %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='functional_status' section_icon='fas fa-running' header_class='bg-info' table_header_class='table-info' text_class='text-info' badge_class='bg-info' border_class='border-info' entries_label='functional assessments' empty_title='No Functional Status' empty_message='No functional status information available for this patient' %}
+        {% endwith %}
+
+    {% elif section.section_id == 'psSocialHistory' %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='social_history' section_icon='fas fa-users' header_class='bg-secondary' table_header_class='table-secondary' text_class='text-secondary' badge_class='bg-secondary' border_class='border-secondary' entries_label='social history items' empty_title='No Social History' empty_message='No social history information available for this patient' %}
+        {% endwith %}
+
+    {% elif section.section_id == 'psPregnancies' %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='pregnancies' section_icon='fas fa-baby' header_class='bg-pink' table_header_class='table-pink' text_class='text-pink' badge_class='bg-pink' border_class='border-pink' entries_label='pregnancy records' empty_title='No Pregnancy History' empty_message='No pregnancy history available for this patient' %}
+        {% endwith %}
+
+    <!-- Default fallback for unknown section types -->
+    {% else %}
+        {% with section_index=forloop.counter0 %}
+            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='unknown' section_icon='fas fa-file-medical' header_class='bg-light text-dark' table_header_class='table-light' text_class='text-muted' badge_class='bg-light text-dark' border_class='border-light' entries_label='entries' empty_title='Clinical Information' empty_message='Clinical information available for this patient' %}
+        {% endwith %}
+    {% endif %}
+{% else %}
+    <!-- No clinical section data -->
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>No Clinical Section Data</strong><br>
+        No clinical section information available for rendering.
+    </div>
+{% endif %}
+
+<!-- Debug information (development only) -->
+{% comment %}
+Django Template Syntax Notes:
+- Updated to work with individual section objects passed from main template loop
+- Added {% with section_index=forloop.counter0 %} to provide section index to child templates
+- Replaced generic_section.html with generic_clinical_section.html for consistency
+- All section routing now uses explicit conditional checks with proper section_index context
+{% endcomment %}

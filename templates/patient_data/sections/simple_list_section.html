@@ -1,0 +1,59 @@
+{% load patient_filters %}
+{# Simple List Section Template - For sections with entries but no clinical table #}
+<!-- Fallback to simple list display if no clinical table -->
+<div class="card-body p-0">
+    <!-- Section Tabs -->
+    <div class="section-tabs">
+        <button class="tab-button active" onclick="showTab('section_{% firstof section_index }}', 'structured')">
+            📊 Structured View
+        </button>
+        <button class="tab-button" onclick="showTab('section_{{ section_index }}', 'original')">
+            📄 Original Content
+        </button>
+    </div>
+
+    <!-- Structured View Tab Content -->
+    <div id="section_{{ section_index }}_structured" class="tab-content active">
+        {% for entry in section.entries %}
+        <div class="medical-entry">
+            <div class="row">
+                <div class="col-md-8">
+                    <h6
+                        class="mb-1 {% if entry.display_name == 'Unknown Item' or entry.display_name == 'Unknown Condition' or entry.display_name == 'Unknown Procedure' or entry.display_name == 'Unknown Medication' or entry.display_name == 'Unknown Allergen' %}text-muted fst-italic{% endif %}">
+                        {{ entry.display_name Medical Entry %}
+                    </h6>
+                    {% if entry.reaction %}
+                    <p class="text-danger mb-1"><strong>Reaction:</strong> {{ entry.reaction }}</p>
+                    {% endif %}
+                    {% if entry.dosage %}
+                    <p class="text-info mb-1"><strong>Dosage:</strong> {{ entry.dosage }}</p>
+                    {% endif %}
+                    {% if entry.status %}
+                    <p class="text-success mb-1"><strong>Status:</strong> {{ entry.status }}</p>
+                    {% endif %}
+                </div>
+                <div class="col-md-4 text-end">
+                    {% if entry.has_medical_terminology %}
+                    <div class="medical-terminology">
+                        {% for term in entry.medical_terminology %}
+                        <span class="badge bg-success me-1 mb-1" title="{{ term.system }}: {{ term.code }}">
+                            {{ term.display_name term.code %}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <span class="badge bg-secondary">
+                        <i class="fas fa-question"></i> Basic Text
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Original Content Tab -->
+    <div id="section_{{ section_index }}_original" class="tab-content">
+        {% include 'patient_data/sections/original_content.html' %}
+    </div>
+</div>

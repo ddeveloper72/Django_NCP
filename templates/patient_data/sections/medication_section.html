@@ -1,0 +1,167 @@
+{% load patient_filters %}
+{# Medication Summary Section Template #}
+                                        {% if cell_data|safe_get:"has_terminology" %}
+                                        {% with terminology_data=cell_data|safe_get:"terminology" %}
+                                        {% if terminology_data %}
+                                        <div class="medical-terminology mt-1">
+                                            {% for term in terminology_data %}
+                                            {% if term %}
+                                            <span class="badge bg-primary me-1"
+                                                title="{{ term.system|default:'' }}: {{ term.code|default:'' }}">
+                                                {% firstof term.display_name term.code "Unknown" %}
+                                            </span>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        {% endwith %}
+                                        {% endif %}cation Summary Section -->
+<div class="medical-section" id="medications-section">
+    <div class="card">
+        <!-- Section Header -->
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-pills me-2"></i>
+                {% firstof section.title Medication Summary %}
+                {% if section.code %}
+                <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
+                {% endif %}
+            </h5>
+        </div>
+
+        <!-- Clinical Section Content with Tabs -->
+        {% if section.has_entries and section.clinical_table %}
+        <!-- Clinical Table Section -->
+        <div class="card-body p-0">
+            <!-- Section Tabs -->
+            <div class="section-tabs">
+                <button class="tab-button active"
+                    onclick="showClinicalTab('medications_{{ section_index }}', 'structured')">
+                    📊 Structured Medication Data
+                </button>
+                <button class="tab-button" onclick="showClinicalTab('medications_{{ section_index }}', 'original')">
+                    📄 Original Content
+                </button>
+            </div>
+
+            <!-- Structured View Tab Content -->
+            <div id="medications_{{ section_index }}_structured" class="clinical-tab-content active">
+                <!-- Mobile-Responsive Table Container -->
+                <div class="table-responsive-wrapper">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover clinical-table">
+                            <thead class="table-primary">
+                                <tr>
+                                    {% for header in section.clinical_table.headers %}
+                                    <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
+                                        <div class="th-content">
+                                            <span class="th-label">{{ header.label }}</span>
+                                            {% if header.type == 'medication' %}
+                                            <i class="fas fa-pills ms-1 terminology-indicator" title="Medication"></i>
+                                            {% elif header.type == 'dosage' %}
+                                            <i class="fas fa-balance-scale ms-1 terminology-indicator" title="Dosage"></i>
+                                            {% elif header.type == 'frequency' %}
+                                    <i class="fas fa-clock ms-1 terminology-indicator" title="Frequency"></i>
+                                    {% elif header.type == 'route' %}
+                                    <i class="fas fa-syringe ms-1 terminology-indicator"
+                                        title="Route of Administration"></i>
+                                    {% elif header.type == 'status' %}
+                                    <i class="fas fa-heartbeat ms-1 terminology-indicator"
+                                        title="Medication Status"></i>
+                                    {% endif %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in section.clinical_table.rows %}
+                            <tr>
+                                {% for header in section.clinical_table.headers %}
+                                {% with cell_data=row.data|lookup:header.key %}
+                                <td>
+                                    {% if header.primary %}
+                                    <div class="primary-field">
+                                        <strong class="text-primary">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</strong>
+                                        {% if cell_data|safe_get:"has_terminology" %}
+                                        <div class="medical-terminology mt-1">
+                                            {% for term in cell_data|safe_get:"terminology" %}
+                                            <span class="badge bg-primary me-1"
+                                                title="{% firstof term.system }}: {{ term.code }}">
+                                                {{ term.display_name term.code %}
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <div class="cell-content">
+                                        {% if cell_data|safe_get:"has_codes" %}
+                                        <div class="medical-codes-container">
+                                            {% for code in cell_data|safe_get:"codes" %}
+                                            <span class="badge bg-primary me-1 mb-1"
+                                                title="{% firstof code.system }}: {{ code.code }}">
+                                                {{ code.display_name code.code %}
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                        {% else %}
+                                        {% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}                                </td>
+                                {% endwith %}
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                </div> <!-- End table-responsive-wrapper -->
+
+                <!-- Medication Table Summary -->
+                <div class="card-footer bg-light border-primary">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-pills me-1 text-primary"></i>
+                                <strong>{{ section.clinical_table.rows|length }}</strong> active medications
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-exclamation-triangle me-1 text-warning"></i>
+                                Check drug interactions
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-check me-1 text-success"></i>
+                                Adherence monitoring
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Original Content Tab -->
+            <div id="medications_{{ section_index }}_original" class="clinical-tab-content">
+                {% include 'patient_data/sections/original_content.html' %>
+            </div>
+        </div>
+
+        {% elif section.has_entries %}
+        <!-- Simple List Section for medications without clinical tables -->
+        {% include 'patient_data/sections/simple_list_section.html' %}
+
+        {% else %}
+        <!-- Empty Medications Section -->
+        <div class="card-body text-center py-5">
+            <div class="text-info">
+                <i class="fas fa-info-circle fa-3x mb-3"></i>
+                <h6 class="text-info">No Current Medications</h6>
+                <p class="text-muted">No active medications reported for this patient</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>

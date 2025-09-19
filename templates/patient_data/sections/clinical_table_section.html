@@ -1,0 +1,149 @@
+{% load patient_filters %}
+{# Clinical Table Se                                                                       <i class="fas fa-tag me-1"></i>{{ term.display_name|default:term.code }}        {{ term.display_name|default:term.code }}tion Template - For sections with clinical tables #}
+<!-- Clinical Table Display with Tabs -->
+<div class="card-body p-0">
+    <!-- Section Tabs -->
+    <div class="section-tabs">
+        <button class="tab-button active" onclick="showTab('section_{{ section_index }}', 'structured')">
+            📊 Structured View
+        </button>
+        <button class="tab-button" onclick="showTab('section_{{ section_index }}', 'original')">
+            📄 Original Content
+        </button>
+    </div>
+
+    <!-- Structured View Tab Content -->
+    <div id="section_{{ section_index }}_structured" class="tab-content active">
+        <div class="clinical-table">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        {% for header in section.clinical_table.headers %}
+                        <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
+                            {{ header.label }}
+                            {% if header.type == 'codes' %}
+                            <i class="fas fa-code ms-1 terminology-indicator" title="Medical Codes"></i>
+                            {% elif header.type == 'date' %}
+                            <i class="fas fa-calendar ms-1 terminology-indicator" title="Date"></i>
+                            {% elif header.type == 'status' %}
+                            <i class="fas fa-info-circle ms-1 terminology-indicator" title="Status"></i>
+                            {% endif %}
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in section.clinical_table.rows %}
+                    <tr {% if row.has_medical_codes %}class="table-success" {% endif %}>
+                        {% for header in section.clinical_table.headers %}
+                        {% with row.data|get_item:header.key as cell_data %}
+                        <td>
+                            {% if header.primary %}
+                            <div class="primary-field">
+                                <strong>{{ cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:'N/A' }}</strong>
+                                {% if cell_data|safe_get:"has_terminology" %}
+                                <div class="medical-terminology mt-1">
+                                    {% for term in cell_data|safe_get:"terminology" %}
+                                    <span class="badge bg-success me-1" title="{% firstof term.system }}: {{ term.code }}">
+                                        {{ term.display_name term.code %}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="cell-content">
+                                {% if cell_data|safe_get:"has_codes" %}
+                                <div class="medical-codes-container">
+                                    <div class="medical-code-item d-flex flex-wrap align-items-center">
+                                        {% for code in cell_data|safe_get:"codes" %}
+                                        {% if code.badge %}
+                                        <span class="badge {% firstof code.badge }} me-1 mb-1"
+                                            title="{{ code.system }}: {{ code.code }}">
+                                            {{ code.display_name code.code %}
+                                        </span>
+                                        {% else %}
+                                        <code class="me-1 mb-1">{% firstof code.code }}</code>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% else %}
+                                {{ cell_data|safe_get:"display_value" cell_data|safe_get:"value" or 'N/A %}
+                                {% endif %}
+
+                                {% if cell_data|safe_get:"has_terminology" %}
+                                <div class="medical-terminology mt-1">
+                                    {% for term in cell_data|safe_get:"terminology" %}
+                                    <span class="badge bg-info me-1" title="{% firstof term.system }}: {{ term.code }}">
+                                        <i class="fas fa-tag me-1"></i>{{ term.display_name term.code %}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </td>
+                        {% endwith %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table Summary -->
+        <div class="card-footer bg-light">
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        <i class="fas fa-table me-1"></i>
+                        <strong>{{ section.clinical_table.rows|length }}</strong> entries
+                        {% if section.clinical_table.has_coded_entries %}
+                        <span class="badge bg-success ms-2">
+                            <i class="fas fa-check me-1"></i>Contains medical codes
+                        </span>
+                        {% endif %}
+                    </small>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        <strong>{{ section.clinical_table.medical_terminology_coverage }}%</strong> coded
+                    </small>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">
+                        {% if section.clinical_table.has_coded_entries %}
+                        <i class="fas fa-check text-success"></i> Medical terminology
+                        {% else %}
+                        <i class="fas fa-info-circle text-info"></i> Text only
+                        {% endif %}
+                    </small>
+                </div>
+                {% if section.clinical_table.has_coded_entries %}
+                <div class="col-12 mt-2">
+                    <details class="code-system-legend">
+                        <summary class="text-muted" style="font-size: 0.75rem; cursor: pointer;">
+                            <i class="fas fa-info-circle me-1"></i>Code System Legend
+                        </summary>
+                        <div class="mt-2" style="font-size: 0.75rem;">
+                            <span class="badge bg-primary me-2">SNOMED CT</span>
+                            <span class="badge bg-success me-2">LOINC</span>
+                            <span class="badge bg-warning me-2">RxNorm</span>
+                            <span class="badge bg-danger me-2">ICD-10</span>
+                            <span class="badge bg-info me-2">UCUM</span>
+                            <span class="badge bg-secondary me-2">Legacy</span>
+                            <span class="badge bg-dark">ATC</span>
+                        </div>
+                    </details>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div> <!-- End structured tab content -->
+
+    <!-- Original Content Tab -->
+    <div id="section_{{ section_index }}_original" class="tab-content">
+        {% include 'patient_data/sections/original_content.html' %}
+    </div>
+</div> <!-- End clinical-table -->

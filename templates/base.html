@@ -1,0 +1,264 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EU NCP Portal{% endblock %}</title>
+
+    <!-- TEMPLATE UPDATE TEST - September 16, 2025 -->
+    <!-- Bootstrap 5.3.3 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Font Awesome 6 for modern icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <!-- Irish Healthcare Bootstrap Theme -->
+    <link href="{% static 'css/irish-healthcare-theme.css' %}?v={% now 'U' %}" rel="stylesheet" media="screen">
+
+    <!-- Custom CSS overrides - Re-enabled for navigation functionality -->
+    <link href="{% static 'css/bootstrap-components.css' %}?v={% now 'U' %}" rel="stylesheet" media="screen">
+
+    {% block extra_css %} {% endblock %}
+</head>
+
+<body>
+    <!-- Navigation Header - Healthcare Theme -->
+    {% if request.resolver_match.url_name == 'home' %}
+    <!-- Homepage Hero Header -->
+    <header class="bg-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-12 text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-3">
+                        <i class="fas fa-hospital fa-3x me-3"></i>
+                        <div>
+                            <h1 class="display-4 fw-bold mb-0">EU eHealth NCP Portal</h1>
+                            <p class="lead mb-0">Cross-Border Healthcare Document Exchange Platform</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    {% else %}
+    <!-- Standard Navigation Bar for other pages -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+        <div class="container-fluid px-4">
+            <a href="/" class="navbar-brand d-flex align-items-center">
+                <i class="fas fa-hospital text-primary me-2"></i>
+                <span class="fw-bold text-primary">EU NCP Portal</span>
+            </a>
+
+            <!-- Mobile toggle button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-nav" aria-controls="navbar-nav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Main Navigation -->
+            <div class="collapse navbar-collapse" id="navbar-nav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                            <i class="fas fa-home me-1"></i>
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/patients/search/" class="nav-link {% if 'patients' in request.path %}active{% endif %}">
+                            <i class="fas fa-search me-1"></i>
+                            Patient Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/portal/" class="nav-link {% if 'portal' in request.path %}active{% endif %}">
+                            <i class="fas fa-globe me-1"></i>
+                            Portal
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/" class="nav-link {% if 'admin' in request.path %}active{% endif %}">
+                            <i class="fas fa-cog me-1"></i>
+                            Admin
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Enhanced Login Status Indicator -->
+                <div class="d-flex align-items-center">
+                    {% if request.user.is_authenticated %}
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted me-3">
+                            <i class="fas fa-user-circle me-1"></i>
+                            Welcome, {{ request.user.username }}
+                        </span>
+                        <a href="/accounts/logout/" class="btn btn-outline-primary btn-sm" title="Logout">
+                            <i class="fas fa-sign-out-alt me-1"></i>
+                            Logout
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted me-3">
+                            <i class="fas fa-user me-1"></i>
+                            Not logged in
+                        </span>
+                        <a href="/accounts/login/" class="btn btn-primary btn-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i>
+                            Login
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Breadcrumb/Context Area -->
+    {% block page_context %}{% endblock %}
+
+    {% endif %}
+
+
+    <!-- Main Content Area -->
+    <main class="container-fluid py-4">
+        {% if messages %}
+        <div class="container flash-messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <div class="d-flex align-items-start">
+                    <div class="flex-grow-1">
+                        {% if message.tags == 'error' %}
+                            <h6 class="alert-heading">Error</h6>
+                        {% elif message.tags == 'warning' %}
+                            <h6 class="alert-heading">Warning</h6>
+                        {% elif message.tags == 'success' %}
+                            <h6 class="alert-heading">Success</h6>
+                        {% elif message.tags == 'info' %}
+                            <h6 class="alert-heading">Information</h6>
+                        {% endif %}
+                        {{ message }}
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %} {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5 class="text-primary">EU eHealth NCP Portal</h5>
+                    <p class="small">Cross-border healthcare document exchange system built with Django and powered by secure medical data standards.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-light">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-light text-decoration-none">Home</a></li>
+                        <li><a href="/patients/search/" class="text-light text-decoration-none">Patient Search</a></li>
+                        <li><a href="/portal/" class="text-light text-decoration-none">Portal</a></li>
+                        <li><a href="/admin/" class="text-light text-decoration-none">Administration</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-light">Technical Info</h6>
+                    <p class="small mb-1">Django {{ django_version }} | Python {{ python_version }}</p>
+                    <p class="small">Built for DMZ deployment</p>
+                </div>
+            </div>
+            <hr class="text-secondary">
+            <div class="text-center">
+                <p class="small mb-0">&copy; 2024 EU eHealth NCP Portal. Compliant with European Cross-Border Healthcare Standards.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <!-- Navigation JavaScript -->
+    <script src="{% static 'js/navigation.js' %}"></script>
+
+    <!-- Bootstrap JavaScript for tab functionality -->
+    <script>
+        // Simple tab functionality for Bootstrap-style tabs
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle tab clicks
+            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function(tab) {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Tab clicked:', this.getAttribute('data-bs-target'));
+
+                    // Remove active class from all tabs and panes
+                    document.querySelectorAll('.nav-link').forEach(function(link) {
+                        link.classList.remove('active');
+                    });
+                    document.querySelectorAll('.tab-pane').forEach(function(pane) {
+                        pane.classList.remove('show', 'active');
+                    });
+
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    console.log('Tab set to active:', this.id);
+
+                    // Show corresponding tab pane
+                    const targetId = this.getAttribute('data-bs-target');
+                    const targetPane = document.querySelector(targetId);
+                    if (targetPane) {
+                        targetPane.classList.add('show', 'active');
+                        console.log('Tab pane activated:', targetId);
+                    } else {
+                        console.error('Tab pane not found:', targetId);
+                    }
+                });
+            });
+        });
+
+        // Mobile menu toggle
+        const navbarToggle = document.querySelector('.navbar-toggle');
+        const navbarNav = document.querySelector('.navbar-nav');
+
+        if (navbarToggle && navbarNav) {
+            navbarToggle.addEventListener('click', function() {
+                navbarNav.classList.toggle('navbar-nav-open');
+                navbarToggle.classList.toggle('navbar-toggle-active');
+
+                const isOpen = navbarNav.classList.contains('navbar-nav-open');
+                navbarToggle.setAttribute('aria-expanded', isOpen);
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.navbar-main')) {
+                    navbarNav.classList.remove('navbar-nav-open');
+                    navbarToggle.classList.remove('navbar-toggle-active');
+                    navbarToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Close mobile menu on window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    navbarNav.classList.remove('navbar-nav-open');
+                    navbarToggle.classList.remove('navbar-toggle-active');
+                    navbarToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            navbarToggle.setAttribute('aria-expanded', 'false');
+            navbarToggle.setAttribute('aria-controls', 'navbar-nav');
+        }
+    </script>
+
+    <!-- Bootstrap 5.3.3 JavaScript CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    {% block extra_js %} {% endblock %}
+</body>
+
+</html>

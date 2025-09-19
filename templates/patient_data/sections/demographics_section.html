@@ -1,0 +1,171 @@
+<!-- Demographics Section Template Component -->
+{% if data %}
+<div class="demographics-grid">
+    <!-- Basic Information -->
+    <div class="demo-card">
+        <h5><i class="fas fa-user"></i> Basic Information</h5>
+        {% if data.name %}
+        <div class="info-item">
+            <span class="info-label">Full Name</span>
+            <span class="info-value">
+                {% for name in data.name %}
+                {% if name.given %}
+                {% for given in name.given %}{{ given }} {% endfor %}
+                {% endif %}
+                {% if name.family %}{{ name.family }}{% endif %}
+                {% if not forloop.last %}<br>{% endif %}
+                {% endfor %}
+            </span>
+        </div>
+        {% endif %}
+
+        {% if data.gender %}
+        <div class="info-item">
+            <span class="info-label">Gender</span>
+            <span class="info-value">{{ data.gender|title }}</span>
+        </div>
+        {% endif %}
+
+        {% if data.birth_date %}
+        <div class="info-item">
+            <span class="info-label">Date of Birth</span>
+            <span class="info-value">{{ data.birth_date|date:"Y-m-d" }}</span>
+        </div>
+        {% endif %}
+
+        {% if data.marital_status %}
+        <div class="info-item">
+            <span class="info-label">Marital Status</span>
+            <span class="info-value">
+                {% firstof data.marital_status.text data.marital_status.coding.0.display "Not specified" %}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Contact Information -->
+    <div class="demo-card">
+        <h5><i class="fas fa-address-book"></i> Contact Information</h5>
+        {% if data.telecom %}
+        {% for contact in data.telecom %}
+        <div class="info-item">
+            <span class="info-label">{{ contact.system|title }}</span>
+            <span class="info-value">{{ contact.value }}</span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="info-item">
+            <span class="info-value">No contact information available</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Address Information -->
+    <div class="demo-card">
+        <h5><i class="fas fa-map-marker-alt"></i> Address</h5>
+        {% if data.address %}
+        {% for addr in data.address %}
+        <div class="info-item">
+            <span class="info-label">{% firstof addr.use|title "Address" %}</span>
+            <span class="info-value">
+                {% if addr.line %}
+                {% for line in addr.line %}{{ line }}<br>{% endfor %}
+                {% endif %}
+                {% if addr.city %}{{ addr.city }}, {% endif %}
+                {% if addr.state %}{{ addr.state }} {% endif %}
+                {% if addr.postal_code %}{{ addr.postal_code }}<br>{% endif %}
+                {% if addr.country %}{{ addr.country }}{% endif %}
+            </span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="info-item">
+            <span class="info-value">No address information available</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Identifiers -->
+    {% if data.identifier %}
+    <div class="demo-card">
+        <h5><i class="fas fa-id-card"></i> Identifiers</h5>
+        {% for identifier in data.identifier %}
+        <div class="info-item">
+            <span class="info-label">
+                {% if identifier.type.text %}
+                {{ identifier.type.text }}
+                {% elif identifier.type.coding.0.display %}
+                {{ identifier.type.coding.0.display }}
+                {% elif identifier.system %}
+                {{ identifier.system|title }}
+                {% else %}
+                Identifier
+                {% endif %}
+            </span>
+            <span class="info-value">
+                {% firstof identifier.value }}
+                {% if identifier.system %}
+                <br><small class="code-display">{{ identifier.system }}</small>
+                {% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Communication -->
+    {% if data.communication %}
+    <div class="demo-card">
+        <h5><i class="fas fa-language"></i> Communication</h5>
+        {% for comm in data.communication %}
+        <div class="info-item">
+            <span class="info-label">Language</span>
+            <span class="info-value">
+                {{ comm.language.text comm.language.coding.0.display %}
+                {% if comm.preferred %}(Preferred){% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Additional Demographics -->
+    {% if data.deceased_boolean is not None or data.deceased_datetime or data.multiple_birth_boolean is not None %}
+    <div class="demo-card">
+        <h5><i class="fas fa-info"></i> Additional Information</h5>
+
+        {% if data.deceased_boolean is not None %}
+        <div class="info-item">
+            <span class="info-label">Deceased</span>
+            <span class="info-value">{% if data.deceased_boolean %}Yes{% else %}No{% endif %}</span>
+        </div>
+        {% endif %}
+
+        {% if data.deceased_datetime %}
+        <div class="info-item">
+            <span class="info-label">Date of Death</span>
+            <span class="info-value">{{ data.deceased_datetime|date:"Y-m-d" }}</span>
+        </div>
+        {% endif %}
+
+        {% if data.multiple_birth_boolean is not None %}
+        <div class="info-item">
+            <span class="info-label">Multiple Birth</span>
+            <span class="info-value">{% if data.multiple_birth_boolean %}Yes{% else %}No{% endif %}</span>
+        </div>
+        {% endif %}
+
+        {% if data.multiple_birth_integer %}
+        <div class="info-item">
+            <span class="info-label">Birth Order</span>
+            <span class="info-value">{{ data.multiple_birth_integer }}</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<div class="empty-section">
+    No patient demographic information available.
+</div>
+{% endif %}

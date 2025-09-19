@@ -60,6 +60,18 @@ class EnhancedCDAProcessor:
             Dictionary with enhanced sections data
         """
         try:
+            # Check if CDA content is valid
+            if not cda_content or not isinstance(cda_content, str):
+                logger.warning("No valid CDA content provided")
+                return {
+                    "success": False,
+                    "error": "No valid CDA content provided",
+                    "sections": [],
+                    "sections_count": 0,
+                    "medical_terms_count": 0,
+                    "coded_sections_count": 0,
+                }
+
             # Determine content type and parse accordingly
             if (
                 cda_content.strip().startswith("<?xml")
@@ -3291,7 +3303,7 @@ class EnhancedCDAProcessor:
             if project_root not in sys.path:
                 sys.path.append(project_root)
 
-            from patient_data.utils.administrative_extractor import (
+            from patient_data.services.cda_administrative_extractor import (
                 CDAAdministrativeExtractor,
             )
 
@@ -3377,45 +3389,115 @@ class EnhancedCDAProcessor:
             # Get extended header data
             extended_data = self.extract_extended_header_data(xml_content)
 
+            # Convert AdministrativeData object to dictionary format
+            if hasattr(extended_data, "__dict__"):
+                # Convert to dictionary for consistent access
+                extended_dict = {
+                    "patient_contact": {
+                        "has_contact_info": bool(
+                            extended_data.patient_contact_info.addresses
+                            or extended_data.patient_contact_info.telecoms
+                        ),
+                        "addresses": extended_data.patient_contact_info.addresses,
+                        "telecoms": extended_data.patient_contact_info.telecoms,
+                    },
+                    "healthcare_team": {
+                        "has_healthcare_team": bool(
+                            extended_data.author_hcp.family_name
+                            or extended_data.author_hcp.given_name
+                        ),
+                        "author": {
+                            "name": f"{extended_data.author_hcp.given_name} {extended_data.author_hcp.family_name}".strip(),
+                            "organization": (
+                                extended_data.author_hcp.organization.name
+                                if hasattr(
+                                    extended_data.author_hcp.organization, "name"
+                                )
+                                else ""
+                            ),
+                            "role": extended_data.author_hcp.role,
+                        },
+                        "total_count": (
+                            1
+                            if (
+                                extended_data.author_hcp.family_name
+                                or extended_data.author_hcp.given_name
+                            )
+                            else 0
+                        ),
+                    },
+                    "document_info": {
+                        "creation_date": extended_data.document_creation_date,
+                        "last_update": extended_data.document_last_update_date,
+                        "version": extended_data.document_version_number,
+                        "set_id": extended_data.document_set_id,
+                        "custodian": {
+                            "name": extended_data.custodian_organization.name,
+                            "addresses": extended_data.custodian_organization.addresses,
+                            "telecoms": extended_data.custodian_organization.telecoms,
+                        },
+                    },
+                    "emergency_contacts": {
+                        "has_emergency_contacts": bool(extended_data.other_contacts),
+                        "contacts": extended_data.other_contacts,
+                        "total_count": len(extended_data.other_contacts),
+                    },
+                    "dependants": {
+                        "has_dependants": False,  # Not extracted in current implementation
+                        "total_count": 0,
+                    },
+                    "extended_demographics": {},
+                    "metadata": {
+                        "custodian_organization": extended_data.custodian_organization.name,
+                        "author_organization": (
+                            extended_data.author_hcp.organization.name
+                            if hasattr(extended_data.author_hcp.organization, "name")
+                            else ""
+                        ),
+                    },
+                }
+            else:
+                extended_dict = extended_data
+
             # Combine for comprehensive summary
             comprehensive_summary = {
                 # Basic patient information
                 "patient_identity": basic_identity,
                 # Document information
-                "document_info": extended_data.get("document_info", {}),
+                "document_info": extended_dict.get("document_info", {}),
                 # Contact information
-                "contact_details": extended_data.get("patient_contact", {}),
+                "contact_details": extended_dict.get("patient_contact", {}),
                 # Family and emergency contacts
-                "emergency_contacts": extended_data.get("emergency_contacts", {}),
+                "emergency_contacts": extended_dict.get("emergency_contacts", {}),
                 # Healthcare team
-                "healthcare_team": extended_data.get("healthcare_team", {}),
+                "healthcare_team": extended_dict.get("healthcare_team", {}),
                 # Dependants
-                "dependants": extended_data.get("dependants", {}),
+                "dependants": extended_dict.get("dependants", {}),
                 # Extended demographics
-                "extended_demographics": extended_data.get("extended_demographics", {}),
+                "extended_demographics": extended_dict.get("extended_demographics", {}),
                 # Metadata
-                "metadata": extended_data.get("metadata", {}),
+                "metadata": extended_dict.get("metadata", {}),
                 # Summary statistics
                 "summary_stats": {
-                    "has_emergency_contacts": extended_data.get(
+                    "has_emergency_contacts": extended_dict.get(
                         "emergency_contacts", {}
                     ).get("has_emergency_contacts", False),
-                    "emergency_contacts_count": extended_data.get(
+                    "emergency_contacts_count": extended_dict.get(
                         "emergency_contacts", {}
                     ).get("total_count", 0),
-                    "has_healthcare_team": extended_data.get("healthcare_team", {}).get(
+                    "has_healthcare_team": extended_dict.get("healthcare_team", {}).get(
                         "has_healthcare_team", False
                     ),
-                    "healthcare_team_count": extended_data.get(
+                    "healthcare_team_count": extended_dict.get(
                         "healthcare_team", {}
                     ).get("total_count", 0),
-                    "has_dependants": extended_data.get("dependants", {}).get(
+                    "has_dependants": extended_dict.get("dependants", {}).get(
                         "has_dependants", False
                     ),
-                    "dependants_count": extended_data.get("dependants", {}).get(
+                    "dependants_count": extended_dict.get("dependants", {}).get(
                         "total_count", 0
                     ),
-                    "has_contact_info": extended_data.get("patient_contact", {}).get(
+                    "has_contact_info": extended_dict.get("patient_contact", {}).get(
                         "has_contact_info", False
                     ),
                 },

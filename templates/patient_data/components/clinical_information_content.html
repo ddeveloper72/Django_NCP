@@ -1,0 +1,164 @@
+<!-- Clinical Information Content Component -->
+{% load patient_filters %}
+{% load patient_date_filters %}
+
+<div class="clinical-information-container">
+    <!-- Check if we have any clinical data -->
+    {% if processed_sections and processed_sections|length > 0 %}
+
+    <!-- Clinical Information Master Controls -->
+    <div class="clinical-master-controls mb-3 d-flex justify-content-between align-items-center">
+        <div class="control-buttons">
+            <button type="button" class="btn btn-outline-primary btn-sm me-2" id="expandAllClinical">
+                <i class="fas fa-expand-arrows-alt me-1"></i>
+                Expand All
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="collapseAllClinical">
+                <i class="fas fa-compress-arrows-alt me-1"></i>
+                Collapse All
+            </button>
+        </div>
+        <div class="section-count text-muted">
+            <small>
+                <i class="fas fa-info-circle me-1"></i>
+                Clinical sections can be expanded/collapsed independently
+            </small>
+        </div>
+    </div>
+
+    <!-- Clinical Information Accordion -->
+    <div class="accordion" id="clinicalInformationAccordion">
+
+        <!-- Dynamic Clinical Sections from processed_sections -->
+        {% for section in processed_sections %}
+        <div class="accordion-item clinical-accordion-item">
+            <h2 class="accordion-header" id="heading-{{ section.code|default:forloop.counter }}">
+                <button class="accordion-button" type="button"
+                        onclick="toggleSection('collapse-{{ section.code|default:forloop.counter }}')"
+                        aria-expanded="true"
+                        aria-controls="collapse-{{ section.code|default:forloop.counter }}">
+                    <i class="fas fa-stethoscope me-2"></i>
+                    <strong>{% firstof section.title section.section_title "Clinical Section" %}</strong>
+                    {% if section.code %}
+                    <span class="badge bg-primary ms-2">{{ section.code }}</span>
+                    {% endif %}
+                </button>
+            </h2>
+            <div id="collapse-{{ section.code|default:forloop.counter }}"
+                 class="accordion-collapse collapse show"
+                 aria-labelledby="heading-{{ section.code|default:forloop.counter }}">
+                <div class="accordion-body">
+                    <!-- Modular Clinical Section Router - Enhanced Version -->
+                    {% include 'patient_data/sections/clinical_section_router.html' %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Other Clinical Sections -->
+        {% if clinical_sections %}
+        <div class="accordion-item clinical-accordion-item">
+            <h2 class="accordion-header" id="headingOtherClinical">
+                <button class="accordion-button" type="button"
+                        onclick="toggleSection('collapseOtherClinical')"
+                        aria-expanded="true"
+                        aria-controls="collapseOtherClinical">
+                    <i class="fas fa-file-medical me-2"></i>
+                    <strong>Other Clinical Information</strong>
+                </button>
+            </h2>
+            <div id="collapseOtherClinical"
+                 class="accordion-collapse collapse show"
+                 aria-labelledby="headingOtherClinical">
+                <div class="accordion-body">
+                    {% for section in clinical_sections %}
+                    <div class="clinical-section-item mb-4">
+                        <h5 class="text-dark mb-3">
+                            <i class="fas fa-file-alt me-2"></i>
+                            {{ section.section_title }}
+                        </h5>
+
+                        <!-- Display section content based on available data -->
+                        {% if section.entries %}
+                            {% for entry in section.entries %}
+                            <div class="entry-item border-bottom pb-2 mb-2">
+                                <div class="entry-content">
+                                    <p class="mb-1">{{ entry.display_name|default:"Clinical Entry" }}</p>
+                                    {% if entry.status %}
+                                    <span class="badge bg-info">{{ entry.status }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% elif section.content %}
+                            <div class="section-content">
+                                {{ section.content|safe }}
+                            </div>
+                        {% else %}
+                            <div class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                No detailed information available for this section.
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- JavaScript for Accordion Functionality -->
+    <script>
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const button = document.querySelector(`[aria-controls="${sectionId}"]`);
+
+            if (section.classList.contains('show')) {
+                section.classList.remove('show');
+                button.setAttribute('aria-expanded', 'false');
+                button.classList.add('collapsed');
+            } else {
+                section.classList.add('show');
+                button.setAttribute('aria-expanded', 'true');
+                button.classList.remove('collapsed');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Expand All functionality
+            document.getElementById('expandAllClinical')?.addEventListener('click', function() {
+                document.querySelectorAll('.accordion-collapse').forEach(function(section) {
+                    section.classList.add('show');
+                });
+                document.querySelectorAll('.accordion-button').forEach(function(button) {
+                    button.setAttribute('aria-expanded', 'true');
+                    button.classList.remove('collapsed');
+                });
+            });
+
+            // Collapse All functionality
+            document.getElementById('collapseAllClinical')?.addEventListener('click', function() {
+                document.querySelectorAll('.accordion-collapse').forEach(function(section) {
+                    section.classList.remove('show');
+                });
+                document.querySelectorAll('.accordion-button').forEach(function(button) {
+                    button.setAttribute('aria-expanded', 'false');
+                    button.classList.add('collapsed');
+                });
+            });
+        });
+    </script>
+
+    {% else %}
+    <!-- No Clinical Data Available -->
+    <div class="no-clinical-data text-center py-5">
+        <div class="text-muted">
+            <i class="fas fa-notes-medical fa-3x mb-3 opacity-50"></i>
+            <h5 class="text-muted">No Clinical Information Available</h5>
+            <p class="mb-0">No clinical sections were found in the patient's medical record.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>

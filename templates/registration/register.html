@@ -41,7 +41,7 @@
                                 <i class="fa fa-user"></i> First Name
                             </label>
                             <input type="text" class="form-control" id="{{ form.first_name.id_for_label }}"
-                                name="{{ form.first_name.name }}" value="{{ form.first_name.value|default:'' }}"
+                                name="{{ form.first_name.name }}" value="{{ form.first_name.value|default:"" }}"
                                 placeholder="Enter first name" required>
                             {% if form.first_name.errors %}
                             <div class="error-message">{{ form.first_name.errors.0 }}</div>
@@ -53,7 +53,7 @@
                                 <i class="fa fa-user"></i> Last Name
                             </label>
                             <input type="text" class="form-control" id="{{ form.last_name.id_for_label }}"
-                                name="{{ form.last_name.name }}" value="{{ form.last_name.value|default:'' }}"
+                                name="{{ form.last_name.name }}" value="{{ form.last_name.value|default:"" }}"
                                 placeholder="Enter last name" required>
                             {% if form.last_name.errors %}
                             <div class="error-message">{{ form.last_name.errors.0 }}</div>
@@ -66,7 +66,7 @@
                             <i class="fa fa-at"></i> Username
                         </label>
                         <input type="text" class="form-control" id="{{ form.username.id_for_label }}"
-                            name="{{ form.username.name }}" value="{{ form.username.value|default:'' }}"
+                            name="{{ form.username.name }}" value="{{ form.username.value|default:"" }}"
                             placeholder="Choose a username" required>
                         {% if form.username.errors %}
                         <div class="error-message">{{ form.username.errors.0 }}</div>
@@ -78,7 +78,7 @@
                             <i class="fa fa-envelope"></i> Email Address
                         </label>
                         <input type="email" class="form-control" id="{{ form.email.id_for_label }}"
-                            name="{{ form.email.name }}" value="{{ form.email.value|default:'' }}"
+                            name="{{ form.email.name }}" value="{{ form.email.value|default:"" }}"
                             placeholder="Enter your email" required>
                         {% if form.email.errors %}
                         <div class="error-message">{{ form.email.errors.0 }}</div>

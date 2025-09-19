@@ -274,7 +274,6 @@ def batch_translate_documents(request):
                 request,
                 "patient_data/batch_translation_results.html",
                 context,
-                using="jinja2",
             )
 
         except Exception as e:
@@ -284,6 +283,4 @@ def batch_translate_documents(request):
 
     else:
         # Show batch translation form
-        return render(
-            request, "patient_data/batch_translation_form.html", using="jinja2"
-        )
+        return render(request, "patient_data/batch_translation_form.html")

@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% load static %}
+<!-- <div class="service-icon">
+    <i class="fa fa-database"></i>
+</div>{% block title %}Django EU eHealth NCP Server{% endblock %}
+
+<div class="config-header">
+    <i class="fa fa-code"></i>
+    <h3>API Configuration</h3>
+</div> -->
+
+{% block content %}
+<!-- Home page content will be contained within the hero header from base.html -->
+
+<section class="services-section">
+    <div class="container">
+        <h2>Your Health Services</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fa fa-search"></i>
+                </div>
+                <h3>Patient Search</h3>
+                <p>Search for patients across EU member states with break-the-glass emergency access capabilities.
+                    GDPR-compliant cross-border patient data retrieval.</p>
+                <a href="/patients/search/" class="service-link">Search Patients</a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fa fa-globe"></i>
+                </div>
+                <h3>Django Portal UI</h3>
+                <p>Full eHealth portal with European SMP integration, country-specific International Search Masks (ISM),
+                    and cross-border patient lookup capabilities.</p>
+                <a href="/portal/" class="service-link">Launch Portal</a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fa fa-cog"></i>
+                </div>
+                <h3>Django Admin</h3>
+                <p>Administrative interface for managing the eHealth system, user permissions, and system configuration.
+                    Full Django admin panel access.</p>
+                <a href="/admin/" class="service-link">Admin Panel</a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fa fa-file-medical-o"></i>
+                </div>
+                <h3>CDA Translation</h3>
+                <p>Convert between CDA (Clinical Document Architecture) and FHIR formats for interoperability across
+                    European healthcare systems.</p>
+                <a href="/translation/" class="service-link">Translation Services</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features-section">
+    <div class="container">
+        <h2>System Capabilities</h2>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fa fa-shield"></i>
+                </div>
+                <h4>GDPR Compliant</h4>
+                <p>Full compliance with European data protection regulations and healthcare privacy standards.</p>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fa fa-sitemap"></i>
+                </div>
+                <h4>Cross-Border Integration</h4>
+                <p>Seamless integration with EU member state healthcare systems through standardized protocols.</p>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fa fa-key"></i>
+                </div>
+                <h4>Emergency Access</h4>
+                <p>Break-the-glass capabilities for emergency patient data access across international borders.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="configuration-section">
+    <div class="container">
+        <h2>Active Configuration</h2>
+        <div class="config-grid">
+            <div class="config-card">
+                <div class="config-header">
+                    <i class="fa fa-server"></i>
+                    <h3>SMP Configuration</h3>
+                </div>
+                <div class="config-details">
+                    <p><strong>Source:</strong> {{ current_smp_name }}</p>
+                    <p><strong>Portal:</strong> <a href="{{ current_smp_ui_url }}" target="_blank"
+                            class="config-link">{{ current_smp_ui_url }}</a></p>
+                    <div class="config-note">
+                        <i class="fa fa-info-circle"></i>
+                        <span>Configuration is managed by administrators</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-card">
+                <div class="config-header">
+                    <i class="fas fa-code"></i>
+                    <h3>API Endpoints</h3>
+                </div>
+                <div class="api-list">
+                    <div class="api-item">
+                        <span class="api-method">GET</span>
+                        <a href="/api/countries/" class="api-endpoint">/api/countries/</a>
+                        <p>Get available EU countries with ISM support</p>
+                    </div>
+                    <div class="api-item">
+                        <span class="api-method">POST</span>
+                        <span class="api-endpoint">/api/patient/lookup/</span>
+                        <p>Cross-border patient lookup with country-specific validation</p>
+                    </div>
+                    <div class="api-item">
+                        <span class="api-method">GET</span>
+                        <span class="api-endpoint">/api/patient/{id}/document/{type}/</span>
+                        <p>Retrieve patient documents from European health systems</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="external-services-section">
+    <div class="container">
+        <h2>External Service Connections</h2>
+        <div class="external-grid">
+            <div class="external-card">
+                <div class="external-icon">
+                    <i class="fab fa-java"></i>
+                </div>
+                <h3>Java OpenNCP Portal</h3>
+                <p>Original Java-based portal integration</p>
+                <a href="http://localhost:8093" target="_blank" class="external-link">localhost:8093</a>
+            </div>
+
+            <div class="external-card">
+                <div class="external-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <h3>DomiSMP Server</h3>
+                <p>Service Metadata Publisher</p>
+                <a href="{{ current_smp_ui_url }}" target="_blank" class="external-link">{{ current_smp_ui_url }}</a>
+            </div>
+        </div>
+
+        <div class="status-indicator">
+            <div class="status-icon">
+                <i class="fa fa-check-circle"></i>
+            </div>
+            <span>All API endpoints are accessible without authentication for Java portal integration</span>
+        </div>
+    </div>
+</section>
+{% endblock %}

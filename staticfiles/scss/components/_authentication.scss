@@ -1,0 +1,601 @@
+// ========================================
+// Authentication Components - HSE-Inspired Styling
+// Login, Registration, Password Reset, and Logout pages
+// ========================================
+
+// Authentication Container Base
+.auth-container {
+  min-height: calc(100vh - 120px);
+  background: linear-gradient(135deg, #f8fffe 0%, #e8f5f4 100%);
+  padding: $space-xxl 0;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $space-lg;
+  }
+}
+
+// Authentication Card
+.auth-card {
+  background: $white;
+  border-radius: $border-radius-xl;
+  box-shadow: 0 8px 32px rgba($hse-primary-teal, 0.1);
+  border: 1px solid rgba($hse-primary-teal, 0.1);
+  overflow: hidden;
+  max-width: 420px;
+  margin: 0 auto;
+
+  // Larger card for registration
+  &.auth-card-large {
+    max-width: 480px;
+  }
+}
+
+// Authentication Header
+.auth-header {
+  background: linear-gradient(
+    135deg,
+    $hse-primary-teal 0%,
+    $hse-primary-teal-dark 100%
+  );
+  color: $white;
+  padding: $space-xxl;
+  text-align: center;
+  position: relative;
+
+  // Subtle pattern overlay
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.03"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    pointer-events: none;
+  }
+
+  // Success variant for password reset confirmation
+  &.auth-header-success {
+    background: linear-gradient(
+      135deg,
+      $success 0%,
+      darken($success, 10%) 100%
+    );
+  }
+
+  .auth-logo {
+    font-size: $font-size-xxxl;
+    margin-bottom: $space-lg;
+    opacity: 0.9;
+    position: relative;
+    z-index: 2;
+  }
+
+  .auth-title {
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $space-sm;
+    position: relative;
+    z-index: 2;
+  }
+
+  .auth-subtitle {
+    font-size: $font-size-sm;
+    opacity: 0.8;
+    position: relative;
+    z-index: 2;
+    line-height: $line-height-relaxed;
+  }
+}
+
+// Authentication Body
+.auth-body {
+  padding: $space-xxl;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $space-xl;
+  }
+}
+
+// Form Components
+.form-group {
+  margin-bottom: $space-xl;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-lg;
+  margin-bottom: $space-xl;
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+.form-label {
+  display: block;
+  font-weight: $font-weight-medium;
+  color: $text-dark;
+  margin-bottom: $space-sm;
+  font-size: $font-size-sm;
+
+  i {
+    margin-right: $space-xs;
+    color: $hse-primary-teal;
+  }
+}
+
+.form-control {
+  width: 100%;
+  padding: $space-md $space-lg;
+  border: 2px solid $border-light;
+  border-radius: $border-radius-md;
+  font-size: $font-size-base;
+  transition: all $transition-hse;
+  background: $white;
+  font-family: $font-family-primary;
+
+  &::placeholder {
+    color: $text-muted;
+    opacity: 0.7;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $hse-primary-teal;
+    box-shadow: 0 0 0 3px rgba($hse-primary-teal, 0.1);
+    transform: translateY(-1px);
+  }
+
+  &.error {
+    border-color: $error;
+    box-shadow: 0 0 0 3px rgba($error, 0.1);
+  }
+}
+
+// Error Messages
+.error-message {
+  color: $error;
+  font-size: $font-size-xs;
+  margin-top: $space-xs;
+  font-weight: $font-weight-medium;
+
+  &::before {
+    content: '⚠ ';
+    margin-right: $space-xs;
+  }
+}
+
+// Authentication Buttons
+.btn-auth {
+  width: 100%;
+  padding: $space-md $space-xl;
+  background: linear-gradient(
+    135deg,
+    $hse-primary-teal 0%,
+    $hse-primary-teal-dark 100%
+  );
+  color: $white;
+  border: none;
+  border-radius: $border-radius-md;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: all $transition-hse;
+  margin-bottom: $space-lg;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  font-family: $font-family-primary;
+  box-shadow: 0 2px 4px rgba($hse-primary-teal, 0.2);
+
+  i {
+    margin-right: $space-sm;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba($hse-primary-teal, 0.3);
+    color: $white;
+    text-decoration: none;
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba($hse-primary-teal, 0.2);
+  }
+
+  &:focus {
+    outline: 2px solid rgba($hse-primary-teal, 0.5);
+    outline-offset: 2px;
+  }
+
+  // Secondary button variant
+  &.btn-secondary {
+    background: linear-gradient(
+      135deg,
+      $neutral-medium 0%,
+      darken($neutral-medium, 10%) 100%
+    );
+    box-shadow: 0 2px 4px rgba($neutral-medium, 0.2);
+
+    &:hover {
+      box-shadow: 0 6px 16px rgba($neutral-medium, 0.3);
+    }
+
+    &:active {
+      box-shadow: 0 2px 4px rgba($neutral-medium, 0.2);
+    }
+  }
+
+  // Inline button (not full width)
+  &.btn-inline {
+    width: auto;
+    display: inline-block;
+    margin: $space-sm;
+  }
+}
+
+// Alert Components
+.alert {
+  padding: $space-lg;
+  border-radius: $border-radius-md;
+  margin-bottom: $space-xl;
+  border: none;
+  font-weight: $font-weight-medium;
+
+  i {
+    margin-right: $space-sm;
+  }
+
+  &.alert-danger {
+    background: linear-gradient(
+      135deg,
+      lighten($error, 45%) 0%,
+      lighten($error, 40%) 100%
+    );
+    color: darken($error, 20%);
+    border-left: 4px solid $error;
+  }
+
+  &.alert-success {
+    background: linear-gradient(
+      135deg,
+      lighten($success, 40%) 0%,
+      lighten($success, 35%) 100%
+    );
+    color: darken($success, 20%);
+    border-left: 4px solid $success;
+  }
+
+  &.alert-warning {
+    background: linear-gradient(
+      135deg,
+      lighten($warning, 30%) 0%,
+      lighten($warning, 25%) 100%
+    );
+    color: darken($warning, 20%);
+    border-left: 4px solid $warning;
+  }
+}
+
+// Information Boxes
+.info-box {
+  background: linear-gradient(
+    135deg,
+    lighten($info, 35%) 0%,
+    lighten($info, 30%) 100%
+  );
+  border: 1px solid $info;
+  border-radius: $border-radius-md;
+  padding: $space-lg;
+  margin-bottom: $space-xl;
+  color: darken($info, 30%);
+
+  .fa {
+    margin-right: $space-sm;
+  }
+}
+
+.success-message {
+  background: linear-gradient(
+    135deg,
+    lighten($success, 40%) 0%,
+    lighten($success, 35%) 100%
+  );
+  border: 1px solid $success;
+  border-radius: $border-radius-md;
+  padding: $space-xl;
+  margin-bottom: $space-xxl;
+  color: darken($success, 20%);
+  text-align: center;
+
+  .fa {
+    font-size: $font-size-xxl;
+    margin-bottom: $space-lg;
+    display: block;
+    color: $success;
+  }
+
+  strong {
+    display: block;
+    margin-bottom: $space-sm;
+    font-size: $font-size-lg;
+  }
+
+  p {
+    margin: 0;
+    opacity: 0.9;
+  }
+}
+
+.instructions {
+  background: linear-gradient(
+    135deg,
+    lighten($warning, 30%) 0%,
+    lighten($warning, 25%) 100%
+  );
+  border: 1px solid $warning;
+  border-radius: $border-radius-md;
+  padding: $space-lg;
+  margin-bottom: $space-xl;
+  color: darken($warning, 30%);
+  font-size: $font-size-sm;
+
+  strong {
+    display: block;
+    margin-bottom: $space-sm;
+  }
+
+  ol {
+    text-align: left;
+    margin: $space-sm 0 0 0;
+    padding-left: $space-lg;
+
+    li {
+      margin-bottom: $space-xs;
+    }
+  }
+}
+
+// Password Requirements Box
+.requirements-box {
+  background: linear-gradient(
+    135deg,
+    $neutral-lightest 0%,
+    lighten($neutral-light, 5%) 100%
+  );
+  border: 1px solid $neutral-light;
+  border-radius: $border-radius-md;
+  padding: $space-lg;
+  margin-bottom: $space-xl;
+
+  .requirements-title {
+    font-weight: $font-weight-semibold;
+    color: $text-dark;
+    margin-bottom: $space-sm;
+    font-size: $font-size-sm;
+
+    i {
+      margin-right: $space-sm;
+      color: $hse-primary-teal;
+    }
+  }
+
+  .requirements-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      font-size: $font-size-xs;
+      color: $text-muted;
+      margin-bottom: $space-xs;
+      padding-left: $space-lg;
+      position: relative;
+
+      &::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: $success;
+        font-weight: $font-weight-bold;
+      }
+    }
+  }
+}
+
+// Dividers
+.auth-divider {
+  margin: $space-xl 0;
+  text-align: center;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: $border-light;
+  }
+
+  span {
+    background: $white;
+    padding: 0 $space-lg;
+    color: $text-muted;
+    font-size: $font-size-sm;
+    position: relative;
+    font-weight: $font-weight-medium;
+  }
+}
+
+// Authentication Links
+.auth-link {
+  color: $hse-primary-teal;
+  text-decoration: none;
+  font-weight: $font-weight-medium;
+  transition: all $transition-hse;
+
+  &:hover {
+    color: $hse-primary-teal-dark;
+    text-decoration: underline;
+  }
+
+  &:focus {
+    outline: 2px solid rgba($hse-primary-teal, 0.3);
+    outline-offset: 2px;
+  }
+
+  i {
+    margin-right: $space-xs;
+  }
+}
+
+// Authentication Links Container
+.auth-links {
+  text-align: center;
+  margin-top: $space-xl;
+}
+
+// Authentication Footer
+.auth-footer {
+  text-align: center;
+  margin-top: $space-xxl;
+  padding-top: $space-xxl;
+  border-top: 1px solid $border-light;
+  color: $text-muted;
+  font-size: $font-size-sm;
+  line-height: $line-height-relaxed;
+
+  i {
+    margin-right: $space-xs;
+  }
+
+  a {
+    @extend .auth-link;
+  }
+}
+
+// Authentication Options (side-by-side buttons)
+.auth-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-lg;
+  margin-top: $space-lg;
+  align-items: center;
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+    gap: $space-md;
+  }
+
+  .auth-link {
+    justify-self: center;
+  }
+}
+
+// Button Actions Container
+.auth-actions {
+  margin: $space-xxl 0;
+  text-align: center;
+
+  .btn-auth {
+    margin: $space-sm;
+  }
+}
+
+// Responsive Adjustments
+@media (max-width: $breakpoint-sm) {
+  .auth-container {
+    padding: $space-lg;
+  }
+
+  .auth-body {
+    padding: $space-xl;
+  }
+
+  .auth-header {
+    padding: $space-xl;
+
+    .auth-logo {
+      font-size: $font-size-xxl;
+    }
+
+    .auth-title {
+      font-size: $font-size-xl;
+    }
+  }
+}
+
+// Special styling for logout confirmation pages
+.logout-container {
+  @extend .auth-container;
+
+  .logout-card {
+    @extend .auth-card;
+    text-align: center;
+
+    .logout-content {
+      padding: $space-xxxl $space-xxl;
+
+      .logout-icon {
+        font-size: $font-size-display;
+        color: $hse-primary-teal;
+        margin-bottom: $space-xl;
+      }
+
+      .logout-message {
+        font-size: $font-size-lg;
+        color: $text-dark;
+        margin-bottom: $space-xxl;
+        line-height: $line-height-relaxed;
+      }
+    }
+  }
+}
+
+// Instructions component for password reset done
+.instructions {
+  background: linear-gradient(
+    135deg,
+    lighten($warning, 35%) 0%,
+    lighten($warning, 30%) 100%
+  );
+  border: 1px solid $warning;
+  border-radius: $border-radius-md;
+  padding: $space-lg;
+  margin-bottom: $space-xl;
+  color: darken($warning, 40%);
+  font-size: $font-size-sm;
+
+  strong {
+    display: block;
+    margin-bottom: $space-sm;
+    color: darken($warning, 50%);
+  }
+}
+
+.instructions-list {
+  text-align: left;
+  margin-top: $space-sm;
+  padding-left: 1.25rem;
+
+  li {
+    margin-bottom: $space-xs;
+    color: darken($warning, 40%);
+    font-size: $font-size-sm;
+  }
+}
+
+// Success header variant
+.auth-header.auth-header-success {
+  background: linear-gradient(135deg, $success 0%, darken($success, 10%) 100%);
+}

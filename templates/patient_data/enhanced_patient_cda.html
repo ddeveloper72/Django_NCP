@@ -1,0 +1,805 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load patient_filters %}
+{% load patient_date_filters %}
+{% load tooltip_tags %}
+
+{# Django replacement for Jinja2 macro - use |document_date filter instead #}
+{# format_medical_date functionality moved to patient_date_filters.py #}
+
+{% block title %}Enhanced CDA Display - {{ patient_identity.given_name }} {{ patient_identity.family_name }}{% endblock %}
+
+{% block extra_css %}
+<!-- Bootstrap 5.3 handles all styling - no inline CSS needed -->
+<style>
+/* Extended Patient Tab Navigation Styles */
+.tab-navigation {
+    display: flex;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+    gap: 0;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: #6c757d;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    border-radius: 8px 8px 0 0;
+    margin-right: 0.25rem;
+    position: relative;
+}
+
+.tab-button:hover {
+    color: #495057;
+    background: #f8f9fa;
+    transform: translateY(-1px);
+}
+
+.tab-button.active {
+    color: #ffffff !important;
+    border-bottom-color: var(--healthcare-blue);
+    background: var(--healthcare-blue) !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 91, 184, 0.3);
+}
+
+.tab-button.active:hover {
+    background: var(--healthcare-dark-blue) !important;
+    transform: translateY(-1px);
+}
+
+.tab-button .badge {
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Clinical Tab Content Styles */
+.clinical-tab-content {
+    display: none !important;
+    padding: 20px;
+    background: white;
+    border-radius: 0 0 0.375rem 0.375rem;
+    height: auto;
+    min-height: fit-content;
+    overflow: visible;
+}
+
+.clinical-tab-content.active {
+    display: block !important;
+    height: auto;
+    min-height: fit-content;
+    overflow: visible;
+}
+
+/* Extended Patient Section Styling */
+.clinical-section {
+    background: white;
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+    margin-bottom: 1.5rem;
+}
+
+.extended-tab-content-container {
+    background: white;
+    border-radius: 0 0 0.375rem 0.375rem;
+}
+
+/* Responsive design for tabs */
+@media (max-width: 768px) {
+    .tab-navigation {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .tab-button {
+        border-radius: 0.375rem;
+        margin-right: 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .tab-button.active {
+        border-bottom-color: #0066cc;
+    }
+}
+
+/* Layout Controls - Force Vertical Stacking */
+.section-wrapper {
+    margin-bottom: 1.5rem;
+    width: 100%;
+    display: block;
+    clear: both;
+}
+
+/* Ensure no horizontal scrolling or side-by-side layout */
+.card {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Fix for scrollbar issue - ensure parent containers grow to fit content */
+html, body {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+main {
+    height: auto !important;
+    min-height: unset !important;
+}
+
+/* Remove any viewport height constraints that might cause scrolling */
+.container-fluid {
+    height: auto !important;
+    min-height: unset !important;
+    overflow-x: hidden !important;
+    max-width: 100vw;
+}
+
+/* Fix specific tab content height constraint - User's targeted solution */
+.tab-content .tab-pane > div {
+    max-height: 100%;         /* Changed from 400px to 100% to prevent scrollbars */
+    overflow-y: visible;      /* Changed from auto to visible */
+}
+
+/* Disable card transform effects that might interfere with layout */
+.section-wrapper .card.shadow {
+    transform: none !important;
+    transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.section-wrapper .card.shadow:hover {
+    transform: none !important;
+}
+
+/* Admin-style contact cards aligned with System & Documentation styling */
+.admin-contact-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-card-header {
+    background: linear-gradient(135deg, #085a9f 0%, #064a8a 100%);
+    color: white;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.admin-card-header i {
+    margin-right: 0.5rem;
+    opacity: 0.9;
+}
+
+.admin-card-content {
+    padding: 1rem;
+}
+
+.admin-info-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.admin-info-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.admin-label {
+    min-width: 120px;
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.admin-label i {
+    color: #085a9f;
+    width: 16px;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+.admin-value {
+    color: #212529;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-left: 0.75rem;
+    flex: 1;
+}
+
+/* Role badges */
+.role-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.15rem 0.4rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+    font-weight: normal;
+}
+
+/* Language badges */
+.language-badge {
+    display: inline-block;
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+    border: 1px solid #bbdefb;
+}
+
+/* Special styling for guardian and other contact cards */
+.admin-contact-card.guardian-contact .admin-card-header {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+}
+
+.admin-contact-card.other-contact-card .admin-card-header {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+/* Combined contact card styling */
+.contact-section-item {
+    margin-bottom: 1.5rem !important;
+    padding-bottom: 1rem !important;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.contact-section-item:last-child {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: none;
+}
+
+.section-icon-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    color: #495057 !important;
+}
+
+.section-icon-header i {
+    color: #007bff !important;
+    margin-right: 0.5rem !important;
+}
+
+.telecom-container {
+    margin-top: 0.5rem;
+}
+
+/* Linear contact layout - streamlined and compact */
+.contact-info-unified {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.contact-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.contact-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 0.5rem 0.75rem !important;
+    margin: -0.75rem -0.75rem 0.75rem -0.75rem !important;
+    border-radius: 6px 6px 0 0;
+    font-size: 0.9rem !important;
+    font-weight: 500;
+}
+
+.contact-header i {
+    opacity: 0.9;
+}
+
+.contact-content {
+    padding: 0 !important;
+}
+
+/* Linear address layout - matching System & Documentation style */
+.address-inline {
+    font-size: 0.95rem !important;
+    color: #212529 !important;
+    margin-bottom: 0.5rem !important;
+    line-height: 1.4 !important;
+}
+
+.address-details-inline {
+    font-size: 0.85rem !important;
+    color: #495057 !important;
+    line-height: 1.4 !important;
+}
+
+.address-line {
+    display: inline-block;
+    margin-right: 0.5rem !important;
+    margin-bottom: 0.25rem !important;
+    font-size: 0.9rem !important;
+    line-height: 1.4 !important;
+}
+
+.address-line:after {
+    content: ", ";
+    color: #6c757d;
+}
+
+.address-line:last-child:after {
+    content: "";
+}
+
+.detail-item {
+    display: inline-block !important;
+    margin-right: 1rem !important;
+    margin-bottom: 0.25rem !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap;
+}
+
+.detail-label {
+    font-weight: 600 !important;
+    color: #495057 !important;
+    margin-right: 0.25rem !important;
+}
+
+.detail-value {
+    color: #212529 !important;
+}
+
+/* Linear telecom layout */
+.telecom-item {
+    display: flex !important;
+    align-items: center !important;
+    margin-bottom: 0.5rem !important;
+    padding: 0.25rem 0 !important;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.telecom-item:last-child {
+    border-bottom: none;
+}
+
+.telecom-icon {
+    margin-right: 0.75rem !important;
+    min-width: 20px;
+}
+
+.telecom-details {
+    flex: 1;
+    font-size: 0.9rem !important;
+}
+
+.telecom-value {
+    font-weight: 500;
+    color: #212529;
+}
+
+.telecom-meta {
+    font-size: 0.8rem !important;
+    color: #6c757d !important;
+    margin-top: 0.1rem !important;
+}
+
+/* Language badges - more linear */
+.language-badge {
+    display: inline-block;
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+    border: 1px solid #bbdefb;
+}
+
+/* Guardian section - streamlined */
+.guardian-card .contact-header {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+}
+
+.guardian-section {
+    margin-bottom: 1rem;
+}
+
+.guardian-subtitle {
+    font-size: 0.85rem;
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 0.25rem;
+}
+
+.role-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 0.15rem 0.4rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-nav">
+    <ol class="breadcrumb breadcrumb-enhanced mb-0">
+        <li class="breadcrumb-item">
+            <a href="{% url 'home' %}" class="text-decoration-none">
+                <i class="fas fa-home me-1"></i>Home
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'patient_data:patient_data_form' %}" class="text-decoration-none">
+                <i class="fas fa-search me-1"></i>Patient Search
+            </a>
+        </li>
+        {% if patient_identity.patient_id %}
+        <li class="breadcrumb-item">
+            <a href="{% url 'patient_data:patient_details' patient_identity.url_patient_id|default:patient_identity.patient_id %}"
+                class="text-decoration-none">
+                <i class="fas fa-user me-1"></i>{{ patient_identity.given_name }} {{
+                patient_identity.family_name }}
+            </a>
+        </li>
+        {% endif %}
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-file-medical me-1"></i>CDA Document
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block page_context %}
+<div class="page-context-content">
+    <div class="page-info">
+        <span class="page-location">
+            <i class="fa fa-file-medical"></i> CDA Document
+        </span>
+    </div>
+    <div class="page-actions">
+        {% if patient_identity.patient_id %}
+        <a href="{% url 'patient_data:patient_details' patient_identity.url_patient_id|default:patient_identity.patient_id %}"
+            class="btn btn-outline-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> Back to Patient
+        </a>
+        {% else %}
+        <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> Back to Search
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="p-0">
+    <!-- Patient Header with Tabbed Interface -->
+    <div class="section-wrapper">
+        <!-- Main Patient Header Card with Integrated Tabs -->
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0" {% tooltip "patient_name_header" %}>
+                        <i class="fas fa-user-injured me-2"></i>
+                        {# Django: Fix Jinja2 syntax - no ~ concatenation or |default() with args #}
+                        {% if patient_identity.full_name %}
+                        {{ patient_identity.full_name }}
+                        {% elif patient_identity.given_name or patient_identity.family_name %}
+                        {{ patient_identity.given_name|default:"" }} {{ patient_identity.family_name|default:"" }}
+                        {% else %}
+                        Patient
+                        {% endif %}
+                    </h2>
+                    <div class="d-flex align-items-center">
+                        <span class="badge {% if source_country == 'IE' %}bg-success{% elif source_country == 'MT' %}bg-primary{% elif source_country == 'PT' %}bg-info{% elif source_country == 'LU' %}bg-warning{% elif source_country == 'UNKNOWN' or source_country == 'ERROR' %}bg-danger{% else %}bg-secondary{% endif %} text-white me-2"
+                              {% tooltip "source_country_flag" %}>
+                            <i class="fas fa-flag me-1"></i>{{ source_country }}
+                        </span>
+                        <span class="badge {% if 'High' in translation_quality %}bg-success{% elif 'Medium' in translation_quality %}bg-warning{% else %}bg-secondary{% endif %}"
+                              {% tooltip "translation_quality" %}>
+                            <i class="fas fa-check-circle me-1"></i>{{ translation_quality }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integrated Navigation Tabs -->
+            <div class="card-body p-0">
+                <ul class="nav nav-tabs nav-tabs-healthcare border-0" id="patientTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab"
+                            data-bs-target="#overview-content" type="button" role="tab"
+                            aria-controls="overview-content" aria-selected="true">
+                            <i class="fas fa-user me-2"></i>
+                            Patient Overview
+                        </button>
+                    </li>
+
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="extended-tab" data-bs-toggle="tab"
+                            data-bs-target="#extended-content" type="button" role="tab"
+                            aria-controls="extended-content" aria-selected="false">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Extended Patient Information
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Integrated Tab Content -->
+                <div class="tab-content" id="patientTabContent">
+                    <!-- Patient Overview Tab Content -->
+                    <div class="tab-pane fade show active" id="overview-content" role="tabpanel" aria-labelledby="overview-tab">
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Birth Date:</strong>
+                                        {% if patient_identity.birth_date_formatted %}
+                                        {{ patient_identity.birth_date_formatted }}
+                                        {% elif patient_identity.birth_date %}
+                                        {{ patient_identity.birth_date|document_date }}
+                                        {% else %}
+                                        Unknown
+                                        {% endif %}
+                                    </p>
+                                    <p><strong>Gender:</strong> {{ patient_identity.gender|default:"Unknown" }}</p>
+                                    <p><strong>Patient ID:</strong> {{ patient_identity.patient_id }}</p>
+                                    {% if patient_identity.secondary_patient_id %}
+                                    <p><strong>Secondary ID:</strong> {{ patient_identity.secondary_patient_id }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Source Country:</strong> {{ source_country }}</p>
+                                    <p><strong>CDA Type:</strong> {{ cda_type }}</p>
+                                    <p><strong>Translation Quality:</strong>
+                                        <span class="badge {% if 'High' in translation_quality %}bg-success{% elif 'Medium' in translation_quality %}bg-warning{% else %}bg-secondary{% endif %}"
+                                              {% tooltip "translation_quality" "top" %}>
+                                            {{ translation_quality }}
+                                        </span>
+                                    </p>
+                                    {% if patient_identity.document_metadata %}
+                                    {# Django: Use direct access instead of {% set %} #}
+                                    {% if patient_identity.document_metadata.title %}
+                                    <p><strong>Document:</strong> {{ patient_identity.document_metadata.title }}</p>
+                                    {% endif %}
+                                    {% if patient_identity.document_metadata.language_code %}
+                                    <p><strong>Language:</strong> {{ patient_identity.document_metadata.language_code }}</p>
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- CDA Type Toggle Buttons -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="btn-group" role="group" aria-label="CDA Type Selection">
+                                        {# Django: Replace {% set %} with conditional class assignment #}
+                                        <a href="{% url 'patient_data:patient_cda_view_typed' patient_identity.url_patient_id|default:patient_identity.patient_id 'L1' %}"
+                                            class="{% if cda_type == 'L1' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %} {% if not has_l1_cda %} disabled{% endif %}">
+                                            <i class="fas fa-file-medical me-1"></i>L1 Original Document
+                                            {% if not has_l1_cda %}<small>(Not Available)</small>{% endif %}
+                                        </a>
+                                        {# Django: Replace {% set %} with conditional class assignment #}
+                                        <a href="{% url 'patient_data:patient_cda_view_typed' patient_identity.url_patient_id|default:patient_identity.patient_id 'L3' %}"
+                                            class="{% if cda_type == 'L3' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %} {% if not has_l3_cda %} disabled{% endif %}">
+                                            <i class="fas fa-language me-1"></i>L3 Patient Summary
+                                            {% if not has_l3_cda %}<small>(Not Available)</small>{% endif %}
+                                        </a>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        <strong>L1:</strong> Original clinical document from source country |
+                                        <strong>L3:</strong> Standardized European Patient Summary
+                                        {% if cda_type == 'L1' and has_l1_cda %}
+                                        | Currently viewing: <strong>Original clinical data</strong>
+                                        {% elif cda_type == 'L3' and has_l3_cda %}
+                                        | Currently viewing: <strong>European Patient Summary</strong>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Extended Patient Information Tab Content -->
+                    <div class="tab-pane fade" id="extended-content" role="tabpanel" aria-labelledby="extended-tab">
+                        <div class="p-4">
+                            {% include 'patient_data/components/extended_patient_info.html' %}
+                        </div>
+                    </div>
+
+                </div> <!-- End Integrated Tab Content -->
+            </div> <!-- End card-body -->
+        </div> <!-- End Main Patient Header Card -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Pure Bootstrap Tab Functionality -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('🎯 Initializing Pure Bootstrap Tabs...');
+
+        // Initialize Bootstrap tabs for Extended Patient Info
+        const extendedInfoTabs = document.querySelectorAll('#extendedInfoTabs button[data-bs-toggle="tab"]');
+        extendedInfoTabs.forEach(tab => {
+            new bootstrap.Tab(tab);
+        });
+
+        // Initialize Bootstrap tabs for Clinical Sections
+        const clinicalTabs = document.querySelectorAll('.clinical-tabs button[data-bs-toggle="tab"]');
+        clinicalTabs.forEach(tab => {
+            new bootstrap.Tab(tab);
+        });
+
+        // Enhanced hover effects for interactive elements
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.transition = 'transform 0.2s ease';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        console.log('✅ Pure Bootstrap functionality initialized successfully');
+    });
+
+    // Extended Patient Tab Management Function
+    function showExtendedTab(sectionId, tabType) {
+        console.log('🎯 Switching Extended Patient tab:', sectionId, tabType);
+
+        // Hide all tab contents for the extended patient section
+        const personalTab = document.getElementById(sectionId + '_personal');
+        const healthcareTab = document.getElementById(sectionId + '_healthcare');
+        const systemTab = document.getElementById(sectionId + '_system');
+        const clinicalTab = document.getElementById(sectionId + '_clinical');
+        const pdfsTab = document.getElementById(sectionId + '_pdfs');
+
+        // Find the parent extended patient container
+        const extendedContainer = personalTab ? personalTab.closest('.clinical-section') :
+            (healthcareTab ? healthcareTab.closest('.clinical-section') :
+            (systemTab ? systemTab.closest('.clinical-section') :
+            (clinicalTab ? clinicalTab.closest('.clinical-section') :
+            (pdfsTab ? pdfsTab.closest('.clinical-section') : null))));
+
+        if (!extendedContainer) {
+            console.error('❌ Extended patient container not found for:', sectionId);
+            return;
+        }
+
+        const buttons = extendedContainer.querySelectorAll('.tab-button');
+        const allTabs = [personalTab, healthcareTab, systemTab, clinicalTab, pdfsTab].filter(tab => tab !== null);
+
+        // Remove active class and hide all tabs
+        allTabs.forEach(tab => {
+            if (tab) {
+                tab.classList.remove('active');
+                tab.style.display = 'none';
+            }
+        });
+
+        // Remove active class from all buttons
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        // Show selected tab and activate corresponding button
+        let activeTab = null;
+        let activeButtonIndex = -1;
+
+        if (tabType === 'personal' && personalTab) {
+            activeTab = personalTab;
+            activeButtonIndex = 0;
+        } else if (tabType === 'healthcare' && healthcareTab) {
+            activeTab = healthcareTab;
+            activeButtonIndex = 1;
+        } else if (tabType === 'system' && systemTab) {
+            activeTab = systemTab;
+            activeButtonIndex = 2;
+        } else if (tabType === 'clinical' && clinicalTab) {
+            activeTab = clinicalTab;
+            activeButtonIndex = 3;
+        } else if (tabType === 'pdfs' && pdfsTab) {
+            activeTab = pdfsTab;
+            activeButtonIndex = pdfsTab ? 4 : -1;
+        }
+
+        if (activeTab) {
+            activeTab.classList.add('active');
+            activeTab.style.display = 'block';
+            console.log('✅ Activated tab:', activeTab.id);
+        }
+
+        if (activeButtonIndex >= 0 && buttons[activeButtonIndex]) {
+            buttons[activeButtonIndex].classList.add('active');
+            console.log('✅ Activated button:', activeButtonIndex);
+        }
+
+        console.log('✅ Extended patient tab switch completed:', sectionId, tabType);
+    }
+
+    // Date formatting utility function
+    function formatMedicalDate(dateStr) {
+        if (!dateStr || typeof dateStr !== 'string') return dateStr;
+
+        dateStr = dateStr.trim();
+        let parsedDate = null;
+
+        // Format: YYYYMMDDHHMMSS (e.g., 20130317124500)
+        if (/^\d{14}$/.test(dateStr)) {
+            const year = dateStr.substring(0, 4);
+            const month = dateStr.substring(4, 6);
+            const day = dateStr.substring(6, 8);
+            const hour = dateStr.substring(8, 10);
+            const minute = dateStr.substring(10, 12);
+            const second = dateStr.substring(12, 14);
+            parsedDate = new Date(year, month - 1, day, hour, minute, second);
+        }
+        // Format: YYYYMMDD (e.g., 20130317)
+        else if (/^\d{8}$/.test(dateStr)) {
+            const year = dateStr.substring(0, 4);
+            const month = dateStr.substring(4, 6);
+            const day = dateStr.substring(6, 8);
+            parsedDate = new Date(year, month - 1, day);
+        }
+        // Format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS (ISO format)
+        else if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+            parsedDate = new Date(dateStr);
+        }
+
+        if (parsedDate && !isNaN(parsedDate.getTime())) {
+            const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+            const day = String(parsedDate.getDate()).padStart(2, '0');
+            const year = parsedDate.getFullYear();
+            const hour = String(parsedDate.getHours()).padStart(2, '0');
+            const minute = String(parsedDate.getMinutes()).padStart(2, '0');
+
+            if (/^\d{8}$/.test(dateStr.trim()) || /^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
+                return `${month}/${day}/${year}`;
+            } else {
+                return `${month}/${day}/${year} ${hour}:${minute}`;
+            }
+        }
+        return dateStr;
+    }
+
+    // Initialize Bootstrap tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

@@ -119,9 +119,8 @@ def clean_patient_cda_view(request, patient_id):
         # Render the clean template
         return render(
             request,
-            "jinja2/patient_data/clean_cda_document.html",
+            "patient_data/clean_cda_document.html",
             context,
-            using="jinja2",
         )
 
     except Exception as e:

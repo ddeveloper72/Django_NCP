@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% block title %}Patient Details - EU NCP Portal{% endblock %}
+
+{% block page_context %}
+<div class="bg-light py-3 border-bottom">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-user text-primary me-2"></i>
+                <span class="text-muted">Patient Details</span>
+            </div>
+            <div>
+                <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Search
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2 text-primary fw-bold">Patient Details</h1>
+
+                {% if has_cda_match %}
+                <div class="badge bg-success fs-6 p-2">
+                    <i class="fas fa-check-circle me-1"></i>
+                    Match Found: {{ match_confidence }}% Confidence
+                </div>
+                {% else %}
+                <div class="badge bg-warning fs-6 p-2">
+                    <i class="fas fa-exclamation-circle me-1"></i>
+                    No Matching Records Found
+                </div>
+                {% endif %}
+            </div>
+
+    {% if session_error %}
+    <div class="alert alert-warning d-flex align-items-center" role="alert">
+        <i class="fas fa-exclamation-triangle me-3"></i>
+        <div>
+            <h5 class="alert-heading">Session Expired</h5>
+            <p class="mb-1">{{ session_error }}</p>
+            <p class="mb-0">
+                <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-link">
+                    <i class="fas fa-search me-1"></i> Search Again
+                </a>
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <!-- Patient Information Card -->
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user me-2"></i>
+                        Patient Information
+                        {% if has_cda_match %}
+                        <span class="badge bg-light text-primary ms-2">
+                            <i class="fas fa-check-circle me-1"></i>
+                            {{ match_confidence }}% Match
+                        </span>
+                        {% endif %}
+                    </h5>
+                    {% if has_cda_match %}
+                    <small class="text-light">
+                        Source: {{ source_country }} • Document: Patient Summary ({{ preferred_cda_type|default:"L3" }})
+                    </small>
+                    {% endif %}
+                </div>
+
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small">Full Name:</label>
+                            <p class="fw-bold mb-0">{{ patient_data.given_name }} {{ patient_data.family_name }}</p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Date of Birth:</label>
+                            <p class="mb-0">
+                                {% if patient_data.birth_date %}
+                                {{ patient_data.birth_date|date:"d F Y" }}
+                                {% else %}
+                                <span class="text-muted">Not provided</span>
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Gender:</label>
+                            <p class="mb-0">{{ patient_data.get_gender_display|default:"Not specified" }}</p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Country:</label>
+                            <p class="mb-0">{% if source_country_display %}{{ source_country_display }}{% else %}<span class="text-muted">Not specified</span>{% endif %}</p>
+                        </div>
+
+                        {% if has_cda_match and patient_summary.patient_identifiers %}
+                        {% for identifier in patient_summary.patient_identifiers %}
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small">Patient ID{% if identifier.assigningAuthorityName %} ({{ identifier.assigningAuthorityName }}){% elif identifier.root %} ({{ identifier.root }}){% endif %}:</label>
+                            <p class="mb-0 font-monospace">{{ identifier.extension }}</p>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if patient_data.patient_id %}
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small">Patient ID:</label>
+                            <p class="mb-0 font-monospace">{{ patient_id }}</p>
+                        </div>
+                        {% endif %}
+
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small">Submitted:</label>
+                            <p class="mb-0">
+                                {% if patient_data.access_timestamp %}
+                                {{ patient_data.access_timestamp|date:"j F Y, g:i:s A O" }}
+                                {% elif patient_data.patient_identifier.created_at %}
+                                {{ patient_data.patient_identifier.created_at|date:"j F Y, g:i:s A O" }}
+                                {% else %}
+                                <span class="text-muted">Not available</span>
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        {% if has_cda_match and patient_summary.file_path %}
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small">Source File:</label>
+                            <p class="mb-0 font-monospace small">{{ patient_summary.file_path|default:"Unknown" }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if has_cda_match %}
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-medical me-2"></i>
+                        Document Actions
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <!-- View CDA Document - Dynamic type based on user selection -->
+                        {% with selected_cda_type=preferred_cda_type|default:"L3" %}
+                        <a href="{% url 'patient_data:patient_cda_view_typed' patient_id selected_cda_type %}"
+                            class="btn btn-primary d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-eye me-2"></i>
+                                <div>
+                                    <div class="fw-bold">View CDA Document</div>
+                                    <small class="d-block">{{ selected_cda_type }} Browser View</small>
+                                </div>
+                            </div>
+                        </a>
+                        {% endwith %}
+
+                        <!-- Document Selection - Multiple Documents Available -->
+                        {% if l1_available and l3_available %}
+                        {% with total_docs=2 %}
+                        <a href="{% url 'patient_data:select_document' patient_id %}" class="btn btn-outline-primary d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-list me-2"></i>
+                                <div>
+                                    <div class="fw-bold">Select Document</div>
+                                    <small class="d-block">{{ total_docs }} Available</small>
+                                </div>
+                            </div>
+                        </a>
+                        {% endwith %}
+                        {% endif %}
+
+                        <!-- CDA Download - Always uses L1 for better PDF structure when available -->
+                        <a href="{% url 'patient_data:download_cda_pdf' patient_id %}" class="btn btn-outline-success d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-download me-2"></i>
+                                <div>
+                                    <div class="fw-bold">CDA Download</div>
+                                    <small class="d-block">
+                                        {% if l1_available %}L1 Document (PDF Structure){% else %}{{ preferred_cda_type|default:"L3" }} Document{% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Patient Summary PDF Download -->
+                        <a href="{% url 'patient_data:download_patient_summary_pdf' patient_id %}"
+                            class="btn btn-outline-info d-flex align-items-center justify-content-between" download>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-pdf me-2"></i>
+                                <div>
+                                    <div class="fw-bold">Patient Summary PDF</div>
+                                    <small class="d-block">Healthcare Professional</small>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- ORCD - PDF Preview and Download -->
+                        <a href="{% url 'patient_data:patient_orcd_view' patient_id %}" class="btn btn-outline-warning d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-text me-2"></i>
+                                <div>
+                                    <div class="fw-bold">ORCD</div>
+                                    <small class="d-block">PDF Preview & Download</small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="mt-4">
+                        <h6 class="text-muted mb-3">Document Information</h6>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <small class="d-flex justify-content-between">
+                                    <span class="text-muted">Source File:</span>
+                                    <span class="font-monospace">{{ cda_file_name }}</span>
+                                </small>
+                            </div>
+                            <div class="col-12">
+                                <small class="d-flex justify-content-between">
+                                    <span class="text-muted">Country:</span>
+                                    <span>{{ source_country }}</span>
+                                </small>
+                            </div>
+                            <div class="col-12">
+                                <small class="d-flex justify-content-between">
+                                    <span class="text-muted">Match Confidence:</span>
+                                    <span>{{ match_confidence }}%</span>
+                                </small>
+                            </div>
+                            <div class="col-12">
+                                <small class="d-flex justify-content-between">
+                                    <span class="text-muted">Available Types:</span>
+                                    <span>
+                                        {% if l1_available %}L1 CDA{% endif %}
+                                        {% if l1_available and l3_available %}, {% endif %}
+                                        {% if l3_available %}L3 CDA{% endif %}
+                                        {% if not l1_available and not l3_available %}Unknown{% endif %}
+                                    </span>
+                                </small>
+                            </div>
+                            <div class="col-12">
+                                <small class="d-flex justify-content-between">
+                                    <span class="text-muted">Rendering:</span>
+                                    <span>{{ preferred_cda_type }} CDA</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if has_cda_match %}
+    <!-- Extended Patient Information Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            {% include 'patient_data/components/extended_patient_info.html' %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not has_cda_match %}
+    <!-- No Match Found -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-search me-2"></i>
+                        Search Results
+                    </h5>
+                </div>
+
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                    <h4 class="text-primary">No Matching Records Found</h4>
+                    <p class="text-muted mb-4">We could not find any patient records in the EU member states database that match the provided credentials.</p>
+
+                    <div class="alert alert-info text-start">
+                        <h6 class="alert-heading">Suggestions:</h6>
+                        <ul class="mb-0">
+                            <li>Verify the patient name spelling</li>
+                            <li>Check the date of birth format</li>
+                            <li>Ensure the correct country is selected</li>
+                            <li>Try providing additional patient identifiers</li>
+                        </ul>
+                    </div>
+
+                    <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>
+                        Try Another Search
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+</div>
+{% endblock %}
