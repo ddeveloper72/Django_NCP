@@ -1274,25 +1274,20 @@ h6.bg-secondary {
   font-weight: 700 !important;
 }
 
-/* FontAwesome Icons in All Section Headers - Enhanced Styling */
+/* FontAwesome Icons - Enhanced Styling with Context-Aware Colors */
+
+/* Icons in dark backgrounds (headers with colored backgrounds) */
+.bg-primary i.fas, .bg-primary i.far, .bg-primary i.fab,
+.bg-secondary i.fas, .bg-secondary i.far, .bg-secondary i.fab,
+.bg-success i.fas, .bg-success i.far, .bg-success i.fab,
+.bg-info i.fas, .bg-info i.far, .bg-info i.fab,
+.bg-warning i.fas, .bg-warning i.far, .bg-warning i.fab,
+.bg-danger i.fas, .bg-danger i.far, .bg-danger i.fab,
+.bg-dark i.fas, .bg-dark i.far, .bg-dark i.fab,
+.card-header.bg-primary i.fas, .card-header.bg-primary i.far, .card-header.bg-primary i.fab,
 .clinical-section-card .section-header i.fas,
 .clinical-section-card .section-header i.far,
-.clinical-section-card .section-header i.fab,
-.card-header i.fas,
-.card-header i.far,
-.card-header i.fab,
-.section-header i.fas,
-.section-header i.far,
-.section-header i.fab,
-h4 i.fas,
-h4 i.far,
-h4 i.fab,
-h5 i.fas,
-h5 i.far,
-h5 i.fab,
-h6 i.fas,
-h6 i.far,
-h6 i.fab {
+.clinical-section-card .section-header i.fab {
   color: var(--healthcare-text-light) !important;
   margin-right: 0.75rem;
   font-size: 1.1rem;
@@ -1300,14 +1295,60 @@ h6 i.fab {
   transition: transform 0.3s ease;
 }
 
-/* Icon hover effects for interactive headers */
+/* Icons in light backgrounds (general usage) */
+.card-header i.fas:not(.bg-primary *):not(.bg-secondary *):not(.bg-success *):not(.bg-info *):not(.bg-warning *):not(.bg-danger *):not(.bg-dark *),
+.card-header i.far:not(.bg-primary *):not(.bg-secondary *):not(.bg-success *):not(.bg-info *):not(.bg-warning *):not(.bg-danger *):not(.bg-dark *),
+.card-header i.fab:not(.bg-primary *):not(.bg-secondary *):not(.bg-success *):not(.bg-info *):not(.bg-warning *):not(.bg-danger *):not(.bg-dark *),
+.card-body i.fas, .card-body i.far, .card-body i.fab,
+.breadcrumb i.fas, .breadcrumb i.far, .breadcrumb i.fab,
+.btn i.fas, .btn i.far, .btn i.fab,
+.alert i.fas, .alert i.far, .alert i.fab,
+h4 i.fas, h4 i.far, h4 i.fab,
+h5 i.fas, h5 i.far, h5 i.fab,
+h6 i.fas, h6 i.far, h6 i.fab,
+i.fas, i.far, i.fab {
+  color: var(--healthcare-blue) !important;
+  margin-right: 0.5rem;
+  font-size: 1.0rem;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+/* Color-specific icon styling */
+.text-info i.fas, .text-info i.far, .text-info i.fab,
+.card-title.text-info i.fas, .card-title.text-info i.far, .card-title.text-info i.fab {
+  color: var(--healthcare-blue) !important;
+}
+
+.text-success i.fas, .text-success i.far, .text-success i.fab,
+.card-title.text-success i.fas, .card-title.text-success i.far, .card-title.text-success i.fab {
+  color: var(--healthcare-green) !important;
+}
+
+.text-warning i.fas, .text-warning i.far, .text-warning i.fab,
+.card-title.text-warning i.fas, .card-title.text-warning i.far, .card-title.text-warning i.fab {
+  color: var(--healthcare-orange) !important;
+}
+
+.text-danger i.fas, .text-danger i.far, .text-danger i.fab,
+.card-title.text-danger i.fas, .card-title.text-danger i.far, .card-title.text-danger i.fab {
+  color: var(--healthcare-red) !important;
+}
+
+/* Icon hover effects for interactive elements */
 .card-header:hover i.fas,
 .card-header:hover i.far,
 .card-header:hover i.fab,
 .section-header:hover i.fas,
 .section-header:hover i.far,
-.section-header:hover i.fab {
+.section-header:hover i.fab,
+.btn:hover i.fas,
+.btn:hover i.far,
+.btn:hover i.fab,
+.breadcrumb-link:hover i.fas,
+.breadcrumb-link:hover i.far,
+.breadcrumb-link:hover i.fab {
   transform: scale(1.1);
+  color: var(--healthcare-dark-blue) !important;
 }
 
 /* Enhanced Data Display Tabs (Structured Data, Original Content, etc.) */
