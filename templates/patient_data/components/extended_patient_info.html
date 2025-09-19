@@ -711,35 +711,32 @@ button.tab-button.text-muted,
     opacity: 1 !important;
 }
 
-/* Ensure section header icons are WHITE on colored backgrounds */
+/* Force card header icons to be WHITE on colored backgrounds */
 .card-header i,
 .admin-card-header i,
 .bg-primary i,
+.bg-secondary i,
 .bg-success i,
-.bg-info i,
-.bg-warning i,
 .bg-danger i,
-.bg-secondary i {
+.bg-warning i,
+.bg-info i,
+.bg-light i,
+.bg-dark i {
     color: #ffffff !important;
     opacity: 1 !important;
 }
 
-/* Ensure card headers with colored backgrounds have white text and icons */
-.card-header.bg-primary,
-.card-header.bg-success,
-.card-header.bg-info,
-.card-header.bg-warning,
-.card-header.bg-danger,
-.card-header.bg-secondary {
-    color: #ffffff !important;
-}
-
-.card-header.bg-primary i,
-.card-header.bg-success i,
-.card-header.bg-info i,
-.card-header.bg-warning i,
-.card-header.bg-danger i,
-.card-header.bg-secondary i {
+/* Prevent icon color changes on hover */
+.card-header:hover i,
+.admin-card-header:hover i,
+.bg-primary:hover i,
+.bg-secondary:hover i,
+.bg-success:hover i,
+.bg-danger:hover i,
+.bg-warning:hover i,
+.bg-info:hover i,
+.bg-light:hover i,
+.bg-dark:hover i {
     color: #ffffff !important;
     opacity: 1 !important;
 }
