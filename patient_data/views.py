@@ -3834,14 +3834,14 @@ def patient_cda_view(request, patient_id, cda_type=None):
                         logger.error(f"Error applying Malta CDA enhancements: {e}")
 
                 # Extract extended header data if enhanced processing was successful
-                # First check if we have cached enhanced data in session
-                cached_extended_data = request.session.get("patient_extended_data")
+                # First check if we have cached enhanced data in session (patient-specific)
+                cached_extended_data = request.session.get(f"patient_extended_data_{patient_id}")
                 if cached_extended_data:
                     extended_header_data = cached_extended_data
-                    logger.info("USING CACHED EXTENDED HEADER DATA from session")
+                    logger.info(f"USING CACHED EXTENDED HEADER DATA from session for patient {patient_id}")
                 else:
                     extended_header_data = {}
-                    logger.info("GENERATING NEW EXTENDED HEADER DATA")
+                    logger.info(f"GENERATING NEW EXTENDED HEADER DATA for patient {patient_id}")
 
                 # DEBUG: Log the enhanced processing result status
                 logger.info(
@@ -4314,8 +4314,8 @@ def patient_cda_view(request, patient_id, cda_type=None):
         # Add extended header data to context for enhanced patient information display
         if extended_header_data:
             context["patient_extended_data"] = extended_header_data
-            # Store enhanced data in session for persistence across page loads
-            request.session["patient_extended_data"] = extended_header_data
+            # Store patient-specific extended data in session to prevent cross-contamination
+            request.session[f"patient_extended_data_{patient_id}"] = extended_header_data
             logger.info(
                 f"Successfully Added extended header data to context AND SESSION - Contact info: {extended_header_data.get('patient_contact_info', {}) if isinstance(extended_header_data, dict) else 'Available'}, "
                 f"Author HCP: {extended_header_data.get('author_hcp', {}) if isinstance(extended_header_data, dict) else 'Available'}, "
@@ -4651,8 +4651,8 @@ def patient_cda_view(request, patient_id, cda_type=None):
 
             # TEMPORARILY ENABLED: Mock data application - testing extended patient templates
             context["patient_extended_data"] = mock_extended_data
-            # Store mock enhanced data in session for persistence across page loads
-            request.session["patient_extended_data"] = mock_extended_data
+            # Store patient-specific mock data in session to prevent cross-contamination
+            request.session[f"patient_extended_data_{patient_id}"] = mock_extended_data
             logger.info(
                 f"🧪 MOCK DATA ENABLED - Testing extended patient templates for {patient_country_code} patient {patient_id}"
             )
