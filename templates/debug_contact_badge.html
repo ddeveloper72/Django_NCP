@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Template Debug Test</title>
+</head>
+<body>
+    <h1>Debug Contact Data Badge Logic</h1>
+
+    <!-- Test the exact template logic from extended_patient_info.html -->
+    <div>
+        <p>contact_data: {{ contact_data }}</p>
+        <p>contact_data.addresses: {{ contact_data.addresses }}</p>
+        <p>contact_data.telecoms: {{ contact_data.telecoms }}</p>
+        <p>addresses length: {{ contact_data.addresses|length }}</p>
+        <p>telecoms length: {{ contact_data.telecoms|length }}</p>
+
+        <!-- Test the condition that determines badge visibility -->
+        {% if contact_data and contact_data.addresses or contact_data.telecoms %}
+            <p style="color: red;">CONDITION IS TRUE - Badge should show</p>
+            <span class="badge bg-primary ms-2">
+                Badge count: {{ contact_data.addresses|length|add:contact_data.telecoms|length }}
+            </span>
+        {% else %}
+            <p style="color: green;">CONDITION IS FALSE - Badge should NOT show</p>
+        {% endif %}
+
+        <!-- Break down the condition -->
+        <p>contact_data exists: {% if contact_data %}YES{% else %}NO{% endif %}</p>
+        <p>contact_data.addresses exists: {% if contact_data.addresses %}YES{% else %}NO{% endif %}</p>
+        <p>contact_data.telecoms exists: {% if contact_data.telecoms %}YES{% else %}NO{% endif %}</p>
+
+        <!-- Test individual parts -->
+        <p>Part 1 (contact_data and contact_data.addresses): {% if contact_data and contact_data.addresses %}TRUE{% else %}FALSE{% endif %}</p>
+        <p>Part 2 (contact_data.telecoms): {% if contact_data.telecoms %}TRUE{% else %}FALSE{% endif %}</p>
+    </div>
+</body>
+</html>

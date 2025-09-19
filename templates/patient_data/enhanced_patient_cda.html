@@ -444,6 +444,93 @@ main {
     font-size: 0.75rem;
     margin-left: 0.5rem;
 }
+
+/* Patient Overview Tabs (Bootstrap nav-link) Styling Fix */
+.nav-tabs-healthcare .nav-link,
+.nav-tabs .nav-link,
+button.nav-link {
+    background-color: #ffffff !important;
+    border: 2px solid #0085e9 !important;
+    color: #0085e9 !important;
+    border-radius: 0.375rem !important;
+    padding: 0.5rem 1rem !important;
+    margin-right: 0.5rem !important;
+    transition: all 0.3s ease-in-out !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+    border-bottom: 2px solid #0085e9 !important;
+}
+
+/* Patient Overview Tabs Hover State */
+.nav-tabs-healthcare .nav-link:hover,
+.nav-tabs .nav-link:hover,
+button.nav-link:hover {
+    background-color: #0085e9 !important;
+    border-color: #0085e9 !important;
+    color: #1a1a1a !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 133, 233, 0.3) !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+    border-bottom: 2px solid #0085e9 !important;
+}
+
+/* Patient Overview Tabs Active State */
+.nav-tabs-healthcare .nav-link.active,
+.nav-tabs .nav-link.active,
+button.nav-link.active {
+    background-color: #0085e9 !important;
+    border-color: #0085e9 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 133, 233, 0.3) !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+    border-bottom: 2px solid #0085e9 !important;
+}
+
+/* Patient Overview Tabs Active Hover */
+.nav-tabs-healthcare .nav-link.active:hover,
+.nav-tabs .nav-link.active:hover,
+button.nav-link.active:hover {
+    background-color: #0070c7 !important;
+    border-color: #0070c7 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+    border-bottom: 2px solid #0070c7 !important;
+}
+
+/* Patient Overview Tabs Icons */
+.nav-tabs-healthcare .nav-link i,
+.nav-tabs .nav-link i,
+button.nav-link i {
+    color: #0085e9 !important;
+    transition: color 0.3s ease-in-out !important;
+    opacity: 1 !important;
+}
+
+.nav-tabs-healthcare .nav-link:hover i,
+.nav-tabs .nav-link:hover i,
+button.nav-link:hover i {
+    color: #1a1a1a !important;
+    opacity: 1 !important;
+}
+
+.nav-tabs-healthcare .nav-link.active i,
+.nav-tabs .nav-link.active i,
+button.nav-link.active i {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+.nav-tabs-healthcare .nav-link.active:hover i,
+.nav-tabs .nav-link.active:hover i,
+button.nav-link.active:hover i {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
 </style>
 {% endblock %}
 

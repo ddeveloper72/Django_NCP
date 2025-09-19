@@ -9,9 +9,20 @@
         <button class="tab-button active" onclick="showExtendedTab('extended_patient', 'personal')"
                 type="button">
             <i class="fas fa-user me-1"></i>Personal Information
-            {% if contact_data and contact_data.addresses or contact_data.telecoms %}
+            {% comment %}Show badge if any contact information exists{% endcomment %}
+            {% if contact_data.addresses or contact_data.telecoms or administrative_data.patient_contact_info.addresses or administrative_data.patient_contact_info.telecoms or administrative_data.guardian.contact_info.addresses or administrative_data.guardian.contact_info.telecoms or administrative_data.other_contacts %}
             <span class="badge bg-primary ms-2">
-                {{ contact_data.addresses|length|add:contact_data.telecoms|length }}
+                {% comment %}Calculate contact count: primary + admin + guardian + other contacts{% endcomment %}
+                {% with primary_count=contact_data.addresses|length|add:contact_data.telecoms|length %}
+                {% with admin_count=administrative_data.patient_contact_info.addresses|length|add:administrative_data.patient_contact_info.telecoms|length %}
+                {% with guardian_count=administrative_data.guardian.contact_info.addresses|length|add:administrative_data.guardian.contact_info.telecoms|length %}
+                {% with other_contacts_count=administrative_data.other_contacts|length %}
+                    {# Each other contact typically has 1-2 contact methods (address + phone), so multiply by 2 as estimate #}
+                    {{ primary_count|add:admin_count|add:guardian_count|add:other_contacts_count|add:other_contacts_count }}
+                {% endwith %}
+                {% endwith %}
+                {% endwith %}
+                {% endwith %}
             </span>
             {% endif %}
         </button>
@@ -543,3 +554,161 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 3000); // Check after 3 seconds
 });
 </script>
+
+<style>
+/* Enhanced tab button styling with MAXIMUM specificity to override Bootstrap */
+.clinical-section .tab-navigation .tab-button,
+.tab-navigation .tab-button,
+button.tab-button {
+    background-color: #ffffff !important;
+    border: 2px solid #0085e9 !important;
+    color: #0085e9 !important;
+    border-radius: 0.375rem !important;
+    padding: 0.5rem 1rem !important;
+    margin-right: 0.5rem !important;
+    transition: all 0.3s ease-in-out !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+}
+
+/* Hover state: Blue background with DARK text for maximum contrast */
+.clinical-section .tab-navigation .tab-button:hover,
+.tab-navigation .tab-button:hover,
+button.tab-button:hover {
+    background-color: #0085e9 !important;
+    border-color: #0085e9 !important;
+    color: #1a1a1a !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 133, 233, 0.3) !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+}
+
+/* Active state: Blue background with WHITE text */
+.clinical-section .tab-navigation .tab-button.active,
+.tab-navigation .tab-button.active,
+button.tab-button.active {
+    background-color: #0085e9 !important;
+    border-color: #0085e9 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 133, 233, 0.3) !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+}
+
+/* Active hover: Keep white text */
+.clinical-section .tab-navigation .tab-button.active:hover,
+.tab-navigation .tab-button.active:hover,
+button.tab-button.active:hover {
+    background-color: #0070c7 !important;
+    border-color: #0070c7 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+}
+
+/* FORCE icon colors to match text exactly */
+.clinical-section .tab-navigation .tab-button i,
+.tab-navigation .tab-button i,
+button.tab-button i {
+    color: #0085e9 !important;
+    transition: color 0.3s ease-in-out !important;
+    opacity: 1 !important;
+}
+
+.clinical-section .tab-navigation .tab-button:hover i,
+.tab-navigation .tab-button:hover i,
+button.tab-button:hover i {
+    color: #1a1a1a !important;
+    opacity: 1 !important;
+}
+
+.clinical-section .tab-navigation .tab-button.active i,
+.tab-navigation .tab-button.active i,
+button.tab-button.active i {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+.clinical-section .tab-navigation .tab-button.active:hover i,
+.tab-navigation .tab-button.active:hover i,
+button.tab-button.active:hover i {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* Force badge visibility and contrast */
+.tab-button .badge {
+    background-color: #0085e9 !important;
+    color: #ffffff !important;
+    border: 1px solid #0085e9 !important;
+    transition: all 0.3s ease-in-out !important;
+    opacity: 1 !important;
+}
+
+.tab-button:hover .badge {
+    background-color: #1a1a1a !important;
+    color: #ffffff !important;
+    border: 1px solid #1a1a1a !important;
+    opacity: 1 !important;
+}
+
+.tab-button.active .badge {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    opacity: 1 !important;
+}
+
+/* Disabled tabs */
+.clinical-section .tab-navigation .tab-button.text-muted,
+.tab-navigation .tab-button.text-muted,
+button.tab-button.text-muted {
+    background-color: #f8f9fa !important;
+    border-color: #6c757d !important;
+    color: #6c757d !important;
+    opacity: 1 !important;
+}
+
+.clinical-section .tab-navigation .tab-button.text-muted:hover,
+.tab-navigation .tab-button.text-muted:hover,
+button.tab-button.text-muted:hover {
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2) !important;
+    opacity: 1 !important;
+}
+
+.tab-button.text-muted i {
+    color: #6c757d !important;
+    opacity: 1 !important;
+}
+
+.tab-button.text-muted:hover i {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* Ensure section header icons match text color */
+.card-header i,
+.admin-card-header i {
+    color: inherit !important;
+    opacity: 1 !important;
+}
+
+/* Tab navigation layout */
+.tab-navigation {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.tab-navigation .tab-button {
+    margin-bottom: 0.5rem !important;
+}
+</style>
