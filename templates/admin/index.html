@@ -8,31 +8,31 @@
 <div class="module filtered" id="test-data-management">
     <table>
         <caption>
-            <a href="{% url 'admin:patient_data_test_data_dashboard' %}" class="section">
+            <a href="{% url 'patient_data:test_patients' %}" class="section">
                 EU Test Data Management
             </a>
         </caption>
         <tbody>
             <tr class="model-row">
                 <th scope="row">
-                    <a href="{% url 'admin:patient_data_test_data_dashboard' %}">
-                        Test Data Dashboard
+                    <a href="{% url 'patient_data:test_patients' %}">
+                        Test Patients Dashboard
                     </a>
                 </th>
                 <td>
-                    <a href="{% url 'admin:patient_data_test_data_dashboard' %}" class="addlink">
-                        View Dashboard
+                    <a href="{% url 'patient_data:test_patients' %}" class="addlink">
+                        View Test Patients
                     </a>
                 </td>
             </tr>
             <tr class="model-row">
                 <th scope="row">
-                    <a href="{% url 'admin:patient_data_test_data_list' %}">
+                    <a href="{% url 'patient_data:test_patients' %}">
                         Test Data Patients
                     </a>
                 </th>
                 <td>
-                    <a href="{% url 'admin:patient_data_test_data_list' %}" class="changelink">
+                    <a href="{% url 'patient_data:test_patients' %}" class="changelink">
                         {% if test_data_count %}
                         {{ test_data_count }} patient{{ test_data_count|pluralize }}
                         {% else %}
