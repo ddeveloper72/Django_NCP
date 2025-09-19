@@ -2274,6 +2274,8 @@ def patient_details_view(request, patient_id):
     - Real patient IDs from CDA are larger numbers (e.g., aGVhbHRoY2FyZUlkMTIz)
     - Session IDs are safe for logging, real patient IDs must be protected
     """
+    
+    print(f"DEBUG: patient_details_view called with patient_id: {patient_id}")
 
     # First check for PatientSession record (new session management)
     from .models import PatientSession
@@ -2302,71 +2304,74 @@ def patient_details_view(request, patient_id):
     # If no session data found, this might be direct access from admin console
     # Try to find the patient in the test data index and perform a search
     if not match_data:
-        logger.info(f"No session data found for patient {patient_id}, attempting direct lookup")
+        logger.info(
+            f"No session data found for patient {patient_id}, attempting direct lookup"
+        )
         try:
             from .services.cda_document_index import get_cda_indexer
-            from .services import EUNCPPatientSearchService
-            from .models import PatientCredentials
-            
+            from .services import EUPatientSearchService, PatientCredentials
+
             indexer = get_cda_indexer()
             all_patients = indexer.get_all_patients()
-            
+
             # Find the patient by patient_id
             target_patient = None
             for patient in all_patients:
-                if patient['patient_id'] == patient_id:
+                if patient["patient_id"] == patient_id:
                     target_patient = patient
                     break
-            
+
             if target_patient:
-                logger.info(f"Found patient {patient_id} in index: {target_patient['given_name']} {target_patient['family_name']}")
-                
+                logger.info(
+                    f"Found patient {patient_id} in index: {target_patient['given_name']} {target_patient['family_name']}"
+                )
+
                 # Create credentials for search
                 credentials = PatientCredentials(
-                    given_name=target_patient['given_name'],
-                    family_name=target_patient['family_name'],
-                    birth_date=target_patient.get('birth_date', ''),
-                    country_code=target_patient['country_code']
+                    given_name=target_patient["given_name"],
+                    family_name=target_patient["family_name"],
+                    birth_date=target_patient.get("birth_date", ""),
+                    country_code=target_patient["country_code"],
                 )
-                
+
                 # Perform the search
-                search_service = EUNCPPatientSearchService()
+                search_service = EUPatientSearchService()
                 search_result = search_service.search_patient(credentials)
-                
+
                 if search_result:
                     logger.info(f"Direct search successful for patient {patient_id}")
-                    
+
                     # Store in session for future access
                     match_data = {
-                        'patient_data': {
-                            'name': f"{target_patient['given_name']} {target_patient['family_name']}",
-                            'given_name': target_patient['given_name'],
-                            'family_name': target_patient['family_name'],
-                            'birth_date': target_patient.get('birth_date', ''),
-                            'gender': target_patient.get('gender', ''),
+                        "patient_data": {
+                            "name": f"{target_patient['given_name']} {target_patient['family_name']}",
+                            "given_name": target_patient["given_name"],
+                            "family_name": target_patient["family_name"],
+                            "birth_date": target_patient.get("birth_date", ""),
+                            "gender": target_patient.get("gender", ""),
                         },
-                        'cda_content': search_result.cda_content,
-                        'file_path': search_result.file_path,
-                        'confidence_score': search_result.confidence_score,
-                        'country_code': target_patient['country_code'],
-                        'preferred_cda_type': 'L3',
-                        'has_l1': search_result.has_l1,
-                        'has_l3': search_result.has_l3,
+                        "cda_content": search_result.cda_content,
+                        "file_path": search_result.file_path,
+                        "confidence_score": search_result.confidence_score,
+                        "country_code": target_patient["country_code"],
+                        "preferred_cda_type": "L3",
+                        "has_l1": search_result.has_l1,
+                        "has_l3": search_result.has_l3,
                     }
-                    
+
                     # Store in session
                     session_key = f"patient_match_{patient_id}"
                     request.session[session_key] = match_data
-                    
+
                     messages.success(
                         request,
-                        f"Patient documents found with 100.0% confidence in {target_patient['country_code']} NCP!"
+                        f"Patient documents found with 100.0% confidence in {target_patient['country_code']} NCP!",
                     )
                 else:
                     logger.warning(f"Direct search failed for patient {patient_id}")
             else:
                 logger.warning(f"Patient {patient_id} not found in test data index")
-                
+
         except Exception as e:
             logger.error(f"Error during direct patient lookup for {patient_id}: {e}")
 

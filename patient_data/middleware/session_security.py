@@ -52,6 +52,7 @@ class PatientSessionMiddleware(MiddlewareMixin):
         "/login/",
         "/logout/",
         "/api/health/",
+        "/patients/test-patients/",  # Allow access to test patients list
     ]
 
     # Maximum requests per session per minute
@@ -103,6 +104,14 @@ class PatientSessionMiddleware(MiddlewareMixin):
 
     def _handle_patient_session(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle patient session validation and management."""
+
+        # Special case: Allow direct access to patient details for admin users
+        # This enables direct navigation from admin console to patient details
+        if (request.path.startswith("/patients/details/") and 
+            request.user.is_authenticated and 
+            (request.user.is_staff or request.user.is_superuser)):
+            logger.info(f"Allowing direct admin access to {request.path} for user {request.user}")
+            return None
 
         # Extract session ID from URL or headers
         session_id = self._extract_session_id(request)
