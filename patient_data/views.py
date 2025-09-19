@@ -2177,6 +2177,12 @@ def patient_data_view(request):
         # GET request - check for URL parameters to pre-fill form
         initial_data = {}
 
+        # Check for session-based pre-fill data first (from smart search)
+        session_prefill = request.session.pop('prefill_search_form', None)
+        if session_prefill:
+            initial_data.update(session_prefill)
+            logger.info(f"Pre-filling form from session data: {session_prefill}")
+
         # Check for country and patient_id parameters from test patient links
         country_param = request.GET.get("country")
         patient_id_param = request.GET.get("patient_id")
