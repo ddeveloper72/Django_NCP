@@ -559,7 +559,9 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Enhanced tab button styling with MAXIMUM specificity to override Bootstrap */
 .clinical-section .tab-navigation .tab-button,
 .tab-navigation .tab-button,
-button.tab-button {
+button.tab-button,
+#pdf-tab-btn,
+#clinical-tab-btn {
     background-color: #ffffff !important;
     border: 2px solid #0085e9 !important;
     color: #0085e9 !important;
@@ -575,7 +577,9 @@ button.tab-button {
 /* Hover state: Blue background with DARK text for maximum contrast */
 .clinical-section .tab-navigation .tab-button:hover,
 .tab-navigation .tab-button:hover,
-button.tab-button:hover {
+button.tab-button:hover,
+#pdf-tab-btn:hover,
+#clinical-tab-btn:hover {
     background-color: #0085e9 !important;
     border-color: #0085e9 !important;
     color: #1a1a1a !important;
@@ -588,7 +592,9 @@ button.tab-button:hover {
 /* Active state: Blue background with WHITE text */
 .clinical-section .tab-navigation .tab-button.active,
 .tab-navigation .tab-button.active,
-button.tab-button.active {
+button.tab-button.active,
+#pdf-tab-btn.active,
+#clinical-tab-btn.active {
     background-color: #0085e9 !important;
     border-color: #0085e9 !important;
     color: #ffffff !important;
@@ -600,7 +606,9 @@ button.tab-button.active {
 /* Active hover: Keep white text */
 .clinical-section .tab-navigation .tab-button.active:hover,
 .tab-navigation .tab-button.active:hover,
-button.tab-button.active:hover {
+button.tab-button.active:hover,
+#pdf-tab-btn.active:hover,
+#clinical-tab-btn.active:hover {
     background-color: #0070c7 !important;
     border-color: #0070c7 !important;
     color: #ffffff !important;
@@ -612,7 +620,9 @@ button.tab-button.active:hover {
 /* FORCE icon colors to match text exactly */
 .clinical-section .tab-navigation .tab-button i,
 .tab-navigation .tab-button i,
-button.tab-button i {
+button.tab-button i,
+#pdf-tab-btn i,
+#clinical-tab-btn i {
     color: #0085e9 !important;
     transition: color 0.3s ease-in-out !important;
     opacity: 1 !important;
@@ -620,27 +630,35 @@ button.tab-button i {
 
 .clinical-section .tab-navigation .tab-button:hover i,
 .tab-navigation .tab-button:hover i,
-button.tab-button:hover i {
+button.tab-button:hover i,
+#pdf-tab-btn:hover i,
+#clinical-tab-btn:hover i {
     color: #1a1a1a !important;
     opacity: 1 !important;
 }
 
 .clinical-section .tab-navigation .tab-button.active i,
 .tab-navigation .tab-button.active i,
-button.tab-button.active i {
+button.tab-button.active i,
+#pdf-tab-btn.active i,
+#clinical-tab-btn.active i {
     color: #ffffff !important;
     opacity: 1 !important;
 }
 
 .clinical-section .tab-navigation .tab-button.active:hover i,
 .tab-navigation .tab-button.active:hover i,
-button.tab-button.active:hover i {
+button.tab-button.active:hover i,
+#pdf-tab-btn.active:hover i,
+#clinical-tab-btn.active:hover i {
     color: #ffffff !important;
     opacity: 1 !important;
 }
 
-/* Force badge visibility and contrast */
-.tab-button .badge {
+/* Force badge visibility and contrast - Keep badges BLUE always */
+.tab-button .badge,
+#pdf-tab-btn .badge,
+#clinical-tab-btn .badge {
     background-color: #0085e9 !important;
     color: #ffffff !important;
     border: 1px solid #0085e9 !important;
@@ -648,55 +666,81 @@ button.tab-button.active:hover i {
     opacity: 1 !important;
 }
 
-.tab-button:hover .badge {
-    background-color: #1a1a1a !important;
+.tab-button:hover .badge,
+#pdf-tab-btn:hover .badge,
+#clinical-tab-btn:hover .badge {
+    background-color: #0085e9 !important; /* Keep blue on hover */
     color: #ffffff !important;
-    border: 1px solid #1a1a1a !important;
+    border: 1px solid #0085e9 !important;
     opacity: 1 !important;
 }
 
-.tab-button.active .badge {
+.tab-button.active .badge,
+#pdf-tab-btn.active .badge,
+#clinical-tab-btn.active .badge {
     background-color: rgba(255, 255, 255, 0.2) !important;
     color: #ffffff !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
     opacity: 1 !important;
 }
 
-/* Disabled tabs */
+/* Disabled/muted tabs - SPECIAL handling for PDF and Clinical tabs */
 .clinical-section .tab-navigation .tab-button.text-muted,
 .tab-navigation .tab-button.text-muted,
-button.tab-button.text-muted {
+button.tab-button.text-muted,
+#pdf-tab-btn.text-muted,
+#clinical-tab-btn.text-muted,
+.tab-button:disabled,
+#pdf-tab-btn:disabled,
+#clinical-tab-btn:disabled {
     background-color: #f8f9fa !important;
     border-color: #6c757d !important;
     color: #6c757d !important;
     opacity: 1 !important;
+    pointer-events: none !important; /* NO hover effects for disabled/muted tabs */
+    cursor: default !important;
 }
 
-.clinical-section .tab-navigation .tab-button.text-muted:hover,
-.tab-navigation .tab-button.text-muted:hover,
-button.tab-button.text-muted:hover {
-    background-color: #6c757d !important;
-    border-color: #6c757d !important;
-    color: #ffffff !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2) !important;
-    opacity: 1 !important;
-}
-
-.tab-button.text-muted i {
+.tab-button.text-muted i,
+#pdf-tab-btn.text-muted i,
+#clinical-tab-btn.text-muted i,
+.tab-button:disabled i,
+#pdf-tab-btn:disabled i,
+#clinical-tab-btn:disabled i {
     color: #6c757d !important;
     opacity: 1 !important;
 }
 
-.tab-button.text-muted:hover i {
+/* Ensure section header icons are WHITE on colored backgrounds */
+.card-header i,
+.admin-card-header i,
+.bg-primary i,
+.bg-success i,
+.bg-info i,
+.bg-warning i,
+.bg-danger i,
+.bg-secondary i {
     color: #ffffff !important;
     opacity: 1 !important;
 }
 
-/* Ensure section header icons match text color */
-.card-header i,
-.admin-card-header i {
-    color: inherit !important;
+/* Ensure card headers with colored backgrounds have white text and icons */
+.card-header.bg-primary,
+.card-header.bg-success,
+.card-header.bg-info,
+.card-header.bg-warning,
+.card-header.bg-danger,
+.card-header.bg-secondary {
+    color: #ffffff !important;
+}
+
+.card-header.bg-primary i,
+.card-header.bg-success i,
+.card-header.bg-info i,
+.card-header.bg-warning i,
+.card-header.bg-danger i,
+.card-header.bg-secondary i {
+    color: #ffffff !important;
     opacity: 1 !important;
 }
 
