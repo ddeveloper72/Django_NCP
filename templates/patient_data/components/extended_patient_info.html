@@ -711,7 +711,7 @@ button.tab-button.text-muted,
     opacity: 1 !important;
 }
 
-/* Force card header icons to be WHITE on colored backgrounds */
+/* Force card header icons to be WHITE and STATIC - NO hover changes */
 .card-header i,
 .admin-card-header i,
 .bg-primary i,
@@ -721,12 +721,21 @@ button.tab-button.text-muted,
 .bg-warning i,
 .bg-info i,
 .bg-light i,
-.bg-dark i {
+.bg-dark i,
+.card-header .fas,
+.card-header .far,
+.card-header .fal,
+.card-header .fab,
+.admin-card-header .fas,
+.admin-card-header .far,
+.admin-card-header .fal,
+.admin-card-header .fab {
     color: #ffffff !important;
     opacity: 1 !important;
+    transition: none !important; /* NO transitions */
 }
 
-/* Prevent icon color changes on hover */
+/* PREVENT any hover changes on section header icons */
 .card-header:hover i,
 .admin-card-header:hover i,
 .bg-primary:hover i,
@@ -736,9 +745,21 @@ button.tab-button.text-muted,
 .bg-warning:hover i,
 .bg-info:hover i,
 .bg-light:hover i,
-.bg-dark:hover i {
+.bg-dark:hover i,
+.card-header:hover .fas,
+.card-header:hover .far,
+.card-header:hover .fal,
+.card-header:hover .fab,
+.admin-card-header:hover .fas,
+.admin-card-header:hover .far,
+.admin-card-header:hover .fal,
+.admin-card-header:hover .fab,
+.card:hover .card-header i,
+.card:hover .admin-card-header i {
     color: #ffffff !important;
     opacity: 1 !important;
+    transition: none !important; /* NO transitions */
+    transform: none !important; /* NO transforms */
 }
 
 /* Tab navigation layout */
