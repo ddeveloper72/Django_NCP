@@ -6,7 +6,11 @@ URL patterns for patient search, data retrieval, and document request functional
 
 from django.urls import path
 from patient_data import views as main_views
-from .cda_test_views import test_patients_view, refresh_cda_index_view, smart_patient_search_view
+from .cda_test_views import (
+    test_patients_view,
+    refresh_cda_index_view,
+    smart_patient_search_view,
+)
 from .debug_views import debug_cda_index
 from .clean_cda_views import clean_patient_cda_view
 from .view_modules.enhanced_cda_view import (
@@ -32,7 +36,11 @@ urlpatterns = [
     # Test CDA Documents Management
     path("test-patients/", test_patients_view, name="test_patients"),
     path("refresh-cda-index/", refresh_cda_index_view, name="refresh_cda_index"),
-    path("smart-search/<str:patient_id>/", smart_patient_search_view, name="smart_patient_search"),
+    path(
+        "smart-search/<str:patient_id>/",
+        smart_patient_search_view,
+        name="smart_patient_search",
+    ),
     # Patient data form and search
     path("", main_views.patient_data_view, name="patient_data_form"),
     path(

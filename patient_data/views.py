@@ -2178,7 +2178,7 @@ def patient_data_view(request):
         initial_data = {}
 
         # Check for session-based pre-fill data first (from smart search)
-        session_prefill = request.session.pop('prefill_search_form', None)
+        session_prefill = request.session.pop("prefill_search_form", None)
         if session_prefill:
             initial_data.update(session_prefill)
             logger.info(f"Pre-filling form from session data: {session_prefill}")
@@ -2224,13 +2224,11 @@ def patient_data_view(request):
                             birth_date=match.birth_date,
                             gender=match.gender,
                         )
-                        # Don't save to database - just use for ID generation
-                        temp_patient.id = (
-                            hash(f"{country_param}_{patient_id_param}") % 1000000
-                        )
+                        # Use the original patient_id_param as the ID for consistency
+                        temp_patient.id = patient_id_param
 
                         # Store the match information in session for patient details view
-                        session_key = f"patient_match_{temp_patient.id}"
+                        session_key = f"patient_match_{patient_id_param}"
                         request.session[session_key] = {
                             "patient_data": match.patient_data,
                             "match_score": match.match_score,
@@ -2250,9 +2248,9 @@ def patient_data_view(request):
                             f"from {match.country_code} NCP. Confidence: {match.confidence_score:.1%}",
                         )
 
-                        # Redirect to patient details
+                        # Redirect to patient details using the original patient ID
                         return redirect(
-                            "patient_data:patient_details", patient_id=temp_patient.id
+                            "patient_data:patient_details", patient_id=patient_id_param
                         )
                     else:
                         # No match found

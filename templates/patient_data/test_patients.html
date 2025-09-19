@@ -106,7 +106,7 @@
                                                             </small>
                                                         </p>
                                                         <div class="btn-group w-100" role="group">
-                                                            <a href="{% url 'patient_data:smart_patient_search' patient.patient_id %}"
+                                                            <a href="{% url 'patient_data:patient_data_form' %}?country={{ patient.country_code }}&patient_id={{ patient.patient_id }}&auto_search=true"
                                                                class="btn btn-outline-primary btn-sm">
                                                                 <i class="fas fa-eye"></i> View Details
                                                             </a>
