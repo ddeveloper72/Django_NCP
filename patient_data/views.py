@@ -2267,89 +2267,267 @@ def patient_data_view(request):
 def direct_patient_view(request, patient_id):
     """
     Direct patient access from admin console - bypasses session middleware
+    Supports both:
+    1. Database primary keys (from admin console View Details buttons)
+    2. Actual patient identifiers (from CDA files)
     """
-    print(f"DEBUG: direct_patient_view called with patient_id: {patient_id}")
+    import logging
+    from django.http import HttpResponse
 
     try:
-        from .services.cda_document_index import get_cda_indexer
-        from .services import EUPatientSearchService
-        # Import the correct PatientCredentials class that supports given_name/family_name
-        from dataclasses import dataclass
+        logger = logging.getLogger(__name__)
+        print(f"DEBUG: direct_patient_view called with patient_id: {patient_id}")
 
-        @dataclass
-        class PatientCredentials:
-            """Patient search credentials for direct access"""
-            given_name: str = ""
-            family_name: str = ""
-            birth_date: str = ""
-            gender: str = ""
-            country_code: str = ""
-            patient_id: str = ""
+        # Simple test response first
+        if patient_id == "test":
+            return HttpResponse("Direct patient view is working!")
+
+        print(f"DEBUG: Starting patient processing for {patient_id}")
+
+        # STEP 1: Check if patient_id is a database primary key (from admin console)
+        # This simulates using database records as signposts for automated search
+        target_patient_identifier = None
+        target_country_code = None
+        database_record = None
+
+        try:
+            # Try to find database record by primary key
+            from .models import PatientData, PatientIdentifier
+
+            # Check if patient_id looks like a database primary key (numeric)
+            if patient_id.isdigit():
+                print(f"DEBUG: 🎯 Treating {patient_id} as database signpost (simulating admin console selection)")
+
+                try:
+                    patient_data = PatientData.objects.get(pk=int(patient_id))
+                    patient_identifier = patient_data.patient_identifier
+                    target_patient_identifier = patient_identifier.patient_id
+                    raw_country = patient_identifier.home_member_state
+                    
+                    # Normalize country code (extract 2-letter code if it's in format "Country (XX)")
+                    if '(' in raw_country and ')' in raw_country:
+                        # Extract code from "Ireland (IE)" -> "IE"
+                        target_country_code = raw_country.split('(')[1].split(')')[0]
+                    else:
+                        target_country_code = raw_country
+                        
+                    print(f"DEBUG: 📋 Database signpost found - Will search for patient_id: {target_patient_identifier} in country: {target_country_code} (raw: {raw_country})")
+                    print(f"DEBUG: 🔍 This simulates: Admin Console → Automated NCP Search → {target_country_code} NCP API")
+
+                except PatientData.DoesNotExist:
+                    print(f"DEBUG: ❌ No database signpost found for primary key {patient_id}")
+                    # Continue with original logic - maybe it's a real patient ID
+
+        except Exception as db_error:
+            print(f"DEBUG: ⚠️ Database lookup error: {db_error}")
+            # Continue with original logic
+
+        # STEP 2: Search CDA file system
+        from .services.cda_document_index import get_cda_indexer
+
+        print(f"DEBUG: Successfully imported get_cda_indexer")
 
         indexer = get_cda_indexer()
-        all_patients = indexer.get_all_patients()
+        print(f"DEBUG: Successfully got indexer")
 
-        # Find the patient by patient_id
+        all_patients = indexer.get_all_patients()
+        print(f"DEBUG: Successfully got all patients: {len(all_patients)}")
+
+        # STEP 3: Find the patient by identifier (use database info if available)
+        search_patient_id = target_patient_identifier or patient_id
+        search_country_code = target_country_code
+
         target_patient = None
-        for patient in all_patients:
-            if patient["patient_id"] == patient_id:
-                target_patient = patient
-                break
+
+        # First try: if we have database info, search by those identifiers
+        if target_patient_identifier and target_country_code:
+            for patient in all_patients:
+                if (
+                    patient["patient_id"] == target_patient_identifier
+                    and patient["country_code"] == target_country_code
+                ):
+                    target_patient = patient
+                    print(
+                        f"DEBUG: Found patient via database identifiers: {target_patient}"
+                    )
+                    break
+
+        # Second try: search by the original patient_id (for backwards compatibility)
+        if not target_patient:
+            for patient in all_patients:
+                if patient["patient_id"] == patient_id:
+                    target_patient = patient
+                    print(f"DEBUG: Found patient via direct ID match: {target_patient}")
+                    break
 
         if not target_patient:
-            messages.error(request, f"Patient {patient_id} not found in test data.")
+            print(f"DEBUG: Patient {search_patient_id} not found in CDA files")
+            if target_patient_identifier:
+                messages.error(
+                    request,
+                    f"Patient {target_patient_identifier} from {target_country_code} not found in CDA files. The database record exists but the CDA document may not be available.",
+                )
+            else:
+                messages.error(request, f"Patient {patient_id} not found in test data.")
             return redirect("patient_data:patient_data_form")
 
-        # Create credentials for search
+        print(f"DEBUG: Found patient: {target_patient}")
+
+        # Create credentials for search (same pattern as existing working code)
         credentials = PatientCredentials(
-            given_name=target_patient["given_name"],
-            family_name=target_patient["family_name"],
-            birth_date=target_patient.get("birth_date", ""),
-            gender=target_patient.get("gender", ""),
             country_code=target_patient["country_code"],
             patient_id=target_patient["patient_id"],
         )
+        print(f"DEBUG: ✅ Created search credentials for {target_patient['country_code']} NCP")
 
-        # Perform the search
+        # STEP 4: Execute automated search (simulating NCP-to-NCP communication)
+        if database_record:
+            print(f"DEBUG: 🚀 AUTOMATED SEARCH: Simulating query to {target_patient['country_code']} NCP for patient {target_patient['patient_id']}")
+            print(f"DEBUG: 🌐 In production: This would be an API call to {target_patient['country_code']} National Contact Point")
+            print(f"DEBUG: 📁 Demo mode: Searching local CDA files to simulate remote response")
+        
         search_service = EUPatientSearchService()
-        search_result = search_service.search_patient(credentials)
+        print(f"DEBUG: Created search service")
 
-        if not search_result:
-            messages.error(request, f"No CDA documents found for patient {patient_id}.")
+        matches = search_service.search_patient(credentials)
+        print(f"DEBUG: 🎯 Search complete: {len(matches) if matches else 0} CDA documents found")
+
+        if not matches:
+            error_msg = f"No CDA documents found for patient {target_patient_identifier or patient_id}"
+            if database_record:
+                error_msg += f" in {target_country_code} NCP. The database signpost exists but no corresponding CDA files were found."
+            print(f"DEBUG: ❌ {error_msg}")
+            messages.error(request, error_msg)
             return redirect("patient_data:patient_data_form")
 
-        # Store in session for redirect to normal details view
-        session_key = f"patient_match_{patient_id}"
-        match_data = {
-            "patient_data": {
-                "name": f"{target_patient['given_name']} {target_patient['family_name']}",
-                "given_name": target_patient["given_name"],
-                "family_name": target_patient["family_name"],
-                "birth_date": target_patient.get("birth_date", ""),
-                "gender": target_patient.get("gender", ""),
-            },
-            "cda_content": search_result.cda_content,
-            "file_path": search_result.file_path,
-            "confidence_score": search_result.confidence_score,
-            "country_code": target_patient["country_code"],
-            "preferred_cda_type": "L3",
-            "has_l1": search_result.has_l1,
-            "has_l3": search_result.has_l3,
+        # Get the first (best) match
+        match = matches[0]
+        print(f"DEBUG: 📄 Processing CDA document: {type(match)}")
+        
+        if database_record:
+            print(f"DEBUG: ✨ SUCCESS: Database signpost → Automated search → CDA found → Rendering patient details")
+            messages.success(request, f"🚀 Automated search completed! Found CDA documents via {target_country_code} NCP simulation.")
+
+        # Build patient data similar to patient_details_view
+        patient_data = {
+            "name": f"{target_patient['given_name']} {target_patient['family_name']}",
+            "given_name": target_patient["given_name"],
+            "family_name": target_patient["family_name"],
+            "birth_date": target_patient.get("birth_date", ""),
+            "gender": target_patient.get("gender", ""),
+            "primary_patient_id": target_patient["patient_id"],
+            "secondary_patient_id": "",
+            "patient_identifiers": [],
+            "address": {},
+            "contact_info": {},
         }
 
-        request.session[session_key] = match_data
+        # Process CDA content for display
+        from .document_services import CDAProcessor
 
-        messages.success(
-            request,
-            f"Patient documents found with 100.0% confidence in {target_patient['country_code']} NCP!",
+        processor = CDAProcessor()
+        cda_data = processor.parse_cda_document(match.cda_content)
+
+        # Extract patient information from the parsed data
+        patient_summary = cda_data.get("patient", {})
+
+        # Get country display name
+        from .forms import COUNTRY_CHOICES
+
+        country_display = next(
+            (
+                name
+                for code, name in COUNTRY_CHOICES
+                if code == target_patient["country_code"]
+            ),
+            target_patient["country_code"],
         )
 
-        # Redirect to the normal patient details view
-        return redirect("patient_data:patient_details", patient_id=patient_id)
+        # STEP 5: Create secure session and redirect (instead of direct rendering)
+        print(f"DEBUG: Creating secure session for patient data")
+        
+        import uuid
+        from datetime import timedelta
+        from django.utils import timezone
+        from .models import PatientSession
+        
+        # Generate a unique session ID (same pattern as normal search)
+        session_id = str(uuid.uuid4().int)[:10]  # 10-digit session ID
+        print(f"DEBUG: Generated session ID: {session_id}")
+
+        # Prepare patient data for secure storage (same format as normal search)
+        patient_session_data = {
+            "file_path": match.file_path,
+            "country_code": target_patient["country_code"],
+            "confidence_score": 1.0,  # 100% confidence for direct access
+            "patient_data": patient_data,
+            "cda_content": match.cda_content,
+            # Enhanced L1/L3 CDA support
+            "l1_cda_content": getattr(match, "l1_cda_content", None),
+            "l3_cda_content": getattr(match, "l3_cda_content", None),
+            "l1_cda_path": getattr(match, "l1_cda_path", None),
+            "l3_cda_path": getattr(match, "l3_cda_path", None),
+            "preferred_cda_type": "L3",
+            "has_l1": getattr(match, "has_l1", False),
+            "has_l3": getattr(match, "has_l3", True),
+            # Enhanced multiple document support
+            "l1_documents": getattr(match, "l1_documents", []),
+            "l3_documents": getattr(match, "l3_documents", []),
+            "selected_l1_index": 0,
+            "selected_l3_index": 0,
+            "document_summary": {},
+            "available_document_types": ["L3"],
+            # Automation context
+            "automated_search": database_record is not None,
+            "original_database_id": patient_id if database_record else None,
+        }
+
+        # Create PatientSession for secure session management
+        try:
+            patient_session = PatientSession.objects.create(
+                session_id=session_id,
+                user=request.user,
+                country_code=target_patient["country_code"],
+                search_criteria_hash=hash(f"{target_patient['country_code']}_{target_patient['patient_id']}"),
+                status="active",
+                expires_at=timezone.now() + timedelta(hours=8),
+                client_ip=request.META.get("REMOTE_ADDR", ""),
+                last_action="automated_admin_search" if database_record else "direct_patient_access",
+                encryption_key_version=1,
+            )
+            
+            # Encrypt and store patient data
+            patient_session.encrypt_patient_data(patient_session_data)
+            print(f"DEBUG: Created secure PatientSession record")
+        except Exception as session_error:
+            print(f"DEBUG: Warning - Could not create PatientSession: {session_error}")
+            # Continue with traditional session storage
+
+        # Store in traditional session for backward compatibility
+        request.session[f"patient_match_{session_id}"] = patient_session_data
+        print(f"DEBUG: Stored patient data in session with key: patient_match_{session_id}")
+
+        # Add appropriate success message
+        if database_record:
+            success_message = f"🚀 Automated search via database signpost completed! Retrieved CDA documents from {target_patient['country_code']} NCP with 100% confidence."
+        else:
+            success_message = f"Patient documents found with 100.0% confidence in {target_patient['country_code']} NCP!"
+            
+        messages.success(request, success_message)
+
+        print(f"DEBUG: Redirecting to secure patient_details view with session_id: {session_id}")
+        # Redirect to secure patient details view (same as normal search flow)
+        return redirect("patient_data:patient_details", patient_id=session_id)
 
     except Exception as e:
-        print(f"DEBUG: Error in direct_patient_view: {e}")
-        messages.error(request, f"Error accessing patient data: {str(e)}")
+        print(f"DEBUG: Exception in direct_patient_view: {e}")
+        import traceback
+
+        print(f"DEBUG: Full traceback: {traceback.format_exc()}")
+        try:
+            messages.error(request, f"Error accessing patient data: {str(e)}")
+        except:
+            pass
         return redirect("patient_data:patient_data_form")
 
 
