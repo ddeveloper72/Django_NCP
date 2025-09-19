@@ -2264,6 +2264,91 @@ def patient_data_view(request):
     return render(request, "patient_data/patient_form.html", {"form": form})
 
 
+def direct_patient_view(request, patient_id):
+    """
+    Direct patient access from admin console - bypasses session middleware
+    """
+    print(f"DEBUG: direct_patient_view called with patient_id: {patient_id}")
+
+    try:
+        from .services.cda_document_index import get_cda_indexer
+        from .services import EUPatientSearchService
+        # Import the correct PatientCredentials class that supports given_name/family_name
+        from dataclasses import dataclass
+
+        @dataclass
+        class PatientCredentials:
+            """Patient search credentials for direct access"""
+            given_name: str = ""
+            family_name: str = ""
+            birth_date: str = ""
+            country_code: str = ""
+
+        indexer = get_cda_indexer()
+        all_patients = indexer.get_all_patients()
+
+        # Find the patient by patient_id
+        target_patient = None
+        for patient in all_patients:
+            if patient["patient_id"] == patient_id:
+                target_patient = patient
+                break
+
+        if not target_patient:
+            messages.error(request, f"Patient {patient_id} not found in test data.")
+            return redirect("patient_data:patient_data_form")
+
+        # Create credentials for search
+        credentials = PatientCredentials(
+            given_name=target_patient["given_name"],
+            family_name=target_patient["family_name"],
+            birth_date=target_patient.get("birth_date", ""),
+            country_code=target_patient["country_code"],
+        )
+
+        # Perform the search
+        search_service = EUPatientSearchService()
+        search_result = search_service.search_patient(credentials)
+
+        if not search_result:
+            messages.error(request, f"No CDA documents found for patient {patient_id}.")
+            return redirect("patient_data:patient_data_form")
+
+        # Store in session for redirect to normal details view
+        session_key = f"patient_match_{patient_id}"
+        match_data = {
+            "patient_data": {
+                "name": f"{target_patient['given_name']} {target_patient['family_name']}",
+                "given_name": target_patient["given_name"],
+                "family_name": target_patient["family_name"],
+                "birth_date": target_patient.get("birth_date", ""),
+                "gender": target_patient.get("gender", ""),
+            },
+            "cda_content": search_result.cda_content,
+            "file_path": search_result.file_path,
+            "confidence_score": search_result.confidence_score,
+            "country_code": target_patient["country_code"],
+            "preferred_cda_type": "L3",
+            "has_l1": search_result.has_l1,
+            "has_l3": search_result.has_l3,
+        }
+
+        request.session[session_key] = match_data
+
+        messages.success(
+            request,
+            f"Patient documents found with 100.0% confidence in {target_patient['country_code']} NCP!",
+        )
+
+        # Redirect to the normal patient details view
+        return redirect("patient_data:patient_details", patient_id=patient_id)
+
+    except Exception as e:
+        print(f"DEBUG: Error in direct_patient_view: {e}")
+        messages.error(request, f"Error accessing patient data: {str(e)}")
+        return redirect("patient_data:patient_data_form")
+
+
 def patient_details_view(request, patient_id):
     """
     View for displaying patient details and CDA documents
@@ -2274,7 +2359,7 @@ def patient_details_view(request, patient_id):
     - Real patient IDs from CDA are larger numbers (e.g., aGVhbHRoY2FyZUlkMTIz)
     - Session IDs are safe for logging, real patient IDs must be protected
     """
-    
+
     print(f"DEBUG: patient_details_view called with patient_id: {patient_id}")
 
     # First check for PatientSession record (new session management)

@@ -53,6 +53,7 @@ class PatientSessionMiddleware(MiddlewareMixin):
         "/logout/",
         "/api/health/",
         "/patients/test-patients/",  # Allow access to test patients list
+        "/patients/direct/",  # Allow direct patient access from admin console
     ]
 
     # Maximum requests per session per minute
@@ -107,10 +108,14 @@ class PatientSessionMiddleware(MiddlewareMixin):
 
         # Special case: Allow direct access to patient details for admin users
         # This enables direct navigation from admin console to patient details
-        if (request.path.startswith("/patients/details/") and 
-            request.user.is_authenticated and 
-            (request.user.is_staff or request.user.is_superuser)):
-            logger.info(f"Allowing direct admin access to {request.path} for user {request.user}")
+        if (
+            request.path.startswith("/patients/details/")
+            and request.user.is_authenticated
+            and (request.user.is_staff or request.user.is_superuser)
+        ):
+            logger.info(
+                f"Allowing direct admin access to {request.path} for user {request.user}"
+            )
             return None
 
         # Extract session ID from URL or headers

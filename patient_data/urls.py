@@ -48,6 +48,12 @@ urlpatterns = [
         main_views.patient_details_view,
         name="patient_details",
     ),
+    # Direct patient access from admin console (bypasses session middleware)
+    path(
+        "direct/<str:patient_id>/",
+        main_views.direct_patient_view,
+        name="direct_patient",
+    ),
     # Default CDA view (L3 preferred)
     path("cda/<str:patient_id>/", main_views.patient_cda_view, name="patient_cda_view"),
     # Document selection for multiple CDA documents
