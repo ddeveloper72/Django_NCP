@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Test Patients - CDA Document Index{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb breadcrumb-enhanced">
+        <li class="breadcrumb-item">
+            <a href="/" class="breadcrumb-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'patient_data:patient_data_form' %}" class="breadcrumb-link">
+                <i class="fas fa-users"></i> Patient Data
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-vial"></i> Test Patients
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-vial"></i> Test Patients - CDA Document Index
+                    </h4>
+                    <p class="mb-0 mt-2">Available test patients from indexed CDA documents</p>
+                </div>
+                
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card border-info">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-info">
+                                        <i class="fas fa-users"></i> Total Patients
+                                    </h5>
+                                    <h2 class="text-info">{{ total_patients }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-success">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-success">
+                                        <i class="fas fa-globe"></i> Countries
+                                    </h5>
+                                    <h2 class="text-success">{{ total_countries }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-warning">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-warning">
+                                        <i class="fas fa-file-medical"></i> Status
+                                    </h5>
+                                    <h6 class="text-warning">Test Data</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if patients_by_country %}
+                        {% for country, patients in patients_by_country.items %}
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-flag"></i> {{ country }}
+                                        <span class="badge bg-primary ms-2">{{ patients|length }} patient{{ patients|length|pluralize }}</span>
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        {% for patient in patients %}
+                                            <div class="col-md-6 col-lg-4 mb-3">
+                                                <div class="card border-secondary h-100">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">
+                                                            <i class="fas fa-user"></i> 
+                                                            {{ patient.family_name }}, {{ patient.given_name }}
+                                                        </h6>
+                                                        <p class="card-text">
+                                                            <small class="text-muted">
+                                                                <strong>Patient ID:</strong> {{ patient.patient_id }}<br>
+                                                                <strong>Country:</strong> {{ patient.country_code }}<br>
+                                                                <strong>Documents:</strong> 
+                                                                {{ patient.l1_count }} L1, {{ patient.l3_count }} L3
+                                                            </small>
+                                                        </p>
+                                                        <div class="btn-group w-100" role="group">
+                                                            <a href="{% url 'patient_data:patient_details' patient.patient_id %}" 
+                                                               class="btn btn-outline-primary btn-sm">
+                                                                <i class="fas fa-eye"></i> View Details
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-warning" role="alert">
+                            <h4 class="alert-heading">
+                                <i class="fas fa-exclamation-triangle"></i> No Test Patients Found
+                            </h4>
+                            <p>No test patients are currently available in the CDA document index.</p>
+                            <hr>
+                            <p class="mb-0">
+                                <a href="{% url 'patient_data:refresh_cda_index' %}" class="btn btn-outline-warning">
+                                    <i class="fas fa-sync"></i> Refresh Index
+                                </a>
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Patient Data
+                            </a>
+                        </div>
+                        <div>
+                            <a href="{% url 'patient_data:refresh_cda_index' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-sync"></i> Refresh Index
+                            </a>
+                            <a href="{% url 'patient_data:debug_cda_index' %}" class="btn btn-outline-info">
+                                <i class="fas fa-bug"></i> Debug Index
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-dismiss alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert:not(.alert-danger)');
+        alerts.forEach(function(alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+});
+</script>
+{% endblock %}
