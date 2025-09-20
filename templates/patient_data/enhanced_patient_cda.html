@@ -445,77 +445,52 @@ main {
     margin-left: 0.5rem;
 }
 
-/* Force card header icons to be WHITE and STATIC - NO hover changes */
+/* NUCLEAR OPTION: Force ALL icons in card headers to be WHITE */
 .card-header i,
-.admin-card-header i,
+.card-header .fas,
+.card-header .far,
+.card-header .fal,
+.card-header .fab,
+.card-header .fa,
 .bg-primary i,
 .bg-secondary i,
 .bg-success i,
 .bg-danger i,
 .bg-warning i,
 .bg-info i,
-.bg-light i,
 .bg-dark i,
-.card-header .fas,
-.card-header .far,
-.card-header .fal,
-.card-header .fab,
-.admin-card-header .fas,
-.admin-card-header .far,
-.admin-card-header .fal,
-.admin-card-header .fab,
-.clinical-section .card-header i,
-.clinical-section .card-header .fas,
-.clinical-section .card-header .far,
-.clinical-section .card-header .fal,
-.clinical-section .card-header .fab,
-.medical-section .card-header i,
-.medical-section .card-header .fas,
-.medical-section .card-header .far,
-.medical-section .card-header .fal,
-.medical-section .card-header .fab {
-    color: #ffffff !important;
+.clinical-section i,
+.medical-section i,
+div[class*="bg-"] i,
+[class*="card-header"] i {
+    color: white !important;
+    fill: white !important;
     opacity: 1 !important;
-    transition: none !important; /* NO transitions */
+    transition: none !important;
 }
 
-/* PREVENT any hover changes on section header icons */
+/* FORCE white on hover too */
 .card-header:hover i,
-.admin-card-header:hover i,
+.card-header:hover .fas,
+.card-header:hover .far,
+.card-header:hover .fal,
+.card-header:hover .fab,
+.card-header:hover .fa,
 .bg-primary:hover i,
 .bg-secondary:hover i,
 .bg-success:hover i,
 .bg-danger:hover i,
 .bg-warning:hover i,
 .bg-info:hover i,
-.bg-light:hover i,
 .bg-dark:hover i,
-.card-header:hover .fas,
-.card-header:hover .far,
-.card-header:hover .fal,
-.card-header:hover .fab,
-.admin-card-header:hover .fas,
-.admin-card-header:hover .far,
-.admin-card-header:hover .fal,
-.admin-card-header:hover .fab,
-.card:hover .card-header i,
-.card:hover .admin-card-header i,
-.clinical-section:hover .card-header i,
-.clinical-section:hover .card-header .fas,
-.clinical-section:hover .card-header .far,
-.clinical-section:hover .card-header .fal,
-.clinical-section:hover .card-header .fab,
-.medical-section:hover .card-header i,
-.medical-section:hover .card-header .fas,
-.medical-section:hover .card-header .far,
-.medical-section:hover .card-header .fal,
-.medical-section:hover .card-header .fab,
-.clinical-section .card:hover .card-header i,
-.medical-section .card:hover .card-header i {
-    color: #ffffff !important;
+.clinical-section:hover i,
+.medical-section:hover i,
+div[class*="bg-"]:hover i,
+[class*="card-header"]:hover i {
+    color: white !important;
+    fill: white !important;
     opacity: 1 !important;
-    transition: none !important; /* NO transitions */
-    transform: none !important; /* NO transforms */
+    transition: none !important;
 }
 
 /* Enhanced nav-link styling for Patient Overview tabs */
@@ -962,4 +937,11 @@ button.nav-link.active:hover i {
         });
     });
 </script>
+
+<!-- FINAL OVERRIDE: Nuclear CSS for icon colors loaded last -->
+<style>
+/* FINAL NUCLEAR OVERRIDE: Force white icons on blue backgrounds */
+.card-header i, .card-header .fas, .card-header .far, .card-header .fal, .card-header .fab, .card-header .fa, .bg-primary i, .bg-secondary i, .bg-success i, .bg-danger i, .bg-warning i, .bg-info i, .bg-dark i { color: white !important; fill: white !important; }
+.card-header:hover i, .card-header:hover .fas, .card-header:hover .far, .card-header:hover .fal, .card-header:hover .fab, .card-header:hover .fa, .bg-primary:hover i, .bg-secondary:hover i, .bg-success:hover i, .bg-danger:hover i, .bg-warning:hover i, .bg-info:hover i, .bg-dark:hover i { color: white !important; fill: white !important; }
+</style>
 {% endblock %}
