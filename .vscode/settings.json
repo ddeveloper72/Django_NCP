@@ -52,6 +52,30 @@
   "beautify.ignore": [
     "**/*.html"
   ],
-  "editor.codeActionsOnSave": {},
-  "html.autoClosingTags": true
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "html.autoClosingTags": true,
+  "files.autoSave": "afterDelay",
+  "editor.formatOnSave": true,
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [
+    "."
+  ],
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  // RunOnSave configuration
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "static/scss/.*\\.scss$",
+        "cmd": "sass static/scss:static/css"
+      },
+      {
+        "match": ".*\\.py$",
+        "cmd": "python -m flake8 ${file} --max-line-length=120 --ignore=E203,W503"
+      }
+    ]
+  }
 }

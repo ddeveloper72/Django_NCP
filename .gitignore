@@ -47,10 +47,15 @@ venv.bak/
 
 # IDE
 .vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
 .idea/
 *.swp
 *.swo
 *~
+
+# Specifications and Documentation
+.specs/
 
 # OS
 .DS_Store
