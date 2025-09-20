@@ -4851,6 +4851,7 @@ img[data-src]::before {
   font-weight: 500;
   font-size: 1rem;
   transition: all 0.2s ease-out;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   min-width: 180px;
 }
@@ -5270,6 +5271,7 @@ img[data-src]::before {
 .navbar.hero-header .page-context .page-context-content {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 .navbar.hero-header .page-context .page-context-content .page-info .page-location {

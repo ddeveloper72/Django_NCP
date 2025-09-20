@@ -122,25 +122,6 @@
             </div>
         </div>
     </nav>
-                        </a>
-                    </div>
-                    {% else %}
-                    <div class="d-flex align-items-center">
-                        <span class="text-muted me-3" role="status" aria-live="polite">
-                            <i class="fas fa-user me-1" aria-hidden="true"></i>
-                            <span class="visually-hidden">Authentication status: </span>Not logged in
-                        </span>
-                        <a href="/accounts/login/" class="btn btn-primary btn-sm"
-                           title="Sign in to your account" aria-label="Login">
-                            <i class="fas fa-sign-in-alt me-1" aria-hidden="true"></i>
-                            Login
-                        </a>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </nav>
 
     <!-- Hero Section for Home Page Only -->
     {% if request.resolver_match.url_name == 'home' %}

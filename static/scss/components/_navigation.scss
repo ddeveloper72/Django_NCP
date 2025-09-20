@@ -22,34 +22,38 @@
 // Enhanced Professional Medical Portal Navigation Bar
 #main-navigation.navbar {
   // Modern gradient background with professional depth
-  background: linear-gradient(135deg, 
-    rgba($white, 0.98) 0%, 
-    rgba($primary-color, 0.02) 50%, 
-    rgba($white, 0.98) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba($white, 0.98) 0%,
+    rgba($primary-color, 0.02) 50%,
+    rgba($white, 0.98) 100%
+  );
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-bottom: 3px solid transparent;
-  border-image: linear-gradient(90deg, $primary-color, $primary-light, $secondary-color) 1;
-  
+  border-image: linear-gradient(
+      90deg,
+      $primary-color,
+      $primary-light,
+      $secondary-color
+    )
+    1;
+
   padding: $space-lg 0;
   position: sticky;
   top: 0;
   z-index: 1030;
-  
+
   // Professional shadow with depth
-  box-shadow: 
-    0 4px 20px rgba($primary-color, 0.12),
-    0 1px 3px rgba($primary-color, 0.08),
-    inset 0 1px 0 rgba($white, 0.8);
-    
+  box-shadow: 0 4px 20px rgba($primary-color, 0.12),
+    0 1px 3px rgba($primary-color, 0.08), inset 0 1px 0 rgba($white, 0.8);
+
   transition: all $transition-hse;
-  
+
   // Enhanced hover state for entire navbar
   &:hover {
-    box-shadow: 
-      0 6px 25px rgba($primary-color, 0.15),
-      0 2px 8px rgba($primary-color, 0.1),
-      inset 0 1px 0 rgba($white, 0.9);
+    box-shadow: 0 6px 25px rgba($primary-color, 0.15),
+      0 2px 8px rgba($primary-color, 0.1), inset 0 1px 0 rgba($white, 0.9);
   }
 
   .navbar-brand {
@@ -58,28 +62,32 @@
     font-weight: $font-weight-bold;
     letter-spacing: -0.02em;
     line-height: 1.2;
-    
+
     // Professional gradient text effect
-    background: linear-gradient(135deg, $primary-color, $primary-dark, $secondary-color);
+    background: linear-gradient(
+      135deg,
+      $primary-color,
+      $primary-dark,
+      $secondary-color
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    
+
     text-decoration: none;
     padding: $space-md $space-lg;
     border-radius: $border-radius-lg;
     position: relative;
     overflow: hidden;
-    
+
     // Professional container styling
     background-color: rgba($white, 0.9);
     border: 1px solid rgba($primary-color, 0.15);
-    box-shadow: 
-      0 2px 8px rgba($primary-color, 0.08),
+    box-shadow: 0 2px 8px rgba($primary-color, 0.08),
       inset 0 1px 0 rgba($white, 0.8);
-    
+
     transition: all $transition-hse;
-    
+
     // Subtle animation on load
     animation: brandGlow 3s ease-in-out infinite alternate;
 
@@ -90,26 +98,32 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, 
-        transparent, 
-        rgba($primary-color, 0.1), 
-        transparent);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba($primary-color, 0.1),
+        transparent
+      );
       transition: left 0.6s ease;
     }
 
     &:hover {
       transform: translateY(-2px) scale(1.02);
-      box-shadow: 
-        0 6px 20px rgba($primary-color, 0.15),
+      box-shadow: 0 6px 20px rgba($primary-color, 0.15),
         inset 0 1px 0 rgba($white, 0.9);
       border-color: rgba($primary-color, 0.3);
-      
+
       &::before {
         left: 100%;
       }
-      
+
       // Enhanced text gradient on hover
-      background: linear-gradient(135deg, $primary-dark, $primary-color, $secondary-light);
+      background: linear-gradient(
+        135deg,
+        $primary-dark,
+        $primary-color,
+        $secondary-light
+      );
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -118,8 +132,7 @@
     &:focus {
       outline: 3px solid $primary-color;
       outline-offset: 3px;
-      box-shadow: 
-        0 0 0 6px rgba($primary-color, 0.25),
+      box-shadow: 0 0 0 6px rgba($primary-color, 0.25),
         0 6px 20px rgba($primary-color, 0.15);
       transform: translateY(-1px);
     }
@@ -142,13 +155,13 @@
       z-index: 2;
       font-family: $font-family-primary;
       text-shadow: 0 1px 2px rgba($primary-color, 0.1);
-      
+
       // Enhanced brand text styling
       .brand-primary {
         font-weight: $font-weight-bold;
         letter-spacing: -0.01em;
       }
-      
+
       .brand-secondary {
         font-weight: $font-weight-medium;
         opacity: 0.9;
@@ -160,15 +173,12 @@
   // Professional brand glow animation
   @keyframes brandGlow {
     0% {
-      box-shadow: 
-        0 2px 8px rgba($primary-color, 0.08),
+      box-shadow: 0 2px 8px rgba($primary-color, 0.08),
         inset 0 1px 0 rgba($white, 0.8);
     }
     100% {
-      box-shadow: 
-        0 4px 12px rgba($primary-color, 0.12),
-        inset 0 1px 0 rgba($white, 0.9),
-        0 0 20px rgba($primary-color, 0.05);
+      box-shadow: 0 4px 12px rgba($primary-color, 0.12),
+        inset 0 1px 0 rgba($white, 0.9), 0 0 20px rgba($primary-color, 0.05);
     }
   }
 
@@ -178,19 +188,18 @@
     border-radius: $border-radius-lg;
     padding: $space-md;
     background: linear-gradient($white, $white) padding-box,
-                linear-gradient(135deg, $primary-color, $secondary-color) border-box;
-    
+      linear-gradient(135deg, $primary-color, $secondary-color) border-box;
+
     // Enhanced dimensions and touch targets
     min-width: 48px;
     min-height: 48px;
     width: 48px;
     height: 48px;
-    
+
     // Professional shadow and effects
-    box-shadow: 
-      0 2px 8px rgba($primary-color, 0.12),
+    box-shadow: 0 2px 8px rgba($primary-color, 0.12),
       inset 0 1px 0 rgba($white, 0.8);
-    
+
     transition: all $transition-hse;
     position: relative;
     overflow: hidden;
@@ -202,7 +211,11 @@
       left: 50%;
       width: 0;
       height: 0;
-      background: radial-gradient(circle, rgba($primary-color, 0.1), transparent);
+      background: radial-gradient(
+        circle,
+        rgba($primary-color, 0.1),
+        transparent
+      );
       border-radius: 50%;
       transform: translate(-50%, -50%);
       transition: all 0.3s ease;
@@ -210,10 +223,9 @@
 
     &:hover {
       transform: translateY(-1px) scale(1.05);
-      box-shadow: 
-        0 4px 15px rgba($primary-color, 0.2),
+      box-shadow: 0 4px 15px rgba($primary-color, 0.2),
         inset 0 1px 0 rgba($white, 0.9);
-      
+
       &::before {
         width: 100%;
         height: 100%;
@@ -223,8 +235,7 @@
     &:focus {
       outline: 3px solid $primary-color;
       outline-offset: 3px;
-      box-shadow: 
-        0 0 0 6px rgba($primary-color, 0.25),
+      box-shadow: 0 0 0 6px rgba($primary-color, 0.25),
         0 4px 15px rgba($primary-color, 0.2);
       transform: translateY(-1px);
     }
@@ -241,7 +252,7 @@
       transition: all $transition-hse;
       filter: drop-shadow(0 1px 1px rgba($primary-color, 0.2));
     }
-    
+
     // Animation states
     &[aria-expanded="true"] {
       .navbar-toggler-icon {
@@ -263,24 +274,25 @@
         font-size: $font-size-base;
         font-family: $font-family-primary;
         letter-spacing: 0.01em;
-        
+
         // Professional spacing and dimensions
         padding: $space-md $space-lg;
         border-radius: $border-radius-lg;
         min-height: 48px;
-        
+
         // Modern design elements
-        background: linear-gradient(135deg, 
-          rgba($white, 0.8) 0%, 
-          rgba($primary-color, 0.02) 50%, 
-          rgba($white, 0.8) 100%);
+        background: linear-gradient(
+          135deg,
+          rgba($white, 0.8) 0%,
+          rgba($primary-color, 0.02) 50%,
+          rgba($white, 0.8) 100%
+        );
         border: 1px solid rgba($primary-color, 0.1);
-        
+
         // Professional shadows and effects
-        box-shadow: 
-          0 1px 3px rgba($primary-color, 0.05),
+        box-shadow: 0 1px 3px rgba($primary-color, 0.05),
           inset 0 1px 0 rgba($white, 0.7);
-        
+
         transition: all $transition-hse;
         display: flex;
         align-items: center;
@@ -297,24 +309,27 @@
           left: -100%;
           width: 100%;
           height: 100%;
-          background: linear-gradient(90deg, 
-            transparent, 
-            rgba($primary-color, 0.08), 
-            transparent);
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba($primary-color, 0.08),
+            transparent
+          );
           transition: left 0.5s ease;
         }
 
         &:hover {
           color: $primary-color;
-          background: linear-gradient(135deg, 
-            rgba($primary-color, 0.05) 0%, 
-            rgba($primary-color, 0.08) 50%, 
-            rgba($primary-color, 0.05) 100%);
+          background: linear-gradient(
+            135deg,
+            rgba($primary-color, 0.05) 0%,
+            rgba($primary-color, 0.08) 50%,
+            rgba($primary-color, 0.05) 100%
+          );
           border-color: rgba($primary-color, 0.2);
           transform: translateY(-2px);
-          
-          box-shadow: 
-            0 4px 12px rgba($primary-color, 0.15),
+
+          box-shadow: 0 4px 12px rgba($primary-color, 0.15),
             inset 0 1px 0 rgba($white, 0.8);
 
           &::before {
@@ -325,8 +340,7 @@
         &:focus {
           outline: 3px solid $primary-color;
           outline-offset: 2px;
-          box-shadow: 
-            0 0 0 6px rgba($primary-color, 0.25),
+          box-shadow: 0 0 0 6px rgba($primary-color, 0.25),
             0 4px 12px rgba($primary-color, 0.15);
         }
 
@@ -335,10 +349,9 @@
           font-weight: $font-weight-bold;
           background: linear-gradient(135deg, $primary-color, $primary-dark);
           border-color: $primary-dark;
-          box-shadow: 
-            0 3px 8px rgba($primary-color, 0.3),
+          box-shadow: 0 3px 8px rgba($primary-color, 0.3),
             inset 0 1px 0 rgba($white, 0.2);
-          
+
           // Professional active indicator
           &::after {
             content: "";
@@ -348,7 +361,11 @@
             transform: translateX(-50%);
             width: 40px;
             height: 4px;
-            background: linear-gradient(90deg, $secondary-color, $secondary-light);
+            background: linear-gradient(
+              90deg,
+              $secondary-color,
+              $secondary-light
+            );
             border-radius: $border-radius-sm;
             box-shadow: 0 1px 3px rgba($secondary-color, 0.4);
           }
@@ -377,7 +394,7 @@
           color: $primary-dark;
           transform: scale(1.1);
         }
-        
+
         span {
           color: $primary-color;
         }
@@ -395,12 +412,13 @@
   [role="region"][aria-label="User authentication status"] {
     padding: $space-sm;
     border-radius: $border-radius-lg;
-    background: linear-gradient(135deg, 
-      rgba($white, 0.9) 0%, 
-      rgba($primary-color, 0.02) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba($white, 0.9) 0%,
+      rgba($primary-color, 0.02) 100%
+    );
     border: 1px solid rgba($primary-color, 0.1);
-    box-shadow: 
-      0 2px 8px rgba($primary-color, 0.08),
+    box-shadow: 0 2px 8px rgba($primary-color, 0.08),
       inset 0 1px 0 rgba($white, 0.8);
 
     .text-muted {
@@ -412,13 +430,13 @@
       border-radius: $border-radius-md;
       border: 1px solid rgba($primary-color, 0.08);
       margin-right: $space-md;
-      
+
       i {
         color: $primary-color;
         margin-right: $space-xs;
         filter: drop-shadow(0 1px 1px rgba($primary-color, 0.2));
       }
-      
+
       .user-welcome strong {
         color: $primary-color;
         font-weight: $font-weight-bold;
@@ -456,8 +474,7 @@
       &:focus {
         outline: 3px solid $primary-color;
         outline-offset: 2px;
-        box-shadow: 
-          0 0 0 6px rgba($primary-color, 0.25),
+        box-shadow: 0 0 0 6px rgba($primary-color, 0.25),
           0 4px 12px rgba($primary-color, 0.15);
       }
 
@@ -475,16 +492,14 @@
       background: linear-gradient(135deg, $primary-color, $primary-light);
       border: 2px solid $primary-color;
       color: $white;
-      box-shadow: 
-        0 2px 8px rgba($primary-color, 0.3),
+      box-shadow: 0 2px 8px rgba($primary-color, 0.3),
         inset 0 1px 0 rgba($white, 0.2);
 
       &:hover {
         background: linear-gradient(135deg, $primary-dark, $primary-color);
         border-color: $primary-dark;
         transform: translateY(-1px);
-        box-shadow: 
-          0 4px 12px rgba($primary-color, 0.4),
+        box-shadow: 0 4px 12px rgba($primary-color, 0.4),
           inset 0 1px 0 rgba($white, 0.3);
       }
 
@@ -496,11 +511,12 @@
     .btn-outline-primary {
       border: 2px solid $primary-color;
       color: $primary-color;
-      background: linear-gradient(135deg, 
-        rgba($white, 0.9) 0%, 
-        rgba($primary-color, 0.05) 100%);
-      box-shadow: 
-        0 2px 6px rgba($primary-color, 0.15),
+      background: linear-gradient(
+        135deg,
+        rgba($white, 0.9) 0%,
+        rgba($primary-color, 0.05) 100%
+      );
+      box-shadow: 0 2px 6px rgba($primary-color, 0.15),
         inset 0 1px 0 rgba($white, 0.8);
 
       &:hover {
@@ -508,8 +524,7 @@
         border-color: $primary-color;
         color: $white;
         transform: translateY(-1px);
-        box-shadow: 
-          0 4px 12px rgba($primary-color, 0.3),
+        box-shadow: 0 4px 12px rgba($primary-color, 0.3),
           inset 0 1px 0 rgba($white, 0.2);
       }
 
@@ -522,12 +537,14 @@
   // Enhanced Mobile Responsive Design
   @media (max-width: 991.98px) {
     padding: $space-md 0;
-    
+
     .navbar-collapse {
-      background: linear-gradient(135deg, 
-        rgba($white, 0.98) 0%, 
-        rgba($primary-color, 0.02) 50%, 
-        rgba($white, 0.98) 100%);
+      background: linear-gradient(
+        135deg,
+        rgba($white, 0.98) 0%,
+        rgba($primary-color, 0.02) 50%,
+        rgba($white, 0.98) 100%
+      );
       -webkit-backdrop-filter: blur(15px);
       backdrop-filter: blur(15px);
       border: 1px solid rgba($primary-color, 0.15);
@@ -535,12 +552,10 @@
       border-radius: 0 0 $border-radius-lg $border-radius-lg;
       margin-top: $space-lg;
       padding: $space-lg;
-      
-      box-shadow: 
-        0 8px 25px rgba($primary-color, 0.15),
-        0 4px 10px rgba($primary-color, 0.1),
-        inset 0 1px 0 rgba($white, 0.8);
-      
+
+      box-shadow: 0 8px 25px rgba($primary-color, 0.15),
+        0 4px 10px rgba($primary-color, 0.1), inset 0 1px 0 rgba($white, 0.8);
+
       // Smooth slide animation
       animation: mobileMenuSlide 0.3s ease-out;
     }
@@ -548,36 +563,41 @@
     .navbar-nav {
       .nav-item {
         margin: $space-xs 0;
-        
+
         .nav-link {
           padding: $space-md $space-lg;
           margin: $space-xs 0;
           font-size: $font-size-base;
           border-radius: $border-radius-lg;
-          
+
           // Enhanced mobile touch targets
           min-height: 52px;
-          
+
           // Professional mobile styling
-          background: linear-gradient(135deg, 
-            rgba($white, 0.7) 0%, 
-            rgba($primary-color, 0.03) 100%);
+          background: linear-gradient(
+            135deg,
+            rgba($white, 0.7) 0%,
+            rgba($primary-color, 0.03) 100%
+          );
           border: 1px solid rgba($primary-color, 0.1);
-          
-          &:hover, &:focus {
-            background: linear-gradient(135deg, 
-              rgba($primary-color, 0.08) 0%, 
-              rgba($primary-color, 0.12) 100%);
+
+          &:hover,
+          &:focus {
+            background: linear-gradient(
+              135deg,
+              rgba($primary-color, 0.08) 0%,
+              rgba($primary-color, 0.12) 100%
+            );
             border-color: rgba($primary-color, 0.2);
             transform: translateX(4px);
           }
-          
+
           &.active {
             background: linear-gradient(135deg, $primary-color, $primary-dark);
             border-color: $primary-dark;
             color: $white;
             transform: translateX(8px);
-            
+
             &::after {
               left: 0;
               transform: none;
@@ -594,13 +614,15 @@
     [role="region"][aria-label="User authentication status"] {
       margin-top: $space-lg;
       padding: $space-lg;
-      background: linear-gradient(135deg, 
-        rgba($primary-color, 0.03) 0%, 
-        rgba($white, 0.8) 100%);
+      background: linear-gradient(
+        135deg,
+        rgba($primary-color, 0.03) 0%,
+        rgba($white, 0.8) 100%
+      );
       border: 1px solid rgba($primary-color, 0.1);
       border-radius: $border-radius-lg;
       text-align: center;
-      
+
       .text-muted {
         display: block;
         margin-bottom: $space-md;
@@ -608,7 +630,7 @@
         background: rgba($white, 0.8);
         border-radius: $border-radius-md;
       }
-      
+
       .btn {
         width: 100%;
         max-width: 200px;
@@ -725,6 +747,7 @@
       font-weight: $font-weight-medium;
       font-size: $font-size-base;
       transition: all $transition-hse;
+      -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
       min-width: 180px;
 
@@ -1193,6 +1216,7 @@
     .page-context-content {
       background: rgba($white, 0.1);
       border: 1px solid rgba($white, 0.2);
+      -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
 
       .page-info {
