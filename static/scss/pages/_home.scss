@@ -19,7 +19,7 @@
     overflow: hidden;
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: -50%;
       right: -20%;
@@ -143,7 +143,7 @@
     transition: all $transition-normal;
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: 0;
@@ -188,7 +188,7 @@
     overflow: hidden;
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: -100%;
@@ -428,5 +428,233 @@
   }
   50% {
     transform: translateY(-20px) rotate(10deg);
+  }
+}
+
+// ========================================
+// Home Page Specific Service Card Overrides
+// Higher specificity to override global styles
+// ========================================
+
+// Target the main content area on home page to ensure specificity
+body .services-section {
+  padding: 4rem 0 !important;
+
+  h2 {
+    text-align: center !important;
+    color: #007b7f !important;
+    font-size: 2.5rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 4rem !important;
+  }
+
+  .services-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+    gap: 2rem !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 1.5rem !important;
+  }
+
+  .service-card {
+    background: #ffffff !important;
+    padding: 2rem !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 123, 127, 0.08) !important;
+    transition: all 0.3s ease !important;
+    border: 1px solid rgba(0, 123, 127, 0.05) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+
+    &::before {
+      content: "" !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 4px !important;
+      background: linear-gradient(90deg, #007b7f, #005b5f) !important;
+      transform: scaleX(0) !important;
+      transform-origin: left !important;
+      transition: transform 0.3s ease !important;
+    }
+
+    &:hover {
+      transform: translateY(-8px) !important;
+      box-shadow: 0 12px 30px rgba(0, 123, 127, 0.15) !important;
+
+      &::before {
+        transform: scaleX(1) !important;
+      }
+
+      .service-icon {
+        transform: scale(1.1) rotate(5deg) !important;
+      }
+    }
+
+    .service-icon {
+      width: 70px !important;
+      height: 70px !important;
+      background: linear-gradient(135deg, #007b7f, #005b5f) !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin-bottom: 1.5rem !important;
+      color: #ffffff !important;
+      font-size: 1.5rem !important;
+      box-shadow: 0 4px 15px rgba(0, 123, 127, 0.2) !important;
+      transition: all 0.3s ease !important;
+    }
+
+    h3 {
+      color: #007b7f !important;
+      font-size: 1.5rem !important;
+      font-weight: 600 !important;
+      margin-bottom: 1rem !important;
+      line-height: 1.2 !important;
+    }
+
+    p {
+      color: #2d3748 !important;
+      line-height: 1.6 !important;
+      margin-bottom: 1.5rem !important;
+      font-size: 1rem !important;
+      flex-grow: 1 !important;
+    }
+
+    .service-link {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 0.5rem !important;
+      color: #007b7f !important;
+      font-weight: 600 !important;
+      text-decoration: none !important;
+      padding: 1rem 1.5rem !important;
+      border: 2px solid #007b7f !important;
+      border-radius: 50px !important;
+      transition: all 0.3s ease !important;
+      position: relative !important;
+      overflow: hidden !important;
+      align-self: flex-start !important;
+      margin-top: auto !important;
+
+      &::before {
+        content: "" !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: -100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: #007b7f !important;
+        transition: left 0.3s ease !important;
+        z-index: -1 !important;
+      }
+
+      &:hover {
+        color: #ffffff !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 5px 15px rgba(0, 123, 127, 0.3) !important;
+
+        &::before {
+          left: 0 !important;
+        }
+      }
+    }
+  }
+}
+
+// Features section styling with higher specificity
+body .features-section {
+  background: linear-gradient(135deg, #f7fafc 0%, #f8f9fa 100%) !important;
+  padding: 4rem 0 !important;
+
+  h2 {
+    text-align: center !important;
+    color: #007b7f !important;
+    font-size: 2.5rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 4rem !important;
+  }
+
+  .features-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    gap: 2rem !important;
+    max-width: 1000px !important;
+    margin: 0 auto !important;
+    padding: 0 1.5rem !important;
+  }
+
+  .feature-item {
+    text-align: center !important;
+    padding: 1.5rem !important;
+
+    .feature-icon {
+      width: 60px !important;
+      height: 60px !important;
+      background: linear-gradient(135deg, #38a169, #2f855a) !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin: 0 auto 1.5rem !important;
+      color: #ffffff !important;
+      font-size: 1.25rem !important;
+      box-shadow: 0 4px 15px rgba(56, 161, 105, 0.2) !important;
+    }
+
+    h4 {
+      color: #007b7f !important;
+      font-size: 1.25rem !important;
+      font-weight: 600 !important;
+      margin-bottom: 1rem !important;
+    }
+
+    p {
+      color: #2d3748 !important;
+      line-height: 1.6 !important;
+      font-size: 0.875rem !important;
+    }
+  }
+}
+
+// External Service Icons - Force White Color
+.external-services-section {
+  .external-card {
+    .external-icon {
+      i {
+        color: #ffffff !important;
+
+        // Force color for specific FontAwesome brand icons that might override
+        &.fab,
+        &.fas {
+          color: #ffffff !important;
+        }
+      }
+    }
+  }
+}
+
+// Service Section Icons - Force White Color (additional specificity)
+.services-section {
+  .service-card {
+    .service-icon {
+      i {
+        color: #ffffff !important;
+
+        // Force color for all FontAwesome icon types that might override
+        &.fa,
+        &.fab,
+        &.fas,
+        &.far {
+          color: #ffffff !important;
+        }
+      }
+    }
   }
 }
