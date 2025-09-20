@@ -31,36 +31,66 @@
 <body>
     <!-- Navigation Header - Healthcare Theme -->
     {% if request.resolver_match.url_name == 'home' %}
-    <!-- Homepage Hero Header -->
-    <header class="bg-primary text-white py-5">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-12 text-center">
-                    <div class="d-flex justify-content-center align-items-center mb-3">
-                        <i class="fas fa-hospital fa-3x me-3"></i>
-                        <div>
-                            <h1 class="display-4 fw-bold mb-0">EU eHealth NCP Portal</h1>
-                            <p class="lead mb-0">Cross-Border Healthcare Document Exchange Platform</p>
-                        </div>
-                    </div>
+    <!-- Hero Navigation for Homepage -->
+    <nav class="navbar hero-header" role="navigation" aria-label="Main navigation">
+        <div class="hero-container">
+            <!-- Hero Branding Section -->
+            <div class="hero-branding">
+                <div class="hero-logo">
+                    <i class="fas fa-hospital" aria-hidden="true"></i>
+                </div>
+                <div class="hero-title">
+                    <h1>EU eHealth NCP Portal</h1>
+                    <p class="hero-subtitle">Cross-Border Healthcare Document Exchange Platform</p>
                 </div>
             </div>
+            
+            <!-- Hero Navigation Links -->
+            <div class="hero-nav">
+                <a href="/patients/search/" class="hero-nav-link">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    Patient Search
+                </a>
+                <a href="/portal/" class="hero-nav-link">
+                    <i class="fas fa-globe" aria-hidden="true"></i>
+                    Portal
+                </a>
+                <a href="/smp/" class="hero-nav-link">
+                    <i class="fas fa-network-wired" aria-hidden="true"></i>
+                    SMP Management
+                </a>
+                <a href="/admin/" class="hero-nav-link">
+                    <i class="fas fa-cog" aria-hidden="true"></i>
+                    Admin
+                </a>
+                {% if request.user.is_authenticated %}
+                <a href="/accounts/logout/" class="hero-nav-link">
+                    <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                    Logout
+                </a>
+                {% else %}
+                <a href="/accounts/login/" class="hero-nav-link">
+                    <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                    Login
+                </a>
+                {% endif %}
+            </div>
         </div>
-    </header>
+    </nav>
     {% else %}
     <!-- Standard Navigation Bar for other pages -->
     <nav id="main-navigation" class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm" role="navigation" aria-label="Main navigation">
         <div class="container-fluid px-4">
             <!-- Skip to main content link for accessibility -->
             <a href="#main-content" class="visually-hidden-focusable btn btn-primary">Skip to main content</a>
-            
+
             <a href="/" class="navbar-brand d-flex align-items-center" aria-label="EU NCP Portal Home">
                 <i class="fas fa-hospital text-primary me-2" aria-hidden="true"></i>
                 <span class="fw-bold text-primary">EU NCP Portal</span>
             </a>
 
             <!-- Mobile toggle button with enhanced accessibility -->
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-nav" 
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-nav"
                     aria-controls="navbar-nav" aria-expanded="false" aria-label="Toggle navigation menu">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -69,7 +99,7 @@
             <div class="collapse navbar-collapse" id="navbar-nav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0" role="menubar">
                     <li class="nav-item" role="none">
-                        <a href="/" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
+                        <a href="/" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
                            role="menuitem" aria-current="{% if request.resolver_match.url_name == 'home' %}page{% endif %}">
                             <i class="fas fa-home me-1" aria-hidden="true"></i>
                             Home
@@ -113,7 +143,7 @@
                             <i class="fas fa-user-circle me-1" aria-hidden="true"></i>
                             <span class="visually-hidden">Logged in as </span>Welcome, {{ request.user.username }}
                         </span>
-                        <a href="/accounts/logout/" class="btn btn-outline-primary btn-sm" 
+                        <a href="/accounts/logout/" class="btn btn-outline-primary btn-sm"
                            title="Sign out of your account" aria-label="Logout">
                             <i class="fas fa-sign-out-alt me-1" aria-hidden="true"></i>
                             Logout
