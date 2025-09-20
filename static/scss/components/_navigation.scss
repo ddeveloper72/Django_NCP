@@ -13,214 +13,620 @@
   clip: auto;
   white-space: nowrap;
   z-index: 999999;
-  
+
   &:focus {
     top: 6px;
   }
 }
 
-// Enhanced Standard Navigation Bar (Bootstrap-based)
+// Enhanced Professional Medical Portal Navigation Bar
 #main-navigation.navbar {
-  background-color: $white;
-  border-bottom: 2px solid $primary-lighter;
-  padding: $space-md 0;
+  // Modern gradient background with professional depth
+  background: linear-gradient(135deg, 
+    rgba($white, 0.98) 0%, 
+    rgba($primary-color, 0.02) 50%, 
+    rgba($white, 0.98) 100%);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(90deg, $primary-color, $primary-light, $secondary-color) 1;
+  
+  padding: $space-lg 0;
   position: sticky;
   top: 0;
   z-index: 1030;
-  box-shadow: 0 2px 8px rgba($primary-color, 0.08);
+  
+  // Professional shadow with depth
+  box-shadow: 
+    0 4px 20px rgba($primary-color, 0.12),
+    0 1px 3px rgba($primary-color, 0.08),
+    inset 0 1px 0 rgba($white, 0.8);
+    
   transition: all $transition-hse;
+  
+  // Enhanced hover state for entire navbar
+  &:hover {
+    box-shadow: 
+      0 6px 25px rgba($primary-color, 0.15),
+      0 2px 8px rgba($primary-color, 0.1),
+      inset 0 1px 0 rgba($white, 0.9);
+  }
 
   .navbar-brand {
-    font-size: $font-size-lg;
+    // Enhanced typography and spacing
+    font-size: clamp($font-size-lg, 2.5vw, $font-size-xl);
     font-weight: $font-weight-bold;
-    color: $primary-color;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    
+    // Professional gradient text effect
+    background: linear-gradient(135deg, $primary-color, $primary-dark, $secondary-color);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    
     text-decoration: none;
-    padding: $space-sm $space-md;
-    border-radius: $border-radius-md;
+    padding: $space-md $space-lg;
+    border-radius: $border-radius-lg;
+    position: relative;
+    overflow: hidden;
+    
+    // Professional container styling
+    background-color: rgba($white, 0.9);
+    border: 1px solid rgba($primary-color, 0.15);
+    box-shadow: 
+      0 2px 8px rgba($primary-color, 0.08),
+      inset 0 1px 0 rgba($white, 0.8);
+    
     transition: all $transition-hse;
+    
+    // Subtle animation on load
+    animation: brandGlow 3s ease-in-out infinite alternate;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba($primary-color, 0.1), 
+        transparent);
+      transition: left 0.6s ease;
+    }
 
     &:hover {
-      color: $primary-dark;
-      background: rgba($primary-color, 0.05);
-      transform: translateY(-1px);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 
+        0 6px 20px rgba($primary-color, 0.15),
+        inset 0 1px 0 rgba($white, 0.9);
+      border-color: rgba($primary-color, 0.3);
+      
+      &::before {
+        left: 100%;
+      }
+      
+      // Enhanced text gradient on hover
+      background: linear-gradient(135deg, $primary-dark, $primary-color, $secondary-light);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     &:focus {
-      outline: 2px solid $primary-color;
-      outline-offset: 2px;
-      box-shadow: 0 0 0 4px rgba($primary-color, 0.2);
+      outline: 3px solid $primary-color;
+      outline-offset: 3px;
+      box-shadow: 
+        0 0 0 6px rgba($primary-color, 0.25),
+        0 6px 20px rgba($primary-color, 0.15);
+      transform: translateY(-1px);
     }
 
     i {
-      color: $primary-color;
-      transition: color $transition-hse;
+      // Professional icon styling
+      font-size: 1.4em;
+      margin-right: $space-sm;
+      background: linear-gradient(135deg, $primary-color, $secondary-color);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 1px 2px rgba($primary-color, 0.3));
+      transition: all $transition-hse;
     }
 
     span {
-      transition: color $transition-hse;
+      // Text styling with professional weight
+      position: relative;
+      z-index: 2;
+      font-family: $font-family-primary;
+      text-shadow: 0 1px 2px rgba($primary-color, 0.1);
+      
+      // Enhanced brand text styling
+      .brand-primary {
+        font-weight: $font-weight-bold;
+        letter-spacing: -0.01em;
+      }
+      
+      .brand-secondary {
+        font-weight: $font-weight-medium;
+        opacity: 0.9;
+        margin-left: $space-xs;
+      }
+    }
+  }
+
+  // Professional brand glow animation
+  @keyframes brandGlow {
+    0% {
+      box-shadow: 
+        0 2px 8px rgba($primary-color, 0.08),
+        inset 0 1px 0 rgba($white, 0.8);
+    }
+    100% {
+      box-shadow: 
+        0 4px 12px rgba($primary-color, 0.12),
+        inset 0 1px 0 rgba($white, 0.9),
+        0 0 20px rgba($primary-color, 0.05);
     }
   }
 
   .navbar-toggler {
-    border: 2px solid $primary-lighter;
-    border-radius: $border-radius-md;
-    padding: $space-sm;
-    transition: all $transition-hse;
-    background: transparent;
+    // Professional button design
+    border: 2px solid transparent;
+    border-radius: $border-radius-lg;
+    padding: $space-md;
+    background: linear-gradient($white, $white) padding-box,
+                linear-gradient(135deg, $primary-color, $secondary-color) border-box;
     
-    // Ensure minimum touch target size (44px)
-    min-width: 44px;
-    min-height: 44px;
+    // Enhanced dimensions and touch targets
+    min-width: 48px;
+    min-height: 48px;
+    width: 48px;
+    height: 48px;
+    
+    // Professional shadow and effects
+    box-shadow: 
+      0 2px 8px rgba($primary-color, 0.12),
+      inset 0 1px 0 rgba($white, 0.8);
+    
+    transition: all $transition-hse;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba($primary-color, 0.1), transparent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 0.3s ease;
+    }
 
     &:hover {
-      border-color: $primary-color;
-      background: rgba($primary-color, 0.05);
+      transform: translateY(-1px) scale(1.05);
+      box-shadow: 
+        0 4px 15px rgba($primary-color, 0.2),
+        inset 0 1px 0 rgba($white, 0.9);
+      
+      &::before {
+        width: 100%;
+        height: 100%;
+      }
     }
 
     &:focus {
-      outline: 2px solid $primary-color;
-      outline-offset: 2px;
-      box-shadow: 0 0 0 4px rgba($primary-color, 0.2);
-      border-color: $primary-color;
+      outline: 3px solid $primary-color;
+      outline-offset: 3px;
+      box-shadow: 
+        0 0 0 6px rgba($primary-color, 0.25),
+        0 4px 15px rgba($primary-color, 0.2);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.98);
     }
 
     .navbar-toggler-icon {
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='#{$primary-color}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      // Enhanced icon with professional styling
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23#{str-slice(inspect($primary-color), 2)}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2.5' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      width: 20px;
+      height: 20px;
       transition: all $transition-hse;
+      filter: drop-shadow(0 1px 1px rgba($primary-color, 0.2));
+    }
+    
+    // Animation states
+    &[aria-expanded="true"] {
+      .navbar-toggler-icon {
+        transform: rotate(90deg);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23#{str-slice(inspect($primary-color), 2)}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2.5' d='M6 6l18 18M6 24L24 6'/%3e%3c/svg%3e");
+      }
     }
   }
 
   .navbar-nav {
     .nav-item {
       margin: 0 $space-xs;
+      position: relative;
 
       .nav-link {
+        // Enhanced typography for medical professionals
         color: $text-dark;
         font-weight: $font-weight-medium;
         font-size: $font-size-base;
-        padding: $space-sm $space-md;
-        border-radius: $border-radius-md;
+        font-family: $font-family-primary;
+        letter-spacing: 0.01em;
+        
+        // Professional spacing and dimensions
+        padding: $space-md $space-lg;
+        border-radius: $border-radius-lg;
+        min-height: 48px;
+        
+        // Modern design elements
+        background: linear-gradient(135deg, 
+          rgba($white, 0.8) 0%, 
+          rgba($primary-color, 0.02) 50%, 
+          rgba($white, 0.8) 100%);
+        border: 1px solid rgba($primary-color, 0.1);
+        
+        // Professional shadows and effects
+        box-shadow: 
+          0 1px 3px rgba($primary-color, 0.05),
+          inset 0 1px 0 rgba($white, 0.7);
+        
         transition: all $transition-hse;
         display: flex;
         align-items: center;
-        gap: $space-xs;
+        gap: $space-sm;
         text-decoration: none;
         position: relative;
-        
-        // Ensure minimum touch target size
-        min-height: 44px;
+        overflow: hidden;
+
+        // Subtle shimmer effect
+        &::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, 
+            transparent, 
+            rgba($primary-color, 0.08), 
+            transparent);
+          transition: left 0.5s ease;
+        }
 
         &:hover {
           color: $primary-color;
-          background: rgba($primary-color, 0.08);
-          transform: translateY(-1px);
+          background: linear-gradient(135deg, 
+            rgba($primary-color, 0.05) 0%, 
+            rgba($primary-color, 0.08) 50%, 
+            rgba($primary-color, 0.05) 100%);
+          border-color: rgba($primary-color, 0.2);
+          transform: translateY(-2px);
+          
+          box-shadow: 
+            0 4px 12px rgba($primary-color, 0.15),
+            inset 0 1px 0 rgba($white, 0.8);
+
+          &::before {
+            left: 100%;
+          }
         }
 
         &:focus {
-          outline: 2px solid $primary-color;
+          outline: 3px solid $primary-color;
           outline-offset: 2px;
-          box-shadow: 0 0 0 4px rgba($primary-color, 0.2);
+          box-shadow: 
+            0 0 0 6px rgba($primary-color, 0.25),
+            0 4px 12px rgba($primary-color, 0.15);
         }
 
         &.active {
-          color: $primary-color;
-          background: rgba($primary-color, 0.12);
+          color: $white;
           font-weight: $font-weight-bold;
+          background: linear-gradient(135deg, $primary-color, $primary-dark);
+          border-color: $primary-dark;
+          box-shadow: 
+            0 3px 8px rgba($primary-color, 0.3),
+            inset 0 1px 0 rgba($white, 0.2);
           
+          // Professional active indicator
           &::after {
             content: "";
             position: absolute;
-            bottom: -2px;
+            bottom: -1px;
             left: 50%;
             transform: translateX(-50%);
-            width: 32px;
-            height: 3px;
-            background: linear-gradient(90deg, $primary-color, $primary-light);
+            width: 40px;
+            height: 4px;
+            background: linear-gradient(90deg, $secondary-color, $secondary-light);
             border-radius: $border-radius-sm;
+            box-shadow: 0 1px 3px rgba($secondary-color, 0.4);
+          }
+
+          // Enhanced icon for active state
+          i {
+            color: $white;
+            text-shadow: 0 1px 2px rgba($primary-dark, 0.3);
           }
         }
 
         i {
+          // Professional icon styling
           color: $primary-color;
           font-size: $font-size-sm;
-          width: 16px;
+          width: 18px;
           text-align: center;
+          filter: drop-shadow(0 1px 1px rgba($primary-color, 0.2));
+          transition: all $transition-hse;
+        }
+      }
+
+      // Enhanced hover effect for entire nav item
+      &:hover .nav-link:not(.active) {
+        i {
+          color: $primary-dark;
+          transform: scale(1.1);
+        }
+        
+        span {
+          color: $primary-color;
         }
       }
     }
+
+    // Enhanced navigation link text styling
+    .nav-link span {
+      font-weight: inherit;
+      transition: color $transition-hse;
+    }
   }
 
-  // Authentication status section
+  // Enhanced Authentication Status Section
   [role="region"][aria-label="User authentication status"] {
+    padding: $space-sm;
+    border-radius: $border-radius-lg;
+    background: linear-gradient(135deg, 
+      rgba($white, 0.9) 0%, 
+      rgba($primary-color, 0.02) 100%);
+    border: 1px solid rgba($primary-color, 0.1);
+    box-shadow: 
+      0 2px 8px rgba($primary-color, 0.08),
+      inset 0 1px 0 rgba($white, 0.8);
+
+    .text-muted {
+      color: $neutral-medium !important;
+      font-weight: $font-weight-medium;
+      font-size: $font-size-sm;
+      padding: $space-sm $space-md;
+      background: rgba($primary-color, 0.03);
+      border-radius: $border-radius-md;
+      border: 1px solid rgba($primary-color, 0.08);
+      margin-right: $space-md;
+      
+      i {
+        color: $primary-color;
+        margin-right: $space-xs;
+        filter: drop-shadow(0 1px 1px rgba($primary-color, 0.2));
+      }
+      
+      .user-welcome strong {
+        color: $primary-color;
+        font-weight: $font-weight-bold;
+      }
+    }
+
     .btn {
-      min-height: 44px; // Ensure touch target size
+      min-height: 44px;
+      padding: $space-sm $space-lg;
+      font-weight: $font-weight-medium;
+      font-size: $font-size-sm;
+      border-radius: $border-radius-lg;
       transition: all $transition-hse;
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: radial-gradient(circle, rgba($white, 0.3), transparent);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.3s ease;
+      }
+
+      &:hover::before {
+        width: 100%;
+        height: 100%;
+      }
 
       &:focus {
-        outline: 2px solid $primary-color;
+        outline: 3px solid $primary-color;
         outline-offset: 2px;
-        box-shadow: 0 0 0 4px rgba($primary-color, 0.2);
+        box-shadow: 
+          0 0 0 6px rgba($primary-color, 0.25),
+          0 4px 12px rgba($primary-color, 0.15);
+      }
+
+      i {
+        margin-right: $space-xs;
+        transition: transform $transition-hse;
+      }
+
+      &:hover i {
+        transform: scale(1.1);
       }
     }
 
     .btn-primary {
       background: linear-gradient(135deg, $primary-color, $primary-light);
-      border: none;
-      
+      border: 2px solid $primary-color;
+      color: $white;
+      box-shadow: 
+        0 2px 8px rgba($primary-color, 0.3),
+        inset 0 1px 0 rgba($white, 0.2);
+
       &:hover {
         background: linear-gradient(135deg, $primary-dark, $primary-color);
+        border-color: $primary-dark;
         transform: translateY(-1px);
+        box-shadow: 
+          0 4px 12px rgba($primary-color, 0.4),
+          inset 0 1px 0 rgba($white, 0.3);
+      }
+
+      &:active {
+        transform: translateY(0);
       }
     }
 
     .btn-outline-primary {
       border: 2px solid $primary-color;
       color: $primary-color;
-      
+      background: linear-gradient(135deg, 
+        rgba($white, 0.9) 0%, 
+        rgba($primary-color, 0.05) 100%);
+      box-shadow: 
+        0 2px 6px rgba($primary-color, 0.15),
+        inset 0 1px 0 rgba($white, 0.8);
+
       &:hover {
-        background: $primary-color;
+        background: linear-gradient(135deg, $primary-color, $primary-light);
         border-color: $primary-color;
         color: $white;
         transform: translateY(-1px);
+        box-shadow: 
+          0 4px 12px rgba($primary-color, 0.3),
+          inset 0 1px 0 rgba($white, 0.2);
+      }
+
+      &:active {
+        transform: translateY(0);
       }
     }
   }
 
-  // Mobile responsive improvements
+  // Enhanced Mobile Responsive Design
   @media (max-width: 991.98px) {
+    padding: $space-md 0;
+    
     .navbar-collapse {
-      background: $white;
-      border-top: 1px solid $primary-lighter;
-      margin-top: $space-md;
-      padding-top: $space-md;
-      box-shadow: 0 4px 8px rgba($primary-color, 0.1);
+      background: linear-gradient(135deg, 
+        rgba($white, 0.98) 0%, 
+        rgba($primary-color, 0.02) 50%, 
+        rgba($white, 0.98) 100%);
+      -webkit-backdrop-filter: blur(15px);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba($primary-color, 0.15);
+      border-top: 3px solid $primary-color;
+      border-radius: 0 0 $border-radius-lg $border-radius-lg;
+      margin-top: $space-lg;
+      padding: $space-lg;
+      
+      box-shadow: 
+        0 8px 25px rgba($primary-color, 0.15),
+        0 4px 10px rgba($primary-color, 0.1),
+        inset 0 1px 0 rgba($white, 0.8);
+      
+      // Smooth slide animation
+      animation: mobileMenuSlide 0.3s ease-out;
     }
 
     .navbar-nav {
       .nav-item {
         margin: $space-xs 0;
-
+        
         .nav-link {
-          padding: $space-md;
-          font-size: $font-size-md;
+          padding: $space-md $space-lg;
+          margin: $space-xs 0;
+          font-size: $font-size-base;
+          border-radius: $border-radius-lg;
           
-          &:hover {
-            background: rgba($primary-color, 0.12);
+          // Enhanced mobile touch targets
+          min-height: 52px;
+          
+          // Professional mobile styling
+          background: linear-gradient(135deg, 
+            rgba($white, 0.7) 0%, 
+            rgba($primary-color, 0.03) 100%);
+          border: 1px solid rgba($primary-color, 0.1);
+          
+          &:hover, &:focus {
+            background: linear-gradient(135deg, 
+              rgba($primary-color, 0.08) 0%, 
+              rgba($primary-color, 0.12) 100%);
+            border-color: rgba($primary-color, 0.2);
+            transform: translateX(4px);
+          }
+          
+          &.active {
+            background: linear-gradient(135deg, $primary-color, $primary-dark);
+            border-color: $primary-dark;
+            color: $white;
+            transform: translateX(8px);
+            
+            &::after {
+              left: 0;
+              transform: none;
+              width: 4px;
+              height: 100%;
+              border-radius: 0 $border-radius-sm $border-radius-sm 0;
+            }
           }
         }
       }
     }
 
+    // Enhanced mobile authentication section
     [role="region"][aria-label="User authentication status"] {
-      margin-top: $space-md;
-      padding-top: $space-md;
-      border-top: 1px solid $primary-lighter;
+      margin-top: $space-lg;
+      padding: $space-lg;
+      background: linear-gradient(135deg, 
+        rgba($primary-color, 0.03) 0%, 
+        rgba($white, 0.8) 100%);
+      border: 1px solid rgba($primary-color, 0.1);
+      border-radius: $border-radius-lg;
+      text-align: center;
       
-      .d-flex {
-        flex-direction: column;
-        align-items: flex-start !important;
-        gap: $space-md;
+      .text-muted {
+        display: block;
+        margin-bottom: $space-md;
+        padding: $space-md;
+        background: rgba($white, 0.8);
+        border-radius: $border-radius-md;
       }
+      
+      .btn {
+        width: 100%;
+        max-width: 200px;
+        margin: 0 auto;
+        display: block;
+      }
+    }
+  }
+
+  // Mobile menu slide animation
+  @keyframes mobileMenuSlide {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 }

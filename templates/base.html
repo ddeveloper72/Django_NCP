@@ -29,124 +29,99 @@
 </head>
 
 <body>
-    <!-- Navigation Header - Healthcare Theme -->
-    {% if request.resolver_match.url_name == 'home' %}
-    <!-- Hero Navigation for Homepage -->
-    <nav class="navbar hero-header" role="navigation" aria-label="Main navigation">
-        <div class="hero-container">
-            <!-- Hero Branding Section -->
-            <div class="hero-branding">
-                <div class="hero-logo">
-                    <i class="fas fa-hospital" aria-hidden="true"></i>
-                </div>
-                <div class="hero-title">
-                    <h1>EU eHealth NCP Portal</h1>
-                    <p class="hero-subtitle">Cross-Border Healthcare Document Exchange Platform</p>
-                </div>
-            </div>
-            
-            <!-- Hero Navigation Links -->
-            <div class="hero-nav">
-                <a href="/patients/search/" class="hero-nav-link">
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                    Patient Search
-                </a>
-                <a href="/portal/" class="hero-nav-link">
-                    <i class="fas fa-globe" aria-hidden="true"></i>
-                    Portal
-                </a>
-                <a href="/smp/" class="hero-nav-link">
-                    <i class="fas fa-network-wired" aria-hidden="true"></i>
-                    SMP Management
-                </a>
-                <a href="/admin/" class="hero-nav-link">
-                    <i class="fas fa-cog" aria-hidden="true"></i>
-                    Admin
-                </a>
-                {% if request.user.is_authenticated %}
-                <a href="/accounts/logout/" class="hero-nav-link">
-                    <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
-                    Logout
-                </a>
-                {% else %}
-                <a href="/accounts/login/" class="hero-nav-link">
-                    <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
-                    Login
-                </a>
-                {% endif %}
-            </div>
-        </div>
-    </nav>
-    {% else %}
-    <!-- Standard Navigation Bar for other pages -->
-    <nav id="main-navigation" class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm" role="navigation" aria-label="Main navigation">
+    <!-- Professional Medical Portal Navigation Bar -->
+    <nav id="main-navigation" class="navbar navbar-expand-lg navbar-enhanced" role="navigation" aria-label="Main navigation">
         <div class="container-fluid px-4">
             <!-- Skip to main content link for accessibility -->
             <a href="#main-content" class="visually-hidden-focusable btn btn-primary">Skip to main content</a>
 
-            <a href="/" class="navbar-brand d-flex align-items-center" aria-label="EU NCP Portal Home">
-                <i class="fas fa-hospital text-primary me-2" aria-hidden="true"></i>
-                <span class="fw-bold text-primary">EU NCP Portal</span>
+            <!-- Enhanced Brand with Professional Medical Identity -->
+            <a href="/" class="navbar-brand d-flex align-items-center" aria-label="EU NCP Portal - International Medical Portal Home">
+                <i class="fas fa-hospital-user text-primary me-2" aria-hidden="true" title="Medical Portal"></i>
+                <span class="fw-bold text-primary">
+                    <span class="brand-primary">EU NCP</span>
+                    <span class="brand-secondary">Portal</span>
+                </span>
             </a>
 
-            <!-- Mobile toggle button with enhanced accessibility -->
+            <!-- Enhanced Mobile toggle button -->
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-nav"
                     aria-controls="navbar-nav" aria-expanded="false" aria-label="Toggle navigation menu">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <!-- Main Navigation -->
+            <!-- Professional Medical Navigation -->
             <div class="collapse navbar-collapse" id="navbar-nav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0" role="menubar">
                     <li class="nav-item" role="none">
                         <a href="/" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
                            role="menuitem" aria-current="{% if request.resolver_match.url_name == 'home' %}page{% endif %}">
-                            <i class="fas fa-home me-1" aria-hidden="true"></i>
-                            Home
+                            <i class="fas fa-home me-1" aria-hidden="true" title="Home Dashboard"></i>
+                            <span>Home</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
                         <a href="/patients/search/" class="nav-link {% if 'patients' in request.path %}active{% endif %}"
                            role="menuitem" aria-current="{% if 'patients' in request.path %}page{% endif %}">
-                            <i class="fas fa-search me-1" aria-hidden="true"></i>
-                            Patient Search
+                            <i class="fas fa-user-md me-1" aria-hidden="true" title="Patient Search"></i>
+                            <span>Patient Search</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
                         <a href="/portal/" class="nav-link {% if 'portal' in request.path %}active{% endif %}"
                            role="menuitem" aria-current="{% if 'portal' in request.path %}page{% endif %}">
-                            <i class="fas fa-globe me-1" aria-hidden="true"></i>
-                            Portal
+                            <i class="fas fa-globe-europe me-1" aria-hidden="true" title="European Portal"></i>
+                            <span>Portal</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
                         <a href="/smp/" class="nav-link {% if 'smp' in request.path %}active{% endif %}"
                            role="menuitem" aria-current="{% if 'smp' in request.path %}page{% endif %}">
-                            <i class="fas fa-network-wired me-1" aria-hidden="true"></i>
-                            SMP Management
+                            <i class="fas fa-network-wired me-1" aria-hidden="true" title="Secure Message Protocol"></i>
+                            <span>SMP Management</span>
                         </a>
                     </li>
                     <li class="nav-item" role="none">
                         <a href="/admin/" class="nav-link {% if 'admin' in request.path %}active{% endif %}"
                            role="menuitem" aria-current="{% if 'admin' in request.path %}page{% endif %}">
-                            <i class="fas fa-cog me-1" aria-hidden="true"></i>
-                            Admin
+                            <i class="fas fa-cogs me-1" aria-hidden="true" title="System Administration"></i>
+                            <span>Admin</span>
                         </a>
                     </li>
                 </ul>
 
-                <!-- Enhanced Login Status Indicator -->
+                <!-- Enhanced Authentication Status with Professional Design -->
                 <div class="d-flex align-items-center" role="region" aria-label="User authentication status">
                     {% if request.user.is_authenticated %}
                     <div class="d-flex align-items-center">
                         <span class="text-muted me-3" role="status" aria-live="polite">
-                            <i class="fas fa-user-circle me-1" aria-hidden="true"></i>
-                            <span class="visually-hidden">Logged in as </span>Welcome, {{ request.user.username }}
+                            <i class="fas fa-user-circle me-1" aria-hidden="true" title="Authenticated User"></i>
+                            <span class="visually-hidden">Logged in as </span>
+                            <span class="user-welcome">Welcome, <strong>{{ request.user.username }}</strong></span>
                         </span>
                         <a href="/accounts/logout/" class="btn btn-outline-primary btn-sm"
-                           title="Sign out of your account" aria-label="Logout">
+                           title="Sign out of your account" aria-label="Logout from EU NCP Portal">
                             <i class="fas fa-sign-out-alt me-1" aria-hidden="true"></i>
-                            Logout
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted me-3" role="status" aria-live="polite">
+                            <i class="fas fa-user-slash me-1" aria-hidden="true" title="Not Authenticated"></i>
+                            <span>Guest Access</span>
+                        </span>
+                        <a href="/accounts/login/" class="btn btn-primary btn-sm"
+                           title="Sign in to your account" aria-label="Login to EU NCP Portal">
+                            <i class="fas fa-sign-in-alt me-1" aria-hidden="true"></i>
+                            <span>Login</span>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
                         </a>
                     </div>
                     {% else %}
@@ -167,10 +142,43 @@
         </div>
     </nav>
 
+    <!-- Hero Section for Home Page Only -->
+    {% if request.resolver_match.url_name == 'home' %}
+    <section class="hero-banner">
+        <div class="container">
+            <div class="hero-content text-center">
+                <div class="hero-icon mb-4">
+                    <i class="fas fa-hospital" aria-hidden="true"></i>
+                </div>
+                <h1 class="hero-title">EU eHealth NCP Portal</h1>
+                <p class="hero-subtitle">Cross-Border Healthcare Document Exchange Platform</p>
+                <div class="hero-features">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="feature-grid">
+                                <div class="feature-item">
+                                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                    <span>GDPR Compliant</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-globe-europe" aria-hidden="true"></i>
+                                    <span>EU Cross-Border</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-lock" aria-hidden="true"></i>
+                                    <span>Secure Exchange</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
     <!-- Page Breadcrumb/Context Area -->
     {% block page_context %}{% endblock %}
-
-    {% endif %}
 
 
     <!-- Main Content Area -->
