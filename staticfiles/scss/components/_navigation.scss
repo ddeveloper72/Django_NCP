@@ -2,6 +2,229 @@
 // Navigation Components - HSE-Inspired Styling
 // ========================================
 
+// Skip to content link for accessibility
+.visually-hidden-focusable {
+  position: absolute !important;
+  top: -40px;
+  left: 6px;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: nowrap;
+  z-index: 999999;
+  
+  &:focus {
+    top: 6px;
+  }
+}
+
+// Enhanced Standard Navigation Bar (Bootstrap-based)
+#main-navigation.navbar {
+  background-color: $white;
+  border-bottom: 2px solid $primary-lighter;
+  padding: $space-md 0;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  box-shadow: 0 2px 8px rgba($primary-color, 0.08);
+  transition: all $transition-hse;
+
+  .navbar-brand {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $primary-color;
+    text-decoration: none;
+    padding: $space-sm $space-md;
+    border-radius: $border-radius-md;
+    transition: all $transition-hse;
+
+    &:hover {
+      color: $primary-dark;
+      background: rgba($primary-color, 0.05);
+      transform: translateY(-1px);
+    }
+
+    &:focus {
+      outline: 2px solid $primary-color;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba($primary-color, 0.2);
+    }
+
+    i {
+      color: $primary-color;
+      transition: color $transition-hse;
+    }
+
+    span {
+      transition: color $transition-hse;
+    }
+  }
+
+  .navbar-toggler {
+    border: 2px solid $primary-lighter;
+    border-radius: $border-radius-md;
+    padding: $space-sm;
+    transition: all $transition-hse;
+    background: transparent;
+    
+    // Ensure minimum touch target size (44px)
+    min-width: 44px;
+    min-height: 44px;
+
+    &:hover {
+      border-color: $primary-color;
+      background: rgba($primary-color, 0.05);
+    }
+
+    &:focus {
+      outline: 2px solid $primary-color;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba($primary-color, 0.2);
+      border-color: $primary-color;
+    }
+
+    .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='#{$primary-color}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      transition: all $transition-hse;
+    }
+  }
+
+  .navbar-nav {
+    .nav-item {
+      margin: 0 $space-xs;
+
+      .nav-link {
+        color: $text-dark;
+        font-weight: $font-weight-medium;
+        font-size: $font-size-base;
+        padding: $space-sm $space-md;
+        border-radius: $border-radius-md;
+        transition: all $transition-hse;
+        display: flex;
+        align-items: center;
+        gap: $space-xs;
+        text-decoration: none;
+        position: relative;
+        
+        // Ensure minimum touch target size
+        min-height: 44px;
+
+        &:hover {
+          color: $primary-color;
+          background: rgba($primary-color, 0.08);
+          transform: translateY(-1px);
+        }
+
+        &:focus {
+          outline: 2px solid $primary-color;
+          outline-offset: 2px;
+          box-shadow: 0 0 0 4px rgba($primary-color, 0.2);
+        }
+
+        &.active {
+          color: $primary-color;
+          background: rgba($primary-color, 0.12);
+          font-weight: $font-weight-bold;
+          
+          &::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 3px;
+            background: linear-gradient(90deg, $primary-color, $primary-light);
+            border-radius: $border-radius-sm;
+          }
+        }
+
+        i {
+          color: $primary-color;
+          font-size: $font-size-sm;
+          width: 16px;
+          text-align: center;
+        }
+      }
+    }
+  }
+
+  // Authentication status section
+  [role="region"][aria-label="User authentication status"] {
+    .btn {
+      min-height: 44px; // Ensure touch target size
+      transition: all $transition-hse;
+
+      &:focus {
+        outline: 2px solid $primary-color;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px rgba($primary-color, 0.2);
+      }
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, $primary-color, $primary-light);
+      border: none;
+      
+      &:hover {
+        background: linear-gradient(135deg, $primary-dark, $primary-color);
+        transform: translateY(-1px);
+      }
+    }
+
+    .btn-outline-primary {
+      border: 2px solid $primary-color;
+      color: $primary-color;
+      
+      &:hover {
+        background: $primary-color;
+        border-color: $primary-color;
+        color: $white;
+        transform: translateY(-1px);
+      }
+    }
+  }
+
+  // Mobile responsive improvements
+  @media (max-width: 991.98px) {
+    .navbar-collapse {
+      background: $white;
+      border-top: 1px solid $primary-lighter;
+      margin-top: $space-md;
+      padding-top: $space-md;
+      box-shadow: 0 4px 8px rgba($primary-color, 0.1);
+    }
+
+    .navbar-nav {
+      .nav-item {
+        margin: $space-xs 0;
+
+        .nav-link {
+          padding: $space-md;
+          font-size: $font-size-md;
+          
+          &:hover {
+            background: rgba($primary-color, 0.12);
+          }
+        }
+      }
+    }
+
+    [role="region"][aria-label="User authentication status"] {
+      margin-top: $space-md;
+      padding-top: $space-md;
+      border-top: 1px solid $primary-lighter;
+      
+      .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: $space-md;
+      }
+    }
+  }
+}
+
 // HSE-Style Hero Header for Homepage
 .hero-header {
   background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
@@ -12,7 +235,7 @@
 
   // Subtle pattern overlay
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -215,7 +438,7 @@
           font-weight: $font-weight-semibold;
 
           &::after {
-            content: '';
+            content: "";
             position: absolute;
             bottom: -17px;
             left: 50%;
@@ -360,7 +583,7 @@
           font-weight: $font-weight-bold;
 
           &::after {
-            content: '';
+            content: "";
             position: absolute;
             bottom: -13px;
             left: 50%;
@@ -460,7 +683,7 @@
 
   // Subtle pattern overlay
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -871,7 +1094,7 @@
     }
 
     &:not(:last-child)::after {
-      content: '›';
+      content: "›";
       color: rgba($primary-color, 0.4);
       font-weight: $font-weight-semibold;
       margin-left: $space-xs;
@@ -932,7 +1155,7 @@
     border: none;
 
     .breadcrumb-item + .breadcrumb-item::before {
-      content: '›';
+      content: "›";
       color: rgba($primary-color, 0.5);
       font-weight: $font-weight-semibold;
     }
@@ -1129,7 +1352,7 @@
     position: relative;
 
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       bottom: -$space-sm;
       left: 50%;
@@ -1165,7 +1388,7 @@
   overflow: hidden;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -1211,7 +1434,7 @@
       font-size: $font-size-xl;
       line-height: 1;
       text-align: center;
-      
+
       // Ensure all FontAwesome icon types are properly centered
       &.fa,
       &.fab,
@@ -1262,7 +1485,7 @@
     overflow: hidden;
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: -100%;
