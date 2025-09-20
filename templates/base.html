@@ -7,18 +7,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}EU NCP Portal{% endblock %}</title>
 
-    <!-- TEMPLATE UPDATE TEST - September 16, 2025 -->
-    <!-- Bootstrap 5.3.3 CSS CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- CLEAN CSS ARCHITECTURE - September 20, 2025 -->
+    <!-- External Dependencies (DMZ Compliant) -->
+    <link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'vendor/fontawesome/fontawesome.min.css' %}">
 
-    <!-- Font Awesome 6 for modern icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <!-- All Custom Styles - Compiled from SASS -->
+    <link href="{% static 'css/main.css' %}?v={% now 'U' %}" rel="stylesheet" media="screen">
 
-    <!-- Irish Healthcare Bootstrap Theme -->
-    <link href="{% static 'css/irish-healthcare-theme.css' %}?v={% now 'U' %}" rel="stylesheet" media="screen">
-
-    <!-- Custom CSS overrides - Re-enabled for navigation functionality -->
-    <link href="{% static 'css/bootstrap-components.css' %}?v={% now 'U' %}" rel="stylesheet" media="screen">
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#005eb8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="EU NCP Portal">
+    <link rel="apple-touch-icon" href="{% static 'icons/icon-192x192.png' %}">
+    <meta name="msapplication-TileColor" content="#005eb8">
+    <meta name="msapplication-TileImage" content="{% static 'icons/icon-144x144.png' %}">
 
     {% block extra_css %} {% endblock %}
 </head>
@@ -44,68 +49,85 @@
     </header>
     {% else %}
     <!-- Standard Navigation Bar for other pages -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+    <nav id="main-navigation" class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm" role="navigation" aria-label="Main navigation">
         <div class="container-fluid px-4">
-            <a href="/" class="navbar-brand d-flex align-items-center">
-                <i class="fas fa-hospital text-primary me-2"></i>
+            <!-- Skip to main content link for accessibility -->
+            <a href="#main-content" class="visually-hidden-focusable btn btn-primary">Skip to main content</a>
+            
+            <a href="/" class="navbar-brand d-flex align-items-center" aria-label="EU NCP Portal Home">
+                <i class="fas fa-hospital text-primary me-2" aria-hidden="true"></i>
                 <span class="fw-bold text-primary">EU NCP Portal</span>
             </a>
 
-            <!-- Mobile toggle button -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-nav" aria-controls="navbar-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <!-- Mobile toggle button with enhanced accessibility -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-nav" 
+                    aria-controls="navbar-nav" aria-expanded="false" aria-label="Toggle navigation menu">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <!-- Main Navigation -->
             <div class="collapse navbar-collapse" id="navbar-nav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a href="/" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
-                            <i class="fas fa-home me-1"></i>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" role="menubar">
+                    <li class="nav-item" role="none">
+                        <a href="/" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
+                           role="menuitem" aria-current="{% if request.resolver_match.url_name == 'home' %}page{% endif %}">
+                            <i class="fas fa-home me-1" aria-hidden="true"></i>
                             Home
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="/patients/search/" class="nav-link {% if 'patients' in request.path %}active{% endif %}">
-                            <i class="fas fa-search me-1"></i>
+                    <li class="nav-item" role="none">
+                        <a href="/patients/search/" class="nav-link {% if 'patients' in request.path %}active{% endif %}"
+                           role="menuitem" aria-current="{% if 'patients' in request.path %}page{% endif %}">
+                            <i class="fas fa-search me-1" aria-hidden="true"></i>
                             Patient Search
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="/portal/" class="nav-link {% if 'portal' in request.path %}active{% endif %}">
-                            <i class="fas fa-globe me-1"></i>
+                    <li class="nav-item" role="none">
+                        <a href="/portal/" class="nav-link {% if 'portal' in request.path %}active{% endif %}"
+                           role="menuitem" aria-current="{% if 'portal' in request.path %}page{% endif %}">
+                            <i class="fas fa-globe me-1" aria-hidden="true"></i>
                             Portal
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="/admin/" class="nav-link {% if 'admin' in request.path %}active{% endif %}">
-                            <i class="fas fa-cog me-1"></i>
+                    <li class="nav-item" role="none">
+                        <a href="/smp/" class="nav-link {% if 'smp' in request.path %}active{% endif %}"
+                           role="menuitem" aria-current="{% if 'smp' in request.path %}page{% endif %}">
+                            <i class="fas fa-network-wired me-1" aria-hidden="true"></i>
+                            SMP Management
+                        </a>
+                    </li>
+                    <li class="nav-item" role="none">
+                        <a href="/admin/" class="nav-link {% if 'admin' in request.path %}active{% endif %}"
+                           role="menuitem" aria-current="{% if 'admin' in request.path %}page{% endif %}">
+                            <i class="fas fa-cog me-1" aria-hidden="true"></i>
                             Admin
                         </a>
                     </li>
                 </ul>
 
                 <!-- Enhanced Login Status Indicator -->
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center" role="region" aria-label="User authentication status">
                     {% if request.user.is_authenticated %}
                     <div class="d-flex align-items-center">
-                        <span class="text-muted me-3">
-                            <i class="fas fa-user-circle me-1"></i>
-                            Welcome, {{ request.user.username }}
+                        <span class="text-muted me-3" role="status" aria-live="polite">
+                            <i class="fas fa-user-circle me-1" aria-hidden="true"></i>
+                            <span class="visually-hidden">Logged in as </span>Welcome, {{ request.user.username }}
                         </span>
-                        <a href="/accounts/logout/" class="btn btn-outline-primary btn-sm" title="Logout">
-                            <i class="fas fa-sign-out-alt me-1"></i>
+                        <a href="/accounts/logout/" class="btn btn-outline-primary btn-sm" 
+                           title="Sign out of your account" aria-label="Logout">
+                            <i class="fas fa-sign-out-alt me-1" aria-hidden="true"></i>
                             Logout
                         </a>
                     </div>
                     {% else %}
                     <div class="d-flex align-items-center">
-                        <span class="text-muted me-3">
-                            <i class="fas fa-user me-1"></i>
-                            Not logged in
+                        <span class="text-muted me-3" role="status" aria-live="polite">
+                            <i class="fas fa-user me-1" aria-hidden="true"></i>
+                            <span class="visually-hidden">Authentication status: </span>Not logged in
                         </span>
-                        <a href="/accounts/login/" class="btn btn-primary btn-sm">
-                            <i class="fas fa-sign-in-alt me-1"></i>
+                        <a href="/accounts/login/" class="btn btn-primary btn-sm"
+                           title="Sign in to your account" aria-label="Login">
+                            <i class="fas fa-sign-in-alt me-1" aria-hidden="true"></i>
                             Login
                         </a>
                     </div>
@@ -122,7 +144,7 @@
 
 
     <!-- Main Content Area -->
-    <main class="container-fluid py-4">
+    <main id="main-content" class="container-fluid py-4" role="main" aria-label="Main content">
         {% if messages %}
         <div class="container flash-messages">
             {% for message in messages %}
@@ -151,7 +173,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
+    <footer class="bg-dark text-white py-4 mt-5" role="contentinfo" aria-label="Site footer">
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-3">
@@ -184,79 +206,29 @@
     <!-- Navigation JavaScript -->
     <script src="{% static 'js/navigation.js' %}"></script>
 
-    <!-- Bootstrap JavaScript for tab functionality -->
+    <!-- Base JavaScript functionality -->
+    <script src="{% static 'js/base.js' %}"></script>
+
+    <!-- Accessibility enhancements -->
+    <script src="{% static 'js/accessibility.js' %}"></script>
+
+    <!-- Bootstrap 5.3.3 Local JavaScript (DMZ Compliant) -->
+    <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+
+    <!-- PWA Service Worker Registration -->
     <script>
-        // Simple tab functionality for Bootstrap-style tabs
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle tab clicks
-            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function(tab) {
-                tab.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('Tab clicked:', this.getAttribute('data-bs-target'));
-
-                    // Remove active class from all tabs and panes
-                    document.querySelectorAll('.nav-link').forEach(function(link) {
-                        link.classList.remove('active');
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('{% static "sw.js" %}')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful: ', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('ServiceWorker registration failed: ', error);
                     });
-                    document.querySelectorAll('.tab-pane').forEach(function(pane) {
-                        pane.classList.remove('show', 'active');
-                    });
-
-                    // Add active class to clicked tab
-                    this.classList.add('active');
-                    console.log('Tab set to active:', this.id);
-
-                    // Show corresponding tab pane
-                    const targetId = this.getAttribute('data-bs-target');
-                    const targetPane = document.querySelector(targetId);
-                    if (targetPane) {
-                        targetPane.classList.add('show', 'active');
-                        console.log('Tab pane activated:', targetId);
-                    } else {
-                        console.error('Tab pane not found:', targetId);
-                    }
-                });
             });
-        });
-
-        // Mobile menu toggle
-        const navbarToggle = document.querySelector('.navbar-toggle');
-        const navbarNav = document.querySelector('.navbar-nav');
-
-        if (navbarToggle && navbarNav) {
-            navbarToggle.addEventListener('click', function() {
-                navbarNav.classList.toggle('navbar-nav-open');
-                navbarToggle.classList.toggle('navbar-toggle-active');
-
-                const isOpen = navbarNav.classList.contains('navbar-nav-open');
-                navbarToggle.setAttribute('aria-expanded', isOpen);
-            });
-
-            // Close mobile menu when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!event.target.closest('.navbar-main')) {
-                    navbarNav.classList.remove('navbar-nav-open');
-                    navbarToggle.classList.remove('navbar-toggle-active');
-                    navbarToggle.setAttribute('aria-expanded', 'false');
-                }
-            });
-
-            // Close mobile menu on window resize
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
-                    navbarNav.classList.remove('navbar-nav-open');
-                    navbarToggle.classList.remove('navbar-toggle-active');
-                    navbarToggle.setAttribute('aria-expanded', 'false');
-                }
-            });
-
-            navbarToggle.setAttribute('aria-expanded', 'false');
-            navbarToggle.setAttribute('aria-controls', 'navbar-nav');
         }
     </script>
-
-    <!-- Bootstrap 5.3.3 JavaScript CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     {% block extra_js %} {% endblock %}
 </body>
