@@ -1200,6 +1200,30 @@
     font-size: $font-size-xl;
     box-shadow: 0 4px 15px rgba($primary-color, 0.2);
     transition: all $transition-hse;
+
+    // FontAwesome icon centering and sizing
+    i {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      font-size: $font-size-xl;
+      line-height: 1;
+      text-align: center;
+      
+      // Ensure all FontAwesome icon types are properly centered
+      &.fa,
+      &.fab,
+      &.fas,
+      &.far {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: $font-size-xl;
+        line-height: 1;
+      }
+    }
   }
 
   &:hover .service-icon,
