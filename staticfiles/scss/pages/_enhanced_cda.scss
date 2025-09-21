@@ -33,16 +33,19 @@
   }
 
   &.active {
-    color: #ffffff !important;
+    color: #2d3748 !important; // Dark gray text for excellent readability
     border-bottom-color: var(--hse-primary);
-    background: var(--hse-primary) !important;
+    background: #f8f9fa !important; // Light gray background for contrast
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(0, 91, 184, 0.3);
+  }
 
-    &:hover {
-      background: var(--hse-primary-dark) !important;
-      transform: translateY(-1px);
-    }
+  // Separate hover rule for active tabs - only applies on actual hover
+  &.active:hover {
+    color: #2d3748 !important; // Keep dark text even on hover for consistency
+    background: #e9ecef !important; // Slightly darker gray on hover
+    transform: translateY(-1px);
+    box-shadow: 0 3px 12px rgba(0, 91, 184, 0.4);
   }
 
   .badge {

@@ -604,50 +604,44 @@ body {
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6) !important;
 }
 
-.tab-button.active {
-  color: var(--healthcare-text-light) !important;
-  background: linear-gradient(
-    135deg,
-    var(--healthcare-blue) 0%,
-    var(--healthcare-dark-blue) 100%
-  ) !important;
+.tab-button.active,
+.nav-tabs .tab-button.active,
+.nav-tabs .nav-link.tab-button.active {
+  color: #2d3748 !important; // Dark gray text for excellent readability
+  background: #f8f9fa !important; // Light gray background for contrast
   border-color: var(--healthcare-blue) !important;
   font-weight: 700 !important;
   transform: translateY(-1px) !important;
   box-shadow: 0 4px 12px rgba(0, 94, 184, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  text-shadow: none !important; // No text shadow for crisp text
   z-index: 10;
 }
 
-.tab-button.active:hover {
-  background: linear-gradient(
-    135deg,
-    var(--healthcare-dark-blue) 0%,
-    var(--healthcare-blue) 100%
-  ) !important;
-  border-color: var(--healthcare-dark-blue) !important;
+/* CRITICAL: Override Bootstrap nav-tabs rule that forces white text */
+.nav-tabs .nav-link.active.tab-button,
+.nav-tabs .nav-link.tab-button.active,
+.nav-tabs .tab-button.nav-link.active {
+  color: #2d3748 !important; // Force dark gray text over Bootstrap's white text
+  background: #f8f9fa !important; // Light background for contrast
+}
+
+.tab-button.active:hover,
+.nav-tabs .tab-button.active:hover,
+.nav-tabs .nav-link.tab-button.active:hover,
+.nav-tabs .nav-link.active.tab-button:hover,
+.nav-tabs .tab-button.nav-link.active:hover {
+  color: #1a202c !important; // Even darker gray text for better hover contrast
+  background: #e2e8f0 !important; // Slightly darker light background for hover feedback
+  border-color: var(--healthcare-blue) !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 6px 16px rgba(0, 94, 184, 0.5), 0 3px 8px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 6px 16px rgba(0, 94, 184, 0.3), 0 3px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
 }
 
-/* Enhanced Badge Styling in Extended Patient Tabs */
-.tab-button .badge {
-  margin-left: 0.5rem !important;
-  font-size: 0.7rem !important;
-  padding: 0.25rem 0.5rem !important;
-  border-radius: 0.5rem !important;
-  font-weight: 600 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-}
-
-.tab-button.active .badge {
-  background-color: rgba(255, 255, 255, 0.9) !important;
-  color: var(--healthcare-blue) !important;
-  border-color: rgba(255, 255, 255, 0.5) !important;
-}
+/* Tab Button Badge Styling - Handled by Enhanced CDA file */
+/* Simple badge styling is defined in static/scss/pages/_enhanced_cda.scss */
+/* This allows for cleaner, more maintainable badge styling per page/component */
 
 /* Tab Button Icons Enhancement */
 .tab-button i {
@@ -1413,13 +1407,13 @@ i.fab {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Icon hover effects for interactive elements - exclude navigation */
-.card-header:hover i.fa-solid,
-.card-header:hover i.far,
-.card-header:hover i.fab,
-.section-header:hover i.fa-solid,
-.section-header:hover i.far,
-.section-header:hover i.fab,
+/* Icon hover effects for interactive elements - exclude navigation and tab buttons */
+.card-header:not(.tab-button):hover i.fa-solid,
+.card-header:not(.tab-button):hover i.far,
+.card-header:not(.tab-button):hover i.fab,
+.section-header:not(.tab-button):hover i.fa-solid,
+.section-header:not(.tab-button):hover i.far,
+.section-header:not(.tab-button):hover i.fab,
 .breadcrumb-link:hover i.fa-solid,
 .breadcrumb-link:hover i.far,
 .breadcrumb-link:hover i.fab {
@@ -1427,10 +1421,10 @@ i.fab {
   color: var(--healthcare-dark-blue) !important;
 }
 
-/* Specific button hover effects - exclude navbar buttons */
-.btn:hover i.fa-solid,
-.btn:hover i.far,
-.btn:hover i.fab {
+/* Specific button hover effects - exclude navbar buttons and tab buttons */
+.btn:not(.navbar *):not(.tab-button):hover i.fa-solid,
+.btn:not(.navbar *):not(.tab-button):hover i.far,
+.btn:not(.navbar *):not(.tab-button):hover i.fab {
   transform: scale(1.1);
   color: var(--healthcare-dark-blue) !important;
 }
@@ -2453,3 +2447,82 @@ body nav .badge:hover i.fa-user-injured,
 .clinical-accordion-item .accordion-button.collapsed .fa-solid {
   color: rgba(255, 255, 255, 0.8);
 }
+
+/* UI Improvements - Hero Button Spacing and Text Contrast */
+
+/* Fix 1: Hero Button Spacing for better icon/text layout */
+.hero-nav-link {
+  min-width: 200px !important; // Increase from 180px for better spacing
+  gap: 1rem !important; // Increase gap between icon and text
+
+  // Enhanced responsive behavior
+  @media (max-width: 768px) {
+    min-width: 160px !important; // Larger minimum width on mobile
+    padding: 0.75rem 1rem !important; // Better padding
+    gap: 0.75rem !important; // Maintain good spacing on mobile
+  }
+
+  @media (max-width: 576px) {
+    min-width: 140px !important;
+    padding: 0.5rem 0.75rem !important;
+    gap: 0.5rem !important;
+    font-size: 0.875rem !important; // Slightly smaller text on very small screens
+  }
+}
+
+/* Fix 2: Improve text contrast for washed out card text */
+.card .text-muted,
+.text-muted {
+  color: var(
+    --healthcare-dark-blue
+  ) !important; // Use healthcare dark blue instead of neutral-light
+  opacity: 0.8; // Slight transparency for muted effect but still readable
+}
+
+/* Specific fix for Personal Information and similar cards */
+.card-body .text-muted,
+.card-header .text-muted,
+.card-title + .text-muted {
+  color: #2d3748 !important; // Use neutral-dark for better contrast
+  opacity: 0.75; // Maintain muted appearance but with better readability
+}
+
+/* Enhanced contrast for card content with badges */
+.card .d-flex .text-muted {
+  color: #4a5568 !important; // Medium gray with better contrast than light gray
+  font-weight: 500; // Slightly bolder for better readability
+}
+
+/* Fix 3: Selected Tab Button Text Contrast and Icon Color Issues */
+/* Override washed out active tab styling with darker text */
+/* Fix icon colors for active tab buttons - darker icons on light background */
+.tab-button.active i.fa-solid,
+.tab-button.active i.far,
+.tab-button.active i.fab {
+  color: var(--healthcare-blue) !important; // Blue icons on light background
+  transform: scale(1.1) !important;
+}
+
+/* Fix badge visibility on active tab buttons */
+.tab-button.active .badge {
+  background-color: var(
+    --healthcare-blue
+  ) !important; // Blue background for badge
+  color: #ffffff !important; // White text/number for contrast
+  border: 2px solid #ffffff !important; // White border for definition
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important; // Shadow for depth
+}
+
+/* Prevent our general hover effects from affecting tab buttons */
+.tab-button:hover i.fa-solid,
+.tab-button:hover i.far,
+.tab-button:hover i.fab,
+.tab-button i.fa-solid,
+.tab-button i.far,
+.tab-button i.fab {
+  color: inherit !important; // Use the button's text color
+  transform: scale(1.1) !important;
+}
+
+/* Unselected tab button styling removed - using Enhanced CDA approach */
+/* Badge styling is now handled by static/scss/pages/_enhanced_cda.scss */
