@@ -1,6 +1,7 @@
 {# Simple List Section Template - For sections with entries but no clinical table #}
 <!-- Fallback to simple list display if no clinical table -->
 <div class="card-body p-0">
+    {% if not hide_tabs %}
     <!-- Section Tabs -->
     <div class="section-tabs">
         <button class="tab-button active" onclick="showTab('section_{{ section_index }}', 'structured')">
@@ -10,6 +11,7 @@
             <i class="fa-solid fa-file-text"></i> Original Content
         </button>
     </div>
+    {% endif %}
 
     <!-- Structured View Tab Content -->
     <div id="section_{{ section_index }}_structured" class="tab-content active">

@@ -3,7 +3,7 @@
 {# Generic Clinical Section Template #}
 
 <!-- Generic Clinical Section -->
-<div class="medical-section" 
+<div class="medical-section"
     id="{% if generic_config %}{{ generic_config.section_id|default:'generic-section' }}{% else %}{{ section.section_id|default:'generic-section' }}{% endif %}">
     <div class="card">
         <!-- Section Header -->
@@ -21,6 +21,7 @@
         {% if section.has_entries and section.clinical_table %}
         <!-- Clinical Table Section -->
         <div class="card-body p-0">
+            {% if not hide_tabs %}
             <!-- Section Tabs -->
             <div class="section-tabs">
                 <button class="tab-button active" onclick="showClinicalTab('generic_{{ section_index }}', 'structured')">
@@ -30,10 +31,11 @@
                     <i class="fa-solid fa-file-text"></i> Original Content
                 </button>
             </div>
+            {% endif %}
 
             <!-- Structured Content Tab -->
             <div id="generic_{{ section_index }}_structured" class="clinical-tab-content active">
-                {% include 'patient_data/sections/clinical_table_section.html' %}
+                {% include 'patient_data/sections/clinical_table_section.html' with hide_tabs=True %}
             </div>
 
             <!-- Original Content Tab -->
@@ -45,6 +47,7 @@
         {% elif section.has_entries %}
         <!-- Simple List Section -->
         <div class="card-body p-0">
+            {% if not hide_tabs %}
             <!-- Section Tabs -->
             <div class="section-tabs">
                 <button class="tab-button active" onclick="showClinicalTab('generic_{{ section_index }}', 'structured')">
@@ -54,10 +57,11 @@
                     <i class="fa-solid fa-file-text"></i> Original Content
                 </button>
             </div>
+            {% endif %}
 
             <!-- Structured Content Tab -->
             <div id="generic_{{ section_index }}_structured" class="clinical-tab-content active">
-                {% include 'patient_data/sections/simple_list_section.html' %}
+                {% include 'patient_data/sections/simple_list_section.html' with hide_tabs=True %}
             </div>
 
             <!-- Original Content Tab -->
@@ -69,11 +73,13 @@
         {% else %}
         <!-- Text-only Section -->
         <div class="card-body">
+            {% if not hide_tabs %}
             <div class="section-tabs">
                 <button class="tab-button active" onclick="showClinicalTab('generic_{{ section_index }}', 'original')">
                     <i class="fa-solid fa-file-text"></i> Original Content
                 </button>
             </div>
+            {% endif %}
 
             <!-- Original Content Tab -->
             <div id="generic_{{ section_index }}_original" class="clinical-tab-content active">

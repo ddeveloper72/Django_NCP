@@ -4,6 +4,7 @@
 
 <!-- Clinical Table Display with Tabs -->
 <div class="card-body p-0">
+    {% if not hide_tabs %}
     <!-- Section Tabs -->
     <div class="section-tabs">
 
@@ -14,6 +15,7 @@
             <i class="fa-solid fa-file-text"></i> Original Content
         </button>
     </div>
+    {% endif %}
 
     <!-- Structured View Tab Content -->
     <div id="section_{{ section_index }}_structured" class="tab-content active">
