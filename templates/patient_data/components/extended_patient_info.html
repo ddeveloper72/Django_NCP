@@ -8,7 +8,7 @@
     <div class="tab-navigation mb-3">
         <button class="tab-button active" onclick="showExtendedTab('extended_patient', 'personal')"
                 type="button">
-            <i class="fas fa-user me-1"></i>Personal Information
+            <i class="fa-solid fa-user me-1"></i>Personal Information
             {% comment %}Show badge if any contact information exists{% endcomment %}
             {% if contact_data.addresses or contact_data.telecoms or administrative_data.patient_contact_info.addresses or administrative_data.patient_contact_info.telecoms or administrative_data.guardian.contact_info.addresses or administrative_data.guardian.contact_info.telecoms or administrative_data.other_contacts %}
             <span class="badge bg-primary ms-2">
@@ -29,7 +29,7 @@
 
         <button class="tab-button" onclick="showExtendedTab('extended_patient', 'healthcare')"
                 type="button">
-            <i class="fas fa-stethoscope me-1"></i>Healthcare Team
+            <i class="fa-solid fa-stethoscope me-1"></i>Healthcare Team
             {% if healthcare_data %}
             <span class="badge bg-success ms-2">
                 {% if healthcare_data.author_hcp %}1{% endif %}{% if healthcare_data.organization %}{% if healthcare_data.author_hcp %}+{% endif %}1{% endif %}{% if healthcare_data.legal_authenticator %}{% if healthcare_data.author_hcp or healthcare_data.organization %}+{% endif %}1{% endif %}
@@ -39,7 +39,7 @@
 
         <button class="tab-button" onclick="showExtendedTab('extended_patient', 'system')"
                 type="button">
-            <i class="fas fa-server me-1"></i>System & Documentation
+            <i class="fa-solid fa-server me-1"></i>System & Documentation
             <span class="badge bg-warning ms-2">3</span>
         </button>
 
@@ -47,7 +47,7 @@
                 onclick="{% if has_l1_cda and not has_l3_cda %}return false;{% else %}showExtendedTab('extended_patient', 'clinical');{% endif %}"
                 type="button"
                 {% if has_l1_cda and not has_l3_cda %}disabled title="Clinical data not available for L1 CDA documents"{% elif not processed_sections or processed_sections|length == 0 %}disabled title="No structured clinical data available"{% endif %}>
-            <i class="fas fa-notes-medical me-1"></i>Clinical Information
+            <i class="fa-solid fa-notes-medical me-1"></i>Clinical Information
             {% if medications or allergies or problems or vital_signs or procedures %}
             <span class="badge bg-warning ms-2">
                 {% with total_clinical=medications|length|add:allergies|length|add:problems|length|add:vital_signs|length|add:procedures|length %}
@@ -65,7 +65,7 @@
                 onclick="{% if has_l3_cda and not has_embedded_pdfs %}return false;{% else %}showExtendedTab('extended_patient', 'pdfs');{% endif %}"
                 type="button"
                 {% if has_l3_cda and not has_embedded_pdfs %}disabled title="No PDF documents available for this L3 CDA"{% elif not has_embedded_pdfs %}disabled title="No PDF documents available"{% endif %}>
-            <i class="fas fa-file-pdf me-1"></i>PDF Documents
+            <i class="fa-solid fa-file-pdf me-1"></i>PDF Documents
             {% if has_embedded_pdfs %}
             <span class="badge bg-danger ms-2">{{ embedded_pdfs|length }}</span>
             {% else %}
@@ -85,7 +85,7 @@
                 <div class="card border-primary">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-address-book me-2"></i>Contact Information
+                            <i class="fa-solid fa-address-book me-2"></i>Contact Information
                         </h5>
                     </div>
                     <div class="card-body">
@@ -104,7 +104,7 @@
                 <div class="card border-success">
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-user-md me-2"></i>Healthcare Provider Information
+                            <i class="fa-solid fa-user-md me-2"></i>Healthcare Provider Information
                         </h5>
                     </div>
                     <div class="card-body">
@@ -123,7 +123,7 @@
                 <div class="card border-info">
                     <div class="card-header bg-info text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-cogs me-2"></i>Administrative & System Information
+                            <i class="fa-solid fa-cogs me-2"></i>Administrative & System Information
                         </h5>
                     </div>
                     <div class="card-body">
@@ -148,13 +148,13 @@
                 <div class="card border-danger">
                     <div class="card-header bg-danger text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-file-pdf me-2"></i>Embedded PDF Documents
+                            <i class="fa-solid fa-file-pdf me-2"></i>Embedded PDF Documents
                         </h5>
                     </div>
                     <div class="card-body">
                         {% if has_embedded_pdfs and embedded_pdfs %}
                         <p class="text-muted mb-3">
-                            <i class="fas fa-info-circle me-1"></i>
+                            <i class="fa-solid fa-info-circle me-1"></i>
                             This L1 CDA document contains {{ embedded_pdfs|length }} embedded PDF document{{ embedded_pdfs|length|pluralize }}.
                             These are the original clinical documents from the source healthcare system.
                         </p>
@@ -164,7 +164,7 @@
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div>
                                     <h6 class="mb-1">
-                                        <i class="fas fa-file-pdf text-danger me-2"></i>
+                                        <i class="fa-solid fa-file-pdf text-danger me-2"></i>
                                         {{ pdf.filename|default:"Clinical Document" }}
                                     </h6>
                                     <small class="text-muted">
@@ -177,34 +177,34 @@
                                     <a href="{% url 'patient_data:download_pdf' patient_id=patient_id pdf_index=forloop.counter0 %}"
                                        download="{{ pdf.filename|default:'clinical_document.pdf' }}"
                                        class="btn btn-sm btn-outline-danger me-2">
-                                        <i class="fas fa-download me-1"></i>Download
+                                        <i class="fa-solid fa-download me-1"></i>Download
                                     </a>
                                     {% endif %}
                                     <button type="button" class="btn btn-sm btn-danger"
                                             onclick="showPDFViewer({{ forloop.counter0 }})">
-                                        <i class="fas fa-eye me-1"></i>View
+                                        <i class="fa-solid fa-eye me-1"></i>View
                                     </button>
                                 </div>
                             </div>
 
                             <!-- PDF Viewer Container (initially hidden) -->
-                            <div id="pdf-viewer-{{ forloop.counter0 }}" class="pdf-viewer-container mt-3" style="display: none;">
-                                <div class="border rounded" style="background-color: #f8f9fa;">
+                            <div id="pdf-viewer-{{ forloop.counter0 }}" class="pdf-viewer-container mt-3 hidden">
+                                <div class="border rounded pdf-viewer-background">
                                     <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
                                         <span class="text-muted">
-                                            <i class="fas fa-file-pdf text-danger me-1"></i>
+                                            <i class="fa-solid fa-file-pdf text-danger me-1"></i>
                                             {{ pdf.filename|default:"Clinical Document" }}
                                         </span>
                                         <div class="btn-group">
                                             <button type="button" class="btn btn-sm btn-outline-primary"
                                                     onclick="openPDFFullscreen({{ forloop.counter0 }})"
                                                     title="Open in fullscreen">
-                                                <i class="fas fa-expand"></i>
+                                                <i class="fa-solid fa-expand"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-outline-secondary"
                                                     onclick="hidePDFViewer({{ forloop.counter0 }})"
                                                     title="Close viewer">
-                                                <i class="fas fa-times"></i>
+                                                <i class="fa-solid fa-times"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -218,7 +218,7 @@
                                                 frameborder="0"
                                                 allow="fullscreen"
                                                 loading="lazy"
-                                                style="border-radius: 0 0 0.375rem 0.375rem;"
+                                                class="pdf-frame-rounded"
                                                 onerror="handlePDFLoadError({{ forloop.counter0 }})">
                                             <p>Your browser does not support PDFs.
                                                <a href="{% url 'patient_data:download_pdf' patient_id=patient_id pdf_index=forloop.counter0 %}" download="{{ pdf.filename|default:'clinical_document.pdf' }}">Download the PDF</a>
@@ -227,28 +227,28 @@
                                     </div>
 
                                     <!-- Fallback PDF viewer for blocked content -->
-                                    <div id="pdf-fallback-{{ forloop.counter0 }}" style="display: none;" class="text-center p-4 border rounded">
+                                    <div id="pdf-fallback-{{ forloop.counter0 }}" class="pdf-fallback hidden text-center p-4 border rounded">
                                         <div class="alert alert-info">
-                                            <i class="fas fa-info-circle me-2"></i>
+                                            <i class="fa-solid fa-info-circle me-2"></i>
                                             <strong>PDF Content Blocked</strong>
                                             <p class="mb-3 mt-2">Your browser's security settings are preventing the PDF from displaying inline. You can:</p>
                                             <div class="d-grid gap-2 d-md-flex justify-content-md-center">
                                                 <a href="{% url 'patient_data:download_pdf' patient_id=patient_id pdf_index=forloop.counter0 %}"
                                                    download="{{ pdf.filename|default:'clinical_document.pdf' }}"
                                                    class="btn btn-primary">
-                                                    <i class="fas fa-download me-2"></i>Download PDF
+                                                    <i class="fa-solid fa-download me-2"></i>Download PDF
                                                 </a>
                                                 <button type="button"
                                                         class="btn btn-outline-secondary"
                                                         onclick="openPDFInNewTab({{ forloop.counter0 }})">
-                                                    <i class="fas fa-external-link-alt me-2"></i>Open in New Tab
+                                                    <i class="fa-solid fa-external-link-alt me-2"></i>Open in New Tab
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
                                     {% else %}
                                     <div class="text-center p-4">
-                                        <i class="fas fa-exclamation-triangle text-warning fa-2x mb-2"></i>
+                                        <i class="fa-solid fa-exclamation-triangle text-warning fa-2x mb-2"></i>
                                         <p class="text-muted">PDF content could not be loaded.</p>
                                     </div>
                                     {% endif %}
@@ -259,7 +259,7 @@
 
                         {% else %}
                         <div class="alert alert-info">
-                            <h6><i class="fas fa-info-circle me-2"></i>No PDF Documents Available</h6>
+                            <h6><i class="fa-solid fa-info-circle me-2"></i>No PDF Documents Available</h6>
                             {% if has_l1_cda %}
                             <p class="mb-0">This L1 CDA document does not contain any embedded PDF documents.</p>
                             {% elif has_l3_cda %}
@@ -276,504 +276,13 @@
     </div>
 </div> <!-- End Clinical Section -->
 
-<script>
-// Extended Patient Tab Management Function
-function showExtendedTab(sectionId, tabType) {
-    console.log('🎯 Switching Extended Patient tab:', sectionId, tabType);
 
-    // Hide all tab contents for the extended patient section
-    const personalTab = document.getElementById(sectionId + '_personal');
-    const healthcareTab = document.getElementById(sectionId + '_healthcare');
-    const systemTab = document.getElementById(sectionId + '_system');
-    const clinicalTab = document.getElementById(sectionId + '_clinical');
-    const pdfsTab = document.getElementById(sectionId + '_pdfs');
 
-    // Find the parent extended patient container
-    const extendedContainer = personalTab ? personalTab.closest('.clinical-section') :
-        (healthcareTab ? healthcareTab.closest('.clinical-section') :
-        (systemTab ? systemTab.closest('.clinical-section') :
-        (clinicalTab ? clinicalTab.closest('.clinical-section') :
-        (pdfsTab ? pdfsTab.closest('.clinical-section') : null))));
-
-    if (!extendedContainer) {
-        console.error('❌ Extended patient container not found for:', sectionId);
-        return;
-    }
-
-    const buttons = extendedContainer.querySelectorAll('.tab-button');
-    const allTabs = [personalTab, healthcareTab, systemTab, clinicalTab, pdfsTab].filter(tab => tab !== null);
-
-    // Remove active class and hide all tabs
-    allTabs.forEach(tab => {
-        if (tab) {
-            tab.classList.remove('active');
-            tab.style.display = 'none';
-        }
-    });
-
-    // Remove active class from all buttons
-    buttons.forEach(btn => btn.classList.remove('active'));
-
-    // Show selected tab and activate corresponding button
-    let activeTab = null;
-    let activeButtonIndex = -1;
-
-    if (tabType === 'personal' && personalTab) {
-        activeTab = personalTab;
-        activeButtonIndex = 0;
-    } else if (tabType === 'healthcare' && healthcareTab) {
-        activeTab = healthcareTab;
-        activeButtonIndex = 1;
-    } else if (tabType === 'system' && systemTab) {
-        activeTab = systemTab;
-        activeButtonIndex = 2;
-    } else if (tabType === 'clinical' && clinicalTab) {
-        activeTab = clinicalTab;
-        activeButtonIndex = 3;
-    } else if (tabType === 'pdfs' && pdfsTab) {
-        activeTab = pdfsTab;
-        activeButtonIndex = pdfsTab ? 4 : -1; // Index depends on whether PDF tab exists
-    }
-
-    if (activeTab) {
-        activeTab.classList.add('active');
-        activeTab.style.display = 'block';
-        console.log('✅ Activated tab:', activeTab.id);
-    }
-
-    if (activeButtonIndex >= 0 && buttons[activeButtonIndex]) {
-        buttons[activeButtonIndex].classList.add('active');
-        console.log('✅ Activated button:', activeButtonIndex);
-    }
-
-    console.log('✅ Extended patient tab switch completed:', sectionId, tabType);
-}
-
-    // Remove active class and hide all tabs
-    allTabs.forEach(tab => {
-        if (tab) {
-            tab.classList.remove('active');
-            tab.style.display = 'none';
-        }
-    });
-
-    // Remove active class from all buttons
-    buttons.forEach(btn => btn.classList.remove('active'));
-
-    // Show selected tab and activate corresponding button
-    let activeTab = null;
-    let activeButtonIndex = -1;
-
-    if (tabType === 'personal' && personalTab) {
-        activeTab = personalTab;
-        activeButtonIndex = 0;
-    } else if (tabType === 'healthcare' && healthcareTab) {
-        activeTab = healthcareTab;
-        activeButtonIndex = 1;
-    } else if (tabType === 'system' && systemTab) {
-        activeTab = systemTab;
-        activeButtonIndex = 2;
-    } else if (tabType === 'clinical' && clinicalTab) {
-        activeTab = clinicalTab;
-        activeButtonIndex = 3;
-    }
-
-    if (activeTab) {
-        activeTab.classList.add('active');
-        activeTab.style.display = 'block';
-        console.log('✅ Activated tab:', activeTab.id);
-    }
-
-    if (activeButtonIndex >= 0 && buttons[activeButtonIndex]) {
-        buttons[activeButtonIndex].classList.add('active');
-        console.log('✅ Activated button:', activeButtonIndex);
-    }
-
-    console.log('✅ Extended patient tab switch completed:', sectionId, tabType);
-}
-
-// Initialize Extended Patient Tabs on load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎯 Initializing Extended Patient tabs...');
-
-    // Ensure the first tab is properly displayed
-    setTimeout(() => {
-        const firstPersonalTab = document.getElementById('extended_patient_personal');
-        if (firstPersonalTab && !firstPersonalTab.classList.contains('active')) {
-            console.log('🔧 Auto-activating first tab...');
-            showExtendedTab('extended_patient', 'personal');
-        }
-    }, 100);
-});
-</script>
 
 {% else %}
 <!-- No Extended Data Available -->
 <div class="alert alert-info">
-    <h6><i class="fas fa-info-circle me-2"></i>Extended Patient Information</h6>
+    <h6>Extended Patient Information</h6>
     <p class="mb-0">Extended patient information is not available for this document. The system was unable to extract additional patient data from the CDA content.</p>
 </div>
 {% endif %}
-
-<!-- PDF Viewer JavaScript Functions - Always Available -->
-<script>
-// Patient data for JavaScript functions
-let patientId = '';
-{% if patient_identity %}
-patientId = '{{ patient_identity.url_patient_id|default:patient_identity.patient_id|escapejs }}';
-{% elif patient_summary.primary_patient_id %}
-patientId = '{{ patient_summary.primary_patient_id|escapejs }}';
-{% else %}
-patientId = '{{ patient_id|escapejs }}';
-{% endif %}
-const PATIENT_ID = patientId;
-
-// PDF Viewer Functions
-function showPDFViewer(pdfIndex) {
-    console.log('🔍 Opening PDF viewer for index:', pdfIndex);
-
-    const viewer = document.getElementById('pdf-viewer-' + pdfIndex);
-
-    if (viewer) {
-        if (viewer.style.display === 'none' || viewer.style.display === '') {
-            viewer.style.display = 'block';
-            console.log('✅ PDF viewer opened for index:', pdfIndex);
-
-            // Scroll to the viewer to ensure it's visible
-            viewer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } else {
-            viewer.style.display = 'none';
-            console.log('🔒 PDF viewer closed for index:', pdfIndex);
-        }
-    } else {
-        console.error('❌ PDF viewer not found for index:', pdfIndex);
-    }
-}
-
-function hidePDFViewer(pdfIndex) {
-    console.log('🔒 Closing PDF viewer for index:', pdfIndex);
-
-    const viewer = document.getElementById('pdf-viewer-' + pdfIndex);
-
-    if (viewer) {
-        viewer.style.display = 'none';
-        console.log('✅ PDF viewer closed for index:', pdfIndex);
-    } else {
-        console.error('❌ PDF viewer not found for index:', pdfIndex);
-    }
-}
-
-function openPDFFullscreen(pdfIndex) {
-    console.log('🖥️ Opening PDF in fullscreen for index:', pdfIndex);
-
-    const iframe = document.getElementById('pdf-frame-' + pdfIndex);
-
-    if (iframe && iframe.src) {
-        // Open PDF in a new window/tab for fullscreen viewing
-        const fullscreenWindow = window.open(iframe.src, '_blank', 'width=' + screen.width + ',height=' + screen.height + ',fullscreen=yes');
-
-        if (fullscreenWindow) {
-            console.log('✅ PDF opened in fullscreen for index:', pdfIndex);
-        } else {
-            console.error('❌ Failed to open fullscreen window - popup might be blocked');
-            // Fallback: try to request fullscreen on the iframe itself
-            if (iframe.requestFullscreen) {
-                iframe.requestFullscreen().catch(err => {
-                    console.error('❌ Fullscreen request failed:', err);
-                });
-            }
-        }
-    } else {
-        console.error('❌ PDF iframe not found or no source for index:', pdfIndex);
-    }
-}
-
-// PDF Error Handling Functions
-function handlePDFLoadError(pdfIndex) {
-    console.log('⚠️ PDF iframe failed to load for index:', pdfIndex);
-
-    // Hide the iframe container and show the fallback
-    const iframeContainer = document.getElementById('pdf-iframe-container-' + pdfIndex);
-    const fallbackContainer = document.getElementById('pdf-fallback-' + pdfIndex);
-
-    if (iframeContainer) {
-        iframeContainer.style.display = 'none';
-    }
-
-    if (fallbackContainer) {
-        fallbackContainer.style.display = 'block';
-        console.log('✅ Showing PDF fallback for index:', pdfIndex);
-    }
-}
-
-function openPDFInNewTab(pdfIndex) {
-    console.log('🔗 Opening PDF in new tab for index:', pdfIndex);
-
-    try {
-        // Use the proper PDF endpoint instead of data URIs
-        const pdfUrl = `/patient-data/${PATIENT_ID}/pdf/${pdfIndex}/`;
-
-        const newTab = window.open(pdfUrl, '_blank');
-
-        if (newTab) {
-            console.log('✅ PDF opened in new tab for index:', pdfIndex);
-            newTab.focus();
-        } else {
-            console.error('❌ Failed to open new tab - popup might be blocked');
-            alert('Unable to open PDF in new tab. Please check if popups are blocked for this site.');
-        }
-    } catch (error) {
-        console.error('❌ Error opening PDF in new tab:', error);
-        alert('Unable to open PDF. Please try downloading it instead.');
-    }
-}
-
-// Check for PDF loading issues on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // Set up a timer to check if PDFs loaded successfully
-    setTimeout(function() {
-        const iframes = document.querySelectorAll('iframe[id^="pdf-frame-"]');
-
-        iframes.forEach(function(iframe) {
-            const pdfIndex = iframe.id.replace('pdf-frame-', '');
-
-            try {
-                // Try to access the iframe content to check if it loaded
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-
-                if (!iframeDoc || iframeDoc.readyState !== 'complete') {
-                    console.log('⚠️ PDF iframe may not have loaded properly for index:', pdfIndex);
-                    // Don't automatically show fallback here as it might be still loading
-                }
-            } catch (error) {
-                // Cross-origin or blocked content error
-                console.log('⚠️ PDF iframe access blocked for index:', pdfIndex, error.message);
-                handlePDFLoadError(pdfIndex);
-            }
-        });
-    }, 3000); // Check after 3 seconds
-});
-</script>
-
-<style>
-/* Enhanced tab button styling with MAXIMUM specificity to override Bootstrap */
-.clinical-section .tab-navigation .tab-button,
-.tab-navigation .tab-button,
-button.tab-button,
-#pdf-tab-btn,
-#clinical-tab-btn {
-    background-color: #ffffff !important;
-    border: 2px solid #0085e9 !important;
-    color: #0085e9 !important;
-    border-radius: 0.375rem !important;
-    padding: 0.5rem 1rem !important;
-    margin-right: 0.5rem !important;
-    transition: all 0.3s ease-in-out !important;
-    font-weight: 600 !important;
-    opacity: 1 !important;
-    text-shadow: none !important;
-}
-
-/* Hover state: Blue background with DARK text for maximum contrast */
-.clinical-section .tab-navigation .tab-button:hover,
-.tab-navigation .tab-button:hover,
-button.tab-button:hover,
-#pdf-tab-btn:hover,
-#clinical-tab-btn:hover {
-    background-color: #0085e9 !important;
-    border-color: #0085e9 !important;
-    color: #1a1a1a !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 8px rgba(0, 133, 233, 0.3) !important;
-    opacity: 1 !important;
-    text-shadow: none !important;
-}
-
-/* Active state: Blue background with WHITE text */
-.clinical-section .tab-navigation .tab-button.active,
-.tab-navigation .tab-button.active,
-button.tab-button.active,
-#pdf-tab-btn.active,
-#clinical-tab-btn.active {
-    background-color: #0085e9 !important;
-    border-color: #0085e9 !important;
-    color: #ffffff !important;
-    box-shadow: 0 2px 8px rgba(0, 133, 233, 0.3) !important;
-    opacity: 1 !important;
-    text-shadow: none !important;
-}
-
-/* Active hover: Keep white text */
-.clinical-section .tab-navigation .tab-button.active:hover,
-.tab-navigation .tab-button.active:hover,
-button.tab-button.active:hover,
-#pdf-tab-btn.active:hover,
-#clinical-tab-btn.active:hover {
-    background-color: #0070c7 !important;
-    border-color: #0070c7 !important;
-    color: #ffffff !important;
-    transform: translateY(-1px) !important;
-    opacity: 1 !important;
-    text-shadow: none !important;
-}
-
-/* FORCE icon colors to match text exactly */
-.clinical-section .tab-navigation .tab-button i,
-.tab-navigation .tab-button i,
-button.tab-button i,
-#pdf-tab-btn i,
-#clinical-tab-btn i {
-    color: #0085e9 !important;
-    transition: color 0.3s ease-in-out !important;
-    opacity: 1 !important;
-}
-
-.clinical-section .tab-navigation .tab-button:hover i,
-.tab-navigation .tab-button:hover i,
-button.tab-button:hover i,
-#pdf-tab-btn:hover i,
-#clinical-tab-btn:hover i {
-    color: #1a1a1a !important;
-    opacity: 1 !important;
-}
-
-.clinical-section .tab-navigation .tab-button.active i,
-.tab-navigation .tab-button.active i,
-button.tab-button.active i,
-#pdf-tab-btn.active i,
-#clinical-tab-btn.active i {
-    color: #ffffff !important;
-    opacity: 1 !important;
-}
-
-.clinical-section .tab-navigation .tab-button.active:hover i,
-.tab-navigation .tab-button.active:hover i,
-button.tab-button.active:hover i,
-#pdf-tab-btn.active:hover i,
-#clinical-tab-btn.active:hover i {
-    color: #ffffff !important;
-    opacity: 1 !important;
-}
-
-/* Force badge visibility and contrast - Keep badges BLUE always */
-.tab-button .badge,
-#pdf-tab-btn .badge,
-#clinical-tab-btn .badge {
-    background-color: #0085e9 !important;
-    color: #ffffff !important;
-    border: 1px solid #0085e9 !important;
-    transition: all 0.3s ease-in-out !important;
-    opacity: 1 !important;
-}
-
-.tab-button:hover .badge,
-#pdf-tab-btn:hover .badge,
-#clinical-tab-btn:hover .badge {
-    background-color: #0085e9 !important; /* Keep blue on hover */
-    color: #ffffff !important;
-    border: 1px solid #0085e9 !important;
-    opacity: 1 !important;
-}
-
-.tab-button.active .badge,
-#pdf-tab-btn.active .badge,
-#clinical-tab-btn.active .badge {
-    background-color: rgba(255, 255, 255, 0.2) !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    opacity: 1 !important;
-}
-
-/* Disabled/muted tabs - SPECIAL handling for PDF and Clinical tabs */
-.clinical-section .tab-navigation .tab-button.text-muted,
-.tab-navigation .tab-button.text-muted,
-button.tab-button.text-muted,
-#pdf-tab-btn.text-muted,
-#clinical-tab-btn.text-muted,
-.tab-button:disabled,
-#pdf-tab-btn:disabled,
-#clinical-tab-btn:disabled {
-    background-color: #f8f9fa !important;
-    border-color: #6c757d !important;
-    color: #6c757d !important;
-    opacity: 1 !important;
-    pointer-events: none !important; /* NO hover effects for disabled/muted tabs */
-    cursor: default !important;
-}
-
-.tab-button.text-muted i,
-#pdf-tab-btn.text-muted i,
-#clinical-tab-btn.text-muted i,
-.tab-button:disabled i,
-#pdf-tab-btn:disabled i,
-#clinical-tab-btn:disabled i {
-    color: #6c757d !important;
-    opacity: 1 !important;
-}
-
-/* NUCLEAR OPTION: Force ALL icons in card headers to be WHITE */
-.card-header i,
-.card-header .fas,
-.card-header .far,
-.card-header .fal,
-.card-header .fab,
-.card-header .fa,
-.bg-primary i,
-.bg-secondary i,
-.bg-success i,
-.bg-danger i,
-.bg-warning i,
-.bg-info i,
-.bg-dark i,
-.clinical-section i,
-.medical-section i,
-div[class*="bg-"] i,
-[class*="card-header"] i {
-    color: white !important;
-    fill: white !important;
-    opacity: 1 !important;
-    transition: none !important;
-}
-
-/* FORCE white on hover too */
-.card-header:hover i,
-.card-header:hover .fas,
-.card-header:hover .far,
-.card-header:hover .fal,
-.card-header:hover .fab,
-.card-header:hover .fa,
-.bg-primary:hover i,
-.bg-secondary:hover i,
-.bg-success:hover i,
-.bg-danger:hover i,
-.bg-warning:hover i,
-.bg-info:hover i,
-.bg-dark:hover i,
-.clinical-section:hover i,
-.medical-section:hover i,
-div[class*="bg-"]:hover i,
-[class*="card-header"]:hover i {
-    color: white !important;
-    fill: white !important;
-    opacity: 1 !important;
-    transition: none !important;
-}
-
-/* Enhanced tab button styling with MAXIMUM specificity to override Bootstrap */
-
-/* Tab navigation layout */
-.tab-navigation {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 0.5rem !important;
-    margin-bottom: 1rem !important;
-}
-
-.tab-navigation .tab-button {
-    margin-bottom: 0.5rem !important;
-}
-
-/* FINAL NUCLEAR OVERRIDE: Force white icons on blue backgrounds */
-.card-header i, .card-header .fas, .card-header .far, .card-header .fal, .card-header .fab, .card-header .fa, .bg-primary i, .bg-secondary i, .bg-success i, .bg-danger i, .bg-warning i, .bg-info i, .bg-dark i { color: white !important; fill: white !important; }
-.card-header:hover i, .card-header:hover .fas, .card-header:hover .far, .card-header:hover .fal, .card-header:hover .fab, .card-header:hover .fa, .bg-primary:hover i, .bg-secondary:hover i, .bg-success:hover i, .bg-danger:hover i, .bg-warning:hover i, .bg-info:hover i, .bg-dark:hover i { color: white !important; fill: white !important; }
-</style>

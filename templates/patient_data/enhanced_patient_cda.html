@@ -10,55 +10,8 @@
 {% block title %}Enhanced CDA Display - {{ patient_identity.given_name }} {{ patient_identity.family_name }}{% endblock %}
 
 {% block extra_css %}
-<!-- Bootstrap 5.3 handles all styling - no inline CSS needed -->
+<!-- Enhanced CDA styles are now externalized to _enhanced_cda.scss -->
 <style>
-/* Extended Patient Tab Navigation Styles */
-.tab-navigation {
-    display: flex;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid #e9ecef;
-    gap: 0;
-}
-
-.tab-button {
-    background: none;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    cursor: pointer;
-    font-weight: 500;
-    color: #6c757d;
-    border-bottom: 3px solid transparent;
-    transition: all 0.3s ease;
-    border-radius: 8px 8px 0 0;
-    margin-right: 0.25rem;
-    position: relative;
-}
-
-.tab-button:hover {
-    color: #495057;
-    background: #f8f9fa;
-    transform: translateY(-1px);
-}
-
-.tab-button.active {
-    color: #ffffff !important;
-    border-bottom-color: var(--healthcare-blue);
-    background: var(--healthcare-blue) !important;
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(0, 91, 184, 0.3);
-}
-
-.tab-button.active:hover {
-    background: var(--healthcare-dark-blue) !important;
-    transform: translateY(-1px);
-}
-
-.tab-button .badge {
-    margin-left: 0.5rem;
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-}
-
 /* Clinical Tab Content Styles */
 .clinical-tab-content {
     display: none !important;
@@ -94,18 +47,470 @@
 @media (max-width: 768px) {
     .tab-navigation {
         flex-direction: column;
-        gap: 0.25rem;
     }
 
     .tab-button {
-        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
         margin-right: 0;
-        border-bottom: 1px solid #dee2e6;
     }
+}
 
-    .tab-button.active {
-        border-bottom-color: #0066cc;
-    }
+/* Tab Navigation Enhanced Styling */
+.tab-navigation {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+.tab-button {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem 0.375rem 0 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tab-button:hover {
+    background: #e9ecef;
+    color: #212529;
+    text-decoration: none;
+}
+
+.tab-button.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+    border-bottom-color: white;
+    margin-bottom: -2px;
+    padding-bottom: calc(0.75rem + 2px);
+}
+
+.tab-button .badge {
+    font-size: 0.7rem;
+    min-width: 1.5rem;
+    text-align: center;
+}
+
+.tab-button.active .badge {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: white;
+}
+
+/* Contact and Administrative Styling */
+.admin-contact-card {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.admin-card-header {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.contact-section {
+    margin-bottom: 1.5rem;
+}
+
+.contact-section-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 0.25rem;
+    border: 1px solid #e9ecef;
+}
+
+.contact-item i {
+    width: 1.25rem;
+    margin-right: 0.75rem;
+    color: #6c757d;
+}
+
+/* Admin-style contact cards aligned with System & Documentation styling */
+.contact-info-unified {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+}
+
+.contact-section-unified {
+    margin-bottom: 1.5rem;
+}
+
+.contact-section-unified:last-child {
+    margin-bottom: 0;
+}
+
+.contact-section-title-unified {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.contact-card-unified {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    padding: 1rem;
+}
+
+.contact-type-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+}
+
+.contact-value-unified {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 500;
+    color: #212529;
+    word-break: break-all;
+}
+
+.address-line-unified {
+    margin-bottom: 0.25rem;
+    color: #495057;
+}
+
+.address-line-unified:last-child {
+    margin-bottom: 0;
+}
+
+/* Document Information Styling */
+.document-info-unified {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+}
+
+.document-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    padding: 1.5rem;
+    height: 100%;
+}
+
+.document-header {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.document-content {
+    color: #212529;
+}
+
+.document-type {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.document-standard {
+    display: block;
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: normal;
+    margin-top: 0.25rem;
+}
+
+.document-details {
+    margin-top: 1rem;
+}
+
+.detail-section-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-secure {
+    background: #cce7ff;
+    color: #004085;
+}
+
+.status-normal {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.document-meta-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.document-meta-item:last-child {
+    border-bottom: none;
+}
+
+.meta-label {
+    font-weight: 500;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.meta-value {
+    font-weight: 500;
+    color: #212529;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.meta-code {
+    font-family: 'Courier New', Courier, monospace;
+    background: #f8f9fa;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    color: #495057;
+    border: 1px solid #e9ecef;
+}
+
+/* Healthcare Information Styling */
+.healthcare-info-unified {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+}
+
+.healthcare-section {
+    margin-bottom: 1.5rem;
+}
+
+.healthcare-section:last-child {
+    margin-bottom: 0;
+}
+
+.healthcare-section-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.provider-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.provider-card:last-child {
+    margin-bottom: 0;
+}
+
+.provider-name {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.provider-role {
+    color: #28a745;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.provider-specialty {
+    color: #17a2b8;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.provider-details {
+    margin-top: 1rem;
+}
+
+.provider-detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 0.25rem;
+}
+
+.provider-detail-item i {
+    width: 1.25rem;
+    margin-right: 0.75rem;
+    color: #6c757d;
+}
+
+.organization-details {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin-top: 1rem;
+}
+
+.organization-name {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.75rem;
+}
+
+/* Linear address layout - matching System & Documentation style */
+.address-details-inline {
+    font-size: 0.85rem !important;
+    color: #495057 !important;
+    line-height: 1.4 !important;
+}
+
+.address-line {
+    display: inline-block;
+    margin-right: 0.5rem !important;
+    margin-bottom: 0.25rem !important;
+    font-size: 0.9rem !important;
+    line-height: 1.4 !important;
+}
+
+.address-line:after {
+    content: ", ";
+    color: #6c757d;
+}
+
+.address-line:last-child:after {
+    content: "";
+}
+
+.detail-item {
+    display: inline-block !important;
+    margin-right: 1rem !important;
+    margin-bottom: 0.25rem !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap;
+}
+
+.detail-label {
+    font-weight: 600 !important;
+    color: #495057 !important;
+    margin-right: 0.25rem !important;
+}
+
+.detail-value {
+    color: #212529 !important;
+}
+
+/* Border styling for System & Documentation cards */
+.border-info-custom {
+    border-color: #b3d9ff !important;
+}
+
+.bg-info-light {
+    background-color: #f0f8ff !important;
+}
+
+/* Patient Overview Tabs Icons */
+.nav-tabs-healthcare .nav-link i,
+.nav-tabs .nav-link i,
+button.nav-link i {
+    color: #0085e9 !important;
+    transition: color 0.3s ease-in-out !important;
+    opacity: 1 !important;
+}
+
+.nav-tabs-healthcare .nav-link:hover i,
+.nav-tabs .nav-link:hover i,
+button.nav-link:hover i {
+    color: #1a1a1a !important;
+    opacity: 1 !important;
+}
+
+.nav-tabs-healthcare .nav-link.active i,
+.nav-tabs .nav-link.active i,
+button.nav-link.active i {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+.nav-tabs-healthcare .nav-link.active:hover i,
+.nav-tabs .nav-link.active:hover i,
+button.nav-link.active:hover i {
+    color: #ffffff !important;
+    opacity: 1 !important;
 }
 
 /* Layout Controls - Force Vertical Stacking */
@@ -447,7 +852,7 @@ main {
 
 /* NUCLEAR OPTION: Force ALL icons in card headers to be WHITE */
 .card-header i,
-.card-header .fas,
+.card-header .fa-solid,
 .card-header .far,
 .card-header .fal,
 .card-header .fab,
@@ -471,7 +876,7 @@ div[class*="bg-"] i,
 
 /* FORCE white on hover too */
 .card-header:hover i,
-.card-header:hover .fas,
+.card-header:hover .fa-solid,
 .card-header:hover .far,
 .card-header:hover .fal,
 .card-header:hover .fab,
@@ -587,25 +992,25 @@ button.nav-link.active:hover i {
     <ol class="breadcrumb breadcrumb-enhanced mb-0">
         <li class="breadcrumb-item">
             <a href="{% url 'home' %}" class="text-decoration-none">
-                <i class="fas fa-home me-1"></i>Home
+                <i class="fa-solid fa-home me-1"></i>Home
             </a>
         </li>
         <li class="breadcrumb-item">
             <a href="{% url 'patient_data:patient_data_form' %}" class="text-decoration-none">
-                <i class="fas fa-search me-1"></i>Patient Search
+                <i class="fa-solid fa-search me-1"></i>Patient Search
             </a>
         </li>
         {% if patient_identity.patient_id %}
         <li class="breadcrumb-item">
             <a href="{% url 'patient_data:patient_details' patient_identity.url_patient_id|default:patient_identity.patient_id %}"
                 class="text-decoration-none">
-                <i class="fas fa-user me-1"></i>{{ patient_identity.given_name }} {{
+                <i class="fa-solid fa-user me-1"></i>{{ patient_identity.given_name }} {{
                 patient_identity.family_name }}
             </a>
         </li>
         {% endif %}
         <li class="breadcrumb-item active" aria-current="page">
-            <i class="fas fa-file-medical me-1"></i>CDA Document
+            <i class="fa-solid fa-file-medical me-1"></i>CDA Document
         </li>
     </ol>
 </nav>
@@ -642,7 +1047,7 @@ button.nav-link.active:hover i {
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h2 class="mb-0" {% tooltip "patient_name_header" %}>
-                        <i class="fas fa-user-injured me-2"></i>
+                        <i class="fa-solid fa-user-injured me-2"></i>
                         {# Django: Fix Jinja2 syntax - no ~ concatenation or |default() with args #}
                         {% if patient_identity.full_name %}
                         {{ patient_identity.full_name }}
@@ -655,11 +1060,11 @@ button.nav-link.active:hover i {
                     <div class="d-flex align-items-center">
                         <span class="badge {% if source_country == 'IE' %}bg-success{% elif source_country == 'MT' %}bg-primary{% elif source_country == 'PT' %}bg-info{% elif source_country == 'LU' %}bg-warning{% elif source_country == 'UNKNOWN' or source_country == 'ERROR' %}bg-danger{% else %}bg-secondary{% endif %} text-white me-2"
                               {% tooltip "source_country_flag" %}>
-                            <i class="fas fa-flag me-1"></i>{{ source_country }}
+                            <i class="fa-solid fa-flag me-1"></i>{{ source_country }}
                         </span>
                         <span class="badge {% if 'High' in translation_quality %}bg-success{% elif 'Medium' in translation_quality %}bg-warning{% else %}bg-secondary{% endif %}"
                               {% tooltip "translation_quality" %}>
-                            <i class="fas fa-check-circle me-1"></i>{{ translation_quality }}
+                            <i class="fa-solid fa-check-circle me-1"></i>{{ translation_quality }}
                         </span>
                     </div>
                 </div>
@@ -672,7 +1077,7 @@ button.nav-link.active:hover i {
                         <button class="nav-link active" id="overview-tab" data-bs-toggle="tab"
                             data-bs-target="#overview-content" type="button" role="tab"
                             aria-controls="overview-content" aria-selected="true">
-                            <i class="fas fa-user me-2"></i>
+                            <i class="fa-solid fa-user me-2"></i>
                             Patient Overview
                         </button>
                     </li>
@@ -681,7 +1086,7 @@ button.nav-link.active:hover i {
                         <button class="nav-link" id="extended-tab" data-bs-toggle="tab"
                             data-bs-target="#extended-content" type="button" role="tab"
                             aria-controls="extended-content" aria-selected="false">
-                            <i class="fas fa-user-plus me-2"></i>
+                            <i class="fa-solid fa-user-plus me-2"></i>
                             Extended Patient Information
                         </button>
                     </li>
@@ -737,13 +1142,13 @@ button.nav-link.active:hover i {
                                         {# Django: Replace {% set %} with conditional class assignment #}
                                         <a href="{% url 'patient_data:patient_cda_view_typed' patient_identity.url_patient_id|default:patient_identity.patient_id 'L1' %}"
                                             class="{% if cda_type == 'L1' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %} {% if not has_l1_cda %} disabled{% endif %}">
-                                            <i class="fas fa-file-medical me-1"></i>L1 Original Document
+                                            <i class="fa-solid fa-file-medical me-1"></i>L1 Original Document
                                             {% if not has_l1_cda %}<small>(Not Available)</small>{% endif %}
                                         </a>
                                         {# Django: Replace {% set %} with conditional class assignment #}
                                         <a href="{% url 'patient_data:patient_cda_view_typed' patient_identity.url_patient_id|default:patient_identity.patient_id 'L3' %}"
                                             class="{% if cda_type == 'L3' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %} {% if not has_l3_cda %} disabled{% endif %}">
-                                            <i class="fas fa-language me-1"></i>L3 Patient Summary
+                                            <i class="fa-solid fa-language me-1"></i>L3 Patient Summary
                                             {% if not has_l3_cda %}<small>(Not Available)</small>{% endif %}
                                         </a>
                                     </div>
@@ -779,169 +1184,6 @@ button.nav-link.active:hover i {
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Pure Bootstrap Tab Functionality -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log('🎯 Initializing Pure Bootstrap Tabs...');
-
-        // Initialize Bootstrap tabs for Extended Patient Info
-        const extendedInfoTabs = document.querySelectorAll('#extendedInfoTabs button[data-bs-toggle="tab"]');
-        extendedInfoTabs.forEach(tab => {
-            new bootstrap.Tab(tab);
-        });
-
-        // Initialize Bootstrap tabs for Clinical Sections
-        const clinicalTabs = document.querySelectorAll('.clinical-tabs button[data-bs-toggle="tab"]');
-        clinicalTabs.forEach(tab => {
-            new bootstrap.Tab(tab);
-        });
-
-        // Enhanced hover effects for interactive elements
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-                this.style.transition = 'transform 0.2s ease';
-            });
-
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
-
-        console.log('✅ Pure Bootstrap functionality initialized successfully');
-    });
-
-    // Extended Patient Tab Management Function
-    function showExtendedTab(sectionId, tabType) {
-        console.log('🎯 Switching Extended Patient tab:', sectionId, tabType);
-
-        // Hide all tab contents for the extended patient section
-        const personalTab = document.getElementById(sectionId + '_personal');
-        const healthcareTab = document.getElementById(sectionId + '_healthcare');
-        const systemTab = document.getElementById(sectionId + '_system');
-        const clinicalTab = document.getElementById(sectionId + '_clinical');
-        const pdfsTab = document.getElementById(sectionId + '_pdfs');
-
-        // Find the parent extended patient container
-        const extendedContainer = personalTab ? personalTab.closest('.clinical-section') :
-            (healthcareTab ? healthcareTab.closest('.clinical-section') :
-            (systemTab ? systemTab.closest('.clinical-section') :
-            (clinicalTab ? clinicalTab.closest('.clinical-section') :
-            (pdfsTab ? pdfsTab.closest('.clinical-section') : null))));
-
-        if (!extendedContainer) {
-            console.error('❌ Extended patient container not found for:', sectionId);
-            return;
-        }
-
-        const buttons = extendedContainer.querySelectorAll('.tab-button');
-        const allTabs = [personalTab, healthcareTab, systemTab, clinicalTab, pdfsTab].filter(tab => tab !== null);
-
-        // Remove active class and hide all tabs
-        allTabs.forEach(tab => {
-            if (tab) {
-                tab.classList.remove('active');
-                tab.style.display = 'none';
-            }
-        });
-
-        // Remove active class from all buttons
-        buttons.forEach(btn => btn.classList.remove('active'));
-
-        // Show selected tab and activate corresponding button
-        let activeTab = null;
-        let activeButtonIndex = -1;
-
-        if (tabType === 'personal' && personalTab) {
-            activeTab = personalTab;
-            activeButtonIndex = 0;
-        } else if (tabType === 'healthcare' && healthcareTab) {
-            activeTab = healthcareTab;
-            activeButtonIndex = 1;
-        } else if (tabType === 'system' && systemTab) {
-            activeTab = systemTab;
-            activeButtonIndex = 2;
-        } else if (tabType === 'clinical' && clinicalTab) {
-            activeTab = clinicalTab;
-            activeButtonIndex = 3;
-        } else if (tabType === 'pdfs' && pdfsTab) {
-            activeTab = pdfsTab;
-            activeButtonIndex = pdfsTab ? 4 : -1;
-        }
-
-        if (activeTab) {
-            activeTab.classList.add('active');
-            activeTab.style.display = 'block';
-            console.log('✅ Activated tab:', activeTab.id);
-        }
-
-        if (activeButtonIndex >= 0 && buttons[activeButtonIndex]) {
-            buttons[activeButtonIndex].classList.add('active');
-            console.log('✅ Activated button:', activeButtonIndex);
-        }
-
-        console.log('✅ Extended patient tab switch completed:', sectionId, tabType);
-    }
-
-    // Date formatting utility function
-    function formatMedicalDate(dateStr) {
-        if (!dateStr || typeof dateStr !== 'string') return dateStr;
-
-        dateStr = dateStr.trim();
-        let parsedDate = null;
-
-        // Format: YYYYMMDDHHMMSS (e.g., 20130317124500)
-        if (/^\d{14}$/.test(dateStr)) {
-            const year = dateStr.substring(0, 4);
-            const month = dateStr.substring(4, 6);
-            const day = dateStr.substring(6, 8);
-            const hour = dateStr.substring(8, 10);
-            const minute = dateStr.substring(10, 12);
-            const second = dateStr.substring(12, 14);
-            parsedDate = new Date(year, month - 1, day, hour, minute, second);
-        }
-        // Format: YYYYMMDD (e.g., 20130317)
-        else if (/^\d{8}$/.test(dateStr)) {
-            const year = dateStr.substring(0, 4);
-            const month = dateStr.substring(4, 6);
-            const day = dateStr.substring(6, 8);
-            parsedDate = new Date(year, month - 1, day);
-        }
-        // Format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS (ISO format)
-        else if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
-            parsedDate = new Date(dateStr);
-        }
-
-        if (parsedDate && !isNaN(parsedDate.getTime())) {
-            const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
-            const day = String(parsedDate.getDate()).padStart(2, '0');
-            const year = parsedDate.getFullYear();
-            const hour = String(parsedDate.getHours()).padStart(2, '0');
-            const minute = String(parsedDate.getMinutes()).padStart(2, '0');
-
-            if (/^\d{8}$/.test(dateStr.trim()) || /^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
-                return `${month}/${day}/${year}`;
-            } else {
-                return `${month}/${day}/${year} ${hour}:${minute}`;
-            }
-        }
-        return dateStr;
-    }
-
-    // Initialize Bootstrap tooltips
-    document.addEventListener('DOMContentLoaded', function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
-</script>
-
-<!-- FINAL OVERRIDE: Nuclear CSS for icon colors loaded last -->
-<style>
-/* FINAL NUCLEAR OVERRIDE: Force white icons on blue backgrounds */
-.card-header i, .card-header .fas, .card-header .far, .card-header .fal, .card-header .fab, .card-header .fa, .bg-primary i, .bg-secondary i, .bg-success i, .bg-danger i, .bg-warning i, .bg-info i, .bg-dark i { color: white !important; fill: white !important; }
-.card-header:hover i, .card-header:hover .fas, .card-header:hover .far, .card-header:hover .fal, .card-header:hover .fab, .card-header:hover .fa, .bg-primary:hover i, .bg-secondary:hover i, .bg-success:hover i, .bg-danger:hover i, .bg-warning:hover i, .bg-info:hover i, .bg-dark:hover i { color: white !important; fill: white !important; }
-</style>
+<!-- Enhanced CDA JavaScript functionality is now externalized -->
+<script src="{% static 'js/enhanced_cda.js' %}"></script>
 {% endblock %}
