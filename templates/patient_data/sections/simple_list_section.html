@@ -1,14 +1,13 @@
-{% load patient_filters %}
 {# Simple List Section Template - For sections with entries but no clinical table #}
 <!-- Fallback to simple list display if no clinical table -->
 <div class="card-body p-0">
     <!-- Section Tabs -->
     <div class="section-tabs">
         <button class="tab-button active" onclick="showTab('section_{{ section_index }}', 'structured')">
-            📊 Structured View
+            <i class="fa-solid fa-chart-bar"></i> Structured View
         </button>
         <button class="tab-button" onclick="showTab('section_{{ section_index }}', 'original')">
-            📄 Original Content
+            <i class="fa-solid fa-file-text"></i> Original Content
         </button>
     </div>
 
@@ -20,15 +19,15 @@
                 <div class="col-md-8">
                     <h6
                         class="mb-1 {% if entry.display_name == 'Unknown Item' or entry.display_name == 'Unknown Condition' or entry.display_name == 'Unknown Procedure' or entry.display_name == 'Unknown Medication' or entry.display_name == 'Unknown Allergen' %}text-muted fst-italic{% endif %}">
-                        {{ entry.display_name Medical Entry %}
+                        {{ entry.display_name|default:"Medical Entry" }}
                     </h6>
-                    {% if entry.reaction %}
-                    <p class="text-danger mb-1"><strong>Reaction:</strong> {{ entry.reaction }}</p>
+                    {% if entry.get('reaction') %}
+                    <p class="text-danger mb-1"><strong>Reaction:</strong> {{ entry.reaction|default:"Unknown" }}</p>
                     {% endif %}
-                    {% if entry.dosage %}
+                    {% if entry.get('dosage') %}
                     <p class="text-info mb-1"><strong>Dosage:</strong> {{ entry.dosage }}</p>
                     {% endif %}
-                    {% if entry.status %}
+                    {% if entry.get('status') %}
                     <p class="text-success mb-1"><strong>Status:</strong> {{ entry.status }}</p>
                     {% endif %}
                 </div>
@@ -37,7 +36,7 @@
                     <div class="medical-terminology">
                         {% for term in entry.medical_terminology %}
                         <span class="badge bg-success me-1 mb-1" title="{{ term.system }}: {{ term.code }}">
-                            {{ term.display_name term.code %}
+                            {{ term.display_name|default:term.code }}
                         </span>
                         {% endfor %}
                     </div>

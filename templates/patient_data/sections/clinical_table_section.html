@@ -1,14 +1,17 @@
 {% load patient_filters %}
-{# Clinical Table Se                                                                       <i class="fa-solid fa-tag me-1"></i>{{ term.display_name|default:term.code }}        {{ term.display_name|default:term.code }}tion Template - For sections with clinical tables #}
+
+{# Clinical Table Section Template - For sections with clinical tables #}
+
 <!-- Clinical Table Display with Tabs -->
 <div class="card-body p-0">
     <!-- Section Tabs -->
     <div class="section-tabs">
+
         <button class="tab-button active" onclick="showTab('section_{{ section_index }}', 'structured')">
-            📊 Structured View
+            <i class="fa-solid fa-chart-bar"></i> Structured View
         </button>
         <button class="tab-button" onclick="showTab('section_{{ section_index }}', 'original')">
-            📄 Original Content
+            <i class="fa-solid fa-file-text"></i> Original Content
         </button>
     </div>
 
@@ -32,6 +35,7 @@
                         {% endfor %}
                     </tr>
                 </thead>
+
                 <tbody>
                     {% for row in section.clinical_table.rows %}
                     <tr {% if row.has_medical_codes %}class="table-success" {% endif %}>
@@ -44,8 +48,8 @@
                                 {% if cell_data|safe_get:"has_terminology" %}
                                 <div class="medical-terminology mt-1">
                                     {% for term in cell_data|safe_get:"terminology" %}
-                                    <span class="badge bg-success me-1" title="{% firstof term.system }}: {{ term.code }}">
-                                        {{ term.display_name term.code %}
+                                    <span class="badge bg-success me-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
+                                        {{ term.display_name|default:term.code }}
                                     </span>
                                     {% endfor %}
                                 </div>
@@ -58,25 +62,25 @@
                                     <div class="medical-code-item d-flex flex-wrap align-items-center">
                                         {% for code in cell_data|safe_get:"codes" %}
                                         {% if code.badge %}
-                                        <span class="badge {% firstof code.badge }} me-1 mb-1"
+                                        <span class="badge {{ code.badge|default:'bg-secondary' }} me-1 mb-1"
                                             title="{{ code.system }}: {{ code.code }}">
-                                            {{ code.display_name code.code %}
+                                            {{ code.display_name|default:code.code }}
                                         </span>
                                         {% else %}
-                                        <code class="me-1 mb-1">{% firstof code.code }}</code>
+                                        <code class="me-1 mb-1">{{ code.code|default:'Unknown' }}</code>
                                         {% endif %}
                                         {% endfor %}
                                     </div>
                                 </div>
                                 {% else %}
-                                {{ cell_data|safe_get:"display_value" cell_data|safe_get:"value" or 'N/A %}
+                                {{ cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:'N/A' }}
                                 {% endif %}
 
                                 {% if cell_data|safe_get:"has_terminology" %}
                                 <div class="medical-terminology mt-1">
                                     {% for term in cell_data|safe_get:"terminology" %}
-                                    <span class="badge bg-info me-1" title="{% firstof term.system }}: {{ term.code }}">
-                                        <i class="fa-solid fa-tag me-1"></i>{{ term.display_name term.code %}
+                                    <span class="badge bg-info me-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
+                                        <i class="fa-solid fa-tag me-1"></i>{{ term.display_name|default:term.code }}
                                     </span>
                                     {% endfor %}
                                 </div>
@@ -108,7 +112,7 @@
                 </div>
                 <div class="col-md-4">
                     <small class="text-muted">
-                        <strong>{{ section.clinical_table.medical_terminology_coverage }}%</strong> coded
+                        <strong>{{ section.clinical_table.medical_terminology_coverage|default:'0%' }}</strong> coded
                     </small>
                 </div>
                 <div class="col-md-4">
@@ -123,10 +127,10 @@
                 {% if section.clinical_table.has_coded_entries %}
                 <div class="col-12 mt-2">
                     <details class="code-system-legend">
-                        <summary class="text-muted" style="font-size: 0.75rem; cursor: pointer;">
+                        <summary class="text-muted small-font legend-cursor">
                             <i class="fa-solid fa-info-circle me-1"></i>Code System Legend
                         </summary>
-                        <div class="mt-2" style="font-size: 0.75rem;">
+                        <div class="mt-2 small-font">
                             <span class="badge bg-primary me-2">SNOMED CT</span>
                             <span class="badge bg-success me-2">LOINC</span>
                             <span class="badge bg-warning me-2">RxNorm</span>
@@ -140,10 +144,12 @@
                 {% endif %}
             </div>
         </div>
-    </div> <!-- End structured tab content -->
+    </div>
+    <!-- End structured tab content -->
 
     <!-- Original Content Tab -->
     <div id="section_{{ section_index }}_original" class="tab-content">
         {% include 'patient_data/sections/original_content.html' %}
     </div>
-</div> <!-- End clinical-table -->
+</div>
+<!-- End clinical-table -->
