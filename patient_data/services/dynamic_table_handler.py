@@ -4,9 +4,12 @@ Uses admin-configured columns to build tables with comprehensive data extraction
 """
 
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from django.conf import settings
+
 from patient_data.models import ClinicalSectionConfig, DataExtractionLog
+
 from .deep_xml_extractor import DeepXMLExtractor
 
 logger = logging.getLogger(__name__)
@@ -447,11 +450,7 @@ class DynamicClinicalTableHandler:
     def _format_date_for_mobile(self, date_value: str) -> Dict[str, str]:
         """Format date with mobile-friendly display options"""
         if not date_value or date_value == "Not specified":
-            return {
-                "short": "N/A",
-                "long": "Not specified",
-                "mobile": "Not specified"
-            }
+            return {"short": "N/A", "long": "Not specified", "mobile": "Not specified"}
 
         # Handle HL7 format
         if len(date_value) >= 8 and date_value.isdigit():
@@ -459,27 +458,32 @@ class DynamicClinicalTableHandler:
                 year = date_value[:4]
                 month = date_value[4:6]
                 day = date_value[6:8]
-                
+
                 # Create different format options
                 month_names = {
-                    "01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr",
-                    "05": "May", "06": "Jun", "07": "Jul", "08": "Aug",
-                    "09": "Sep", "10": "Oct", "11": "Nov", "12": "Dec"
+                    "01": "Jan",
+                    "02": "Feb",
+                    "03": "Mar",
+                    "04": "Apr",
+                    "05": "May",
+                    "06": "Jun",
+                    "07": "Jul",
+                    "08": "Aug",
+                    "09": "Sep",
+                    "10": "Oct",
+                    "11": "Nov",
+                    "12": "Dec",
                 }
-                
+
                 return {
                     "short": f"{day}/{month}/{year[-2:]}",  # 15/03/24
-                    "long": f"{day}/{month}/{year}",        # 15/03/2024
-                    "mobile": f"{day} {month_names.get(month, month)} {year}"  # 15 Mar 2024
+                    "long": f"{day}/{month}/{year}",  # 15/03/2024
+                    "mobile": f"{day} {month_names.get(month, month)} {year}",  # 15 Mar 2024
                 }
             except:
                 pass
 
-        return {
-            "short": date_value,
-            "long": date_value,
-            "mobile": date_value
-        }
+        return {"short": date_value, "long": date_value, "mobile": date_value}
 
     def _calculate_table_metrics(self, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Calculate enhanced table metrics"""
