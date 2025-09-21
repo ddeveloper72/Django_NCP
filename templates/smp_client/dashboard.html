@@ -173,65 +173,11 @@
     </div>
 </div>
 
+{% block extra_js %}
+<!-- Dashboard functionality is now externalized -->
 <script>
-    // Get CSRF token from cookie
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    async function syncWithEuropeanSMP() {
-        const resultDiv = document.getElementById('sync-result');
-        const button = event.target;
-
-        button.textContent = '🔄 Syncing...';
-        button.disabled = true;
-
-        try {
-            const response = await fetch('{% url 'smp_client:european_smp_sync' %}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                resultDiv.innerHTML = `
-                    <div class="alert alert-success">
-                        ✅ Sync completed! Synced ${data.synced_participants} participants.
-                    </div>
-                `;
-                setTimeout(() => location.reload(), 2000);
-            } else {
-                resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        ❌ Sync failed: ${data.error}
-                    </div>
-                `;
-            }
-        } catch (error) {
-            resultDiv.innerHTML = `
-                <div class="alert alert-danger">
-                    ❌ Network error: ${error.message}
-                </div>
-            `;
-        }
-
-        button.textContent = '🔄 Sync with European SMP';
-        button.disabled = false;
-    }
+    // Pass Django URLs to JavaScript
+    window.europeanSMPSyncURL = '{% url 'smp_client:european_smp_sync' %}';
 </script>
+<script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}

@@ -109,48 +109,6 @@
 
     </div>
 
-    <!-- JavaScript for Accordion Functionality -->
-    <script>
-        function toggleSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            const button = document.querySelector(`[aria-controls="${sectionId}"]`);
-
-            if (section.classList.contains('show')) {
-                section.classList.remove('show');
-                button.setAttribute('aria-expanded', 'false');
-                button.classList.add('collapsed');
-            } else {
-                section.classList.add('show');
-                button.setAttribute('aria-expanded', 'true');
-                button.classList.remove('collapsed');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Expand All functionality
-            document.getElementById('expandAllClinical')?.addEventListener('click', function() {
-                document.querySelectorAll('.accordion-collapse').forEach(function(section) {
-                    section.classList.add('show');
-                });
-                document.querySelectorAll('.accordion-button').forEach(function(button) {
-                    button.setAttribute('aria-expanded', 'true');
-                    button.classList.remove('collapsed');
-                });
-            });
-
-            // Collapse All functionality
-            document.getElementById('collapseAllClinical')?.addEventListener('click', function() {
-                document.querySelectorAll('.accordion-collapse').forEach(function(section) {
-                    section.classList.remove('show');
-                });
-                document.querySelectorAll('.accordion-button').forEach(function(button) {
-                    button.setAttribute('aria-expanded', 'false');
-                    button.classList.add('collapsed');
-                });
-            });
-        });
-    </script>
-
     {% else %}
     <!-- No Clinical Data Available -->
     <div class="no-clinical-data text-center py-5">

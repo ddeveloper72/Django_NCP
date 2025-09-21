@@ -229,79 +229,14 @@
     </div>
 </div>
 
+{% block extra_js %}
+<!-- Document translation functionality is now externalized -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Translation functionality
-        document.getElementById('translate_document').addEventListener('click', function () {
-            const targetLanguage = document.getElementById('target_language').value;
-            const button = this;
-            const originalText = button.innerHTML;
-
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Translating...';
-            button.disabled = true;
-
-            // Find translatable sections
-            const sections = document.querySelectorAll('.cda-section-content, .fhir-resource');
-            let translationsCompleted = 0;
-
-            sections.forEach(function (section) {
-                const text = section.textContent.trim();
-                if (text.length > 20) { // Only translate substantial content
-
-                    fetch('{% url "patient_data:translate_document_section" %}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': '{% csrf_token %}'
-                        },
-                        body: JSON.stringify({
-                            text: text,
-                            target_language: targetLanguage
-                        })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.translated_text) {
-                                // Store original text if not already stored
-                                if (!section.dataset.originalText) {
-                                    section.dataset.originalText = section.innerHTML;
-                                }
-
-                                // Create translation notice
-                                const translationNotice = `
-                            <div class="alert alert-info alert-sm mb-2">
-                                <small><i class="fas fa-language"></i> Translated to ${targetLanguage.toUpperCase()}</small>
-                            </div>
-                        `;
-
-                                section.innerHTML = translationNotice + data.translated_text;
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Translation error:', error);
-                        })
-                        .finally(() => {
-                            translationsCompleted++;
-                            if (translationsCompleted === sections.length) {
-                                button.innerHTML = originalText;
-                                button.disabled = false;
-                            }
-                        });
-                } else {
-                    translationsCompleted++;
-                    if (translationsCompleted === sections.length) {
-                        button.innerHTML = originalText;
-                        button.disabled = false;
-                    }
-                }
-            });
-
-            if (sections.length === 0) {
-                button.innerHTML = originalText;
-                button.disabled = false;
-                alert('No translatable content found in this document.');
-            }
-        });
-    });
+    // Pass Django URLs to JavaScript
+    window.documentViewerConfig = {
+        translateUrl: '{% url "patient_data:translate_document_section" %}',
+        csrfToken: '{% csrf_token %}'
+    };
 </script>
+<script src="{% static 'js/document_viewer.js' %}"></script>
 {% endblock %}

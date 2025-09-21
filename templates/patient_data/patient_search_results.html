@@ -1,6 +1,17 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Patient Search Results - EU eHealth NCP{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/patient_data.js' %}"></script>
+<script>
+    // Configure URLs and IDs for patient data functionality
+    window.requestPatientServiceURL = "{% url 'patient_data:request_patient_service' %}";
+    window.localCDADocumentURL = "{{ url('patient_data:local_cda_document_view_indexed', args=[patient_identifier.id, '__INDEX__']) }}";
+    window.patientIdentifierId = {{ patient_identifier.id }};
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="results-container">
@@ -197,7 +208,7 @@
             <div class="service-card" data-service-id="{{ service.id }}">
                 <div class="service-header">
                     <div
-                        class="service-icon 
+                        class="service-icon
                         {% if service.service_type == 'PS' %}service-ps{% elif service.service_type == 'EP' %}service-ep{% elif service.service_type == 'LR' %}service-lr{% elif service.service_type == 'MR' %}service-mr{% elif service.service_type == 'DI' %}service-di{% elif service.service_type == 'VR' %}service-vr{% endif %}">
                         {% if service.service_type == 'PS' %}📋{% elif service.service_type == 'EP' %}💊{% elif
                         service.service_type == 'LR' %}🔬{% elif service.service_type == 'MR' %}📄{% elif
@@ -232,7 +243,7 @@
             {% endfor %}
 
             {% if not available_services %}
-            <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #666;">
+            <div class="no-services-message">
                 No services available for this member state.
             </div>
             {% endif %}
@@ -255,7 +266,7 @@
                         {{ data.get_access_type() }}
                     </span>
                     <a href="{{ url('patient_data:patient_data_view', data.id) }}"
-                        style="margin-left: 1rem; color: #3498db;">View Data</a>
+                        class="view-data-link">View Data</a>
                 </div>
             </li>
             {% endfor %}
@@ -284,92 +295,6 @@
     </div>
 </div>
 
-<script>
-    let currentServiceId = null;
-    let currentServiceName = null;
-
-    // Debug: Check if modal is visible on page load
-    document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('breakGlassModal');
-        if (modal && modal.style.display !== 'none') {
-            console.warn('Modal is visible on page load, hiding it');
-            modal.style.display = 'none';
-        }
-    });
-
-    function requestService(serviceId, serviceName) {
-        currentServiceId = serviceId;
-        currentServiceName = serviceName;
-
-        const consentMethod = document.querySelector(`input[name="consent_${serviceId}"]:checked`).value;
-
-        if (consentMethod === 'BREAK_GLASS') {
-            const modal = document.getElementById('breakGlassModal');
-            modal.classList.add('show');
-        } else {
-            submitServiceRequest(serviceId, consentMethod, '');
-        }
-    }
-
-    function closeBreakGlassModal() {
-        const modal = document.getElementById('breakGlassModal');
-        modal.classList.remove('show');
-        document.getElementById('emergencyReason').value = '';
-    }
-
-    function confirmBreakGlass() {
-        const reason = document.getElementById('emergencyReason').value.trim();
-        if (!reason) {
-            alert('Please provide a reason for emergency access.');
-            return;
-        }
-
-        submitServiceRequest(currentServiceId, 'BREAK_GLASS', reason);
-        closeBreakGlassModal();
-    }
-
-    // Function to view local CDA documents
-    function viewLocalCDADocument(documentIndex) {
-        window.location.href = "{{ url('patient_data:local_cda_document_view_indexed', args=[patient_identifier.id, '__INDEX__']) }}".replace('__INDEX__', documentIndex);
-    }
-
-    function submitServiceRequest(serviceId, consentMethod, breakGlassReason) {
-        fetch('{% url 'patient_data: request_patient_service' %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            },
-            body: JSON.stringify({
-                patient_identifier_id: {{ patient_identifier.id }},
-            service_id: serviceId,
-            consent_method: consentMethod,
-            break_glass_reason: breakGlassReason
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(`${data.message}\nRequest ID: ${data.request_id}`);
-                location.reload(); // Refresh to show updated data
-            } else {
-                alert(`Error: ${data.error}`);
-            }
-        })
-        .catch(error => {
-            alert('An error occurred while processing your request.');
-            console.error('Error:', error);
-        });
-    }
-
-    // Close modal when clicking outside
-    document.getElementById('breakGlassModal').addEventListener('click', function (e) {
-        if (e.target === this) {
-            closeBreakGlassModal();
-        }
-    });
-</script>
-
 <!-- CSRF Token for AJAX requests -->
-<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">>
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 {% endblock %}

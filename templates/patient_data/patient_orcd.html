@@ -1,6 +1,17 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}ORCD Document - {{ patient_data.given_name }} {{ patient_data.family_name }}{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/patient_data.js' %}"></script>
+<script>
+    // Configure ORCD functionality
+    window.orcdAvailable = {% if orcd_available %}true{% else %}false{% endif %};
+    window.orcdDownloadURL = "{{ url('patient_data:download_orcd_pdf', patient_data.id) }}";
+    window.orcdViewURL = "{{ url('patient_data:view_orcd_pdf', patient_data.id) }}";
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="orcd-container">
@@ -64,7 +75,7 @@
                     <!-- Primary: Iframe (most compatible) -->
                     <iframe id="pdfFrame" src="{{ url('patient_data:view_orcd_pdf', patient_data.id) }}" width="100%"
                         height="600px" frameborder="0" title="ORCD PDF Viewer"
-                        style="border: 1px solid #ddd; display: block;">
+                        class="pdf-frame">
                         <p>Your browser doesn't support PDF viewing.
                             <a href="{{ url('patient_data:download_orcd_pdf', patient_data.id) }}">Download the PDF</a>
                             instead.
@@ -72,7 +83,7 @@
                     </iframe>
 
                     <!-- Simplified controls - enhanced functionality removed for now -->
-                    <div class="pdf-controls" style="margin-top: 10px; text-align: center;">
+                    <div class="pdf-controls">
                         <button class="btn btn-sm btn-primary" onclick="openPdfDirectly()">
                             <i class="icon-external-link"></i>
                             Open in New Tab
@@ -189,7 +200,7 @@
 </div>
 
 <!-- Fullscreen PDF Modal -->
-<div id="fullscreenModal" class="fullscreen-modal" style="display: none;">
+<div id="fullscreenModal" class="fullscreen-modal hidden">
     <div class="fullscreen-header">
         <div class="fullscreen-title">
             <h2>{{ patient_data.given_name }} {{ patient_data.family_name }} - ORCD Full Screen</h2>
@@ -228,7 +239,7 @@
     </div>
 </div>
 
-<style>
+{% endblock %}
     .orcd-container {
         max-width: 1200px;
         margin: 0 auto;
@@ -542,103 +553,5 @@
     }
 </style>
 
-<script>
-    function downloadORCD() {
-        {% if orcd_available %}
-        // Use the actual download URL
-        window.location.href = "{{ url('patient_data:download_orcd_pdf', patient_data.id) }}";
-        {% else %}
-        alert('PDF is not available for this document. This could be because the source document is L3 CDA only (no embedded PDF).');
-        {% endif %}
-    }
-
-    function openFullscreen() {
-        {% if orcd_available %}
-        const modal = document.getElementById('fullscreenModal');
-        const iframe = document.getElementById('fullscreenPdfFrame');
-
-        // Set the PDF source URL
-        iframe.src = "{{ url('patient_data:view_orcd_pdf', patient_data.id) }}";
-
-        // Show the modal with animation
-        modal.style.display = 'flex';
-
-        // Trigger animation after display is set
-        setTimeout(() => {
-            modal.classList.add('show');
-        }, 10);
-
-        // Add escape key listener
-        document.addEventListener('keydown', handleEscapeKey);
-
-        // Prevent body scroll
-        document.body.style.overflow = 'hidden';
-        {% else %}
-        alert('PDF is not available for fullscreen viewing. This could be because the source document is L3 CDA only (no embedded PDF).');
-        {% endif %}
-    }
-
-    function closeFullscreen() {
-        const modal = document.getElementById('fullscreenModal');
-        const iframe = document.getElementById('fullscreenPdfFrame');
-
-        // Start close animation
-        modal.classList.remove('show');
-
-        // Hide modal after animation
-        setTimeout(() => {
-            modal.style.display = 'none';
-            // Clear iframe source to stop loading
-            iframe.src = '';
-        }, 300);
-
-        // Remove escape key listener
-        document.removeEventListener('keydown', handleEscapeKey);
-
-        // Restore body scroll
-        document.body.style.overflow = '';
-    }
-
-    function handleEscapeKey(event) {
-        if (event.key === 'Escape') {
-            closeFullscreen();
-        }
-    }
-
-    // Close fullscreen when clicking outside the content
-    document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('fullscreenModal');
-
-        modal.addEventListener('click', function (event) {
-            // Only close if clicking the modal background, not the content
-            if (event.target === modal) {
-                closeFullscreen();
-            }
-        });
-    });
-
-    // PDF Display Functions
-    function openPdfDirectly() {
-        {% if orcd_available %}
-        window.open("{{ url('patient_data:view_orcd_pdf', patient_data.id) }}", '_blank');
-        {% else %}
-        alert('PDF is not available for direct viewing.');
-        {% endif %}
-    }
-
-    // Test PDF loading on page load
-    document.addEventListener('DOMContentLoaded', function () {
-        {% if orcd_available %}
-        const iframe = document.getElementById('pdfFrame');
-
-        iframe.onload = function () {
-            console.log('PDF iframe loaded successfully');
-        };
-
-        iframe.onerror = function () {
-            console.error('Failed to load PDF in iframe');
-        };
-        {% endif %}
-    });
-</script>
+{% endblock %}
 {% endblock %}

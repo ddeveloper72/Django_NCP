@@ -187,33 +187,6 @@
     </div>
 </div>
 
-<style>
-    .patient-info,
-    .document-summary {
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid #007bff;
-    }
-
-    .document-summary {
-        border-left-color: #28a745;
-    }
-
-    .document-selection-form .form-check {
-        transition: all 0.2s ease;
-    }
-
-    .document-selection-form .form-check:hover {
-        background-color: #f8f9fa !important;
-    }
-
-    .document-selection-form .form-check-input:checked+.form-check-label {
-        font-weight: 500;
-    }
-
-    .badge {
-        font-size: 0.75em;
-    }
-</style>
+{% block extra_css %}
+<!-- Document selection styles are now externalized to _document_management.scss -->
 {% endblock %}

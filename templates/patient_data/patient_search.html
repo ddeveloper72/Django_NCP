@@ -1,6 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Patient Search - EU eHealth NCP{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/patient_data.js' %}"></script>
+{% endblock %}
 
 
 {% block content %}
@@ -22,16 +27,6 @@
                 </div>
 
                 <div class="card-body bg-light">
-                    <!-- Display Django messages -->
-                    {% if messages %}
-                    {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-
                     <div class="text-center mb-4">
                         <h4 class="text-primary">🇪🇺 EU Patient Search</h4>
                         <p class="fw-bold">Search for patient records across EU member states using the patient's credentials</p>
@@ -112,8 +107,7 @@
                     This action will be logged and audited.
                 </p>
 
-                <div class="break-glass-reason" id="breakGlassReason" {% if not break_glass %}style="display: none;" {%
-                    endif %}>
+                <div class="break-glass-reason{% if not break_glass %} hidden{% endif %}" id="breakGlassReason">
                     <label for="break_glass_reason_text" class="form-label">
                         Emergency Reason <span class="required">*</span>
                     </label>
@@ -175,97 +169,4 @@
     </div>
 </div>
 
-<script>
-    function toggleBreakGlassReason() {
-        const checkbox = document.getElementById('break_glass');
-        const reasonSection = document.getElementById('breakGlassReason');
-        const reasonTextarea = document.getElementById('break_glass_reason_text');
-
-        if (checkbox.checked) {
-            reasonSection.style.display = 'block';
-            reasonTextarea.required = true;
-        } else {
-            reasonSection.style.display = 'none';
-            reasonTextarea.required = false;
-            reasonTextarea.value = '';
-        }
-    }
-
-    // Date input formatting
-    document.getElementById('birthdate').addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length >= 4) {
-            value = value.substring(0, 4) + '/' + value.substring(4);
-        }
-        if (value.length >= 7) {
-            value = value.substring(0, 7) + '/' + value.substring(7, 9);
-        }
-        e.target.value = value;
-    });
-
-    // Initialize break glass reason visibility
-    document.addEventListener('DOMContentLoaded', function () {
-        toggleBreakGlassReason();
-        initializeFileUpload();
-    });
-
-    // File upload functionality
-    function initializeFileUpload() {
-        const fileInput = document.getElementById('cda_file');
-        const fileLabel = document.querySelector('.file-upload-label');
-        const feedback = document.getElementById('fileUploadFeedback');
-
-        fileInput.addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (file) {
-                // Update label text
-                const uploadText = fileLabel.querySelector('.upload-text');
-                uploadText.textContent = file.name;
-
-                // Validate file type
-                const validExtensions = ['.xml', '.cda'];
-                const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-
-                if (!validExtensions.includes(fileExtension)) {
-                    feedback.innerHTML = '<span class="text-error">⚠️ Please select an XML or CDA file</span>';
-                    feedback.style.display = 'block';
-                    fileLabel.classList.add('upload-error');
-                } else {
-                    feedback.innerHTML = '<span class="text-success">✅ File ready for upload</span>';
-                    feedback.style.display = 'block';
-                    fileLabel.classList.remove('upload-error');
-                    fileLabel.classList.add('upload-ready');
-                }
-            } else {
-                // Reset to original state
-                const uploadText = fileLabel.querySelector('.upload-text');
-                uploadText.textContent = 'Choose CDA File';
-                feedback.style.display = 'none';
-                fileLabel.classList.remove('upload-error', 'upload-ready');
-            }
-        });
-
-        // Drag and drop functionality
-        fileLabel.addEventListener('dragover', function (e) {
-            e.preventDefault();
-            fileLabel.classList.add('upload-dragover');
-        });
-
-        fileLabel.addEventListener('dragleave', function (e) {
-            e.preventDefault();
-            fileLabel.classList.remove('upload-dragover');
-        });
-
-        fileLabel.addEventListener('drop', function (e) {
-            e.preventDefault();
-            fileLabel.classList.remove('upload-dragover');
-
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                fileInput.files = files;
-                fileInput.dispatchEvent(new Event('change'));
-            }
-        });
-    }
-</script>
 {% endblock %}
