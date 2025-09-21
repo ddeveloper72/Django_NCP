@@ -1,0 +1,180 @@
+// =====================================
+// DOCUMENT VIEWER STYLES
+// HSE-compliant styling for document viewing templates
+// =====================================
+
+// Document View Container
+.uploaded-document-view {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+// Info Cards
+.info-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+// Grid Layouts
+.patient-details-grid,
+.document-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+// Detail Items
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  .label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+  }
+
+  .value {
+    color: #212529;
+  }
+}
+
+// Status Badges
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+
+  &.success {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  &.pending {
+    background: #fff3cd;
+    color: #856404;
+  }
+}
+
+// Sections Container
+.sections-container {
+  margin-top: 2rem;
+}
+
+// Section Cards
+.section-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.section-header {
+  background: #f8f9fa;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-title {
+  margin: 0;
+  color: #333;
+}
+
+.section-code {
+  background: #e9ecef;
+  color: #495057;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.section-content {
+  padding: 1.5rem;
+}
+
+// Dual Language Content
+.dual-language-content {
+  position: relative;
+}
+
+// Language Tabs
+.language-tabs {
+  display: flex;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: #6c757d;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #495057;
+    background: #f8f9fa;
+  }
+
+  &.active {
+    color: #0066cc;
+    border-bottom-color: #0066cc;
+  }
+}
+
+// Language Content
+.language-content {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}
+
+.single-language-content {
+  /* Standard content styling */
+}
+
+// Empty States
+.no-content {
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+  padding: 2rem;
+}
+
+.no-sections {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.empty-state {
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 3rem;
+
+  h4 {
+    color: #6c757d;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: #6c757d;
+    margin: 0;
+  }
+}

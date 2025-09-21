@@ -33,22 +33,22 @@
 
 /* Header Navigation Tabs Styling */
 .nav-tabs-light .nav-link {
-  border: 1px solid rgba(255,255,255,0.3);
-  color: rgba(255,255,255,0.8);
-  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
 }
 
 .nav-tabs-light .nav-link:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   color: white;
-  border-color: rgba(255,255,255,0.5);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .nav-tabs-light .nav-link.active {
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   color: var(--bs-primary) !important;
-  border-color: rgba(255,255,255,0.9);
+  border-color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
 }
 
@@ -56,6 +56,5 @@
 .tab-content .tab-pane > div {
   max-height: 400px;
   overflow-y: auto;
-}
   transition: background-color 0.2s ease;
 }

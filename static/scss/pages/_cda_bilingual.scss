@@ -1,0 +1,214 @@
+// =====================================
+// CDA BILINGUAL DISPLAY STYLES
+// HSE-compliant styling for bilingual CDA document display
+// =====================================
+
+// Main Container
+.cda-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+// Header Section
+.cda-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+
+  h1 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+  }
+}
+
+.language-indicator {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+// Patient Info Section
+.patient-info-section {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.patient-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.patient-info-column {
+  h3 {
+    color: #495057;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+  }
+}
+
+.patient-field {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: white;
+  border-radius: 4px;
+  border-left: 4px solid #007bff;
+}
+
+.field-label {
+  font-weight: bold;
+  color: #495057;
+  margin-bottom: 5px;
+}
+
+.field-value {
+  color: #6c757d;
+}
+
+// Bilingual Sections
+.bilingual-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.section-column {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.section-column-header {
+  padding: 15px 20px;
+  font-weight: bold;
+  color: white;
+}
+
+.original-column .section-column-header {
+  background: #dc3545;
+}
+
+.translated-column .section-column-header {
+  background: #28a745;
+}
+
+.section-content {
+  padding: 20px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+// Medical Sections
+.medical-section {
+  margin-bottom: 30px;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.section-title {
+  background: #f8f9fa;
+  padding: 15px 20px;
+  margin: 0;
+  font-size: 18px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.section-body {
+  padding: 20px;
+}
+
+// Medical Tables
+.medical-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  font-size: 14px;
+
+  th {
+    background: #f8f9fa;
+    padding: 12px 8px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+    font-weight: bold;
+  }
+
+  td {
+    padding: 10px 8px;
+    border: 1px solid #dee2e6;
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) {
+    background: #f8f9fa;
+  }
+}
+
+.section-text {
+  line-height: 1.6;
+  color: #495057;
+}
+
+// Translation Controls
+.translation-controls {
+  background: #e9ecef;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 10px;
+}
+
+.toggle-btn {
+  padding: 8px 16px;
+  border: 1px solid #007bff;
+  background: white;
+  color: #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &.active,
+  &:hover {
+    background: #007bff;
+    color: white;
+  }
+}
+
+.single-column {
+  grid-template-columns: 1fr;
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .bilingual-sections {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .translation-controls {
+    flex-direction: column;
+    gap: 15px;
+  }
+}

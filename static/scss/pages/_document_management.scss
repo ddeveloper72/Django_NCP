@@ -1,0 +1,167 @@
+// =====================================
+// DOCUMENT MANAGEMENT STYLES
+// HSE-compliant styling for document upload/selection templates
+// =====================================
+
+// Uploaded Documents Page
+.uploaded-documents-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.documents-summary {
+  margin: 2rem 0;
+}
+
+.summary-card {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.documents-list {
+  margin-top: 2rem;
+}
+
+.document-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  padding: 1.5rem;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &.processed {
+    border-left: 4px solid #28a745;
+  }
+
+  &.pending {
+    border-left: 4px solid #ffc107;
+  }
+}
+
+.document-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.document-title {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+}
+
+.document-meta {
+  margin: 0;
+  color: #6c757d;
+}
+
+.document-actions {
+  flex-shrink: 0;
+}
+
+.document-details {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+}
+
+.patient-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+
+  .label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+  }
+
+  .value {
+    color: #212529;
+  }
+}
+
+.sections-summary {
+  margin-top: 1rem;
+}
+
+.sections-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.section-badge {
+  background: #e9ecef;
+  color: #495057;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.no-documents {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.empty-state {
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 3rem;
+
+  h4 {
+    color: #6c757d;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: #6c757d;
+    margin: 0;
+  }
+}
+
+// Document Selection Styles
+.patient-info,
+.document-summary {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid #007bff;
+}
+
+.document-summary {
+  border-left-color: #28a745;
+}
+
+.document-selection-form {
+  .form-check {
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #f8f9fa !important;
+    }
+  }
+
+  .form-check-input:checked + .form-check-label {
+    font-weight: 500;
+  }
+}
+
+.badge {
+  font-size: 0.75em;
+}
