@@ -1413,21 +1413,85 @@ i.fab {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Icon hover effects for interactive elements */
+/* Icon hover effects for interactive elements - exclude navigation */
 .card-header:hover i.fa-solid,
 .card-header:hover i.far,
 .card-header:hover i.fab,
 .section-header:hover i.fa-solid,
 .section-header:hover i.far,
 .section-header:hover i.fab,
-.btn:hover i.fa-solid,
-.btn:hover i.far,
-.btn:hover i.fab,
 .breadcrumb-link:hover i.fa-solid,
 .breadcrumb-link:hover i.far,
 .breadcrumb-link:hover i.fab {
   transform: scale(1.1);
   color: var(--healthcare-dark-blue) !important;
+}
+
+/* Specific button hover effects - exclude navbar buttons */
+.btn:hover i.fa-solid,
+.btn:hover i.far,
+.btn:hover i.fab {
+  transform: scale(1.1);
+  color: var(--healthcare-dark-blue) !important;
+}
+
+/* Override for navigation elements - highest specificity */
+.navbar .badge:hover i.fa-solid,
+.navbar .badge:hover i.far,
+.navbar .badge:hover i.fab,
+.navbar .nav-link:hover i.fa-solid,
+.navbar .nav-link:hover i.far,
+.navbar .nav-link:hover i.fab,
+.navbar .btn:hover i.fa-solid,
+.navbar .btn:hover i.far,
+.navbar .btn:hover i.fab,
+nav .badge:hover i.fa-solid,
+nav .badge:hover i.far,
+nav .badge:hover i.fab,
+body nav .badge:hover i.fa-solid,
+body nav .badge:hover i.far,
+body nav .badge:hover i.fab,
+body nav .badge:hover i.fa-user-injured,
+.badge.bg-success:hover i.fa-solid,
+.badge.bg-success:hover i.far,
+.badge.bg-success:hover i.fab,
+.badge.bg-success:hover i.fa-user-injured,
+.badge.bg-warning:hover i.fa-solid,
+.badge.bg-warning:hover i.far,
+.badge.bg-warning:hover i.fab {
+  color: inherit !important;
+  transform: none !important;
+}
+
+/* Override for patient header card with badges - prevent icon color change */
+.card-header.bg-primary.text-white:hover .badge i.fa-solid,
+.card-header.bg-primary.text-white:hover .badge i.far,
+.card-header.bg-primary.text-white:hover .badge i.fab,
+.card-header.bg-primary:hover .badge i.fa-solid,
+.card-header.bg-primary:hover .badge i.far,
+.card-header.bg-primary:hover .badge i.fab,
+.card-header.bg-primary.text-white .badge:hover i.fa-solid,
+.card-header.bg-primary.text-white .badge:hover i.far,
+.card-header.bg-primary.text-white .badge:hover i.fab,
+.card-header.bg-primary .badge:hover i.fa-solid,
+.card-header.bg-primary .badge:hover i.far,
+.card-header.bg-primary .badge:hover i.fab {
+  color: inherit !important;
+  transform: none !important;
+}
+
+/* Override for section header cards with shadow - prevent icon color change */
+.card.shadow:hover i.fa-solid,
+.card.shadow:hover i.far,
+.card.shadow:hover i.fab,
+.card.shadow .card-header:hover i.fa-solid,
+.card.shadow .card-header:hover i.far,
+.card.shadow .card-header:hover i.fab,
+.card.shadow:hover .badge i.fa-solid,
+.card.shadow:hover .badge i.far,
+.card.shadow:hover .badge i.fab {
+  color: inherit !important;
+  transform: none !important;
 }
 
 /* Enhanced Data Display Tabs (Structured Data, Original Content, etc.) */
