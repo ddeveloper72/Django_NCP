@@ -561,7 +561,8 @@ main {
 .bg-danger i,
 .bg-warning i,
 .bg-info i,
-.bg-dark i {
+.bg-dark i,
+.bg-teal i {
   color: white !important;
   fill: white !important;
 
@@ -583,7 +584,8 @@ main {
 .bg-danger:hover i,
 .bg-warning:hover i,
 .bg-info:hover i,
-.bg-dark:hover i {
+.bg-dark:hover i,
+.bg-teal:hover i {
   color: white !important;
   fill: white !important;
 }

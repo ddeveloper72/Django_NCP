@@ -5,16 +5,13 @@
 
 {% block extra_js %}
 <script src="{% static 'js/patient_data.js' %}"></script>
-<script>
-    // Configure ORCD functionality
-    window.orcdAvailable = {% if orcd_available %}true{% else %}false{% endif %};
-    window.orcdDownloadURL = "{{ url('patient_data:download_orcd_pdf', patient_data.id) }}";
-    window.orcdViewURL = "{{ url('patient_data:view_orcd_pdf', patient_data.id) }}";
-</script>
 {% endblock %}
 
 {% block content %}
-<div class="orcd-container">
+<div class="orcd-container"
+     data-orcd-available="{% if orcd_available %}true{% else %}false{% endif %}"
+     data-download-url="{{ url('patient_data:download_orcd_pdf', patient_data.id) }}"
+     data-view-url="{{ url('patient_data:view_orcd_pdf', patient_data.id) }}">
     <div class="orcd-header">
         <div class="breadcrumb-nav">
             <a href="{{ url('patient_data:patient_details', patient_data.id) }}" class="breadcrumb-link">
@@ -60,7 +57,7 @@
                         PDF Not Available
                     </button>
                     {% endif %}
-                    <button class="btn btn-outline-secondary" onclick="openFullscreen()">
+                    <button class="btn btn-outline-secondary" data-action="open-fullscreen">>
                         <i class="icon-maximize"></i>
                         Fullscreen
                     </button>
@@ -84,7 +81,7 @@
 
                     <!-- Simplified controls - enhanced functionality removed for now -->
                     <div class="pdf-controls">
-                        <button class="btn btn-sm btn-primary" onclick="openPdfDirectly()">
+                        <button class="btn btn-sm btn-primary" data-action="open-pdf-directly">>
                             <i class="icon-external-link"></i>
                             Open in New Tab
                         </button>
@@ -207,12 +204,12 @@
         </div>
         <div class="fullscreen-controls">
             {% if orcd_available %}
-            <button id="downloadBtn" class="btn btn-secondary" onclick="downloadORCD()">
+            <button id="downloadBtn" class="btn btn-secondary" data-action="download-orcd">>
                 <i class="icon-download"></i>
                 Download PDF
             </button>
             {% endif %}
-            <button id="closeFullscreenBtn" class="btn btn-outline-secondary" onclick="closeFullscreen()">
+            <button id="closeFullscreenBtn" class="btn btn-outline-secondary" data-action="close-fullscreen">>
                 <i class="icon-minimize"></i>
                 Exit Fullscreen
             </button>
@@ -229,7 +226,7 @@
                 <i class="icon-file-text"></i>
                 <h3>ORCD PDF Not Available</h3>
                 <p>This document doesn't contain an embedded PDF or the PDF couldn't be extracted.</p>
-                <button class="btn btn-primary" onclick="closeFullscreen()">
+                <button class="btn btn-primary" data-action="close-fullscreen">>
                     <i class="icon-arrow-left"></i>
                     Return to Document View
                 </button>

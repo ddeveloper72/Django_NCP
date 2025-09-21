@@ -2721,13 +2721,14 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   max-height: 80vh;
   background: linear-gradient(
     135deg,
-    rgba($white, 0.98) 0%,
-    rgba($hse-primary-teal, 0.05) 100%
+    rgba($white, 0.95) 0%,
+    rgba($hse-primary-teal, 0.12) 100%
   );
-  border: 2px solid rgba($hse-primary-teal, 0.2);
+  border: 2px solid rgba($hse-primary-teal, 0.3);
   border-radius: $border-radius-lg 0 0 $border-radius-lg;
-  box-shadow: 0 16px 48px rgba($hse-primary-teal, 0.25),
-    0 8px 24px rgba($hse-primary-teal, 0.15), inset 0 1px 0 rgba($white, 0.9);
+  box-shadow: 0 16px 48px rgba($hse-primary-teal, 0.35),
+    0 8px 24px rgba($hse-primary-teal, 0.25), inset 0 1px 0 rgba($white, 0.9);
+  backdrop-filter: blur(10px);
   z-index: 1050;
   transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
@@ -2742,7 +2743,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     transform: translateY(-50%);
     width: 48px;
     height: 48px;
-    background: $hse-primary-teal;
+    background: linear-gradient(135deg, #00a8b3 0%, #007b7f 100%);
     border: 2px solid rgba($white, 0.9);
     border-radius: $border-radius-lg 0 0 $border-radius-lg;
     color: $white;
@@ -2752,14 +2753,14 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 24px rgba($hse-primary-teal, 0.3),
-      0 4px 12px rgba($hse-primary-teal, 0.2);
+    box-shadow: 0 8px 24px rgba($hse-primary-teal, 0.4),
+      0 4px 12px rgba($hse-primary-teal, 0.3);
 
     &:hover {
-      background: $hse-primary-teal-light;
+      background: linear-gradient(135deg, #33c5d1 0%, #33969a 100%);
       transform: translateY(-50%) scale(1.05);
-      box-shadow: 0 12px 32px rgba($hse-primary-teal, 0.4),
-        0 6px 16px rgba($hse-primary-teal, 0.25);
+      box-shadow: 0 12px 32px rgba($hse-primary-teal, 0.5),
+        0 6px 16px rgba($hse-primary-teal, 0.35);
     }
 
     &:active {
@@ -2767,7 +2768,16 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     }
 
     i {
+      color: $white !important;
       transition: transform 0.3s ease;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .fa-solid,
+    .far,
+    .fab,
+    .fa {
+      color: $white !important;
     }
   }
 
@@ -2874,7 +2884,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
           }
 
           i {
-            color: $hse-primary-teal;
+            color: var(--healthcare-text-dark);
             width: 20px;
             text-align: center;
             opacity: 0.8;

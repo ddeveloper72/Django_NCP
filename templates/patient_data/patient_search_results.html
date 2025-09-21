@@ -5,16 +5,13 @@
 
 {% block extra_js %}
 <script src="{% static 'js/patient_data.js' %}"></script>
-<script>
-    // Configure URLs and IDs for patient data functionality
-    window.requestPatientServiceURL = "{% url 'patient_data:request_patient_service' %}";
-    window.localCDADocumentURL = "{{ url('patient_data:local_cda_document_view_indexed', args=[patient_identifier.id, '__INDEX__']) }}";
-    window.patientIdentifierId = {{ patient_identifier.id }};
-</script>
 {% endblock %}
 
 {% block content %}
-<div class="results-container">
+<div class="results-container"
+     data-request-service-url="{% url 'patient_data:request_patient_service' %}"
+     data-local-cda-url="{{ url('patient_data:local_cda_document_view_indexed', args=[patient_identifier.id, '__INDEX__']) }}"
+     data-patient-id="{{ patient_identifier.id }}">
     <div class="results-header">
         <a href="{% url 'patient_data:patient_search' %}" class="back-button">
             ← Back to Search
@@ -107,7 +104,7 @@
 
         <div class="services-grid">
             {% for doc in sample_patient_info.cda_documents %}
-            <div class="service-card" onclick="viewLocalCDADocument({{ forloop.counter0 }})">
+            <div class="service-card" data-action="view-local-cda" data-document-index="{{ forloop.counter0 }}">>
                 <div class="service-header">
                     <div class="service-icon service-local-cda">
                         📄
@@ -236,7 +233,7 @@
                     </div>
                 </div>
 
-                <button class="request-button" onclick="requestService({{ service.id }}, '{{ service.service_name }}')">
+                <button class="request-button" data-action="request-service" data-service-id="{{ service.id }}" data-service-name="{{ service.service_name }}">
                     Request {{ service.service_name }}
                 </button>
             </div>
@@ -289,8 +286,8 @@
         </div>
 
         <div class="modal-actions">
-            <button onclick="closeBreakGlassModal()" class="modal-btn modal-btn-secondary">Cancel</button>
-            <button onclick="confirmBreakGlass()" class="modal-btn modal-btn-danger">Confirm Emergency Access</button>
+            <button data-action="close-break-glass-modal" class="modal-btn modal-btn-secondary">Cancel</button>
+            <button data-action="confirm-break-glass" class="modal-btn modal-btn-danger">Confirm Emergency Access</button>
         </div>
     </div>
 </div>

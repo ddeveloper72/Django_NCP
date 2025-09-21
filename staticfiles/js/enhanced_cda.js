@@ -45,7 +45,7 @@ function initializeEnhancedCDA() {
  * @param {string} tabType - Type of tab to show (personal, healthcare, system, clinical, pdfs)
  */
 function showExtendedTab(sectionId, tabType) {
-    console.log('🎯 Switching Extended Patient tab:', sectionId, tabType);
+    console.log('Switching tab:', tabType);
 
     // Hide all tab contents for the extended patient section
     const personalTab = document.getElementById(sectionId + '_personal');
@@ -104,15 +104,11 @@ function showExtendedTab(sectionId, tabType) {
     if (activeTab) {
         activeTab.classList.add('active');
         activeTab.style.display = 'block';
-        console.log('✅ Activated tab:', activeTab.id);
     }
 
     if (activeButtonIndex >= 0 && buttons[activeButtonIndex]) {
         buttons[activeButtonIndex].classList.add('active');
-        console.log('✅ Activated button:', activeButtonIndex);
     }
-
-    console.log('✅ Extended patient tab switch completed:', sectionId, tabType);
 }
 
 /**
@@ -210,7 +206,66 @@ function initializeEnhancedCDA() {
     // Initialize Bootstrap tooltips
     initializeTooltips();
 
-    console.log('✅ Pure Bootstrap functionality initialized successfully');
+    // Initialize Extended Patient Event Delegation
+    initializeExtendedPatientEventDelegation();
+
+    console.log('Bootstrap functionality initialized');
+}
+
+/**
+ * Initialize event delegation for extended patient tabs
+ * This handles the clicking of tab buttons that use data-action attributes
+ */
+function initializeExtendedPatientEventDelegation() {
+    const extendedContainer = document.querySelector('#extendedPatientSection');
+    if (!extendedContainer) {
+        return;
+    }
+
+    // Prevent duplicate listeners
+    if (extendedContainer.dataset.initialized === 'true') {
+        return;
+    }
+
+    console.log('Initializing extended patient tabs...');
+
+    extendedContainer.addEventListener('click', function (event) {
+        // Find the closest button with data-action (in case user clicks on icon or text inside button)
+        const target = event.target.closest('[data-action]') || event.target;
+        const action = target.dataset.action;
+
+        // If we found a button with an action, prevent Bootstrap from interfering
+        if (action) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Check if THIS SPECIFIC button is disabled
+            if (target.disabled || target.dataset.disabled === 'true') {
+                console.log('Button disabled:', action);
+                return;
+            }
+        } else {
+            return;
+        }
+
+        switch (action) {
+            case 'show-extended-tab':
+                const sectionId = target.dataset.sectionId;
+                const tabType = target.dataset.tabType;
+                console.log('Switching to tab:', tabType);
+                if (sectionId && tabType) {
+                    showExtendedTab(sectionId, tabType);
+                }
+                break;
+
+            default:
+                console.log('Unknown action:', action);
+                break;
+        }
+    }, true); // Use capture phase to run before other event listeners
+
+    // Mark as initialized to prevent duplicate listeners
+    extendedContainer.dataset.initialized = 'true';
 }
 
 // Initialize when DOM is ready
