@@ -1,269 +1,121 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Participant Search - SMP</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% block title %}Participant Search - SMP{% endblock %}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+{% block extra_css %}
+<!-- Participant search styles are now in main.css via SASS -->
+{% endblock %}
 
-        .search-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
+{% block content %}
+<div class="dashboard-container">
+    <div class="smp-dashboard-header">
+        <h1>🔍 Participant Search</h1>
+        <p>Search SMP participants across the EU eHealth Network</p>
+        <a href="{% url 'smp_client:dashboard' %}" class="btn btn-secondary" aria-label="Return to SMP Dashboard">
+            ← Back to Dashboard
+        </a>
+    </div>
 
-        .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 30px 40px;
-            text-align: center;
-        }
-
-        .search-form {
-            padding: 40px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        label {
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #495057;
-        }
-
-        input,
-        select {
-            padding: 12px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .search-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .search-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .results-section {
-            padding: 40px;
-        }
-
-        .participant-card {
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .participant-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .participant-name {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .participant-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .detail-item {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        .detail-value {
-            color: #495057;
-            margin-top: 2px;
-        }
-
-        .flag-emoji {
-            font-size: 1.5rem;
-            margin-right: 10px;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 60px;
-            color: #6c757d;
-        }
-
-        .back-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            text-decoration: none;
-            display: inline-block;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover {
-            background: #495057;
-            transform: translateY(-2px);
-        }
-    </style>
-</head>
-
-<body>
-    <div class="search-container">
-        <div class="header">
-            <h1>🔍 SMP Participant Search</h1>
-            <p>Find service metadata participants across EU domains</p>
-        </div>
-
-        <div class="search-form">
-            <a href="{% url 'smp_client:dashboard' %}" class="back-btn">← Back to Dashboard</a>
-
-            <form method="GET">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="search">Search Participants</label>
-                        <input type="text" id="search" name="q" value="{{ search_query }}"
-                            placeholder="Search by name or identifier...">
-                    </div>
-                    <div class="form-group">
-                        <label for="domain">Domain</label>
-                        <select id="domain" name="domain">
-                            <option value="">All Domains</option>
-                            {% for domain in domains %}
-                            <option value="{{ domain.domain_code }}" {% if domain_filter==domain.domain_code
-                                %}selected{% endif %}>
-                                {{ domain.domain_name }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="country">Country</label>
-                        <select id="country" name="country">
-                            <option value="">All Countries</option>
-                            {% for country in countries %}
-                            {% if country %}
-                            <option value="{{ country }}" {% if country_filter==country %}selected{% endif %}>
-                                {% if country == 'IE' %}🇮🇪 Ireland
-                                {% elif country == 'BE' %}🇧🇪 Belgium
-                                {% elif country == 'AT' %}🇦🇹 Austria
-                                {% elif country == 'HU' %}🇭🇺 Hungary
-                                {% else %}🇪🇺 {{ country }}{% endif %}
-                            </option>
-                            {% endif %}
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group" style="justify-content: flex-end; display: flex; align-items: flex-end;">
-                        <button type="submit" class="search-btn">Search</button>
-                    </div>
+    <div class="search-section">
+        <form method="get" class="search-form" role="search" aria-label="Participant search form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="search" class="form-label">Search Participants</label>
+                    <input 
+                        type="text" 
+                        id="search"
+                        name="search" 
+                        value="{{ search_query }}" 
+                        placeholder="Enter participant name, domain, or identifier"
+                        class="form-control"
+                        aria-describedby="search-help"
+                    >
+                    <small id="search-help" class="form-text">Search by name, organization, or service domain</small>
                 </div>
-            </form>
+
+                <div class="form-group">
+                    <label for="domain_filter" class="form-label">Service Domain</label>
+                    <select id="domain_filter" name="domain_filter" class="form-control" aria-label="Filter by service domain">
+                        <option value="">All Domains</option>
+                        {% for domain in domains %}
+                        <option value="{{ domain.domain_code }}" {% if domain_filter==domain.domain_code %}selected{% endif %}>
+                            {{ domain.display_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="country_filter" class="form-label">Country</label>
+                    <select id="country_filter" name="country_filter" class="form-control" aria-label="Filter by country">
+                        <option value="">All Countries</option>
+                        {% for country in countries %}
+                        {% if country %}
+                        <option value="{{ country }}" {% if country_filter==country %}selected{% endif %}>
+                            {% if country == 'IE' %}🇮🇪 Ireland
+                            {% elif country == 'BE' %}🇧🇪 Belgium
+                            {% elif country == 'AT' %}🇦🇹 Austria
+                            {% elif country == 'HU' %}🇭🇺 Hungary
+                            {% else %}🇪🇺 {{ country }}{% endif %}
+                        </option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" aria-label="Search participants">
+                        🔍 Search Participants
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="results-section">
+        {% if participants %}
+        <div class="results-header">
+            <h2>Search Results ({{ participants|length }} found)</h2>
         </div>
 
-        <div class="results-section">
-            {% if participants %}
-            <h2 style="margin-bottom: 30px; color: #2c3e50;">
-                Found {{ participants.count }} participant{{ participants.count|pluralize }}
-            </h2>
-
+        <div class="participants-grid" role="main" aria-label="Search results">
             {% for participant in participants %}
-            <div class="participant-card">
-                <div class="participant-name">
-                    <span class="flag-emoji">
+            <article class="participant-card" role="article" aria-labelledby="participant-{{ participant.id }}">
+                <div class="participant-header">
+                    <h3 id="participant-{{ participant.id }}" class="participant-name">
                         {% if participant.country_code == 'IE' %}🇮🇪
                         {% elif participant.country_code == 'BE' %}🇧🇪
                         {% elif participant.country_code == 'AT' %}🇦🇹
                         {% elif participant.country_code == 'HU' %}🇭🇺
                         {% else %}🇪🇺{% endif %}
-                    </span>
-                    {{ participant.participant_name|default:participant.participant_identifier }}
+                        {{ participant.name }}
+                    </h3>
                 </div>
 
                 <div class="participant-details">
                     <div class="detail-item">
                         <div class="detail-label">Participant ID</div>
-                        <div class="detail-value">{{ participant.participant_identifier }}</div>
+                        <div class="detail-value">{{ participant.participant_id }}</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Scheme</div>
-                        <div class="detail-value">{{ participant.participant_scheme.scheme_name }}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Domain</div>
-                        <div class="detail-value">{{ participant.domain.domain_name }}</div>
-                    </div>
+
                     <div class="detail-item">
                         <div class="detail-label">Country</div>
                         <div class="detail-value">{{ participant.country_code }}</div>
                     </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">Domain</div>
+                        <div class="detail-value">{{ participant.service_domain }}</div>
+                    </div>
+
                     {% if participant.organization_type %}
                     <div class="detail-item">
                         <div class="detail-label">Organization Type</div>
                         <div class="detail-value">{{ participant.organization_type }}</div>
                     </div>
                     {% endif %}
+
                     {% if participant.contact_email %}
                     <div class="detail-item">
                         <div class="detail-label">Contact</div>
@@ -272,22 +124,75 @@
                     {% endif %}
                 </div>
 
-                <div style="margin-top: 15px;">
-                    <a href="{% url 'smp_client:participant_detail' participant.id %}" class="search-btn"
-                        style="font-size: 0.9rem; padding: 8px 20px;">
-                        View Services →
+                <div class="participant-actions">
+                    <a href="{% url 'smp_client:participant_detail' participant.id %}" 
+                       class="btn btn-primary"
+                       aria-label="View details for {{ participant.name }}">
+                        View Details →
                     </a>
                 </div>
-            </div>
+            </article>
             {% endfor %}
-            {% else %}
-            <div class="no-results">
-                <h3>No participants found</h3>
-                <p>Try adjusting your search criteria or sync with European SMP server.</p>
-            </div>
-            {% endif %}
         </div>
+        {% else %}
+        <div class="no-results" role="status" aria-live="polite">
+            <div class="no-results-icon">🔍</div>
+            <h3>No participants found</h3>
+            <p>Try adjusting your search criteria or filters</p>
+        </div>
+        {% endif %}
     </div>
-</body>
+</div>
+{% endblock %}
 
-</html>
+{% block extra_js %}
+<script src="{% static 'js/smp_dashboard.js' %}"></script>
+<script>
+    // Initialize participant search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-submit search on filter change
+        const filters = document.querySelectorAll('#domain_filter, #country_filter');
+        filters.forEach(filter => {
+            filter.addEventListener('change', function() {
+                this.form.submit();
+            });
+        });
+
+        // Enhanced keyboard navigation
+        const participantCards = document.querySelectorAll('.participant-card');
+        participantCards.forEach((card, index) => {
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const link = card.querySelector('a');
+                    if (link) link.click();
+                }
+            });
+            
+            // Make cards focusable
+            card.setAttribute('tabindex', '0');
+        });
+
+        // Search form accessibility enhancements
+        const searchInput = document.getElementById('search');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                // Clear previous search results announcement
+                const existingAlert = document.getElementById('search-status');
+                if (existingAlert) existingAlert.remove();
+                
+                // Add live region for search status updates
+                if (this.value.length > 2) {
+                    const statusDiv = document.createElement('div');
+                    statusDiv.id = 'search-status';
+                    statusDiv.setAttribute('aria-live', 'polite');
+                    statusDiv.setAttribute('aria-atomic', 'true');
+                    statusDiv.className = 'sr-only';
+                    statusDiv.textContent = 'Search query updated. Press Enter to search.';
+                    this.parentNode.appendChild(statusDiv);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
