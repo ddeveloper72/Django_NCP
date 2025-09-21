@@ -11,37 +11,11 @@
 
 {% block extra_css %}
 <!-- Enhanced CDA styles are now externalized to _enhanced_cda.scss -->
-<style>
-/* Clinical Tab Content Styles */
-.clinical-tab-content {
-    display: none !important;
-    padding: 20px;
-    background: white;
-    border-radius: 0 0 0.375rem 0.375rem;
-    height: auto;
-    min-height: fit-content;
-    overflow: visible;
-}
 
-.clinical-tab-content.active {
-    display: block !important;
-    height: auto;
-    min-height: fit-content;
-    overflow: visible;
-}
+{% endblock %}
 
-/* Extended Patient Section Styling */
-.clinical-section {
-    background: white;
-    border-radius: 0.375rem;
-    border: 1px solid #dee2e6;
-    margin-bottom: 1.5rem;
-}
-
-.extended-tab-content-container {
-    background: white;
-    border-radius: 0 0 0.375rem 0.375rem;
-}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-nav">
 
 /* Responsive design for tabs */
 @media (max-width: 768px) {
