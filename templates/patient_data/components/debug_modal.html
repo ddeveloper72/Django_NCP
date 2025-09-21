@@ -4,7 +4,7 @@
 <div class="debug-toggle-container">
     <button type="button" class="btn btn-sm btn-outline-secondary debug-toggle-btn" data-bs-toggle="modal"
         data-bs-target="#debugModal" title="Show Debug Information">
-        <i class="fas fa-bug me-1"></i>
+        <i class="fa-solid fa-bug me-1"></i>
         <span class="d-none d-md-inline">Debug</span>
         <span class="badge bg-danger ms-1">DEV</span>
     </button>
@@ -16,7 +16,7 @@
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
                 <h5 class="modal-title" id="debugModalLabel">
-                    <i class="fas fa-bug me-2"></i>Development Debug Information
+                    <i class="fa-solid fa-bug me-2"></i>Development Debug Information
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                     aria-label="Close"></button>
@@ -25,7 +25,7 @@
                 <!-- Administrative Data Debug -->
                 {% if administrative_data %}
                 <div class="alert alert-success mb-3">
-                    <h6><i class="fas fa-database me-2"></i>Administrative Data Available</h6>
+                    <h6><i class="fa-solid fa-database me-2"></i>Administrative Data Available</h6>
                     <div class="row">
                         <div class="col-md-6">
                             <p><strong>Data Keys:</strong>
@@ -55,7 +55,7 @@
                 <!-- Patient Data Debug -->
                 {% if administrative_data and administrative_data.patient %}
                 <div class="alert alert-info mb-3">
-                    <h6><i class="fas fa-user me-2"></i>Patient Data Available</h6>
+                    <h6><i class="fa-solid fa-user me-2"></i>Patient Data Available</h6>
                     <p><strong>Patient Keys:</strong>
                         {% for key, value in administrative_data.patient.items %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
                     </p>
@@ -71,7 +71,7 @@
                 <!-- Enhanced Header Data Debug -->
                 {% if extended_header_data %}
                 <div class="alert alert-primary mb-3">
-                    <h6><i class="fas fa-file-medical me-2"></i>Extended Header Data</h6>
+                    <h6><i class="fa-solid fa-file-medical me-2"></i>Extended Header Data</h6>
                     <p><strong>Data Keys:</strong>
                         {% for key, value in extended_header_data.items %}{{ key }}{% if not forloop.last %}, {% endif %} {% endfor %}
                     </p>
@@ -81,7 +81,7 @@
 
                 <!-- CDA Processing Debug -->
                 <div class="alert alert-warning mb-3">
-                    <h6><i class="fas fa-cogs me-2"></i>Processing Information</h6>
+                    <h6><i class="fa-solid fa-cogs me-2"></i>Processing Information</h6>
                     <p><strong>Mock Data Disabled:</strong> Yes (using real CDA processor data)</p>
                     <p><strong>Template Engine:</strong> Jinja2</p>
                     <p><strong>Environment:</strong> Development</p>
@@ -96,7 +96,7 @@
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#adminDataCollapse" aria-expanded="false"
                                 aria-controls="adminDataCollapse">
-                                <i class="fas fa-database me-2"></i>Administrative Data Structure
+                                <i class="fa-solid fa-database me-2"></i>Administrative Data Structure
                             </button>
                         </h2>
                         <div id="adminDataCollapse" class="accordion-collapse collapse"
@@ -115,7 +115,7 @@
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#patientDataCollapse" aria-expanded="false"
                                 aria-controls="patientDataCollapse">
-                                <i class="fas fa-user me-2"></i>Patient Data Structure
+                                <i class="fa-solid fa-user me-2"></i>Patient Data Structure
                             </button>
                         </h2>
                         <div id="patientDataCollapse" class="accordion-collapse collapse"
@@ -130,10 +130,10 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>Close
+                    <i class="fa-solid fa-times me-1"></i>Close
                 </button>
                 <small class="text-muted">
-                    <i class="fas fa-info-circle me-1"></i>
+                    <i class="fa-solid fa-info-circle me-1"></i>
                     This debug information will be removed in production builds
                 </small>
             </div>

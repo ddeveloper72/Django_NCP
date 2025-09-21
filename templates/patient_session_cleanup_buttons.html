@@ -9,7 +9,7 @@ Usage: {% include 'patient_session_cleanup_buttons.html' %}
     <div class="card border-warning">
         <div class="card-header bg-warning text-dark">
             <h6 class="card-title mb-0">
-                <i class="fas fa-shield-alt"></i> Patient Data Security
+                <i class="fa-solid fa-shield-alt"></i> Patient Data Security
             </h6>
         </div>
         <div class="card-body">
@@ -23,20 +23,20 @@ Usage: {% include 'patient_session_cleanup_buttons.html' %}
                         class="btn btn-outline-warning btn-sm"
                         data-action="clear-patient-session"
                         title="Clear all patient data from your session">
-                    <i class="fas fa-eraser"></i> Clear Patient Data
+                    <i class="fa-solid fa-eraser"></i> Clear Patient Data
                 </button>
 
                 <button type="button"
                         class="btn btn-outline-danger btn-sm"
                         data-action="emergency-session-cleanup"
                         title="Emergency cleanup - clears ALL session data">
-                    <i class="fas fa-exclamation-triangle"></i> Emergency Cleanup
+                    <i class="fa-solid fa-exclamation-triangle"></i> Emergency Cleanup
                 </button>
             </div>
 
             <div class="mt-2">
                 <small class="text-muted">
-                    <i class="fas fa-info-circle"></i>
+                    <i class="fa-solid fa-info-circle"></i>
                     Emergency cleanup will clear <strong>all</strong> session data and log you out.
                 </small>
             </div>
@@ -47,7 +47,7 @@ Usage: {% include 'patient_session_cleanup_buttons.html' %}
 <!-- Session Activity Monitor (optional) -->
 <div class="patient-session-monitor d-none" id="sessionMonitor">
     <div class="alert alert-info alert-dismissible">
-        <i class="fas fa-clock"></i>
+        <i class="fa-solid fa-clock"></i>
         <span id="sessionActivityText">Patient session active</span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>

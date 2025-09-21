@@ -9,12 +9,12 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="fas fa-file-medical"></i>
+                        <i class="fa-solid fa-file-medical"></i>
                         Select CDA Document for {{ patient_data.given_name }} {{ patient_data.family_name }}
                     </h5>
                     <a href="{{ url('patient_data:patient_details', args=[patient_id]) }}"
                         class="btn btn-secondary btn-sm">
-                        <i class="fas fa-arrow-left"></i> Back to Details
+                        <i class="fa-solid fa-arrow-left"></i> Back to Details
                     </a>
                 </div>
                 <div class="card-body">
@@ -23,7 +23,7 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="patient-info">
-                                <h6><i class="fas fa-user"></i> Patient Information</h6>
+                                <h6><i class="fa-solid fa-user"></i> Patient Information</h6>
                                 <p><strong>Name:</strong> {{ patient_data.given_name }} {{ patient_data.family_name }}
                                 </p>
                                 <p><strong>ID:</strong> {{ patient_data.identifier }}</p>
@@ -33,7 +33,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="document-summary">
-                                <h6><i class="fas fa-chart-pie"></i> Document Summary</h6>
+                                <h6><i class="fa-solid fa-chart-pie"></i> Document Summary</h6>
                                 <p><strong>Total Documents:</strong> {{ document_summary.total_documents }}</p>
                                 <p><strong>L1 Documents:</strong> {{ document_summary.l1_count }}</p>
                                 <p><strong>L3 Documents:</strong> {{ document_summary.l3_count }}</p>
@@ -48,7 +48,7 @@
                         <div class="col-md-6">
                             <div class="card border-primary">
                                 <div class="card-header bg-primary text-white">
-                                    <h6 class="mb-0"><i class="fas fa-file-alt"></i> L1 Documents (Summary)</h6>
+                                    <h6 class="mb-0"><i class="fa-solid fa-file-alt"></i> L1 Documents (Summary)</h6>
                                 </div>
                                 <div class="card-body">
                                     <p class="text-muted">L1 documents provide a standardized patient summary with
@@ -71,7 +71,7 @@
                                                         <br>
                                                         <small class="text-muted">{{ doc.file_path | basename }}</small>
                                                         {% if forloop.counter0 == selected_l1_index %}
-                                                        <br><small class="text-primary"><i class="fas fa-check"></i>
+                                                        <br><small class="text-primary"><i class="fa-solid fa-check"></i>
                                                             Currently Selected</small>
                                                         {% endif %}
                                                     </div>
@@ -87,7 +87,7 @@
                                         {% endfor %}
 
                                         <button type="submit" class="btn btn-primary w-100">
-                                            <i class="fas fa-check"></i> Select L1 Document
+                                            <i class="fa-solid fa-check"></i> Select L1 Document
                                         </button>
                                     </form>
                                 </div>
@@ -99,7 +99,7 @@
                         <div class="col-md-6">
                             <div class="card border-success">
                                 <div class="card-header bg-success text-white">
-                                    <h6 class="mb-0"><i class="fas fa-file-medical"></i> L3 Documents (Detailed)</h6>
+                                    <h6 class="mb-0"><i class="fa-solid fa-file-medical"></i> L3 Documents (Detailed)</h6>
                                 </div>
                                 <div class="card-body">
                                     <p class="text-muted">L3 documents provide comprehensive clinical information with
@@ -122,7 +122,7 @@
                                                         <br>
                                                         <small class="text-muted">{{ doc.file_path | basename }}</small>
                                                         {% if forloop.counter0 == selected_l3_index %}
-                                                        <br><small class="text-success"><i class="fas fa-check"></i>
+                                                        <br><small class="text-success"><i class="fa-solid fa-check"></i>
                                                             Currently Selected</small>
                                                         {% endif %}
                                                     </div>
@@ -138,7 +138,7 @@
                                         {% endfor %}
 
                                         <button type="submit" class="btn btn-success w-100">
-                                            <i class="fas fa-check"></i> Select L3 Document
+                                            <i class="fa-solid fa-check"></i> Select L3 Document
                                         </button>
                                     </form>
                                 </div>
@@ -148,7 +148,7 @@
                     </div>
                     {% else %}
                     <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
+                        <i class="fa-solid fa-exclamation-triangle"></i>
                         No documents available for selection.
                     </div>
                     {% endif %}
@@ -159,7 +159,7 @@
                             <div class="d-flex justify-content-between">
                                 <a href="{{ url('patient_data:patient_details', args=[patient_id]) }}"
                                     class="btn btn-outline-secondary">
-                                    <i class="fas fa-arrow-left"></i> Back to Patient Details
+                                    <i class="fa-solid fa-arrow-left"></i> Back to Patient Details
                                 </a>
 
                                 {% if l1_documents or l3_documents %}
@@ -167,13 +167,13 @@
                                     {% if l1_documents %}
                                     <a href="{{ url('patient_data:patient_cda_view_typed', args=[patient_id, 'L1']) }}"
                                         class="btn btn-outline-primary">
-                                        <i class="fas fa-eye"></i> View Selected L1
+                                        <i class="fa-solid fa-eye"></i> View Selected L1
                                     </a>
                                     {% endif %}
                                     {% if l3_documents %}
                                     <a href="{{ url('patient_data:patient_cda_view_typed', args=[patient_id, 'L3']) }}"
                                         class="btn btn-outline-success">
-                                        <i class="fas fa-eye"></i> View Selected L3
+                                        <i class="fa-solid fa-eye"></i> View Selected L3
                                     </a>
                                     {% endif %}
                                 </div>

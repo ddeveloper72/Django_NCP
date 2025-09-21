@@ -20,7 +20,7 @@
         <!-- Section Header -->
         <div class="card-header bg-dark text-white">
             <h5 class="mb-0">
-                <i class="fas fa-user-md me-2"></i>
+                <i class="fa-solid fa-user-md me-2"></i>
                 {% firstof section.title Surgical Procedures %}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
@@ -53,15 +53,15 @@
                                 <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
                                     {{ header.label }}
                                     {% if header.type == 'procedure' %}
-                                    <i class="fas fa-scalpel ms-1 terminology-indicator" title="Surgical Procedure"></i>
+                                    <i class="fa-solid fa-scalpel ms-1 terminology-indicator" title="Surgical Procedure"></i>
                                     {% elif header.type == 'date' %}
-                                    <i class="fas fa-calendar-alt ms-1 terminology-indicator" title="Surgery Date"></i>
+                                    <i class="fa-solid fa-calendar-alt ms-1 terminology-indicator" title="Surgery Date"></i>
                                     {% elif header.type == 'surgeon' %}
-                                    <i class="fas fa-user-md ms-1 terminology-indicator" title="Surgeon"></i>
+                                    <i class="fa-solid fa-user-md ms-1 terminology-indicator" title="Surgeon"></i>
                                     {% elif header.type == 'outcome' %}
-                                    <i class="fas fa-chart-line ms-1 terminology-indicator" title="Outcome"></i>
+                                    <i class="fa-solid fa-chart-line ms-1 terminology-indicator" title="Outcome"></i>
                                     {% elif header.type == 'complications' %}
-                                    <i class="fas fa-exclamation-triangle ms-1 terminology-indicator"
+                                    <i class="fa-solid fa-exclamation-triangle ms-1 terminology-indicator"
                                         title="Complications"></i>
                                     {% endif %}
                                 </th>
@@ -117,19 +117,19 @@
                     <div class="row text-center">
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-user-md me-1 text-dark"></i>
+                                <i class="fa-solid fa-user-md me-1 text-dark"></i>
                                 <strong>{{ section.clinical_table.rows|length }}</strong> surgical procedures
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-history me-1 text-info"></i>
+                                <i class="fa-solid fa-history me-1 text-info"></i>
                                 Complete surgical history
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-heartbeat me-1 text-success"></i>
+                                <i class="fa-solid fa-heartbeat me-1 text-success"></i>
                                 Post-operative status
                             </small>
                         </div>
@@ -151,7 +151,7 @@
         <!-- Empty Surgeries Section -->
         <div class="card-body text-center py-5">
             <div class="text-success">
-                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                <i class="fa-solid fa-check-circle fa-3x mb-3"></i>
                 <h6 class="text-success">No Surgical History</h6>
                 <p class="text-muted">No surgical procedures reported for this patient</p>
             </div>

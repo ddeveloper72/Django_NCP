@@ -15,7 +15,7 @@
 {% endif %}
 
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h5 class="mb-0"><i class="fas fa-user-md me-2"></i>Healthcare Team</h5>
+  <h5 class="mb-0"><i class="fa-solid fa-user-md me-2"></i>Healthcare Team</h5>
   {% if healthcare_data %}
     <span class="badge bg-light text-dark border">
       {% if healthcare_data.author_hcp %}Primary Author{% endif %}
@@ -31,18 +31,18 @@
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <h6 class="card-title mb-3">
-                    <i class="fas fa-user-md me-2"></i>Document Author
+                    <i class="fa-solid fa-user-md me-2"></i>Document Author
                     <span class="badge bg-light text-dark border ms-2">Primary HCP</span>
                 </h6>
 
                 <div class="row">
                     <div class="col-md-8 mb-3">
                         <label class="form-label text-muted fw-bold mb-2">
-                            <i class="fas fa-id-badge me-1"></i>Healthcare Provider Information
+                            <i class="fa-solid fa-id-badge me-1"></i>Healthcare Provider Information
                         </label>
                         <div class="p-3 bg-light rounded">
                             <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-user text-primary me-2"></i>
+                                <i class="fa-solid fa-user text-primary me-2"></i>
                                 <div>
                                     <span class="fw-medium">
                                         {% if author_hcp.title %}{{ author_hcp.title }} {% endif %}
@@ -54,7 +54,7 @@
 
                             {% if author_hcp.role %}
                                 <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-briefcase text-success me-2"></i>
+                                    <i class="fa-solid fa-briefcase text-success me-2"></i>
                                     <div>
                                         <span class="fw-medium">Role: </span>{{ author_hcp.role }}
                                     </div>
@@ -63,7 +63,7 @@
 
                             {% if author_hcp.specialty %}
                                 <div class="d-flex align-items-center">
-                                    <i class="fas fa-stethoscope text-info me-2"></i>
+                                    <i class="fa-solid fa-stethoscope text-info me-2"></i>
                                     <div>
                                         <span class="fw-medium">Specialty: </span>{{ author_hcp.specialty }}
                                     </div>
@@ -75,11 +75,11 @@
                     <div class="col-md-4 mb-3">
                         {% if author_hcp.organization and author_hcp.organization.name %}
                             <label class="form-label text-muted fw-bold mb-2">
-                                <i class="fas fa-building me-1"></i>Organization
+                                <i class="fa-solid fa-building me-1"></i>Organization
                             </label>
                             <div class="p-3 bg-light rounded">
                                 <div class="d-flex align-items-center">
-                                    <i class="fas fa-hospital text-secondary me-2"></i>
+                                    <i class="fa-solid fa-hospital text-secondary me-2"></i>
                                     <div>
                                         <span class="fw-medium">{{ author_hcp.organization.name }}</span>
                                         {% if author_hcp.organization.organization_type %}
@@ -102,18 +102,18 @@
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <h6 class="card-title mb-3">
-                    <i class="fas fa-certificate me-2"></i>Legal Authenticator
+                    <i class="fa-solid fa-certificate me-2"></i>Legal Authenticator
                     <span class="badge bg-light text-dark border ms-2">Document Validator</span>
                 </h6>
 
                 <div class="row">
                     <div class="col-md-8 mb-3">
                         <label class="form-label text-muted fw-bold mb-2">
-                            <i class="fas fa-id-badge me-1"></i>Healthcare Provider Information
+                            <i class="fa-solid fa-id-badge me-1"></i>Healthcare Provider Information
                         </label>
                         <div class="p-3 bg-light rounded">
                             <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-user text-primary me-2"></i>
+                                <i class="fa-solid fa-user text-primary me-2"></i>
                                 <div>
                                     <span class="fw-medium">
                                         {% if legal_auth.title %}{{ legal_auth.title }} {% endif %}
@@ -125,7 +125,7 @@
 
                             {% if legal_auth.role %}
                                 <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-briefcase text-success me-2"></i>
+                                    <i class="fa-solid fa-briefcase text-success me-2"></i>
                                     <div>
                                         <span class="fw-medium">Role: </span>{{ legal_auth.role }}
                                     </div>
@@ -134,7 +134,7 @@
 
                             {% if legal_auth.specialty %}
                                 <div class="d-flex align-items-center">
-                                    <i class="fas fa-stethoscope text-info me-2"></i>
+                                    <i class="fa-solid fa-stethoscope text-info me-2"></i>
                                     <div>
                                         <span class="fw-medium">Specialty: </span>{{ legal_auth.specialty }}
                                     </div>
@@ -146,11 +146,11 @@
                     <div class="col-md-4 mb-3">
                         {% if legal_auth.organization and legal_auth.organization.name %}
                             <label class="form-label text-muted fw-bold mb-2">
-                                <i class="fas fa-building me-1"></i>Organization
+                                <i class="fa-solid fa-building me-1"></i>Organization
                             </label>
                             <div class="p-3 bg-light rounded">
                                 <div class="d-flex align-items-center">
-                                    <i class="fas fa-hospital text-secondary me-2"></i>
+                                    <i class="fa-solid fa-hospital text-secondary me-2"></i>
                                     <div>
                                         <span class="fw-medium">{{ legal_auth.organization.name }}</span>
                                         {% if legal_auth.organization.organization_type %}
@@ -167,7 +167,7 @@
                 {% if legal_auth.contact_info.addresses or legal_auth.contact_info.telecoms %}
                     <div class="mt-3 pt-3 border-top">
                         <label class="form-label text-muted fw-bold mb-2">
-                            <i class="fas fa-address-book me-1"></i>Contact Information
+                            <i class="fa-solid fa-address-book me-1"></i>Contact Information
                         </label>
                         <div class="row">
                             {% if legal_auth.contact_info.addresses %}
@@ -175,7 +175,7 @@
                                     {% for address in legal_auth.contact_info.addresses %}
                                         <div class="p-2 bg-light rounded mb-2">
                                             <div class="d-flex align-items-start">
-                                                <i class="fas fa-map-marker-alt text-danger me-2 mt-1"></i>
+                                                <i class="fa-solid fa-map-marker-alt text-danger me-2 mt-1"></i>
                                                 <address class="mb-0">
                                                     {% for line in address.streetAddressLine %}{{ line }}<br>{% endfor %}
                                                     {% if address.city %}{{ address.city }}{% endif %}
@@ -194,21 +194,21 @@
                                         <div class="p-2 bg-light rounded mb-2">
                                             {% if 'tel:' in telecom.value %}
                                                 <div class="d-flex align-items-center">
-                                                    <i class="fas fa-phone text-success me-2"></i>
+                                                    <i class="fa-solid fa-phone text-success me-2"></i>
                                                     <div>
                                                         <a href="{{ telecom.value }}" class="text-decoration-none fw-medium">{{ telecom.value|slice:"4:" }}</a>
                                                     </div>
                                                 </div>
                                             {% elif 'mailto:' in telecom.value %}
                                                 <div class="d-flex align-items-center">
-                                                    <i class="fas fa-envelope text-primary me-2"></i>
+                                                    <i class="fa-solid fa-envelope text-primary me-2"></i>
                                                     <div>
                                                         <a href="{{ telecom.value }}" class="text-decoration-none fw-medium">{{ telecom.value|slice:"7:" }}</a>
                                                     </div>
                                                 </div>
                                             {% else %}
                                                 <div class="d-flex align-items-center">
-                                                    <i class="fas fa-address-card text-secondary me-2"></i>
+                                                    <i class="fa-solid fa-address-card text-secondary me-2"></i>
                                                     <div>
                                                         <span class="fw-medium">{{ telecom.value }}</span>
                                                     </div>
@@ -233,18 +233,18 @@
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
                     <h6 class="card-title mb-3">
-                        <i class="fas fa-star me-2"></i>Preferred Healthcare Provider
+                        <i class="fa-solid fa-star me-2"></i>Preferred Healthcare Provider
                         <span class="badge bg-light text-dark border ms-2">Primary Care</span>
                     </h6>
 
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label class="form-label text-muted fw-bold mb-2">
-                                <i class="fas fa-building me-1"></i>Organization Information
+                                <i class="fa-solid fa-building me-1"></i>Organization Information
                             </label>
                             <div class="p-3 bg-light rounded">
                                 <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-hospital text-primary me-2"></i>
+                                    <i class="fa-solid fa-hospital text-primary me-2"></i>
                                     <div>
                                         <span class="fw-medium">{{ preferred_hcp.name|default:"Preferred Healthcare Organization" }}</span>
                                     </div>
@@ -252,7 +252,7 @@
 
                                 {% if preferred_hcp.organization_type %}
                                     <div class="d-flex align-items-center">
-                                        <i class="fas fa-tag text-info me-2"></i>
+                                        <i class="fa-solid fa-tag text-info me-2"></i>
                                         <div>
                                             <span class="fw-medium">Type: </span>{{ preferred_hcp.organization_type }}
                                         </div>
@@ -265,14 +265,14 @@
                         {% if preferred_hcp.addresses or preferred_hcp.telecoms %}
                             <div class="col-md-4 mb-3">
                                 <label class="form-label text-muted fw-bold mb-2">
-                                    <i class="fas fa-address-book me-1"></i>Contact Information
+                                    <i class="fa-solid fa-address-book me-1"></i>Contact Information
                                 </label>
 
                                 {% if preferred_hcp.addresses %}
                                     {% for address in preferred_hcp.addresses %}
                                         <div class="p-2 bg-light rounded mb-2">
                                             <div class="d-flex align-items-start">
-                                                <i class="fas fa-map-marker-alt text-danger me-2 mt-1"></i>
+                                                <i class="fa-solid fa-map-marker-alt text-danger me-2 mt-1"></i>
                                                 <address class="mb-0 small">
                                                     {% for line in address.streetAddressLine %}{{ line }}<br>{% endfor %}
                                                     {% if address.city %}{{ address.city }}{% endif %}
@@ -289,21 +289,21 @@
                                         <div class="p-2 bg-light rounded mb-2">
                                             {% if 'tel:' in telecom.value %}
                                                 <div class="d-flex align-items-center">
-                                                    <i class="fas fa-phone text-success me-2"></i>
+                                                    <i class="fa-solid fa-phone text-success me-2"></i>
                                                     <div>
                                                         <a href="{{ telecom.value }}" class="text-decoration-none fw-medium small">{{ telecom.value|slice:"4:" }}</a>
                                                     </div>
                                                 </div>
                                             {% elif 'mailto:' in telecom.value %}
                                                 <div class="d-flex align-items-center">
-                                                    <i class="fas fa-envelope text-primary me-2"></i>
+                                                    <i class="fa-solid fa-envelope text-primary me-2"></i>
                                                     <div>
                                                         <a href="{{ telecom.value }}" class="text-decoration-none fw-medium small">{{ telecom.value|slice:"7:" }}</a>
                                                     </div>
                                                 </div>
                                             {% else %}
                                                 <div class="d-flex align-items-center">
-                                                    <i class="fas fa-address-card text-secondary me-2"></i>
+                                                    <i class="fa-solid fa-address-card text-secondary me-2"></i>
                                                     <div>
                                                         <span class="fw-medium small">{{ telecom.value }}</span>
                                                     </div>
@@ -325,7 +325,7 @@
 {% if not healthcare_data or not healthcare_data.author_hcp and not healthcare_data.legal_authenticator and not healthcare_data.preferred_hcp %}
     <div class="alert alert-info">
         <div class="d-flex align-items-center">
-            <i class="fas fa-info-circle fa-2x me-3"></i>
+            <i class="fa-solid fa-info-circle fa-2x me-3"></i>
             <div>
                 <h6 class="mb-1">No Healthcare Team Information Available</h6>
                 <p class="mb-0">Healthcare provider details are not available in the current document or have not been extracted from the CDA.</p>

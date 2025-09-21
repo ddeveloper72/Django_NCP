@@ -23,7 +23,7 @@
         <!-- Section Header -->
         <div class="card-header {% if generic_config %}{{ generic_config.header_class|default:'bg-secondary' }}{% else %}{{ section.header_class|default:'bg-secondary' }}{% endif %} text-white">
             <h5 class="mb-0">
-                <i class="{% if generic_config %}{{ generic_config.icon|default:'fas fa-file-medical' }}{% else %}{{ section.icon|default:'fas fa-file-medical' }}{% endif %} me-2"></i>
+                <i class="{% if generic_config %}{{ generic_config.icon|default:'fa-solid fa-file-medical' }}{% else %}{{ section.icon|default:'fa-solid fa-file-medical' }}{% endif %} me-2"></i>
                 {{ section.title|default:'Clinical Section' }}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
@@ -100,7 +100,7 @@
                                         </div>
                                         {% elif cell_data|safe_get:"is_abnormal" %}
                                         <span class="text-danger fw-bold">{{ cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:"N/A" }}</span>
-                                        <i class="fas fa-exclamation-triangle text-danger ms-1"
+                                        <i class="fa-solid fa-exclamation-triangle text-danger ms-1"
                                             title="Abnormal Value"></i>
                                         {% else %}
                                         {{ cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:"N/A" }}
@@ -121,19 +121,19 @@
                     <div class="row text-center">
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="{% if generic_config %}{{ generic_config.icon|default:'fas fa-file-medical' }}{% else %}{{ section.icon|default:'fas fa-file-medical' }}{% endif %} me-1 {% if generic_config %}{{ generic_config.text_class|default:'text-secondary' }}{% else %}{{ section.text_class|default:'text-secondary' }}{% endif %}"></i>
+                                <i class="{% if generic_config %}{{ generic_config.icon|default:'fa-solid fa-file-medical' }}{% else %}{{ section.icon|default:'fa-solid fa-file-medical' }}{% endif %} me-1 {% if generic_config %}{{ generic_config.text_class|default:'text-secondary' }}{% else %}{{ section.text_class|default:'text-secondary' }}{% endif %}"></i>
                                 <strong>{{ section.clinical_table.rows|length }}</strong> {% if generic_config %}{{ generic_config.entries_label|default:'entries' }}{% else %}{{ section.entries_label|default:'entries' }}{% endif %}
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-info-circle me-1 text-info"></i>
+                                <i class="fa-solid fa-info-circle me-1 text-info"></i>
                                 Clinical data available
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-check-circle me-1 text-success"></i>
+                                <i class="fa-solid fa-check-circle me-1 text-success"></i>
                                 Validated content
                             </small>
                         </div>
@@ -156,7 +156,7 @@
             <!-- Empty Section -->
             <div class="card-body text-center py-5">
                 <div class="{% if generic_config %}{{ generic_config.empty_class|default:'text-info' }}{% else %}{{ section.empty_class|default:'text-info' }}{% endif %}">
-                    <i class="{% if generic_config %}{{ generic_config.empty_icon|default:'fas fa-info-circle' }}{% else %}{{ section.empty_icon|default:'fas fa-info-circle' }}{% endif %} fa-3x mb-3"></i>
+                    <i class="{% if generic_config %}{{ generic_config.empty_icon|default:'fa-solid fa-info-circle' }}{% else %}{{ section.empty_icon|default:'fa-solid fa-info-circle' }}{% endif %} fa-3x mb-3"></i>
                     <h6 class="{% if generic_config %}{{ generic_config.empty_class|default:'text-info' }}{% else %}{{ section.empty_class|default:'text-info' }}{% endif %}">
                         {% if generic_config %}{{ generic_config.empty_title|default:'No Data Available' }}{% else %}{{ section.empty_title|default:'No Data Available' }}{% endif %}</h6>
                     <p class="text-muted">{% if generic_config %}{{ generic_config.empty_message|default:'No entries available for this section' }}{% else %}{{ section.empty_message|default:'No entries available for this section' }}{% endif %}</p>

@@ -3,7 +3,7 @@
 <div class="demographics-grid">
     <!-- Basic Information -->
     <div class="demo-card">
-        <h5><i class="fas fa-user"></i> Basic Information</h5>
+        <h5><i class="fa-solid fa-user"></i> Basic Information</h5>
         {% if data.name %}
         <div class="info-item">
             <span class="info-label">Full Name</span>
@@ -45,7 +45,7 @@
 
     <!-- Contact Information -->
     <div class="demo-card">
-        <h5><i class="fas fa-address-book"></i> Contact Information</h5>
+        <h5><i class="fa-solid fa-address-book"></i> Contact Information</h5>
         {% if data.telecom %}
         {% for contact in data.telecom %}
         <div class="info-item">
@@ -62,7 +62,7 @@
 
     <!-- Address Information -->
     <div class="demo-card">
-        <h5><i class="fas fa-map-marker-alt"></i> Address</h5>
+        <h5><i class="fa-solid fa-map-marker-alt"></i> Address</h5>
         {% if data.address %}
         {% for addr in data.address %}
         <div class="info-item">
@@ -88,7 +88,7 @@
     <!-- Identifiers -->
     {% if data.identifier %}
     <div class="demo-card">
-        <h5><i class="fas fa-id-card"></i> Identifiers</h5>
+        <h5><i class="fa-solid fa-id-card"></i> Identifiers</h5>
         {% for identifier in data.identifier %}
         <div class="info-item">
             <span class="info-label">
@@ -116,7 +116,7 @@
     <!-- Communication -->
     {% if data.communication %}
     <div class="demo-card">
-        <h5><i class="fas fa-language"></i> Communication</h5>
+        <h5><i class="fa-solid fa-language"></i> Communication</h5>
         {% for comm in data.communication %}
         <div class="info-item">
             <span class="info-label">Language</span>
@@ -132,7 +132,7 @@
     <!-- Additional Demographics -->
     {% if data.deceased_boolean is not None or data.deceased_datetime or data.multiple_birth_boolean is not None %}
     <div class="demo-card">
-        <h5><i class="fas fa-info"></i> Additional Information</h5>
+        <h5><i class="fa-solid fa-info"></i> Additional Information</h5>
 
         {% if data.deceased_boolean is not None %}
         <div class="info-item">

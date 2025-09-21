@@ -21,7 +21,7 @@
         <!-- Section Header -->
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">
-                <i class="fas fa-pills me-2"></i>
+                <i class="fa-solid fa-pills me-2"></i>
                 {% firstof section.title Medication Summary %}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
@@ -57,16 +57,16 @@
                                         <div class="th-content">
                                             <span class="th-label">{{ header.label }}</span>
                                             {% if header.type == 'medication' %}
-                                            <i class="fas fa-pills ms-1 terminology-indicator" title="Medication"></i>
+                                            <i class="fa-solid fa-pills ms-1 terminology-indicator" title="Medication"></i>
                                             {% elif header.type == 'dosage' %}
-                                            <i class="fas fa-balance-scale ms-1 terminology-indicator" title="Dosage"></i>
+                                            <i class="fa-solid fa-balance-scale ms-1 terminology-indicator" title="Dosage"></i>
                                             {% elif header.type == 'frequency' %}
-                                    <i class="fas fa-clock ms-1 terminology-indicator" title="Frequency"></i>
+                                    <i class="fa-solid fa-clock ms-1 terminology-indicator" title="Frequency"></i>
                                     {% elif header.type == 'route' %}
-                                    <i class="fas fa-syringe ms-1 terminology-indicator"
+                                    <i class="fa-solid fa-syringe ms-1 terminology-indicator"
                                         title="Route of Administration"></i>
                                     {% elif header.type == 'status' %}
-                                    <i class="fas fa-heartbeat ms-1 terminology-indicator"
+                                    <i class="fa-solid fa-heartbeat ms-1 terminology-indicator"
                                         title="Medication Status"></i>
                                     {% endif %}
                                 </th>
@@ -123,19 +123,19 @@
                     <div class="row text-center">
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-pills me-1 text-primary"></i>
+                                <i class="fa-solid fa-pills me-1 text-primary"></i>
                                 <strong>{{ section.clinical_table.rows|length }}</strong> active medications
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-exclamation-triangle me-1 text-warning"></i>
+                                <i class="fa-solid fa-exclamation-triangle me-1 text-warning"></i>
                                 Check drug interactions
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-calendar-check me-1 text-success"></i>
+                                <i class="fa-solid fa-calendar-check me-1 text-success"></i>
                                 Adherence monitoring
                             </small>
                         </div>
@@ -157,7 +157,7 @@
         <!-- Empty Medications Section -->
         <div class="card-body text-center py-5">
             <div class="text-info">
-                <i class="fas fa-info-circle fa-3x mb-3"></i>
+                <i class="fa-solid fa-info-circle fa-3x mb-3"></i>
                 <h6 class="text-info">No Current Medications</h6>
                 <p class="text-muted">No active medications reported for this patient</p>
             </div>

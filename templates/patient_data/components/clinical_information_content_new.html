@@ -10,17 +10,17 @@
     <div class="clinical-master-controls mb-3 d-flex justify-content-between align-items-center">
         <div class="control-buttons">
             <button type="button" class="btn btn-outline-primary btn-sm me-2" id="expandAllClinical">
-                <i class="fas fa-expand-arrows-alt me-1"></i>
+                <i class="fa-solid fa-expand-arrows-alt me-1"></i>
                 Expand All
             </button>
             <button type="button" class="btn btn-outline-secondary btn-sm" id="collapseAllClinical">
-                <i class="fas fa-compress-arrows-alt me-1"></i>
+                <i class="fa-solid fa-compress-arrows-alt me-1"></i>
                 Collapse All
             </button>
         </div>
         <div class="section-count text-muted">
             <small>
-                <i class="fas fa-info-circle me-1"></i>
+                <i class="fa-solid fa-info-circle me-1"></i>
                 Clinical sections can be expanded/collapsed independently
             </small>
         </div>
@@ -37,7 +37,7 @@
                         onclick="toggleSection('collapse-{{ section.code|default:forloop.counter }}')"
                         aria-expanded="true"
                         aria-controls="collapse-{{ section.code|default:forloop.counter }}">
-                    <i class="fas fa-stethoscope me-2 text-primary"></i>
+                    <i class="fa-solid fa-stethoscope me-2 text-primary"></i>
                     <strong>{% firstof section.title section.section_title "Clinical Section" %}</strong>
                     {% if section.code %}
                     <span class="badge bg-primary ms-2">{{ section.code }}</span>
@@ -66,7 +66,7 @@
                         onclick="toggleSection('collapseOtherClinical')"
                         aria-expanded="true"
                         aria-controls="collapseOtherClinical">
-                    <i class="fas fa-file-medical me-2 text-dark"></i>
+                    <i class="fa-solid fa-file-medical me-2 text-dark"></i>
                     <strong>Other Clinical Information</strong>
                     <span class="badge bg-dark ms-2">{{ clinical_sections|length }} section(s)</span>
                 </button>
@@ -78,7 +78,7 @@
                     {% for section in clinical_sections %}
                     <div class="clinical-section-item mb-4">
                         <h5 class="text-dark mb-3">
-                            <i class="fas fa-file-alt me-2"></i>
+                            <i class="fa-solid fa-file-alt me-2"></i>
                             {{ section.section_title }}
                         </h5>
 
@@ -100,7 +100,7 @@
                             </div>
                         {% else %}
                             <div class="text-muted">
-                                <i class="fas fa-info-circle me-1"></i>
+                                <i class="fa-solid fa-info-circle me-1"></i>
                                 No detailed information available for this section.
                             </div>
                         {% endif %}
@@ -159,7 +159,7 @@
     <!-- No Clinical Data Available -->
     <div class="no-clinical-data text-center py-5">
         <div class="text-muted">
-            <i class="fas fa-notes-medical fa-3x mb-3 opacity-50"></i>
+            <i class="fa-solid fa-notes-medical fa-3x mb-3 opacity-50"></i>
             <h5 class="text-muted">No Clinical Information Available</h5>
             <p class="mb-0">No clinical sections were found in the patient's medical record.</p>
         </div>

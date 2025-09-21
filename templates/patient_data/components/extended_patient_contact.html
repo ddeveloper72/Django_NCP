@@ -13,7 +13,7 @@
                     <div class="col">
                         <div class="d-flex align-items-center">
                             <div class="icon-circle bg-white bg-opacity-20 rounded-circle p-2 me-3">
-                                <i class="fas fa-user fa-lg text-white"></i>
+                                <i class="fa-solid fa-user fa-lg text-white"></i>
                             </div>
                             <div>
                                 <h5 class="card-title mb-1 fw-bold">Patient Contact Information</h5>
@@ -25,13 +25,13 @@
                         <div class="d-flex gap-2">
                             {% if contact_data.addresses %}
                             <span class="badge bg-white bg-opacity-20 text-white">
-                                <i class="fas fa-map-marker-alt me-1"></i>
+                                <i class="fa-solid fa-map-marker-alt me-1"></i>
                                 {{ contact_data.addresses|length }} Address{{ contact_data.addresses|length|pluralize:"es" }}
                             </span>
                             {% endif %}
                             {% if contact_data.telecoms %}
                             <span class="badge bg-white bg-opacity-20 text-white">
-                                <i class="fas fa-phone me-1"></i>
+                                <i class="fa-solid fa-phone me-1"></i>
                                 {{ contact_data.telecoms|length }} Contact{{ contact_data.telecoms|length|pluralize }}
                             </span>
                             {% endif %}
@@ -51,7 +51,7 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <h6 class="text-primary fw-bold mb-0 d-flex align-items-center">
                                         <div class="icon-circle bg-danger bg-opacity-10 rounded-circle p-2 me-3">
-                                            <i class="fas fa-map-marker-alt text-danger"></i>
+                                            <i class="fa-solid fa-map-marker-alt text-danger"></i>
                                         </div>
                                         Patient Address Information
                                     </h6>
@@ -72,7 +72,7 @@
                                         {% if address.street %}
                                         <div class="address-line d-flex align-items-start mb-3">
                                             <div class="icon-wrapper me-3">
-                                                <i class="fas fa-road text-muted fa-fw"></i>
+                                                <i class="fa-solid fa-road text-muted fa-fw"></i>
                                             </div>
                                             <div class="address-text">
                                                 <span class="fw-semibold text-dark">{{ address.street }}</span>
@@ -87,7 +87,7 @@
                                             {% if address.city %}
                                             <div class="col-md-6">
                                                 <div class="info-item d-flex align-items-center p-2 rounded bg-white">
-                                                    <i class="fas fa-city text-info me-2 fa-fw"></i>
+                                                    <i class="fa-solid fa-city text-info me-2 fa-fw"></i>
                                                     <span class="text-dark">{{ address.city }}</span>
                                                 </div>
                                             </div>
@@ -96,7 +96,7 @@
                                             {% if address.postal_code %}
                                             <div class="col-md-6">
                                                 <div class="info-item d-flex align-items-center p-2 rounded bg-white">
-                                                    <i class="fas fa-mail-bulk text-secondary me-2 fa-fw"></i>
+                                                    <i class="fa-solid fa-mail-bulk text-secondary me-2 fa-fw"></i>
                                                     <span class="text-dark">{{ address.postal_code }}</span>
                                                 </div>
                                             </div>
@@ -105,7 +105,7 @@
                                             {% if address.state %}
                                             <div class="col-md-6">
                                                 <div class="info-item d-flex align-items-center p-2 rounded bg-white">
-                                                    <i class="fas fa-map text-success me-2 fa-fw"></i>
+                                                    <i class="fa-solid fa-map text-success me-2 fa-fw"></i>
                                                     <span class="text-dark">{{ address.state }}</span>
                                                 </div>
                                             </div>
@@ -114,7 +114,7 @@
                                             {% if address.country %}
                                             <div class="col-md-6">
                                                 <div class="info-item d-flex align-items-center p-2 rounded bg-white">
-                                                    <i class="fas fa-flag text-warning me-2 fa-fw"></i>
+                                                    <i class="fa-solid fa-flag text-warning me-2 fa-fw"></i>
                                                     <span class="fw-semibold text-dark">{{ address.country }}</span>
                                                 </div>
                                             </div>
@@ -135,7 +135,7 @@
                             <div class="section-header mb-4">
                                 <h6 class="text-success fw-bold mb-0 d-flex align-items-center">
                                     <div class="icon-circle bg-success bg-opacity-10 rounded-circle p-2 me-3">
-                                        <i class="fas fa-phone text-success"></i>
+                                        <i class="fa-solid fa-phone text-success"></i>
                                     </div>
                                     Patient Contact Methods
                                 </h6>
@@ -147,7 +147,7 @@
                                     {% if telecom.system == 'phone' or 'tel:' in telecom.value %}
                                     <div class="method-header d-flex align-items-center mb-3">
                                         <div class="icon-circle bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3 contact-icon">
-                                            <i class="fas fa-phone"></i>
+                                            <i class="fa-solid fa-phone"></i>
                                         </div>
                                         <div class="method-info flex-grow-1">
                                             <div class="method-type fw-bold text-success">Phone</div>
@@ -156,7 +156,7 @@
                                     </div>
                                     <div class="method-value ms-5">
                                         <a href="tel:{{ telecom.value }}" class="btn btn-outline-success btn-sm w-100 d-flex align-items-center justify-content-center">
-                                            <i class="fas fa-phone me-2"></i>
+                                            <i class="fa-solid fa-phone me-2"></i>
                                             {{ telecom.value }}
                                         </a>
                                     </div>
@@ -164,7 +164,7 @@
                                     {% elif telecom.system == 'email' or 'mailto:' in telecom.value %}
                                     <div class="method-header d-flex align-items-center mb-3">
                                         <div class="icon-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 contact-icon">
-                                            <i class="fas fa-envelope"></i>
+                                            <i class="fa-solid fa-envelope"></i>
                                         </div>
                                         <div class="method-info flex-grow-1">
                                             <div class="method-type fw-bold text-primary">Email</div>
@@ -173,7 +173,7 @@
                                     </div>
                                     <div class="method-value ms-5">
                                         <a href="mailto:{{ telecom.value }}" class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center">
-                                            <i class="fas fa-envelope me-2"></i>
+                                            <i class="fa-solid fa-envelope me-2"></i>
                                             {{ telecom.value }}
                                         </a>
                                     </div>
@@ -181,7 +181,7 @@
                                     {% else %}
                                     <div class="method-header d-flex align-items-center mb-3">
                                         <div class="icon-circle bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3 contact-icon">
-                                            <i class="fas fa-address-card"></i>
+                                            <i class="fa-solid fa-address-card"></i>
                                         </div>
                                         <div class="method-info flex-grow-1">
                                             <div class="method-type fw-bold text-secondary">Contact</div>
@@ -209,7 +209,7 @@
 <div class="row g-4 mb-4">
     <div class="col-12">
         <div class="alert alert-info d-flex align-items-center">
-            <i class="fas fa-info-circle fa-2x me-3 text-info"></i>
+            <i class="fa-solid fa-info-circle fa-2x me-3 text-info"></i>
             <div>
                 <h6 class="alert-heading mb-1">No Contact Information Available</h6>
                 <p class="mb-0">Contact information not available for this patient</p>
@@ -232,7 +232,7 @@
                             <div class="col">
                                 <div class="d-flex align-items-center">
                                     <div class="icon-circle bg-white bg-opacity-20 rounded-circle p-2 me-3">
-                                        <i class="fas fa-users fa-lg text-white"></i>
+                                        <i class="fa-solid fa-users fa-lg text-white"></i>
                                     </div>
                                     <div>
                                         <h5 class="card-title mb-1 fw-bold">
@@ -250,13 +250,13 @@
                                 <div class="d-flex gap-2">
                                     {% if guardian.contact_info.addresses %}
                                     <span class="badge bg-white bg-opacity-20 text-white">
-                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        <i class="fa-solid fa-map-marker-alt me-1"></i>
                                         {{ guardian.contact_info.addresses|length }} Address{{ guardian.contact_info.addresses|length|pluralize:"es" }}
                                     </span>
                                     {% endif %}
                                     {% if guardian.contact_info.telecoms %}
                                     <span class="badge bg-white bg-opacity-20 text-white">
-                                        <i class="fas fa-phone me-1"></i>
+                                        <i class="fa-solid fa-phone me-1"></i>
                                         {{ guardian.contact_info.telecoms|length }} Contact{{ guardian.contact_info.telecoms|length|pluralize }}
                                     </span>
                                     {% endif %}
@@ -277,7 +277,7 @@
                                             <div class="d-flex align-items-center justify-content-between">
                                                 <h6 class="text-info fw-bold mb-0 d-flex align-items-center">
                                                     <div class="icon-circle bg-danger bg-opacity-10 rounded-circle p-2 me-3">
-                                                        <i class="fas fa-map-marker-alt text-danger"></i>
+                                                        <i class="fa-solid fa-map-marker-alt text-danger"></i>
                                                     </div>
                                                     Guardian Address Information
                                                 </h6>
@@ -298,7 +298,7 @@
                                                     {% if address.street %}
                                                     <div class="address-line d-flex align-items-start mb-3">
                                                         <div class="icon-wrapper me-3">
-                                                            <i class="fas fa-road text-muted fa-fw"></i>
+                                                            <i class="fa-solid fa-road text-muted fa-fw"></i>
                                                         </div>
                                                         <div class="address-text">
                                                             <span class="fw-semibold text-dark">{{ address.street }}</span>
@@ -313,7 +313,7 @@
                                                         {% if address.city %}
                                                         <div class="col-md-6">
                                                             <div class="info-item d-flex align-items-center p-2 rounded bg-white">
-                                                                <i class="fas fa-city text-info me-2 fa-fw"></i>
+                                                                <i class="fa-solid fa-city text-info me-2 fa-fw"></i>
                                                                 <span class="text-dark">{{ address.city }}</span>
                                                             </div>
                                                         </div>
@@ -322,7 +322,7 @@
                                                         {% if address.postal_code %}
                                                         <div class="col-md-6">
                                                             <div class="info-item d-flex align-items-center p-2 rounded bg-white">
-                                                                <i class="fas fa-mail-bulk text-secondary me-2 fa-fw"></i>
+                                                                <i class="fa-solid fa-mail-bulk text-secondary me-2 fa-fw"></i>
                                                                 <span class="text-dark">{{ address.postal_code }}</span>
                                                             </div>
                                                         </div>
@@ -331,7 +331,7 @@
                                                         {% if address.state %}
                                                         <div class="col-md-6">
                                                             <div class="info-item d-flex align-items-center p-2 rounded bg-white">
-                                                                <i class="fas fa-map text-success me-2 fa-fw"></i>
+                                                                <i class="fa-solid fa-map text-success me-2 fa-fw"></i>
                                                                 <span class="text-dark">{{ address.state }}</span>
                                                             </div>
                                                         </div>
@@ -340,7 +340,7 @@
                                                         {% if address.country %}
                                                         <div class="col-md-6">
                                                             <div class="info-item d-flex align-items-center p-2 rounded bg-white">
-                                                                <i class="fas fa-flag text-warning me-2 fa-fw"></i>
+                                                                <i class="fa-solid fa-flag text-warning me-2 fa-fw"></i>
                                                                 <span class="fw-semibold text-dark">{{ address.country }}</span>
                                                             </div>
                                                         </div>
@@ -361,7 +361,7 @@
                                         <div class="section-header mb-4">
                                             <h6 class="text-success fw-bold mb-0 d-flex align-items-center">
                                                 <div class="icon-circle bg-success bg-opacity-10 rounded-circle p-2 me-3">
-                                                    <i class="fas fa-phone text-success"></i>
+                                                    <i class="fa-solid fa-phone text-success"></i>
                                                 </div>
                                                 Guardian Contact Methods
                                             </h6>
@@ -373,7 +373,7 @@
                                                 {% if telecom.system == 'phone' or 'tel:' in telecom.value %}
                                                 <div class="method-header d-flex align-items-center mb-3">
                                                     <div class="icon-circle bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3 contact-icon">
-                                                        <i class="fas fa-phone"></i>
+                                                        <i class="fa-solid fa-phone"></i>
                                                     </div>
                                                     <div class="method-info flex-grow-1">
                                                         <div class="method-type fw-bold text-success">Phone</div>
@@ -382,7 +382,7 @@
                                                 </div>
                                                 <div class="method-value ms-5">
                                                     <a href="tel:{{ telecom.value }}" class="btn btn-outline-success btn-sm w-100 d-flex align-items-center justify-content-center">
-                                                        <i class="fas fa-phone me-2"></i>
+                                                        <i class="fa-solid fa-phone me-2"></i>
                                                         {{ telecom.value }}
                                                     </a>
                                                 </div>
@@ -390,7 +390,7 @@
                                                 {% elif telecom.system == 'email' or 'mailto:' in telecom.value %}
                                                 <div class="method-header d-flex align-items-center mb-3">
                                                     <div class="icon-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 contact-icon">
-                                                        <i class="fas fa-envelope"></i>
+                                                        <i class="fa-solid fa-envelope"></i>
                                                     </div>
                                                     <div class="method-info flex-grow-1">
                                                         <div class="method-type fw-bold text-primary">Email</div>
@@ -399,7 +399,7 @@
                                                 </div>
                                                 <div class="method-value ms-5">
                                                     <a href="mailto:{{ telecom.value }}" class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center">
-                                                        <i class="fas fa-envelope me-2"></i>
+                                                        <i class="fa-solid fa-envelope me-2"></i>
                                                         {{ telecom.value }}
                                                     </a>
                                                 </div>
@@ -407,7 +407,7 @@
                                                 {% else %}
                                                 <div class="method-header d-flex align-items-center mb-3">
                                                     <div class="icon-circle bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3 contact-icon">
-                                                        <i class="fas fa-address-card"></i>
+                                                        <i class="fa-solid fa-address-card"></i>
                                                     </div>
                                                     <div class="method-info flex-grow-1">
                                                         <div class="method-type fw-bold text-secondary">Contact</div>
@@ -430,7 +430,7 @@
                         {% else %}
                             <div class="p-4 text-center">
                                 <div class="text-muted">
-                                    <i class="fas fa-info-circle fa-3x mb-3"></i>
+                                    <i class="fa-solid fa-info-circle fa-3x mb-3"></i>
                                     <h6>No Contact Information Available</h6>
                                     <p class="mb-0">Contact information not available for guardian</p>
                                 </div>
@@ -450,7 +450,7 @@
         {% if not administrative_data.guardian or not administrative_data.guardian.contact_info.addresses and not administrative_data.guardian.contact_info.telecoms %}
             <div class="alert alert-info">
                 <div class="d-flex align-items-center">
-                    <i class="fas fa-info-circle fa-2x me-3"></i>
+                    <i class="fa-solid fa-info-circle fa-2x me-3"></i>
                     <div>
                         <h6 class="mb-1">No Contact Information Available</h6>
                         <p class="mb-0">Contact details are not available in the current document or have not been extracted from the CDA.</p>

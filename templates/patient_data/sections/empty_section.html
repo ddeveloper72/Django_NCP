@@ -26,7 +26,7 @@
                         {% for field_name, field_data in first_entry.fields|dict_items %}
                         <th>
                             {% if 'code' in field_name|lower %}
-                            <i class="fas fa-code me-1"></i>
+                            <i class="fa-solid fa-code me-1"></i>
                             {% endif %}
                             {{ field_name|default:"Field" }}
                         </th>
@@ -58,7 +58,7 @@
                 <div class="row text-center">
                     <div class="col-12">
                         <small class="text-muted">
-                            <i class="fas fa-table me-1"></i>
+                            <i class="fa-solid fa-table me-1"></i>
                             <strong>{{ section.structured_data|length }}</strong> entries processed
                         </small>
                     </div>

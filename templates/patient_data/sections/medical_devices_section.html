@@ -19,7 +19,7 @@
         <!-- Section Header -->
         <div class="card-header bg-info text-white">
             <h5 class="mb-0">
-                <i class="fas fa-cogs me-2"></i>
+                <i class="fa-solid fa-cogs me-2"></i>
                 {% firstof section.title Medical Devices %}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
@@ -52,15 +52,15 @@
                                 <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
                                     {{ header.label }}
                                     {% if header.type == 'device' %}
-                                    <i class="fas fa-microchip ms-1 terminology-indicator" title="Medical Device"></i>
+                                    <i class="fa-solid fa-microchip ms-1 terminology-indicator" title="Medical Device"></i>
                                     {% elif header.type == 'type' %}
-                                    <i class="fas fa-cogs ms-1 terminology-indicator" title="Device Type"></i>
+                                    <i class="fa-solid fa-cogs ms-1 terminology-indicator" title="Device Type"></i>
                                     {% elif header.type == 'status' %}
-                                    <i class="fas fa-power-off ms-1 terminology-indicator" title="Device Status"></i>
+                                    <i class="fa-solid fa-power-off ms-1 terminology-indicator" title="Device Status"></i>
                                     {% elif header.type == 'implant_date' %}
-                                    <i class="fas fa-calendar-plus ms-1 terminology-indicator" title="Implant Date"></i>
+                                    <i class="fa-solid fa-calendar-plus ms-1 terminology-indicator" title="Implant Date"></i>
                                     {% elif header.type == 'manufacturer' %}
-                                    <i class="fas fa-industry ms-1 terminology-indicator" title="Manufacturer"></i>
+                                    <i class="fa-solid fa-industry ms-1 terminology-indicator" title="Manufacturer"></i>
                                     {% endif %}
                                 </th>
                                 {% endfor %}
@@ -115,19 +115,19 @@
                     <div class="row text-center">
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-cogs me-1 text-info"></i>
+                                <i class="fa-solid fa-cogs me-1 text-info"></i>
                                 <strong>{{ section.clinical_table.rows|length }}</strong> medical devices
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-shield-alt me-1 text-success"></i>
+                                <i class="fa-solid fa-shield-alt me-1 text-success"></i>
                                 Device safety monitoring
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-tools me-1 text-warning"></i>
+                                <i class="fa-solid fa-tools me-1 text-warning"></i>
                                 Maintenance scheduled
                             </small>
                         </div>
@@ -149,7 +149,7 @@
         <!-- Empty Medical Devices Section -->
         <div class="card-body text-center py-5">
             <div class="text-success">
-                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                <i class="fa-solid fa-check-circle fa-3x mb-3"></i>
                 <h6 class="text-success">No Medical Devices</h6>
                 <p class="text-muted">No medical devices reported for this patient</p>
             </div>

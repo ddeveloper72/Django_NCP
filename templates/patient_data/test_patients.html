@@ -8,16 +8,16 @@
     <ol class="breadcrumb breadcrumb-enhanced">
         <li class="breadcrumb-item">
             <a href="/" class="breadcrumb-link">
-                <i class="fas fa-home"></i> Home
+                <i class="fa-solid fa-home"></i> Home
             </a>
         </li>
         <li class="breadcrumb-item">
             <a href="{% url 'patient_data:patient_data_form' %}" class="breadcrumb-link">
-                <i class="fas fa-users"></i> Patient Data
+                <i class="fa-solid fa-users"></i> Patient Data
             </a>
         </li>
         <li class="breadcrumb-item active" aria-current="page">
-            <i class="fas fa-vial"></i> Test Patients
+            <i class="fa-solid fa-vial"></i> Test Patients
         </li>
     </ol>
 </nav>
@@ -30,7 +30,7 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">
-                        <i class="fas fa-vial"></i> Test Patients - CDA Document Index
+                        <i class="fa-solid fa-vial"></i> Test Patients - CDA Document Index
                     </h4>
                     <p class="mb-0 mt-2">Available test patients from indexed CDA documents</p>
                 </div>
@@ -41,7 +41,7 @@
                             <div class="card border-info">
                                 <div class="card-body text-center">
                                     <h5 class="card-title text-info">
-                                        <i class="fas fa-users"></i> Total Patients
+                                        <i class="fa-solid fa-users"></i> Total Patients
                                     </h5>
                                     <h2 class="text-info">{{ total_patients }}</h2>
                                 </div>
@@ -51,7 +51,7 @@
                             <div class="card border-success">
                                 <div class="card-body text-center">
                                     <h5 class="card-title text-success">
-                                        <i class="fas fa-globe"></i> Countries
+                                        <i class="fa-solid fa-globe"></i> Countries
                                     </h5>
                                     <h2 class="text-success">{{ total_countries }}</h2>
                                 </div>
@@ -61,7 +61,7 @@
                             <div class="card border-warning">
                                 <div class="card-body text-center">
                                     <h5 class="card-title text-warning">
-                                        <i class="fas fa-file-medical"></i> Status
+                                        <i class="fa-solid fa-file-medical"></i> Status
                                     </h5>
                                     <h6 class="text-warning">Test Data</h6>
                                 </div>
@@ -74,7 +74,7 @@
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
                                     <h5 class="mb-0">
-                                        <i class="fas fa-flag"></i> {{ country }}
+                                        <i class="fa-solid fa-flag"></i> {{ country }}
                                         <span class="badge bg-primary ms-2">{{ patients|length }} patient{{ patients|length|pluralize }}</span>
                                     </h5>
                                 </div>
@@ -85,7 +85,7 @@
                                                 <div class="card border-secondary h-100">
                                                     <div class="card-body">
                                                         <h6 class="card-title">
-                                                            <i class="fas fa-user"></i>
+                                                            <i class="fa-solid fa-user"></i>
                                                             {{ patient.family_name }}, {{ patient.given_name }}
                                                         </h6>
                                                         <p class="card-text">
@@ -99,7 +99,7 @@
                                                         <div class="btn-group w-100" role="group">
                                                             <a href="{% url 'patient_data:direct_patient' patient_id=patient.patient_id %}"
                                                                class="btn btn-outline-primary btn-sm">
-                                                                <i class="fas fa-eye"></i> View Details
+                                                                <i class="fa-solid fa-eye"></i> View Details
                                                             </a>
                                                         </div>
                                                     </div>
@@ -113,13 +113,13 @@
                     {% else %}
                         <div class="alert alert-warning" role="alert">
                             <h4 class="alert-heading">
-                                <i class="fas fa-exclamation-triangle"></i> No Test Patients Found
+                                <i class="fa-solid fa-exclamation-triangle"></i> No Test Patients Found
                             </h4>
                             <p>No test patients are currently available in the CDA document index.</p>
                             <hr>
                             <p class="mb-0">
                                 <a href="{% url 'patient_data:refresh_cda_index' %}" class="btn btn-outline-warning">
-                                    <i class="fas fa-sync"></i> Refresh Index
+                                    <i class="fa-solid fa-sync"></i> Refresh Index
                                 </a>
                             </p>
                         </div>
@@ -130,15 +130,15 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Back to Patient Data
+                                <i class="fa-solid fa-arrow-left"></i> Back to Patient Data
                             </a>
                         </div>
                         <div>
                             <a href="{% url 'patient_data:refresh_cda_index' %}" class="btn btn-outline-primary">
-                                <i class="fas fa-sync"></i> Refresh Index
+                                <i class="fa-solid fa-sync"></i> Refresh Index
                             </a>
                             <a href="{% url 'patient_data:debug_cda_index' %}" class="btn btn-outline-info">
-                                <i class="fas fa-bug"></i> Debug Index
+                                <i class="fa-solid fa-bug"></i> Debug Index
                             </a>
                         </div>
                     </div>

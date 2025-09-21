@@ -547,7 +547,7 @@ main {
 // ----------------------------------------------------------------------------
 // Force white icons on colored backgrounds
 .card-header i,
-.card-header .fas,
+.card-header .fa-solid,
 .card-header .far,
 .card-header .fal,
 .card-header .fab,
@@ -569,7 +569,7 @@ main {
 }
 
 .card-header:hover i,
-.card-header:hover .fas,
+.card-header:hover .fa-solid,
 .card-header:hover .far,
 .card-header:hover .fal,
 .card-header:hover .fab,

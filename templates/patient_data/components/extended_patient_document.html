@@ -22,7 +22,7 @@
 {% endif %}
 
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h5 class="mb-0"><i class="fas fa-file-medical-alt me-2 text-primary"></i>Document Information</h5>
+  <h5 class="mb-0"><i class="fa-solid fa-file-medical-alt me-2 text-primary"></i>Document Information</h5>
   <span class="badge bg-light text-dark border">
     Patient Summary (PS) - European eHealth Standard
   </span>
@@ -261,7 +261,7 @@
     <!-- Fallback content when no document data is available -->
     <div class="alert alert-info border-0">
         <div class="d-flex align-items-center">
-            <i class="fas fa-info-circle fa-2x me-3 text-info"></i>
+            <i class="fa-solid fa-info-circle fa-2x me-3 text-info"></i>
             <div>
                 <h6 class="mb-1">Limited Document Information</h6>
                 <p class="mb-0">Document metadata is not available or has not been extracted from the current CDA document.</p>
@@ -274,7 +274,7 @@
 {% if not document_data or not document_data.document_creation_date and not document_data.custodian_organization %}
 <div class="alert alert-info">
     <div class="d-flex align-items-center">
-        <i class="fas fa-info-circle fa-2x me-3"></i>
+        <i class="fa-solid fa-info-circle fa-2x me-3"></i>
         <div>
             <h6 class="mb-1">Limited Document Information</h6>
             <p class="mb-0">Document metadata is not available or has not been extracted from the current CDA document.</p>
@@ -286,7 +286,7 @@
 <!-- No Document Information Message -->
 {% if not document_data %}
     <div class="empty-state text-center py-4">
-        <i class="fas fa-file-medical fa-3x text-muted mb-3"></i>
+        <i class="fa-solid fa-file-medical fa-3x text-muted mb-3"></i>
         <h6>No Document Information</h6>
         <p class="text-muted">No document metadata is available.</p>
     </div>

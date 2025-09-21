@@ -20,7 +20,7 @@ separately to maintain clinical context and relationship clarity.
         <div class="col-12">
             <div class="admin-contact-card h-100">
                 <div class="admin-card-header">
-                    <i class="fas fa-address-card me-2"></i>
+                    <i class="fa-solid fa-address-card me-2"></i>
                     <strong>{{ ui_labels.sections.contact_information|default:"Contact Information" }}</strong>
                 </div>
                 <div class="admin-card-content">
@@ -29,7 +29,7 @@ separately to maintain clinical context and relationship clarity.
                         {% for address in contact_data.addresses %}
                         <div class="admin-info-row">
                             <div class="admin-label">
-                                <i class="fas fa-map-marker-alt"></i> Address:
+                                <i class="fa-solid fa-map-marker-alt"></i> Address:
                             </div>
                             <div class="admin-value">
                                 {% if address.street_lines %}
@@ -48,7 +48,7 @@ separately to maintain clinical context and relationship clarity.
                         {% for address in administrative_data.patient_contact_info.addresses %}
                         <div class="admin-info-row">
                             <div class="admin-label">
-                                <i class="fas fa-map-marker-alt"></i> Address:
+                                <i class="fa-solid fa-map-marker-alt"></i> Address:
                             </div>
                             <div class="admin-value">
                                 {% if address.street_lines %}
@@ -71,13 +71,13 @@ separately to maintain clinical context and relationship clarity.
                         <div class="admin-info-row">
                             <div class="admin-label">
                                 {% if telecom.system == 'phone' %}
-                                <i class="fas fa-phone"></i> Phone:
+                                <i class="fa-solid fa-phone"></i> Phone:
                                 {% elif telecom.system == 'email' %}
-                                <i class="fas fa-envelope"></i> Email:
+                                <i class="fa-solid fa-envelope"></i> Email:
                                 {% elif telecom.system == 'fax' %}
-                                <i class="fas fa-fax"></i> Fax:
+                                <i class="fa-solid fa-fax"></i> Fax:
                                 {% else %}
-                                <i class="fas fa-info-circle"></i> {{ telecom.system|capfirst }}:
+                                <i class="fa-solid fa-info-circle"></i> {{ telecom.system|capfirst }}:
                                 {% endif %}
                             </div>
                             <div class="admin-value">
@@ -91,13 +91,13 @@ separately to maintain clinical context and relationship clarity.
                         <div class="admin-info-row">
                             <div class="admin-label">
                                 {% if telecom.system == 'phone' %}
-                                <i class="fas fa-phone"></i> Phone:
+                                <i class="fa-solid fa-phone"></i> Phone:
                                 {% elif telecom.system == 'email' %}
-                                <i class="fas fa-envelope"></i> Email:
+                                <i class="fa-solid fa-envelope"></i> Email:
                                 {% elif telecom.system == 'fax' %}
-                                <i class="fas fa-fax"></i> Fax:
+                                <i class="fa-solid fa-fax"></i> Fax:
                                 {% else %}
-                                <i class="fas fa-info-circle"></i> {{ telecom.system|capfirst }}:
+                                <i class="fa-solid fa-info-circle"></i> {{ telecom.system|capfirst }}:
                                 {% endif %}
                             </div>
                             <div class="admin-value">
@@ -121,13 +121,13 @@ separately to maintain clinical context and relationship clarity.
         <div class="col-12">
             <div class="admin-contact-card">
                 <div class="admin-card-header">
-                    <i class="fas fa-globe me-2"></i>
+                    <i class="fa-solid fa-globe me-2"></i>
                     <strong>{{ ui_labels.sections.patient_languages|default:"Patient Languages" }}</strong>
                 </div>
                 <div class="admin-card-content">
                     <div class="admin-info-row">
                         <div class="admin-label">
-                            <i class="fas fa-language"></i> {{ ui_labels.fields.communication_languages|default:"Communication Languages" }}:
+                            <i class="fa-solid fa-language"></i> {{ ui_labels.fields.communication_languages|default:"Communication Languages" }}:
                         </div>
                         <div class="admin-value">
                             {% for language in administrative_data.patient_languages %}
@@ -150,14 +150,14 @@ separately to maintain clinical context and relationship clarity.
         <div class="col-12">
             <div class="admin-contact-card guardian-contact">
                 <div class="admin-card-header">
-                    <i class="fas fa-user-shield me-2"></i>
+                    <i class="fa-solid fa-user-shield me-2"></i>
                     <strong>{{ ui_labels.sections.guardian|default:"Guardian / Next of Kin" }}</strong>
                 </div>
                 <div class="admin-card-content">
                     {% if administrative_data.guardian.given_name or administrative_data.guardian.family_name %}
                     <div class="admin-info-row">
                         <div class="admin-label">
-                            <i class="fas fa-user"></i> {{ ui_labels.fields.guardian_name|default:"Guardian Name" }}:
+                            <i class="fa-solid fa-user"></i> {{ ui_labels.fields.guardian_name|default:"Guardian Name" }}:
                         </div>
                         <div class="admin-value">
                             <strong>
@@ -182,7 +182,7 @@ separately to maintain clinical context and relationship clarity.
                     {% if administrative_data.guardian.relationship %}
                     <div class="admin-info-row">
                         <div class="admin-label">
-                            <i class="fas fa-heart"></i> {{ ui_labels.fields.relationship|default:"Relationship" }}:
+                            <i class="fa-solid fa-heart"></i> {{ ui_labels.fields.relationship|default:"Relationship" }}:
                         </div>
                         <div class="admin-value">
                             {{ administrative_data.guardian.relationship }}
@@ -191,7 +191,7 @@ separately to maintain clinical context and relationship clarity.
                     {% elif administrative_data.guardian.contact_type %}
                     <div class="admin-info-row">
                         <div class="admin-label">
-                            <i class="fas fa-tag"></i> Contact Type:
+                            <i class="fa-solid fa-tag"></i> Contact Type:
                         </div>
                         <div class="admin-value">
                             {{ administrative_data.guardian.contact_type }}
@@ -202,9 +202,9 @@ separately to maintain clinical context and relationship clarity.
                     <div class="admin-info-row">
                         <div class="admin-label">
                             {% if "From:" in administrative_data.guardian.specialty or "To:" in administrative_data.guardian.specialty %}
-                            <i class="fas fa-calendar-alt"></i> {{ ui_labels.fields.effective_period|default:"Effective Period" }}:
+                            <i class="fa-solid fa-calendar-alt"></i> {{ ui_labels.fields.effective_period|default:"Effective Period" }}:
                             {% else %}
-                            <i class="fas fa-stethoscope"></i> {{ ui_labels.fields.specialty|default:"Specialty" }}:
+                            <i class="fa-solid fa-stethoscope"></i> {{ ui_labels.fields.specialty|default:"Specialty" }}:
                             {% endif %}
                         </div>
                         <div class="admin-value">
@@ -218,7 +218,7 @@ separately to maintain clinical context and relationship clarity.
                         {% for address in administrative_data.guardian.contact_info.addresses %}
                         <div class="admin-info-row">
                             <div class="admin-label">
-                                <i class="fas fa-map-marker-alt"></i> Address:
+                                <i class="fa-solid fa-map-marker-alt"></i> Address:
                             </div>
                             <div class="admin-value">
                                 {% if address.street_lines %}
@@ -241,13 +241,13 @@ separately to maintain clinical context and relationship clarity.
                         <div class="admin-info-row">
                             <div class="admin-label">
                                 {% if telecom.system == 'phone' %}
-                                <i class="fas fa-phone"></i> Phone:
+                                <i class="fa-solid fa-phone"></i> Phone:
                                 {% elif telecom.system == 'email' %}
-                                <i class="fas fa-envelope"></i> Email:
+                                <i class="fa-solid fa-envelope"></i> Email:
                                 {% elif telecom.system == 'fax' %}
-                                <i class="fas fa-fax"></i> Fax:
+                                <i class="fa-solid fa-fax"></i> Fax:
                                 {% else %}
-                                <i class="fas fa-info-circle"></i> {{ telecom.system|capfirst }}:
+                                <i class="fa-solid fa-info-circle"></i> {{ telecom.system|capfirst }}:
                                 {% endif %}
                             </div>
                             <div class="admin-value">
@@ -272,13 +272,13 @@ separately to maintain clinical context and relationship clarity.
         <div class="col-12">
             <div class="admin-contact-card other-contact-card">
                 <div class="admin-card-header">
-                    <i class="fas fa-users me-2"></i>
+                    <i class="fa-solid fa-users me-2"></i>
                     <strong>{{ ui_labels.sections.other_contacts|default:"Other Contacts" }}</strong>
                 </div>
                 <div class="admin-card-content">
                     <div class="admin-info-row">
                         <div class="admin-label">
-                            <i class="fas fa-user"></i> {{ ui_labels.fields.contact_name|default:"Contact Name" }}:
+                            <i class="fa-solid fa-user"></i> {{ ui_labels.fields.contact_name|default:"Contact Name" }}:
                         </div>
                         <div class="admin-value">
                             <strong>{{ contact.given_name }} {{ contact.family_name }}</strong>
@@ -294,7 +294,7 @@ separately to maintain clinical context and relationship clarity.
                     {% if contact.relationship %}
                     <div class="admin-info-row">
                         <div class="admin-label">
-                            <i class="fas fa-heart"></i> {{ ui_labels.fields.relationship|default:"Relationship" }}:
+                            <i class="fa-solid fa-heart"></i> {{ ui_labels.fields.relationship|default:"Relationship" }}:
                         </div>
                         <div class="admin-value">
                             {{ contact.relationship }}
@@ -303,7 +303,7 @@ separately to maintain clinical context and relationship clarity.
                     {% elif contact.contact_type %}
                     <div class="admin-info-row">
                         <div class="admin-label">
-                            <i class="fas fa-tag"></i> Contact Type:
+                            <i class="fa-solid fa-tag"></i> Contact Type:
                         </div>
                         <div class="admin-value">
                             {{ contact.contact_type }}
@@ -314,9 +314,9 @@ separately to maintain clinical context and relationship clarity.
                     <div class="admin-info-row">
                         <div class="admin-label">
                             {% if "From:" in contact.specialty or "To:" in contact.specialty %}
-                            <i class="fas fa-calendar-alt"></i> {{ ui_labels.fields.effective_period|default:"Effective Period" }}:
+                            <i class="fa-solid fa-calendar-alt"></i> {{ ui_labels.fields.effective_period|default:"Effective Period" }}:
                             {% else %}
-                            <i class="fas fa-stethoscope"></i> {{ ui_labels.fields.specialty|default:"Specialty" }}:
+                            <i class="fa-solid fa-stethoscope"></i> {{ ui_labels.fields.specialty|default:"Specialty" }}:
                             {% endif %}
                         </div>
                         <div class="admin-value">
@@ -331,7 +331,7 @@ separately to maintain clinical context and relationship clarity.
                         {% for address in contact.contact_info.addresses %}
                         <div class="admin-info-row">
                             <div class="admin-label">
-                                <i class="fas fa-map-marker-alt"></i> Address:
+                                <i class="fa-solid fa-map-marker-alt"></i> Address:
                             </div>
                             <div class="admin-value">
                                 {% if address.street_lines %}
@@ -354,11 +354,11 @@ separately to maintain clinical context and relationship clarity.
                         <div class="admin-info-row">
                             <div class="admin-label">
                                 {% if telecom.system == 'phone' %}
-                                <i class="fas fa-phone"></i> Phone:
+                                <i class="fa-solid fa-phone"></i> Phone:
                                 {% elif telecom.system == 'email' %}
-                                <i class="fas fa-envelope"></i> Email:
+                                <i class="fa-solid fa-envelope"></i> Email:
                                 {% else %}
-                                <i class="fas fa-info-circle"></i> {{ telecom.system|capfirst }}:
+                                <i class="fa-solid fa-info-circle"></i> {{ telecom.system|capfirst }}:
                                 {% endif %}
                             </div>
                             <div class="admin-value">
@@ -378,7 +378,7 @@ separately to maintain clinical context and relationship clarity.
 
 {% else %}
 <div class="text-center py-5">
-    <i class="fas fa-address-card fa-3x text-muted mb-3"></i>
+    <i class="fa-solid fa-address-card fa-3x text-muted mb-3"></i>
     <h6 class="text-muted">No Contact Information Available</h6>
     <p class="text-muted small">No contact details or addresses were found in the patient record.</p>
 </div>

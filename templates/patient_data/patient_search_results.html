@@ -152,13 +152,13 @@
         <!-- Clinical Document Services -->
         {% if existing_data %}
         <div class="mb-4">
-            <h4 class="mb-3"><i class="fas fa-file-medical text-primary"></i> Clinical Documents</h4>
+            <h4 class="mb-3"><i class="fa-solid fa-file-medical text-primary"></i> Clinical Documents</h4>
             <div class="row">
                 <div class="col-md-6">
                     <div class="card border-primary">
                         <div class="card-body">
                             <h5 class="card-title text-primary">
-                                <i class="fas fa-file-medical"></i> Request Clinical Documents
+                                <i class="fa-solid fa-file-medical"></i> Request Clinical Documents
                             </h5>
                             <p class="card-text">
                                 Request patient summaries, ePrescriptions, and other clinical documents
@@ -166,7 +166,7 @@
                             </p>
                             <a href="{{ url('patient_data:request_clinical_documents', existing_data[0].id) }}"
                                 class="btn btn-primary">
-                                <i class="fas fa-download"></i> Request Documents
+                                <i class="fa-solid fa-download"></i> Request Documents
                             </a>
                         </div>
                     </div>
@@ -175,14 +175,14 @@
                     <div class="card border-info">
                         <div class="card-body">
                             <h5 class="card-title text-info">
-                                <i class="fas fa-history"></i> Document History
+                                <i class="fa-solid fa-history"></i> Document History
                             </h5>
                             <p class="card-text">
                                 View previously requested clinical documents and their processing status.
                             </p>
                             <a href="{{ url('patient_data:clinical_document_history', existing_data[0].id) }}"
                                 class="btn btn-info">
-                                <i class="fas fa-list"></i> View History
+                                <i class="fa-solid fa-list"></i> View History
                             </a>
                         </div>
                     </div>
@@ -191,9 +191,9 @@
         </div>
         {% else %}
         <div class="mb-4">
-            <h4 class="mb-3"><i class="fas fa-file-medical text-muted"></i> Clinical Documents</h4>
+            <h4 class="mb-3"><i class="fa-solid fa-file-medical text-muted"></i> Clinical Documents</h4>
             <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle"></i>
+                <i class="fa-solid fa-exclamation-triangle"></i>
                 <strong>Patient Data Required:</strong>
                 Clinical documents can only be requested after patient data has been successfully retrieved.
                 Please use one of the legacy service requests below to fetch patient data first.
@@ -202,7 +202,7 @@
         {% endif %}
 
         <!-- Legacy Service Requests -->
-        <h4 class="mb-3"><i class="fas fa-server text-secondary"></i> Legacy Service Requests</h4>
+        <h4 class="mb-3"><i class="fa-solid fa-server text-secondary"></i> Legacy Service Requests</h4>
         <div class="services-grid">
             {% for service in available_services %}
             <div class="service-card" data-service-id="{{ service.id }}">

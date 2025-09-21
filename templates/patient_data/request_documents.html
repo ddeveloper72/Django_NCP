@@ -8,7 +8,7 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h4><i class="fas fa-file-medical"></i> Request Clinical Documents</h4>
+                    <h4><i class="fa-solid fa-file-medical"></i> Request Clinical Documents</h4>
                 </div>
                 <div class="card-body">
                     <!-- Patient Information -->
@@ -86,10 +86,10 @@
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <a href="{% url 'patient_data:patient_search_results' patient_identifier.id %}"
                                 class="btn btn-secondary me-md-2">
-                                <i class="fas fa-arrow-left"></i> Back to Patient
+                                <i class="fa-solid fa-arrow-left"></i> Back to Patient
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-download"></i> Request Documents
+                                <i class="fa-solid fa-download"></i> Request Documents
                             </button>
                         </div>
                     </form>
@@ -101,7 +101,7 @@
             <!-- Information Panel -->
             <div class="card">
                 <div class="card-header bg-info text-white">
-                    <h5><i class="fas fa-info-circle"></i> Information</h5>
+                    <h5><i class="fa-solid fa-info-circle"></i> Information</h5>
                 </div>
                 <div class="card-body">
                     <h6>Cross-Border Document Exchange</h6>
@@ -129,12 +129,12 @@
             <!-- Document History -->
             <div class="card mt-3">
                 <div class="card-header bg-secondary text-white">
-                    <h5><i class="fas fa-history"></i> Recent Requests</h5>
+                    <h5><i class="fa-solid fa-history"></i> Recent Requests</h5>
                 </div>
                 <div class="card-body">
                     <a href="{% url 'patient_data:clinical_document_history' patient_data.id %}"
                         class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-list"></i> View Document History
+                        <i class="fa-solid fa-list"></i> View Document History
                     </a>
                 </div>
             </div>

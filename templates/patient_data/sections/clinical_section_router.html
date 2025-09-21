@@ -47,39 +47,39 @@
     <!-- Generic sections with predefined configurations -->
     {% elif section.section_id == 'psHistoryOfPastIllnesses' %}
         {% with section_index=forloop.counter0 %}
-            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='past_illnesses' section_icon='fas fa-history' header_class='bg-warning text-dark' table_header_class='table-warning' text_class='text-warning' badge_class='bg-warning text-dark' border_class='border-warning' entries_label='past illnesses' empty_title='No Past Illness History' empty_message='No history of past illnesses reported for this patient' %}
+            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='past_illnesses' section_icon='fa-solid fa-history' header_class='bg-warning text-dark' table_header_class='table-warning' text_class='text-warning' badge_class='bg-warning text-dark' border_class='border-warning' entries_label='past illnesses' empty_title='No Past Illness History' empty_message='No history of past illnesses reported for this patient' %}
         {% endwith %}
 
     {% elif section.section_id == 'psHealthMaintenanceCarePlan' %}
         {% with section_index=forloop.counter0 %}
-            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='health_maintenance' section_icon='fas fa-heart' header_class='bg-success' table_header_class='table-success' text_class='text-success' badge_class='bg-success' border_class='border-success' entries_label='care plans' empty_title='No Health Maintenance Plan' empty_message='No health maintenance care plan available for this patient' %}
+            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='health_maintenance' section_icon='fa-solid fa-heart' header_class='bg-success' table_header_class='table-success' text_class='text-success' badge_class='bg-success' border_class='border-success' entries_label='care plans' empty_title='No Health Maintenance Plan' empty_message='No health maintenance care plan available for this patient' %}
         {% endwith %}
 
     {% elif section.section_id == 'psFunctionalStatus' %}
         {% with section_index=forloop.counter0 %}
-            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='functional_status' section_icon='fas fa-running' header_class='bg-info' table_header_class='table-info' text_class='text-info' badge_class='bg-info' border_class='border-info' entries_label='functional assessments' empty_title='No Functional Status' empty_message='No functional status information available for this patient' %}
+            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='functional_status' section_icon='fa-solid fa-running' header_class='bg-info' table_header_class='table-info' text_class='text-info' badge_class='bg-info' border_class='border-info' entries_label='functional assessments' empty_title='No Functional Status' empty_message='No functional status information available for this patient' %}
         {% endwith %}
 
     {% elif section.section_id == 'psSocialHistory' %}
         {% with section_index=forloop.counter0 %}
-            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='social_history' section_icon='fas fa-users' header_class='bg-secondary' table_header_class='table-secondary' text_class='text-secondary' badge_class='bg-secondary' border_class='border-secondary' entries_label='social history items' empty_title='No Social History' empty_message='No social history information available for this patient' %}
+            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='social_history' section_icon='fa-solid fa-users' header_class='bg-secondary' table_header_class='table-secondary' text_class='text-secondary' badge_class='bg-secondary' border_class='border-secondary' entries_label='social history items' empty_title='No Social History' empty_message='No social history information available for this patient' %}
         {% endwith %}
 
     {% elif section.section_id == 'psPregnancies' %}
         {% with section_index=forloop.counter0 %}
-            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='pregnancies' section_icon='fas fa-baby' header_class='bg-pink' table_header_class='table-pink' text_class='text-pink' badge_class='bg-pink' border_class='border-pink' entries_label='pregnancy records' empty_title='No Pregnancy History' empty_message='No pregnancy history available for this patient' %}
+            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='pregnancies' section_icon='fa-solid fa-baby' header_class='bg-pink' table_header_class='table-pink' text_class='text-pink' badge_class='bg-pink' border_class='border-pink' entries_label='pregnancy records' empty_title='No Pregnancy History' empty_message='No pregnancy history available for this patient' %}
         {% endwith %}
 
     <!-- Default fallback for unknown section types -->
     {% else %}
         {% with section_index=forloop.counter0 %}
-            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='unknown' section_icon='fas fa-file-medical' header_class='bg-light text-dark' table_header_class='table-light' text_class='text-muted' badge_class='bg-light text-dark' border_class='border-light' entries_label='entries' empty_title='Clinical Information' empty_message='Clinical information available for this patient' %}
+            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='unknown' section_icon='fa-solid fa-file-medical' header_class='bg-light text-dark' table_header_class='table-light' text_class='text-muted' badge_class='bg-light text-dark' border_class='border-light' entries_label='entries' empty_title='Clinical Information' empty_message='Clinical information available for this patient' %}
         {% endwith %}
     {% endif %}
 {% else %}
     <!-- No clinical section data -->
     <div class="alert alert-info">
-        <i class="fas fa-info-circle me-2"></i>
+        <i class="fa-solid fa-info-circle me-2"></i>
         <strong>No Clinical Section Data</strong><br>
         No clinical section information available for rendering.
     </div>

@@ -1277,31 +1277,31 @@ h6.bg-secondary {
 /* FontAwesome Icons - Enhanced Styling with Context-Aware Colors */
 
 /* Icons in dark backgrounds (headers with colored backgrounds) */
-.bg-primary i.fas,
+.bg-primary i.fa-solid,
 .bg-primary i.far,
 .bg-primary i.fab,
-.bg-secondary i.fas,
+.bg-secondary i.fa-solid,
 .bg-secondary i.far,
 .bg-secondary i.fab,
-.bg-success i.fas,
+.bg-success i.fa-solid,
 .bg-success i.far,
 .bg-success i.fab,
-.bg-info i.fas,
+.bg-info i.fa-solid,
 .bg-info i.far,
 .bg-info i.fab,
-.bg-warning i.fas,
+.bg-warning i.fa-solid,
 .bg-warning i.far,
 .bg-warning i.fab,
-.bg-danger i.fas,
+.bg-danger i.fa-solid,
 .bg-danger i.far,
 .bg-danger i.fab,
-.bg-dark i.fas,
+.bg-dark i.fa-solid,
 .bg-dark i.far,
 .bg-dark i.fab,
-.card-header.bg-primary i.fas,
+.card-header.bg-primary i.fa-solid,
 .card-header.bg-primary i.far,
 .card-header.bg-primary i.fab,
-.clinical-section-card .section-header i.fas,
+.clinical-section-card .section-header i.fa-solid,
 .clinical-section-card .section-header i.far,
 .clinical-section-card .section-header i.fab {
   color: var(--healthcare-text-light) !important;
@@ -1313,7 +1313,7 @@ h6.bg-secondary {
 
 /* Icons in light backgrounds (general usage) */
 .card-header
-  i.fas:not(.bg-primary *):not(.bg-secondary *):not(.bg-success *):not(
+  i.fa-solid:not(.bg-primary *):not(.bg-secondary *):not(.bg-success *):not(
     .bg-info *
   ):not(.bg-warning *):not(.bg-danger *):not(.bg-dark *),
 .card-header
@@ -1324,28 +1324,28 @@ h6.bg-secondary {
   i.fab:not(.bg-primary *):not(.bg-secondary *):not(.bg-success *):not(
     .bg-info *
   ):not(.bg-warning *):not(.bg-danger *):not(.bg-dark *),
-.card-body i.fas,
+.card-body i.fa-solid,
 .card-body i.far,
 .card-body i.fab,
-.breadcrumb i.fas,
+.breadcrumb i.fa-solid,
 .breadcrumb i.far,
 .breadcrumb i.fab,
-.btn i.fas,
+.btn i.fa-solid,
 .btn i.far,
 .btn i.fab,
-.alert i.fas,
+.alert i.fa-solid,
 .alert i.far,
 .alert i.fab,
-h4 i.fas,
+h4 i.fa-solid,
 h4 i.far,
 h4 i.fab,
-h5 i.fas,
+h5 i.fa-solid,
 h5 i.far,
 h5 i.fab,
-h6 i.fas,
+h6 i.fa-solid,
 h6 i.far,
 h6 i.fab,
-i.fas,
+i.fa-solid,
 i.far,
 i.fab {
   color: var(--healthcare-blue) !important;
@@ -1355,47 +1355,47 @@ i.fab {
 }
 
 /* Color-specific icon styling */
-.text-info i.fas,
+.text-info i.fa-solid,
 .text-info i.far,
 .text-info i.fab,
-.card-title.text-info i.fas,
+.card-title.text-info i.fa-solid,
 .card-title.text-info i.far,
 .card-title.text-info i.fab {
   color: var(--healthcare-blue) !important;
 }
 
-.text-success i.fas,
+.text-success i.fa-solid,
 .text-success i.far,
 .text-success i.fab,
-.card-title.text-success i.fas,
+.card-title.text-success i.fa-solid,
 .card-title.text-success i.far,
 .card-title.text-success i.fab {
   color: var(--healthcare-green) !important;
 }
 
-.text-warning i.fas,
+.text-warning i.fa-solid,
 .text-warning i.far,
 .text-warning i.fab,
-.card-title.text-warning i.fas,
+.card-title.text-warning i.fa-solid,
 .card-title.text-warning i.far,
 .card-title.text-warning i.fab {
   color: var(--healthcare-orange) !important;
 }
 
-.text-danger i.fas,
+.text-danger i.fa-solid,
 .text-danger i.far,
 .text-danger i.fab,
-.card-title.text-danger i.fas,
+.card-title.text-danger i.fa-solid,
 .card-title.text-danger i.far,
 .card-title.text-danger i.fab {
   color: var(--healthcare-red) !important;
 }
 
 /* Specific styling for light background card headers */
-.bg-light i.fas,
+.bg-light i.fa-solid,
 .bg-light i.far,
 .bg-light i.fab,
-.card-header.bg-light i.fas,
+.card-header.bg-light i.fa-solid,
 .card-header.bg-light i.far,
 .card-header.bg-light i.fab {
   color: var(--healthcare-blue) !important;
@@ -1406,7 +1406,7 @@ i.fab {
 }
 
 /* Enhanced styling for country flag icons specifically */
-.card-header.bg-light .fas.fa-flag {
+.card-header.bg-light .fa-solid.fa-flag {
   color: var(--healthcare-green) !important;
   font-size: 1.2rem;
   margin-right: 0.5rem;
@@ -1414,16 +1414,16 @@ i.fab {
 }
 
 /* Icon hover effects for interactive elements */
-.card-header:hover i.fas,
+.card-header:hover i.fa-solid,
 .card-header:hover i.far,
 .card-header:hover i.fab,
-.section-header:hover i.fas,
+.section-header:hover i.fa-solid,
 .section-header:hover i.far,
 .section-header:hover i.fab,
-.btn:hover i.fas,
+.btn:hover i.fa-solid,
 .btn:hover i.far,
 .btn:hover i.fab,
-.breadcrumb-link:hover i.fas,
+.breadcrumb-link:hover i.fa-solid,
 .breadcrumb-link:hover i.far,
 .breadcrumb-link:hover i.fab {
   transform: scale(1.1);
@@ -1508,64 +1508,64 @@ i.fab {
 }
 
 /* FontAwesome Icons with Bootstrap Color Classes - Healthcare Context */
-.clinical-accordion-item i.fas.text-primary,
+.clinical-accordion-item i.fa-solid.text-primary,
 .clinical-accordion-item i.far.text-primary,
 .clinical-accordion-item i.fab.text-primary,
-.clinical-section-card i.fas.text-primary,
+.clinical-section-card i.fa-solid.text-primary,
 .clinical-section-card i.far.text-primary,
 .clinical-section-card i.fab.text-primary {
   color: var(--healthcare-blue) !important;
 }
 
-.clinical-accordion-item i.fas.text-danger,
+.clinical-accordion-item i.fa-solid.text-danger,
 .clinical-accordion-item i.far.text-danger,
 .clinical-accordion-item i.fab.text-danger,
-.clinical-section-card i.fas.text-danger,
+.clinical-section-card i.fa-solid.text-danger,
 .clinical-section-card i.far.text-danger,
 .clinical-section-card i.fab.text-danger {
   color: var(--healthcare-red) !important;
 }
 
-.clinical-accordion-item i.fas.text-warning,
+.clinical-accordion-item i.fa-solid.text-warning,
 .clinical-accordion-item i.far.text-warning,
 .clinical-accordion-item i.fab.text-warning,
-.clinical-section-card i.fas.text-warning,
+.clinical-section-card i.fa-solid.text-warning,
 .clinical-section-card i.far.text-warning,
 .clinical-section-card i.fab.text-warning {
   color: var(--healthcare-orange) !important;
 }
 
-.clinical-accordion-item i.fas.text-success,
+.clinical-accordion-item i.fa-solid.text-success,
 .clinical-accordion-item i.far.text-success,
 .clinical-accordion-item i.fab.text-success,
-.clinical-section-card i.fas.text-success,
+.clinical-section-card i.fa-solid.text-success,
 .clinical-section-card i.far.text-success,
 .clinical-section-card i.fab.text-success {
   color: var(--healthcare-green) !important;
 }
 
-.clinical-accordion-item i.fas.text-info,
+.clinical-accordion-item i.fa-solid.text-info,
 .clinical-accordion-item i.far.text-info,
 .clinical-accordion-item i.fab.text-info,
-.clinical-section-card i.fas.text-info,
+.clinical-section-card i.fa-solid.text-info,
 .clinical-section-card i.far.text-info,
 .clinical-section-card i.fab.text-info {
   color: var(--healthcare-blue) !important;
 }
 
-.clinical-accordion-item i.fas.text-secondary,
+.clinical-accordion-item i.fa-solid.text-secondary,
 .clinical-accordion-item i.far.text-secondary,
 .clinical-accordion-item i.fab.text-secondary,
-.clinical-section-card i.fas.text-secondary,
+.clinical-section-card i.fa-solid.text-secondary,
 .clinical-section-card i.far.text-secondary,
 .clinical-section-card i.fab.text-secondary {
   color: var(--healthcare-navy) !important;
 }
 
-.clinical-accordion-item i.fas.text-dark,
+.clinical-accordion-item i.fa-solid.text-dark,
 .clinical-accordion-item i.far.text-dark,
 .clinical-accordion-item i.fab.text-dark,
-.clinical-section-card i.fas.text-dark,
+.clinical-section-card i.fa-solid.text-dark,
 .clinical-section-card i.far.text-dark,
 .clinical-section-card i.fab.text-dark {
   color: var(--healthcare-text-dark) !important;
@@ -1896,7 +1896,7 @@ i.fab {
 }
 
 /* FontAwesome Icons in Accordion Headers */
-.clinical-accordion-item .accordion-button i.fas,
+.clinical-accordion-item .accordion-button i.fa-solid,
 .clinical-accordion-item .accordion-button i.far,
 .clinical-accordion-item .accordion-button i.fab {
   color: var(--healthcare-blue);
@@ -1905,13 +1905,13 @@ i.fab {
   transition: color 0.3s ease;
 }
 
-.clinical-accordion-item .accordion-button:not(.collapsed) i.fas,
+.clinical-accordion-item .accordion-button:not(.collapsed) i.fa-solid,
 .clinical-accordion-item .accordion-button:not(.collapsed) i.far,
 .clinical-accordion-item .accordion-button:not(.collapsed) i.fab {
   color: var(--healthcare-text-light);
 }
 
-.clinical-accordion-item .accordion-button:hover i.fas,
+.clinical-accordion-item .accordion-button:hover i.fa-solid,
 .clinical-accordion-item .accordion-button:hover i.far,
 .clinical-accordion-item .accordion-button:hover i.fab {
   color: var(--healthcare-text-light);
@@ -2078,7 +2078,7 @@ i.fab {
   color: var(--healthcare-dark-grey);
 }
 
-.clinical-master-controls .section-count .fas {
+.clinical-master-controls .section-count .fa-solid {
   color: var(--healthcare-blue);
 }
 
@@ -2105,12 +2105,12 @@ i.fab {
 }
 
 /* Button Success State Animation */
-.clinical-master-controls .btn .fas.fa-check {
+.clinical-master-controls .btn .fa-solid.fa-check {
   color: var(--healthcare-green);
 }
 
 /* Hover Animation for Icons */
-.clinical-master-controls .btn:hover .fas {
+.clinical-master-controls .btn:hover .fa-solid {
   transform: scale(1.1);
   transition: transform 0.2s ease;
 }
@@ -2381,11 +2381,11 @@ i.fab {
 }
 
 /* Section Icon Color Coordination */
-.clinical-accordion-item .accordion-button:not(.collapsed) .fas {
+.clinical-accordion-item .accordion-button:not(.collapsed) .fa-solid {
   color: rgba(255, 255, 255, 0.9);
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
-.clinical-accordion-item .accordion-button.collapsed .fas {
+.clinical-accordion-item .accordion-button.collapsed .fa-solid {
   color: rgba(255, 255, 255, 0.8);
 }

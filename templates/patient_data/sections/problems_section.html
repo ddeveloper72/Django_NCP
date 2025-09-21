@@ -20,7 +20,7 @@
         <!-- Section Header -->
         <div class="card-header bg-warning text-dark">
             <h5 class="mb-0">
-                <i class="fas fa-stethoscope me-2"></i>
+                <i class="fa-solid fa-stethoscope me-2"></i>
                 {% firstof section.title Active Problems %}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
@@ -53,14 +53,14 @@
                                 <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
                                     {{ header.label }}
                                     {% if header.type == 'condition' %}
-                                    <i class="fas fa-disease ms-1 terminology-indicator"
+                                    <i class="fa-solid fa-disease ms-1 terminology-indicator"
                                         title="Condition/Diagnosis"></i>
                                     {% elif header.type == 'status' %}
-                                    <i class="fas fa-heartbeat ms-1 terminology-indicator" title="Clinical Status"></i>
+                                    <i class="fa-solid fa-heartbeat ms-1 terminology-indicator" title="Clinical Status"></i>
                                     {% elif header.type == 'onset' %}
-                                    <i class="fas fa-calendar-alt ms-1 terminology-indicator" title="Onset Date"></i>
+                                    <i class="fa-solid fa-calendar-alt ms-1 terminology-indicator" title="Onset Date"></i>
                                     {% elif header.type == 'severity' %}
-                                    <i class="fas fa-thermometer-half ms-1 terminology-indicator" title="Severity"></i>
+                                    <i class="fa-solid fa-thermometer-half ms-1 terminology-indicator" title="Severity"></i>
                                     {% endif %}
                                 </th>
                                 {% endfor %}
@@ -117,19 +117,19 @@
                     <div class="row text-center">
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-stethoscope me-1 text-warning"></i>
+                                <i class="fa-solid fa-stethoscope me-1 text-warning"></i>
                                 <strong>{{ section.clinical_table.rows|length }}</strong> active problems
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-heartbeat me-1 text-danger"></i>
+                                <i class="fa-solid fa-heartbeat me-1 text-danger"></i>
                                 Clinical monitoring required
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-clipboard-check me-1 text-success"></i>
+                                <i class="fa-solid fa-clipboard-check me-1 text-success"></i>
                                 Treatment plan active
                             </small>
                         </div>
@@ -151,7 +151,7 @@
         <!-- Empty Problems Section -->
         <div class="card-body text-center py-5">
             <div class="text-success">
-                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                <i class="fa-solid fa-check-circle fa-3x mb-3"></i>
                 <h6 class="text-success">No Active Problems</h6>
                 <p class="text-muted">No active medical conditions reported for this patient</p>
             </div>

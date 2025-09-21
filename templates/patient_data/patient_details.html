@@ -8,12 +8,12 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-                <i class="fas fa-user text-primary me-2"></i>
+                <i class="fa-solid fa-user text-primary me-2"></i>
                 <span class="text-muted">Patient Details</span>
             </div>
             <div>
                 <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-outline-secondary btn-sm">
-                    <i class="fas fa-arrow-left me-1"></i> Back to Search
+                    <i class="fa-solid fa-arrow-left me-1"></i> Back to Search
                 </a>
             </div>
         </div>
@@ -30,12 +30,12 @@
 
                 {% if has_cda_match %}
                 <div class="badge bg-success fs-6 p-2">
-                    <i class="fas fa-check-circle me-1"></i>
+                    <i class="fa-solid fa-check-circle me-1"></i>
                     Match Found: {{ match_confidence }}% Confidence
                 </div>
                 {% else %}
                 <div class="badge bg-warning fs-6 p-2">
-                    <i class="fas fa-exclamation-circle me-1"></i>
+                    <i class="fa-solid fa-exclamation-circle me-1"></i>
                     No Matching Records Found
                 </div>
                 {% endif %}
@@ -43,13 +43,13 @@
 
     {% if session_error %}
     <div class="alert alert-warning d-flex align-items-center" role="alert">
-        <i class="fas fa-exclamation-triangle me-3"></i>
+        <i class="fa-solid fa-exclamation-triangle me-3"></i>
         <div>
             <h5 class="alert-heading">Session Expired</h5>
             <p class="mb-1">{{ session_error }}</p>
             <p class="mb-0">
                 <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-link">
-                    <i class="fas fa-search me-1"></i> Search Again
+                    <i class="fa-solid fa-search me-1"></i> Search Again
                 </a>
             </p>
         </div>
@@ -62,11 +62,11 @@
             <div class="card h-100">
                 <div class="card-header bg-primary text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-user me-2"></i>
+                        <i class="fa-solid fa-user me-2"></i>
                         Patient Information
                         {% if has_cda_match %}
                         <span class="badge bg-light text-primary ms-2">
-                            <i class="fas fa-check-circle me-1"></i>
+                            <i class="fa-solid fa-check-circle me-1"></i>
                             {{ match_confidence }}% Match
                         </span>
                         {% endif %}
@@ -151,7 +151,7 @@
             <div class="card h-100">
                 <div class="card-header bg-success text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-file-medical me-2"></i>
+                        <i class="fa-solid fa-file-medical me-2"></i>
                         Document Actions
                     </h5>
                 </div>
@@ -163,7 +163,7 @@
                         <a href="{% url 'patient_data:patient_cda_view_typed' patient_id selected_cda_type %}"
                             class="btn btn-primary d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-eye me-2"></i>
+                                <i class="fa-solid fa-eye me-2"></i>
                                 <div>
                                     <div class="fw-bold">View CDA Document</div>
                                     <small class="d-block">{{ selected_cda_type }} Browser View</small>
@@ -177,7 +177,7 @@
                         {% with total_docs=2 %}
                         <a href="{% url 'patient_data:select_document' patient_id %}" class="btn btn-outline-primary d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-list me-2"></i>
+                                <i class="fa-solid fa-list me-2"></i>
                                 <div>
                                     <div class="fw-bold">Select Document</div>
                                     <small class="d-block">{{ total_docs }} Available</small>
@@ -190,7 +190,7 @@
                         <!-- CDA Download - Always uses L1 for better PDF structure when available -->
                         <a href="{% url 'patient_data:download_cda_pdf' patient_id %}" class="btn btn-outline-success d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-download me-2"></i>
+                                <i class="fa-solid fa-download me-2"></i>
                                 <div>
                                     <div class="fw-bold">CDA Download</div>
                                     <small class="d-block">
@@ -204,7 +204,7 @@
                         <a href="{% url 'patient_data:download_patient_summary_pdf' patient_id %}"
                             class="btn btn-outline-info d-flex align-items-center justify-content-between" download>
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-file-pdf me-2"></i>
+                                <i class="fa-solid fa-file-pdf me-2"></i>
                                 <div>
                                     <div class="fw-bold">Patient Summary PDF</div>
                                     <small class="d-block">Healthcare Professional</small>
@@ -215,7 +215,7 @@
                         <!-- ORCD - PDF Preview and Download -->
                         <a href="{% url 'patient_data:patient_orcd_view' patient_id %}" class="btn btn-outline-warning d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-file-text me-2"></i>
+                                <i class="fa-solid fa-file-text me-2"></i>
                                 <div>
                                     <div class="fw-bold">ORCD</div>
                                     <small class="d-block">PDF Preview & Download</small>
@@ -286,13 +286,13 @@
             <div class="card">
                 <div class="card-header bg-warning text-dark">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-search me-2"></i>
+                        <i class="fa-solid fa-search me-2"></i>
                         Search Results
                     </h5>
                 </div>
 
                 <div class="card-body text-center py-5">
-                    <i class="fas fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                    <i class="fa-solid fa-exclamation-circle fa-3x text-warning mb-3"></i>
                     <h4 class="text-primary">No Matching Records Found</h4>
                     <p class="text-muted mb-4">We could not find any patient records in the EU member states database that match the provided credentials.</p>
 
@@ -307,7 +307,7 @@
                     </div>
 
                     <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-primary">
-                        <i class="fas fa-search me-2"></i>
+                        <i class="fa-solid fa-search me-2"></i>
                         Try Another Search
                     </a>
                 </div>

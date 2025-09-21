@@ -1,5 +1,5 @@
 {% load patient_filters %}
-{# Clinical Table Se                                                                       <i class="fas fa-tag me-1"></i>{{ term.display_name|default:term.code }}        {{ term.display_name|default:term.code }}tion Template - For sections with clinical tables #}
+{# Clinical Table Se                                                                       <i class="fa-solid fa-tag me-1"></i>{{ term.display_name|default:term.code }}        {{ term.display_name|default:term.code }}tion Template - For sections with clinical tables #}
 <!-- Clinical Table Display with Tabs -->
 <div class="card-body p-0">
     <!-- Section Tabs -->
@@ -22,11 +22,11 @@
                         <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
                             {{ header.label }}
                             {% if header.type == 'codes' %}
-                            <i class="fas fa-code ms-1 terminology-indicator" title="Medical Codes"></i>
+                            <i class="fa-solid fa-code ms-1 terminology-indicator" title="Medical Codes"></i>
                             {% elif header.type == 'date' %}
-                            <i class="fas fa-calendar ms-1 terminology-indicator" title="Date"></i>
+                            <i class="fa-solid fa-calendar ms-1 terminology-indicator" title="Date"></i>
                             {% elif header.type == 'status' %}
-                            <i class="fas fa-info-circle ms-1 terminology-indicator" title="Status"></i>
+                            <i class="fa-solid fa-info-circle ms-1 terminology-indicator" title="Status"></i>
                             {% endif %}
                         </th>
                         {% endfor %}
@@ -76,7 +76,7 @@
                                 <div class="medical-terminology mt-1">
                                     {% for term in cell_data|safe_get:"terminology" %}
                                     <span class="badge bg-info me-1" title="{% firstof term.system }}: {{ term.code }}">
-                                        <i class="fas fa-tag me-1"></i>{{ term.display_name term.code %}
+                                        <i class="fa-solid fa-tag me-1"></i>{{ term.display_name term.code %}
                                     </span>
                                     {% endfor %}
                                 </div>
@@ -97,11 +97,11 @@
             <div class="row text-center">
                 <div class="col-md-4">
                     <small class="text-muted">
-                        <i class="fas fa-table me-1"></i>
+                        <i class="fa-solid fa-table me-1"></i>
                         <strong>{{ section.clinical_table.rows|length }}</strong> entries
                         {% if section.clinical_table.has_coded_entries %}
                         <span class="badge bg-success ms-2">
-                            <i class="fas fa-check me-1"></i>Contains medical codes
+                            <i class="fa-solid fa-check me-1"></i>Contains medical codes
                         </span>
                         {% endif %}
                     </small>
@@ -114,9 +114,9 @@
                 <div class="col-md-4">
                     <small class="text-muted">
                         {% if section.clinical_table.has_coded_entries %}
-                        <i class="fas fa-check text-success"></i> Medical terminology
+                        <i class="fa-solid fa-check text-success"></i> Medical terminology
                         {% else %}
-                        <i class="fas fa-info-circle text-info"></i> Text only
+                        <i class="fa-solid fa-info-circle text-info"></i> Text only
                         {% endif %}
                     </small>
                 </div>
@@ -124,7 +124,7 @@
                 <div class="col-12 mt-2">
                     <details class="code-system-legend">
                         <summary class="text-muted" style="font-size: 0.75rem; cursor: pointer;">
-                            <i class="fas fa-info-circle me-1"></i>Code System Legend
+                            <i class="fa-solid fa-info-circle me-1"></i>Code System Legend
                         </summary>
                         <div class="mt-2" style="font-size: 0.75rem;">
                             <span class="badge bg-primary me-2">SNOMED CT</span>

@@ -21,7 +21,7 @@
         <!-- Section Header -->
         <div class="card-header bg-success text-white">
             <h5 class="mb-0">
-                <i class="fas fa-syringe me-2"></i>
+                <i class="fa-solid fa-syringe me-2"></i>
                 {% firstof section.title Immunizations %}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
@@ -54,17 +54,17 @@
                                 <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
                                     {{ header.label }}
                                     {% if header.type == 'vaccine' %}
-                                    <i class="fas fa-shield-virus ms-1 terminology-indicator" title="Vaccine"></i>
+                                    <i class="fa-solid fa-shield-virus ms-1 terminology-indicator" title="Vaccine"></i>
                                     {% elif header.type == 'date' %}
-                                    <i class="fas fa-calendar-alt ms-1 terminology-indicator"
+                                    <i class="fa-solid fa-calendar-alt ms-1 terminology-indicator"
                                         title="Administration Date"></i>
                                     {% elif header.type == 'dose' %}
-                                    <i class="fas fa-vial ms-1 terminology-indicator" title="Dose Number"></i>
+                                    <i class="fa-solid fa-vial ms-1 terminology-indicator" title="Dose Number"></i>
                                     {% elif header.type == 'status' %}
-                                    <i class="fas fa-check-circle ms-1 terminology-indicator"
+                                    <i class="fa-solid fa-check-circle ms-1 terminology-indicator"
                                         title="Vaccination Status"></i>
                                     {% elif header.type == 'manufacturer' %}
-                                    <i class="fas fa-industry ms-1 terminology-indicator" title="Manufacturer"></i>
+                                    <i class="fa-solid fa-industry ms-1 terminology-indicator" title="Manufacturer"></i>
                                     {% endif %}
                                 </th>
                                 {% endfor %}
@@ -121,19 +121,19 @@
                     <div class="row text-center">
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-syringe me-1 text-success"></i>
+                                <i class="fa-solid fa-syringe me-1 text-success"></i>
                                 <strong>{{ section.clinical_table.rows|length }}</strong> immunizations
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-shield-alt me-1 text-info"></i>
+                                <i class="fa-solid fa-shield-alt me-1 text-info"></i>
                                 Protective immunity
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fas fa-calendar-check me-1 text-warning"></i>
+                                <i class="fa-solid fa-calendar-check me-1 text-warning"></i>
                                 Schedule up to date
                             </small>
                         </div>
@@ -155,7 +155,7 @@
         <!-- Empty Immunizations Section -->
         <div class="card-body text-center py-5">
             <div class="text-warning">
-                <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                <i class="fa-solid fa-exclamation-triangle fa-3x mb-3"></i>
                 <h6 class="text-warning">No Immunization Records</h6>
                 <p class="text-muted">No vaccination records available for this patient</p>
             </div>
