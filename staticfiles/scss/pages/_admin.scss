@@ -1,0 +1,156 @@
+// ========================================
+// Admin Interface Styles
+// HSE-compliant styling for Django admin
+// ========================================
+
+// Admin Login Page Styles
+.login {
+  // Cancel Button Styling
+  .cancel-button {
+    background-color: $neutral-lighter;
+    color: $text-dark;
+    border: 1px solid $border-light;
+    padding: $space-sm $space-md;
+    margin-left: $space-sm;
+    text-decoration: none;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+    line-height: 1.4;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: $neutral-light;
+      text-decoration: none;
+      color: $text-dark;
+    }
+
+    &:focus {
+      outline: 2px solid $primary-color;
+      outline-offset: 2px;
+    }
+  }
+
+  // Submit Row Layout
+  .submit-row {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+
+    input[type="submit"] {
+      margin: 0;
+      background-color: $primary-color;
+      border-color: $primary-color;
+
+      &:hover {
+        background-color: $primary-dark;
+        border-color: $primary-dark;
+      }
+    }
+  }
+}
+
+// Admin Dashboard Styles
+.admin-dashboard {
+  // EU Test Data Management Section
+  #test-data-management {
+    margin-top: $space-lg;
+
+    caption {
+      background: linear-gradient(135deg, $hse-accent-blue, $primary-color);
+      color: $white;
+      font-weight: $font-weight-bold;
+      padding: $space-sm $space-md;
+      border-radius: $border-radius-sm $border-radius-sm 0 0;
+
+      a {
+        color: $white;
+        text-decoration: none;
+
+        &:hover {
+          color: $primary-lighter;
+        }
+      }
+    }
+
+    .model-row {
+      th {
+        background: $bg-light;
+        font-weight: $font-weight-bold;
+        color: $hse-accent-blue;
+      }
+
+      &:hover {
+        background: $neutral-lightest;
+      }
+    }
+  }
+}
+
+// HSE Branding for Admin Interface
+.admin-header {
+  background-color: $primary-color;
+  border-bottom: 3px solid $primary-dark;
+
+  h1 {
+    color: $white;
+    font-family: $font-family-secondary;
+  }
+
+  .user-tools {
+    a {
+      color: $primary-lighter;
+
+      &:hover {
+        color: $white;
+      }
+    }
+  }
+}
+
+// Admin Form Enhancements
+.admin-form {
+  .form-row {
+    margin-bottom: $space-md;
+  }
+
+  .required label:after {
+    content: " *";
+    color: $error;
+  }
+
+  .help {
+    color: $text-muted;
+    font-size: $font-size-sm;
+    margin-top: $space-xs;
+  }
+}
+
+// Admin Table Styling
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: $space-md 0;
+
+  th {
+    background-color: $primary-lighter;
+    color: $text-dark;
+    padding: $space-sm;
+    text-align: left;
+    font-weight: $font-weight-semibold;
+  }
+
+  td {
+    padding: $space-sm;
+    border-bottom: 1px solid $border-light;
+  }
+
+  tr:nth-child(even) {
+    background-color: $bg-light;
+  }
+
+  tr:hover {
+    background-color: $primary-lighter;
+  }
+}

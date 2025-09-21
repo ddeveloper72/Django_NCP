@@ -1,0 +1,91 @@
+{
+  "name": "EU NCP Portal",
+  "short_name": "EU NCP",
+  "description": "European Union National Contact Point Portal for healthcare information and patient services",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#005eb8",
+  "background_color": "#f5f8ff",
+  "lang": "en",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/static/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Patient Search",
+      "short_name": "Search",
+      "description": "Search for patient information",
+      "url": "/patient/search/",
+      "icons": [
+        {
+          "src": "/static/icons/search-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View healthcare dashboard",
+      "url": "/dashboard/",
+      "icons": [
+        {
+          "src": "/static/icons/dashboard-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "categories": ["health", "medical", "government"],
+  "dir": "ltr",
+  "prefer_related_applications": false
+}

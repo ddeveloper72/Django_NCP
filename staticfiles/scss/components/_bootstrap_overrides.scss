@@ -1,0 +1,60 @@
+/* Contact Card Components - Minimal CSS for Bootstrap 5.3 */
+
+/* Icon circle sizing and hover effects */
+.contact-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.icon-circle {
+  transition: transform 0.2s ease;
+}
+
+.icon-circle:hover {
+  transform: scale(1.05);
+}
+
+/* Card hover animations */
+.address-card,
+.contact-method-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.address-card:hover,
+.contact-method-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Info item hover state */
+.info-item:hover {
+  background-color: var(--bs-light) !important;
+  transition: background-color 0.2s ease;
+}
+
+/* Header Navigation Tabs Styling */
+.nav-tabs-light .nav-link {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.nav-tabs-light .nav-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-tabs-light .nav-link.active {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--bs-primary) !important;
+  border-color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+/* Extended info container styling */
+.tab-content .tab-pane > div {
+  max-height: 400px;
+  overflow-y: auto;
+  transition: background-color 0.2s ease;
+}

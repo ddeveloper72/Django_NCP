@@ -1,44 +1,53 @@
 // ========================================
 // Main SCSS File - DMZ Compatible
-// Import all components for compilation
+// Consolidated CSS Architecture - September 20, 2025
+// Single source of truth for all styles
 // ========================================
-// Production SCSS compilation - Updated patient search styles with SASS classes - Force compile v2
 
 // 1. Utilities (Variables and Mixins first)
-@import 'utils/variables';
-@import 'utils/mixins';
+@import "utils/variables";
+@import "utils/mixins";
 
 // 2. Base Styles
-@import 'base/reset';
-@import 'base/typography';
+@import "base/reset";
+@import "base/typography";
+@import "base/irish_healthcare_theme";
+@import "base/accessibility";
 
 // 3. Layout Components
-@import 'layouts/grid';
-@import 'layouts/header';
-@import 'layouts/footer';
-@import 'layouts/sidebar';
+@import "layouts/grid";
+@import "layouts/header";
+@import "layouts/footer";
+@import "layouts/sidebar";
 
 // 4. UI Components
-@import 'components/buttons';
-@import 'components/forms';
-@import 'components/cards';
-@import 'components/tables';
-@import 'components/navigation';
-@import 'components/modals';
-@import 'components/alerts';
-@import 'components/administrative_section';
+@import "components/bootstrap_overrides";
+@import "components/buttons";
+@import "components/forms";
+@import "components/cards";
+@import "components/tables";
+@import "components/navigation";
+@import "components/modals";
+@import "components/alerts";
+@import "components/administrative_section";
+@import "components/smp_dashboard";
 
 // 5. Page-specific Styles
-@import 'pages/home';
-@import 'pages/dashboard';
-@import 'pages/forms';
-@import 'pages/patient_data_view';
-@import 'pages/admin_import';
-@import 'pages/country_selection';
-@import 'pages/patient_search';
-@import 'pages/patient-details';
-@import 'pages/patient_cda';
-@import 'pages/patient_form';
+@import "pages/home";
+@import "pages/dashboard";
+@import "pages/forms";
+@import "pages/patient_data_view";
+@import "pages/admin";
+@import "pages/admin_import";
+@import "pages/country_selection";
+@import "pages/patient";
+@import "pages/patient-details";
+@import "pages/patient_cda";
+@import "pages/patient_form";
+@import "pages/enhanced_cda";
+@import "pages/document_viewer";
+@import "pages/cda_bilingual";
+@import "pages/document_management";
 
 // 6. Utility Classes
 .container {
