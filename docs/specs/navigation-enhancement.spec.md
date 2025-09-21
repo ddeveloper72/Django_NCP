@@ -7,6 +7,7 @@ Enhance the navigation bar across the Django NCP Portal to provide better mobile
 ## 2. Requirements
 
 ### Current Issues Identified
+
 - Navigation bar lacks proper focus states for accessibility
 - Mobile hamburger menu may not have proper spacing/sizing
 - Active state styling could be more prominent
@@ -15,6 +16,7 @@ Enhance the navigation bar across the Django NCP Portal to provide better mobile
 - No proper visual feedback for hover states on touch devices
 
 ### Target Improvements
+
 - Enhanced mobile-first responsive design
 - Better accessibility with proper ARIA labels and focus management
 - Improved visual hierarchy and spacing
@@ -26,6 +28,7 @@ Enhance the navigation bar across the Django NCP Portal to provide better mobile
 ## 3. System Design
 
 ### Navigation Components
+
 1. **Hero Header** (home page only)
    - Large branding with hospital icon
    - Subtitle for context
@@ -38,6 +41,7 @@ Enhance the navigation bar across the Django NCP Portal to provide better mobile
    - Mobile-responsive hamburger menu
 
 ### Responsive Behavior
+
 - **Desktop (≥992px)**: Full horizontal layout with icons and text
 - **Tablet (768px-991px)**: Condensed layout, smaller icons
 - **Mobile (<768px)**: Hamburger menu, larger touch targets
@@ -45,24 +49,28 @@ Enhance the navigation bar across the Django NCP Portal to provide better mobile
 ## 4. Implementation Tasks
 
 ### Phase 1: Accessibility Improvements
+
 1. Add proper ARIA labels to all navigation elements
 2. Implement focus management for keyboard navigation
 3. Ensure proper color contrast ratios
 4. Add skip-to-content links
 
 ### Phase 2: Mobile Responsiveness
+
 1. Improve hamburger menu styling and animation
 2. Enhance touch target sizes (minimum 44px)
 3. Add proper spacing for mobile viewports
 4. Implement swipe-friendly interactions
 
 ### Phase 3: Visual Polish
+
 1. Enhance hover and active states
 2. Add smooth transitions and micro-animations
 3. Improve typography hierarchy
 4. Polish button styling and spacing
 
 ### Phase 4: HSE Theme Integration
+
 1. Ensure proper HSE color palette usage
 2. Add HSE-style gradients and shadows
 3. Implement consistent spacing using HSE tokens
@@ -91,18 +99,21 @@ Enhance the navigation bar across the Django NCP Portal to provide better mobile
 ## 7. Testing Plan
 
 ### Accessibility Testing
+
 - Screen reader testing (NVDA, JAWS)
 - Keyboard-only navigation testing
 - Color contrast validation
 - Focus management verification
 
 ### Responsive Testing
+
 - Test on actual mobile devices
 - Verify touch interactions
 - Check scaling on different screen densities
 - Validate hamburger menu functionality
 
 ### Visual Testing
+
 - Cross-browser compatibility (Chrome, Firefox, Safari, Edge)
 - Animation performance validation
 - HSE theme consistency check
@@ -111,6 +122,7 @@ Enhance the navigation bar across the Django NCP Portal to provide better mobile
 ## 8. Technical Implementation
 
 ### SASS Structure
+
 ```scss
 // _navigation.scss enhancements
 .navbar {
@@ -139,6 +151,7 @@ Enhance the navigation bar across the Django NCP Portal to provide better mobile
 ```
 
 ### HTML Improvements
+
 - Add proper semantic markup
 - Include ARIA labels and descriptions
 - Implement skip navigation links

@@ -7,8 +7,9 @@ This project follows a practice of making small, focused commits with clear mess
 ### Commit Message Format
 
 Use conventional commit format:
+
 - `fix:` for bug fixes
-- `feat:` for new features  
+- `feat:` for new features
 - `style:` for formatting/styling changes
 - `refactor:` for code restructuring
 - `docs:` for documentation changes
@@ -63,6 +64,7 @@ git commit -m "style: enforce consistent icon colors"
 ## Recent Example
 
 The FontAwesome icon fixes were properly split into focused commits:
+
 1. `fix: resolve FontAwesome webfont 404 errors` - Fixed CSS paths
 2. `fix: replace invalid FontAwesome icon for CDA Translation` - Icon replacement
 3. `style: enforce white color for FontAwesome icons` - Color consistency
