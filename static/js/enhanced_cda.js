@@ -9,7 +9,7 @@
  * Called when DOM is ready
  */
 function initializeEnhancedCDA() {
-  console.log('🎯 Initializing Pure Bootstrap Tabs...');
+  console.log('Initializing Bootstrap tabs...');
 
   // Initialize Bootstrap tabs for Extended Patient Info
   const extendedInfoTabs = document.querySelectorAll('#extendedInfoTabs button[data-bs-toggle="tab"]');
@@ -36,7 +36,13 @@ function initializeEnhancedCDA() {
     });
   });
 
-  console.log('✅ Pure Bootstrap functionality initialized successfully');
+  // Initialize Bootstrap tooltips
+  initializeTooltips();
+
+  // Initialize Extended Patient Event Delegation
+  initializeExtendedPatientEventDelegation();
+
+  console.log('Bootstrap functionality initialized');
 }
 
 /**
@@ -172,44 +178,61 @@ function initializeTooltips() {
 }
 
 /**
- * Initialize Enhanced CDA functionality
- * Called when DOM is ready
+ * Show clinical section tab (Structured Data vs Original Content) - Legacy function name
+ * @param {string} sectionId - ID of the clinical section
+ * @param {string} tabType - Type of tab to show ('structured' or 'original')
  */
-function initializeEnhancedCDA() {
-  console.log('🎯 Initializing Pure Bootstrap Tabs...');
+function showTab(sectionId, tabType) {
+  // Just call the main function to avoid code duplication
+  showClinicalTab(sectionId, tabType);
+}
 
-  // Initialize Bootstrap tabs for Extended Patient Info
-  const extendedInfoTabs = document.querySelectorAll('#extendedInfoTabs button[data-bs-toggle="tab"]');
-  extendedInfoTabs.forEach(tab => {
-    new bootstrap.Tab(tab);
-  });
+/**
+ * Show clinical section tab (Structured Data vs Original Content)
+ * @param {string} sectionId - ID of the clinical section
+ * @param {string} tabType - Type of tab to show ('structured' or 'original')
+ */
+function showClinicalTab(sectionId, tabType) {
+  console.log('Switching clinical tab:', tabType);
 
-  // Initialize Bootstrap tabs for Clinical Sections
-  const clinicalTabs = document.querySelectorAll('.clinical-tabs button[data-bs-toggle="tab"]');
-  clinicalTabs.forEach(tab => {
-    new bootstrap.Tab(tab);
-  });
+  // Find the tab content elements
+  const structuredTab = document.getElementById(sectionId + '_structured');
+  const originalTab = document.getElementById(sectionId + '_original');
 
-  // Enhanced hover effects for interactive elements
-  const cards = document.querySelectorAll('.card');
-  cards.forEach(card => {
-    card.addEventListener('mouseenter', function () {
-      this.style.transform = 'translateY(-2px)';
-      this.style.transition = 'transform 0.2s ease';
-    });
+  console.log('Looking for elements:');
+  console.log('- Structured tab:', sectionId + '_structured', '→', structuredTab);
+  console.log('- Original tab:', sectionId + '_original', '→', originalTab);
 
-    card.addEventListener('mouseleave', function () {
-      this.style.transform = 'translateY(0)';
-    });
-  });
+  if (!structuredTab && !originalTab) {
+    console.error('No clinical tab content found for:', sectionId);
+    // Let's see what elements with similar IDs exist
+    const similarElements = document.querySelectorAll('[id*="' + sectionId + '"]');
+    console.log('Found similar elements:', similarElements);
+    return;
+  }
 
-  // Initialize Bootstrap tooltips
-  initializeTooltips();
+  // Find the tab buttons
+  const container = (structuredTab || originalTab).closest('.card') || (structuredTab || originalTab).closest('.clinical-section');
+  if (!container) {
+    console.error('Clinical section container not found for:', sectionId);
+    return;
+  }
 
-  // Initialize Extended Patient Event Delegation
-  initializeExtendedPatientEventDelegation();
+  const buttons = container.querySelectorAll('.tab-button');
 
-  console.log('Bootstrap functionality initialized');
+  // Hide all tabs and remove active class from buttons
+  if (structuredTab) structuredTab.classList.remove('active');
+  if (originalTab) originalTab.classList.remove('active');
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  // Show selected tab and activate corresponding button
+  if (tabType === 'structured' && structuredTab) {
+    structuredTab.classList.add('active');
+    if (buttons[0]) buttons[0].classList.add('active');
+  } else if (tabType === 'original' && originalTab) {
+    originalTab.classList.add('active');
+    if (buttons[1]) buttons[1].classList.add('active');
+  }
 }
 
 /**
@@ -256,6 +279,45 @@ function initializeExtendedPatientEventDelegation() {
         if (sectionId && tabType) {
           showExtendedTab(sectionId, tabType);
         }
+        break;
+
+      case 'show-pdf-viewer':
+        const pdfIndex1 = target.dataset.pdfIndex;
+        console.log('PDF viewer requested for index:', pdfIndex1);
+        // PDF functionality not implemented in enhanced_cda.js
+        console.warn('PDF viewer functionality not available in enhanced CDA view');
+        break;
+
+      case 'open-pdf-fullscreen':
+        const pdfIndex2 = target.dataset.pdfIndex;
+        console.log('PDF fullscreen requested for index:', pdfIndex2);
+        console.warn('PDF fullscreen functionality not available in enhanced CDA view');
+        break;
+
+      case 'hide-pdf-viewer':
+        const pdfIndex3 = target.dataset.pdfIndex;
+        console.log('Hide PDF viewer requested for index:', pdfIndex3);
+        console.warn('Hide PDF viewer functionality not available in enhanced CDA view');
+        break;
+
+      case 'open-pdf-new-tab':
+        const pdfIndex4 = target.dataset.pdfIndex;
+        console.log('PDF new tab requested for index:', pdfIndex4);
+        if (pdfIndex4 !== undefined) {
+          // Try to open PDF directly by finding the download link
+          const pdfContainer = target.closest('.pdf-item') || target.closest('.pdf-document');
+          const downloadLink = pdfContainer ? pdfContainer.querySelector('a[href*=".pdf"]') : null;
+          if (downloadLink) {
+            window.open(downloadLink.href, '_blank');
+          } else {
+            console.warn('Could not find PDF download link');
+          }
+        }
+        break;
+
+      case 'open-pdf-directly':
+        console.log('Direct PDF open requested');
+        console.warn('Direct PDF functionality not available in enhanced CDA view');
         break;
 
       default:

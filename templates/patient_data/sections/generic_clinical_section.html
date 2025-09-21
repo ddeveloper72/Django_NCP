@@ -1,5 +1,6 @@
 {% load patient_filters %}
-{# Generic Clinical Section Templ                                        {% if cell_data|safe_get:"has_terminology" %}
+{# Generic Clinical Section Templ                                        {% if cell_data|safe_get:"has_terminology"             <!-- Original Content Tab -->
+            <div id="generic_{{ section_index }}_original" class="clinical-tab-content">
                                         {% with terminology_data=cell_data|safe_get:"terminology" %}
                                         {% if terminology_data %}
                                         <div class="medical-terminology mt-1">
