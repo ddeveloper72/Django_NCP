@@ -1,28 +1,14 @@
 {% load patient_filters %}
 {# Vital Signs Section Template #}
-<!--                                         {% if cell_data|safe_get:"has_terminology" %}
-                                        {% with terminology_data=cell_data|safe_get:"terminology" %}
-                                        {% if terminology_data %}
-                                        <div class="medical-terminology mt-1">
-                                            {% for term in terminology_data %}
-                                            {% if term %}
-                                            <span class="badge bg-secondary me-1"
-                                                title="{{ term.system|default:'' }}: {{ term.code|default:'' }}">
-                                                {% firstof term.display_name term.code "Unknown" %}
-                                            </span>
-                                            {% endif %}
-                                            {% endfor %}
-                                        </div>
-                                        {% endif %}
-                                        {% endwith %}
-                                        {% endif %}ns Section -->
+
+<!-- Vital Signs Section -->
 <div class="medical-section" id="vital-signs-section">
     <div class="card">
         <!-- Section Header -->
         <div class="card-header bg-secondary text-white">
             <h5 class="mb-0">
                 <i class="fa-solid fa-heartbeat me-2"></i>
-                {% firstof section.title Vital Signs %}
+                {% firstof section.title "Vital Signs" %}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
                 {% endif %}
@@ -47,99 +33,149 @@
             <!-- Structured View Tab Content -->
             <div id="vital_signs_{{ section_index }}_structured" class="clinical-tab-content active">
                 <div class="clinical-table">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-secondary">
-                            <tr>
-                                {% for header in section.clinical_table.headers %}
-                                <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
-                                    {{ header.label }}
-                                    {% if header.type == 'vital' %}
-                                    <i class="fa-solid fa-heartbeat ms-1 terminology-indicator" title="Vital Sign"></i>
-                                    {% elif header.type == 'value' %}
-                                    <i class="fa-solid fa-tachometer-alt ms-1 terminology-indicator"
-                                        title="Measurement Value"></i>
-                                    {% elif header.type == 'unit' %}
-                                    <i class="fa-solid fa-ruler ms-1 terminology-indicator" title="Unit of Measure"></i>
-                                    {% elif header.type == 'date' %}
-                                    <i class="fa-solid fa-calendar-alt ms-1 terminology-indicator"
-                                        title="Measurement Date"></i>
-                                    {% elif header.type == 'range' %}
-                                    <i class="fa-solid fa-arrows-alt-h ms-1 terminology-indicator" title="Normal Range"></i>
-                                    {% endif %}
-                                </th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <!-- Mobile Card Layout (hidden on desktop) -->
+                    <div class="d-block d-md-none">
+                        <div class="clinical-cards-container">
                             {% for row in section.clinical_table.rows %}
-                            <tr>
-                                {% for header in section.clinical_table.headers %}
-                                {% with cell_data=row.data|lookup:header.key %}
-                                <td>
-                                    {% if header.primary %}
-                                    <div class="primary-field">
-                                        <strong class="text-secondary">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" or
-                                            'N/A %}</strong>
-                                        {% if cell_data|safe_get:"has_terminology" %}
-                                        <div class="medical-terminology mt-1">
-                                            {% for term in cell_data|safe_get:"terminology" %}
-                                            <span class="badge bg-secondary me-1"
-                                                title="{% firstof term.system }}: {{ term.code }}">
-                                                {{ term.display_name term.code %}
-                                            </span>
-                                            {% endfor %}
+                            <div class="card clinical-card mb-3 {% if row.has_medical_codes %}border-success{% endif %}">
+                                <div class="card-body">
+                                    {% for header in section.clinical_table.headers %}
+                                    {% with row.data|get_item:header.key as cell_data %}
+                                    <div class="clinical-field mb-2 {% if header.primary %}primary-field-mobile{% endif %}">
+                                        <div class="field-label d-flex align-items-center mb-1">
+                                            <strong class="text-muted small">{{ header.label }}</strong>
+                                            {% if header.type == 'vital' %}
+                                            <i class="fa-solid fa-heartbeat ms-1 terminology-indicator text-muted" title="Vital Sign"></i>
+                                            {% elif header.type == 'value' %}
+                                            <i class="fa-solid fa-tachometer-alt ms-1 terminology-indicator text-muted" title="Measurement Value"></i>
+                                            {% elif header.type == 'unit' %}
+                                            <i class="fa-solid fa-ruler ms-1 terminology-indicator text-muted" title="Unit of Measure"></i>
+                                            {% elif header.type == 'date' %}
+                                            <i class="fa-solid fa-calendar-alt ms-1 terminology-indicator text-muted" title="Measurement Date"></i>
+                                            {% elif header.type == 'range' %}
+                                            <i class="fa-solid fa-arrows-alt-h ms-1 terminology-indicator text-muted" title="Normal Range"></i>
+                                            {% endif %}
                                         </div>
-                                        {% endif %}
-                                    </div>
-                                    {% else %}
-                                    <div class="cell-content">
-                                        {% if cell_data|safe_get:"has_codes" %}
-                                        <div class="medical-codes-container">
-                                            {% for code in cell_data|safe_get:"codes" %}
-                                            <span class="badge bg-secondary me-1 mb-1"
-                                                title="{% firstof code.system }}: {{ code.code }}">
-                                                {{ code.display_name code.code %}
-                                            </span>
-                                            {% endfor %}
-                                        </div>
-                                        {% elif cell_data|safe_get:"is_abnormal" %}
-                                        <span class="text-danger fw-bold">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value"
-                                            or 'N/A %}</span>
-                                        <i class="fa-solid fa-exclamation-triangle text-danger ms-1"
-                                            title="Abnormal Vital Sign"></i>
-                                        {% else %}
-                                        {% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}                                </td>
-                                {% endwith %}
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                        <div class="field-value">
+                                            {% if header.primary %}
+                                            <div class="primary-field-content">
+                                                <strong class="text-dark">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</strong>
+                                                {% if cell_data|safe_get:"has_terminology" %}
+                                                <div class="medical-terminology mt-1">
+                                                    {% for term in cell_data|safe_get:"terminology" %}
+                                                    <span class="badge bg-secondary me-1 mb-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
+                                                        {{ term.display_name|default:term.code }}
+                                                    </span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            {% else %}
+                                            <div class="field-content">
+                                                {% if cell_data|safe_get:"has_codes" %}
+                                                <div class="medical-codes-container-mobile">
+                                                    <div class="medical-code-item d-flex flex-wrap">
+                                                        {% for code in cell_data|safe_get:"codes" %}
+                                                        <span class="badge bg-secondary me-1 mb-1" title="{{ code.system|default:'Unknown' }}: {{ code.code }}">
+                                                            {{ code.display_name|default:code.code }}
+                                                        </span>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                                {% else %}
+                                                <span class="text-dark">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</span>
+                                                {% endif %}
 
-                <!-- Vital Signs Table Summary -->
-                <div class="card-footer bg-light border-secondary">
-                    <div class="row text-center">
-                        <div class="col-md-4">
-                            <small class="text-muted">
-                                <i class="fa-solid fa-heartbeat me-1 text-secondary"></i>
-                                <strong>{{ section.clinical_table.rows|length }}</strong> vital measurements
-                            </small>
+                                                {% if cell_data|safe_get:"has_terminology" %}
+                                                <div class="medical-terminology mt-1">
+                                                    {% for term in cell_data|safe_get:"terminology" %}
+                                                    <span class="badge bg-info me-1 mb-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
+                                                        <i class="fa-solid fa-tag me-1"></i>{{ term.display_name|default:term.code }}
+                                                    </span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endwith %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
-                        <div class="col-md-4">
-                            <small class="text-muted">
-                                <i class="fa-solid fa-chart-line me-1 text-info"></i>
-                                Trending available
-                            </small>
-                        </div>
-                        <div class="col-md-4">
-                            <small class="text-muted">
-                                <i class="fa-solid fa-clock me-1 text-primary"></i>
-                                Real-time monitoring
-                            </small>
+                    </div>
+
+                    <!-- Desktop Table Layout (hidden on mobile) -->
+                    <div class="d-none d-md-block">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover clinical-table">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        {% for header in section.clinical_table.headers %}
+                                        <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
+                                            <div class="th-content">
+                                                <span class="th-label">{{ header.label }}</span>
+                                                {% if header.type == 'vital' %}
+                                                <i class="fa-solid fa-heartbeat ms-1 terminology-indicator" title="Vital Sign"></i>
+                                                {% elif header.type == 'value' %}
+                                                <i class="fa-solid fa-tachometer-alt ms-1 terminology-indicator" title="Measurement Value"></i>
+                                                {% elif header.type == 'unit' %}
+                                                <i class="fa-solid fa-ruler ms-1 terminology-indicator" title="Unit of Measure"></i>
+                                                {% elif header.type == 'date' %}
+                                                <i class="fa-solid fa-calendar-alt ms-1 terminology-indicator" title="Measurement Date"></i>
+                                                {% elif header.type == 'range' %}
+                                                <i class="fa-solid fa-arrows-alt-h ms-1 terminology-indicator" title="Normal Range"></i>
+                                                {% endif %}
+                                            </div>
+                                        </th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in section.clinical_table.rows %}
+                                    <tr>
+                                        {% for header in section.clinical_table.headers %}
+                                        {% with cell_data=row.data|lookup:header.key %}
+                                        <td>
+                                            {% if header.primary %}
+                                            <div class="primary-field">
+                                                <strong class="text-secondary">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</strong>
+                                                {% if cell_data|safe_get:"has_terminology" %}
+                                                <div class="medical-terminology mt-1">
+                                                    {% for term in cell_data|safe_get:"terminology" %}
+                                                    <span class="badge bg-secondary me-1"
+                                                        title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
+                                                        {{ term.display_name|default:term.code }}
+                                                    </span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            {% else %}
+                                            <div class="cell-content">
+                                                {% if cell_data|safe_get:"has_codes" %}
+                                                <div class="medical-codes-container">
+                                                    {% for code in cell_data|safe_get:"codes" %}
+                                                    <span class="badge bg-secondary me-1 mb-1"
+                                                        title="{{ code.system|default:'Unknown' }}: {{ code.code }}">
+                                                        {{ code.display_name|default:code.code }}
+                                                    </span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% else %}
+                                                {% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}
+                                                {% endif %}
+                                            </div>
+                                            {% endif %}
+                                        </td>
+                                        {% endwith %}
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -147,21 +183,27 @@
 
             <!-- Original Content Tab -->
             <div id="vital_signs_{{ section_index }}_original" class="clinical-tab-content">
-                {% include 'patient_data/sections/original_content.html' %}
+                <div class="section-content-area">
+                    {% if section.original_content %}
+                    <div class="original-content-display">
+                        {{ section.original_content|safe }}
+                    </div>
+                    {% else %}
+                    <div class="no-content-message">
+                        <i class="fa-solid fa-info-circle me-2"></i>
+                        <span>No original content available for this section.</span>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
-
-        {% elif section.has_entries %}
-        <!-- Simple List Section for vital signs without clinical tables -->
-        {% include 'patient_data/sections/simple_list_section.html' %}
-
         {% else %}
-        <!-- Empty Vital Signs Section -->
-        <div class="card-body text-center py-5">
-            <div class="text-info">
-                <i class="fa-solid fa-info-circle fa-3x mb-3"></i>
-                <h6 class="text-info">No Vital Signs</h6>
-                <p class="text-muted">No vital sign measurements available for this patient</p>
+        <!-- No Entries State -->
+        <div class="card-body">
+            <div class="no-entries-message text-center py-4">
+                <i class="fa-solid fa-heartbeat fa-3x text-muted mb-3"></i>
+                <h6 class="text-muted">No Vital Signs Data Available</h6>
+                <p class="text-muted small">This section does not contain any vital signs information.</p>
             </div>
         </div>
         {% endif %}

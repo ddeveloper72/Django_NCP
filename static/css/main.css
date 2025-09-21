@@ -13617,7 +13617,8 @@ button.nav-link i {
     align-items: flex-start;
     gap: 0.5rem;
   }
-  .medical-codes-container-mobile .medical-code-item .badge, .medical-codes-container-mobile .medical-code-item code {
+  .medical-codes-container-mobile .medical-code-item .badge,
+  .medical-codes-container-mobile .medical-code-item code {
     margin: 0 0.25rem 0.25rem 0;
   }
 }
