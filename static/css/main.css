@@ -13514,6 +13514,130 @@ button.nav-link i {
   opacity: 1 !important;
 }
 
+.clinical-cards-container {
+  padding: 0.5rem 0;
+}
+
+.clinical-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.clinical-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.clinical-card.border-success {
+  border-left: 4px solid #28a745;
+  background: linear-gradient(to right, rgba(40, 167, 69, 0.05) 0%, transparent 100%);
+}
+
+.clinical-field {
+  border-bottom: 1px solid #f1f3f4;
+}
+.clinical-field:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+.clinical-field.primary-field-mobile {
+  background: linear-gradient(to right, rgba(0, 133, 233, 0.05) 0%, transparent 100%);
+  padding: 0.75rem;
+  margin: -0.5rem -0.75rem 0.5rem -0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(0, 133, 233, 0.1);
+}
+
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+}
+.field-label .terminology-indicator {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+.field-value {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.field-value .primary-field-content strong {
+  font-size: 1rem;
+  color: #212529;
+}
+.field-value .field-content {
+  color: #495057;
+}
+
+.medical-codes-container-mobile .medical-code-item {
+  gap: 0.25rem;
+}
+.medical-codes-container-mobile .medical-code-item .badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+}
+.medical-codes-container-mobile .medical-code-item code {
+  font-size: 0.75rem;
+  background: #f8f9fa;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  border: 1px solid #dee2e6;
+}
+
+.medical-terminology .badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+}
+.medical-terminology .badge .fa-tag {
+  font-size: 0.6rem;
+}
+
+@media (max-width: 767.98px) {
+  .clinical-cards-container {
+    padding: 0.25rem 0;
+  }
+  .clinical-card {
+    margin-bottom: 1rem;
+  }
+  .clinical-card .card-body {
+    padding: 0.75rem;
+  }
+  .clinical-field {
+    margin-bottom: 0.75rem;
+  }
+  .clinical-field.primary-field-mobile {
+    margin: -0.25rem -0.5rem 0.5rem -0.5rem;
+    padding: 0.5rem;
+  }
+  .field-label {
+    margin-bottom: 0.25rem;
+  }
+  .medical-codes-container-mobile .medical-code-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .medical-codes-container-mobile .medical-code-item .badge, .medical-codes-container-mobile .medical-code-item code {
+    margin: 0 0.25rem 0.25rem 0;
+  }
+}
+@media (min-width: 640px) {
+  .clinical-cards-container {
+    padding: 0.75rem 0;
+  }
+  .clinical-card .card-body {
+    padding: 1rem;
+  }
+  .clinical-field.primary-field-mobile {
+    padding: 0.75rem;
+    margin: -0.5rem -0.75rem 0.75rem -0.75rem;
+  }
+}
+@media (min-width: 768px) {
+  .clinical-cards-container {
+    display: none !important;
+  }
+}
 .uploaded-document-view {
   max-width: 1200px;
   margin: 0 auto;
@@ -14266,3 +14390,5 @@ button.nav-link i {
 .pb-xl {
   padding-bottom: 2rem;
 }
+
+/*# sourceMappingURL=main.css.map */

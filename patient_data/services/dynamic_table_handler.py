@@ -374,10 +374,12 @@ class DynamicClinicalTableHandler:
         """Apply type-specific formatting to cell data"""
 
         if column_type == "date":
+            date_formats = self._format_date_for_mobile(cell_data["value"])
             return {
                 "value": cell_data["value"],
                 "type": "date",
                 "formatted": self._format_date_display(cell_data["value"]),
+                "mobile_formats": date_formats,
                 "source_field": cell_data.get("source_field"),
             }
 
@@ -425,7 +427,7 @@ class DynamicClinicalTableHandler:
         return status_map.get(status_value.lower(), "badge bg-light")
 
     def _format_date_display(self, date_value: str) -> str:
-        """Format date for display"""
+        """Format date for display with mobile-friendly options"""
         if not date_value or date_value == "Not specified":
             return "Not specified"
 
@@ -435,11 +437,49 @@ class DynamicClinicalTableHandler:
                 year = date_value[:4]
                 month = date_value[4:6]
                 day = date_value[6:8]
+                # Return formatted date
                 return f"{day}/{month}/{year}"
             except:
                 pass
 
         return date_value
+
+    def _format_date_for_mobile(self, date_value: str) -> Dict[str, str]:
+        """Format date with mobile-friendly display options"""
+        if not date_value or date_value == "Not specified":
+            return {
+                "short": "N/A",
+                "long": "Not specified",
+                "mobile": "Not specified"
+            }
+
+        # Handle HL7 format
+        if len(date_value) >= 8 and date_value.isdigit():
+            try:
+                year = date_value[:4]
+                month = date_value[4:6]
+                day = date_value[6:8]
+                
+                # Create different format options
+                month_names = {
+                    "01": "Jan", "02": "Feb", "03": "Mar", "04": "Apr",
+                    "05": "May", "06": "Jun", "07": "Jul", "08": "Aug",
+                    "09": "Sep", "10": "Oct", "11": "Nov", "12": "Dec"
+                }
+                
+                return {
+                    "short": f"{day}/{month}/{year[-2:]}",  # 15/03/24
+                    "long": f"{day}/{month}/{year}",        # 15/03/2024
+                    "mobile": f"{day} {month_names.get(month, month)} {year}"  # 15 Mar 2024
+                }
+            except:
+                pass
+
+        return {
+            "short": date_value,
+            "long": date_value,
+            "mobile": date_value
+        }
 
     def _calculate_table_metrics(self, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Calculate enhanced table metrics"""
