@@ -1,6 +1,12 @@
 {% extends "admin/index.html" %}
 {% load i18n static %}
 
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} admin-dashboard{% endblock %}
+
 {% block content %}
 {{ block.super }}
 
@@ -44,33 +50,4 @@
         </tbody>
     </table>
 </div>
-
-<style>
-    #test-data-management {
-        margin-top: 20px;
-    }
-
-    #test-data-management caption {
-        background: linear-gradient(135deg, #2c3e50, #3498db);
-        color: white;
-        font-weight: bold;
-        padding: 8px 12px;
-        border-radius: 4px 4px 0 0;
-    }
-
-    #test-data-management caption a {
-        color: white;
-        text-decoration: none;
-    }
-
-    #test-data-management .model-row th {
-        background: #f8f9fa;
-        font-weight: bold;
-        color: #2c3e50;
-    }
-
-    #test-data-management .model-row:hover {
-        background: #f1f3f4;
-    }
-</style>
 {% endblock %}
