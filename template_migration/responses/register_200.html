@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - EU NCP Portal</title>
+
+    <!-- CLEAN CSS ARCHITECTURE - September 20, 2025 -->
+    <!-- External Dependencies (DMZ Compliant) -->
+    <link href="/static/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/vendor/fontawesome/fontawesome.min.css">
+
+    <!-- All Custom Styles - Compiled from SASS -->
+    <link href="/static/css/main.css?v=1758382187" rel="stylesheet" media="screen">
+
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#005eb8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="EU NCP Portal">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+    <meta name="msapplication-TileColor" content="#005eb8">
+    <meta name="msapplication-TileImage" content="/static/icons/icon-144x144.png">
+
+     
+</head>
+
+<body>
+    <!-- Navigation Header - Healthcare Theme -->
+    
+    <!-- Standard Navigation Bar for other pages -->
+    <nav id="main-navigation" class="navbar navbar-expand-lg navbar-light bg-white border-bottom" role="navigation" aria-label="Main navigation">
+        <div class="container-fluid px-4">
+            <a href="/" class="navbar-brand d-flex align-items-center">
+                <i class="fas fa-hospital text-primary me-2"></i>
+                <span class="fw-bold text-primary">EU NCP Portal</span>
+            </a>
+
+            <!-- Mobile toggle button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-nav" aria-controls="navbar-nav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Main Navigation -->
+            <div class="collapse navbar-collapse" id="navbar-nav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link ">
+                            <i class="fas fa-home me-1"></i>
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/patients/search/" class="nav-link ">
+                            <i class="fas fa-search me-1"></i>
+                            Patient Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/portal/" class="nav-link ">
+                            <i class="fas fa-globe me-1"></i>
+                            Portal
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/smp/" class="nav-link ">
+                            <i class="fas fa-network-wired me-1"></i>
+                            SMP Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/" class="nav-link ">
+                            <i class="fas fa-cog me-1"></i>
+                            Admin
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Enhanced Login Status Indicator -->
+                <div class="d-flex align-items-center">
+                    
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted me-3">
+                            <i class="fas fa-user me-1"></i>
+                            Not logged in
+                        </span>
+                        <a href="/accounts/login/" class="btn btn-primary btn-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i>
+                            Login
+                        </a>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Breadcrumb/Context Area -->
+    
+
+    
+
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="container-fluid py-4" role="main" aria-label="Main content">
+        
+
+        
+<div class="auth-container">
+    <div class="container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fa fa-user-plus"></i>
+                </div>
+                <h1 class="auth-title">Create Account</h1>
+                <p class="auth-subtitle">Join the EU eHealth NCP Portal</p>
+            </div>
+
+            <div class="auth-body">
+                
+
+                
+
+                <form method="post">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="KDcq5Mfl4T3tTchP487mwOlkJdOIwWTeDvqDlkEKct2LSzg1tQsA0XuIRa4wxCYp">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_first_name" class="form-label">
+                                <i class="fa fa-user"></i> First Name
+                            </label>
+                            <input type="text" class="form-control" id="id_first_name"
+                                name="first_name" value=""
+                                placeholder="Enter first name" required>
+                            
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_last_name" class="form-label">
+                                <i class="fa fa-user"></i> Last Name
+                            </label>
+                            <input type="text" class="form-control" id="id_last_name"
+                                name="last_name" value=""
+                                placeholder="Enter last name" required>
+                            
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_username" class="form-label">
+                            <i class="fa fa-at"></i> Username
+                        </label>
+                        <input type="text" class="form-control" id="id_username"
+                            name="username" value=""
+                            placeholder="Choose a username" required>
+                        
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_email" class="form-label">
+                            <i class="fa fa-envelope"></i> Email Address
+                        </label>
+                        <input type="email" class="form-control" id="id_email"
+                            name="email" value=""
+                            placeholder="Enter your email" required>
+                        
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password1" class="form-label">
+                            <i class="fa fa-key"></i> Password
+                        </label>
+                        <input type="password" class="form-control" id="id_password1"
+                            name="password1" placeholder="Enter password" required>
+                        
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password2" class="form-label">
+                            <i class="fa fa-key"></i> Confirm Password
+                        </label>
+                        <input type="password" class="form-control" id="id_password2"
+                            name="password2" placeholder="Confirm password" required>
+                        
+                    </div>
+
+                    <div class="requirements-box">
+                        <div class="requirements-title">
+                            <i class="fa fa-shield"></i> Password Requirements
+                        </div>
+                        <ul class="requirements-list">
+                            <li>At least 8 characters long</li>
+                            <li>Not entirely numeric</li>
+                            <li>Not too common or simple</li>
+                            <li>Different from your personal information</li>
+                        </ul>
+                    </div>
+
+                    <button type="submit" class="btn-auth">
+                        <i class="fa fa-user-plus"></i> Create Account
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    <p class="auth-register-prompt">
+                        Already have an account?
+                    </p>
+                    <a href="/accounts/login/" class="btn-auth btn-secondary">
+                        <i class="fa fa-sign-in"></i> Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5" role="contentinfo" aria-label="Site footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5 class="text-primary">EU eHealth NCP Portal</h5>
+                    <p class="small">Cross-border healthcare document exchange system built with Django and powered by secure medical data standards.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-light">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-light text-decoration-none">Home</a></li>
+                        <li><a href="/patients/search/" class="text-light text-decoration-none">Patient Search</a></li>
+                        <li><a href="/portal/" class="text-light text-decoration-none">Portal</a></li>
+                        <li><a href="/admin/" class="text-light text-decoration-none">Administration</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-light">Technical Info</h6>
+                    <p class="small mb-1">Django  | Python </p>
+                    <p class="small">Built for DMZ deployment</p>
+                </div>
+            </div>
+            <hr class="text-secondary">
+            <div class="text-center">
+                <p class="small mb-0">&copy; 2024 EU eHealth NCP Portal. Compliant with European Cross-Border Healthcare Standards.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <!-- Navigation JavaScript -->
+    <script src="/static/js/navigation.js"></script>
+
+    <!-- Base JavaScript functionality -->
+    <script src="/static/js/base.js"></script>
+
+    <!-- Accessibility enhancements -->
+    <script src="/static/js/accessibility.js"></script>
+
+    <!-- Bootstrap 5.3.3 Local JavaScript (DMZ Compliant) -->
+    <script src="/static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful: ', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+    </script>
+
+     
+</body>
+
+</html>

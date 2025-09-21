@@ -1,0 +1,289 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django EU eHealth NCP Server</title>
+
+    <!-- CLEAN CSS ARCHITECTURE - September 20, 2025 -->
+    <!-- External Dependencies (DMZ Compliant) -->
+    <link href="/static/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/vendor/fontawesome/fontawesome.min.css">
+
+    <!-- All Custom Styles - Compiled from SASS -->
+    <link href="/static/css/main.css?v=1758382187" rel="stylesheet" media="screen">
+
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#005eb8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="EU NCP Portal">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+    <meta name="msapplication-TileColor" content="#005eb8">
+    <meta name="msapplication-TileImage" content="/static/icons/icon-144x144.png">
+
+     
+</head>
+
+<body>
+    <!-- Navigation Header - Healthcare Theme -->
+    
+    <!-- Homepage Hero Header -->
+    <header class="bg-primary text-white py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-12 text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-3">
+                        <i class="fas fa-hospital fa-3x me-3"></i>
+                        <div>
+                            <h1 class="display-4 fw-bold mb-0">EU eHealth NCP Portal</h1>
+                            <p class="lead mb-0">Cross-Border Healthcare Document Exchange Platform</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="container-fluid py-4" role="main" aria-label="Main content">
+        
+
+        
+<!-- Home page content will be contained within the hero header from base.html -->
+
+<section class="services-section">
+    <div class="container">
+        <h2>Your Health Services</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fa fa-search"></i>
+                </div>
+                <h3>Patient Search</h3>
+                <p>Search for patients across EU member states with break-the-glass emergency access capabilities.
+                    GDPR-compliant cross-border patient data retrieval.</p>
+                <a href="/patients/search/" class="service-link">Search Patients</a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fa fa-globe"></i>
+                </div>
+                <h3>Django Portal UI</h3>
+                <p>Full eHealth portal with European SMP integration, country-specific International Search Masks (ISM),
+                    and cross-border patient lookup capabilities.</p>
+                <a href="/portal/" class="service-link">Launch Portal</a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fa fa-cog"></i>
+                </div>
+                <h3>Django Admin</h3>
+                <p>Administrative interface for managing the eHealth system, user permissions, and system configuration.
+                    Full Django admin panel access.</p>
+                <a href="/admin/" class="service-link">Admin Panel</a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fa fa-network-wired"></i>
+                </div>
+                <h3>SMP Management</h3>
+                <p>Service Metadata Publishing for EU eHealth network. Manage participants, generate signed documents, and sync with European SMP servers.</p>
+                <a href="/smp/" class="service-link">SMP Dashboard</a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fa fa-file-medical-o"></i>
+                </div>
+                <h3>CDA Translation</h3>
+                <p>Convert between CDA (Clinical Document Architecture) and FHIR formats for interoperability across
+                    European healthcare systems.</p>
+                <a href="/translation/" class="service-link">Translation Services</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features-section">
+    <div class="container">
+        <h2>System Capabilities</h2>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fa fa-shield"></i>
+                </div>
+                <h4>GDPR Compliant</h4>
+                <p>Full compliance with European data protection regulations and healthcare privacy standards.</p>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fa fa-sitemap"></i>
+                </div>
+                <h4>Cross-Border Integration</h4>
+                <p>Seamless integration with EU member state healthcare systems through standardized protocols.</p>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fa fa-key"></i>
+                </div>
+                <h4>Emergency Access</h4>
+                <p>Break-the-glass capabilities for emergency patient data access across international borders.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="configuration-section">
+    <div class="container">
+        <h2>Active Configuration</h2>
+        <div class="config-grid">
+            <div class="config-card">
+                <div class="config-header">
+                    <i class="fa fa-server"></i>
+                    <h3>SMP Configuration</h3>
+                </div>
+                <div class="config-details">
+                    <p><strong>Source:</strong> European SMP (Test Environment)</p>
+                    <p><strong>Portal:</strong> <a href="https://smp-ehealth-trn.acc.edelivery.tech.ec.europa.eu" target="_blank"
+                            class="config-link">https://smp-ehealth-trn.acc.edelivery.tech.ec.europa.eu</a></p>
+                    <div class="config-note">
+                        <i class="fa fa-info-circle"></i>
+                        <span>Configuration is managed by administrators</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-card">
+                <div class="config-header">
+                    <i class="fas fa-code"></i>
+                    <h3>API Endpoints</h3>
+                </div>
+                <div class="api-list">
+                    <div class="api-item">
+                        <span class="api-method">GET</span>
+                        <a href="/api/countries/" class="api-endpoint">/api/countries/</a>
+                        <p>Get available EU countries with ISM support</p>
+                    </div>
+                    <div class="api-item">
+                        <span class="api-method">POST</span>
+                        <span class="api-endpoint">/api/patient/lookup/</span>
+                        <p>Cross-border patient lookup with country-specific validation</p>
+                    </div>
+                    <div class="api-item">
+                        <span class="api-method">GET</span>
+                        <span class="api-endpoint">/api/patient/{id}/document/{type}/</span>
+                        <p>Retrieve patient documents from European health systems</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="external-services-section">
+    <div class="container">
+        <h2>External Service Connections</h2>
+        <div class="external-grid">
+            <div class="external-card">
+                <div class="external-icon">
+                    <i class="fab fa-java"></i>
+                </div>
+                <h3>Java OpenNCP Portal</h3>
+                <p>Original Java-based portal integration</p>
+                <a href="http://localhost:8093" target="_blank" class="external-link">localhost:8093</a>
+            </div>
+
+            <div class="external-card">
+                <div class="external-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <h3>DomiSMP Server</h3>
+                <p>Service Metadata Publisher</p>
+                <a href="https://smp-ehealth-trn.acc.edelivery.tech.ec.europa.eu" target="_blank" class="external-link">https://smp-ehealth-trn.acc.edelivery.tech.ec.europa.eu</a>
+            </div>
+        </div>
+
+        <div class="status-indicator">
+            <div class="status-icon">
+                <i class="fa fa-check-circle"></i>
+            </div>
+            <span>All API endpoints are accessible without authentication for Java portal integration</span>
+        </div>
+    </div>
+</section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5" role="contentinfo" aria-label="Site footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5 class="text-primary">EU eHealth NCP Portal</h5>
+                    <p class="small">Cross-border healthcare document exchange system built with Django and powered by secure medical data standards.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-light">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-light text-decoration-none">Home</a></li>
+                        <li><a href="/patients/search/" class="text-light text-decoration-none">Patient Search</a></li>
+                        <li><a href="/portal/" class="text-light text-decoration-none">Portal</a></li>
+                        <li><a href="/admin/" class="text-light text-decoration-none">Administration</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-light">Technical Info</h6>
+                    <p class="small mb-1">Django  | Python </p>
+                    <p class="small">Built for DMZ deployment</p>
+                </div>
+            </div>
+            <hr class="text-secondary">
+            <div class="text-center">
+                <p class="small mb-0">&copy; 2024 EU eHealth NCP Portal. Compliant with European Cross-Border Healthcare Standards.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <!-- Navigation JavaScript -->
+    <script src="/static/js/navigation.js"></script>
+
+    <!-- Base JavaScript functionality -->
+    <script src="/static/js/base.js"></script>
+
+    <!-- Accessibility enhancements -->
+    <script src="/static/js/accessibility.js"></script>
+
+    <!-- Bootstrap 5.3.3 Local JavaScript (DMZ Compliant) -->
+    <script src="/static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful: ', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+    </script>
+
+     
+</body>
+
+</html>

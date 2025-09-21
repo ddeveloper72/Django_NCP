@@ -7056,6 +7056,453 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   background-color: #f59e0b;
 }
 
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.admin-section {
+  margin-bottom: 2rem;
+}
+
+.admin-contact-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+.admin-contact-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.admin-card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin: -1.5rem -1.5rem 1rem -1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+.admin-card-header i {
+  margin-right: 0.5rem;
+}
+
+.admin-info-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+.admin-info-row:last-child {
+  margin-bottom: 0;
+}
+
+.admin-label {
+  flex: 0 0 140px;
+  font-weight: 600;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+}
+.admin-label i {
+  margin-right: 0.5rem;
+  color: #667eea;
+}
+
+.admin-value {
+  flex: 1;
+  color: #2d3748;
+  line-height: 1.5;
+}
+
+.contact-info-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+.contact-info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: #007b7f;
+}
+.contact-info-card .contact-type {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+.contact-info-card .contact-type::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #007b7f, #4fd1c7);
+  border-radius: 12px 12px 0 0;
+}
+.contact-info-card .contact-details {
+  color: #2d3748;
+  line-height: 1.6;
+}
+.contact-info-card .contact-details strong {
+  color: #1a202c;
+  font-weight: 600;
+}
+.contact-info-card .contact-details .text-muted {
+  color: #718096;
+  font-size: 0.875rem;
+}
+.contact-info-card .contact-details.mt-2 {
+  margin-top: 0.5rem;
+}
+@media (max-width: 768px) {
+  .contact-info-card {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .contact-info-card .contact-type {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  .contact-info-card .contact-details {
+    font-size: 0.9rem;
+  }
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  color: #007b7f;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+.contact-link:hover {
+  color: #065f63;
+  background-color: rgba(0, 123, 127, 0.1);
+  text-decoration: none;
+  transform: translateX(2px);
+}
+.contact-link i {
+  margin-right: 0.5rem;
+  font-size: 0.875rem;
+}
+.contact-link.phone-link:before {
+  content: "📞";
+  margin-right: 0.25rem;
+}
+.contact-link.email-link:before {
+  content: "✉️";
+  margin-right: 0.25rem;
+}
+
+.professional-card .contact-details {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #007b7f;
+}
+
+.admin-contact-card .admin-info-row .admin-value .contact-item .contact-type {
+  background: #edf2f7;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 576px) {
+  .contact-info-card {
+    margin-bottom: 1rem;
+  }
+  .contact-info-card .contact-link {
+    display: block;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+}
+.admin-contact-card.patient-contact .admin-card-header {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  color: white;
+}
+.admin-contact-card.guardian-contact .admin-card-header {
+  background: linear-gradient(135deg, #8e7cc3 0%, #7b68a9 100%);
+  color: white;
+}
+.admin-contact-card.other-contact .admin-card-header {
+  background: linear-gradient(135deg, #4db6ac 0%, #42a29a 100%);
+  color: white;
+}
+.admin-contact-card.hcp-contact .admin-card-header {
+  background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+  color: white;
+}
+.admin-contact-card.legal-contact .admin-card-header {
+  background: linear-gradient(135deg, #fa8c16 0%, #d46b08 100%);
+  color: white;
+}
+.admin-contact-card.custodian-contact .admin-card-header {
+  background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
+  color: white;
+}
+.admin-contact-card.preferred-hcp-contact .admin-card-header {
+  background: linear-gradient(135deg, #eb2f96 0%, #c41d7f 100%);
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .admin-info-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+@media (max-width: 768px) {
+  .admin-info-row .admin-label {
+    flex: none;
+    margin-bottom: 0.25rem;
+  }
+}
+@media (max-width: 768px) {
+  .admin-info-row .admin-value {
+    margin-left: 1.5rem;
+  }
+}
+.admin-info-row .admin-value .badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+.admin-info-row .admin-value .badge.bg-info {
+  background-color: #36b9cc !important;
+}
+.admin-info-row .admin-value .badge.bg-secondary {
+  background-color: #858796 !important;
+}
+.admin-info-row .admin-value .badge.bg-primary {
+  background-color: #4e73df !important;
+}
+.admin-info-row .admin-value .badge.bg-warning {
+  background-color: #f6c23e !important;
+  color: #333 !important;
+}
+
+.admin-section.mb-4 {
+  margin-bottom: 1.5rem !important;
+}
+
+.contact-info-unified {
+  padding: 0;
+}
+
+.contact-card {
+  background: #ffffff;
+  border: 1px solid #e3f2fd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.contact-header {
+  color: #1976d2;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e3f2fd;
+}
+
+.contact-content {
+  color: #333;
+}
+
+.address-line {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: #2c3e50;
+}
+
+.address-details {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 0.75rem;
+}
+
+.detail-item {
+  display: flex;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #666;
+  min-width: 100px;
+  margin-right: 0.5rem;
+}
+
+.detail-value {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.telecom-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #1976d2;
+}
+
+.telecom-icon {
+  margin-right: 1rem;
+  font-size: 1.1rem;
+}
+
+.telecom-details {
+  flex-grow: 1;
+}
+
+.telecom-value {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.telecom-meta {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.section-title {
+  color: #1976d2;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e3f2fd;
+}
+
+.contact-section {
+  margin-top: 2rem;
+  padding-top: 1rem;
+}
+
+.language-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.guardian-card {
+  border-left: 4px solid #28a745;
+}
+.guardian-card .contact-header {
+  color: #28a745;
+  border-bottom-color: #d4edda;
+}
+
+.role-badge {
+  background: #28a745;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-left: 1rem;
+}
+
+.guardian-section {
+  margin-bottom: 1.5rem;
+}
+
+.guardian-subtitle {
+  color: #28a745;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.address-block {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 3px solid #28a745;
+}
+.address-block.compact {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.address-part {
+  margin-right: 0.5rem;
+  font-weight: 500;
+}
+
+.guardian-telecom {
+  background: #f8f9fa;
+  border-left-color: #28a745;
+}
+
+.other-contact-card {
+  border-left: 4px solid #17a2b8;
+}
+.other-contact-card .contact-header {
+  color: #17a2b8;
+  border-bottom-color: #d1ecf1;
+}
+.other-contact-card .role-badge {
+  background: #17a2b8;
+}
+
+.specialty-info {
+  color: #17a2b8;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: #d1ecf1;
+  border-radius: 4px;
+}
+
+.other-contact-section {
+  margin-bottom: 1rem;
+}
+
+.other-contact-subtitle {
+  color: #17a2b8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.telecom-item.compact {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+}
+
 .admin-section {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;

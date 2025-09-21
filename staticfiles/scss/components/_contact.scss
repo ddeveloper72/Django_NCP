@@ -52,7 +52,7 @@
 }
 
 .admin-label {
-  flex: 0 0 120px;
+  flex: 0 0 140px; // Increased from 120px to accommodate "Phone:", "Email:", etc.
   font-weight: 600;
   color: #4a5568;
   display: flex;
@@ -315,4 +315,206 @@
   &.mb-4 {
     margin-bottom: 1.5rem !important;
   }
+}
+
+// Extended Patient Contact Styles (extracted from template)
+.contact-info-unified {
+  padding: 0;
+}
+
+.contact-card {
+  background: #ffffff;
+  border: 1px solid #e3f2fd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.contact-header {
+  color: #1976d2;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e3f2fd;
+}
+
+.contact-content {
+  color: #333;
+}
+
+.address-line {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: #2c3e50;
+}
+
+.address-details {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 0.75rem;
+}
+
+.detail-item {
+  display: flex;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #666;
+  min-width: 100px;
+  margin-right: 0.5rem;
+}
+
+.detail-value {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.telecom-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #1976d2;
+}
+
+.telecom-icon {
+  margin-right: 1rem;
+  font-size: 1.1rem;
+}
+
+.telecom-details {
+  flex-grow: 1;
+}
+
+.telecom-value {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.telecom-meta {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+// Section titles
+.section-title {
+  color: #1976d2;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e3f2fd;
+}
+
+.contact-section {
+  margin-top: 2rem;
+  padding-top: 1rem;
+}
+
+// Language badges
+.language-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+// Guardian specific styles
+.guardian-card {
+  border-left: 4px solid #28a745;
+
+  .contact-header {
+    color: #28a745;
+    border-bottom-color: #d4edda;
+  }
+}
+
+.role-badge {
+  background: #28a745;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-left: 1rem;
+}
+
+.guardian-section {
+  margin-bottom: 1.5rem;
+}
+
+.guardian-subtitle {
+  color: #28a745;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.address-block {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 3px solid #28a745;
+
+  &.compact {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.address-part {
+  margin-right: 0.5rem;
+  font-weight: 500;
+}
+
+.guardian-telecom {
+  background: #f8f9fa;
+  border-left-color: #28a745;
+}
+
+// Other contacts specific styles
+.other-contact-card {
+  border-left: 4px solid #17a2b8;
+
+  .contact-header {
+    color: #17a2b8;
+    border-bottom-color: #d1ecf1;
+  }
+
+  .role-badge {
+    background: #17a2b8;
+  }
+}
+
+.specialty-info {
+  color: #17a2b8;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: #d1ecf1;
+  border-radius: 4px;
+}
+
+.other-contact-section {
+  margin-bottom: 1rem;
+}
+
+.other-contact-subtitle {
+  color: #17a2b8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.telecom-item.compact {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
 }

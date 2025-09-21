@@ -584,3 +584,404 @@ main {
   color: white !important;
   fill: white !important;
 }
+
+// ============================================================================
+// ADDITIONAL UNIFIED STYLES - EXTRACTED FROM TEMPLATE
+// ============================================================================
+// Contact Information Unified Styles
+// ----------------------------------------------------------------------------
+.contact-info-unified {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+}
+
+.contact-section-unified {
+  margin-bottom: 1.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.contact-section-title-unified {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.contact-card-unified {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+  padding: 1rem;
+}
+
+.contact-type-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: inline-block;
+}
+
+.contact-value-unified {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 500;
+  color: #212529;
+  word-break: break-all;
+}
+
+.address-line-unified {
+  margin-bottom: 0.25rem;
+  color: #495057;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Document Information Styles
+// ----------------------------------------------------------------------------
+.document-info-unified {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+}
+
+.document-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+.document-content {
+  color: #212529;
+}
+
+.document-type {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.document-standard {
+  display: block;
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: normal;
+  margin-top: 0.25rem;
+}
+
+.document-details {
+  margin-top: 1rem;
+}
+
+.detail-section-title {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// Status Badge Variations
+// ----------------------------------------------------------------------------
+.status-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-secure {
+  background: #cce7ff;
+  color: #004085;
+}
+
+.status-normal {
+  background: #fff3cd;
+  color: #856404;
+}
+
+// Document Meta Information
+// ----------------------------------------------------------------------------
+.document-meta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.meta-label {
+  font-weight: 500;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.meta-value {
+  font-weight: 500;
+  color: #212529;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.meta-code {
+  font-family: "Courier New", Courier, monospace;
+  background: #f8f9fa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  color: #495057;
+  border: 1px solid #e9ecef;
+}
+
+// Healthcare Information Styles
+// ----------------------------------------------------------------------------
+.healthcare-info-unified {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+}
+
+.healthcare-section {
+  margin-bottom: 1.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.healthcare-section-title {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.provider-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.provider-name {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.provider-role {
+  color: #28a745;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.provider-specialty {
+  color: #17a2b8;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.provider-details {
+  margin-top: 1rem;
+}
+
+.provider-detail-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 0.25rem;
+
+  i {
+    width: 1.25rem;
+    margin-right: 0.75rem;
+    color: #6c757d;
+  }
+}
+
+.organization-details {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  margin-top: 1rem;
+}
+
+.organization-name {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 0.75rem;
+}
+
+// Telecom Values
+// ----------------------------------------------------------------------------
+.telecom-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem !important;
+}
+
+.telecom-value {
+  font-weight: 500;
+  color: #212529;
+}
+
+.telecom-meta {
+  font-size: 0.8rem !important;
+  color: #6c757d !important;
+  margin-top: 0.1rem !important;
+}
+
+// Guardian Section Styles
+// ----------------------------------------------------------------------------
+.guardian-card .contact-header {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+}
+
+.guardian-section {
+  margin-bottom: 1rem;
+}
+
+.guardian-subtitle {
+  font-size: 0.85rem;
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 0.25rem;
+}
+
+// Custom Border & Background Utilities
+// ----------------------------------------------------------------------------
+.border-info-custom {
+  border-color: #b3d9ff !important;
+}
+
+.bg-info-light {
+  background-color: #f0f8ff !important;
+}
+
+// Enhanced Navigation Tabs for Patient Overview
+// ----------------------------------------------------------------------------
+.nav-tabs-healthcare .nav-link,
+.nav-tabs .nav-link,
+button.nav-link {
+  background-color: #ffffff !important;
+  border: 2px solid #0085e9 !important;
+  color: #0085e9 !important;
+  border-radius: 0.375rem !important;
+  padding: 0.5rem 1rem !important;
+  margin-right: 0.5rem !important;
+  transition: all 0.3s ease-in-out !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+  border-bottom: 2px solid #0085e9 !important;
+
+  // Hover state
+  &:hover {
+    background-color: #0085e9 !important;
+    border-color: #0085e9 !important;
+    color: #1a1a1a !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 133, 233, 0.3) !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+    border-bottom: 2px solid #0085e9 !important;
+
+    i {
+      color: #1a1a1a !important;
+      opacity: 1 !important;
+    }
+  }
+
+  // Active state
+  &.active {
+    background-color: #0085e9 !important;
+    border-color: #0085e9 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 133, 233, 0.3) !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+    border-bottom: 2px solid #0085e9 !important;
+
+    i {
+      color: #ffffff !important;
+      opacity: 1 !important;
+    }
+
+    &:hover {
+      background-color: #0070c7 !important;
+      border-color: #0070c7 !important;
+      color: #ffffff !important;
+      transform: translateY(-1px) !important;
+      opacity: 1 !important;
+      text-shadow: none !important;
+      border-bottom: 2px solid #0070c7 !important;
+
+      i {
+        color: #ffffff !important;
+        opacity: 1 !important;
+      }
+    }
+  }
+
+  // Icons
+  i {
+    color: #0085e9 !important;
+    transition: color 0.3s ease-in-out !important;
+    opacity: 1 !important;
+  }
+}
