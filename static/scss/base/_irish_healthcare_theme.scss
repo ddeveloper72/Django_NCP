@@ -1228,7 +1228,7 @@ h6.bg-secondary {
   letter-spacing: 0.3px;
 }
 
-/* Fix Blue Text on Colored Backgrounds - Force White Text for Better Contrast */
+/* Fix Blue Text on Colored Backgrounds - Use HSE-compliant white text for better contrast */
 .accordion-header h4,
 .accordion-header h5,
 .accordion-header h6,
@@ -1264,9 +1264,7 @@ h6.bg-secondary {
 .bg-secondary h4,
 .bg-secondary h5,
 .bg-secondary h6 {
-  color: var(--healthcare-text-grey) !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-  font-weight: 700 !important;
+  @include text-on-blue-bg;
 }
 
 /* FontAwesome Icons - Enhanced Styling with Context-Aware Colors */
@@ -1423,13 +1421,31 @@ i.fab {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Icon hover effects for interactive elements - exclude navigation and tab buttons */
-.card-header:not(.tab-button):hover i.fa-solid,
-.card-header:not(.tab-button):hover i.far,
-.card-header:not(.tab-button):hover i.fab,
-.section-header:not(.tab-button):hover i.fa-solid,
-.section-header:not(.tab-button):hover i.far,
-.section-header:not(.tab-button):hover i.fab,
+/* Icon hover effects for interactive elements - exclude navigation, tab buttons, and colored backgrounds */
+.card-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(
+    .bg-info
+  ):hover
+  i.fa-solid,
+.card-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(
+    .bg-info
+  ):hover
+  i.far,
+.card-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(
+    .bg-info
+  ):hover
+  i.fab,
+.section-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(
+    .bg-info
+  ):hover
+  i.fa-solid,
+.section-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(
+    .bg-info
+  ):hover
+  i.far,
+.section-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(
+    .bg-info
+  ):hover
+  i.fab,
 .breadcrumb-link:hover i.fa-solid,
 .breadcrumb-link:hover i.far,
 .breadcrumb-link:hover i.fab {

@@ -37,33 +37,33 @@
 
                 <div class="card-body">
                     <div class="row mb-4">
-                        <div class="col-md-4">
-                            <div class="card border-info">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title text-info">
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-info h-100">
+                                <div class="card-body text-center d-flex flex-column justify-content-between" style="min-height: 120px;">
+                                    <h5 class="card-title text-info mb-3">
                                         <i class="fa-solid fa-users"></i> Total Patients
                                     </h5>
-                                    <h2 class="text-info">{{ total_patients }}</h2>
+                                    <h2 class="text-info mb-0 display-4">{{ total_patients }}</h2>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card border-success">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title text-success">
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-success h-100">
+                                <div class="card-body text-center d-flex flex-column justify-content-between" style="min-height: 120px;">
+                                    <h5 class="card-title text-success mb-3">
                                         <i class="fa-solid fa-globe"></i> Countries
                                     </h5>
-                                    <h2 class="text-success">{{ total_countries }}</h2>
+                                    <h2 class="text-success mb-0 display-4">{{ total_countries }}</h2>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card border-warning">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title text-warning">
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-warning h-100">
+                                <div class="card-body text-center d-flex flex-column justify-content-between" style="min-height: 120px;">
+                                    <h5 class="card-title text-warning mb-3">
                                         <i class="fa-solid fa-file-medical"></i> Status
                                     </h5>
-                                    <h6 class="text-warning">Test Data</h6>
+                                    <h2 class="text-warning mb-0 display-6">Test Data</h2>
                                 </div>
                             </div>
                         </div>
@@ -79,24 +79,24 @@
                                     </h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="row">
+                                    <div class="row g-3">
                                         {% for patient in patients %}
-                                            <div class="col-md-6 col-lg-4 mb-3">
-                                                <div class="card border-secondary h-100">
-                                                    <div class="card-body">
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="card service-card border-secondary h-100">
+                                                    <div class="card-body d-flex flex-column">
                                                         <h6 class="card-title">
                                                             <i class="fa-solid fa-user"></i>
                                                             {{ patient.family_name }}, {{ patient.given_name }}
                                                         </h6>
-                                                        <p class="card-text">
-                                                            <small class="text-muted">
+                                                        <p class="card-text flex-grow-1">
+                                                            <small class="text-secondary-accessible">
                                                                 <strong>Patient ID:</strong> {{ patient.patient_id }}<br>
                                                                 <strong>Country:</strong> {{ patient.country_code }}<br>
                                                                 <strong>Documents:</strong>
                                                                 {{ patient.l1_count }} L1, {{ patient.l3_count }} L3
                                                             </small>
                                                         </p>
-                                                        <div class="btn-group w-100" role="group">
+                                                        <div class="btn-group w-100 mt-auto" role="group">
                                                             <a href="{% url 'patient_data:direct_patient' patient_id=patient.patient_id %}"
                                                                class="btn btn-outline-primary btn-sm">
                                                                 <i class="fa-solid fa-eye"></i> View Details

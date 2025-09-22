@@ -60,7 +60,7 @@
     $hse-primary-teal-light 50%,
     $hse-secondary-green 100%
   );
-  color: var(--healthcare-text-grey);
+  @include text-on-blue-bg;
   padding: $space-xxl $space-md;
   overflow: hidden;
 

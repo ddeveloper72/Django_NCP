@@ -1150,7 +1150,7 @@ body {
 
 /* Healthcare Footer Styling */
 .footer {
-  background-color: var(--healthcare-navy);
+  background-color: var(--healthcare-charcoal);
   color: var(--healthcare-white);
   padding: 2rem 0;
   margin-top: 3rem;
@@ -1168,7 +1168,7 @@ body {
 
 /* Footer Dark Background Enhancement */
 footer.bg-dark {
-  background-color: var(--healthcare-navy) !important;
+  background-color: var(--healthcare-charcoal) !important;
   color: var(--healthcare-white) !important;
 }
 
@@ -1405,7 +1405,7 @@ h6.bg-secondary {
   letter-spacing: 0.3px;
 }
 
-/* Fix Blue Text on Colored Backgrounds - Force White Text for Better Contrast */
+/* Fix Blue Text on Colored Backgrounds - Use HSE-compliant white text for better contrast */
 .accordion-header h4,
 .accordion-header h5,
 .accordion-header h6,
@@ -1441,9 +1441,400 @@ h6.bg-secondary {
 .bg-secondary h4,
 .bg-secondary h5,
 .bg-secondary h6 {
-  color: var(--healthcare-text-grey) !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-  font-weight: 700 !important;
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.accordion-header h4 i,
+.accordion-header h4 .fa-solid,
+.accordion-header h4 .fa-regular,
+.accordion-header h4 .fa-light,
+.accordion-header h4 .fa-brands,
+.accordion-header h5 i,
+.accordion-header h5 .fa-solid,
+.accordion-header h5 .fa-regular,
+.accordion-header h5 .fa-light,
+.accordion-header h5 .fa-brands,
+.accordion-header h6 i,
+.accordion-header h6 .fa-solid,
+.accordion-header h6 .fa-regular,
+.accordion-header h6 .fa-light,
+.accordion-header h6 .fa-brands,
+.accordion-button i,
+.accordion-button .fa-solid,
+.accordion-button .fa-regular,
+.accordion-button .fa-light,
+.accordion-button .fa-brands,
+.clinical-accordion-item .accordion-button i,
+.clinical-accordion-item .accordion-button .fa-solid,
+.clinical-accordion-item .accordion-button .fa-regular,
+.clinical-accordion-item .accordion-button .fa-light,
+.clinical-accordion-item .accordion-button .fa-brands,
+.card-header h1 i,
+.card-header h1 .fa-solid,
+.card-header h1 .fa-regular,
+.card-header h1 .fa-light,
+.card-header h1 .fa-brands,
+.card-header h2 i,
+.card-header h2 .fa-solid,
+.card-header h2 .fa-regular,
+.card-header h2 .fa-light,
+.card-header h2 .fa-brands,
+.card-header h3 i,
+.card-header h3 .fa-solid,
+.card-header h3 .fa-regular,
+.card-header h3 .fa-light,
+.card-header h3 .fa-brands,
+.card-header h4 i,
+.card-header h4 .fa-solid,
+.card-header h4 .fa-regular,
+.card-header h4 .fa-light,
+.card-header h4 .fa-brands,
+.card-header h5 i,
+.card-header h5 .fa-solid,
+.card-header h5 .fa-regular,
+.card-header h5 .fa-light,
+.card-header h5 .fa-brands,
+.card-header h6 i,
+.card-header h6 .fa-solid,
+.card-header h6 .fa-regular,
+.card-header h6 .fa-light,
+.card-header h6 .fa-brands,
+.section-header h1 i,
+.section-header h1 .fa-solid,
+.section-header h1 .fa-regular,
+.section-header h1 .fa-light,
+.section-header h1 .fa-brands,
+.section-header h2 i,
+.section-header h2 .fa-solid,
+.section-header h2 .fa-regular,
+.section-header h2 .fa-light,
+.section-header h2 .fa-brands,
+.section-header h3 i,
+.section-header h3 .fa-solid,
+.section-header h3 .fa-regular,
+.section-header h3 .fa-light,
+.section-header h3 .fa-brands,
+.section-header h4 i,
+.section-header h4 .fa-solid,
+.section-header h4 .fa-regular,
+.section-header h4 .fa-light,
+.section-header h4 .fa-brands,
+.section-header h5 i,
+.section-header h5 .fa-solid,
+.section-header h5 .fa-regular,
+.section-header h5 .fa-light,
+.section-header h5 .fa-brands,
+.section-header h6 i,
+.section-header h6 .fa-solid,
+.section-header h6 .fa-regular,
+.section-header h6 .fa-light,
+.section-header h6 .fa-brands,
+.bg-primary h1 i,
+.bg-primary h1 .fa-solid,
+.bg-primary h1 .fa-regular,
+.bg-primary h1 .fa-light,
+.bg-primary h1 .fa-brands,
+.bg-primary h2 i,
+.bg-primary h2 .fa-solid,
+.bg-primary h2 .fa-regular,
+.bg-primary h2 .fa-light,
+.bg-primary h2 .fa-brands,
+.bg-primary h3 i,
+.bg-primary h3 .fa-solid,
+.bg-primary h3 .fa-regular,
+.bg-primary h3 .fa-light,
+.bg-primary h3 .fa-brands,
+.bg-primary h4 i,
+.bg-primary h4 .fa-solid,
+.bg-primary h4 .fa-regular,
+.bg-primary h4 .fa-light,
+.bg-primary h4 .fa-brands,
+.bg-primary h5 i,
+.bg-primary h5 .fa-solid,
+.bg-primary h5 .fa-regular,
+.bg-primary h5 .fa-light,
+.bg-primary h5 .fa-brands,
+.bg-primary h6 i,
+.bg-primary h6 .fa-solid,
+.bg-primary h6 .fa-regular,
+.bg-primary h6 .fa-light,
+.bg-primary h6 .fa-brands,
+.bg-info h1 i,
+.bg-info h1 .fa-solid,
+.bg-info h1 .fa-regular,
+.bg-info h1 .fa-light,
+.bg-info h1 .fa-brands,
+.bg-info h2 i,
+.bg-info h2 .fa-solid,
+.bg-info h2 .fa-regular,
+.bg-info h2 .fa-light,
+.bg-info h2 .fa-brands,
+.bg-info h3 i,
+.bg-info h3 .fa-solid,
+.bg-info h3 .fa-regular,
+.bg-info h3 .fa-light,
+.bg-info h3 .fa-brands,
+.bg-info h4 i,
+.bg-info h4 .fa-solid,
+.bg-info h4 .fa-regular,
+.bg-info h4 .fa-light,
+.bg-info h4 .fa-brands,
+.bg-info h5 i,
+.bg-info h5 .fa-solid,
+.bg-info h5 .fa-regular,
+.bg-info h5 .fa-light,
+.bg-info h5 .fa-brands,
+.bg-info h6 i,
+.bg-info h6 .fa-solid,
+.bg-info h6 .fa-regular,
+.bg-info h6 .fa-light,
+.bg-info h6 .fa-brands,
+.bg-secondary h1 i,
+.bg-secondary h1 .fa-solid,
+.bg-secondary h1 .fa-regular,
+.bg-secondary h1 .fa-light,
+.bg-secondary h1 .fa-brands,
+.bg-secondary h2 i,
+.bg-secondary h2 .fa-solid,
+.bg-secondary h2 .fa-regular,
+.bg-secondary h2 .fa-light,
+.bg-secondary h2 .fa-brands,
+.bg-secondary h3 i,
+.bg-secondary h3 .fa-solid,
+.bg-secondary h3 .fa-regular,
+.bg-secondary h3 .fa-light,
+.bg-secondary h3 .fa-brands,
+.bg-secondary h4 i,
+.bg-secondary h4 .fa-solid,
+.bg-secondary h4 .fa-regular,
+.bg-secondary h4 .fa-light,
+.bg-secondary h4 .fa-brands,
+.bg-secondary h5 i,
+.bg-secondary h5 .fa-solid,
+.bg-secondary h5 .fa-regular,
+.bg-secondary h5 .fa-light,
+.bg-secondary h5 .fa-brands,
+.bg-secondary h6 i,
+.bg-secondary h6 .fa-solid,
+.bg-secondary h6 .fa-regular,
+.bg-secondary h6 .fa-light,
+.bg-secondary h6 .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.accordion-header h4:hover,
+.accordion-header h5:hover,
+.accordion-header h6:hover,
+.accordion-button:hover,
+.clinical-accordion-item .accordion-button:hover,
+.card-header h1:hover,
+.card-header h2:hover,
+.card-header h3:hover,
+.card-header h4:hover,
+.card-header h5:hover,
+.card-header h6:hover,
+.section-header h1:hover,
+.section-header h2:hover,
+.section-header h3:hover,
+.section-header h4:hover,
+.section-header h5:hover,
+.section-header h6:hover,
+.bg-primary h1:hover,
+.bg-primary h2:hover,
+.bg-primary h3:hover,
+.bg-primary h4:hover,
+.bg-primary h5:hover,
+.bg-primary h6:hover,
+.bg-info h1:hover,
+.bg-info h2:hover,
+.bg-info h3:hover,
+.bg-info h4:hover,
+.bg-info h5:hover,
+.bg-info h6:hover,
+.bg-secondary h1:hover,
+.bg-secondary h2:hover,
+.bg-secondary h3:hover,
+.bg-secondary h4:hover,
+.bg-secondary h5:hover,
+.bg-secondary h6:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.accordion-header h4:hover i,
+.accordion-header h4:hover .fa-solid,
+.accordion-header h4:hover .fa-regular,
+.accordion-header h4:hover .fa-light,
+.accordion-header h4:hover .fa-brands,
+.accordion-header h5:hover i,
+.accordion-header h5:hover .fa-solid,
+.accordion-header h5:hover .fa-regular,
+.accordion-header h5:hover .fa-light,
+.accordion-header h5:hover .fa-brands,
+.accordion-header h6:hover i,
+.accordion-header h6:hover .fa-solid,
+.accordion-header h6:hover .fa-regular,
+.accordion-header h6:hover .fa-light,
+.accordion-header h6:hover .fa-brands,
+.accordion-button:hover i,
+.accordion-button:hover .fa-solid,
+.accordion-button:hover .fa-regular,
+.accordion-button:hover .fa-light,
+.accordion-button:hover .fa-brands,
+.clinical-accordion-item .accordion-button:hover i,
+.clinical-accordion-item .accordion-button:hover .fa-solid,
+.clinical-accordion-item .accordion-button:hover .fa-regular,
+.clinical-accordion-item .accordion-button:hover .fa-light,
+.clinical-accordion-item .accordion-button:hover .fa-brands,
+.card-header h1:hover i,
+.card-header h1:hover .fa-solid,
+.card-header h1:hover .fa-regular,
+.card-header h1:hover .fa-light,
+.card-header h1:hover .fa-brands,
+.card-header h2:hover i,
+.card-header h2:hover .fa-solid,
+.card-header h2:hover .fa-regular,
+.card-header h2:hover .fa-light,
+.card-header h2:hover .fa-brands,
+.card-header h3:hover i,
+.card-header h3:hover .fa-solid,
+.card-header h3:hover .fa-regular,
+.card-header h3:hover .fa-light,
+.card-header h3:hover .fa-brands,
+.card-header h4:hover i,
+.card-header h4:hover .fa-solid,
+.card-header h4:hover .fa-regular,
+.card-header h4:hover .fa-light,
+.card-header h4:hover .fa-brands,
+.card-header h5:hover i,
+.card-header h5:hover .fa-solid,
+.card-header h5:hover .fa-regular,
+.card-header h5:hover .fa-light,
+.card-header h5:hover .fa-brands,
+.card-header h6:hover i,
+.card-header h6:hover .fa-solid,
+.card-header h6:hover .fa-regular,
+.card-header h6:hover .fa-light,
+.card-header h6:hover .fa-brands,
+.section-header h1:hover i,
+.section-header h1:hover .fa-solid,
+.section-header h1:hover .fa-regular,
+.section-header h1:hover .fa-light,
+.section-header h1:hover .fa-brands,
+.section-header h2:hover i,
+.section-header h2:hover .fa-solid,
+.section-header h2:hover .fa-regular,
+.section-header h2:hover .fa-light,
+.section-header h2:hover .fa-brands,
+.section-header h3:hover i,
+.section-header h3:hover .fa-solid,
+.section-header h3:hover .fa-regular,
+.section-header h3:hover .fa-light,
+.section-header h3:hover .fa-brands,
+.section-header h4:hover i,
+.section-header h4:hover .fa-solid,
+.section-header h4:hover .fa-regular,
+.section-header h4:hover .fa-light,
+.section-header h4:hover .fa-brands,
+.section-header h5:hover i,
+.section-header h5:hover .fa-solid,
+.section-header h5:hover .fa-regular,
+.section-header h5:hover .fa-light,
+.section-header h5:hover .fa-brands,
+.section-header h6:hover i,
+.section-header h6:hover .fa-solid,
+.section-header h6:hover .fa-regular,
+.section-header h6:hover .fa-light,
+.section-header h6:hover .fa-brands,
+.bg-primary h1:hover i,
+.bg-primary h1:hover .fa-solid,
+.bg-primary h1:hover .fa-regular,
+.bg-primary h1:hover .fa-light,
+.bg-primary h1:hover .fa-brands,
+.bg-primary h2:hover i,
+.bg-primary h2:hover .fa-solid,
+.bg-primary h2:hover .fa-regular,
+.bg-primary h2:hover .fa-light,
+.bg-primary h2:hover .fa-brands,
+.bg-primary h3:hover i,
+.bg-primary h3:hover .fa-solid,
+.bg-primary h3:hover .fa-regular,
+.bg-primary h3:hover .fa-light,
+.bg-primary h3:hover .fa-brands,
+.bg-primary h4:hover i,
+.bg-primary h4:hover .fa-solid,
+.bg-primary h4:hover .fa-regular,
+.bg-primary h4:hover .fa-light,
+.bg-primary h4:hover .fa-brands,
+.bg-primary h5:hover i,
+.bg-primary h5:hover .fa-solid,
+.bg-primary h5:hover .fa-regular,
+.bg-primary h5:hover .fa-light,
+.bg-primary h5:hover .fa-brands,
+.bg-primary h6:hover i,
+.bg-primary h6:hover .fa-solid,
+.bg-primary h6:hover .fa-regular,
+.bg-primary h6:hover .fa-light,
+.bg-primary h6:hover .fa-brands,
+.bg-info h1:hover i,
+.bg-info h1:hover .fa-solid,
+.bg-info h1:hover .fa-regular,
+.bg-info h1:hover .fa-light,
+.bg-info h1:hover .fa-brands,
+.bg-info h2:hover i,
+.bg-info h2:hover .fa-solid,
+.bg-info h2:hover .fa-regular,
+.bg-info h2:hover .fa-light,
+.bg-info h2:hover .fa-brands,
+.bg-info h3:hover i,
+.bg-info h3:hover .fa-solid,
+.bg-info h3:hover .fa-regular,
+.bg-info h3:hover .fa-light,
+.bg-info h3:hover .fa-brands,
+.bg-info h4:hover i,
+.bg-info h4:hover .fa-solid,
+.bg-info h4:hover .fa-regular,
+.bg-info h4:hover .fa-light,
+.bg-info h4:hover .fa-brands,
+.bg-info h5:hover i,
+.bg-info h5:hover .fa-solid,
+.bg-info h5:hover .fa-regular,
+.bg-info h5:hover .fa-light,
+.bg-info h5:hover .fa-brands,
+.bg-info h6:hover i,
+.bg-info h6:hover .fa-solid,
+.bg-info h6:hover .fa-regular,
+.bg-info h6:hover .fa-light,
+.bg-info h6:hover .fa-brands,
+.bg-secondary h1:hover i,
+.bg-secondary h1:hover .fa-solid,
+.bg-secondary h1:hover .fa-regular,
+.bg-secondary h1:hover .fa-light,
+.bg-secondary h1:hover .fa-brands,
+.bg-secondary h2:hover i,
+.bg-secondary h2:hover .fa-solid,
+.bg-secondary h2:hover .fa-regular,
+.bg-secondary h2:hover .fa-light,
+.bg-secondary h2:hover .fa-brands,
+.bg-secondary h3:hover i,
+.bg-secondary h3:hover .fa-solid,
+.bg-secondary h3:hover .fa-regular,
+.bg-secondary h3:hover .fa-light,
+.bg-secondary h3:hover .fa-brands,
+.bg-secondary h4:hover i,
+.bg-secondary h4:hover .fa-solid,
+.bg-secondary h4:hover .fa-regular,
+.bg-secondary h4:hover .fa-light,
+.bg-secondary h4:hover .fa-brands,
+.bg-secondary h5:hover i,
+.bg-secondary h5:hover .fa-solid,
+.bg-secondary h5:hover .fa-regular,
+.bg-secondary h5:hover .fa-light,
+.bg-secondary h5:hover .fa-brands,
+.bg-secondary h6:hover i,
+.bg-secondary h6:hover .fa-solid,
+.bg-secondary h6:hover .fa-regular,
+.bg-secondary h6:hover .fa-light,
+.bg-secondary h6:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
 }
 
 /* FontAwesome Icons - Enhanced Styling with Context-Aware Colors */
@@ -1590,13 +1981,13 @@ i.fab {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Icon hover effects for interactive elements - exclude navigation and tab buttons */
-.card-header:not(.tab-button):hover i.fa-solid,
-.card-header:not(.tab-button):hover i.far,
-.card-header:not(.tab-button):hover i.fab,
-.section-header:not(.tab-button):hover i.fa-solid,
-.section-header:not(.tab-button):hover i.far,
-.section-header:not(.tab-button):hover i.fab,
+/* Icon hover effects for interactive elements - exclude navigation, tab buttons, and colored backgrounds */
+.card-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(.bg-info):hover i.fa-solid,
+.card-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(.bg-info):hover i.far,
+.card-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(.bg-info):hover i.fab,
+.section-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(.bg-info):hover i.fa-solid,
+.section-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(.bg-info):hover i.far,
+.section-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(.bg-info):hover i.fab,
 .breadcrumb-link:hover i.fa-solid,
 .breadcrumb-link:hover i.far,
 .breadcrumb-link:hover i.fab {
@@ -10357,9 +10748,28 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .hero-section {
   position: relative;
   background: linear-gradient(135deg, #007b7f 0%, #33969a 50%, #2d5a27 100%);
-  color: #ffffff;
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   padding: 3rem 1rem;
   overflow: hidden;
+}
+.hero-section i,
+.hero-section .fa-solid,
+.hero-section .fa-regular,
+.hero-section .fa-light,
+.hero-section .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.hero-section:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.hero-section:hover i,
+.hero-section:hover .fa-solid,
+.hero-section:hover .fa-regular,
+.hero-section:hover .fa-light,
+.hero-section:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
 }
 @media (min-width: 768px) {
   .hero-section {
@@ -15736,6 +16146,125 @@ button.nav-link i {
   opacity: 0.8;
 }
 
+.text-on-primary-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: var(--healthcare-primary);
+}
+.text-on-primary-bg i,
+.text-on-primary-bg .fa-solid,
+.text-on-primary-bg .fa-regular,
+.text-on-primary-bg .fa-light,
+.text-on-primary-bg .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-primary-bg:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-primary-bg:hover i,
+.text-on-primary-bg:hover .fa-solid,
+.text-on-primary-bg:hover .fa-regular,
+.text-on-primary-bg:hover .fa-light,
+.text-on-primary-bg:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
+}
+
+.text-on-secondary-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: var(--healthcare-secondary);
+}
+.text-on-secondary-bg i,
+.text-on-secondary-bg .fa-solid,
+.text-on-secondary-bg .fa-regular,
+.text-on-secondary-bg .fa-light,
+.text-on-secondary-bg .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-secondary-bg:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-secondary-bg:hover i,
+.text-on-secondary-bg:hover .fa-solid,
+.text-on-secondary-bg:hover .fa-regular,
+.text-on-secondary-bg:hover .fa-light,
+.text-on-secondary-bg:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
+}
+
+.text-on-accent-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: var(--healthcare-accent);
+}
+.text-on-accent-bg i,
+.text-on-accent-bg .fa-solid,
+.text-on-accent-bg .fa-regular,
+.text-on-accent-bg .fa-light,
+.text-on-accent-bg .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-accent-bg:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-accent-bg:hover i,
+.text-on-accent-bg:hover .fa-solid,
+.text-on-accent-bg:hover .fa-regular,
+.text-on-accent-bg:hover .fa-light,
+.text-on-accent-bg:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
+}
+
+.text-on-info-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: var(--healthcare-info);
+}
+.text-on-info-bg i,
+.text-on-info-bg .fa-solid,
+.text-on-info-bg .fa-regular,
+.text-on-info-bg .fa-light,
+.text-on-info-bg .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-info-bg:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-info-bg:hover i,
+.text-on-info-bg:hover .fa-solid,
+.text-on-info-bg:hover .fa-regular,
+.text-on-info-bg:hover .fa-light,
+.text-on-info-bg:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
+}
+
+.text-on-blue-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.text-on-blue-bg i,
+.text-on-blue-bg .fa-solid,
+.text-on-blue-bg .fa-regular,
+.text-on-blue-bg .fa-light,
+.text-on-blue-bg .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-blue-bg:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-blue-bg:hover i,
+.text-on-blue-bg:hover .fa-solid,
+.text-on-blue-bg:hover .fa-regular,
+.text-on-blue-bg:hover .fa-light,
+.text-on-blue-bg:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
+}
+
 .grid-container {
   display: flex;
   flex-wrap: wrap;
@@ -15933,4 +16462,51 @@ button.nav-link i {
 
 .pb-xl {
   padding-bottom: 2rem;
+}
+
+.text-secondary-accessible {
+  color: var(--healthcare-dark-grey) !important;
+  font-weight: 500;
+}
+
+.text-muted-accessible {
+  color: var(--healthcare-dark-grey);
+  font-weight: 500;
+}
+
+.text-on-blue-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.text-on-blue-bg i,
+.text-on-blue-bg .fa-solid,
+.text-on-blue-bg .fa-regular,
+.text-on-blue-bg .fa-light,
+.text-on-blue-bg .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-blue-bg:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-blue-bg:hover i,
+.text-on-blue-bg:hover .fa-solid,
+.text-on-blue-bg:hover .fa-regular,
+.text-on-blue-bg:hover .fa-light,
+.text-on-blue-bg:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
+}
+
+.card-header.bg-light h5 {
+  color: var(--healthcare-dark-grey) !important;
+  font-weight: 600 !important;
+}
+
+.service-card .card-body small.text-secondary-accessible,
+.service-card small.text-secondary-accessible,
+.card .card-body small.text-secondary-accessible,
+small.text-secondary-accessible {
+  color: var(--healthcare-dark-grey) !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
 }/*# sourceMappingURL=main.css.map */
