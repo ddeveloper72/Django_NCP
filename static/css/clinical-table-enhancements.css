@@ -1,0 +1,218 @@
+/* Clinical Table UX Enhancement Styles */
+
+/* Data Volume Indicators */
+.data-volume-indicator {
+  border-left: 4px solid var(--healthcare-blue);
+  transition: all 0.3s ease;
+}
+
+.data-volume-indicator:hover {
+  background-color: var(--healthcare-light-blue) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.data-metrics small {
+  line-height: 1.4;
+}
+
+.performance-indicators {
+  text-align: right;
+}
+
+/* Primary/Secondary Field Prioritization */
+.primary-field-mobile {
+  border-left: 3px solid var(--healthcare-blue);
+  padding-left: 10px;
+  margin-bottom: 15px !important;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.secondary-field-mobile {
+  border-left: 2px solid #dee2e6;
+  padding-left: 8px;
+  padding: 8px;
+  background-color: #ffffff;
+  border-radius: 3px;
+}
+
+.secondary-fields-container {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #dee2e6;
+}
+
+/* Smart Medical Code Display */
+.medical-terminology {
+  transition: all 0.3s ease;
+}
+
+.medical-codes-container-mobile,
+.medical-codes-container {
+  transition: all 0.3s ease;
+}
+
+/* Enhanced Medical Code Badges */
+.badge.border-warning {
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25);
+  animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+  0% {
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25);
+  }
+}
+
+.bg-warning code {
+  background-color: #fff3cd !important;
+  border: 1px solid #ffeaa7;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* Smart Pagination Controls */
+.mobile-pagination-controls,
+.desktop-pagination-controls {
+  padding: 15px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  margin: 15px 0;
+}
+
+.mobile-pagination-controls .btn,
+.desktop-pagination-controls .btn {
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-pagination-controls .btn:hover,
+.desktop-pagination-controls .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Performance Optimization Visual Cues */
+.clinical-card-hidden,
+.table-row-hidden {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.clinical-card-hidden.d-block,
+.table-row-hidden.table-row {
+  opacity: 1;
+}
+
+.loading-complete {
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Data Completeness Indicators */
+.badge.bg-success {
+  background: linear-gradient(135deg, #28a745, #20c997) !important;
+}
+
+.badge.bg-warning {
+  background: linear-gradient(135deg, #ffc107, #fd7e14) !important;
+}
+
+.badge.bg-info {
+  background: linear-gradient(135deg, #17a2b8, #6f42c1) !important;
+}
+
+.badge.bg-secondary {
+  background: linear-gradient(135deg, #6c757d, #495057) !important;
+}
+
+/* Mobile Responsive Enhancements */
+@media (max-width: 768px) {
+  .data-volume-indicator {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px;
+  }
+
+  .performance-indicators {
+    text-align: left;
+  }
+
+  .primary-field-mobile {
+    margin-bottom: 20px !important;
+  }
+
+  .secondary-fields-container {
+    margin-top: 15px;
+  }
+}
+
+/* Table Enhancement for Large Datasets */
+.table-responsive-wrapper {
+  position: relative;
+}
+
+.table-responsive-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 30px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8));
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Clinical Card Enhancements */
+.clinical-card {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.clinical-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.clinical-card.border-success {
+  border-left: 5px solid #28a745 !important;
+}
+
+/* Field Label Enhancements */
+.field-label {
+  font-weight: 600;
+  color: var(--healthcare-text-dark) !important;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.terminology-indicator {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.field-label:hover .terminology-indicator {
+  opacity: 1;
+}

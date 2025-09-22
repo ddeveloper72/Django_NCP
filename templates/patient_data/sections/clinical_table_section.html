@@ -1,11 +1,15 @@
 {% load patient_filters %}
 
-{# Clinical Table Section Template - For sections with clinical tables #}
+{# =============================================== #}
+{# CLINICAL TABLE SECTION TEMPLATE #}
+{# For sections with structured clinical tables #}
+{# Implements smart UX optimizations based on data volume #}
+{# =============================================== #}
 
-<!-- Clinical Table Display with Tabs -->
+{# Clinical Table Display with Tabs #}
 <div class="card-body p-0">
     {% if not hide_tabs %}
-    <!-- Section Tabs -->
+    {# Section navigation tabs for structured vs original content #}
     <div class="section-tabs">
 
         <button class="tab-button active" onclick="showTab('section_{{ section_index }}', 'structured')">
@@ -17,18 +21,110 @@
     </div>
     {% endif %}
 
-    <!-- Structured View Tab Content -->
+    {# Structured View Tab Content with smart UX optimizations #}
     <div id="section_{{ section_index }}_structured" class="tab-content active">
         <div class="clinical-table">
-            <!-- Mobile Card Layout (hidden on desktop) -->
+
+            {# Smart Entry Count Display Strategy #}
+            {# Determines pagination and display logic based on data volume #}
+            {% with entry_count=section.clinical_table.entry_count medical_coverage=section.clinical_table.medical_terminology_coverage|default:0 %}
+
+            {# Enhanced Data Volume & Performance Indicator #}
+            {# Shows entry count, coding coverage, and performance optimization status #}
+            <div class="data-volume-indicator d-flex justify-content-between align-items-center mb-2 px-3 py-2 bg-light rounded">
+                <div class="data-metrics">
+                    <small class="text-muted">
+                        <i class="fa-solid fa-chart-bar me-1"></i>
+                        {{ entry_count }} clinical {% if entry_count == 1 %}entry{% else %}entries{% endif %}
+                        {% if medical_coverage %}
+                        | {{ medical_coverage }}% coded
+                        {% if medical_coverage >= 75 %}
+                        <span class="badge bg-success ms-1">
+                            <i class="fa-solid fa-code me-1"></i>High coding coverage
+                        </span>
+                        {% else %}
+                            {% if medical_coverage >= 25 %}
+                            <span class="badge bg-warning ms-1">
+                                <i class="fa-solid fa-code me-1"></i>Partial coding
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary ms-1">
+                                <i class="fa-solid fa-text me-1"></i>Minimal coding
+                            </span>
+                            {% endif %}
+                        {% endif %}
+                        {% endif %}
+                    </small>
+
+                    {# Data Completeness Indicators #}
+                    {# Shows endpoint coverage and data quality metrics #}
+                    {% if section.clinical_table.endpoint_coverage %}
+                    <br><small class="text-info">
+                        <i class="fa-solid fa-database me-1"></i>
+                        {{ section.clinical_table.endpoint_coverage|floatformat:0 }}% data completeness
+                        {% if section.clinical_table.endpoint_coverage >= 80 %}
+                        <span class="badge bg-success ms-1">Excellent</span>
+                        {% elif section.clinical_table.endpoint_coverage >= 60 %}
+                        <span class="badge bg-warning ms-1">Good</span>
+                        {% else %}
+                        <span class="badge bg-secondary ms-1">Basic</span>
+                        {% endif %}
+                    </small>
+                    {% endif %}
+                </div>
+
+                <div class="performance-indicators">
+                    {% if entry_count > 15 %}
+                    <small class="text-info">
+                        <i class="fa-solid fa-info-circle me-1"></i>Large dataset - optimized loading
+                        <span class="badge bg-info ms-1">
+                            <i class="fa-solid fa-bolt me-1"></i>Lazy load active
+                        </span>
+                    </small>
+                    {% elif entry_count > 5 %}
+                    <small class="text-warning">
+                        <i class="fa-solid fa-list me-1"></i>Medium dataset - progressive display
+                        <span class="badge bg-warning ms-1">
+                            <i class="fa-solid fa-layer-group me-1"></i>Paginated
+                        </span>
+                    </small>
+                    {% else %}
+                    <small class="text-success">
+                        <i class="fa-solid fa-check-circle me-1"></i>Optimized display
+                        <span class="badge bg-success ms-1">
+                            <i class="fa-solid fa-tachometer-alt me-1"></i>Fast load
+                        </span>
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# =============================================== #}
+            {# MOBILE CARD LAYOUT - Hidden on desktop #}
+            {# Smart pagination: ≤5 show all, 6-15 show 5+more, 16+ show 3+pagination #}
+            {# =============================================== #}
             <div class="d-block d-md-none">
                 <div class="clinical-cards-container">
                     {% for row in section.clinical_table.rows %}
+                    {% if entry_count <= 5 %}
+                        {# Show all entries for small datasets (≤5) #}
+                    {% elif entry_count <= 15 and forloop.counter <= 5 %}
+                        {# Show first 5 entries for medium datasets (6-15) #}
+                    {% elif entry_count > 15 and forloop.counter <= 3 %}
+                        {# Show first 3 entries for large datasets (16+) #}
+                    {% elif entry_count <= 5 %}
+                        {# Always show for small datasets #}
+                    {% else %}
+                        {# Hide additional entries, will be shown via pagination #}
+                        <div class="d-none clinical-card-hidden" data-pagination-group="additional">
+                    {% endif %}
                     <div class="card clinical-card mb-3 {% if row.has_medical_codes %}border-success{% endif %}">
                         <div class="card-body">
+                            {# ===== PRIMARY FIELDS (ALWAYS VISIBLE) ===== #}
                             {% for header in section.clinical_table.headers %}
+                            {% if header.primary %}
                             {% with row.data|get_item:header.key as cell_data %}
-                            <div class="clinical-field mb-2 {% if header.primary %}primary-field-mobile{% endif %}">
+                            <div class="clinical-field mb-2 primary-field-mobile">
                                 <div class="field-label d-flex align-items-center mb-1">
                                     <strong class="text-muted small">{{ header.label }}</strong>
                                     {% if header.type == 'codes' %}
@@ -40,65 +136,153 @@
                                     {% endif %}
                                 </div>
                                 <div class="field-value">
-                                    {% if header.primary %}
                                     <div class="primary-field-content">
                                         <strong class="text-dark">{{ cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:'N/A' }}</strong>
-                                        {% if cell_data|safe_get:"has_terminology" %}
-                                        <div class="medical-terminology mt-1">
+                                        {% if cell_data|safe_get:"has_terminology" and medical_coverage >= 25 %}
+                                        <div class="medical-terminology mt-1 {% if medical_coverage >= 25 and medical_coverage < 75 %}collapse{% endif %}" {% if medical_coverage >= 25 and medical_coverage < 75 %}id="terminology_{{ section_index }}_{{ forloop.counter }}_primary"{% endif %}>
                                             {% for term in cell_data|safe_get:"terminology" %}
-                                            <span class="badge bg-success me-1 mb-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
-                                                {{ term.display_name|default:term.code }}
+                                            <span class="badge {% if medical_coverage >= 75 %}bg-success{% else %}bg-info{% endif %} me-1 mb-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
+                                                {% if medical_coverage >= 75 %}<i class="fa-solid fa-star me-1"></i>{% endif %}{{ term.display_name|default:term.code }}
                                             </span>
                                             {% endfor %}
                                         </div>
+                                        {% if medical_coverage >= 25 and medical_coverage < 75 and cell_data|safe_get:"has_terminology" %}
+                                        <button class="btn btn-link btn-sm p-0 text-decoration-none mt-1" type="button" data-bs-toggle="collapse" data-bs-target="#terminology_{{ section_index }}_{{ forloop.counter }}_primary">
+                                            <small class="text-muted"><i class="fa-solid fa-code me-1"></i>Show medical codes</small>
+                                        </button>
+                                        {% endif %}
                                         {% endif %}
                                     </div>
-                                    {% else %}
-                                    <div class="field-content">
-                                        {% if cell_data|safe_get:"has_codes" %}
-                                        <div class="medical-codes-container-mobile">
-                                            <div class="medical-code-item d-flex flex-wrap">
-                                                {% for code in cell_data|safe_get:"codes" %}
-                                                {% if code.badge %}
-                                                <span class="badge {{ code.badge|default:'bg-secondary' }} me-1 mb-1"
-                                                    title="{{ code.system }}: {{ code.code }}">
-                                                    {{ code.display_name|default:code.code }}
-                                                </span>
-                                                {% else %}
-                                                <code class="me-1 mb-1 small">{{ code.code|default:'Unknown' }}</code>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        {% elif header.type == 'date' and cell_data|safe_get:"mobile_formats" %}
-                                        <span class="text-dark d-inline d-sm-none">{{ cell_data|safe_get:"mobile_formats"|safe_get:"mobile"|default:cell_data|safe_get:"formatted" }}</span>
-                                        <span class="text-dark d-none d-sm-inline">{{ cell_data|safe_get:"formatted"|default:cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:'N/A' }}</span>
-                                        {% else %}
-                                        <span class="text-dark">{{ cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:'N/A' }}</span>
-                                        {% endif %}
-
-                                        {% if cell_data|safe_get:"has_terminology" %}
-                                        <div class="medical-terminology mt-1">
-                                            {% for term in cell_data|safe_get:"terminology" %}
-                                            <span class="badge bg-info me-1 mb-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
-                                                <i class="fa-solid fa-tag me-1"></i>{{ term.display_name|default:term.code }}
-                                            </span>
-                                            {% endfor %}
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
                                 </div>
                             </div>
                             {% endwith %}
+                            {% endif %}
                             {% endfor %}
+
+                            {# ===== SECONDARY FIELDS (COLLAPSIBLE) ===== #}
+                            {% with secondary_fields=section.clinical_table.headers|length|add:"-1" %}
+                            {% if secondary_fields > 0 %}
+                            <div class="secondary-fields-container">
+                                <button class="btn btn-link btn-sm p-0 text-decoration-none mb-2"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#secondary_{{ section_index }}_{{ forloop.counter }}"
+                                        aria-expanded="false">
+                                    <i class="fa-solid fa-chevron-down me-1"></i>
+                                    <small class="text-muted">Show {{ secondary_fields }} more detail{{ secondary_fields|pluralize }}</small>
+                                </button>
+
+                                <div class="collapse" id="secondary_{{ section_index }}_{{ forloop.counter }}">
+                                    {% for header in section.clinical_table.headers %}
+                                    {% if not header.primary %}
+                                    {% with row.data|get_item:header.key as cell_data %}
+                                    <div class="clinical-field mb-2 secondary-field-mobile">
+                                        <div class="field-label d-flex align-items-center mb-1">
+                                            <strong class="text-muted small">{{ header.label }}</strong>
+                                            {% if header.type == 'codes' %}
+                                            <i class="fa-solid fa-code ms-1 terminology-indicator text-muted" title="Medical Codes"></i>
+                                            {% elif header.type == 'date' %}
+                                            <i class="fa-solid fa-calendar ms-1 terminology-indicator text-muted" title="Date"></i>
+                                            {% elif header.type == 'status' %}
+                                            <i class="fa-solid fa-info-circle ms-1 terminology-indicator text-muted" title="Status"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="field-value">
+                                            <div class="field-content">
+                                                {% if cell_data|safe_get:"has_codes" and medical_coverage >= 25 %}
+                                                <div class="medical-codes-container-mobile {% if medical_coverage >= 25 and medical_coverage < 75 %}collapse{% endif %}" {% if medical_coverage >= 25 and medical_coverage < 75 %}id="codes_{{ section_index }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"{% endif %}>
+                                                    <div class="medical-code-item d-flex flex-wrap">
+                                                        {% for code in cell_data|safe_get:"codes" %}
+                                                        {% if code.badge %}
+                                                        <span class="badge {{ code.badge|default:'bg-secondary' }} {% if medical_coverage >= 75 %}border border-warning{% endif %} me-1 mb-1"
+                                                            title="{{ code.system }}: {{ code.code }}">
+                                                            {% if medical_coverage >= 75 %}<i class="fa-solid fa-certificate me-1"></i>{% endif %}{{ code.display_name|default:code.code }}
+                                                        </span>
+                                                        {% else %}
+                                                        <code class="me-1 mb-1 small {% if medical_coverage >= 75 %}bg-warning{% endif %}">{{ code.code|default:'Unknown' }}</code>
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                                {% if medical_coverage >= 25 and medical_coverage < 75 and cell_data|safe_get:"has_codes" %}
+                                                <button class="btn btn-link btn-sm p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#codes_{{ section_index }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
+                                                    <small class="text-muted"><i class="fa-solid fa-code me-1"></i>Show codes</small>
+                                                </button>
+                                                {% endif %}
+                                                {% elif header.type == 'date' and cell_data|safe_get:"mobile_formats" %}
+                                                <span class="text-dark d-inline d-sm-none">{{ cell_data|safe_get:"mobile_formats"|safe_get:"mobile"|default:cell_data|safe_get:"formatted" }}</span>
+                                                <span class="text-dark d-none d-sm-inline">{{ cell_data|safe_get:"formatted"|default:cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:'N/A' }}</span>
+                                                {% else %}
+                                                <span class="text-dark">{{ cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:'N/A' }}</span>
+                                                {% endif %}
+
+                                                {% if cell_data|safe_get:"has_terminology" and medical_coverage >= 25 %}
+                                                <div class="medical-terminology mt-1 {% if medical_coverage >= 25 and medical_coverage < 75 %}collapse{% endif %}" {% if medical_coverage >= 25 and medical_coverage < 75 %}id="terminology_secondary_{{ section_index }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"{% endif %}>
+                                                    {% for term in cell_data|safe_get:"terminology" %}
+                                                    <span class="badge {% if medical_coverage >= 75 %}bg-success{% else %}bg-info{% endif %} me-1 mb-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
+                                                        <i class="fa-solid fa-tag me-1"></i>{{ term.display_name|default:term.code }}
+                                                    </span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% if medical_coverage >= 25 and medical_coverage < 75 and cell_data|safe_get:"has_terminology" %}
+                                                <button class="btn btn-link btn-sm p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#terminology_secondary_{{ section_index }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
+                                                    <small class="text-muted"><i class="fa-solid fa-tags me-1"></i>Show terminology</small>
+                                                </button>
+                                                {% endif %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endwith %}
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endwith %}
                         </div>
                     </div>
+                    {% if entry_count > 15 and forloop.counter > 3 %}
+                        {# Close hidden card container for large datasets #}
+                        </div>
+                    {% elif entry_count > 5 and entry_count <= 15 and forloop.counter > 5 %}
+                        {# Close hidden card container for medium datasets #}
+                        </div>
+                    {% endif %}
                     {% endfor %}
                 </div>
+
+                {# ===== SMART PAGINATION CONTROLS FOR MOBILE ===== #}
+                {% if entry_count > 5 %}
+                <div class="mobile-pagination-controls mt-3 text-center">
+                    {% if entry_count <= 15 %}
+                    {# Medium datasets: Show More button #}
+                    <button class="btn btn-outline-primary btn-sm" onclick="showMoreEntries('section_{{ section_index }}')">
+                        <i class="fa-solid fa-plus me-1"></i>
+                        Show {{ entry_count|add:"-5" }} More Entry{{ entry_count|add:"-5"|pluralize }}
+                    </button>
+                    {% else %}
+                    {# Large datasets: Pagination #}
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary btn-sm" onclick="showMoreEntries('section_{{ section_index }}')">
+                            <i class="fa-solid fa-plus me-1"></i>
+                            Show {{ entry_count|add:"-3" }} More
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="showAllEntries('section_{{ section_index }}')">
+                            <i class="fa-solid fa-list me-1"></i>
+                            View All
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
 
-            <!-- Desktop Table Layout (hidden on mobile) -->
+            {% endwith %}
+
+            {# =============================================== #}
+            {# DESKTOP TABLE LAYOUT - Hidden on mobile #}
+            {# =============================================== #}
             <div class="d-none d-md-block">
                 <table class="table table-striped table-hover">
                     <thead>
@@ -120,6 +304,20 @@
 
                     <tbody>
                         {% for row in section.clinical_table.rows %}
+                        {% if entry_count <= 5 %}
+                            {# Show all entries for small datasets (≤5) #}
+                        {% elif entry_count <= 15 and forloop.counter <= 5 %}
+                            {# Show first 5 entries for medium datasets (6-15) #}
+                        {% elif entry_count > 15 and forloop.counter <= 3 %}
+                            {# Show first 3 entries for large datasets (16+) #}
+                        {% elif entry_count <= 5 %}
+                            {# Always show for small datasets #}
+                        {% else %}
+                            {# Hide additional entries for pagination #}
+                            <tr class="d-none table-row-hidden" data-pagination-group="additional" {% if row.has_medical_codes %}data-has-codes="true"{% endif %}>
+                        {% endif %}
+
+                        {% if entry_count <= 5 or forloop.counter <= 5 and entry_count <= 15 or forloop.counter <= 3 and entry_count > 15 %}
                         <tr {% if row.has_medical_codes %}class="table-success" {% endif %}>
                             {% for header in section.clinical_table.headers %}
                             {% with row.data|get_item:header.key as cell_data %}
@@ -127,33 +325,43 @@
                                 {% if header.primary %}
                                 <div class="primary-field">
                                     <strong>{{ cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:'N/A' }}</strong>
-                                    {% if cell_data|safe_get:"has_terminology" %}
-                                    <div class="medical-terminology mt-1">
+                                    {% if cell_data|safe_get:"has_terminology" and medical_coverage >= 25 %}
+                                    <div class="medical-terminology mt-1 {% if medical_coverage >= 25 and medical_coverage < 75 %}collapse{% endif %}" {% if medical_coverage >= 25 and medical_coverage < 75 %}id="desktop_terminology_{{ section_index }}_{{ forloop.counter }}_primary"{% endif %}>
                                         {% for term in cell_data|safe_get:"terminology" %}
-                                        <span class="badge bg-success me-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
-                                            {{ term.display_name|default:term.code }}
+                                        <span class="badge {% if medical_coverage >= 75 %}bg-success{% else %}bg-info{% endif %} me-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
+                                            {% if medical_coverage >= 75 %}<i class="fa-solid fa-star me-1"></i>{% endif %}{{ term.display_name|default:term.code }}
                                         </span>
                                         {% endfor %}
                                     </div>
+                                    {% if medical_coverage >= 25 and medical_coverage < 75 and cell_data|safe_get:"has_terminology" %}
+                                    <button class="btn btn-link btn-sm p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#desktop_terminology_{{ section_index }}_{{ forloop.counter }}_primary">
+                                        <small class="text-muted"><i class="fa-solid fa-code me-1"></i>Show codes</small>
+                                    </button>
+                                    {% endif %}
                                     {% endif %}
                                 </div>
                                 {% else %}
                                 <div class="cell-content">
-                                    {% if cell_data|safe_get:"has_codes" %}
-                                    <div class="medical-codes-container">
+                                    {% if cell_data|safe_get:"has_codes" and medical_coverage >= 25 %}
+                                    <div class="medical-codes-container {% if medical_coverage >= 25 and medical_coverage < 75 %}collapse{% endif %}" {% if medical_coverage >= 25 and medical_coverage < 75 %}id="desktop_codes_{{ section_index }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"{% endif %}>
                                         <div class="medical-code-item d-flex flex-wrap align-items-center">
                                             {% for code in cell_data|safe_get:"codes" %}
                                             {% if code.badge %}
-                                            <span class="badge {{ code.badge|default:'bg-secondary' }} me-1 mb-1"
+                                            <span class="badge {{ code.badge|default:'bg-secondary' }} {% if medical_coverage >= 75 %}border border-warning{% endif %} me-1 mb-1"
                                                 title="{{ code.system }}: {{ code.code }}">
-                                                {{ code.display_name|default:code.code }}
+                                                {% if medical_coverage >= 75 %}<i class="fa-solid fa-certificate me-1"></i>{% endif %}{{ code.display_name|default:code.code }}
                                             </span>
                                             {% else %}
-                                            <code class="me-1 mb-1">{{ code.code|default:'Unknown' }}</code>
+                                            <code class="me-1 mb-1 {% if medical_coverage >= 75 %}bg-warning{% endif %}">{{ code.code|default:'Unknown' }}</code>
                                             {% endif %}
                                             {% endfor %}
                                         </div>
                                     </div>
+                                    {% if medical_coverage >= 25 and medical_coverage < 75 and cell_data|safe_get:"has_codes" %}
+                                    <button class="btn btn-link btn-sm p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#desktop_codes_{{ section_index }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
+                                        <small class="text-muted"><i class="fa-solid fa-code me-1"></i>Show codes</small>
+                                    </button>
+                                    {% endif %}
                                     {% else %}
                                     {{ cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:'N/A' }}
                                     {% endif %}
@@ -173,13 +381,44 @@
                             {% endwith %}
                             {% endfor %}
                         </tr>
+                        {% if entry_count > 15 and forloop.counter > 3 %}
+                            {# Close hidden table row for large datasets #}
+                            </tr>
+                        {% elif entry_count > 5 and entry_count <= 15 and forloop.counter > 5 %}
+                            {# Close hidden table row for medium datasets #}
+                            </tr>
+                        {% endif %}
+                        {% endif %}
                         {% endfor %}
                     </tbody>
                 </table>
+
+                {# ===== DESKTOP PAGINATION CONTROLS ===== #}
+                {% if entry_count > 5 %}
+                <div class="desktop-pagination-controls mt-3 text-center">
+                    {% if entry_count <= 15 %}
+                    <button class="btn btn-outline-primary btn-sm" onclick="showMoreTableRows('section_{{ section_index }}')">
+                        <i class="fa-solid fa-table-rows me-1"></i>
+                        Show {{ entry_count|add:"-5" }} More Row{{ entry_count|add:"-5"|pluralize }}
+                    </button>
+                    {% else %}
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary btn-sm" onclick="showMoreTableRows('section_{{ section_index }}')">
+                            <i class="fa-solid fa-table-rows me-1"></i>
+                            Show {{ entry_count|add:"-3" }} More
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="showAllTableRows('section_{{ section_index }}')">
+                            <i class="fa-solid fa-table me-1"></i>
+                            Show All Rows
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
         </div>
 
-        <!-- Table Summary -->
+        {# ===== TABLE SUMMARY ===== #}
         <div class="card-footer bg-light">
             <div class="row text-center">
                 <div class="col-md-4">
@@ -228,11 +467,103 @@
             </div>
         </div>
     </div>
-    <!-- End structured tab content -->
+    {# End structured tab content #}
 
-    <!-- Original Content Tab -->
+    {# Close entry_count and medical_coverage context variables #}
+    {% endwith %}    {# Original Content Tab - displays raw CDA content #}
     <div id="section_{{ section_index }}_original" class="tab-content">
         {% include 'patient_data/sections/original_content.html' %}
     </div>
 </div>
-<!-- End clinical-table -->
+{# End clinical-table container #}
+
+{# ======================================================================= #}
+{# SMART PAGINATION JAVASCRIPT FUNCTIONS #}
+{# Handles responsive pagination for both mobile cards and desktop tables #}
+{# ======================================================================= #}
+<script>
+// Smart Mobile Pagination Functions
+function showMoreEntries(sectionId) {
+    const hiddenCards = document.querySelectorAll(`#${sectionId}_structured .clinical-card-hidden`);
+    hiddenCards.forEach(card => {
+        card.classList.remove('d-none');
+        card.classList.add('d-block');
+    });
+
+    // Hide the pagination controls
+    const paginationControls = document.querySelector(`#${sectionId}_structured .mobile-pagination-controls`);
+    if (paginationControls) {
+        paginationControls.style.display = 'none';
+    }
+}
+
+function showAllEntries(sectionId) {
+    showMoreEntries(sectionId);
+
+    // Show loading indicator for user feedback
+    const container = document.querySelector(`#${sectionId}_structured .clinical-cards-container`);
+    if (container) {
+        container.classList.add('loading-complete');
+
+        // Add performance indicator
+        const indicator = document.createElement('div');
+        indicator.className = 'alert alert-success mt-2';
+        indicator.innerHTML = '<i class="fa-solid fa-check me-1"></i>All entries loaded successfully';
+        container.appendChild(indicator);
+
+        // Remove indicator after 3 seconds
+        setTimeout(() => indicator.remove(), 3000);
+    }
+}
+
+// Smart Desktop Table Pagination Functions
+function showMoreTableRows(sectionId) {
+    const hiddenRows = document.querySelectorAll(`#${sectionId}_structured .table-row-hidden`);
+    hiddenRows.forEach(row => {
+        row.classList.remove('d-none');
+        row.classList.add('table-row');
+    });
+
+    // Hide the pagination controls
+    const paginationControls = document.querySelector(`#${sectionId}_structured .desktop-pagination-controls`);
+    if (paginationControls) {
+        paginationControls.style.display = 'none';
+    }
+}
+
+function showAllTableRows(sectionId) {
+    showMoreTableRows(sectionId);
+
+    // Add performance indicator to table
+    const table = document.querySelector(`#${sectionId}_structured table`);
+    if (table) {
+        const tbody = table.querySelector('tbody');
+        const indicator = document.createElement('tr');
+        indicator.className = 'table-info';
+        indicator.innerHTML = `
+            <td colspan="100%" class="text-center py-2">
+                <small><i class="fa-solid fa-check me-1"></i>All ${tbody.children.length} entries loaded - Performance optimized</small>
+            </td>
+        `;
+        tbody.appendChild(indicator);
+
+        // Remove indicator after 3 seconds
+        setTimeout(() => indicator.remove(), 3000);
+    }
+}
+
+// Auto-collapse secondary fields for better performance on large datasets
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-collapse secondary fields on mobile for datasets > 10 entries
+    const largeSections = document.querySelectorAll('[data-entry-count]');
+    largeSections.forEach(section => {
+        const entryCount = parseInt(section.getAttribute('data-entry-count'));
+        if (entryCount > 10) {
+            const secondaryFields = section.querySelectorAll('.secondary-fields-container .collapse');
+            secondaryFields.forEach(field => {
+                field.classList.remove('show');
+            });
+        }
+    });
+});
+</script>
