@@ -85,21 +85,8 @@
 
     <!-- Personal Information Tab Content -->
     <div class="clinical-tab-content active" id="extended_patient_personal">
-        <div class="row g-3">
-            <!-- Patient Contact Information Card -->
-            <div class="col-12">
-                <div class="card border-primary">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="fa-solid fa-address-book me-2"></i>Contact Information
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        {% include 'patient_data/components/extended_patient_contact_clean.html' %}
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% comment %} Direct inclusion of contact component with its responsive card grid {% endcomment %}
+        {% include 'patient_data/components/extended_patient_contact_clean.html' %}
     </div>
 
     <!-- Healthcare Team Tab Content -->

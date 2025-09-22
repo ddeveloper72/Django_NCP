@@ -4,10 +4,10 @@
 ================================================================================================
 COMPONENT: Extended Patient Contact Information
 ================================================================================================
-PURPOSE: Displays contact information for patients, guardians, and emergency contacts in a 
+PURPOSE: Displays contact information for patients, guardians, and emergency contacts in a
          responsive card grid layout optimized for mobile-first design.
 
-DEPENDENCIES: 
+DEPENDENCIES:
 - patient_filters (Django template tags)
 - Bootstrap 5 grid system
 - HSE color palette classes
@@ -20,7 +20,7 @@ DATA STRUCTURE:
 
 RESPONSIVE BEHAVIOR:
 - Mobile (col-12): Single column stack
-- Tablet (col-md-6): Two column layout  
+- Tablet (col-md-6): Two column layout
 - Desktop (col-lg-4): Three column grid
 
 SECURITY: No personal data in template logic - all data passed via context
@@ -38,6 +38,139 @@ This is not data duplication but necessary clinical context preservation.
 {% comment %} RESPONSIVE CONTACT GRID: Mobile-first card layout {% endcomment %}
 <div class="contact-info-grid">
     <div class="row g-3">
+        {% comment %} PATIENT DEMOGRAPHICS CARD: Basic personal information {% endcomment %}
+        {% if patient_identity or patient_extended_data %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card service-card border-info h-100">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fa-solid fa-user me-2"></i>Patient Demographics
+                    </h6>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    {% if patient_identity.given_name or patient_identity.family_name %}
+                    <div class="mb-2">
+                        <strong class="text-secondary-accessible">
+                            {{ patient_identity.given_name|default:"" }} {{ patient_identity.family_name|default:"" }}
+                        </strong>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="flex-grow-1">
+                        {% if patient_identity.birth_date or patient_identity.birth_date_formatted %}
+                        <div class="mb-2">
+                            <small class="text-secondary-accessible">
+                                <i class="fa-solid fa-calendar text-info me-1"></i>
+                                <strong>Birth Date:</strong><br>
+                                {{ patient_identity.birth_date_formatted|default:patient_identity.birth_date }}
+                            </small>
+                        </div>
+                        {% endif %}
+                        
+                        {% if patient_identity.administrative_gender or patient_identity.gender %}
+                        <div class="mb-2">
+                            <small class="text-secondary-accessible">
+                                <i class="fa-solid fa-venus-mars text-info me-1"></i>
+                                <strong>Gender:</strong><br>
+                                {{ patient_identity.administrative_gender|default:patient_identity.gender|capfirst }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% comment %} PATIENT IDENTIFIERS CARD: Medical record numbers and IDs {% endcomment %}
+        {% if patient_identity.patient_identifiers or administrative_data.patient_id %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card service-card border-secondary h-100">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">
+                        <i class="fa-solid fa-id-card me-2"></i>Patient Identifiers
+                    </h6>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="flex-grow-1">
+                        {% if patient_identity.patient_identifiers %}
+                        {% for identifier in patient_identity.patient_identifiers %}
+                        <div class="mb-2">
+                            <small class="text-secondary-accessible">
+                                <i class="fa-solid fa-fingerprint text-secondary me-1"></i>
+                                {% if identifier.assigningAuthorityName %}
+                                <strong>{{ identifier.assigningAuthorityName }}:</strong><br>
+                                {% elif identifier.root %}
+                                <strong>{{ identifier.root|truncatechars:20 }}:</strong><br>
+                                {% else %}
+                                <strong>Patient ID:</strong><br>
+                                {% endif %}
+                                <code class="small">{{ identifier.extension }}</code>
+                            </small>
+                        </div>
+                        {% if not forloop.last %}<hr class="my-2">{% endif %}
+                        {% endfor %}
+                        {% elif administrative_data.patient_id %}
+                        <div class="mb-2">
+                            <small class="text-secondary-accessible">
+                                <i class="fa-solid fa-fingerprint text-secondary me-1"></i>
+                                <strong>Patient ID:</strong><br>
+                                <code class="small">{{ administrative_data.patient_id }}</code>
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% comment %} ADMINISTRATIVE INFO CARD: Country, healthcare system details {% endcomment %}
+        {% if administrative_data.patient_country or administrative_data.home_member_state or patient_identity.country %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card service-card border-dark h-100">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0">
+                        <i class="fa-solid fa-globe-europe me-2"></i>Administrative
+                    </h6>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="flex-grow-1">
+                        {% if administrative_data.patient_country %}
+                        <div class="mb-2">
+                            <small class="text-secondary-accessible">
+                                <i class="fa-solid fa-flag text-dark me-1"></i>
+                                <strong>Patient Country:</strong><br>
+                                {{ administrative_data.patient_country }}
+                            </small>
+                        </div>
+                        {% endif %}
+                        
+                        {% if administrative_data.home_member_state %}
+                        <div class="mb-2">
+                            <small class="text-secondary-accessible">
+                                <i class="fa-solid fa-hospital text-dark me-1"></i>
+                                <strong>Member State:</strong><br>
+                                {{ administrative_data.home_member_state }}
+                            </small>
+                        </div>
+                        {% endif %}
+                        
+                        {% if patient_identity.country and not administrative_data.patient_country %}
+                        <div class="mb-2">
+                            <small class="text-secondary-accessible">
+                                <i class="fa-solid fa-flag text-dark me-1"></i>
+                                <strong>Country:</strong><br>
+                                {{ patient_identity.country }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
         {% comment %} PATIENT ADDRESS CARD: Primary residential/postal addresses {% endcomment %}
         {% if contact_data.addresses or administrative_data.patient_contact_info.addresses %}
         <div class="col-12 col-md-6 col-lg-4">
@@ -201,7 +334,7 @@ This is not data duplication but necessary clinical context preservation.
                         {% endif %}
                     </div>
                     {% endif %}
-                    
+
                     {% comment %} Guardian contact information display {% endcomment %}
                     <div class="flex-grow-1">
                         {% if administrative_data.guardian.contact_info.addresses %}
