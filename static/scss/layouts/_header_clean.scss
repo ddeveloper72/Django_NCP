@@ -24,7 +24,7 @@
     font-size: $font-size-xxxl;
     font-weight: $font-weight-bold;
     margin: 0;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
   }
 
   .header-subtitle {
@@ -178,7 +178,7 @@
       margin: 0 0 $space-lg 0;
       font-size: 3rem;
       font-weight: $font-weight-bold;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 
       @include mobile-up {
         font-size: 2rem;
