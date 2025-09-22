@@ -280,6 +280,7 @@ Generated: September 16, 2025
   /* HSE Accessible Colors for Better Contrast */
   --healthcare-text-dark: #1d1d1b; /* High contrast text */
   --healthcare-text-light: #ffffff;
+  --healthcare-text-grey: #6c757d; /* Grey text for headers */
   --healthcare-border: #d4d4d4;
   --healthcare-background: #f7f7f7;
   /* Enhanced HSE.ie Color Palette 2025 */
@@ -1148,7 +1149,7 @@ body {
 
 /* Healthcare Footer Styling */
 .footer {
-  background-color: var(--healthcare-navy);
+  background-color: var(--healthcare-charcoal);
   color: var(--healthcare-white);
   padding: 2rem 0;
   margin-top: 3rem;
@@ -1166,7 +1167,7 @@ body {
 
 /* Footer Dark Background Enhancement */
 footer.bg-dark {
-  background-color: var(--healthcare-navy) !important;
+  background-color: var(--healthcare-charcoal) !important;
   color: var(--healthcare-white) !important;
 }
 
@@ -1439,7 +1440,7 @@ h6.bg-secondary {
 .bg-secondary h4,
 .bg-secondary h5,
 .bg-secondary h6 {
-  color: var(--healthcare-text-light) !important;
+  color: var(--healthcare-text-grey) !important;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
   font-weight: 700 !important;
 }
@@ -2613,16 +2614,449 @@ img.fade-in {
 }
 
 /* High contrast mode */
+:root {
+  /* Default (normal) color scheme */
+  --hc-bg-primary: inherit;
+  --hc-bg-secondary: inherit;
+  --hc-text-primary: inherit;
+  --hc-text-secondary: inherit;
+  --hc-border-primary: inherit;
+  --hc-border-secondary: inherit;
+  --hc-link-color: inherit;
+  --hc-btn-bg: inherit;
+  --hc-btn-text: inherit;
+  --hc-btn-border: inherit;
+}
+
 .high-contrast {
-  filter: contrast(150%) brightness(110%);
+  /* High contrast color scheme */
+  --hc-bg-primary: #000000;
+  --hc-bg-secondary: #333333;
+  --hc-text-primary: #ffffff;
+  --hc-text-secondary: #ffffff;
+  --hc-border-primary: #ffffff;
+  --hc-border-secondary: #ffffff;
+  --hc-link-color: #ffffff;
+  --hc-btn-bg: #ffffff;
+  --hc-btn-text: #000000;
+  --hc-btn-border: #000000;
+  /* Override background and text colors for true high contrast */
+  background-color: var(--hc-bg-primary) !important;
+  color: var(--hc-text-primary) !important;
+}
+
+/* Base component classes for high contrast */
+.hc-bg-primary {
+  background-color: var(--hc-bg-primary) !important;
+}
+
+.hc-bg-secondary {
+  background-color: var(--hc-bg-secondary) !important;
+}
+
+.hc-text-primary {
+  color: var(--hc-text-primary) !important;
+}
+
+.hc-text-secondary {
+  color: var(--hc-text-secondary) !important;
+}
+
+.hc-border-primary {
+  border-color: var(--hc-border-primary) !important;
+}
+
+.hc-border-secondary {
+  border-color: var(--hc-border-secondary) !important;
+}
+
+/* Apply high contrast to common elements */
+.high-contrast .hero-section,
+.high-contrast .services-section,
+.high-contrast .container,
+.high-contrast .container-fluid {
+  background-color: var(--hc-bg-primary) !important;
+}
+
+.high-contrast .hero-content,
+.high-contrast .hero-title,
+.high-contrast .hero-subtitle {
+  color: var(--hc-text-primary) !important;
+}
+
+.high-contrast .card,
+.high-contrast .service-card {
+  background-color: var(--hc-bg-primary) !important;
+  color: var(--hc-text-primary) !important;
+  border: 2px solid var(--hc-border-primary) !important;
+}
+
+.high-contrast .badge {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 1px solid var(--hc-btn-border) !important;
+}
+
+.high-contrast .btn {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 2px solid var(--hc-btn-border) !important;
+  font-weight: bold;
+}
+
+.high-contrast .btn:hover,
+.high-contrast .btn:focus {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 3px solid var(--hc-btn-border) !important;
+  box-shadow: 0 0 0 3px var(--hc-border-primary) !important;
+}
+
+.high-contrast .stat-item,
+.high-contrast .stat-number,
+.high-contrast .stat-label {
+  color: var(--hc-text-primary) !important;
+}
+
+.high-contrast .section-title,
+.high-contrast .section-subtitle,
+.high-contrast .service-title,
+.high-contrast .service-description {
+  color: var(--hc-text-primary) !important;
+}
+
+.high-contrast .service-icon,
+.high-contrast .stat-icon,
+.high-contrast .hero-icon {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 2px solid var(--hc-btn-border) !important;
+}
+
+.high-contrast .service-icon i,
+.high-contrast .stat-icon i,
+.high-contrast .hero-icon i {
+  color: var(--hc-btn-text) !important;
+}
+
+.high-contrast .stat-item {
+  color: var(--hc-text-primary) !important;
+}
+
+.high-contrast .stat-item .stat-icon {
+  background-color: var(--hc-btn-bg) !important;
+  border: 2px solid var(--hc-btn-border) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.high-contrast .stat-item .stat-icon i {
+  color: var(--hc-btn-text) !important;
+  margin: 0 !important;
+}
+
+.high-contrast .container,
+.high-contrast .container-fluid {
+  background-color: #000000 !important;
+}
+
+.high-contrast p,
+.high-contrast span,
+.high-contrast div,
+.high-contrast h1,
+.high-contrast h2,
+.high-contrast h3,
+.high-contrast h4,
+.high-contrast h5,
+.high-contrast h6 {
+  color: #ffffff !important;
+}
+
+.high-contrast .text-dark,
+.high-contrast .text-muted {
+  color: #ffffff !important;
+}
+
+/* Fix high contrast toggle button visibility */
+.high-contrast #contrast-toggle {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 3px solid #ffffff !important;
+}
+
+.high-contrast #contrast-toggle:hover,
+.high-contrast #contrast-toggle:focus {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
 }
 
 .high-contrast img:not(.no-contrast) {
   filter: contrast(120%);
 }
 
-.high-contrast .btn {
-  border-width: 2px;
+.high-contrast .services-section,
+.high-contrast .hero-section {
+  background-color: #000000 !important;
+}
+
+.high-contrast .service-features li {
+  color: #ffffff !important;
+}
+
+.high-contrast .service-features li i {
+  color: #ffffff !important;
+}
+
+/* Navigation Bar High Contrast Styling */
+.high-contrast .navbar,
+.high-contrast .navbar-nav,
+.high-contrast .nav {
+  background-color: #000000 !important;
+  border-bottom: 3px solid #ffffff !important;
+}
+
+.high-contrast .navbar-brand,
+.high-contrast .nav-link,
+.high-contrast .navbar-nav .nav-link {
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+.high-contrast .navbar-brand:hover,
+.high-contrast .navbar-brand:focus,
+.high-contrast .nav-link:hover,
+.high-contrast .nav-link:focus {
+  color: #ffffff !important;
+  background-color: #333333 !important;
+  border: 2px solid #ffffff !important;
+  border-radius: 4px;
+}
+
+.high-contrast .navbar-toggler {
+  background-color: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+.high-contrast .navbar-toggler-icon {
+  background-color: #000000 !important;
+}
+
+/* Card Content Areas - Fix Hidden Descriptions */
+.high-contrast .card-body,
+.high-contrast .card-text,
+.high-contrast .card-content {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .service-card .card-body,
+.high-contrast .service-card .service-description {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #ffffff !important;
+  padding: 15px !important;
+}
+
+/* Ensure all service card content is visible */
+.high-contrast .service-card p,
+.high-contrast .service-card .card-text,
+.high-contrast .service-card .service-description,
+.high-contrast .service-card ul,
+.high-contrast .service-card li {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Fix service card headers and titles */
+.high-contrast .service-card .card-header,
+.high-contrast .service-card h3,
+.high-contrast .service-card h4,
+.high-contrast .service-card h5 {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #ffffff !important;
+}
+
+.high-contrast .external-service-card,
+.high-contrast .external-service-card .card-body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast .external-service-card .service-description,
+.high-contrast .external-service-card p,
+.high-contrast .external-service-card .card-text {
+  color: #ffffff !important;
+  background-color: #000000 !important;
+}
+
+/* Ensure external service links are visible */
+.high-contrast .external-service-card .btn,
+.high-contrast .external-service-card a.btn {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: bold;
+}
+
+.high-contrast .external-service-card .btn:hover,
+.high-contrast .external-service-card .btn:focus,
+.high-contrast .external-service-card a.btn:hover,
+.high-contrast .external-service-card a.btn:focus {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 0 0 0 3px #ffffff !important;
+}
+
+/* Footer and Settings Areas */
+.high-contrast footer,
+.high-contrast .footer {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-top: 3px solid #ffffff !important;
+}
+
+.high-contrast footer a,
+.high-contrast .footer a,
+.high-contrast footer .nav-link,
+.high-contrast .footer .nav-link {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
+
+.high-contrast footer a:hover,
+.high-contrast footer a:focus,
+.high-contrast .footer a:hover,
+.high-contrast .footer a:focus {
+  color: #ffffff !important;
+  background-color: #333333 !important;
+  border: 1px solid #ffffff !important;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+/* Settings and Utility Icons */
+.high-contrast .settings-icon,
+.high-contrast .utility-icon,
+.high-contrast .gear-icon {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  border-radius: 4px;
+}
+
+/* Link Styling */
+.high-contrast a:not(.btn),
+.high-contrast .link {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}
+
+.high-contrast a:not(.btn):hover,
+.high-contrast a:not(.btn):focus {
+  color: #ffffff !important;
+  background-color: #333333 !important;
+  border: 1px solid #ffffff !important;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+/* List and Menu Items */
+.high-contrast .list-group-item,
+.high-contrast .dropdown-item {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #ffffff !important;
+}
+
+.high-contrast .list-group-item:hover,
+.high-contrast .list-group-item:focus,
+.high-contrast .dropdown-item:hover,
+.high-contrast .dropdown-item:focus {
+  background-color: #333333 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+/* Form Elements in High Contrast */
+.high-contrast .form-control,
+.high-contrast .form-select,
+.high-contrast input,
+.high-contrast textarea,
+.high-contrast select {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast .form-control:focus,
+.high-contrast .form-select:focus,
+.high-contrast input:focus,
+.high-contrast textarea:focus,
+.high-contrast select:focus {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 3px solid #ffffff !important;
+  box-shadow: 0 0 0 3px #ffffff !important;
+}
+
+.high-contrast label,
+.high-contrast .form-label {
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+/* Alert and Message Styling */
+.high-contrast .alert {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 3px solid #ffffff !important;
+}
+
+.high-contrast .alert-success {
+  border-color: #ffffff !important;
+}
+
+.high-contrast .alert-warning {
+  border-color: #ffffff !important;
+}
+
+.high-contrast .alert-danger {
+  border-color: #ffffff !important;
+}
+
+/* Breadcrumb and Navigation Aids */
+.high-contrast .breadcrumb, .high-contrast .breadcrumb-enhanced,
+.high-contrast .breadcrumb-item {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .breadcrumb-item a {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
+
+.high-contrast .breadcrumb-item.active {
+  color: #ffffff !important;
+}
+
+/* Table High Contrast */
+.high-contrast table,
+.high-contrast th,
+.high-contrast td {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast th {
+  background-color: #333333 !important;
   font-weight: bold;
 }
 
@@ -4191,12 +4625,20 @@ img[data-src]::before {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  position: relative !important;
 }
 .service-card .service-card-header .service-icon i {
-  display: block !important;
-  text-align: center !important;
+  font-size: 1em !important;
   line-height: 1 !important;
   margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
 }
 .service-card .service-card-header .service-icon {
   margin: 0 auto 20px auto;
@@ -4228,7 +4670,7 @@ img[data-src]::before {
 .service-card .service-card-body .service-description {
   font-size: 16px;
   line-height: 1.6;
-  color: #4a5568;
+  color: #636567;
   margin-bottom: 24px;
   flex-shrink: 0;
 }
@@ -4274,6 +4716,14 @@ img[data-src]::before {
   justify-content: center;
   gap: 8px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: normal;
+  text-align: center;
+  line-height: 1.3;
+  min-height: 56px;
+  flex-wrap: wrap;
+}
+.service-card .service-card-footer .btn-service i {
+  flex-shrink: 0;
 }
 .service-card .service-card-footer .btn-service:hover {
   transform: translateY(-1px);
@@ -7659,24 +8109,97 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 
 .service-card .service-card-header .service-icon,
 .services-section .service-card .service-card-header .service-icon,
-.admin-card .service-card-header .service-icon {
+.admin-card .service-card-header .service-icon,
+.external-service-card .service-card-header .service-icon {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  position: relative !important;
 }
 .service-card .service-card-header .service-icon i,
 .services-section .service-card .service-card-header .service-icon i,
-.admin-card .service-card-header .service-icon i {
-  display: block !important;
-  text-align: center !important;
+.admin-card .service-card-header .service-icon i,
+.external-service-card .service-card-header .service-icon i {
+  font-size: 1em !important;
   line-height: 1 !important;
   margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
 }
 .service-card .service-card-header .service-icon i,
 .services-section .service-card .service-card-header .service-icon i,
-.admin-card .service-card-header .service-icon i {
+.admin-card .service-card-header .service-icon i,
+.external-service-card .service-card-header .service-icon i {
   font-size: 1.8em !important;
   color: #ffffff !important;
+}
+.service-card .service-card-header .service-icon i.fa, .service-card .service-card-header .service-icon i.fas, .service-card .service-card-header .service-icon i.far, .service-card .service-card-header .service-icon i.fal, .service-card .service-card-header .service-icon i.fat, .service-card .service-card-header .service-icon i.fad, .service-card .service-card-header .service-icon i.fab, .service-card .service-card-header .service-icon i[class*=fa-],
+.services-section .service-card .service-card-header .service-icon i.fa,
+.services-section .service-card .service-card-header .service-icon i.fas,
+.services-section .service-card .service-card-header .service-icon i.far,
+.services-section .service-card .service-card-header .service-icon i.fal,
+.services-section .service-card .service-card-header .service-icon i.fat,
+.services-section .service-card .service-card-header .service-icon i.fad,
+.services-section .service-card .service-card-header .service-icon i.fab,
+.services-section .service-card .service-card-header .service-icon i[class*=fa-],
+.admin-card .service-card-header .service-icon i.fa,
+.admin-card .service-card-header .service-icon i.fas,
+.admin-card .service-card-header .service-icon i.far,
+.admin-card .service-card-header .service-icon i.fal,
+.admin-card .service-card-header .service-icon i.fat,
+.admin-card .service-card-header .service-icon i.fad,
+.admin-card .service-card-header .service-icon i.fab,
+.admin-card .service-card-header .service-icon i[class*=fa-],
+.external-service-card .service-card-header .service-icon i.fa,
+.external-service-card .service-card-header .service-icon i.fas,
+.external-service-card .service-card-header .service-icon i.far,
+.external-service-card .service-card-header .service-icon i.fal,
+.external-service-card .service-card-header .service-icon i.fat,
+.external-service-card .service-card-header .service-icon i.fad,
+.external-service-card .service-card-header .service-icon i.fab,
+.external-service-card .service-card-header .service-icon i[class*=fa-] {
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  position: static !important;
+}
+.service-card .service-card-header .service-icon i.fa::before, .service-card .service-card-header .service-icon i.fas::before, .service-card .service-card-header .service-icon i.far::before, .service-card .service-card-header .service-icon i.fal::before, .service-card .service-card-header .service-icon i.fat::before, .service-card .service-card-header .service-icon i.fad::before, .service-card .service-card-header .service-icon i.fab::before, .service-card .service-card-header .service-icon i[class*=fa-]::before,
+.services-section .service-card .service-card-header .service-icon i.fa::before,
+.services-section .service-card .service-card-header .service-icon i.fas::before,
+.services-section .service-card .service-card-header .service-icon i.far::before,
+.services-section .service-card .service-card-header .service-icon i.fal::before,
+.services-section .service-card .service-card-header .service-icon i.fat::before,
+.services-section .service-card .service-card-header .service-icon i.fad::before,
+.services-section .service-card .service-card-header .service-icon i.fab::before,
+.services-section .service-card .service-card-header .service-icon i[class*=fa-]::before,
+.admin-card .service-card-header .service-icon i.fa::before,
+.admin-card .service-card-header .service-icon i.fas::before,
+.admin-card .service-card-header .service-icon i.far::before,
+.admin-card .service-card-header .service-icon i.fal::before,
+.admin-card .service-card-header .service-icon i.fat::before,
+.admin-card .service-card-header .service-icon i.fad::before,
+.admin-card .service-card-header .service-icon i.fab::before,
+.admin-card .service-card-header .service-icon i[class*=fa-]::before,
+.external-service-card .service-card-header .service-icon i.fa::before,
+.external-service-card .service-card-header .service-icon i.fas::before,
+.external-service-card .service-card-header .service-icon i.far::before,
+.external-service-card .service-card-header .service-icon i.fal::before,
+.external-service-card .service-card-header .service-icon i.fat::before,
+.external-service-card .service-card-header .service-icon i.fad::before,
+.external-service-card .service-card-header .service-icon i.fab::before,
+.external-service-card .service-card-header .service-icon i[class*=fa-]::before {
+  transform: none !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
 }
 .service-card .service-card-header .service-icon i.fa-xs, .service-card .service-card-header .service-icon i.fa-sm, .service-card .service-card-header .service-icon i.fa-lg, .service-card .service-card-header .service-icon i.fa-xl, .service-card .service-card-header .service-icon i.fa-2xl, .service-card .service-card-header .service-icon i.fa-2xs, .service-card .service-card-header .service-icon i.fa-1x, .service-card .service-card-header .service-icon i.fa-2x, .service-card .service-card-header .service-icon i.fa-3x, .service-card .service-card-header .service-icon i.fa-4x, .service-card .service-card-header .service-icon i.fa-5x,
 .services-section .service-card .service-card-header .service-icon i.fa-xs,
@@ -7700,7 +8223,18 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .admin-card .service-card-header .service-icon i.fa-2x,
 .admin-card .service-card-header .service-icon i.fa-3x,
 .admin-card .service-card-header .service-icon i.fa-4x,
-.admin-card .service-card-header .service-icon i.fa-5x {
+.admin-card .service-card-header .service-icon i.fa-5x,
+.external-service-card .service-card-header .service-icon i.fa-xs,
+.external-service-card .service-card-header .service-icon i.fa-sm,
+.external-service-card .service-card-header .service-icon i.fa-lg,
+.external-service-card .service-card-header .service-icon i.fa-xl,
+.external-service-card .service-card-header .service-icon i.fa-2xl,
+.external-service-card .service-card-header .service-icon i.fa-2xs,
+.external-service-card .service-card-header .service-icon i.fa-1x,
+.external-service-card .service-card-header .service-icon i.fa-2x,
+.external-service-card .service-card-header .service-icon i.fa-3x,
+.external-service-card .service-card-header .service-icon i.fa-4x,
+.external-service-card .service-card-header .service-icon i.fa-5x {
   font-size: 1.8em !important;
 }
 
@@ -7800,11 +8334,38 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  position: relative !important;
+}
+.hero-badge .badge i {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
 }
 .hero-badge .badge i {
   font-size: 1.2em !important;
   margin-right: 0.5em !important;
-  line-height: 1 !important;
+}
+.hero-badge .badge i.fa, .hero-badge .badge i.fas, .hero-badge .badge i.far, .hero-badge .badge i.fal, .hero-badge .badge i.fat, .hero-badge .badge i.fad, .hero-badge .badge i.fab, .hero-badge .badge i[class*=fa-] {
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  position: static !important;
+}
+.hero-badge .badge i.fa::before, .hero-badge .badge i.fas::before, .hero-badge .badge i.far::before, .hero-badge .badge i.fal::before, .hero-badge .badge i.fat::before, .hero-badge .badge i.fad::before, .hero-badge .badge i.fab::before, .hero-badge .badge i[class*=fa-]::before {
+  transform: none !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
 }
 .hero-badge .badge i.fa-xs, .hero-badge .badge i.fa-sm, .hero-badge .badge i.fa-lg, .hero-badge .badge i.fa-xl, .hero-badge .badge i.fa-2xl, .hero-badge .badge i.fa-2xs, .hero-badge .badge i.fa-1x, .hero-badge .badge i.fa-2x, .hero-badge .badge i.fa-3x, .hero-badge .badge i.fa-4x, .hero-badge .badge i.fa-5x {
   font-size: 1.2em !important;
@@ -7833,10 +8394,43 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   font-size: 1em !important;
 }
 
+.capability-card .capability-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+.capability-card .capability-icon i {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
 .capability-card .capability-icon i {
   font-size: 2.5em !important;
   color: #007b7f !important;
-  margin-bottom: 1rem !important;
+  margin: 0 !important;
+}
+.capability-card .capability-icon i.fa, .capability-card .capability-icon i.fas, .capability-card .capability-icon i.far, .capability-card .capability-icon i.fal, .capability-card .capability-icon i.fat, .capability-card .capability-icon i.fad, .capability-card .capability-icon i.fab, .capability-card .capability-icon i[class*=fa-] {
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  position: static !important;
+}
+.capability-card .capability-icon i.fa::before, .capability-card .capability-icon i.fas::before, .capability-card .capability-icon i.far::before, .capability-card .capability-icon i.fal::before, .capability-card .capability-icon i.fat::before, .capability-card .capability-icon i.fad::before, .capability-card .capability-icon i.fab::before, .capability-card .capability-icon i[class*=fa-]::before {
+  transform: none !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
 }
 .capability-card .capability-icon i.fa-xs, .capability-card .capability-icon i.fa-sm, .capability-card .capability-icon i.fa-lg, .capability-card .capability-icon i.fa-xl, .capability-card .capability-icon i.fa-2xl, .capability-card .capability-icon i.fa-2xs, .capability-card .capability-icon i.fa-1x, .capability-card .capability-icon i.fa-2x, .capability-card .capability-icon i.fa-3x, .capability-card .capability-icon i.fa-4x, .capability-card .capability-icon i.fa-5x {
   font-size: 2.5em !important;
@@ -7864,15 +8458,365 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  position: relative !important;
+}
+.feature-icon i {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
 }
 .feature-icon i {
   font-size: 2.5em !important;
-  line-height: 1 !important;
-  margin: 0 !important;
-  display: block !important;
 }
 .feature-icon i.fa-xs, .feature-icon i.fa-sm, .feature-icon i.fa-lg, .feature-icon i.fa-xl, .feature-icon i.fa-2xl, .feature-icon i.fa-2xs, .feature-icon i.fa-1x, .feature-icon i.fa-2x, .feature-icon i.fa-3x, .feature-icon i.fa-4x, .feature-icon i.fa-5x {
   font-size: 2.5em !important;
+}
+
+.badge,
+.badge-primary,
+.badge-secondary,
+.badge-success,
+.badge-danger,
+.badge-warning,
+.badge-info,
+.badge-light,
+.badge-dark {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+.badge i,
+.badge-primary i,
+.badge-secondary i,
+.badge-success i,
+.badge-danger i,
+.badge-warning i,
+.badge-info i,
+.badge-light i,
+.badge-dark i {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+.badge i.fa, .badge i.fas, .badge i.far, .badge i.fal, .badge i.fat, .badge i.fad, .badge i.fab, .badge i[class*=fa-],
+.badge-primary i.fa,
+.badge-primary i.fas,
+.badge-primary i.far,
+.badge-primary i.fal,
+.badge-primary i.fat,
+.badge-primary i.fad,
+.badge-primary i.fab,
+.badge-primary i[class*=fa-],
+.badge-secondary i.fa,
+.badge-secondary i.fas,
+.badge-secondary i.far,
+.badge-secondary i.fal,
+.badge-secondary i.fat,
+.badge-secondary i.fad,
+.badge-secondary i.fab,
+.badge-secondary i[class*=fa-],
+.badge-success i.fa,
+.badge-success i.fas,
+.badge-success i.far,
+.badge-success i.fal,
+.badge-success i.fat,
+.badge-success i.fad,
+.badge-success i.fab,
+.badge-success i[class*=fa-],
+.badge-danger i.fa,
+.badge-danger i.fas,
+.badge-danger i.far,
+.badge-danger i.fal,
+.badge-danger i.fat,
+.badge-danger i.fad,
+.badge-danger i.fab,
+.badge-danger i[class*=fa-],
+.badge-warning i.fa,
+.badge-warning i.fas,
+.badge-warning i.far,
+.badge-warning i.fal,
+.badge-warning i.fat,
+.badge-warning i.fad,
+.badge-warning i.fab,
+.badge-warning i[class*=fa-],
+.badge-info i.fa,
+.badge-info i.fas,
+.badge-info i.far,
+.badge-info i.fal,
+.badge-info i.fat,
+.badge-info i.fad,
+.badge-info i.fab,
+.badge-info i[class*=fa-],
+.badge-light i.fa,
+.badge-light i.fas,
+.badge-light i.far,
+.badge-light i.fal,
+.badge-light i.fat,
+.badge-light i.fad,
+.badge-light i.fab,
+.badge-light i[class*=fa-],
+.badge-dark i.fa,
+.badge-dark i.fas,
+.badge-dark i.far,
+.badge-dark i.fal,
+.badge-dark i.fat,
+.badge-dark i.fad,
+.badge-dark i.fab,
+.badge-dark i[class*=fa-] {
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  position: static !important;
+}
+.badge i.fa::before, .badge i.fas::before, .badge i.far::before, .badge i.fal::before, .badge i.fat::before, .badge i.fad::before, .badge i.fab::before, .badge i[class*=fa-]::before,
+.badge-primary i.fa::before,
+.badge-primary i.fas::before,
+.badge-primary i.far::before,
+.badge-primary i.fal::before,
+.badge-primary i.fat::before,
+.badge-primary i.fad::before,
+.badge-primary i.fab::before,
+.badge-primary i[class*=fa-]::before,
+.badge-secondary i.fa::before,
+.badge-secondary i.fas::before,
+.badge-secondary i.far::before,
+.badge-secondary i.fal::before,
+.badge-secondary i.fat::before,
+.badge-secondary i.fad::before,
+.badge-secondary i.fab::before,
+.badge-secondary i[class*=fa-]::before,
+.badge-success i.fa::before,
+.badge-success i.fas::before,
+.badge-success i.far::before,
+.badge-success i.fal::before,
+.badge-success i.fat::before,
+.badge-success i.fad::before,
+.badge-success i.fab::before,
+.badge-success i[class*=fa-]::before,
+.badge-danger i.fa::before,
+.badge-danger i.fas::before,
+.badge-danger i.far::before,
+.badge-danger i.fal::before,
+.badge-danger i.fat::before,
+.badge-danger i.fad::before,
+.badge-danger i.fab::before,
+.badge-danger i[class*=fa-]::before,
+.badge-warning i.fa::before,
+.badge-warning i.fas::before,
+.badge-warning i.far::before,
+.badge-warning i.fal::before,
+.badge-warning i.fat::before,
+.badge-warning i.fad::before,
+.badge-warning i.fab::before,
+.badge-warning i[class*=fa-]::before,
+.badge-info i.fa::before,
+.badge-info i.fas::before,
+.badge-info i.far::before,
+.badge-info i.fal::before,
+.badge-info i.fat::before,
+.badge-info i.fad::before,
+.badge-info i.fab::before,
+.badge-info i[class*=fa-]::before,
+.badge-light i.fa::before,
+.badge-light i.fas::before,
+.badge-light i.far::before,
+.badge-light i.fal::before,
+.badge-light i.fat::before,
+.badge-light i.fad::before,
+.badge-light i.fab::before,
+.badge-light i[class*=fa-]::before,
+.badge-dark i.fa::before,
+.badge-dark i.fas::before,
+.badge-dark i.far::before,
+.badge-dark i.fal::before,
+.badge-dark i.fat::before,
+.badge-dark i.fad::before,
+.badge-dark i.fab::before,
+.badge-dark i[class*=fa-]::before {
+  transform: none !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+}
+.badge i.fa-xs, .badge i.fa-sm, .badge i.fa-lg, .badge i.fa-xl, .badge i.fa-2xl, .badge i.fa-2xs, .badge i.fa-1x, .badge i.fa-2x, .badge i.fa-3x, .badge i.fa-4x, .badge i.fa-5x,
+.badge-primary i.fa-xs,
+.badge-primary i.fa-sm,
+.badge-primary i.fa-lg,
+.badge-primary i.fa-xl,
+.badge-primary i.fa-2xl,
+.badge-primary i.fa-2xs,
+.badge-primary i.fa-1x,
+.badge-primary i.fa-2x,
+.badge-primary i.fa-3x,
+.badge-primary i.fa-4x,
+.badge-primary i.fa-5x,
+.badge-secondary i.fa-xs,
+.badge-secondary i.fa-sm,
+.badge-secondary i.fa-lg,
+.badge-secondary i.fa-xl,
+.badge-secondary i.fa-2xl,
+.badge-secondary i.fa-2xs,
+.badge-secondary i.fa-1x,
+.badge-secondary i.fa-2x,
+.badge-secondary i.fa-3x,
+.badge-secondary i.fa-4x,
+.badge-secondary i.fa-5x,
+.badge-success i.fa-xs,
+.badge-success i.fa-sm,
+.badge-success i.fa-lg,
+.badge-success i.fa-xl,
+.badge-success i.fa-2xl,
+.badge-success i.fa-2xs,
+.badge-success i.fa-1x,
+.badge-success i.fa-2x,
+.badge-success i.fa-3x,
+.badge-success i.fa-4x,
+.badge-success i.fa-5x,
+.badge-danger i.fa-xs,
+.badge-danger i.fa-sm,
+.badge-danger i.fa-lg,
+.badge-danger i.fa-xl,
+.badge-danger i.fa-2xl,
+.badge-danger i.fa-2xs,
+.badge-danger i.fa-1x,
+.badge-danger i.fa-2x,
+.badge-danger i.fa-3x,
+.badge-danger i.fa-4x,
+.badge-danger i.fa-5x,
+.badge-warning i.fa-xs,
+.badge-warning i.fa-sm,
+.badge-warning i.fa-lg,
+.badge-warning i.fa-xl,
+.badge-warning i.fa-2xl,
+.badge-warning i.fa-2xs,
+.badge-warning i.fa-1x,
+.badge-warning i.fa-2x,
+.badge-warning i.fa-3x,
+.badge-warning i.fa-4x,
+.badge-warning i.fa-5x,
+.badge-info i.fa-xs,
+.badge-info i.fa-sm,
+.badge-info i.fa-lg,
+.badge-info i.fa-xl,
+.badge-info i.fa-2xl,
+.badge-info i.fa-2xs,
+.badge-info i.fa-1x,
+.badge-info i.fa-2x,
+.badge-info i.fa-3x,
+.badge-info i.fa-4x,
+.badge-info i.fa-5x,
+.badge-light i.fa-xs,
+.badge-light i.fa-sm,
+.badge-light i.fa-lg,
+.badge-light i.fa-xl,
+.badge-light i.fa-2xl,
+.badge-light i.fa-2xs,
+.badge-light i.fa-1x,
+.badge-light i.fa-2x,
+.badge-light i.fa-3x,
+.badge-light i.fa-4x,
+.badge-light i.fa-5x,
+.badge-dark i.fa-xs,
+.badge-dark i.fa-sm,
+.badge-dark i.fa-lg,
+.badge-dark i.fa-xl,
+.badge-dark i.fa-2xl,
+.badge-dark i.fa-2xs,
+.badge-dark i.fa-1x,
+.badge-dark i.fa-2x,
+.badge-dark i.fa-3x,
+.badge-dark i.fa-4x,
+.badge-dark i.fa-5x {
+  font-size: 1em !important;
+}
+
+.status-badge,
+.status-indicator {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+.status-badge i,
+.status-indicator i {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+.status-badge i,
+.status-indicator i {
+  font-size: 1.2em !important;
+}
+.status-badge i.fa, .status-badge i.fas, .status-badge i.far, .status-badge i.fal, .status-badge i.fat, .status-badge i.fad, .status-badge i.fab, .status-badge i[class*=fa-],
+.status-indicator i.fa,
+.status-indicator i.fas,
+.status-indicator i.far,
+.status-indicator i.fal,
+.status-indicator i.fat,
+.status-indicator i.fad,
+.status-indicator i.fab,
+.status-indicator i[class*=fa-] {
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  position: static !important;
+}
+.status-badge i.fa::before, .status-badge i.fas::before, .status-badge i.far::before, .status-badge i.fal::before, .status-badge i.fat::before, .status-badge i.fad::before, .status-badge i.fab::before, .status-badge i[class*=fa-]::before,
+.status-indicator i.fa::before,
+.status-indicator i.fas::before,
+.status-indicator i.far::before,
+.status-indicator i.fal::before,
+.status-indicator i.fat::before,
+.status-indicator i.fad::before,
+.status-indicator i.fab::before,
+.status-indicator i[class*=fa-]::before {
+  transform: none !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+}
+.status-badge i.fa-xs, .status-badge i.fa-sm, .status-badge i.fa-lg, .status-badge i.fa-xl, .status-badge i.fa-2xl, .status-badge i.fa-2xs, .status-badge i.fa-1x, .status-badge i.fa-2x, .status-badge i.fa-3x, .status-badge i.fa-4x, .status-badge i.fa-5x,
+.status-indicator i.fa-xs,
+.status-indicator i.fa-sm,
+.status-indicator i.fa-lg,
+.status-indicator i.fa-xl,
+.status-indicator i.fa-2xl,
+.status-indicator i.fa-2xs,
+.status-indicator i.fa-1x,
+.status-indicator i.fa-2x,
+.status-indicator i.fa-3x,
+.status-indicator i.fa-4x,
+.status-indicator i.fa-5x {
+  font-size: 1.2em !important;
 }
 
 .external-service-card .service-card-footer {
@@ -9406,6 +10350,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   background-color: #007b7f;
   border-color: #007b7f;
   color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
 }
 .btn-hse-teal:hover, .btn-hse-teal:focus {
   background-color: #005b5f;
@@ -9431,7 +10376,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .hero-section {
   position: relative;
   background: linear-gradient(135deg, #007b7f 0%, #33969a 50%, #2d5a27 100%);
-  color: #ffffff;
+  color: var(--healthcare-text-grey);
   padding: 3rem 1rem;
   overflow: hidden;
 }
@@ -9703,26 +10648,16 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   margin: 0 auto 1.5rem;
-  text-align: center;
-  line-height: 1;
   background: linear-gradient(135deg, #2d5a27, #4a7c59);
   color: #ffffff;
   box-shadow: 0 8px 20px rgba(45, 90, 39, 0.3);
-  --fa-display: inline-block;
 }
 .capabilities-section .capability-card .capability-icon i {
   color: #ffffff !important;
-  line-height: 1;
-  vertical-align: middle;
 }
 .capabilities-section .capability-card .capability-icon i.fa, .capabilities-section .capability-card .capability-icon i.fab, .capabilities-section .capability-card .capability-icon i.fa-solid, .capabilities-section .capability-card .capability-icon i.far, .capabilities-section .capability-card .capability-icon i.fal, .capabilities-section .capability-card .capability-icon i.fat, .capabilities-section .capability-card .capability-icon i.fad {
   color: #ffffff !important;
-  line-height: 1;
-  vertical-align: middle;
 }
 @media (min-width: 768px) {
   .capabilities-section .capability-card .capability-icon {
@@ -9948,7 +10883,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   }
 }
 .external-services-section .external-service-card .service-description {
-  color: #6c757d;
+  color: #636567;
   font-size: 0.875rem;
   line-height: 1.5;
   margin-bottom: 1rem;
