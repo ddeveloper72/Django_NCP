@@ -75,16 +75,445 @@ img.fade-in {
 }
 
 /* High contrast mode */
+:root {
+  /* Default (normal) color scheme */
+  --hc-bg-primary: inherit;
+  --hc-bg-secondary: inherit;
+  --hc-text-primary: inherit;
+  --hc-text-secondary: inherit;
+  --hc-border-primary: inherit;
+  --hc-border-secondary: inherit;
+  --hc-link-color: inherit;
+  --hc-btn-bg: inherit;
+  --hc-btn-text: inherit;
+  --hc-btn-border: inherit;
+}
+
 .high-contrast {
-  filter: contrast(150%) brightness(110%);
+  /* High contrast color scheme */
+  --hc-bg-primary: #000000;
+  --hc-bg-secondary: #333333;
+  --hc-text-primary: #ffffff;
+  --hc-text-secondary: #ffffff;
+  --hc-border-primary: #ffffff;
+  --hc-border-secondary: #ffffff;
+  --hc-link-color: #ffffff;
+  --hc-btn-bg: #ffffff;
+  --hc-btn-text: #000000;
+  --hc-btn-border: #000000;
+
+  /* Override background and text colors for true high contrast */
+  background-color: var(--hc-bg-primary) !important;
+  color: var(--hc-text-primary) !important;
+}
+
+/* Base component classes for high contrast */
+.hc-bg-primary {
+  background-color: var(--hc-bg-primary) !important;
+}
+.hc-bg-secondary {
+  background-color: var(--hc-bg-secondary) !important;
+}
+.hc-text-primary {
+  color: var(--hc-text-primary) !important;
+}
+.hc-text-secondary {
+  color: var(--hc-text-secondary) !important;
+}
+.hc-border-primary {
+  border-color: var(--hc-border-primary) !important;
+}
+.hc-border-secondary {
+  border-color: var(--hc-border-secondary) !important;
+}
+
+/* Apply high contrast to common elements */
+.high-contrast .hero-section,
+.high-contrast .services-section,
+.high-contrast .container,
+.high-contrast .container-fluid {
+  background-color: var(--hc-bg-primary) !important;
+}
+
+.high-contrast .hero-content,
+.high-contrast .hero-title,
+.high-contrast .hero-subtitle {
+  color: var(--hc-text-primary) !important;
+}
+
+.high-contrast .card,
+.high-contrast .service-card {
+  background-color: var(--hc-bg-primary) !important;
+  color: var(--hc-text-primary) !important;
+  border: 2px solid var(--hc-border-primary) !important;
+}
+
+.high-contrast .badge {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 1px solid var(--hc-btn-border) !important;
+}
+
+.high-contrast .btn {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 2px solid var(--hc-btn-border) !important;
+  font-weight: bold;
+}
+
+.high-contrast .btn:hover,
+.high-contrast .btn:focus {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 3px solid var(--hc-btn-border) !important;
+  box-shadow: 0 0 0 3px var(--hc-border-primary) !important;
+}
+
+.high-contrast .stat-item,
+.high-contrast .stat-number,
+.high-contrast .stat-label {
+  color: var(--hc-text-primary) !important;
+}
+
+.high-contrast .section-title,
+.high-contrast .section-subtitle,
+.high-contrast .service-title,
+.high-contrast .service-description {
+  color: var(--hc-text-primary) !important;
+}
+
+.high-contrast .service-icon,
+.high-contrast .stat-icon,
+.high-contrast .hero-icon {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 2px solid var(--hc-btn-border) !important;
+}
+
+.high-contrast .service-icon i,
+.high-contrast .stat-icon i,
+.high-contrast .hero-icon i {
+  color: var(--hc-btn-text) !important;
+}
+
+.high-contrast .stat-item {
+  color: var(--hc-text-primary) !important;
+}
+
+.high-contrast .stat-item .stat-icon {
+  background-color: var(--hc-btn-bg) !important;
+  border: 2px solid var(--hc-btn-border) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.high-contrast .stat-item .stat-icon i {
+  color: var(--hc-btn-text) !important;
+  margin: 0 !important;
+}
+
+.high-contrast .container,
+.high-contrast .container-fluid {
+  background-color: #000000 !important;
+}
+
+.high-contrast p,
+.high-contrast span,
+.high-contrast div,
+.high-contrast h1,
+.high-contrast h2,
+.high-contrast h3,
+.high-contrast h4,
+.high-contrast h5,
+.high-contrast h6 {
+  color: #ffffff !important;
+}
+
+.high-contrast .text-dark,
+.high-contrast .text-muted {
+  color: #ffffff !important;
+}
+
+/* Fix high contrast toggle button visibility */
+.high-contrast #contrast-toggle {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 3px solid #ffffff !important;
+}
+
+.high-contrast #contrast-toggle:hover,
+.high-contrast #contrast-toggle:focus {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
 }
 
 .high-contrast img:not(.no-contrast) {
   filter: contrast(120%);
 }
 
-.high-contrast .btn {
-  border-width: 2px;
+.high-contrast .services-section,
+.high-contrast .hero-section {
+  background-color: #000000 !important;
+}
+
+.high-contrast .service-features li {
+  color: #ffffff !important;
+}
+
+.high-contrast .service-features li i {
+  color: #ffffff !important;
+}
+
+/* Navigation Bar High Contrast Styling */
+.high-contrast .navbar,
+.high-contrast .navbar-nav,
+.high-contrast .nav {
+  background-color: #000000 !important;
+  border-bottom: 3px solid #ffffff !important;
+}
+
+.high-contrast .navbar-brand,
+.high-contrast .nav-link,
+.high-contrast .navbar-nav .nav-link {
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+.high-contrast .navbar-brand:hover,
+.high-contrast .navbar-brand:focus,
+.high-contrast .nav-link:hover,
+.high-contrast .nav-link:focus {
+  color: #ffffff !important;
+  background-color: #333333 !important;
+  border: 2px solid #ffffff !important;
+  border-radius: 4px;
+}
+
+.high-contrast .navbar-toggler {
+  background-color: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+.high-contrast .navbar-toggler-icon {
+  background-color: #000000 !important;
+}
+
+/* Card Content Areas - Fix Hidden Descriptions */
+.high-contrast .card-body,
+.high-contrast .card-text,
+.high-contrast .card-content {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .service-card .card-body,
+.high-contrast .service-card .service-description {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #ffffff !important;
+  padding: 15px !important;
+}
+
+/* Ensure all service card content is visible */
+.high-contrast .service-card p,
+.high-contrast .service-card .card-text,
+.high-contrast .service-card .service-description,
+.high-contrast .service-card ul,
+.high-contrast .service-card li {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Fix service card headers and titles */
+.high-contrast .service-card .card-header,
+.high-contrast .service-card h3,
+.high-contrast .service-card h4,
+.high-contrast .service-card h5 {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #ffffff !important;
+}
+
+.high-contrast .external-service-card,
+.high-contrast .external-service-card .card-body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast .external-service-card .service-description,
+.high-contrast .external-service-card p,
+.high-contrast .external-service-card .card-text {
+  color: #ffffff !important;
+  background-color: #000000 !important;
+}
+
+/* Ensure external service links are visible */
+.high-contrast .external-service-card .btn,
+.high-contrast .external-service-card a.btn {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: bold;
+}
+
+.high-contrast .external-service-card .btn:hover,
+.high-contrast .external-service-card .btn:focus,
+.high-contrast .external-service-card a.btn:hover,
+.high-contrast .external-service-card a.btn:focus {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 0 0 0 3px #ffffff !important;
+}
+
+/* Footer and Settings Areas */
+.high-contrast footer,
+.high-contrast .footer {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-top: 3px solid #ffffff !important;
+}
+
+.high-contrast footer a,
+.high-contrast .footer a,
+.high-contrast footer .nav-link,
+.high-contrast .footer .nav-link {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
+
+.high-contrast footer a:hover,
+.high-contrast footer a:focus,
+.high-contrast .footer a:hover,
+.high-contrast .footer a:focus {
+  color: #ffffff !important;
+  background-color: #333333 !important;
+  border: 1px solid #ffffff !important;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+/* Settings and Utility Icons */
+.high-contrast .settings-icon,
+.high-contrast .utility-icon,
+.high-contrast .gear-icon {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  border-radius: 4px;
+}
+
+/* Link Styling */
+.high-contrast a:not(.btn),
+.high-contrast .link {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}
+
+.high-contrast a:not(.btn):hover,
+.high-contrast a:not(.btn):focus {
+  color: #ffffff !important;
+  background-color: #333333 !important;
+  border: 1px solid #ffffff !important;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+/* List and Menu Items */
+.high-contrast .list-group-item,
+.high-contrast .dropdown-item {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #ffffff !important;
+}
+
+.high-contrast .list-group-item:hover,
+.high-contrast .list-group-item:focus,
+.high-contrast .dropdown-item:hover,
+.high-contrast .dropdown-item:focus {
+  background-color: #333333 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+/* Form Elements in High Contrast */
+.high-contrast .form-control,
+.high-contrast .form-select,
+.high-contrast input,
+.high-contrast textarea,
+.high-contrast select {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast .form-control:focus,
+.high-contrast .form-select:focus,
+.high-contrast input:focus,
+.high-contrast textarea:focus,
+.high-contrast select:focus {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 3px solid #ffffff !important;
+  box-shadow: 0 0 0 3px #ffffff !important;
+}
+
+.high-contrast label,
+.high-contrast .form-label {
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+/* Alert and Message Styling */
+.high-contrast .alert {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 3px solid #ffffff !important;
+}
+
+.high-contrast .alert-success {
+  border-color: #ffffff !important;
+}
+
+.high-contrast .alert-warning {
+  border-color: #ffffff !important;
+}
+
+.high-contrast .alert-danger {
+  border-color: #ffffff !important;
+}
+
+/* Breadcrumb and Navigation Aids */
+.high-contrast .breadcrumb,
+.high-contrast .breadcrumb-item {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .breadcrumb-item a {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
+
+.high-contrast .breadcrumb-item.active {
+  color: #ffffff !important;
+}
+
+/* Table High Contrast */
+.high-contrast table,
+.high-contrast th,
+.high-contrast td {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast th {
+  background-color: #333333 !important;
   font-weight: bold;
 }
 
