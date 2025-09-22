@@ -289,3 +289,86 @@
     transform: rotate(360deg);
   }
 }
+
+// ========================================
+// SMART ICON COLOR SYSTEM
+// Automatically adjusts icon colors based on background
+// ========================================
+
+// Smart icon color mixin - automatically chooses light/dark based on background
+@mixin smart-icon-color($bg-color: null, $light-color: #ffffff, $dark-color: #2d3748) {
+  @if $bg-color {
+    // Calculate luminance to determine if background is light or dark
+    $red: red($bg-color) / 255;
+    $green: green($bg-color) / 255;
+    $blue: blue($bg-color) / 255;
+    
+    // Simple luminance calculation
+    $luminance: ($red * 0.299) + ($green * 0.587) + ($blue * 0.114);
+    
+    @if $luminance > 0.5 {
+      // Light background - use dark icon
+      color: $dark-color !important;
+    } @else {
+      // Dark background - use light icon
+      color: $light-color !important;
+    }
+  } @else {
+    // Default to white icons for dark HSE themes
+    color: $light-color !important;
+  }
+}
+
+// Predefined smart icon classes for common HSE backgrounds
+@mixin hse-smart-icons {
+  // HSE Teal background (dark) - white icons
+  .bg-hse-teal i,
+  .bg-primary i,
+  .service-icon.bg-hse-teal i {
+    @include smart-icon-color($hse-primary-teal);
+  }
+  
+  // HSE Green background (dark) - white icons  
+  .bg-hse-green i,
+  .bg-success i,
+  .service-icon.bg-hse-green i {
+    @include smart-icon-color($hse-secondary-green);
+  }
+  
+  // Warning background (light) - dark icons
+  .bg-warning i,
+  .service-icon.bg-warning i {
+    @include smart-icon-color($warning-orange);
+  }
+  
+  // Light backgrounds - dark icons
+  .bg-light i,
+  .bg-white i,
+  .service-icon.bg-light i {
+    @include smart-icon-color(#ffffff);
+  }
+  
+  // Dark backgrounds - white icons
+  .bg-dark i,
+  .btn-primary i,
+  .btn-success i,
+  .btn-info i,
+  .btn-warning i,
+  .btn-danger i {
+    @include smart-icon-color(#343a40);
+  }
+}
+
+// Perfect icon centering mixin
+@mixin perfect-icon-center {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  
+  i {
+    display: block !important;
+    text-align: center !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+}
