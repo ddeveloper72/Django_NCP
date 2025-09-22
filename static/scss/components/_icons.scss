@@ -601,18 +601,36 @@
 }
 
 // ========================================
-// EXTERNAL SERVICE ICONS
-// Icons for external service connections
+// EXTERNAL SERVICE CARDS
+// External service cards using standard service-card structure with special CTA buttons
 // ========================================
 
-.external-card .external-icon {
-  @include perfect-icon-center; // Apply perfect centering to container
+// External service card variant - inherits from service-card but with unique styling
+.external-service-card {
+  // Use all standard service-card styles
+  // Additional styles for external variant can be added here if needed
+  
+  .service-card-footer {
+    padding-top: 1.5rem;
+  }
+}
 
+// External Call-to-Action buttons - new component for external links
+.external-cta-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 50px !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  border-width: 2px !important;
+  
   i {
-    font-size: 2.2em !important;
-    color: $hse-primary-teal !important;
-    margin: 0 !important; // Remove margin for perfect centering
-
+    font-size: 1em !important;
+    margin: 0 !important;
+    
     // Override FontAwesome sizing classes
     &.fa-xs,
     &.fa-sm,
@@ -625,10 +643,18 @@
     &.fa-3x,
     &.fa-4x,
     &.fa-5x {
-      font-size: 2.2em !important;
+      font-size: 1em !important;
     }
   }
+
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
 }
+
+// Remove old external card icon styles (no longer needed)
+// Legacy external-card styles can be removed as we now use service-card structure
 
 // External link button icons
 .external-link i {

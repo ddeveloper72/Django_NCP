@@ -7875,24 +7875,31 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   font-size: 2.5em !important;
 }
 
-.external-card .external-icon {
-  display: flex !important;
+.external-service-card .service-card-footer {
+  padding-top: 1.5rem;
+}
+
+.external-cta-btn {
+  display: inline-flex !important;
   align-items: center !important;
-  justify-content: center !important;
+  gap: 0.5rem !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 50px !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  border-width: 2px !important;
 }
-.external-card .external-icon i {
-  display: block !important;
-  text-align: center !important;
-  line-height: 1 !important;
+.external-cta-btn i {
+  font-size: 1em !important;
   margin: 0 !important;
 }
-.external-card .external-icon i {
-  font-size: 2.2em !important;
-  color: #007b7f !important;
-  margin: 0 !important;
+.external-cta-btn i.fa-xs, .external-cta-btn i.fa-sm, .external-cta-btn i.fa-lg, .external-cta-btn i.fa-xl, .external-cta-btn i.fa-2xl, .external-cta-btn i.fa-2xs, .external-cta-btn i.fa-1x, .external-cta-btn i.fa-2x, .external-cta-btn i.fa-3x, .external-cta-btn i.fa-4x, .external-cta-btn i.fa-5x {
+  font-size: 1em !important;
 }
-.external-card .external-icon i.fa-xs, .external-card .external-icon i.fa-sm, .external-card .external-icon i.fa-lg, .external-card .external-icon i.fa-xl, .external-card .external-icon i.fa-2xl, .external-card .external-icon i.fa-2xs, .external-card .external-icon i.fa-1x, .external-card .external-icon i.fa-2x, .external-card .external-icon i.fa-3x, .external-card .external-icon i.fa-4x, .external-card .external-icon i.fa-5x {
-  font-size: 2.2em !important;
+.external-cta-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .external-link i {
