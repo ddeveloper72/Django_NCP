@@ -3180,7 +3180,7 @@ img[data-src]::before {
   font-size: 2.5rem;
   font-weight: 700;
   margin: 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 .site-header .header-subtitle {
   font-size: 1.25rem;
@@ -3272,7 +3272,9 @@ img[data-src]::before {
   border-radius: 0.5rem 0.5rem 0 0;
   margin-bottom: 0;
 }
-.page-header h1, .page-header h2, .page-header h3 {
+.page-header h1,
+.page-header h2,
+.page-header h3 {
   margin: 0;
   color: #ffffff;
 }
@@ -3319,7 +3321,7 @@ img[data-src]::before {
   margin: 0 0 1.5rem 0;
   font-size: 3rem;
   font-weight: 700;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 @media (min-width: 480px) {
   .hero-header .hero-content h1 {
@@ -4148,6 +4150,137 @@ img[data-src]::before {
 }
 .card.card-lg {
   padding: 3rem;
+}
+
+.card-equal-height, .service-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.card-equal-height .card-body, .service-card .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.card-equal-height .card-footer, .service-card .card-footer {
+  margin-top: auto;
+}
+
+.service-card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #ffffff;
+}
+.service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+.service-card .service-card-header {
+  padding: 32px 24px 16px 24px;
+  text-align: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+}
+.service-card .service-card-header .service-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.service-card .service-card-header .service-icon i {
+  display: block !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+.service-card .service-card-header .service-icon {
+  margin: 0 auto 20px auto;
+  position: relative;
+}
+.service-card .service-card-header .service-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: inherit;
+  opacity: 0.1;
+  z-index: -1;
+}
+.service-card .service-card-header .service-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+.service-card .service-card-body {
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.service-card .service-card-body .service-description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #4a5568;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+.service-card .service-card-body .service-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 auto 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.service-card .service-card-body .service-features li {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  color: #2d3748;
+  line-height: 1.5;
+}
+.service-card .service-card-body .service-features li i {
+  margin-right: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.service-card .service-card-footer {
+  padding: 20px 24px 32px 24px;
+  margin-top: auto;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fafafa;
+}
+.service-card .service-card-footer .btn-service {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.service-card .service-card-footer .btn-service:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+.service-card .service-card-footer .btn-service:active {
+  transform: translateY(0);
 }
 
 .card-header {
@@ -7235,6 +7368,525 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   background-color: #f59e0b;
 }
 
+.fa.fa-xs,
+.fas.fa-xs,
+.far.fa-xs,
+.fal.fa-xs,
+.fat.fa-xs,
+.fad.fa-xs,
+.fab.fa-xs {
+  font-size: 0.75em;
+}
+.fa.fa-sm,
+.fas.fa-sm,
+.far.fa-sm,
+.fal.fa-sm,
+.fat.fa-sm,
+.fad.fa-sm,
+.fab.fa-sm {
+  font-size: 0.875em;
+}
+.fa.fa-lg,
+.fas.fa-lg,
+.far.fa-lg,
+.fal.fa-lg,
+.fat.fa-lg,
+.fad.fa-lg,
+.fab.fa-lg {
+  font-size: 1.33333em;
+}
+.fa.fa-xl,
+.fas.fa-xl,
+.far.fa-xl,
+.fal.fa-xl,
+.fat.fa-xl,
+.fad.fa-xl,
+.fab.fa-xl {
+  font-size: 1.5em;
+}
+.fa.fa-2xl,
+.fas.fa-2xl,
+.far.fa-2xl,
+.fal.fa-2xl,
+.fat.fa-2xl,
+.fad.fa-2xl,
+.fab.fa-2xl {
+  font-size: 2em;
+}
+.fa.fa-3xl,
+.fas.fa-3xl,
+.far.fa-3xl,
+.fal.fa-3xl,
+.fat.fa-3xl,
+.fad.fa-3xl,
+.fab.fa-3xl {
+  font-size: 2.5em;
+}
+.fa.fa-4xl,
+.fas.fa-4xl,
+.far.fa-4xl,
+.fal.fa-4xl,
+.fat.fa-4xl,
+.fad.fa-4xl,
+.fab.fa-4xl {
+  font-size: 3em;
+}
+.fa.fa-5xl,
+.fas.fa-5xl,
+.far.fa-5xl,
+.fal.fa-5xl,
+.fat.fa-5xl,
+.fad.fa-5xl,
+.fab.fa-5xl {
+  font-size: 4em;
+}
+
+.icon-healthcare {
+  color: #007b7f;
+}
+.icon-healthcare.icon-success {
+  color: #2d5a27;
+}
+.icon-healthcare.icon-warning {
+  color: #f59e0b;
+}
+.icon-healthcare.icon-error {
+  color: #dc2626;
+}
+.icon-healthcare.icon-info {
+  color: #1e3a5f;
+}
+.icon-healthcare.icon-muted {
+  color: #718096;
+}
+.icon-healthcare.icon-white {
+  color: #ffffff;
+}
+
+.icon-nav {
+  font-size: 1.25em;
+  color: #4a5568;
+  transition: color 0.2s ease;
+}
+.icon-nav:hover {
+  color: #007b7f;
+}
+
+.icon-btn, .service-card .service-card-footer .btn-service i {
+  font-size: 1.1em;
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+.icon-btn.icon-btn-lg, .service-card .service-card-footer .btn-service i.icon-btn-lg {
+  font-size: 1.3em;
+}
+.icon-btn.icon-btn-sm, .service-card .service-card-footer .btn-service i.icon-btn-sm {
+  font-size: 0.9em;
+}
+
+.icon-card-header {
+  font-size: 2.5em;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.icon-feature, .service-card .service-card-body .service-features li i {
+  font-size: 1.1em;
+  color: #2d5a27;
+  width: 1.5em;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.icon-status {
+  font-size: 1em;
+}
+.icon-status.status-active {
+  color: #2d5a27;
+}
+.icon-status.status-pending {
+  color: #f59e0b;
+}
+.icon-status.status-inactive {
+  color: #718096;
+}
+.icon-status.status-error {
+  color: #dc2626;
+}
+
+.icon-clinical {
+  font-size: 1.2em;
+  color: #007b7f;
+  margin-right: 0.75em;
+}
+.icon-clinical.icon-medical-code {
+  color: #2d5a27;
+  font-size: 0.9em;
+}
+.icon-clinical.icon-terminology {
+  color: #1e3a5f;
+  font-size: 0.85em;
+}
+
+.icon-responsive {
+  font-size: 1.5em;
+}
+@media (min-width: 768px) {
+  .icon-responsive {
+    font-size: 1.75em;
+  }
+}
+@media (min-width: 1200px) {
+  .icon-responsive {
+    font-size: 2em;
+  }
+}
+
+.icon-interactive {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.icon-interactive:focus {
+  outline: 2px solid #007b7f;
+  outline-offset: 2px;
+}
+.icon-interactive:hover {
+  transform: scale(1.1);
+}
+
+.icon-spin-slow {
+  animation: fa-spin 2s infinite linear;
+}
+
+.icon-pulse {
+  animation: icon-pulse 2s infinite;
+}
+
+@keyframes icon-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-container.icon-container-sm {
+  width: 2em;
+  height: 2em;
+}
+.icon-container.icon-container-md {
+  width: 3em;
+  height: 3em;
+}
+.icon-container.icon-container-lg {
+  width: 4em;
+  height: 4em;
+}
+.icon-container.icon-container-xl {
+  width: 5em;
+  height: 5em;
+}
+
+.service-card .fa,
+.service-card .fas,
+.service-card .far,
+.service-card .fal,
+.service-card .fat,
+.service-card .fad,
+.service-card .fab,
+.clinical-card .fa,
+.clinical-card .fas,
+.clinical-card .far,
+.clinical-card .fal,
+.clinical-card .fat,
+.clinical-card .fad,
+.clinical-card .fab,
+.info-card .fa,
+.info-card .fas,
+.info-card .far,
+.info-card .fal,
+.info-card .fat,
+.info-card .fad,
+.info-card .fab {
+  line-height: inherit;
+  vertical-align: baseline;
+}
+.service-card .fa:not([class*=fa-]),
+.service-card .fas:not([class*=fa-]),
+.service-card .far:not([class*=fa-]),
+.service-card .fal:not([class*=fa-]),
+.service-card .fat:not([class*=fa-]),
+.service-card .fad:not([class*=fa-]),
+.service-card .fab:not([class*=fa-]),
+.clinical-card .fa:not([class*=fa-]),
+.clinical-card .fas:not([class*=fa-]),
+.clinical-card .far:not([class*=fa-]),
+.clinical-card .fal:not([class*=fa-]),
+.clinical-card .fat:not([class*=fa-]),
+.clinical-card .fad:not([class*=fa-]),
+.clinical-card .fab:not([class*=fa-]),
+.info-card .fa:not([class*=fa-]),
+.info-card .fas:not([class*=fa-]),
+.info-card .far:not([class*=fa-]),
+.info-card .fal:not([class*=fa-]),
+.info-card .fat:not([class*=fa-]),
+.info-card .fad:not([class*=fa-]),
+.info-card .fab:not([class*=fa-]) {
+  font-size: inherit;
+}
+
+.service-card .service-card-body .service-features li i {
+  font-size: 1.1em !important;
+  color: #2d5a27 !important;
+  width: 1.5em !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+}
+.service-card .service-card-body .service-features li i.fa-xs, .service-card .service-card-body .service-features li i.fa-sm, .service-card .service-card-body .service-features li i.fa-lg, .service-card .service-card-body .service-features li i.fa-xl, .service-card .service-card-body .service-features li i.fa-2xl, .service-card .service-card-body .service-features li i.fa-2xs, .service-card .service-card-body .service-features li i.fa-1x, .service-card .service-card-body .service-features li i.fa-2x, .service-card .service-card-body .service-features li i.fa-3x, .service-card .service-card-body .service-features li i.fa-4x, .service-card .service-card-body .service-features li i.fa-5x {
+  font-size: 1.1em !important;
+}
+.service-card .service-card-body .service-features li i.text-success, .service-card .service-card-body .service-features li i.text-primary, .service-card .service-card-body .service-features li i.text-info, .service-card .service-card-body .service-features li i.text-warning, .service-card .service-card-body .service-features li i.text-danger, .service-card .service-card-body .service-features li i.text-muted, .service-card .service-card-body .service-features li i.text-dark, .service-card .service-card-body .service-features li i.text-light, .service-card .service-card-body .service-features li i.text-white {
+  color: #2d5a27 !important;
+}
+
+.service-card .service-card-header .service-icon,
+.services-section .service-card .service-card-header .service-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.service-card .service-card-header .service-icon i,
+.services-section .service-card .service-card-header .service-icon i {
+  display: block !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+.service-card .service-card-header .service-icon i,
+.services-section .service-card .service-card-header .service-icon i {
+  font-size: 1.8em !important;
+  color: #ffffff !important;
+}
+.service-card .service-card-header .service-icon i.fa-xs, .service-card .service-card-header .service-icon i.fa-sm, .service-card .service-card-header .service-icon i.fa-lg, .service-card .service-card-header .service-icon i.fa-xl, .service-card .service-card-header .service-icon i.fa-2xl, .service-card .service-card-header .service-icon i.fa-2xs, .service-card .service-card-header .service-icon i.fa-1x, .service-card .service-card-header .service-icon i.fa-2x, .service-card .service-card-header .service-icon i.fa-3x, .service-card .service-card-header .service-icon i.fa-4x, .service-card .service-card-header .service-icon i.fa-5x,
+.services-section .service-card .service-card-header .service-icon i.fa-xs,
+.services-section .service-card .service-card-header .service-icon i.fa-sm,
+.services-section .service-card .service-card-header .service-icon i.fa-lg,
+.services-section .service-card .service-card-header .service-icon i.fa-xl,
+.services-section .service-card .service-card-header .service-icon i.fa-2xl,
+.services-section .service-card .service-card-header .service-icon i.fa-2xs,
+.services-section .service-card .service-card-header .service-icon i.fa-1x,
+.services-section .service-card .service-card-header .service-icon i.fa-2x,
+.services-section .service-card .service-card-header .service-icon i.fa-3x,
+.services-section .service-card .service-card-header .service-icon i.fa-4x,
+.services-section .service-card .service-card-header .service-icon i.fa-5x {
+  font-size: 1.8em !important;
+}
+
+.service-card .service-card-footer .btn-service i,
+.btn-service i,
+.btn i {
+  font-size: 1.1em !important;
+  margin-right: 0.5em !important;
+  vertical-align: middle !important;
+  color: #ffffff !important;
+}
+.service-card .service-card-footer .btn-service i.fa-xs, .service-card .service-card-footer .btn-service i.fa-sm, .service-card .service-card-footer .btn-service i.fa-lg, .service-card .service-card-footer .btn-service i.fa-xl, .service-card .service-card-footer .btn-service i.fa-2xl, .service-card .service-card-footer .btn-service i.fa-2xs, .service-card .service-card-footer .btn-service i.fa-1x, .service-card .service-card-footer .btn-service i.fa-2x, .service-card .service-card-footer .btn-service i.fa-3x, .service-card .service-card-footer .btn-service i.fa-4x, .service-card .service-card-footer .btn-service i.fa-5x,
+.btn-service i.fa-xs,
+.btn-service i.fa-sm,
+.btn-service i.fa-lg,
+.btn-service i.fa-xl,
+.btn-service i.fa-2xl,
+.btn-service i.fa-2xs,
+.btn-service i.fa-1x,
+.btn-service i.fa-2x,
+.btn-service i.fa-3x,
+.btn-service i.fa-4x,
+.btn-service i.fa-5x,
+.btn i.fa-xs,
+.btn i.fa-sm,
+.btn i.fa-lg,
+.btn i.fa-xl,
+.btn i.fa-2xl,
+.btn i.fa-2xs,
+.btn i.fa-1x,
+.btn i.fa-2x,
+.btn i.fa-3x,
+.btn i.fa-4x,
+.btn i.fa-5x {
+  font-size: 1.1em !important;
+}
+
+.bg-hse-teal i,
+.bg-primary i,
+.service-icon.bg-hse-teal i {
+  color: #ffffff !important;
+}
+
+.bg-hse-green i,
+.bg-success i,
+.service-icon.bg-hse-green i {
+  color: #ffffff !important;
+}
+
+.bg-warning i,
+.service-icon.bg-warning i {
+  color: #2d3748 !important;
+}
+
+.bg-light i,
+.bg-white i,
+.service-icon.bg-light i {
+  color: #2d3748 !important;
+}
+
+.bg-dark i,
+.btn-primary i,
+.btn-success i,
+.btn-info i,
+.btn-warning i,
+.btn-danger i {
+  color: #ffffff !important;
+}
+
+.capability-icon i.fa-xs, .capability-icon i.fa-sm, .capability-icon i.fa-lg, .capability-icon i.fa-xl, .capability-icon i.fa-2xl, .capability-icon i.fa-2xs, .capability-icon i.fa-1x, .capability-icon i.fa-2x, .capability-icon i.fa-3x, .capability-icon i.fa-4x, .capability-icon i.fa-5x,
+.stat-icon i.fa-xs,
+.stat-icon i.fa-sm,
+.stat-icon i.fa-lg,
+.stat-icon i.fa-xl,
+.stat-icon i.fa-2xl,
+.stat-icon i.fa-2xs,
+.stat-icon i.fa-1x,
+.stat-icon i.fa-2x,
+.stat-icon i.fa-3x,
+.stat-icon i.fa-4x,
+.stat-icon i.fa-5x,
+.config-icon i.fa-xs,
+.config-icon i.fa-sm,
+.config-icon i.fa-lg,
+.config-icon i.fa-xl,
+.config-icon i.fa-2xl,
+.config-icon i.fa-2xs,
+.config-icon i.fa-1x,
+.config-icon i.fa-2x,
+.config-icon i.fa-3x,
+.config-icon i.fa-4x,
+.config-icon i.fa-5x {
+  font-size: inherit !important;
+}
+
+.hero-badge .badge {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.hero-badge .badge i {
+  font-size: 1.2em !important;
+  margin-right: 0.5em !important;
+  line-height: 1 !important;
+}
+.hero-badge .badge i.fa-xs, .hero-badge .badge i.fa-sm, .hero-badge .badge i.fa-lg, .hero-badge .badge i.fa-xl, .hero-badge .badge i.fa-2xl, .hero-badge .badge i.fa-2xs, .hero-badge .badge i.fa-1x, .hero-badge .badge i.fa-2x, .hero-badge .badge i.fa-3x, .hero-badge .badge i.fa-4x, .hero-badge .badge i.fa-5x {
+  font-size: 1.2em !important;
+}
+
+.hero-stats .stat-icon i {
+  font-size: 3.5em !important;
+  margin-right: 0.5em !important;
+  color: #007b7f !important;
+  vertical-align: top !important;
+  display: inline-block !important;
+}
+.hero-stats .stat-icon i.fa-xs, .hero-stats .stat-icon i.fa-sm, .hero-stats .stat-icon i.fa-lg, .hero-stats .stat-icon i.fa-xl, .hero-stats .stat-icon i.fa-2xl, .hero-stats .stat-icon i.fa-2xs, .hero-stats .stat-icon i.fa-1x, .hero-stats .stat-icon i.fa-2x, .hero-stats .stat-icon i.fa-3x, .hero-stats .stat-icon i.fa-4x, .hero-stats .stat-icon i.fa-5x {
+  font-size: 3.5em !important;
+}
+
+.hero-stats .stat-number i {
+  font-size: 1em !important;
+  margin-right: 0.2em !important;
+  color: inherit !important;
+  vertical-align: baseline !important;
+  display: inline !important;
+  line-height: 1 !important;
+}
+.hero-stats .stat-number i.fa-xs, .hero-stats .stat-number i.fa-sm, .hero-stats .stat-number i.fa-lg, .hero-stats .stat-number i.fa-xl, .hero-stats .stat-number i.fa-2xl, .hero-stats .stat-number i.fa-2xs, .hero-stats .stat-number i.fa-1x, .hero-stats .stat-number i.fa-2x, .hero-stats .stat-number i.fa-3x, .hero-stats .stat-number i.fa-4x, .hero-stats .stat-number i.fa-5x {
+  font-size: 1em !important;
+}
+
+.capability-card .capability-icon i {
+  font-size: 2.5em !important;
+  color: #007b7f !important;
+  margin-bottom: 1rem !important;
+}
+.capability-card .capability-icon i.fa-xs, .capability-card .capability-icon i.fa-sm, .capability-card .capability-icon i.fa-lg, .capability-card .capability-icon i.fa-xl, .capability-card .capability-icon i.fa-2xl, .capability-card .capability-icon i.fa-2xs, .capability-card .capability-icon i.fa-1x, .capability-card .capability-icon i.fa-2x, .capability-card .capability-icon i.fa-3x, .capability-card .capability-icon i.fa-4x, .capability-card .capability-icon i.fa-5x {
+  font-size: 2.5em !important;
+}
+
+.config-card .config-icon i {
+  font-size: 1.8em !important;
+  color: #007b7f !important;
+  margin-right: 0.75rem !important;
+}
+.config-card .config-icon i.fa-xs, .config-card .config-icon i.fa-sm, .config-card .config-icon i.fa-lg, .config-card .config-icon i.fa-xl, .config-card .config-icon i.fa-2xl, .config-card .config-icon i.fa-2xs, .config-card .config-icon i.fa-1x, .config-card .config-icon i.fa-2x, .config-card .config-icon i.fa-3x, .config-card .config-icon i.fa-4x, .config-card .config-icon i.fa-5x {
+  font-size: 1.8em !important;
+}
+
+.section-title i {
+  font-size: 1.3em !important;
+  margin-right: 0.75rem !important;
+  color: #007b7f !important;
+}
+.section-title i.fa-xs, .section-title i.fa-sm, .section-title i.fa-lg, .section-title i.fa-xl, .section-title i.fa-2xl, .section-title i.fa-2xs, .section-title i.fa-1x, .section-title i.fa-2x, .section-title i.fa-3x, .section-title i.fa-4x, .section-title i.fa-5x {
+  font-size: 1.3em !important;
+}
+
+.feature-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.feature-icon i {
+  font-size: 2.5em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  display: block !important;
+}
+.feature-icon i.fa-xs, .feature-icon i.fa-sm, .feature-icon i.fa-lg, .feature-icon i.fa-xl, .feature-icon i.fa-2xl, .feature-icon i.fa-2xs, .feature-icon i.fa-1x, .feature-icon i.fa-2x, .feature-icon i.fa-3x, .feature-icon i.fa-4x, .feature-icon i.fa-5x {
+  font-size: 2.5em !important;
+}
+
+.external-card .external-icon i {
+  font-size: 2.2em !important;
+  color: #007b7f !important;
+  margin-bottom: 1rem !important;
+}
+.external-card .external-icon i.fa-xs, .external-card .external-icon i.fa-sm, .external-card .external-icon i.fa-lg, .external-card .external-icon i.fa-xl, .external-card .external-icon i.fa-2xl, .external-card .external-icon i.fa-2xs, .external-card .external-icon i.fa-1x, .external-card .external-icon i.fa-2x, .external-card .external-icon i.fa-3x, .external-card .external-icon i.fa-4x, .external-card .external-icon i.fa-5x {
+  font-size: 2.2em !important;
+}
+
+.external-link i {
+  font-size: 1em !important;
+  margin-right: 0.5em !important;
+}
+.external-link i.fa-xs, .external-link i.fa-sm, .external-link i.fa-lg, .external-link i.fa-xl, .external-link i.fa-2xl, .external-link i.fa-2xs, .external-link i.fa-1x, .external-link i.fa-2x, .external-link i.fa-3x, .external-link i.fa-4x, .external-link i.fa-5x {
+  font-size: 1em !important;
+}
+
+.config-note i {
+  font-size: 1.1em !important;
+  margin-right: 0.5em !important;
+  color: #1e3a5f !important;
+}
+.config-note i.fa-xs, .config-note i.fa-sm, .config-note i.fa-lg, .config-note i.fa-xl, .config-note i.fa-2xl, .config-note i.fa-2xs, .config-note i.fa-1x, .config-note i.fa-2x, .config-note i.fa-3x, .config-note i.fa-4x, .config-note i.fa-5x {
+  font-size: 1.1em !important;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -8898,10 +9550,11 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 }
 .section-header .section-subtitle {
   font-size: 1rem;
-  color: #6c757d;
+  color: #2d3748;
   line-height: 1.6;
   max-width: 700px;
   margin: 0 auto;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 @media (min-width: 768px) {
   .section-header .section-subtitle {
@@ -8918,123 +9571,72 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
     padding: 4.5rem 1.5rem;
   }
 }
-.services-section .service-card {
-  background: #ffffff;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(0, 123, 127, 0.1);
-  box-shadow: 0 4px 12px rgba(0, 123, 127, 0.1), 0 2px 6px rgba(0, 123, 127, 0.05);
+.services-section .service-card .service-card-header .service-icon.bg-hse-teal {
+  background: linear-gradient(135deg, #007b7f 0%, #005b5f 100%);
 }
-@media (min-width: 768px) {
-  .services-section .service-card {
-    box-shadow: 0 8px 24px rgba(0, 123, 127, 0.12), 0 4px 12px rgba(0, 123, 127, 0.08), 0 2px 6px rgba(0, 123, 127, 0.04);
-  }
+.services-section .service-card .service-card-header .service-icon.bg-hse-teal::after {
+  background: #007b7f;
 }
-.services-section .service-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 123, 127, 0.2), 0 10px 20px rgba(0, 123, 127, 0.15), 0 4px 12px rgba(0, 123, 127, 0.1);
-  border-color: rgba(0, 123, 127, 0.2);
+.services-section .service-card .service-card-header .service-icon.bg-hse-green {
+  background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+}
+.services-section .service-card .service-card-header .service-icon.bg-hse-green::after {
+  background: #2d5a27;
+}
+.services-section .service-card .service-card-header .service-icon.bg-primary {
+  background: linear-gradient(135deg, #085a9f 0%, rgb(5.5568862275, 62.5149700599, 110.4431137725) 100%);
+}
+.services-section .service-card .service-card-header .service-icon.bg-primary::after {
+  background: #085a9f;
+}
+.services-section .service-card .service-card-header .service-icon.bg-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+}
+.services-section .service-card .service-card-header .service-icon.bg-warning::after {
+  background: #ffc107;
+}
+.services-section .service-card .service-card-footer .btn-hse-teal {
+  background: linear-gradient(135deg, #007b7f 0%, #005b5f 100%);
+  border: none;
+  color: white;
+}
+.services-section .service-card .service-card-footer .btn-hse-teal:hover {
+  background: linear-gradient(135deg, #005b5f 0%, #004548 100%);
+  color: white;
+}
+.services-section .service-card .service-card-footer .btn-hse-green {
+  background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+  border: none;
+  color: white;
+}
+.services-section .service-card .service-card-footer .btn-hse-green:hover {
+  background: linear-gradient(135deg, #4a7c59 0%, rgb(83.5303030303, 139.9696969697, 100.4621212121) 100%);
+  color: white;
+}
+.services-section .service-card .service-card-footer .btn-primary {
+  background: linear-gradient(135deg, #085a9f 0%, rgb(5.5568862275, 62.5149700599, 110.4431137725) 100%);
+  border: none;
+  color: white;
+}
+.services-section .service-card .service-card-footer .btn-primary:hover {
+  background: linear-gradient(135deg, rgb(5.5568862275, 62.5149700599, 110.4431137725) 0%, #005b5f 100%);
+  color: white;
+}
+.services-section .service-card .service-card-footer .btn-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  border: none;
+  color: #212529;
+}
+.services-section .service-card .service-card-footer .btn-warning:hover {
+  background: linear-gradient(135deg, #e0a800 0%, #cc9500 100%);
+  color: #212529;
 }
 .services-section .service-card.admin-card {
-  border-color: rgba(255, 193, 7, 0.3);
+  border-color: rgba(255, 193, 7, 0.15);
 }
 .services-section .service-card.admin-card:hover {
-  box-shadow: 0 20px 40px rgba(255, 193, 7, 0.2), 0 10px 20px rgba(255, 193, 7, 0.15), 0 4px 12px rgba(255, 193, 7, 0.1);
-}
-.services-section .service-card .service-card-header {
-  padding: 1.5rem 1.5rem 1rem;
-  text-align: center;
-}
-.services-section .service-card .service-card-header .service-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1rem;
-  text-align: center;
-  line-height: 1;
-  --fa-display: inline-block;
-}
-.services-section .service-card .service-card-header .service-icon i {
-  color: #ffffff !important;
-  line-height: 1;
-  vertical-align: middle;
-}
-.services-section .service-card .service-card-header .service-icon i.fa, .services-section .service-card .service-card-header .service-icon i.fab, .services-section .service-card .service-card-header .service-icon i.fa-solid, .services-section .service-card .service-card-header .service-icon i.far, .services-section .service-card .service-card-header .service-icon i.fal, .services-section .service-card .service-card-header .service-icon i.fat, .services-section .service-card .service-card-header .service-icon i.fad {
-  color: #ffffff !important;
-  line-height: 1;
-  vertical-align: middle;
-}
-@media (min-width: 768px) {
-  .services-section .service-card .service-card-header .service-icon {
-    width: 90px;
-    height: 90px;
-  }
-}
-.services-section .service-card .service-card-header .service-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2d3748;
-  margin: 0;
-  line-height: 1.3;
-}
-@media (min-width: 768px) {
-  .services-section .service-card .service-card-header .service-title {
-    font-size: 1.5rem;
-  }
-}
-.services-section .service-card .service-card-body {
-  padding: 0 1.5rem 1rem;
-}
-.services-section .service-card .service-card-body .service-description {
-  color: #6c757d;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
-}
-@media (min-width: 768px) {
-  .services-section .service-card .service-card-body .service-description {
-    font-size: 1rem;
-  }
-}
-.services-section .service-card .service-card-body .service-features {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.services-section .service-card .service-card-body .service-features li {
-  padding: 0.25rem 0;
-  font-size: 0.875rem;
-  color: #6c757d;
-  display: flex;
-  align-items: center;
-}
-@media (min-width: 768px) {
-  .services-section .service-card .service-card-body .service-features li {
-    font-size: 1rem;
-  }
-}
-.services-section .service-card .service-card-body .service-features li i {
-  flex-shrink: 0;
-}
-.services-section .service-card .service-card-footer {
-  padding: 1rem 1.5rem 1.5rem;
-}
-.services-section .service-card .service-card-footer .btn-service {
-  width: 100%;
-  padding: 1rem 1.5rem;
-  font-weight: 600;
-  border-radius: 0.375rem;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-@media (min-width: 768px) {
-  .services-section .service-card .service-card-footer .btn-service {
-    padding: 1rem 2rem;
-  }
+  border-color: rgba(255, 193, 7, 0.3);
+  box-shadow: 0 20px 40px rgba(255, 193, 7, 0.15);
 }
 
 .capabilities-section {

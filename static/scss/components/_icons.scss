@@ -332,7 +332,8 @@
 }
 
 // Service card header icons - properly sized for 80px containers with perfect centering
-.service-card .service-card-header .service-icon {
+.service-card .service-card-header .service-icon,
+.services-section .service-card .service-card-header .service-icon {
   @include perfect-icon-center; // Use mixin for perfect centering
 
   i {
