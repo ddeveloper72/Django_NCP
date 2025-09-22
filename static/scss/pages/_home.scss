@@ -21,6 +21,7 @@
   background-color: $hse-primary-teal;
   border-color: $hse-primary-teal;
   color: $white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
 
   &:hover,
   &:focus {
@@ -59,7 +60,7 @@
     $hse-primary-teal-light 50%,
     $hse-secondary-green 100%
   );
-  color: $white;
+  color: var(--healthcare-text-grey);
   padding: $space-xxl $space-md;
   overflow: hidden;
 
@@ -442,12 +443,7 @@
       width: 80px;
       height: 80px;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       margin: 0 auto $space-lg;
-      text-align: center;
-      line-height: 1;
       background: linear-gradient(
         135deg,
         $hse-secondary-green,
@@ -456,14 +452,12 @@
       color: $white;
       box-shadow: 0 8px 20px rgba($hse-secondary-green, 0.3);
 
-      // FontAwesome styling for proper alignment
-      --fa-display: inline-block;
+      // Remove conflicting alignment properties - let perfect-icon-center mixin handle this
+      // The perfect-icon-center mixin will provide: display: flex, align-items: center, justify-content: center
 
       // Ensure all icons are white with high specificity
       i {
         color: $white !important;
-        line-height: 1;
-        vertical-align: middle;
 
         // Force color for all FontAwesome icon types
         &.fa,
@@ -474,8 +468,6 @@
         &.fat,
         &.fad {
           color: $white !important;
-          line-height: 1;
-          vertical-align: middle;
         }
       }
 
@@ -768,7 +760,7 @@
     }
 
     .service-description {
-      color: $text-muted;
+      color: #636567;
       font-size: $font-size-sm;
       line-height: 1.5;
       margin-bottom: $space-md;

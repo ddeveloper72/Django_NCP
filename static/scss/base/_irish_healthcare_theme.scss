@@ -28,6 +28,7 @@ Generated: September 16, 2025
   /* HSE Accessible Colors for Better Contrast */
   --healthcare-text-dark: #1d1d1b; /* High contrast text */
   --healthcare-text-light: #ffffff;
+  --healthcare-text-grey: #6c757d; /* Grey text for headers */
   --healthcare-border: #d4d4d4;
   --healthcare-background: #f7f7f7;
 
@@ -942,7 +943,7 @@ body {
 
 /* Healthcare Footer Styling */
 .footer {
-  background-color: var(--healthcare-navy);
+  background-color: var(--healthcare-charcoal);
   color: var(--healthcare-white);
   padding: 2rem 0;
   margin-top: 3rem;
@@ -960,7 +961,7 @@ body {
 
 /* Footer Dark Background Enhancement */
 footer.bg-dark {
-  background-color: var(--healthcare-navy) !important;
+  background-color: var(--healthcare-charcoal) !important;
   color: var(--healthcare-white) !important;
 }
 
@@ -1263,7 +1264,7 @@ h6.bg-secondary {
 .bg-secondary h4,
 .bg-secondary h5,
 .bg-secondary h6 {
-  color: var(--healthcare-text-light) !important;
+  color: var(--healthcare-text-grey) !important;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
   font-weight: 700 !important;
 }
