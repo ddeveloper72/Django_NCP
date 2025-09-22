@@ -77,7 +77,7 @@
                     <div class="action-icon">🔄</div>
                     <h3>European SMP Sync</h3>
                     <p>Synchronize with the European SMP registry for cross-border services.</p>
-                    <button onclick="syncWithEuropeanSMP()" class="btn btn-primary">
+                    <button id="sync-european-smp" class="btn btn-primary" data-sync-url="{% url 'smp_client:european_smp_sync' %}">
                         🔄 Sync with European SMP
                     </button>
                     <div id="sync-result" class="sync-result"></div>
@@ -176,9 +176,5 @@
 
 {% block extra_js %}
 <!-- Dashboard functionality is now externalized -->
-<script>
-    // Pass Django URLs to JavaScript
-    window.europeanSMPSyncURL = '{% url 'smp_client:european_smp_sync' %}';
-</script>
 <script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}

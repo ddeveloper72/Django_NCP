@@ -20,18 +20,17 @@ function getCookie(name) {
 }
 
 // European SMP Synchronization
-async function syncWithEuropeanSMP() {
+async function syncWithEuropeanSMP(event) {
     const resultDiv = document.getElementById('sync-result');
     const button = event.target;
+    const syncUrl = button.dataset.syncUrl || '/smp_client/european_smp_sync/';
 
     button.textContent = '🔄 Syncing...';
     button.disabled = true;
 
     try {
-        // Get sync URL and CSRF token from global config or use defaults
-        const config = window.dashboardConfig || {};
-        const syncUrl = config.europeanSmpSyncUrl || window.europeanSMPSyncURL || '/smp_client/european_smp_sync/';
-        const csrfToken = config.csrfToken || getCookie('csrftoken');
+        // Get CSRF token
+        const csrfToken = getCookie('csrftoken');
 
         const response = await fetch(syncUrl, {
             method: 'POST',
@@ -98,8 +97,11 @@ document.addEventListener('DOMContentLoaded', function () {
         animateStatNumbers();
     }
 
+    // Set up European SMP sync button event listener
+    const syncButton = document.getElementById('sync-european-smp');
+    if (syncButton) {
+        syncButton.addEventListener('click', syncWithEuropeanSMP);
+    }
+
     console.log('✅ Dashboard initialized successfully');
 });
-
-// Make sync function globally available for template usage
-window.syncWithEuropeanSMP = syncWithEuropeanSMP;
