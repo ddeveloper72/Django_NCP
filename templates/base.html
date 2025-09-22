@@ -287,41 +287,6 @@
     </aside>
     {% endif %}
 
-    <!-- Hero Section for Home Page Only -->
-    {% if request.resolver_match.url_name == 'home' %}
-    <section class="hero-banner">
-        <div class="container">
-            <div class="hero-content text-center">
-                <div class="hero-icon mb-4">
-                    <i class="fa-solid fa-hospital fa-2xl" aria-hidden="true"></i>
-                </div>
-                <h1 class="hero-title">EU eHealth NCP Portal</h1>
-                <p class="hero-subtitle">Cross-Border Healthcare Document Exchange Platform</p>
-                <div class="hero-features">
-                    <div class="row justify-content-center">
-                        <div class="col-md-8">
-                            <div class="feature-grid">
-                                <div class="feature-item">
-                                    <i class="fa-solid fa-shield-alt" aria-hidden="true"></i>
-                                    <span>GDPR Compliant</span>
-                                </div>
-                                <div class="feature-item">
-                                    <i class="fa-solid fa-globe-europe" aria-hidden="true"></i>
-                                    <span>EU Cross-Border</span>
-                                </div>
-                                <div class="feature-item">
-                                    <i class="fa-solid fa-lock" aria-hidden="true"></i>
-                                    <span>Secure Exchange</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    {% endif %}
-
     <!-- Page Breadcrumb/Context Area -->
     {% block page_context %}{% endblock %}
 
