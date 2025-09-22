@@ -271,7 +271,7 @@
 // Loading States
 @mixin loading-spinner {
   &::after {
-    content: '';
+    content: "";
     width: 1rem;
     height: 1rem;
     border: 2px solid $neutral-lighter;
@@ -296,16 +296,20 @@
 // ========================================
 
 // Smart icon color mixin - automatically chooses light/dark based on background
-@mixin smart-icon-color($bg-color: null, $light-color: #ffffff, $dark-color: #2d3748) {
+@mixin smart-icon-color(
+  $bg-color: null,
+  $light-color: #ffffff,
+  $dark-color: #2d3748
+) {
   @if $bg-color {
     // Calculate luminance to determine if background is light or dark
     $red: red($bg-color) / 255;
     $green: green($bg-color) / 255;
     $blue: blue($bg-color) / 255;
-    
+
     // Simple luminance calculation
     $luminance: ($red * 0.299) + ($green * 0.587) + ($blue * 0.114);
-    
+
     @if $luminance > 0.5 {
       // Light background - use dark icon
       color: $dark-color !important;
@@ -327,27 +331,27 @@
   .service-icon.bg-hse-teal i {
     @include smart-icon-color($hse-primary-teal);
   }
-  
-  // HSE Green background (dark) - white icons  
+
+  // HSE Green background (dark) - white icons
   .bg-hse-green i,
   .bg-success i,
   .service-icon.bg-hse-green i {
     @include smart-icon-color($hse-secondary-green);
   }
-  
+
   // Warning background (light) - dark icons
   .bg-warning i,
   .service-icon.bg-warning i {
     @include smart-icon-color($warning-orange);
   }
-  
+
   // Light backgrounds - dark icons
   .bg-light i,
   .bg-white i,
   .service-icon.bg-light i {
     @include smart-icon-color(#ffffff);
   }
-  
+
   // Dark backgrounds - white icons
   .bg-dark i,
   .btn-primary i,
@@ -359,16 +363,53 @@
   }
 }
 
-// Perfect icon centering mixin
+// Perfect icon centering mixin - CROSS-HAIR PRECISION
 @mixin perfect-icon-center {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  
+  position: relative !important;
+
   i {
-    display: block !important;
-    text-align: center !important;
+    // NO display property - inherits flex child behavior
+    font-size: 1em !important;
     line-height: 1 !important;
     margin: 0 !important;
+    padding: 0 !important;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    // Cross-hair precision centering
+    text-align: center !important;
+    vertical-align: middle !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+// FontAwesome override mixin - neutralizes FA positioning
+@mixin fontawesome-center-override {
+  // Override any FontAwesome positioning/transform properties
+  &.fa,
+  &.fas,
+  &.far,
+  &.fal,
+  &.fat,
+  &.fad,
+  &.fab,
+  &[class*="fa-"] {
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    position: static !important;
+    // Override any FontAwesome pseudo-element positioning
+    &::before {
+      transform: none !important;
+      position: static !important;
+      top: auto !important;
+      left: auto !important;
+    }
   }
 }
