@@ -7658,20 +7658,23 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 }
 
 .service-card .service-card-header .service-icon,
-.services-section .service-card .service-card-header .service-icon {
+.services-section .service-card .service-card-header .service-icon,
+.admin-card .service-card-header .service-icon {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
 .service-card .service-card-header .service-icon i,
-.services-section .service-card .service-card-header .service-icon i {
+.services-section .service-card .service-card-header .service-icon i,
+.admin-card .service-card-header .service-icon i {
   display: block !important;
   text-align: center !important;
   line-height: 1 !important;
   margin: 0 !important;
 }
 .service-card .service-card-header .service-icon i,
-.services-section .service-card .service-card-header .service-icon i {
+.services-section .service-card .service-card-header .service-icon i,
+.admin-card .service-card-header .service-icon i {
   font-size: 1.8em !important;
   color: #ffffff !important;
 }
@@ -7686,7 +7689,18 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .services-section .service-card .service-card-header .service-icon i.fa-2x,
 .services-section .service-card .service-card-header .service-icon i.fa-3x,
 .services-section .service-card .service-card-header .service-icon i.fa-4x,
-.services-section .service-card .service-card-header .service-icon i.fa-5x {
+.services-section .service-card .service-card-header .service-icon i.fa-5x,
+.admin-card .service-card-header .service-icon i.fa-xs,
+.admin-card .service-card-header .service-icon i.fa-sm,
+.admin-card .service-card-header .service-icon i.fa-lg,
+.admin-card .service-card-header .service-icon i.fa-xl,
+.admin-card .service-card-header .service-icon i.fa-2xl,
+.admin-card .service-card-header .service-icon i.fa-2xs,
+.admin-card .service-card-header .service-icon i.fa-1x,
+.admin-card .service-card-header .service-icon i.fa-2x,
+.admin-card .service-card-header .service-icon i.fa-3x,
+.admin-card .service-card-header .service-icon i.fa-4x,
+.admin-card .service-card-header .service-icon i.fa-5x {
   font-size: 1.8em !important;
 }
 
@@ -7861,10 +7875,21 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   font-size: 2.5em !important;
 }
 
+.external-card .external-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.external-card .external-icon i {
+  display: block !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
 .external-card .external-icon i {
   font-size: 2.2em !important;
   color: #007b7f !important;
-  margin-bottom: 1rem !important;
+  margin: 0 !important;
 }
 .external-card .external-icon i.fa-xs, .external-card .external-icon i.fa-sm, .external-card .external-icon i.fa-lg, .external-card .external-icon i.fa-xl, .external-card .external-icon i.fa-2xl, .external-card .external-icon i.fa-2xs, .external-card .external-icon i.fa-1x, .external-card .external-icon i.fa-2x, .external-card .external-icon i.fa-3x, .external-card .external-icon i.fa-4x, .external-card .external-icon i.fa-5x {
   font-size: 2.2em !important;
