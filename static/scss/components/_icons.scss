@@ -116,7 +116,7 @@
   }
 }
 
-// Card header icons - prominent but not overwhelming  
+// Card header icons - prominent but not overwhelming
 .icon-card-header {
   font-size: 2.5em;
   color: $white;
@@ -334,11 +334,11 @@
 // Service card header icons - properly sized for 80px containers with perfect centering
 .service-card .service-card-header .service-icon {
   @include perfect-icon-center; // Use mixin for perfect centering
-  
+
   i {
     font-size: 1.8em !important; // Reduced from 2.5em to fit 80px container better
     @include smart-icon-color(); // Default to white for dark backgrounds
-    
+
     // Override ALL FontAwesome sizing classes
     &.fa-xs,
     &.fa-sm,
@@ -365,10 +365,19 @@
   margin-right: 0.5em !important;
   vertical-align: middle !important;
   @include smart-icon-color(); // Smart color based on button background
-  
+
   // Override ALL FontAwesome sizing classes
-  &.fa-xs, &.fa-sm, &.fa-lg, &.fa-xl, &.fa-2xl, &.fa-2xs,
-  &.fa-1x, &.fa-2x, &.fa-3x, &.fa-4x, &.fa-5x {
+  &.fa-xs,
+  &.fa-sm,
+  &.fa-lg,
+  &.fa-xl,
+  &.fa-2xl,
+  &.fa-2xs,
+  &.fa-1x,
+  &.fa-2x,
+  &.fa-3x,
+  &.fa-4x,
+  &.fa-5x {
     font-size: 1.1em !important;
   }
 }
@@ -401,24 +410,30 @@
 // Icons within Bootstrap badges in hero section
 // ========================================
 
-.hero-badge .badge i {
-  font-size: 1.2em !important;
-  margin-right: 0.5em !important;
-  vertical-align: middle !important;
+.hero-badge .badge {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 
-  // Override FontAwesome sizing classes for badge context
-  &.fa-xs,
-  &.fa-sm,
-  &.fa-lg,
-  &.fa-xl,
-  &.fa-2xl,
-  &.fa-2xs,
-  &.fa-1x,
-  &.fa-2x,
-  &.fa-3x,
-  &.fa-4x,
-  &.fa-5x {
+  i {
     font-size: 1.2em !important;
+    margin-right: 0.5em !important;
+    line-height: 1 !important;
+
+    // Override FontAwesome sizing classes for badge context
+    &.fa-xs,
+    &.fa-sm,
+    &.fa-lg,
+    &.fa-xl,
+    &.fa-2xl,
+    &.fa-2xs,
+    &.fa-1x,
+    &.fa-2x,
+    &.fa-3x,
+    &.fa-4x,
+    &.fa-5x {
+      font-size: 1.2em !important;
+    }
   }
 }
 
@@ -546,6 +561,40 @@
   &.fa-4x,
   &.fa-5x {
     font-size: 1.3em !important;
+  }
+}
+
+// ========================================
+// FEATURE CARD ICONS
+// Icons within feature cards - ensure perfect centering
+// ========================================
+
+.feature-icon {
+  // Ensure perfect centering for the container
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  i {
+    font-size: 2.5em !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    display: block !important;
+
+    // Override ALL FontAwesome sizing classes to maintain consistency
+    &.fa-xs,
+    &.fa-sm,
+    &.fa-lg,
+    &.fa-xl,
+    &.fa-2xl,
+    &.fa-2xs,
+    &.fa-1x,
+    &.fa-2x,
+    &.fa-3x,
+    &.fa-4x,
+    &.fa-5x {
+      font-size: 2.5em !important;
+    }
   }
 }
 
