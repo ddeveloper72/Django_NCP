@@ -55,26 +55,61 @@
   }
 }
 
-// Clinical Tab Content
+// Clinical Tab Content - Using ID selectors for higher specificity
 // ----------------------------------------------------------------------------
-.clinical-tab-content {
-  display: none !important;
+#extended_patient_personal,
+#extended_patient_healthcare,
+#extended_patient_system,
+#extended_patient_clinical,
+#extended_patient_pdfs {
+  display: none;
   padding: 20px;
   background: white;
   border-radius: 0 0 0.375rem 0.375rem;
   height: auto;
   min-height: fit-content;
   overflow: visible;
+}
 
+// Simplified tab content approach - use display none/block instead of absolute positioning
+.clinical-tab-content {
+  display: none !important;
+  width: 100% !important;
+  min-height: 100px !important;
+  padding: 1rem !important;
+
+  // Only active tab is visible
   &.active {
     display: block !important;
-    height: auto;
-    min-height: fit-content;
-    overflow: visible;
   }
 }
 
-// Extended Patient Section Styling
+// Ensure parent container has proper layout
+.clinical-tabs-container,
+.extended-tab-content-container,
+.extended-tab-content-container.clinical-tabs-container {
+  width: 100% !important;
+  min-height: 200px !important;
+}
+
+// Legacy specific tab rules for additional safety
+#extended_patient_personal.active,
+#extended_patient_healthcare.active,
+#extended_patient_system.active,
+#extended_patient_clinical.active,
+#extended_patient_pdfs.active {
+  display: block !important; // Force visibility with higher specificity
+  height: auto !important;
+  min-height: 100px !important; // Force minimum height
+  width: 100% !important; // Force full width
+  opacity: 1 !important; // Force full opacity
+  visibility: visible !important; // Force visibility
+  position: relative !important; // Ensure proper positioning
+  overflow: visible !important; // Ensure content isn't clipped
+  background-color: #d4edda !important; // Green background for active tabs
+  border: 3px solid #28a745 !important; // Green border for active tabs
+  padding: 15px !important; // More padding for active tabs
+} // Extended Patient Section Styling - Force visible layout
 // ----------------------------------------------------------------------------
 .clinical-section {
   background: white;
@@ -676,6 +711,122 @@ main {
   border-radius: 0.375rem;
   padding: 1.5rem;
   height: 100%;
+}
+
+// Healthcare Information Styles
+// ----------------------------------------------------------------------------
+.healthcare-info-unified {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+}
+
+.healthcare-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+.healthcare-header {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e9ecef;
+
+  i {
+    color: #28a745;
+    margin-right: 0.5rem;
+  }
+}
+
+.healthcare-content {
+  color: #212529;
+}
+
+.provider-name,
+.organization-name {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.provider-details,
+.organization-details {
+  margin-top: 1rem;
+}
+
+.provider-code {
+  font-family: "Courier New", monospace;
+  background: #f8f9fa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid #e9ecef;
+}
+
+.id-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #f1f3f4;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.id-value {
+  font-weight: 500;
+  color: #212529;
+  margin-right: 0.5rem;
+}
+
+.id-system {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.provider-telecom {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.telecom-value {
+  color: #212529;
+  margin-right: 0.5rem;
+}
+
+.telecom-type {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.address-display {
+  background: #f8f9fa;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid #e9ecef;
+  margin-bottom: 0.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.address-location {
+  color: #495057;
+  font-weight: 500;
+  margin-top: 0.25rem;
 }
 
 .document-content {
