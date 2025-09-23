@@ -74,12 +74,28 @@
 .clinical-tab-content {
   display: none !important;
   width: 100% !important;
-  min-height: 100px !important;
+  min-height: 300px !important; // Increased from 100px
   padding: 1rem !important;
+  position: relative !important; // Ensure proper positioning context
+  overflow: visible !important; // Don't clip content
 
   // Only active tab is visible
   &.active {
     display: block !important;
+    height: auto !important; // Let content determine height
+    visibility: visible !important; // Explicitly set visibility
+    
+    // Force all children to be visible
+    * {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    // Override any flex/grid/inline that might be collapsed
+    .row, .col-*, .healthcare-info-unified, .alert {
+      display: block !important;
+    }
   }
 }
 
@@ -88,7 +104,9 @@
 .extended-tab-content-container,
 .extended-tab-content-container.clinical-tabs-container {
   width: 100% !important;
-  min-height: 200px !important;
+  min-height: 400px !important; // Increased from 200px
+  position: relative !important; // Ensure positioning context
+  overflow: visible !important; // Don't clip content
 }
 
 // Legacy specific tab rules for additional safety

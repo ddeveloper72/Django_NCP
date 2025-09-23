@@ -14664,10 +14664,22 @@ input[type=checkbox] {
 .clinical-tab-content {
   display: none !important;
   width: 100% !important;
-  min-height: 100px !important;
+  min-height: 300px !important;
   padding: 1rem !important;
+  position: relative !important;
+  overflow: visible !important;
 }
 .clinical-tab-content.active {
+  display: block !important;
+  height: auto !important;
+  visibility: visible !important;
+}
+.clinical-tab-content.active * {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.clinical-tab-content.active .row, .clinical-tab-content.active .col-*, .clinical-tab-content.active .healthcare-info-unified, .clinical-tab-content.active .alert {
   display: block !important;
 }
 
@@ -14675,7 +14687,9 @@ input[type=checkbox] {
 .extended-tab-content-container,
 .extended-tab-content-container.clinical-tabs-container {
   width: 100% !important;
-  min-height: 200px !important;
+  min-height: 400px !important;
+  position: relative !important;
+  overflow: visible !important;
 }
 
 #extended_patient_personal.active,
