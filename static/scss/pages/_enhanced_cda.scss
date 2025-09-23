@@ -55,26 +55,27 @@
   }
 }
 
-// Clinical Tab Content - Simple display approach
+// Clinical Tab Content - Simple display approach with viewport fixes
 // ----------------------------------------------------------------------------
 .clinical-tab-content {
   display: none;
+  width: 100%;
+  min-height: 200px; // Ensure minimum height
   
   &.active {
     display: block;
+    width: 100%;
+    min-height: 200px;
   }
-} // Extended Patient Section Styling - Force visible layout
-// ----------------------------------------------------------------------------
-.clinical-section {
-  background: white;
-  border-radius: 0.375rem;
-  border: 1px solid #dee2e6;
-  margin-bottom: 1.5rem;
 }
 
+// Ensure tab containers have proper layout
 .extended-tab-content-container {
   background: white;
   border-radius: 0 0 0.375rem 0.375rem;
+  width: 100%;
+  min-height: 300px; // Ensure container height
+  position: relative;
 }
 
 // Responsive design for tabs
@@ -91,6 +92,25 @@
     border-radius: 0.375rem;
     text-align: center;
   }
+  
+  // Ensure tab content is visible on mobile
+  .clinical-tab-content {
+    &.active {
+      display: block !important;
+      width: 100% !important;
+      min-height: 250px !important;
+      padding: 1rem;
+    }
+  }
+}
+
+// Extended Patient Section Styling - Force visible layout
+// ----------------------------------------------------------------------------
+.clinical-section {
+  background: white;
+  border-radius: 0.375rem;
+  border: 1px solid #dee2e6;
+  margin-bottom: 1.5rem;
 }
 
 // Enhanced Card Styling
