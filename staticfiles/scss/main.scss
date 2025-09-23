@@ -29,6 +29,7 @@
 @import "components/navigation";
 @import "components/modals";
 @import "components/alerts";
+@import "components/icons";
 @import "components/contact";
 @import "components/extended_patient_info";
 @import "components/administrative_section";
@@ -91,6 +92,9 @@
 .opacity-80 {
   opacity: 0.8;
 }
+
+// Blue background text utilities
+@include blue-bg-text-variants;
 
 // Flexbox Grid Utilities (replacing CSS Grid)
 .grid-container {
@@ -264,4 +268,40 @@
 }
 .pb-xl {
   padding-bottom: $space-xl;
+}
+
+// ========================================
+// Text Accessibility Utilities
+// ========================================
+
+.text-secondary-accessible {
+  @include text-secondary-accessible;
+}
+
+.text-muted-accessible {
+  @include text-muted-accessible;
+}
+
+.text-on-blue-bg {
+  @include text-on-blue-bg;
+}
+
+// ========================================
+// Specific Overrides for Patient Cards
+// ========================================
+
+// Ensure country code in section headers is visible
+.card-header.bg-light h5 {
+  color: var(--healthcare-dark-grey) !important;
+  font-weight: 600 !important;
+}
+
+// Ensure country code and patient details are visible
+.service-card .card-body small.text-secondary-accessible,
+.service-card small.text-secondary-accessible,
+.card .card-body small.text-secondary-accessible,
+small.text-secondary-accessible {
+  color: var(--healthcare-dark-grey) !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
 }

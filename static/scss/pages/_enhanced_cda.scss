@@ -84,16 +84,19 @@
     display: block !important;
     height: auto !important; // Let content determine height
     visibility: visible !important; // Explicitly set visibility
-    
+
     // Force all children to be visible
     * {
       display: block !important;
       visibility: visible !important;
       opacity: 1 !important;
     }
-    
+
     // Override any flex/grid/inline that might be collapsed
-    .row, .col-*, .healthcare-info-unified, .alert {
+    .row,
+    .col-*,
+    .healthcare-info-unified,
+    .alert {
       display: block !important;
     }
   }

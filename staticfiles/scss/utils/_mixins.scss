@@ -220,6 +220,94 @@
   letter-spacing: 0.05em;
 }
 
+// Accessible text contrast for light backgrounds
+@mixin text-muted-accessible {
+  color: var(--healthcare-dark-grey);
+  font-weight: 500;
+}
+
+// Standard muted text with improved contrast
+@mixin text-secondary-accessible {
+  color: var(--healthcare-dark-grey) !important;
+  font-weight: 500;
+}
+
+// White text on blue background - standardized HSE palette
+@mixin text-on-blue-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+  // Icons should maintain white color
+  i,
+  .fa-solid,
+  .fa-regular,
+  .fa-light,
+  .fa-brands {
+    color: var(--healthcare-text-light) !important;
+  }
+
+  // No hover effects on static headers
+  &:hover {
+    color: var(--healthcare-text-light) !important;
+
+    i,
+    .fa-solid,
+    .fa-regular,
+    .fa-light,
+    .fa-brands {
+      color: var(--healthcare-text-light) !important;
+      transform: none !important;
+    }
+  }
+}
+
+// Primary HSE Blue Background with White Text
+@mixin text-on-primary-bg {
+  @include text-on-blue-bg;
+  background-color: var(--healthcare-primary);
+}
+
+// Secondary HSE Blue Background with White Text
+@mixin text-on-secondary-bg {
+  @include text-on-blue-bg;
+  background-color: var(--healthcare-secondary);
+}
+
+// Accent Blue Background with White Text
+@mixin text-on-accent-bg {
+  @include text-on-blue-bg;
+  background-color: var(--healthcare-accent);
+}
+
+// Info Blue Background with White Text
+@mixin text-on-info-bg {
+  @include text-on-blue-bg;
+  background-color: var(--healthcare-info);
+}
+
+// Utility class generator for consistent blue backgrounds
+@mixin blue-bg-text-variants {
+  .text-on-primary-bg {
+    @include text-on-primary-bg;
+  }
+
+  .text-on-secondary-bg {
+    @include text-on-secondary-bg;
+  }
+
+  .text-on-accent-bg {
+    @include text-on-accent-bg;
+  }
+
+  .text-on-info-bg {
+    @include text-on-info-bg;
+  }
+
+  .text-on-blue-bg {
+    @include text-on-blue-bg;
+  }
+}
+
 // Spacing Utilities
 @mixin margin-center {
   margin-left: auto;
@@ -271,7 +359,7 @@
 // Loading States
 @mixin loading-spinner {
   &::after {
-    content: '';
+    content: "";
     width: 1rem;
     height: 1rem;
     border: 2px solid $neutral-lighter;
@@ -287,5 +375,129 @@
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+// ========================================
+// SMART ICON COLOR SYSTEM
+// Automatically adjusts icon colors based on background
+// ========================================
+
+// Smart icon color mixin - automatically chooses light/dark based on background
+@mixin smart-icon-color(
+  $bg-color: null,
+  $light-color: #ffffff,
+  $dark-color: #2d3748
+) {
+  @if $bg-color {
+    // Calculate luminance to determine if background is light or dark
+    $red: red($bg-color) / 255;
+    $green: green($bg-color) / 255;
+    $blue: blue($bg-color) / 255;
+
+    // Simple luminance calculation
+    $luminance: ($red * 0.299) + ($green * 0.587) + ($blue * 0.114);
+
+    @if $luminance > 0.5 {
+      // Light background - use dark icon
+      color: $dark-color !important;
+    } @else {
+      // Dark background - use light icon
+      color: $light-color !important;
+    }
+  } @else {
+    // Default to white icons for dark HSE themes
+    color: $light-color !important;
+  }
+}
+
+// Predefined smart icon classes for common HSE backgrounds
+@mixin hse-smart-icons {
+  // HSE Teal background (dark) - white icons
+  .bg-hse-teal i,
+  .bg-primary i,
+  .service-icon.bg-hse-teal i {
+    @include smart-icon-color($hse-primary-teal);
+  }
+
+  // HSE Green background (dark) - white icons
+  .bg-hse-green i,
+  .bg-success i,
+  .service-icon.bg-hse-green i {
+    @include smart-icon-color($hse-secondary-green);
+  }
+
+  // Warning background (light) - dark icons
+  .bg-warning i,
+  .service-icon.bg-warning i {
+    @include smart-icon-color($warning-orange);
+  }
+
+  // Light backgrounds - dark icons
+  .bg-light i,
+  .bg-white i,
+  .service-icon.bg-light i {
+    @include smart-icon-color(#ffffff);
+  }
+
+  // Dark backgrounds - white icons
+  .bg-dark i,
+  .btn-primary i,
+  .btn-success i,
+  .btn-info i,
+  .btn-warning i,
+  .btn-danger i {
+    @include smart-icon-color(#343a40);
+  }
+}
+
+// Perfect icon centering mixin - CROSS-HAIR PRECISION
+@mixin perfect-icon-center {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+
+  i {
+    // NO display property - inherits flex child behavior
+    font-size: 1em !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    // Cross-hair precision centering
+    text-align: center !important;
+    vertical-align: middle !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+// FontAwesome override mixin - neutralizes FA positioning
+@mixin fontawesome-center-override {
+  // Override any FontAwesome positioning/transform properties
+  &.fa,
+  &.fas,
+  &.far,
+  &.fal,
+  &.fat,
+  &.fad,
+  &.fab,
+  &[class*="fa-"] {
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    position: static !important;
+    // Override any FontAwesome pseudo-element positioning
+    &::before {
+      transform: none !important;
+      position: static !important;
+      top: auto !important;
+      left: auto !important;
+    }
   }
 }

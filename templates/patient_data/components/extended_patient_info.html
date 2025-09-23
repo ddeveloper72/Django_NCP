@@ -1,18 +1,18 @@
-<!-- Extended Patient Information Main Component -->
+{# Extended Patient Information Main Component #}
 {% load patient_filters %}
 {% if patient_extended_data or administrative_data or contact_data or healthcare_data %}
 
-<!-- Clinical-style Tab Navigation -->
+{# Clinical-style Tab Navigation #}
 <div class="clinical-section" id="extendedPatientSection" data-patient-id="{{ patient_id|default:'' }}">
     <!-- Tab Navigation Buttons -->
     <div class="tab-navigation mb-3">
         <button class="tab-button active" data-action="show-extended-tab" data-section-id="extended_patient" data-tab-type="personal"
                 type="button">
             <i class="fa-solid fa-user me-1"></i>Personal Information
-            {% comment %}Show badge if any contact information exists{% endcomment %}
+            {# Show badge if any contact information exists #}
             {% if contact_data.addresses or contact_data.telecoms or administrative_data.patient_contact_info.addresses or administrative_data.patient_contact_info.telecoms or administrative_data.guardian.contact_info.addresses or administrative_data.guardian.contact_info.telecoms or administrative_data.other_contacts %}
             <span class="badge bg-primary ms-2">
-                {% comment %}Calculate contact count: primary + admin + guardian + other contacts{% endcomment %}
+                {# Calculate contact count: primary + admin + guardian + other contacts #}
                 {% with primary_count=contact_data.addresses|length|add:contact_data.telecoms|length %}
                 {% with admin_count=administrative_data.patient_contact_info.addresses|length|add:administrative_data.patient_contact_info.telecoms|length %}
                 {% with guardian_count=administrative_data.guardian.contact_info.addresses|length|add:administrative_data.guardian.contact_info.telecoms|length %}
@@ -31,9 +31,7 @@
                 type="button">
             <i class="fa-solid fa-stethoscope me-1"></i>Healthcare Team
             {% if healthcare_data %}
-            <span class="badge bg-success ms-2">
-                {% if healthcare_data.author_hcp %}1{% endif %}{% if healthcare_data.organization %}{% if healthcare_data.author_hcp %}+{% endif %}1{% endif %}{% if healthcare_data.legal_authenticator %}{% if healthcare_data.author_hcp or healthcare_data.organization %}+{% endif %}1{% endif %}
-            </span>
+            <span class="badge bg-success ms-2">1</span>
             {% endif %}
         </button>
 
@@ -80,63 +78,45 @@
         </button>
     </div>
 
-    <!-- Tab Content Containers -->
-    <div class="extended-tab-content-container">
+    {# Tab Content Containers #}
+    <div class="extended-tab-content-container clinical-tabs-container">
 
-    <!-- Personal Information Tab Content -->
+    {# Personal Information Tab Content #}
     <div class="clinical-tab-content active" id="extended_patient_personal">
-        {% comment %} Direct inclusion of contact component with its responsive card grid {% endcomment %}
+        {# Direct inclusion of contact component with its responsive card grid #}
         {% include 'patient_data/components/extended_patient_contact_clean.html' %}
     </div>
 
-    <!-- Healthcare Team Tab Content -->
+    {# Healthcare Team Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_healthcare">
-        <div class="row g-3">
-            <!-- Healthcare Provider Information Card -->
-            <div class="col-12">
-                <div class="card border-success">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="fa-solid fa-user-md me-2"></i>Healthcare Provider Information
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        {% include 'patient_data/components/extended_patient_healthcare_clean.html' %}
-                    </div>
-                </div>
-            </div>
+        {# Debug: Healthcare Team content loading #}
+        <div class="alert alert-info mb-3">
+            <small>🔧 Debug: Healthcare Team tab is active and loading content... (ID: extended_patient_healthcare)</small>
         </div>
+        {# Direct inclusion of healthcare component with its responsive card grid #}
+        {% include 'patient_data/components/extended_patient_healthcare_clean.html' %}
     </div>
 
-    <!-- System & Documentation Tab Content -->
+    {# System & Documentation Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_system">
-        <div class="row g-3">
-            <!-- Administrative Information Card -->
-            <div class="col-12">
-                <div class="card border-info">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">
-                            <i class="fa-solid fa-cogs me-2"></i>Administrative & System Information
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        {% include 'patient_data/components/extended_patient_document_clean.html' %}
-                    </div>
-                </div>
-            </div>
+        {# Debug: System & Documentation content loading #}
+        <div class="alert alert-warning mb-3">
+            <small>🔧 Debug: System & Documentation tab is active and loading content... (ID: extended_patient_system)</small>
         </div>
+        {# Direct inclusion of document component with its responsive card grid #}
+        {% include 'patient_data/components/extended_patient_document_clean.html' %}
     </div>
 
-    <!-- Clinical Information Tab Content -->
+    {# Clinical Information Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_clinical">
-        <!-- Direct Clinical Content - No Wrapper Card -->
+        {# Direct Clinical Content - No Wrapper Card #}
         {% include 'patient_data/components/clinical_information_content.html' %}
     </div>
 
-    <!-- PDF Documents Tab Content -->
+    {# PDF Documents Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_pdfs">
         <div class="row g-3">
-            <!-- PDF Documents Card -->
+            {# PDF Documents Card #}
             <div class="col-12">
                 <div class="card border-danger">
                     <div class="card-header bg-danger text-white">
@@ -180,7 +160,7 @@
                                 </div>
                             </div>
 
-                            <!-- PDF Viewer Container (initially hidden) -->
+                            {# PDF Viewer Container (initially hidden) #}
                             <div id="pdf-viewer-{{ forloop.counter0 }}" class="pdf-viewer-container mt-3 hidden">
                                 <div class="border rounded pdf-viewer-background">
                                     <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
@@ -202,7 +182,7 @@
                                         </div>
                                     </div>
                                     {% if pdf.content_base64 %}
-                                    <!-- Primary PDF viewer using iframe -->
+                                    {# Primary PDF viewer using iframe #}
                                     <div id="pdf-iframe-container-{{ forloop.counter0 }}">
                                         <iframe id="pdf-frame-{{ forloop.counter0 }}"
                                                 src="{% url 'patient_data:view_pdf' patient_id=patient_id pdf_index=forloop.counter0 %}"
@@ -219,7 +199,7 @@
                                         </iframe>
                                     </div>
 
-                                    <!-- Fallback PDF viewer for blocked content -->
+                                    {# Fallback PDF viewer for blocked content #}
                                     <div id="pdf-fallback-{{ forloop.counter0 }}" class="pdf-fallback hidden text-center p-4 border rounded">
                                         <div class="alert alert-info">
                                             <i class="fa-solid fa-info-circle me-2"></i>
@@ -267,13 +247,13 @@
             </div>
         </div>
     </div>
-</div> <!-- End Clinical Section -->
+</div> {# End Clinical Section #}
 
 
 
 
 {% else %}
-<!-- No Extended Data Available -->
+{# No Extended Data Available #}
 <div class="alert alert-info">
     <h6>Extended Patient Information</h6>
     <p class="mb-0">Extended patient information is not available for this document. The system was unable to extract additional patient data from the CDA content.</p>

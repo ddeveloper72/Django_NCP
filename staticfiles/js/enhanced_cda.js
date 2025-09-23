@@ -42,6 +42,25 @@ function initializeEnhancedCDA() {
   // Initialize Extended Patient Event Delegation
   initializeExtendedPatientEventDelegation();
 
+  // Show Personal Information tab by default
+  console.log('🎯 Initializing default tab...');
+  setTimeout(() => {
+    console.log('🎯 Delayed initialization - checking if elements exist...');
+    const personalTab = document.getElementById('extended_patient_personal');
+    const healthcareTab = document.getElementById('extended_patient_healthcare');
+
+    console.log('🎯 Elements found:', {
+      personal: personalTab ? 'EXISTS' : 'MISSING',
+      healthcare: healthcareTab ? 'EXISTS' : 'MISSING'
+    });
+
+    if (personalTab) {
+      showExtendedTab('extended_patient', 'personal');
+    } else {
+      console.error('❌ Cannot initialize - personal tab element not found');
+    }
+  }, 100); // Small delay to ensure DOM is ready
+
   console.log('Bootstrap functionality initialized');
 }
 
@@ -51,7 +70,7 @@ function initializeEnhancedCDA() {
  * @param {string} tabType - Type of tab to show (personal, healthcare, system, clinical, pdfs)
  */
 function showExtendedTab(sectionId, tabType) {
-  console.log('Switching tab:', tabType);
+  console.log('🎯 Switching tab:', tabType, 'for section:', sectionId);
 
   // Hide all tab contents for the extended patient section
   const personalTab = document.getElementById(sectionId + '_personal');
@@ -59,6 +78,14 @@ function showExtendedTab(sectionId, tabType) {
   const systemTab = document.getElementById(sectionId + '_system');
   const clinicalTab = document.getElementById(sectionId + '_clinical');
   const pdfsTab = document.getElementById(sectionId + '_pdfs');
+
+  console.log('📋 Tab elements found:', {
+    personal: personalTab ? 'EXISTS' : 'MISSING',
+    healthcare: healthcareTab ? 'EXISTS' : 'MISSING',
+    system: systemTab ? 'EXISTS' : 'MISSING',
+    clinical: clinicalTab ? 'EXISTS' : 'MISSING',
+    pdfs: pdfsTab ? 'EXISTS' : 'MISSING'
+  });
 
   // Find the parent extended patient container
   const extendedContainer = personalTab ? personalTab.closest('.clinical-section') :
@@ -72,14 +99,17 @@ function showExtendedTab(sectionId, tabType) {
     return;
   }
 
-  const buttons = extendedContainer.querySelectorAll('.tab-button');
+  const buttons = extendedContainer.querySelectorAll('.tab-navigation .tab-button');
   const allTabs = [personalTab, healthcareTab, systemTab, clinicalTab, pdfsTab].filter(tab => tab !== null);
 
-  // Remove active class and hide all tabs
+  // Hide all tabs using direct style manipulation (more reliable than CSS classes)
   allTabs.forEach(tab => {
     if (tab) {
       tab.classList.remove('active');
-      tab.style.display = 'none';
+      // Remove direct styles to let CSS handle everything
+      tab.style.display = '';
+      tab.style.visibility = '';
+      tab.style.opacity = '';
     }
   });
 
@@ -108,8 +138,38 @@ function showExtendedTab(sectionId, tabType) {
   }
 
   if (activeTab) {
+    console.log('✅ Activating tab:', activeTab.id);
+
+    // FORCE the active class with aggressive logging
     activeTab.classList.add('active');
-    activeTab.style.display = 'block';
+    console.log('🔧 FORCED active class added');
+    console.log('🔧 classList contains active:', activeTab.classList.contains('active'));
+    console.log('🔧 className:', activeTab.className);
+
+    // Force CSS to refresh by triggering reflow
+    activeTab.offsetHeight; // Trigger reflow
+
+    // Let CSS handle visibility - remove direct style manipulation
+    activeTab.style.display = '';
+    activeTab.style.visibility = '';
+    activeTab.style.opacity = '';
+
+    console.log('🔧 Tab classes after activation:', activeTab.className);
+    console.log('🔧 Computed opacity:', window.getComputedStyle(activeTab).opacity);
+    console.log('🔧 Computed visibility:', window.getComputedStyle(activeTab).visibility);
+    console.log('🔧 Computed z-index:', window.getComputedStyle(activeTab).zIndex);
+    console.log('🔧 Element dimensions:', {
+      width: activeTab.offsetWidth,
+      height: activeTab.offsetHeight,
+      scrollHeight: activeTab.scrollHeight,
+      clientHeight: activeTab.clientHeight
+    });
+
+    // Check if content is actually there
+    console.log('🔧 Tab innerHTML length:', activeTab.innerHTML.length);
+    console.log('🔧 Tab children count:', activeTab.children.length);
+  } else {
+    console.log('❌ No tab found for type:', tabType);
   }
 
   if (activeButtonIndex >= 0 && buttons[activeButtonIndex]) {
@@ -253,9 +313,14 @@ function initializeExtendedPatientEventDelegation() {
   console.log('Initializing extended patient tabs...');
 
   extendedContainer.addEventListener('click', function (event) {
+    console.log('🔧 Click detected on:', event.target);
+
     // Find the closest button with data-action (in case user clicks on icon or text inside button)
     const target = event.target.closest('[data-action]') || event.target;
     const action = target.dataset.action;
+
+    console.log('🔧 Target element:', target);
+    console.log('🔧 Action found:', action);
 
     // If we found a button with an action, prevent Bootstrap from interfering
     if (action) {
@@ -268,6 +333,7 @@ function initializeExtendedPatientEventDelegation() {
         return;
       }
     } else {
+      console.log('🔧 No action found on target');
       return;
     }
 
@@ -275,9 +341,14 @@ function initializeExtendedPatientEventDelegation() {
       case 'show-extended-tab':
         const sectionId = target.dataset.sectionId;
         const tabType = target.dataset.tabType;
+        console.log('🔧 Section ID:', sectionId);
+        console.log('🔧 Tab Type:', tabType);
+        console.log('🔧 All dataset:', target.dataset);
         console.log('Switching to tab:', tabType);
         if (sectionId && tabType) {
           showExtendedTab(sectionId, tabType);
+        } else {
+          console.error('❌ Missing sectionId or tabType', { sectionId, tabType });
         }
         break;
 
@@ -332,3 +403,34 @@ function initializeExtendedPatientEventDelegation() {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', initializeEnhancedCDA);
+
+// Global debugging function - you can call this from browser console
+window.debugTabs = function () {
+  console.log('🔍 DEBUG: Tab Status Report');
+  const allTabs = document.querySelectorAll('.clinical-tab-content');
+  allTabs.forEach(tab => {
+    console.log(`Tab ${tab.id}:`, {
+      hasActiveClass: tab.classList.contains('active'),
+      opacity: window.getComputedStyle(tab).opacity,
+      visibility: window.getComputedStyle(tab).visibility,
+      zIndex: window.getComputedStyle(tab).zIndex,
+      display: window.getComputedStyle(tab).display
+    });
+  });
+};
+
+// Global function to manually activate any tab - you can call this from browser console
+window.forceActivateTab = function (tabId) {
+  console.log(`🔧 FORCING activation of: ${tabId}`);
+  const allTabs = document.querySelectorAll('.clinical-tab-content');
+  allTabs.forEach(tab => tab.classList.remove('active'));
+
+  const targetTab = document.getElementById(tabId);
+  if (targetTab) {
+    targetTab.classList.add('active');
+    console.log(`✅ Forced ${tabId} to active state`);
+    window.debugTabs();
+  } else {
+    console.log(`❌ Tab ${tabId} not found`);
+  }
+};

@@ -415,7 +415,7 @@ function showExtendedTab(sectionId, tabType) {
   [personalTab, healthcareTab, systemTab, clinicalTab, pdfsTab].forEach(tab => {
     if (tab) {
       tab.classList.remove('active');
-      tab.style.display = 'none';
+      // Don't use inline styles - let CSS handle visibility
     }
   });
 
@@ -427,7 +427,7 @@ function showExtendedTab(sectionId, tabType) {
   const targetTab = document.getElementById(sectionId + '_' + tabType);
   if (targetTab) {
     targetTab.classList.add('active');
-    targetTab.style.display = 'block';
+    // Don't use inline styles - let CSS handle visibility
     console.log('✅ Extended tab shown:', sectionId + '_' + tabType);
   }
 

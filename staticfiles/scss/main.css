@@ -281,6 +281,7 @@ Generated: September 16, 2025
   /* HSE Accessible Colors for Better Contrast */
   --healthcare-text-dark: #1d1d1b; /* High contrast text */
   --healthcare-text-light: #ffffff;
+  --healthcare-text-grey: #6c757d; /* Grey text for headers */
   --healthcare-border: #d4d4d4;
   --healthcare-background: #f7f7f7;
   /* Enhanced HSE.ie Color Palette 2025 */
@@ -1149,7 +1150,7 @@ body {
 
 /* Healthcare Footer Styling */
 .footer {
-  background-color: var(--healthcare-navy);
+  background-color: var(--healthcare-charcoal);
   color: var(--healthcare-white);
   padding: 2rem 0;
   margin-top: 3rem;
@@ -1167,7 +1168,7 @@ body {
 
 /* Footer Dark Background Enhancement */
 footer.bg-dark {
-  background-color: var(--healthcare-navy) !important;
+  background-color: var(--healthcare-charcoal) !important;
   color: var(--healthcare-white) !important;
 }
 
@@ -1404,7 +1405,7 @@ h6.bg-secondary {
   letter-spacing: 0.3px;
 }
 
-/* Fix Blue Text on Colored Backgrounds - Force White Text for Better Contrast */
+/* Fix Blue Text on Colored Backgrounds - Use HSE-compliant white text for better contrast */
 .accordion-header h4,
 .accordion-header h5,
 .accordion-header h6,
@@ -1441,8 +1442,399 @@ h6.bg-secondary {
 .bg-secondary h5,
 .bg-secondary h6 {
   color: var(--healthcare-text-light) !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.accordion-header h4 i,
+.accordion-header h4 .fa-solid,
+.accordion-header h4 .fa-regular,
+.accordion-header h4 .fa-light,
+.accordion-header h4 .fa-brands,
+.accordion-header h5 i,
+.accordion-header h5 .fa-solid,
+.accordion-header h5 .fa-regular,
+.accordion-header h5 .fa-light,
+.accordion-header h5 .fa-brands,
+.accordion-header h6 i,
+.accordion-header h6 .fa-solid,
+.accordion-header h6 .fa-regular,
+.accordion-header h6 .fa-light,
+.accordion-header h6 .fa-brands,
+.accordion-button i,
+.accordion-button .fa-solid,
+.accordion-button .fa-regular,
+.accordion-button .fa-light,
+.accordion-button .fa-brands,
+.clinical-accordion-item .accordion-button i,
+.clinical-accordion-item .accordion-button .fa-solid,
+.clinical-accordion-item .accordion-button .fa-regular,
+.clinical-accordion-item .accordion-button .fa-light,
+.clinical-accordion-item .accordion-button .fa-brands,
+.card-header h1 i,
+.card-header h1 .fa-solid,
+.card-header h1 .fa-regular,
+.card-header h1 .fa-light,
+.card-header h1 .fa-brands,
+.card-header h2 i,
+.card-header h2 .fa-solid,
+.card-header h2 .fa-regular,
+.card-header h2 .fa-light,
+.card-header h2 .fa-brands,
+.card-header h3 i,
+.card-header h3 .fa-solid,
+.card-header h3 .fa-regular,
+.card-header h3 .fa-light,
+.card-header h3 .fa-brands,
+.card-header h4 i,
+.card-header h4 .fa-solid,
+.card-header h4 .fa-regular,
+.card-header h4 .fa-light,
+.card-header h4 .fa-brands,
+.card-header h5 i,
+.card-header h5 .fa-solid,
+.card-header h5 .fa-regular,
+.card-header h5 .fa-light,
+.card-header h5 .fa-brands,
+.card-header h6 i,
+.card-header h6 .fa-solid,
+.card-header h6 .fa-regular,
+.card-header h6 .fa-light,
+.card-header h6 .fa-brands,
+.section-header h1 i,
+.section-header h1 .fa-solid,
+.section-header h1 .fa-regular,
+.section-header h1 .fa-light,
+.section-header h1 .fa-brands,
+.section-header h2 i,
+.section-header h2 .fa-solid,
+.section-header h2 .fa-regular,
+.section-header h2 .fa-light,
+.section-header h2 .fa-brands,
+.section-header h3 i,
+.section-header h3 .fa-solid,
+.section-header h3 .fa-regular,
+.section-header h3 .fa-light,
+.section-header h3 .fa-brands,
+.section-header h4 i,
+.section-header h4 .fa-solid,
+.section-header h4 .fa-regular,
+.section-header h4 .fa-light,
+.section-header h4 .fa-brands,
+.section-header h5 i,
+.section-header h5 .fa-solid,
+.section-header h5 .fa-regular,
+.section-header h5 .fa-light,
+.section-header h5 .fa-brands,
+.section-header h6 i,
+.section-header h6 .fa-solid,
+.section-header h6 .fa-regular,
+.section-header h6 .fa-light,
+.section-header h6 .fa-brands,
+.bg-primary h1 i,
+.bg-primary h1 .fa-solid,
+.bg-primary h1 .fa-regular,
+.bg-primary h1 .fa-light,
+.bg-primary h1 .fa-brands,
+.bg-primary h2 i,
+.bg-primary h2 .fa-solid,
+.bg-primary h2 .fa-regular,
+.bg-primary h2 .fa-light,
+.bg-primary h2 .fa-brands,
+.bg-primary h3 i,
+.bg-primary h3 .fa-solid,
+.bg-primary h3 .fa-regular,
+.bg-primary h3 .fa-light,
+.bg-primary h3 .fa-brands,
+.bg-primary h4 i,
+.bg-primary h4 .fa-solid,
+.bg-primary h4 .fa-regular,
+.bg-primary h4 .fa-light,
+.bg-primary h4 .fa-brands,
+.bg-primary h5 i,
+.bg-primary h5 .fa-solid,
+.bg-primary h5 .fa-regular,
+.bg-primary h5 .fa-light,
+.bg-primary h5 .fa-brands,
+.bg-primary h6 i,
+.bg-primary h6 .fa-solid,
+.bg-primary h6 .fa-regular,
+.bg-primary h6 .fa-light,
+.bg-primary h6 .fa-brands,
+.bg-info h1 i,
+.bg-info h1 .fa-solid,
+.bg-info h1 .fa-regular,
+.bg-info h1 .fa-light,
+.bg-info h1 .fa-brands,
+.bg-info h2 i,
+.bg-info h2 .fa-solid,
+.bg-info h2 .fa-regular,
+.bg-info h2 .fa-light,
+.bg-info h2 .fa-brands,
+.bg-info h3 i,
+.bg-info h3 .fa-solid,
+.bg-info h3 .fa-regular,
+.bg-info h3 .fa-light,
+.bg-info h3 .fa-brands,
+.bg-info h4 i,
+.bg-info h4 .fa-solid,
+.bg-info h4 .fa-regular,
+.bg-info h4 .fa-light,
+.bg-info h4 .fa-brands,
+.bg-info h5 i,
+.bg-info h5 .fa-solid,
+.bg-info h5 .fa-regular,
+.bg-info h5 .fa-light,
+.bg-info h5 .fa-brands,
+.bg-info h6 i,
+.bg-info h6 .fa-solid,
+.bg-info h6 .fa-regular,
+.bg-info h6 .fa-light,
+.bg-info h6 .fa-brands,
+.bg-secondary h1 i,
+.bg-secondary h1 .fa-solid,
+.bg-secondary h1 .fa-regular,
+.bg-secondary h1 .fa-light,
+.bg-secondary h1 .fa-brands,
+.bg-secondary h2 i,
+.bg-secondary h2 .fa-solid,
+.bg-secondary h2 .fa-regular,
+.bg-secondary h2 .fa-light,
+.bg-secondary h2 .fa-brands,
+.bg-secondary h3 i,
+.bg-secondary h3 .fa-solid,
+.bg-secondary h3 .fa-regular,
+.bg-secondary h3 .fa-light,
+.bg-secondary h3 .fa-brands,
+.bg-secondary h4 i,
+.bg-secondary h4 .fa-solid,
+.bg-secondary h4 .fa-regular,
+.bg-secondary h4 .fa-light,
+.bg-secondary h4 .fa-brands,
+.bg-secondary h5 i,
+.bg-secondary h5 .fa-solid,
+.bg-secondary h5 .fa-regular,
+.bg-secondary h5 .fa-light,
+.bg-secondary h5 .fa-brands,
+.bg-secondary h6 i,
+.bg-secondary h6 .fa-solid,
+.bg-secondary h6 .fa-regular,
+.bg-secondary h6 .fa-light,
+.bg-secondary h6 .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.accordion-header h4:hover,
+.accordion-header h5:hover,
+.accordion-header h6:hover,
+.accordion-button:hover,
+.clinical-accordion-item .accordion-button:hover,
+.card-header h1:hover,
+.card-header h2:hover,
+.card-header h3:hover,
+.card-header h4:hover,
+.card-header h5:hover,
+.card-header h6:hover,
+.section-header h1:hover,
+.section-header h2:hover,
+.section-header h3:hover,
+.section-header h4:hover,
+.section-header h5:hover,
+.section-header h6:hover,
+.bg-primary h1:hover,
+.bg-primary h2:hover,
+.bg-primary h3:hover,
+.bg-primary h4:hover,
+.bg-primary h5:hover,
+.bg-primary h6:hover,
+.bg-info h1:hover,
+.bg-info h2:hover,
+.bg-info h3:hover,
+.bg-info h4:hover,
+.bg-info h5:hover,
+.bg-info h6:hover,
+.bg-secondary h1:hover,
+.bg-secondary h2:hover,
+.bg-secondary h3:hover,
+.bg-secondary h4:hover,
+.bg-secondary h5:hover,
+.bg-secondary h6:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.accordion-header h4:hover i,
+.accordion-header h4:hover .fa-solid,
+.accordion-header h4:hover .fa-regular,
+.accordion-header h4:hover .fa-light,
+.accordion-header h4:hover .fa-brands,
+.accordion-header h5:hover i,
+.accordion-header h5:hover .fa-solid,
+.accordion-header h5:hover .fa-regular,
+.accordion-header h5:hover .fa-light,
+.accordion-header h5:hover .fa-brands,
+.accordion-header h6:hover i,
+.accordion-header h6:hover .fa-solid,
+.accordion-header h6:hover .fa-regular,
+.accordion-header h6:hover .fa-light,
+.accordion-header h6:hover .fa-brands,
+.accordion-button:hover i,
+.accordion-button:hover .fa-solid,
+.accordion-button:hover .fa-regular,
+.accordion-button:hover .fa-light,
+.accordion-button:hover .fa-brands,
+.clinical-accordion-item .accordion-button:hover i,
+.clinical-accordion-item .accordion-button:hover .fa-solid,
+.clinical-accordion-item .accordion-button:hover .fa-regular,
+.clinical-accordion-item .accordion-button:hover .fa-light,
+.clinical-accordion-item .accordion-button:hover .fa-brands,
+.card-header h1:hover i,
+.card-header h1:hover .fa-solid,
+.card-header h1:hover .fa-regular,
+.card-header h1:hover .fa-light,
+.card-header h1:hover .fa-brands,
+.card-header h2:hover i,
+.card-header h2:hover .fa-solid,
+.card-header h2:hover .fa-regular,
+.card-header h2:hover .fa-light,
+.card-header h2:hover .fa-brands,
+.card-header h3:hover i,
+.card-header h3:hover .fa-solid,
+.card-header h3:hover .fa-regular,
+.card-header h3:hover .fa-light,
+.card-header h3:hover .fa-brands,
+.card-header h4:hover i,
+.card-header h4:hover .fa-solid,
+.card-header h4:hover .fa-regular,
+.card-header h4:hover .fa-light,
+.card-header h4:hover .fa-brands,
+.card-header h5:hover i,
+.card-header h5:hover .fa-solid,
+.card-header h5:hover .fa-regular,
+.card-header h5:hover .fa-light,
+.card-header h5:hover .fa-brands,
+.card-header h6:hover i,
+.card-header h6:hover .fa-solid,
+.card-header h6:hover .fa-regular,
+.card-header h6:hover .fa-light,
+.card-header h6:hover .fa-brands,
+.section-header h1:hover i,
+.section-header h1:hover .fa-solid,
+.section-header h1:hover .fa-regular,
+.section-header h1:hover .fa-light,
+.section-header h1:hover .fa-brands,
+.section-header h2:hover i,
+.section-header h2:hover .fa-solid,
+.section-header h2:hover .fa-regular,
+.section-header h2:hover .fa-light,
+.section-header h2:hover .fa-brands,
+.section-header h3:hover i,
+.section-header h3:hover .fa-solid,
+.section-header h3:hover .fa-regular,
+.section-header h3:hover .fa-light,
+.section-header h3:hover .fa-brands,
+.section-header h4:hover i,
+.section-header h4:hover .fa-solid,
+.section-header h4:hover .fa-regular,
+.section-header h4:hover .fa-light,
+.section-header h4:hover .fa-brands,
+.section-header h5:hover i,
+.section-header h5:hover .fa-solid,
+.section-header h5:hover .fa-regular,
+.section-header h5:hover .fa-light,
+.section-header h5:hover .fa-brands,
+.section-header h6:hover i,
+.section-header h6:hover .fa-solid,
+.section-header h6:hover .fa-regular,
+.section-header h6:hover .fa-light,
+.section-header h6:hover .fa-brands,
+.bg-primary h1:hover i,
+.bg-primary h1:hover .fa-solid,
+.bg-primary h1:hover .fa-regular,
+.bg-primary h1:hover .fa-light,
+.bg-primary h1:hover .fa-brands,
+.bg-primary h2:hover i,
+.bg-primary h2:hover .fa-solid,
+.bg-primary h2:hover .fa-regular,
+.bg-primary h2:hover .fa-light,
+.bg-primary h2:hover .fa-brands,
+.bg-primary h3:hover i,
+.bg-primary h3:hover .fa-solid,
+.bg-primary h3:hover .fa-regular,
+.bg-primary h3:hover .fa-light,
+.bg-primary h3:hover .fa-brands,
+.bg-primary h4:hover i,
+.bg-primary h4:hover .fa-solid,
+.bg-primary h4:hover .fa-regular,
+.bg-primary h4:hover .fa-light,
+.bg-primary h4:hover .fa-brands,
+.bg-primary h5:hover i,
+.bg-primary h5:hover .fa-solid,
+.bg-primary h5:hover .fa-regular,
+.bg-primary h5:hover .fa-light,
+.bg-primary h5:hover .fa-brands,
+.bg-primary h6:hover i,
+.bg-primary h6:hover .fa-solid,
+.bg-primary h6:hover .fa-regular,
+.bg-primary h6:hover .fa-light,
+.bg-primary h6:hover .fa-brands,
+.bg-info h1:hover i,
+.bg-info h1:hover .fa-solid,
+.bg-info h1:hover .fa-regular,
+.bg-info h1:hover .fa-light,
+.bg-info h1:hover .fa-brands,
+.bg-info h2:hover i,
+.bg-info h2:hover .fa-solid,
+.bg-info h2:hover .fa-regular,
+.bg-info h2:hover .fa-light,
+.bg-info h2:hover .fa-brands,
+.bg-info h3:hover i,
+.bg-info h3:hover .fa-solid,
+.bg-info h3:hover .fa-regular,
+.bg-info h3:hover .fa-light,
+.bg-info h3:hover .fa-brands,
+.bg-info h4:hover i,
+.bg-info h4:hover .fa-solid,
+.bg-info h4:hover .fa-regular,
+.bg-info h4:hover .fa-light,
+.bg-info h4:hover .fa-brands,
+.bg-info h5:hover i,
+.bg-info h5:hover .fa-solid,
+.bg-info h5:hover .fa-regular,
+.bg-info h5:hover .fa-light,
+.bg-info h5:hover .fa-brands,
+.bg-info h6:hover i,
+.bg-info h6:hover .fa-solid,
+.bg-info h6:hover .fa-regular,
+.bg-info h6:hover .fa-light,
+.bg-info h6:hover .fa-brands,
+.bg-secondary h1:hover i,
+.bg-secondary h1:hover .fa-solid,
+.bg-secondary h1:hover .fa-regular,
+.bg-secondary h1:hover .fa-light,
+.bg-secondary h1:hover .fa-brands,
+.bg-secondary h2:hover i,
+.bg-secondary h2:hover .fa-solid,
+.bg-secondary h2:hover .fa-regular,
+.bg-secondary h2:hover .fa-light,
+.bg-secondary h2:hover .fa-brands,
+.bg-secondary h3:hover i,
+.bg-secondary h3:hover .fa-solid,
+.bg-secondary h3:hover .fa-regular,
+.bg-secondary h3:hover .fa-light,
+.bg-secondary h3:hover .fa-brands,
+.bg-secondary h4:hover i,
+.bg-secondary h4:hover .fa-solid,
+.bg-secondary h4:hover .fa-regular,
+.bg-secondary h4:hover .fa-light,
+.bg-secondary h4:hover .fa-brands,
+.bg-secondary h5:hover i,
+.bg-secondary h5:hover .fa-solid,
+.bg-secondary h5:hover .fa-regular,
+.bg-secondary h5:hover .fa-light,
+.bg-secondary h5:hover .fa-brands,
+.bg-secondary h6:hover i,
+.bg-secondary h6:hover .fa-solid,
+.bg-secondary h6:hover .fa-regular,
+.bg-secondary h6:hover .fa-light,
+.bg-secondary h6:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
 }
 
 /* FontAwesome Icons - Enhanced Styling with Context-Aware Colors */
@@ -1589,13 +1981,13 @@ i.fab {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Icon hover effects for interactive elements - exclude navigation and tab buttons */
-.card-header:not(.tab-button):hover i.fa-solid,
-.card-header:not(.tab-button):hover i.far,
-.card-header:not(.tab-button):hover i.fab,
-.section-header:not(.tab-button):hover i.fa-solid,
-.section-header:not(.tab-button):hover i.far,
-.section-header:not(.tab-button):hover i.fab,
+/* Icon hover effects for interactive elements - exclude navigation, tab buttons, and colored backgrounds */
+.card-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(.bg-info):hover i.fa-solid,
+.card-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(.bg-info):hover i.far,
+.card-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(.bg-info):hover i.fab,
+.section-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(.bg-info):hover i.fa-solid,
+.section-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(.bg-info):hover i.far,
+.section-header:not(.tab-button):not(.bg-primary):not(.bg-secondary):not(.bg-info):hover i.fab,
 .breadcrumb-link:hover i.fa-solid,
 .breadcrumb-link:hover i.far,
 .breadcrumb-link:hover i.fab {
@@ -2614,16 +3006,449 @@ img.fade-in {
 }
 
 /* High contrast mode */
+:root {
+  /* Default (normal) color scheme */
+  --hc-bg-primary: inherit;
+  --hc-bg-secondary: inherit;
+  --hc-text-primary: inherit;
+  --hc-text-secondary: inherit;
+  --hc-border-primary: inherit;
+  --hc-border-secondary: inherit;
+  --hc-link-color: inherit;
+  --hc-btn-bg: inherit;
+  --hc-btn-text: inherit;
+  --hc-btn-border: inherit;
+}
+
 .high-contrast {
-  filter: contrast(150%) brightness(110%);
+  /* High contrast color scheme */
+  --hc-bg-primary: #000000;
+  --hc-bg-secondary: #333333;
+  --hc-text-primary: #ffffff;
+  --hc-text-secondary: #ffffff;
+  --hc-border-primary: #ffffff;
+  --hc-border-secondary: #ffffff;
+  --hc-link-color: #ffffff;
+  --hc-btn-bg: #ffffff;
+  --hc-btn-text: #000000;
+  --hc-btn-border: #000000;
+  /* Override background and text colors for true high contrast */
+  background-color: var(--hc-bg-primary) !important;
+  color: var(--hc-text-primary) !important;
+}
+
+/* Base component classes for high contrast */
+.hc-bg-primary {
+  background-color: var(--hc-bg-primary) !important;
+}
+
+.hc-bg-secondary {
+  background-color: var(--hc-bg-secondary) !important;
+}
+
+.hc-text-primary {
+  color: var(--hc-text-primary) !important;
+}
+
+.hc-text-secondary {
+  color: var(--hc-text-secondary) !important;
+}
+
+.hc-border-primary {
+  border-color: var(--hc-border-primary) !important;
+}
+
+.hc-border-secondary {
+  border-color: var(--hc-border-secondary) !important;
+}
+
+/* Apply high contrast to common elements */
+.high-contrast .hero-section,
+.high-contrast .services-section,
+.high-contrast .container,
+.high-contrast .container-fluid {
+  background-color: var(--hc-bg-primary) !important;
+}
+
+.high-contrast .hero-content,
+.high-contrast .hero-title,
+.high-contrast .hero-subtitle {
+  color: var(--hc-text-primary) !important;
+}
+
+.high-contrast .card,
+.high-contrast .service-card {
+  background-color: var(--hc-bg-primary) !important;
+  color: var(--hc-text-primary) !important;
+  border: 2px solid var(--hc-border-primary) !important;
+}
+
+.high-contrast .badge {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 1px solid var(--hc-btn-border) !important;
+}
+
+.high-contrast .btn {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 2px solid var(--hc-btn-border) !important;
+  font-weight: bold;
+}
+
+.high-contrast .btn:hover,
+.high-contrast .btn:focus {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 3px solid var(--hc-btn-border) !important;
+  box-shadow: 0 0 0 3px var(--hc-border-primary) !important;
+}
+
+.high-contrast .stat-item,
+.high-contrast .stat-number,
+.high-contrast .stat-label {
+  color: var(--hc-text-primary) !important;
+}
+
+.high-contrast .section-title,
+.high-contrast .section-subtitle,
+.high-contrast .service-title,
+.high-contrast .service-description {
+  color: var(--hc-text-primary) !important;
+}
+
+.high-contrast .service-icon,
+.high-contrast .stat-icon,
+.high-contrast .hero-icon {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 2px solid var(--hc-btn-border) !important;
+}
+
+.high-contrast .service-icon i,
+.high-contrast .stat-icon i,
+.high-contrast .hero-icon i {
+  color: var(--hc-btn-text) !important;
+}
+
+.high-contrast .stat-item {
+  color: var(--hc-text-primary) !important;
+}
+
+.high-contrast .stat-item .stat-icon {
+  background-color: var(--hc-btn-bg) !important;
+  border: 2px solid var(--hc-btn-border) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.high-contrast .stat-item .stat-icon i {
+  color: var(--hc-btn-text) !important;
+  margin: 0 !important;
+}
+
+.high-contrast .container,
+.high-contrast .container-fluid {
+  background-color: #000000 !important;
+}
+
+.high-contrast p,
+.high-contrast span,
+.high-contrast div,
+.high-contrast h1,
+.high-contrast h2,
+.high-contrast h3,
+.high-contrast h4,
+.high-contrast h5,
+.high-contrast h6 {
+  color: #ffffff !important;
+}
+
+.high-contrast .text-dark,
+.high-contrast .text-muted {
+  color: #ffffff !important;
+}
+
+/* Fix high contrast toggle button visibility */
+.high-contrast #contrast-toggle {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 3px solid #ffffff !important;
+}
+
+.high-contrast #contrast-toggle:hover,
+.high-contrast #contrast-toggle:focus {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
 }
 
 .high-contrast img:not(.no-contrast) {
   filter: contrast(120%);
 }
 
-.high-contrast .btn {
-  border-width: 2px;
+.high-contrast .services-section,
+.high-contrast .hero-section {
+  background-color: #000000 !important;
+}
+
+.high-contrast .service-features li {
+  color: #ffffff !important;
+}
+
+.high-contrast .service-features li i {
+  color: #ffffff !important;
+}
+
+/* Navigation Bar High Contrast Styling */
+.high-contrast .navbar,
+.high-contrast .navbar-nav,
+.high-contrast .nav {
+  background-color: #000000 !important;
+  border-bottom: 3px solid #ffffff !important;
+}
+
+.high-contrast .navbar-brand,
+.high-contrast .nav-link,
+.high-contrast .navbar-nav .nav-link {
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+.high-contrast .navbar-brand:hover,
+.high-contrast .navbar-brand:focus,
+.high-contrast .nav-link:hover,
+.high-contrast .nav-link:focus {
+  color: #ffffff !important;
+  background-color: #333333 !important;
+  border: 2px solid #ffffff !important;
+  border-radius: 4px;
+}
+
+.high-contrast .navbar-toggler {
+  background-color: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+.high-contrast .navbar-toggler-icon {
+  background-color: #000000 !important;
+}
+
+/* Card Content Areas - Fix Hidden Descriptions */
+.high-contrast .card-body,
+.high-contrast .card-text,
+.high-contrast .card-content {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .service-card .card-body,
+.high-contrast .service-card .service-description {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #ffffff !important;
+  padding: 15px !important;
+}
+
+/* Ensure all service card content is visible */
+.high-contrast .service-card p,
+.high-contrast .service-card .card-text,
+.high-contrast .service-card .service-description,
+.high-contrast .service-card ul,
+.high-contrast .service-card li {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Fix service card headers and titles */
+.high-contrast .service-card .card-header,
+.high-contrast .service-card h3,
+.high-contrast .service-card h4,
+.high-contrast .service-card h5 {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #ffffff !important;
+}
+
+.high-contrast .external-service-card,
+.high-contrast .external-service-card .card-body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast .external-service-card .service-description,
+.high-contrast .external-service-card p,
+.high-contrast .external-service-card .card-text {
+  color: #ffffff !important;
+  background-color: #000000 !important;
+}
+
+/* Ensure external service links are visible */
+.high-contrast .external-service-card .btn,
+.high-contrast .external-service-card a.btn {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: bold;
+}
+
+.high-contrast .external-service-card .btn:hover,
+.high-contrast .external-service-card .btn:focus,
+.high-contrast .external-service-card a.btn:hover,
+.high-contrast .external-service-card a.btn:focus {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 0 0 0 3px #ffffff !important;
+}
+
+/* Footer and Settings Areas */
+.high-contrast footer,
+.high-contrast .footer {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-top: 3px solid #ffffff !important;
+}
+
+.high-contrast footer a,
+.high-contrast .footer a,
+.high-contrast footer .nav-link,
+.high-contrast .footer .nav-link {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
+
+.high-contrast footer a:hover,
+.high-contrast footer a:focus,
+.high-contrast .footer a:hover,
+.high-contrast .footer a:focus {
+  color: #ffffff !important;
+  background-color: #333333 !important;
+  border: 1px solid #ffffff !important;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+/* Settings and Utility Icons */
+.high-contrast .settings-icon,
+.high-contrast .utility-icon,
+.high-contrast .gear-icon {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  border-radius: 4px;
+}
+
+/* Link Styling */
+.high-contrast a:not(.btn),
+.high-contrast .link {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}
+
+.high-contrast a:not(.btn):hover,
+.high-contrast a:not(.btn):focus {
+  color: #ffffff !important;
+  background-color: #333333 !important;
+  border: 1px solid #ffffff !important;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+/* List and Menu Items */
+.high-contrast .list-group-item,
+.high-contrast .dropdown-item {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #ffffff !important;
+}
+
+.high-contrast .list-group-item:hover,
+.high-contrast .list-group-item:focus,
+.high-contrast .dropdown-item:hover,
+.high-contrast .dropdown-item:focus {
+  background-color: #333333 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+/* Form Elements in High Contrast */
+.high-contrast .form-control,
+.high-contrast .form-select,
+.high-contrast input,
+.high-contrast textarea,
+.high-contrast select {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast .form-control:focus,
+.high-contrast .form-select:focus,
+.high-contrast input:focus,
+.high-contrast textarea:focus,
+.high-contrast select:focus {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 3px solid #ffffff !important;
+  box-shadow: 0 0 0 3px #ffffff !important;
+}
+
+.high-contrast label,
+.high-contrast .form-label {
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+/* Alert and Message Styling */
+.high-contrast .alert {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 3px solid #ffffff !important;
+}
+
+.high-contrast .alert-success {
+  border-color: #ffffff !important;
+}
+
+.high-contrast .alert-warning {
+  border-color: #ffffff !important;
+}
+
+.high-contrast .alert-danger {
+  border-color: #ffffff !important;
+}
+
+/* Breadcrumb and Navigation Aids */
+.high-contrast .breadcrumb, .high-contrast .breadcrumb-enhanced,
+.high-contrast .breadcrumb-item {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .breadcrumb-item a {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
+
+.high-contrast .breadcrumb-item.active {
+  color: #ffffff !important;
+}
+
+/* Table High Contrast */
+.high-contrast table,
+.high-contrast th,
+.high-contrast td {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast th {
+  background-color: #333333 !important;
   font-weight: bold;
 }
 
@@ -3179,7 +4004,7 @@ img[data-src]::before {
   font-size: 2.5rem;
   font-weight: 700;
   margin: 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 .site-header .header-subtitle {
   font-size: 1.25rem;
@@ -3271,7 +4096,9 @@ img[data-src]::before {
   border-radius: 0.5rem 0.5rem 0 0;
   margin-bottom: 0;
 }
-.page-header h1, .page-header h2, .page-header h3 {
+.page-header h1,
+.page-header h2,
+.page-header h3 {
   margin: 0;
   color: #ffffff;
 }
@@ -3316,7 +4143,7 @@ img[data-src]::before {
   margin: 0 0 1.5rem 0;
   font-size: 3rem;
   font-weight: 700;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 @media (min-width: 480px) {
   .hero-header .hero-content h1 {
@@ -4146,6 +4973,151 @@ img[data-src]::before {
 }
 .card.card-lg {
   padding: 3rem;
+}
+
+.card-equal-height, .service-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.card-equal-height .card-body, .service-card .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.card-equal-height .card-footer, .service-card .card-footer {
+  margin-top: auto;
+}
+
+.service-card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #ffffff;
+}
+.service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+.service-card .service-card-header {
+  padding: 32px 24px 16px 24px;
+  text-align: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+}
+.service-card .service-card-header .service-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  margin: 0 auto 20px auto;
+  position: relative;
+}
+.service-card .service-card-header .service-icon i {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+.service-card .service-card-header .service-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: inherit;
+  opacity: 0.1;
+  z-index: -1;
+}
+.service-card .service-card-header .service-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+.service-card .service-card-body {
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.service-card .service-card-body .service-description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #636567;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+.service-card .service-card-body .service-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 auto 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.service-card .service-card-body .service-features li {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  color: #2d3748;
+  line-height: 1.5;
+}
+.service-card .service-card-body .service-features li i {
+  margin-right: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.service-card .service-card-footer {
+  padding: 20px 24px 32px 24px;
+  margin-top: auto;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fafafa;
+}
+.service-card .service-card-footer .btn-service {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: normal;
+  text-align: center;
+  line-height: 1.3;
+  min-height: 56px;
+  flex-wrap: wrap;
+}
+.service-card .service-card-footer .btn-service i {
+  flex-shrink: 0;
+}
+.service-card .service-card-footer .btn-service:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+.service-card .service-card-footer .btn-service:active {
+  transform: translateY(0);
 }
 
 .card-header {
@@ -7220,6 +8192,1051 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   background-color: #f59e0b;
 }
 
+.fa.fa-xs,
+.fas.fa-xs,
+.far.fa-xs,
+.fal.fa-xs,
+.fat.fa-xs,
+.fad.fa-xs,
+.fab.fa-xs {
+  font-size: 0.75em;
+}
+.fa.fa-sm,
+.fas.fa-sm,
+.far.fa-sm,
+.fal.fa-sm,
+.fat.fa-sm,
+.fad.fa-sm,
+.fab.fa-sm {
+  font-size: 0.875em;
+}
+.fa.fa-lg,
+.fas.fa-lg,
+.far.fa-lg,
+.fal.fa-lg,
+.fat.fa-lg,
+.fad.fa-lg,
+.fab.fa-lg {
+  font-size: 1.33333em;
+}
+.fa.fa-xl,
+.fas.fa-xl,
+.far.fa-xl,
+.fal.fa-xl,
+.fat.fa-xl,
+.fad.fa-xl,
+.fab.fa-xl {
+  font-size: 1.5em;
+}
+.fa.fa-2xl,
+.fas.fa-2xl,
+.far.fa-2xl,
+.fal.fa-2xl,
+.fat.fa-2xl,
+.fad.fa-2xl,
+.fab.fa-2xl {
+  font-size: 2em;
+}
+.fa.fa-3xl,
+.fas.fa-3xl,
+.far.fa-3xl,
+.fal.fa-3xl,
+.fat.fa-3xl,
+.fad.fa-3xl,
+.fab.fa-3xl {
+  font-size: 2.5em;
+}
+.fa.fa-4xl,
+.fas.fa-4xl,
+.far.fa-4xl,
+.fal.fa-4xl,
+.fat.fa-4xl,
+.fad.fa-4xl,
+.fab.fa-4xl {
+  font-size: 3em;
+}
+.fa.fa-5xl,
+.fas.fa-5xl,
+.far.fa-5xl,
+.fal.fa-5xl,
+.fat.fa-5xl,
+.fad.fa-5xl,
+.fab.fa-5xl {
+  font-size: 4em;
+}
+
+.icon-healthcare {
+  color: #007b7f;
+}
+.icon-healthcare.icon-success {
+  color: #2d5a27;
+}
+.icon-healthcare.icon-warning {
+  color: #f59e0b;
+}
+.icon-healthcare.icon-error {
+  color: #dc2626;
+}
+.icon-healthcare.icon-info {
+  color: #1e3a5f;
+}
+.icon-healthcare.icon-muted {
+  color: #718096;
+}
+.icon-healthcare.icon-white {
+  color: #ffffff;
+}
+
+.icon-nav {
+  font-size: 1.25em;
+  color: #4a5568;
+  transition: color 0.2s ease;
+}
+.icon-nav:hover {
+  color: #007b7f;
+}
+
+.icon-btn, .service-card .service-card-footer .btn-service i {
+  font-size: 1.1em;
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+.icon-btn.icon-btn-lg, .service-card .service-card-footer .btn-service i.icon-btn-lg {
+  font-size: 1.3em;
+}
+.icon-btn.icon-btn-sm, .service-card .service-card-footer .btn-service i.icon-btn-sm {
+  font-size: 0.9em;
+}
+
+.icon-card-header {
+  font-size: 2.5em;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.icon-feature, .service-card .service-card-body .service-features li i {
+  font-size: 1.1em;
+  color: #2d5a27;
+  width: 1.5em;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.icon-status {
+  font-size: 1em;
+}
+.icon-status.status-active {
+  color: #2d5a27;
+}
+.icon-status.status-pending {
+  color: #f59e0b;
+}
+.icon-status.status-inactive {
+  color: #718096;
+}
+.icon-status.status-error {
+  color: #dc2626;
+}
+
+.icon-clinical {
+  font-size: 1.2em;
+  color: #007b7f;
+  margin-right: 0.75em;
+}
+.icon-clinical.icon-medical-code {
+  color: #2d5a27;
+  font-size: 0.9em;
+}
+.icon-clinical.icon-terminology {
+  color: #1e3a5f;
+  font-size: 0.85em;
+}
+
+.icon-responsive {
+  font-size: 1.5em;
+}
+@media (min-width: 768px) {
+  .icon-responsive {
+    font-size: 1.75em;
+  }
+}
+@media (min-width: 1200px) {
+  .icon-responsive {
+    font-size: 2em;
+  }
+}
+
+.icon-interactive {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.icon-interactive:focus {
+  outline: 2px solid #007b7f;
+  outline-offset: 2px;
+}
+.icon-interactive:hover {
+  transform: scale(1.1);
+}
+
+.icon-spin-slow {
+  animation: fa-spin 2s infinite linear;
+}
+
+.icon-pulse {
+  animation: icon-pulse 2s infinite;
+}
+
+@keyframes icon-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-container.icon-container-sm {
+  width: 2em;
+  height: 2em;
+}
+.icon-container.icon-container-md {
+  width: 3em;
+  height: 3em;
+}
+.icon-container.icon-container-lg {
+  width: 4em;
+  height: 4em;
+}
+.icon-container.icon-container-xl {
+  width: 5em;
+  height: 5em;
+}
+
+.service-card .fa,
+.service-card .fas,
+.service-card .far,
+.service-card .fal,
+.service-card .fat,
+.service-card .fad,
+.service-card .fab,
+.clinical-card .fa,
+.clinical-card .fas,
+.clinical-card .far,
+.clinical-card .fal,
+.clinical-card .fat,
+.clinical-card .fad,
+.clinical-card .fab,
+.info-card .fa,
+.info-card .fas,
+.info-card .far,
+.info-card .fal,
+.info-card .fat,
+.info-card .fad,
+.info-card .fab {
+  line-height: inherit;
+  vertical-align: baseline;
+}
+.service-card .fa:not([class*=fa-]),
+.service-card .fas:not([class*=fa-]),
+.service-card .far:not([class*=fa-]),
+.service-card .fal:not([class*=fa-]),
+.service-card .fat:not([class*=fa-]),
+.service-card .fad:not([class*=fa-]),
+.service-card .fab:not([class*=fa-]),
+.clinical-card .fa:not([class*=fa-]),
+.clinical-card .fas:not([class*=fa-]),
+.clinical-card .far:not([class*=fa-]),
+.clinical-card .fal:not([class*=fa-]),
+.clinical-card .fat:not([class*=fa-]),
+.clinical-card .fad:not([class*=fa-]),
+.clinical-card .fab:not([class*=fa-]),
+.info-card .fa:not([class*=fa-]),
+.info-card .fas:not([class*=fa-]),
+.info-card .far:not([class*=fa-]),
+.info-card .fal:not([class*=fa-]),
+.info-card .fat:not([class*=fa-]),
+.info-card .fad:not([class*=fa-]),
+.info-card .fab:not([class*=fa-]) {
+  font-size: inherit;
+}
+
+.service-card .service-card-body .service-features li i {
+  font-size: 1.1em !important;
+  color: #2d5a27 !important;
+  width: 1.5em !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+}
+.service-card .service-card-body .service-features li i.fa-xs, .service-card .service-card-body .service-features li i.fa-sm, .service-card .service-card-body .service-features li i.fa-lg, .service-card .service-card-body .service-features li i.fa-xl, .service-card .service-card-body .service-features li i.fa-2xl, .service-card .service-card-body .service-features li i.fa-2xs, .service-card .service-card-body .service-features li i.fa-1x, .service-card .service-card-body .service-features li i.fa-2x, .service-card .service-card-body .service-features li i.fa-3x, .service-card .service-card-body .service-features li i.fa-4x, .service-card .service-card-body .service-features li i.fa-5x {
+  font-size: 1.1em !important;
+}
+.service-card .service-card-body .service-features li i.text-success, .service-card .service-card-body .service-features li i.text-primary, .service-card .service-card-body .service-features li i.text-info, .service-card .service-card-body .service-features li i.text-warning, .service-card .service-card-body .service-features li i.text-danger, .service-card .service-card-body .service-features li i.text-muted, .service-card .service-card-body .service-features li i.text-dark, .service-card .service-card-body .service-features li i.text-light, .service-card .service-card-body .service-features li i.text-white {
+  color: #2d5a27 !important;
+}
+
+.service-card .service-card-header .service-icon,
+.services-section .service-card .service-card-header .service-icon,
+.admin-card .service-card-header .service-icon,
+.external-service-card .service-card-header .service-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+.service-card .service-card-header .service-icon i,
+.services-section .service-card .service-card-header .service-icon i,
+.admin-card .service-card-header .service-icon i,
+.external-service-card .service-card-header .service-icon i {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+.service-card .service-card-header .service-icon i,
+.services-section .service-card .service-card-header .service-icon i,
+.admin-card .service-card-header .service-icon i,
+.external-service-card .service-card-header .service-icon i {
+  font-size: 1.8em !important;
+  color: #ffffff !important;
+}
+.service-card .service-card-header .service-icon i.fa, .service-card .service-card-header .service-icon i.fas, .service-card .service-card-header .service-icon i.far, .service-card .service-card-header .service-icon i.fal, .service-card .service-card-header .service-icon i.fat, .service-card .service-card-header .service-icon i.fad, .service-card .service-card-header .service-icon i.fab, .service-card .service-card-header .service-icon i[class*=fa-],
+.services-section .service-card .service-card-header .service-icon i.fa,
+.services-section .service-card .service-card-header .service-icon i.fas,
+.services-section .service-card .service-card-header .service-icon i.far,
+.services-section .service-card .service-card-header .service-icon i.fal,
+.services-section .service-card .service-card-header .service-icon i.fat,
+.services-section .service-card .service-card-header .service-icon i.fad,
+.services-section .service-card .service-card-header .service-icon i.fab,
+.services-section .service-card .service-card-header .service-icon i[class*=fa-],
+.admin-card .service-card-header .service-icon i.fa,
+.admin-card .service-card-header .service-icon i.fas,
+.admin-card .service-card-header .service-icon i.far,
+.admin-card .service-card-header .service-icon i.fal,
+.admin-card .service-card-header .service-icon i.fat,
+.admin-card .service-card-header .service-icon i.fad,
+.admin-card .service-card-header .service-icon i.fab,
+.admin-card .service-card-header .service-icon i[class*=fa-],
+.external-service-card .service-card-header .service-icon i.fa,
+.external-service-card .service-card-header .service-icon i.fas,
+.external-service-card .service-card-header .service-icon i.far,
+.external-service-card .service-card-header .service-icon i.fal,
+.external-service-card .service-card-header .service-icon i.fat,
+.external-service-card .service-card-header .service-icon i.fad,
+.external-service-card .service-card-header .service-icon i.fab,
+.external-service-card .service-card-header .service-icon i[class*=fa-] {
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  position: static !important;
+}
+.service-card .service-card-header .service-icon i.fa::before, .service-card .service-card-header .service-icon i.fas::before, .service-card .service-card-header .service-icon i.far::before, .service-card .service-card-header .service-icon i.fal::before, .service-card .service-card-header .service-icon i.fat::before, .service-card .service-card-header .service-icon i.fad::before, .service-card .service-card-header .service-icon i.fab::before, .service-card .service-card-header .service-icon i[class*=fa-]::before,
+.services-section .service-card .service-card-header .service-icon i.fa::before,
+.services-section .service-card .service-card-header .service-icon i.fas::before,
+.services-section .service-card .service-card-header .service-icon i.far::before,
+.services-section .service-card .service-card-header .service-icon i.fal::before,
+.services-section .service-card .service-card-header .service-icon i.fat::before,
+.services-section .service-card .service-card-header .service-icon i.fad::before,
+.services-section .service-card .service-card-header .service-icon i.fab::before,
+.services-section .service-card .service-card-header .service-icon i[class*=fa-]::before,
+.admin-card .service-card-header .service-icon i.fa::before,
+.admin-card .service-card-header .service-icon i.fas::before,
+.admin-card .service-card-header .service-icon i.far::before,
+.admin-card .service-card-header .service-icon i.fal::before,
+.admin-card .service-card-header .service-icon i.fat::before,
+.admin-card .service-card-header .service-icon i.fad::before,
+.admin-card .service-card-header .service-icon i.fab::before,
+.admin-card .service-card-header .service-icon i[class*=fa-]::before,
+.external-service-card .service-card-header .service-icon i.fa::before,
+.external-service-card .service-card-header .service-icon i.fas::before,
+.external-service-card .service-card-header .service-icon i.far::before,
+.external-service-card .service-card-header .service-icon i.fal::before,
+.external-service-card .service-card-header .service-icon i.fat::before,
+.external-service-card .service-card-header .service-icon i.fad::before,
+.external-service-card .service-card-header .service-icon i.fab::before,
+.external-service-card .service-card-header .service-icon i[class*=fa-]::before {
+  transform: none !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+}
+.service-card .service-card-header .service-icon i.fa-xs, .service-card .service-card-header .service-icon i.fa-sm, .service-card .service-card-header .service-icon i.fa-lg, .service-card .service-card-header .service-icon i.fa-xl, .service-card .service-card-header .service-icon i.fa-2xl, .service-card .service-card-header .service-icon i.fa-2xs, .service-card .service-card-header .service-icon i.fa-1x, .service-card .service-card-header .service-icon i.fa-2x, .service-card .service-card-header .service-icon i.fa-3x, .service-card .service-card-header .service-icon i.fa-4x, .service-card .service-card-header .service-icon i.fa-5x,
+.services-section .service-card .service-card-header .service-icon i.fa-xs,
+.services-section .service-card .service-card-header .service-icon i.fa-sm,
+.services-section .service-card .service-card-header .service-icon i.fa-lg,
+.services-section .service-card .service-card-header .service-icon i.fa-xl,
+.services-section .service-card .service-card-header .service-icon i.fa-2xl,
+.services-section .service-card .service-card-header .service-icon i.fa-2xs,
+.services-section .service-card .service-card-header .service-icon i.fa-1x,
+.services-section .service-card .service-card-header .service-icon i.fa-2x,
+.services-section .service-card .service-card-header .service-icon i.fa-3x,
+.services-section .service-card .service-card-header .service-icon i.fa-4x,
+.services-section .service-card .service-card-header .service-icon i.fa-5x,
+.admin-card .service-card-header .service-icon i.fa-xs,
+.admin-card .service-card-header .service-icon i.fa-sm,
+.admin-card .service-card-header .service-icon i.fa-lg,
+.admin-card .service-card-header .service-icon i.fa-xl,
+.admin-card .service-card-header .service-icon i.fa-2xl,
+.admin-card .service-card-header .service-icon i.fa-2xs,
+.admin-card .service-card-header .service-icon i.fa-1x,
+.admin-card .service-card-header .service-icon i.fa-2x,
+.admin-card .service-card-header .service-icon i.fa-3x,
+.admin-card .service-card-header .service-icon i.fa-4x,
+.admin-card .service-card-header .service-icon i.fa-5x,
+.external-service-card .service-card-header .service-icon i.fa-xs,
+.external-service-card .service-card-header .service-icon i.fa-sm,
+.external-service-card .service-card-header .service-icon i.fa-lg,
+.external-service-card .service-card-header .service-icon i.fa-xl,
+.external-service-card .service-card-header .service-icon i.fa-2xl,
+.external-service-card .service-card-header .service-icon i.fa-2xs,
+.external-service-card .service-card-header .service-icon i.fa-1x,
+.external-service-card .service-card-header .service-icon i.fa-2x,
+.external-service-card .service-card-header .service-icon i.fa-3x,
+.external-service-card .service-card-header .service-icon i.fa-4x,
+.external-service-card .service-card-header .service-icon i.fa-5x {
+  font-size: 1.8em !important;
+}
+
+.service-card .service-card-footer .btn-service i,
+.btn-service i,
+.btn i {
+  font-size: 1.1em !important;
+  margin-right: 0.5em !important;
+  vertical-align: middle !important;
+  color: #ffffff !important;
+}
+.service-card .service-card-footer .btn-service i.fa-xs, .service-card .service-card-footer .btn-service i.fa-sm, .service-card .service-card-footer .btn-service i.fa-lg, .service-card .service-card-footer .btn-service i.fa-xl, .service-card .service-card-footer .btn-service i.fa-2xl, .service-card .service-card-footer .btn-service i.fa-2xs, .service-card .service-card-footer .btn-service i.fa-1x, .service-card .service-card-footer .btn-service i.fa-2x, .service-card .service-card-footer .btn-service i.fa-3x, .service-card .service-card-footer .btn-service i.fa-4x, .service-card .service-card-footer .btn-service i.fa-5x,
+.btn-service i.fa-xs,
+.btn-service i.fa-sm,
+.btn-service i.fa-lg,
+.btn-service i.fa-xl,
+.btn-service i.fa-2xl,
+.btn-service i.fa-2xs,
+.btn-service i.fa-1x,
+.btn-service i.fa-2x,
+.btn-service i.fa-3x,
+.btn-service i.fa-4x,
+.btn-service i.fa-5x,
+.btn i.fa-xs,
+.btn i.fa-sm,
+.btn i.fa-lg,
+.btn i.fa-xl,
+.btn i.fa-2xl,
+.btn i.fa-2xs,
+.btn i.fa-1x,
+.btn i.fa-2x,
+.btn i.fa-3x,
+.btn i.fa-4x,
+.btn i.fa-5x {
+  font-size: 1.1em !important;
+}
+
+.bg-hse-teal i,
+.bg-primary i,
+.service-icon.bg-hse-teal i {
+  color: #ffffff !important;
+}
+
+.bg-hse-green i,
+.bg-success i,
+.service-icon.bg-hse-green i {
+  color: #ffffff !important;
+}
+
+.bg-warning i,
+.service-icon.bg-warning i {
+  color: #2d3748 !important;
+}
+
+.bg-light i,
+.bg-white i,
+.service-icon.bg-light i {
+  color: #2d3748 !important;
+}
+
+.bg-dark i,
+.btn-primary i,
+.btn-success i,
+.btn-info i,
+.btn-warning i,
+.btn-danger i {
+  color: #ffffff !important;
+}
+
+.capability-icon i.fa-xs, .capability-icon i.fa-sm, .capability-icon i.fa-lg, .capability-icon i.fa-xl, .capability-icon i.fa-2xl, .capability-icon i.fa-2xs, .capability-icon i.fa-1x, .capability-icon i.fa-2x, .capability-icon i.fa-3x, .capability-icon i.fa-4x, .capability-icon i.fa-5x,
+.stat-icon i.fa-xs,
+.stat-icon i.fa-sm,
+.stat-icon i.fa-lg,
+.stat-icon i.fa-xl,
+.stat-icon i.fa-2xl,
+.stat-icon i.fa-2xs,
+.stat-icon i.fa-1x,
+.stat-icon i.fa-2x,
+.stat-icon i.fa-3x,
+.stat-icon i.fa-4x,
+.stat-icon i.fa-5x,
+.config-icon i.fa-xs,
+.config-icon i.fa-sm,
+.config-icon i.fa-lg,
+.config-icon i.fa-xl,
+.config-icon i.fa-2xl,
+.config-icon i.fa-2xs,
+.config-icon i.fa-1x,
+.config-icon i.fa-2x,
+.config-icon i.fa-3x,
+.config-icon i.fa-4x,
+.config-icon i.fa-5x {
+  font-size: inherit !important;
+}
+
+.hero-badge .badge {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+.hero-badge .badge i {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+.hero-badge .badge i {
+  font-size: 1.2em !important;
+  margin-right: 0.5em !important;
+}
+.hero-badge .badge i.fa, .hero-badge .badge i.fas, .hero-badge .badge i.far, .hero-badge .badge i.fal, .hero-badge .badge i.fat, .hero-badge .badge i.fad, .hero-badge .badge i.fab, .hero-badge .badge i[class*=fa-] {
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  position: static !important;
+}
+.hero-badge .badge i.fa::before, .hero-badge .badge i.fas::before, .hero-badge .badge i.far::before, .hero-badge .badge i.fal::before, .hero-badge .badge i.fat::before, .hero-badge .badge i.fad::before, .hero-badge .badge i.fab::before, .hero-badge .badge i[class*=fa-]::before {
+  transform: none !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+}
+.hero-badge .badge i.fa-xs, .hero-badge .badge i.fa-sm, .hero-badge .badge i.fa-lg, .hero-badge .badge i.fa-xl, .hero-badge .badge i.fa-2xl, .hero-badge .badge i.fa-2xs, .hero-badge .badge i.fa-1x, .hero-badge .badge i.fa-2x, .hero-badge .badge i.fa-3x, .hero-badge .badge i.fa-4x, .hero-badge .badge i.fa-5x {
+  font-size: 1.2em !important;
+}
+
+.hero-stats .stat-icon i {
+  font-size: 3.5em !important;
+  margin-right: 0.5em !important;
+  color: #007b7f !important;
+  vertical-align: top !important;
+  display: inline-block !important;
+}
+.hero-stats .stat-icon i.fa-xs, .hero-stats .stat-icon i.fa-sm, .hero-stats .stat-icon i.fa-lg, .hero-stats .stat-icon i.fa-xl, .hero-stats .stat-icon i.fa-2xl, .hero-stats .stat-icon i.fa-2xs, .hero-stats .stat-icon i.fa-1x, .hero-stats .stat-icon i.fa-2x, .hero-stats .stat-icon i.fa-3x, .hero-stats .stat-icon i.fa-4x, .hero-stats .stat-icon i.fa-5x {
+  font-size: 3.5em !important;
+}
+
+.hero-stats .stat-number i {
+  font-size: 1em !important;
+  margin-right: 0.2em !important;
+  color: inherit !important;
+  vertical-align: baseline !important;
+  display: inline !important;
+  line-height: 1 !important;
+}
+.hero-stats .stat-number i.fa-xs, .hero-stats .stat-number i.fa-sm, .hero-stats .stat-number i.fa-lg, .hero-stats .stat-number i.fa-xl, .hero-stats .stat-number i.fa-2xl, .hero-stats .stat-number i.fa-2xs, .hero-stats .stat-number i.fa-1x, .hero-stats .stat-number i.fa-2x, .hero-stats .stat-number i.fa-3x, .hero-stats .stat-number i.fa-4x, .hero-stats .stat-number i.fa-5x {
+  font-size: 1em !important;
+}
+
+.capability-card .capability-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+.capability-card .capability-icon i {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+.capability-card .capability-icon i {
+  font-size: 2.5em !important;
+  color: #007b7f !important;
+  margin: 0 !important;
+}
+.capability-card .capability-icon i.fa, .capability-card .capability-icon i.fas, .capability-card .capability-icon i.far, .capability-card .capability-icon i.fal, .capability-card .capability-icon i.fat, .capability-card .capability-icon i.fad, .capability-card .capability-icon i.fab, .capability-card .capability-icon i[class*=fa-] {
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  position: static !important;
+}
+.capability-card .capability-icon i.fa::before, .capability-card .capability-icon i.fas::before, .capability-card .capability-icon i.far::before, .capability-card .capability-icon i.fal::before, .capability-card .capability-icon i.fat::before, .capability-card .capability-icon i.fad::before, .capability-card .capability-icon i.fab::before, .capability-card .capability-icon i[class*=fa-]::before {
+  transform: none !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+}
+.capability-card .capability-icon i.fa-xs, .capability-card .capability-icon i.fa-sm, .capability-card .capability-icon i.fa-lg, .capability-card .capability-icon i.fa-xl, .capability-card .capability-icon i.fa-2xl, .capability-card .capability-icon i.fa-2xs, .capability-card .capability-icon i.fa-1x, .capability-card .capability-icon i.fa-2x, .capability-card .capability-icon i.fa-3x, .capability-card .capability-icon i.fa-4x, .capability-card .capability-icon i.fa-5x {
+  font-size: 2.5em !important;
+}
+
+.config-card .config-icon i {
+  font-size: 1.8em !important;
+  color: #007b7f !important;
+  margin-right: 0.75rem !important;
+}
+.config-card .config-icon i.fa-xs, .config-card .config-icon i.fa-sm, .config-card .config-icon i.fa-lg, .config-card .config-icon i.fa-xl, .config-card .config-icon i.fa-2xl, .config-card .config-icon i.fa-2xs, .config-card .config-icon i.fa-1x, .config-card .config-icon i.fa-2x, .config-card .config-icon i.fa-3x, .config-card .config-icon i.fa-4x, .config-card .config-icon i.fa-5x {
+  font-size: 1.8em !important;
+}
+
+.section-title i {
+  font-size: 1.3em !important;
+  margin-right: 0.75rem !important;
+  color: #007b7f !important;
+}
+.section-title i.fa-xs, .section-title i.fa-sm, .section-title i.fa-lg, .section-title i.fa-xl, .section-title i.fa-2xl, .section-title i.fa-2xs, .section-title i.fa-1x, .section-title i.fa-2x, .section-title i.fa-3x, .section-title i.fa-4x, .section-title i.fa-5x {
+  font-size: 1.3em !important;
+}
+
+.feature-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+.feature-icon i {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+.feature-icon i {
+  font-size: 2.5em !important;
+}
+.feature-icon i.fa-xs, .feature-icon i.fa-sm, .feature-icon i.fa-lg, .feature-icon i.fa-xl, .feature-icon i.fa-2xl, .feature-icon i.fa-2xs, .feature-icon i.fa-1x, .feature-icon i.fa-2x, .feature-icon i.fa-3x, .feature-icon i.fa-4x, .feature-icon i.fa-5x {
+  font-size: 2.5em !important;
+}
+
+.badge,
+.badge-primary,
+.badge-secondary,
+.badge-success,
+.badge-danger,
+.badge-warning,
+.badge-info,
+.badge-light,
+.badge-dark {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+.badge i,
+.badge-primary i,
+.badge-secondary i,
+.badge-success i,
+.badge-danger i,
+.badge-warning i,
+.badge-info i,
+.badge-light i,
+.badge-dark i {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+.badge i.fa, .badge i.fas, .badge i.far, .badge i.fal, .badge i.fat, .badge i.fad, .badge i.fab, .badge i[class*=fa-],
+.badge-primary i.fa,
+.badge-primary i.fas,
+.badge-primary i.far,
+.badge-primary i.fal,
+.badge-primary i.fat,
+.badge-primary i.fad,
+.badge-primary i.fab,
+.badge-primary i[class*=fa-],
+.badge-secondary i.fa,
+.badge-secondary i.fas,
+.badge-secondary i.far,
+.badge-secondary i.fal,
+.badge-secondary i.fat,
+.badge-secondary i.fad,
+.badge-secondary i.fab,
+.badge-secondary i[class*=fa-],
+.badge-success i.fa,
+.badge-success i.fas,
+.badge-success i.far,
+.badge-success i.fal,
+.badge-success i.fat,
+.badge-success i.fad,
+.badge-success i.fab,
+.badge-success i[class*=fa-],
+.badge-danger i.fa,
+.badge-danger i.fas,
+.badge-danger i.far,
+.badge-danger i.fal,
+.badge-danger i.fat,
+.badge-danger i.fad,
+.badge-danger i.fab,
+.badge-danger i[class*=fa-],
+.badge-warning i.fa,
+.badge-warning i.fas,
+.badge-warning i.far,
+.badge-warning i.fal,
+.badge-warning i.fat,
+.badge-warning i.fad,
+.badge-warning i.fab,
+.badge-warning i[class*=fa-],
+.badge-info i.fa,
+.badge-info i.fas,
+.badge-info i.far,
+.badge-info i.fal,
+.badge-info i.fat,
+.badge-info i.fad,
+.badge-info i.fab,
+.badge-info i[class*=fa-],
+.badge-light i.fa,
+.badge-light i.fas,
+.badge-light i.far,
+.badge-light i.fal,
+.badge-light i.fat,
+.badge-light i.fad,
+.badge-light i.fab,
+.badge-light i[class*=fa-],
+.badge-dark i.fa,
+.badge-dark i.fas,
+.badge-dark i.far,
+.badge-dark i.fal,
+.badge-dark i.fat,
+.badge-dark i.fad,
+.badge-dark i.fab,
+.badge-dark i[class*=fa-] {
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  position: static !important;
+}
+.badge i.fa::before, .badge i.fas::before, .badge i.far::before, .badge i.fal::before, .badge i.fat::before, .badge i.fad::before, .badge i.fab::before, .badge i[class*=fa-]::before,
+.badge-primary i.fa::before,
+.badge-primary i.fas::before,
+.badge-primary i.far::before,
+.badge-primary i.fal::before,
+.badge-primary i.fat::before,
+.badge-primary i.fad::before,
+.badge-primary i.fab::before,
+.badge-primary i[class*=fa-]::before,
+.badge-secondary i.fa::before,
+.badge-secondary i.fas::before,
+.badge-secondary i.far::before,
+.badge-secondary i.fal::before,
+.badge-secondary i.fat::before,
+.badge-secondary i.fad::before,
+.badge-secondary i.fab::before,
+.badge-secondary i[class*=fa-]::before,
+.badge-success i.fa::before,
+.badge-success i.fas::before,
+.badge-success i.far::before,
+.badge-success i.fal::before,
+.badge-success i.fat::before,
+.badge-success i.fad::before,
+.badge-success i.fab::before,
+.badge-success i[class*=fa-]::before,
+.badge-danger i.fa::before,
+.badge-danger i.fas::before,
+.badge-danger i.far::before,
+.badge-danger i.fal::before,
+.badge-danger i.fat::before,
+.badge-danger i.fad::before,
+.badge-danger i.fab::before,
+.badge-danger i[class*=fa-]::before,
+.badge-warning i.fa::before,
+.badge-warning i.fas::before,
+.badge-warning i.far::before,
+.badge-warning i.fal::before,
+.badge-warning i.fat::before,
+.badge-warning i.fad::before,
+.badge-warning i.fab::before,
+.badge-warning i[class*=fa-]::before,
+.badge-info i.fa::before,
+.badge-info i.fas::before,
+.badge-info i.far::before,
+.badge-info i.fal::before,
+.badge-info i.fat::before,
+.badge-info i.fad::before,
+.badge-info i.fab::before,
+.badge-info i[class*=fa-]::before,
+.badge-light i.fa::before,
+.badge-light i.fas::before,
+.badge-light i.far::before,
+.badge-light i.fal::before,
+.badge-light i.fat::before,
+.badge-light i.fad::before,
+.badge-light i.fab::before,
+.badge-light i[class*=fa-]::before,
+.badge-dark i.fa::before,
+.badge-dark i.fas::before,
+.badge-dark i.far::before,
+.badge-dark i.fal::before,
+.badge-dark i.fat::before,
+.badge-dark i.fad::before,
+.badge-dark i.fab::before,
+.badge-dark i[class*=fa-]::before {
+  transform: none !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+}
+.badge i.fa-xs, .badge i.fa-sm, .badge i.fa-lg, .badge i.fa-xl, .badge i.fa-2xl, .badge i.fa-2xs, .badge i.fa-1x, .badge i.fa-2x, .badge i.fa-3x, .badge i.fa-4x, .badge i.fa-5x,
+.badge-primary i.fa-xs,
+.badge-primary i.fa-sm,
+.badge-primary i.fa-lg,
+.badge-primary i.fa-xl,
+.badge-primary i.fa-2xl,
+.badge-primary i.fa-2xs,
+.badge-primary i.fa-1x,
+.badge-primary i.fa-2x,
+.badge-primary i.fa-3x,
+.badge-primary i.fa-4x,
+.badge-primary i.fa-5x,
+.badge-secondary i.fa-xs,
+.badge-secondary i.fa-sm,
+.badge-secondary i.fa-lg,
+.badge-secondary i.fa-xl,
+.badge-secondary i.fa-2xl,
+.badge-secondary i.fa-2xs,
+.badge-secondary i.fa-1x,
+.badge-secondary i.fa-2x,
+.badge-secondary i.fa-3x,
+.badge-secondary i.fa-4x,
+.badge-secondary i.fa-5x,
+.badge-success i.fa-xs,
+.badge-success i.fa-sm,
+.badge-success i.fa-lg,
+.badge-success i.fa-xl,
+.badge-success i.fa-2xl,
+.badge-success i.fa-2xs,
+.badge-success i.fa-1x,
+.badge-success i.fa-2x,
+.badge-success i.fa-3x,
+.badge-success i.fa-4x,
+.badge-success i.fa-5x,
+.badge-danger i.fa-xs,
+.badge-danger i.fa-sm,
+.badge-danger i.fa-lg,
+.badge-danger i.fa-xl,
+.badge-danger i.fa-2xl,
+.badge-danger i.fa-2xs,
+.badge-danger i.fa-1x,
+.badge-danger i.fa-2x,
+.badge-danger i.fa-3x,
+.badge-danger i.fa-4x,
+.badge-danger i.fa-5x,
+.badge-warning i.fa-xs,
+.badge-warning i.fa-sm,
+.badge-warning i.fa-lg,
+.badge-warning i.fa-xl,
+.badge-warning i.fa-2xl,
+.badge-warning i.fa-2xs,
+.badge-warning i.fa-1x,
+.badge-warning i.fa-2x,
+.badge-warning i.fa-3x,
+.badge-warning i.fa-4x,
+.badge-warning i.fa-5x,
+.badge-info i.fa-xs,
+.badge-info i.fa-sm,
+.badge-info i.fa-lg,
+.badge-info i.fa-xl,
+.badge-info i.fa-2xl,
+.badge-info i.fa-2xs,
+.badge-info i.fa-1x,
+.badge-info i.fa-2x,
+.badge-info i.fa-3x,
+.badge-info i.fa-4x,
+.badge-info i.fa-5x,
+.badge-light i.fa-xs,
+.badge-light i.fa-sm,
+.badge-light i.fa-lg,
+.badge-light i.fa-xl,
+.badge-light i.fa-2xl,
+.badge-light i.fa-2xs,
+.badge-light i.fa-1x,
+.badge-light i.fa-2x,
+.badge-light i.fa-3x,
+.badge-light i.fa-4x,
+.badge-light i.fa-5x,
+.badge-dark i.fa-xs,
+.badge-dark i.fa-sm,
+.badge-dark i.fa-lg,
+.badge-dark i.fa-xl,
+.badge-dark i.fa-2xl,
+.badge-dark i.fa-2xs,
+.badge-dark i.fa-1x,
+.badge-dark i.fa-2x,
+.badge-dark i.fa-3x,
+.badge-dark i.fa-4x,
+.badge-dark i.fa-5x {
+  font-size: 1em !important;
+}
+
+.status-badge,
+.status-indicator {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+.status-badge i,
+.status-indicator i {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+.status-badge i,
+.status-indicator i {
+  font-size: 1.2em !important;
+}
+.status-badge i.fa, .status-badge i.fas, .status-badge i.far, .status-badge i.fal, .status-badge i.fat, .status-badge i.fad, .status-badge i.fab, .status-badge i[class*=fa-],
+.status-indicator i.fa,
+.status-indicator i.fas,
+.status-indicator i.far,
+.status-indicator i.fal,
+.status-indicator i.fat,
+.status-indicator i.fad,
+.status-indicator i.fab,
+.status-indicator i[class*=fa-] {
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  position: static !important;
+}
+.status-badge i.fa::before, .status-badge i.fas::before, .status-badge i.far::before, .status-badge i.fal::before, .status-badge i.fat::before, .status-badge i.fad::before, .status-badge i.fab::before, .status-badge i[class*=fa-]::before,
+.status-indicator i.fa::before,
+.status-indicator i.fas::before,
+.status-indicator i.far::before,
+.status-indicator i.fal::before,
+.status-indicator i.fat::before,
+.status-indicator i.fad::before,
+.status-indicator i.fab::before,
+.status-indicator i[class*=fa-]::before {
+  transform: none !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+}
+.status-badge i.fa-xs, .status-badge i.fa-sm, .status-badge i.fa-lg, .status-badge i.fa-xl, .status-badge i.fa-2xl, .status-badge i.fa-2xs, .status-badge i.fa-1x, .status-badge i.fa-2x, .status-badge i.fa-3x, .status-badge i.fa-4x, .status-badge i.fa-5x,
+.status-indicator i.fa-xs,
+.status-indicator i.fa-sm,
+.status-indicator i.fa-lg,
+.status-indicator i.fa-xl,
+.status-indicator i.fa-2xl,
+.status-indicator i.fa-2xs,
+.status-indicator i.fa-1x,
+.status-indicator i.fa-2x,
+.status-indicator i.fa-3x,
+.status-indicator i.fa-4x,
+.status-indicator i.fa-5x {
+  font-size: 1.2em !important;
+}
+
+.external-service-card .service-card-footer {
+  padding-top: 1.5rem;
+}
+
+.external-cta-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 50px !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  border-width: 2px !important;
+}
+.external-cta-btn i {
+  font-size: 1em !important;
+  margin: 0 !important;
+}
+.external-cta-btn i.fa-xs, .external-cta-btn i.fa-sm, .external-cta-btn i.fa-lg, .external-cta-btn i.fa-xl, .external-cta-btn i.fa-2xl, .external-cta-btn i.fa-2xs, .external-cta-btn i.fa-1x, .external-cta-btn i.fa-2x, .external-cta-btn i.fa-3x, .external-cta-btn i.fa-4x, .external-cta-btn i.fa-5x {
+  font-size: 1em !important;
+}
+.external-cta-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.external-link i {
+  font-size: 1em !important;
+  margin-right: 0.5em !important;
+}
+.external-link i.fa-xs, .external-link i.fa-sm, .external-link i.fa-lg, .external-link i.fa-xl, .external-link i.fa-2xl, .external-link i.fa-2xs, .external-link i.fa-1x, .external-link i.fa-2x, .external-link i.fa-3x, .external-link i.fa-4x, .external-link i.fa-5x {
+  font-size: 1em !important;
+}
+
+.config-note i {
+  font-size: 1.1em !important;
+  margin-right: 0.5em !important;
+  color: #1e3a5f !important;
+}
+.config-note i.fa-xs, .config-note i.fa-sm, .config-note i.fa-lg, .config-note i.fa-xl, .config-note i.fa-2xl, .config-note i.fa-2xs, .config-note i.fa-1x, .config-note i.fa-2x, .config-note i.fa-3x, .config-note i.fa-4x, .config-note i.fa-5x {
+  font-size: 1.1em !important;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -8705,6 +10722,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   background-color: #007b7f;
   border-color: #007b7f;
   color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
 }
 .btn-hse-teal:hover, .btn-hse-teal:focus {
   background-color: #005b5f;
@@ -8730,9 +10748,28 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .hero-section {
   position: relative;
   background: linear-gradient(135deg, #007b7f 0%, #33969a 50%, #2d5a27 100%);
-  color: #ffffff;
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   padding: 3rem 1rem;
   overflow: hidden;
+}
+.hero-section i,
+.hero-section .fa-solid,
+.hero-section .fa-regular,
+.hero-section .fa-light,
+.hero-section .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.hero-section:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.hero-section:hover i,
+.hero-section:hover .fa-solid,
+.hero-section:hover .fa-regular,
+.hero-section:hover .fa-light,
+.hero-section:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
 }
 @media (min-width: 768px) {
   .hero-section {
@@ -8881,10 +10918,11 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 }
 .section-header .section-subtitle {
   font-size: 1rem;
-  color: #6c757d;
+  color: #2d3748;
   line-height: 1.6;
   max-width: 700px;
   margin: 0 auto;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 @media (min-width: 768px) {
   .section-header .section-subtitle {
@@ -8901,123 +10939,72 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
     padding: 4.5rem 1.5rem;
   }
 }
-.services-section .service-card {
-  background: #ffffff;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(0, 123, 127, 0.1);
-  box-shadow: 0 4px 12px rgba(0, 123, 127, 0.1), 0 2px 6px rgba(0, 123, 127, 0.05);
+.services-section .service-card .service-card-header .service-icon.bg-hse-teal {
+  background: linear-gradient(135deg, #007b7f 0%, #005b5f 100%);
 }
-@media (min-width: 768px) {
-  .services-section .service-card {
-    box-shadow: 0 8px 24px rgba(0, 123, 127, 0.12), 0 4px 12px rgba(0, 123, 127, 0.08), 0 2px 6px rgba(0, 123, 127, 0.04);
-  }
+.services-section .service-card .service-card-header .service-icon.bg-hse-teal::after {
+  background: #007b7f;
 }
-.services-section .service-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 123, 127, 0.2), 0 10px 20px rgba(0, 123, 127, 0.15), 0 4px 12px rgba(0, 123, 127, 0.1);
-  border-color: rgba(0, 123, 127, 0.2);
+.services-section .service-card .service-card-header .service-icon.bg-hse-green {
+  background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+}
+.services-section .service-card .service-card-header .service-icon.bg-hse-green::after {
+  background: #2d5a27;
+}
+.services-section .service-card .service-card-header .service-icon.bg-primary {
+  background: linear-gradient(135deg, #085a9f 0%, rgb(5.5568862275, 62.5149700599, 110.4431137725) 100%);
+}
+.services-section .service-card .service-card-header .service-icon.bg-primary::after {
+  background: #085a9f;
+}
+.services-section .service-card .service-card-header .service-icon.bg-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+}
+.services-section .service-card .service-card-header .service-icon.bg-warning::after {
+  background: #ffc107;
+}
+.services-section .service-card .service-card-footer .btn-hse-teal {
+  background: linear-gradient(135deg, #007b7f 0%, #005b5f 100%);
+  border: none;
+  color: white;
+}
+.services-section .service-card .service-card-footer .btn-hse-teal:hover {
+  background: linear-gradient(135deg, #005b5f 0%, #004548 100%);
+  color: white;
+}
+.services-section .service-card .service-card-footer .btn-hse-green {
+  background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+  border: none;
+  color: white;
+}
+.services-section .service-card .service-card-footer .btn-hse-green:hover {
+  background: linear-gradient(135deg, #4a7c59 0%, rgb(83.5303030303, 139.9696969697, 100.4621212121) 100%);
+  color: white;
+}
+.services-section .service-card .service-card-footer .btn-primary {
+  background: linear-gradient(135deg, #085a9f 0%, rgb(5.5568862275, 62.5149700599, 110.4431137725) 100%);
+  border: none;
+  color: white;
+}
+.services-section .service-card .service-card-footer .btn-primary:hover {
+  background: linear-gradient(135deg, rgb(5.5568862275, 62.5149700599, 110.4431137725) 0%, #005b5f 100%);
+  color: white;
+}
+.services-section .service-card .service-card-footer .btn-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  border: none;
+  color: #212529;
+}
+.services-section .service-card .service-card-footer .btn-warning:hover {
+  background: linear-gradient(135deg, #e0a800 0%, #cc9500 100%);
+  color: #212529;
 }
 .services-section .service-card.admin-card {
-  border-color: rgba(255, 193, 7, 0.3);
+  border-color: rgba(255, 193, 7, 0.15);
 }
 .services-section .service-card.admin-card:hover {
-  box-shadow: 0 20px 40px rgba(255, 193, 7, 0.2), 0 10px 20px rgba(255, 193, 7, 0.15), 0 4px 12px rgba(255, 193, 7, 0.1);
-}
-.services-section .service-card .service-card-header {
-  padding: 1.5rem 1.5rem 1rem;
-  text-align: center;
-}
-.services-section .service-card .service-card-header .service-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1rem;
-  text-align: center;
-  line-height: 1;
-  --fa-display: inline-block;
-}
-.services-section .service-card .service-card-header .service-icon i {
-  color: #ffffff !important;
-  line-height: 1;
-  vertical-align: middle;
-}
-.services-section .service-card .service-card-header .service-icon i.fa, .services-section .service-card .service-card-header .service-icon i.fab, .services-section .service-card .service-card-header .service-icon i.fa-solid, .services-section .service-card .service-card-header .service-icon i.far, .services-section .service-card .service-card-header .service-icon i.fal, .services-section .service-card .service-card-header .service-icon i.fat, .services-section .service-card .service-card-header .service-icon i.fad {
-  color: #ffffff !important;
-  line-height: 1;
-  vertical-align: middle;
-}
-@media (min-width: 768px) {
-  .services-section .service-card .service-card-header .service-icon {
-    width: 90px;
-    height: 90px;
-  }
-}
-.services-section .service-card .service-card-header .service-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2d3748;
-  margin: 0;
-  line-height: 1.3;
-}
-@media (min-width: 768px) {
-  .services-section .service-card .service-card-header .service-title {
-    font-size: 1.5rem;
-  }
-}
-.services-section .service-card .service-card-body {
-  padding: 0 1.5rem 1rem;
-}
-.services-section .service-card .service-card-body .service-description {
-  color: #6c757d;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
-}
-@media (min-width: 768px) {
-  .services-section .service-card .service-card-body .service-description {
-    font-size: 1rem;
-  }
-}
-.services-section .service-card .service-card-body .service-features {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.services-section .service-card .service-card-body .service-features li {
-  padding: 0.25rem 0;
-  font-size: 0.875rem;
-  color: #6c757d;
-  display: flex;
-  align-items: center;
-}
-@media (min-width: 768px) {
-  .services-section .service-card .service-card-body .service-features li {
-    font-size: 1rem;
-  }
-}
-.services-section .service-card .service-card-body .service-features li i {
-  flex-shrink: 0;
-}
-.services-section .service-card .service-card-footer {
-  padding: 1rem 1.5rem 1.5rem;
-}
-.services-section .service-card .service-card-footer .btn-service {
-  width: 100%;
-  padding: 1rem 1.5rem;
-  font-weight: 600;
-  border-radius: 0.375rem;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-@media (min-width: 768px) {
-  .services-section .service-card .service-card-footer .btn-service {
-    padding: 1rem 2rem;
-  }
+  border-color: rgba(255, 193, 7, 0.3);
+  box-shadow: 0 20px 40px rgba(255, 193, 7, 0.15);
 }
 
 .capabilities-section {
@@ -9052,26 +11039,16 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   margin: 0 auto 1.5rem;
-  text-align: center;
-  line-height: 1;
   background: linear-gradient(135deg, #2d5a27, #4a7c59);
   color: #ffffff;
   box-shadow: 0 8px 20px rgba(45, 90, 39, 0.3);
-  --fa-display: inline-block;
 }
 .capabilities-section .capability-card .capability-icon i {
   color: #ffffff !important;
-  line-height: 1;
-  vertical-align: middle;
 }
 .capabilities-section .capability-card .capability-icon i.fa, .capabilities-section .capability-card .capability-icon i.fab, .capabilities-section .capability-card .capability-icon i.fa-solid, .capabilities-section .capability-card .capability-icon i.far, .capabilities-section .capability-card .capability-icon i.fal, .capabilities-section .capability-card .capability-icon i.fat, .capabilities-section .capability-card .capability-icon i.fad {
   color: #ffffff !important;
-  line-height: 1;
-  vertical-align: middle;
 }
 @media (min-width: 768px) {
   .capabilities-section .capability-card .capability-icon {
@@ -9297,7 +11274,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   }
 }
 .external-services-section .external-service-card .service-description {
-  color: #6c757d;
+  color: #636567;
   font-size: 0.875rem;
   line-height: 1.5;
   margin-bottom: 1rem;
@@ -12640,8 +14617,12 @@ input[type=checkbox] {
   padding: 0.25rem 0.5rem;
 }
 
-.clinical-tab-content {
-  display: none !important;
+#extended_patient_personal,
+#extended_patient_healthcare,
+#extended_patient_system,
+#extended_patient_clinical,
+#extended_patient_pdfs {
+  display: none;
   padding: 20px;
   background: white;
   border-radius: 0 0 0.375rem 0.375rem;
@@ -12650,12 +14631,35 @@ input[type=checkbox] {
   min-height: fit-content;
   overflow: visible;
 }
-.clinical-tab-content.active {
+
+#extended_patient_personal,
+#extended_patient_healthcare,
+#extended_patient_system,
+#extended_patient_clinical,
+#extended_patient_pdfs {
   display: block !important;
-  height: auto;
-  min-height: -moz-fit-content;
-  min-height: fit-content;
-  overflow: visible;
+  background-color: #f8f9fa !important;
+  border: 2px solid #007bff !important;
+  padding: 10px !important;
+  margin-bottom: 10px !important;
+}
+
+#extended_patient_personal.active,
+#extended_patient_healthcare.active,
+#extended_patient_system.active,
+#extended_patient_clinical.active,
+#extended_patient_pdfs.active {
+  display: block !important;
+  height: auto !important;
+  min-height: 100px !important;
+  width: 100% !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative !important;
+  overflow: visible !important;
+  background-color: #d4edda !important;
+  border: 3px solid #28a745 !important;
+  padding: 15px !important;
 }
 
 .clinical-section {
@@ -12668,6 +14672,10 @@ input[type=checkbox] {
 .extended-tab-content-container {
   background: white;
   border-radius: 0 0 0.375rem 0.375rem;
+  min-height: 200px;
+  width: 100%;
+  overflow: visible;
+  position: relative;
 }
 
 @media (max-width: 768px) {
@@ -13191,6 +15199,117 @@ main {
   height: 100%;
 }
 
+.healthcare-info-unified {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+}
+
+.healthcare-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+.healthcare-header {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e9ecef;
+}
+.healthcare-header i {
+  color: #28a745;
+  margin-right: 0.5rem;
+}
+
+.healthcare-content {
+  color: #212529;
+}
+
+.provider-name,
+.organization-name {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.provider-details,
+.organization-details {
+  margin-top: 1rem;
+}
+
+.provider-code {
+  font-family: "Courier New", monospace;
+  background: #f8f9fa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid #e9ecef;
+}
+
+.id-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+.id-item:last-child {
+  border-bottom: none;
+}
+
+.id-value {
+  font-weight: 500;
+  color: #212529;
+  margin-right: 0.5rem;
+}
+
+.id-system {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.provider-telecom {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.telecom-value {
+  color: #212529;
+  margin-right: 0.5rem;
+}
+
+.telecom-type {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.address-display {
+  background: #f8f9fa;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid #e9ecef;
+  margin-bottom: 0.5rem;
+}
+.address-display:last-child {
+  margin-bottom: 0;
+}
+
+.address-location {
+  color: #495057;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
 .document-content {
   color: #212529;
 }
@@ -13490,6 +15609,131 @@ button.nav-link i {
   opacity: 1 !important;
 }
 
+.clinical-cards-container {
+  padding: 0.5rem 0;
+}
+
+.clinical-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.clinical-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.clinical-card.border-success {
+  border-left: 4px solid #28a745;
+  background: linear-gradient(to right, rgba(40, 167, 69, 0.05) 0%, transparent 100%);
+}
+
+.clinical-field {
+  border-bottom: 1px solid #f1f3f4;
+}
+.clinical-field:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+.clinical-field.primary-field-mobile {
+  background: linear-gradient(to right, rgba(0, 133, 233, 0.05) 0%, transparent 100%);
+  padding: 0.75rem;
+  margin: -0.5rem -0.75rem 0.5rem -0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(0, 133, 233, 0.1);
+}
+
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+}
+.field-label .terminology-indicator {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+.field-value {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.field-value .primary-field-content strong {
+  font-size: 1rem;
+  color: #212529;
+}
+.field-value .field-content {
+  color: #495057;
+}
+
+.medical-codes-container-mobile .medical-code-item {
+  gap: 0.25rem;
+}
+.medical-codes-container-mobile .medical-code-item .badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+}
+.medical-codes-container-mobile .medical-code-item code {
+  font-size: 0.75rem;
+  background: #f8f9fa;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  border: 1px solid #dee2e6;
+}
+
+.medical-terminology .badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+}
+.medical-terminology .badge .fa-tag {
+  font-size: 0.6rem;
+}
+
+@media (max-width: 767.98px) {
+  .clinical-cards-container {
+    padding: 0.25rem 0;
+  }
+  .clinical-card {
+    margin-bottom: 1rem;
+  }
+  .clinical-card .card-body {
+    padding: 0.75rem;
+  }
+  .clinical-field {
+    margin-bottom: 0.75rem;
+  }
+  .clinical-field.primary-field-mobile {
+    margin: -0.25rem -0.5rem 0.5rem -0.5rem;
+    padding: 0.5rem;
+  }
+  .field-label {
+    margin-bottom: 0.25rem;
+  }
+  .medical-codes-container-mobile .medical-code-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .medical-codes-container-mobile .medical-code-item .badge,
+  .medical-codes-container-mobile .medical-code-item code {
+    margin: 0 0.25rem 0.25rem 0;
+  }
+}
+@media (min-width: 640px) {
+  .clinical-cards-container {
+    padding: 0.75rem 0;
+  }
+  .clinical-card .card-body {
+    padding: 1rem;
+  }
+  .clinical-field.primary-field-mobile {
+    padding: 0.75rem;
+    margin: -0.5rem -0.75rem 0.75rem -0.75rem;
+  }
+}
+@media (min-width: 768px) {
+  .clinical-cards-container {
+    display: none !important;
+  }
+}
 .uploaded-document-view {
   max-width: 1200px;
   margin: 0 auto;
@@ -14044,6 +16288,125 @@ button.nav-link i {
   opacity: 0.8;
 }
 
+.text-on-primary-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: var(--healthcare-primary);
+}
+.text-on-primary-bg i,
+.text-on-primary-bg .fa-solid,
+.text-on-primary-bg .fa-regular,
+.text-on-primary-bg .fa-light,
+.text-on-primary-bg .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-primary-bg:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-primary-bg:hover i,
+.text-on-primary-bg:hover .fa-solid,
+.text-on-primary-bg:hover .fa-regular,
+.text-on-primary-bg:hover .fa-light,
+.text-on-primary-bg:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
+}
+
+.text-on-secondary-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: var(--healthcare-secondary);
+}
+.text-on-secondary-bg i,
+.text-on-secondary-bg .fa-solid,
+.text-on-secondary-bg .fa-regular,
+.text-on-secondary-bg .fa-light,
+.text-on-secondary-bg .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-secondary-bg:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-secondary-bg:hover i,
+.text-on-secondary-bg:hover .fa-solid,
+.text-on-secondary-bg:hover .fa-regular,
+.text-on-secondary-bg:hover .fa-light,
+.text-on-secondary-bg:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
+}
+
+.text-on-accent-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: var(--healthcare-accent);
+}
+.text-on-accent-bg i,
+.text-on-accent-bg .fa-solid,
+.text-on-accent-bg .fa-regular,
+.text-on-accent-bg .fa-light,
+.text-on-accent-bg .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-accent-bg:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-accent-bg:hover i,
+.text-on-accent-bg:hover .fa-solid,
+.text-on-accent-bg:hover .fa-regular,
+.text-on-accent-bg:hover .fa-light,
+.text-on-accent-bg:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
+}
+
+.text-on-info-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: var(--healthcare-info);
+}
+.text-on-info-bg i,
+.text-on-info-bg .fa-solid,
+.text-on-info-bg .fa-regular,
+.text-on-info-bg .fa-light,
+.text-on-info-bg .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-info-bg:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-info-bg:hover i,
+.text-on-info-bg:hover .fa-solid,
+.text-on-info-bg:hover .fa-regular,
+.text-on-info-bg:hover .fa-light,
+.text-on-info-bg:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
+}
+
+.text-on-blue-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.text-on-blue-bg i,
+.text-on-blue-bg .fa-solid,
+.text-on-blue-bg .fa-regular,
+.text-on-blue-bg .fa-light,
+.text-on-blue-bg .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-blue-bg:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-blue-bg:hover i,
+.text-on-blue-bg:hover .fa-solid,
+.text-on-blue-bg:hover .fa-regular,
+.text-on-blue-bg:hover .fa-light,
+.text-on-blue-bg:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
+}
+
 .grid-container {
   display: flex;
   flex-wrap: wrap;
@@ -14241,4 +16604,51 @@ button.nav-link i {
 
 .pb-xl {
   padding-bottom: 2rem;
+}
+
+.text-secondary-accessible {
+  color: var(--healthcare-dark-grey) !important;
+  font-weight: 500;
+}
+
+.text-muted-accessible {
+  color: var(--healthcare-dark-grey);
+  font-weight: 500;
+}
+
+.text-on-blue-bg {
+  color: var(--healthcare-text-light) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.text-on-blue-bg i,
+.text-on-blue-bg .fa-solid,
+.text-on-blue-bg .fa-regular,
+.text-on-blue-bg .fa-light,
+.text-on-blue-bg .fa-brands {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-blue-bg:hover {
+  color: var(--healthcare-text-light) !important;
+}
+.text-on-blue-bg:hover i,
+.text-on-blue-bg:hover .fa-solid,
+.text-on-blue-bg:hover .fa-regular,
+.text-on-blue-bg:hover .fa-light,
+.text-on-blue-bg:hover .fa-brands {
+  color: var(--healthcare-text-light) !important;
+  transform: none !important;
+}
+
+.card-header.bg-light h5 {
+  color: var(--healthcare-dark-grey) !important;
+  font-weight: 600 !important;
+}
+
+.service-card .card-body small.text-secondary-accessible,
+.service-card small.text-secondary-accessible,
+.card .card-body small.text-secondary-accessible,
+small.text-secondary-accessible {
+  color: var(--healthcare-dark-grey) !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
 }/*# sourceMappingURL=main.css.map */

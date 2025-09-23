@@ -55,7 +55,7 @@ This is not data duplication but necessary clinical context preservation.
                         </strong>
                     </div>
                     {% endif %}
-                    
+
                     <div class="flex-grow-1">
                         {% if patient_identity.birth_date or patient_identity.birth_date_formatted %}
                         <div class="mb-2">
@@ -66,7 +66,7 @@ This is not data duplication but necessary clinical context preservation.
                             </small>
                         </div>
                         {% endif %}
-                        
+
                         {% if patient_identity.administrative_gender or patient_identity.gender %}
                         <div class="mb-2">
                             <small class="text-secondary-accessible">
@@ -145,7 +145,7 @@ This is not data duplication but necessary clinical context preservation.
                             </small>
                         </div>
                         {% endif %}
-                        
+
                         {% if administrative_data.home_member_state %}
                         <div class="mb-2">
                             <small class="text-secondary-accessible">
@@ -155,7 +155,7 @@ This is not data duplication but necessary clinical context preservation.
                             </small>
                         </div>
                         {% endif %}
-                        
+
                         {% if patient_identity.country and not administrative_data.patient_country %}
                         <div class="mb-2">
                             <small class="text-secondary-accessible">
@@ -170,7 +170,7 @@ This is not data duplication but necessary clinical context preservation.
             </div>
         </div>
         {% endif %}
-        
+
         {% comment %} PATIENT ADDRESS CARD: Primary residential/postal addresses {% endcomment %}
         {% if contact_data.addresses or administrative_data.patient_contact_info.addresses %}
         <div class="col-12 col-md-6 col-lg-4">

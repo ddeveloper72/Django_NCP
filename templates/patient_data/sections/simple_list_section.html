@@ -23,13 +23,13 @@
                         class="mb-1 {% if entry.display_name == 'Unknown Item' or entry.display_name == 'Unknown Condition' or entry.display_name == 'Unknown Procedure' or entry.display_name == 'Unknown Medication' or entry.display_name == 'Unknown Allergen' %}text-muted fst-italic{% endif %}">
                         {{ entry.display_name|default:"Medical Entry" }}
                     </h6>
-                    {% if entry.get('reaction') %}
+                    {% if entry.reaction %}
                     <p class="text-danger mb-1"><strong>Reaction:</strong> {{ entry.reaction|default:"Unknown" }}</p>
                     {% endif %}
-                    {% if entry.get('dosage') %}
+                    {% if entry.dosage %}
                     <p class="text-info mb-1"><strong>Dosage:</strong> {{ entry.dosage }}</p>
                     {% endif %}
-                    {% if entry.get('status') %}
+                    {% if entry.status %}
                     <p class="text-success mb-1"><strong>Status:</strong> {{ entry.status }}</p>
                     {% endif %}
                 </div>

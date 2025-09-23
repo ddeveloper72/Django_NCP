@@ -21,6 +21,7 @@
   background-color: $hse-primary-teal;
   border-color: $hse-primary-teal;
   color: $white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
 
   &:hover,
   &:focus {
@@ -59,7 +60,7 @@
     $hse-primary-teal-light 50%,
     $hse-secondary-green 100%
   );
-  color: $white;
+  @include text-on-blue-bg;
   padding: $space-xxl $space-md;
   overflow: hidden;
 
@@ -230,10 +231,11 @@
 
   .section-subtitle {
     font-size: $font-size-base;
-    color: $text-muted;
+    color: $neutral-dark; // Much darker and more readable than $text-muted
     line-height: 1.6;
     max-width: 700px;
     margin: 0 auto;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); // Subtle shadow for better contrast
 
     @media (min-width: 768px) {
       font-size: $font-size-lg;
@@ -242,7 +244,7 @@
 }
 
 // =====================================================
-// SERVICES SECTION - MOBILE FIRST
+// SERVICES SECTION - PROFESSIONAL UX LAYOUT
 // =====================================================
 
 .services-section {
@@ -257,150 +259,138 @@
     padding: calc($space-xxl * 1.5) $space-lg;
   }
 
+  // Override service-card styles for perfect alignment
   .service-card {
-    background: $white;
-    border-radius: $border-radius-lg;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba($hse-primary-teal, 0.1);
+    // All service card styles now handled by _cards.scss
+    // This ensures consistent layout across the application
 
-    // Enhanced mobile shadows
-    box-shadow: 0 4px 12px rgba($hse-primary-teal, 0.1),
-      0 2px 6px rgba($hse-primary-teal, 0.05);
+    // HSE specific color overrides for service icons
+    .service-card-header {
+      .service-icon {
+        &.bg-hse-teal {
+          background: linear-gradient(
+            135deg,
+            $hse-primary-teal 0%,
+            $hse-primary-teal-dark 100%
+          );
 
-    // Enhanced tablet/desktop shadows
-    @media (min-width: 768px) {
-      box-shadow: 0 8px 24px rgba($hse-primary-teal, 0.12),
-        0 4px 12px rgba($hse-primary-teal, 0.08),
-        0 2px 6px rgba($hse-primary-teal, 0.04);
+          &::after {
+            background: $hse-primary-teal;
+          }
+        }
+
+        &.bg-hse-green {
+          background: linear-gradient(
+            135deg,
+            $hse-secondary-green 0%,
+            $hse-secondary-green-light 100%
+          );
+
+          &::after {
+            background: $hse-secondary-green;
+          }
+        }
+
+        &.bg-primary {
+          background: linear-gradient(
+            135deg,
+            $primary-color 0%,
+            $primary-dark 100%
+          );
+
+          &::after {
+            background: $primary-color;
+          }
+        }
+
+        &.bg-warning {
+          background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+
+          &::after {
+            background: #ffc107;
+          }
+        }
+      }
     }
 
-    &:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 40px rgba($hse-primary-teal, 0.2),
-        0 10px 20px rgba($hse-primary-teal, 0.15),
-        0 4px 12px rgba($hse-primary-teal, 0.1);
-      border-color: rgba($hse-primary-teal, 0.2);
+    // HSE specific button styling
+    .service-card-footer {
+      .btn-hse-teal {
+        background: linear-gradient(
+          135deg,
+          $hse-primary-teal 0%,
+          $hse-primary-teal-dark 100%
+        );
+        border: none;
+        color: white;
+
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            $hse-primary-teal-dark 0%,
+            #004548 100%
+          );
+          color: white;
+        }
+      }
+
+      .btn-hse-green {
+        background: linear-gradient(
+          135deg,
+          $hse-secondary-green 0%,
+          $hse-secondary-green-light 100%
+        );
+        border: none;
+        color: white;
+
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            $hse-secondary-green-light 0%,
+            lighten($hse-secondary-green-light, 5%) 100%
+          );
+          color: white;
+        }
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          $primary-color 0%,
+          $primary-dark 100%
+        );
+        border: none;
+        color: white;
+
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            $primary-dark 0%,
+            $hse-primary-teal-dark 100%
+          );
+          color: white;
+        }
+      }
+
+      .btn-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        border: none;
+        color: #212529;
+
+        &:hover {
+          background: linear-gradient(135deg, #e0a800 0%, #cc9500 100%);
+          color: #212529;
+        }
+      }
     }
 
+    // Special styling for admin cards
     &.admin-card {
-      border-color: rgba(#ffc107, 0.3);
+      border-color: rgba(#ffc107, 0.15);
 
       &:hover {
-        box-shadow: 0 20px 40px rgba(#ffc107, 0.2),
-          0 10px 20px rgba(#ffc107, 0.15), 0 4px 12px rgba(#ffc107, 0.1);
-      }
-    }
-
-    .service-card-header {
-      padding: $space-lg $space-lg $space-md;
-      text-align: center;
-
-      .service-icon {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto $space-md;
-        text-align: center;
-        line-height: 1;
-
-        // FontAwesome styling for proper alignment
-        --fa-display: inline-block;
-
-        // Ensure all icons are white with high specificity
-        i {
-          color: $white !important;
-          line-height: 1;
-          vertical-align: middle;
-
-          // Force color for all FontAwesome icon types
-          &.fa,
-          &.fab,
-          &.fa-solid,
-          &.far,
-          &.fal,
-          &.fat,
-          &.fad {
-            color: $white !important;
-            line-height: 1;
-            vertical-align: middle;
-          }
-        }
-
-        // Enhanced for tablet/desktop
-        @media (min-width: 768px) {
-          width: 90px;
-          height: 90px;
-        }
-      }
-
-      .service-title {
-        font-size: $font-size-lg;
-        font-weight: $font-weight-bold;
-        color: $text-dark;
-        margin: 0;
-        line-height: 1.3;
-
-        @media (min-width: 768px) {
-          font-size: $font-size-xl;
-        }
-      }
-    }
-
-    .service-card-body {
-      padding: 0 $space-lg $space-md;
-
-      .service-description {
-        color: $text-muted;
-        line-height: 1.6;
-        margin-bottom: $space-md;
-        font-size: $font-size-sm;
-
-        @media (min-width: 768px) {
-          font-size: $font-size-base;
-        }
-      }
-
-      .service-features {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-
-        li {
-          padding: $space-xs 0;
-          font-size: $font-size-sm;
-          color: $text-muted;
-          display: flex;
-          align-items: center;
-
-          @media (min-width: 768px) {
-            font-size: $font-size-base;
-          }
-
-          i {
-            flex-shrink: 0;
-          }
-        }
-      }
-    }
-
-    .service-card-footer {
-      padding: $space-md $space-lg $space-lg;
-
-      .btn-service {
-        width: 100%;
-        padding: $space-md $space-lg;
-        font-weight: $font-weight-semibold;
-        border-radius: $border-radius-md;
-        transition: all 0.3s ease;
-        text-decoration: none;
-
-        @media (min-width: 768px) {
-          padding: $space-md $space-xl;
-        }
+        border-color: rgba(#ffc107, 0.3);
+        box-shadow: 0 20px 40px rgba(#ffc107, 0.15);
       }
     }
   }
@@ -453,12 +443,7 @@
       width: 80px;
       height: 80px;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       margin: 0 auto $space-lg;
-      text-align: center;
-      line-height: 1;
       background: linear-gradient(
         135deg,
         $hse-secondary-green,
@@ -467,14 +452,12 @@
       color: $white;
       box-shadow: 0 8px 20px rgba($hse-secondary-green, 0.3);
 
-      // FontAwesome styling for proper alignment
-      --fa-display: inline-block;
+      // Remove conflicting alignment properties - let perfect-icon-center mixin handle this
+      // The perfect-icon-center mixin will provide: display: flex, align-items: center, justify-content: center
 
       // Ensure all icons are white with high specificity
       i {
         color: $white !important;
-        line-height: 1;
-        vertical-align: middle;
 
         // Force color for all FontAwesome icon types
         &.fa,
@@ -485,8 +468,6 @@
         &.fat,
         &.fad {
           color: $white !important;
-          line-height: 1;
-          vertical-align: middle;
         }
       }
 
@@ -779,7 +760,7 @@
     }
 
     .service-description {
-      color: $text-muted;
+      color: #636567;
       font-size: $font-size-sm;
       line-height: 1.5;
       margin-bottom: $space-md;

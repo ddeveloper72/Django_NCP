@@ -1,0 +1,772 @@
+// ========================================
+// FontAwesome Icon System - Project-Wide Consistency
+// ========================================
+
+// ========================================
+// FONTAWESOME SIZE STANDARDS
+// Following FontAwesome 6.x naming conventions
+// ========================================
+
+// Base icon styling - respects FontAwesome classes
+.fa,
+.fas,
+.far,
+.fal,
+.fat,
+.fad,
+.fab {
+  // Allow FontAwesome sizing classes to work properly
+  // Remove any font-size overrides that conflict with FA classes
+
+  &.fa-xs {
+    font-size: 0.75em;
+  }
+
+  &.fa-sm {
+    font-size: 0.875em;
+  }
+
+  // Default size - no modifier needed
+  &.fa-lg {
+    font-size: 1.33333em;
+  }
+
+  &.fa-xl {
+    font-size: 1.5em;
+  }
+
+  &.fa-2xl {
+    font-size: 2em;
+  }
+
+  &.fa-3xl {
+    font-size: 2.5em;
+  }
+
+  &.fa-4xl {
+    font-size: 3em;
+  }
+
+  &.fa-5xl {
+    font-size: 4em;
+  }
+}
+
+// ========================================
+// HEALTHCARE ICON COLOR SYSTEM
+// Semantic colors for healthcare contexts
+// ========================================
+
+.icon-healthcare {
+  color: $hse-primary-teal;
+
+  &.icon-success {
+    color: $hse-secondary-green;
+  }
+
+  &.icon-warning {
+    color: $warning-orange;
+  }
+
+  &.icon-error {
+    color: $error-red;
+  }
+
+  &.icon-info {
+    color: $hse-accent-blue;
+  }
+
+  &.icon-muted {
+    color: $neutral-light;
+  }
+
+  &.icon-white {
+    color: $white;
+  }
+}
+
+// ========================================
+// SEMANTIC ICON CONTEXTS
+// Predefined icon styles for common healthcare use cases
+// ========================================
+
+// Navigation and UI icons
+.icon-nav {
+  font-size: 1.25em;
+  color: $neutral-medium;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $hse-primary-teal;
+  }
+}
+
+// Button icons - properly sized for button contexts
+.icon-btn {
+  font-size: 1.1em;
+  margin-right: 0.5em;
+  vertical-align: middle;
+
+  &.icon-btn-lg {
+    font-size: 1.3em;
+  }
+
+  &.icon-btn-sm {
+    font-size: 0.9em;
+  }
+}
+
+// Card header icons - prominent but not overwhelming
+.icon-card-header {
+  font-size: 2.5em;
+  color: $white;
+  line-height: 1;
+  // Remove display: block to allow flexbox centering in service cards
+}
+
+// Feature list icons - consistent sizing for bullet points
+.icon-feature {
+  font-size: 1.1em;
+  color: $hse-secondary-green;
+  width: 1.5em;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+// Status indicators - for clinical data states
+.icon-status {
+  font-size: 1em;
+
+  &.status-active {
+    color: $hse-secondary-green;
+  }
+
+  &.status-pending {
+    color: $warning-orange;
+  }
+
+  &.status-inactive {
+    color: $neutral-light;
+  }
+
+  &.status-error {
+    color: $error-red;
+  }
+}
+
+// Clinical section icons - for medical data display
+.icon-clinical {
+  font-size: 1.2em;
+  color: $hse-primary-teal;
+  margin-right: 0.75em;
+
+  &.icon-medical-code {
+    color: $hse-secondary-green;
+    font-size: 0.9em;
+  }
+
+  &.icon-terminology {
+    color: $hse-accent-blue;
+    font-size: 0.85em;
+  }
+}
+
+// ========================================
+// RESPONSIVE ICON SIZING
+// Scalable icons for different viewport sizes
+// ========================================
+
+.icon-responsive {
+  font-size: 1.5em;
+
+  @media (min-width: 768px) {
+    font-size: 1.75em;
+  }
+
+  @media (min-width: 1200px) {
+    font-size: 2em;
+  }
+}
+
+// Icon accessibility should be handled via HTML aria-hidden attributes
+
+// Ensure focus indicators for interactive icons
+.icon-interactive {
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: 2px solid $hse-primary-teal;
+    outline-offset: 2px;
+  }
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+// ========================================
+// ANIMATION UTILITIES
+// Subtle animations for state changes
+// ========================================
+
+.icon-spin-slow {
+  animation: fa-spin 2s infinite linear;
+}
+
+.icon-pulse {
+  animation: icon-pulse 2s infinite;
+}
+
+@keyframes icon-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+// ========================================
+// CONTAINER UTILITIES
+// For consistent icon container sizing
+// ========================================
+
+.icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &.icon-container-sm {
+    width: 2em;
+    height: 2em;
+  }
+
+  &.icon-container-md {
+    width: 3em;
+    height: 3em;
+  }
+
+  &.icon-container-lg {
+    width: 4em;
+    height: 4em;
+  }
+
+  &.icon-container-xl {
+    width: 5em;
+    height: 5em;
+  }
+}
+
+// ========================================
+// BRAND SPECIFIC OVERRIDES
+// HSE and healthcare-specific styling
+// ========================================
+
+// Override any conflicting styles from other components
+.service-card,
+.clinical-card,
+.info-card {
+  .fa,
+  .fas,
+  .far,
+  .fal,
+  .fat,
+  .fad,
+  .fab {
+    // Ensure FontAwesome sizing classes work within cards
+    line-height: inherit;
+    vertical-align: baseline;
+
+    // Remove any forced font-size declarations
+    &:not([class*="fa-"]) {
+      // Only apply default sizing if no FA size class is present
+      font-size: inherit;
+    }
+  }
+}
+
+// ========================================
+// HIGH SPECIFICITY OVERRIDES
+// Force our semantic classes to override FontAwesome conflicts
+// ========================================
+
+// Service card feature icons - override any FontAwesome size/color classes
+.service-card .service-card-body .service-features li i {
+  font-size: 1.1em !important;
+  color: $hse-secondary-green !important;
+  width: 1.5em !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+
+  // Override ALL FontAwesome sizing classes
+  &.fa-xs,
+  &.fa-sm,
+  &.fa-lg,
+  &.fa-xl,
+  &.fa-2xl,
+  &.fa-2xs,
+  &.fa-1x,
+  &.fa-2x,
+  &.fa-3x,
+  &.fa-4x,
+  &.fa-5x {
+    font-size: 1.1em !important;
+  }
+
+  // Override ALL FontAwesome color classes
+  &.text-success,
+  &.text-primary,
+  &.text-info,
+  &.text-warning,
+  &.text-danger,
+  &.text-muted,
+  &.text-dark,
+  &.text-light,
+  &.text-white {
+    color: $hse-secondary-green !important;
+  }
+}
+
+// Service card header icons - properly sized for 80px containers with perfect centering
+.service-card .service-card-header .service-icon,
+.services-section .service-card .service-card-header .service-icon,
+.admin-card .service-card-header .service-icon,
+.external-service-card .service-card-header .service-icon {
+  @include perfect-icon-center; // Use mixin for perfect centering - CROSS-HAIR ALIGNED
+
+  i {
+    font-size: 1.8em !important; // Reduced from 2.5em to fit 80px container better
+    @include smart-icon-color(); // Default to white for dark backgrounds
+    @include fontawesome-center-override; // Override FontAwesome positioning
+
+    // Override ALL FontAwesome sizing classes
+    &.fa-xs,
+    &.fa-sm,
+    &.fa-lg,
+    &.fa-xl,
+    &.fa-2xl,
+    &.fa-2xs,
+    &.fa-1x,
+    &.fa-2x,
+    &.fa-3x,
+    &.fa-4x,
+    &.fa-5x {
+      font-size: 1.8em !important;
+    }
+  }
+}
+
+// Service card button icons - consistent button sizing
+// Service card button icons - consistent button sizing with smart colors
+.service-card .service-card-footer .btn-service i,
+.btn-service i,
+.btn i {
+  font-size: 1.1em !important;
+  margin-right: 0.5em !important;
+  vertical-align: middle !important;
+  @include smart-icon-color(); // Smart color based on button background
+
+  // Override ALL FontAwesome sizing classes
+  &.fa-xs,
+  &.fa-sm,
+  &.fa-lg,
+  &.fa-xl,
+  &.fa-2xl,
+  &.fa-2xs,
+  &.fa-1x,
+  &.fa-2x,
+  &.fa-3x,
+  &.fa-4x,
+  &.fa-5x {
+    font-size: 1.1em !important;
+  }
+}
+
+// Apply HSE smart icon color system globally
+@include hse-smart-icons;
+
+// Capability and stat icons
+.capability-icon i,
+.stat-icon i,
+.config-icon i {
+  // Override FontAwesome sizing for consistency
+  &.fa-xs,
+  &.fa-sm,
+  &.fa-lg,
+  &.fa-xl,
+  &.fa-2xl,
+  &.fa-2xs,
+  &.fa-1x,
+  &.fa-2x,
+  &.fa-3x,
+  &.fa-4x,
+  &.fa-5x {
+    font-size: inherit !important;
+  }
+}
+
+// ========================================
+// HERO BADGE ICONS
+// Icons within Bootstrap badges in hero section - CROSS-HAIR ALIGNED
+// ========================================
+
+.hero-badge .badge {
+  @include perfect-icon-center; // Apply perfect centering mixin for cross-hair alignment
+
+  i {
+    font-size: 1.2em !important;
+    margin-right: 0.5em !important;
+    @include fontawesome-center-override; // Override FontAwesome positioning
+
+    // Override FontAwesome sizing classes for badge context
+    &.fa-xs,
+    &.fa-sm,
+    &.fa-lg,
+    &.fa-xl,
+    &.fa-2xl,
+    &.fa-2xs,
+    &.fa-1x,
+    &.fa-2x,
+    &.fa-3x,
+    &.fa-4x,
+    &.fa-5x {
+      font-size: 1.2em !important;
+    }
+  }
+}
+
+// ========================================
+// HERO SECTION STAT ICONS
+// Specific sizing for hero statistics icons
+// ========================================
+
+// Hero stat icons - ensure proper visual balance
+// Hero stats icons and numbers - large and aligned
+.hero-stats .stat-icon i {
+  font-size: 3.5em !important;
+  margin-right: 0.5em !important;
+  color: $hse-primary-teal !important;
+  vertical-align: top !important;
+  display: inline-block !important;
+
+  // Override ALL FontAwesome sizing classes
+  &.fa-xs,
+  &.fa-sm,
+  &.fa-lg,
+  &.fa-xl,
+  &.fa-2xl,
+  &.fa-2xs,
+  &.fa-1x,
+  &.fa-2x,
+  &.fa-3x,
+  &.fa-4x,
+  &.fa-5x {
+    font-size: 3.5em !important;
+  }
+}
+
+// Hero stats number icons - size to match numbers exactly
+.hero-stats .stat-number i {
+  font-size: 1em !important; // Same as the text numbers
+  margin-right: 0.2em !important;
+  color: inherit !important; // Inherit color from parent stat-number
+  vertical-align: baseline !important;
+  display: inline !important;
+  line-height: 1 !important;
+
+  // Override ALL FontAwesome sizing classes
+  &.fa-xs,
+  &.fa-sm,
+  &.fa-lg,
+  &.fa-xl,
+  &.fa-2xl,
+  &.fa-2xs,
+  &.fa-1x,
+  &.fa-2x,
+  &.fa-3x,
+  &.fa-4x,
+  &.fa-5x {
+    font-size: 1em !important; // Force same size as numbers
+  }
+} // ========================================
+// CAPABILITY SECTION ICONS
+// Ensure proper sizing for capability cards
+// ========================================
+
+.capability-card .capability-icon {
+  @include perfect-icon-center; // Apply cross-hair alignment for perfect centering
+
+  i {
+    font-size: 2.5em !important;
+    color: $hse-primary-teal !important;
+    margin: 0 !important; // Remove margin-bottom to avoid centering conflicts
+    @include fontawesome-center-override; // Override FontAwesome positioning
+
+    // Override FontAwesome sizing classes
+    &.fa-xs,
+    &.fa-sm,
+    &.fa-lg,
+    &.fa-xl,
+    &.fa-2xl,
+    &.fa-2xs,
+    &.fa-1x,
+    &.fa-2x,
+    &.fa-3x,
+    &.fa-4x,
+    &.fa-5x {
+      font-size: 2.5em !important;
+    }
+  }
+}
+
+// Configuration card icons
+.config-card .config-icon i {
+  font-size: 1.8em !important;
+  color: $hse-primary-teal !important;
+  margin-right: 0.75rem !important;
+
+  // Override FontAwesome sizing classes
+  &.fa-xs,
+  &.fa-sm,
+  &.fa-lg,
+  &.fa-xl,
+  &.fa-2xl,
+  &.fa-2xs,
+  &.fa-1x,
+  &.fa-2x,
+  &.fa-3x,
+  &.fa-4x,
+  &.fa-5x {
+    font-size: 1.8em !important;
+  }
+}
+
+// ========================================
+// SECTION TITLE ICONS
+// Icons within section headings
+// ========================================
+
+.section-title i {
+  font-size: 1.3em !important;
+  margin-right: 0.75rem !important;
+  color: $hse-primary-teal !important;
+
+  // Override FontAwesome sizing classes
+  &.fa-xs,
+  &.fa-sm,
+  &.fa-lg,
+  &.fa-xl,
+  &.fa-2xl,
+  &.fa-2xs,
+  &.fa-1x,
+  &.fa-2x,
+  &.fa-3x,
+  &.fa-4x,
+  &.fa-5x {
+    font-size: 1.3em !important;
+  }
+}
+
+// ========================================
+// FEATURE CARD ICONS
+// Icons within feature cards - CROSS-HAIR ALIGNED
+// ========================================
+
+.feature-icon {
+  @include perfect-icon-center; // Apply perfect centering mixin for cross-hair alignment
+
+  i {
+    font-size: 2.5em !important;
+
+    // Override ALL FontAwesome sizing classes to maintain consistency
+    &.fa-xs,
+    &.fa-sm,
+    &.fa-lg,
+    &.fa-xl,
+    &.fa-2xl,
+    &.fa-2xs,
+    &.fa-1x,
+    &.fa-2x,
+    &.fa-3x,
+    &.fa-4x,
+    &.fa-5x {
+      font-size: 2.5em !important;
+    }
+  }
+}
+
+// ========================================
+// UNIVERSAL BADGE ICON ALIGNMENT
+// Ensures ALL badge contexts use cross-hair alignment
+// ========================================
+
+// General badge icons - covers any badge context not specifically addressed above
+.badge,
+.badge-primary,
+.badge-secondary,
+.badge-success,
+.badge-danger,
+.badge-warning,
+.badge-info,
+.badge-light,
+.badge-dark {
+  @include perfect-icon-center; // Apply cross-hair alignment to ALL badges
+
+  i {
+    @include fontawesome-center-override; // Override FontAwesome positioning
+
+    // Override FontAwesome sizing classes for badge consistency
+    &.fa-xs,
+    &.fa-sm,
+    &.fa-lg,
+    &.fa-xl,
+    &.fa-2xl,
+    &.fa-2xs,
+    &.fa-1x,
+    &.fa-2x,
+    &.fa-3x,
+    &.fa-4x,
+    &.fa-5x {
+      font-size: 1em !important; // Consistent badge icon size
+    }
+  }
+}
+
+// Status indicator badges with icons - perfect centering
+.status-badge,
+.status-indicator {
+  @include perfect-icon-center;
+
+  i {
+    font-size: 1.2em !important;
+    @include fontawesome-center-override; // Override FontAwesome positioning
+
+    &.fa-xs,
+    &.fa-sm,
+    &.fa-lg,
+    &.fa-xl,
+    &.fa-2xl,
+    &.fa-2xs,
+    &.fa-1x,
+    &.fa-2x,
+    &.fa-3x,
+    &.fa-4x,
+    &.fa-5x {
+      font-size: 1.2em !important;
+    }
+  }
+}
+
+// ========================================
+// EXTERNAL SERVICE CARDS
+// External service cards using standard service-card structure with special CTA buttons
+// ========================================
+
+// External service card variant - inherits from service-card but with unique styling
+.external-service-card {
+  // Use all standard service-card styles
+  // Additional styles for external variant can be added here if needed
+
+  .service-card-footer {
+    padding-top: 1.5rem;
+  }
+}
+
+// External Call-to-Action buttons - new component for external links
+.external-cta-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 50px !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  border-width: 2px !important;
+
+  i {
+    font-size: 1em !important;
+    margin: 0 !important;
+
+    // Override FontAwesome sizing classes
+    &.fa-xs,
+    &.fa-sm,
+    &.fa-lg,
+    &.fa-xl,
+    &.fa-2xl,
+    &.fa-2xs,
+    &.fa-1x,
+    &.fa-2x,
+    &.fa-3x,
+    &.fa-4x,
+    &.fa-5x {
+      font-size: 1em !important;
+    }
+  }
+
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+// Remove old external card icon styles (no longer needed)
+// Legacy external-card styles can be removed as we now use service-card structure
+
+// External link button icons
+.external-link i {
+  font-size: 1em !important;
+  margin-right: 0.5em !important;
+
+  // Override FontAwesome sizing classes
+  &.fa-xs,
+  &.fa-sm,
+  &.fa-lg,
+  &.fa-xl,
+  &.fa-2xl,
+  &.fa-2xs,
+  &.fa-1x,
+  &.fa-2x,
+  &.fa-3x,
+  &.fa-4x,
+  &.fa-5x {
+    font-size: 1em !important;
+  }
+}
+
+// Configuration note icons
+.config-note i {
+  font-size: 1.1em !important;
+  margin-right: 0.5em !important;
+  color: $hse-accent-blue !important;
+
+  // Override FontAwesome sizing classes
+  &.fa-xs,
+  &.fa-sm,
+  &.fa-lg,
+  &.fa-xl,
+  &.fa-2xl,
+  &.fa-2xs,
+  &.fa-1x,
+  &.fa-2x,
+  &.fa-3x,
+  &.fa-4x,
+  &.fa-5x {
+    font-size: 1.1em !important;
+  }
+}
+
+// ========================================
+// DEBUGGING UTILITIES
+// Remove in production
+// ========================================
+
+// Uncomment for debugging icon sizing issues
+// .fa, .fas, .far, .fal, .fat, .fad, .fab {
+//   border: 1px dashed red !important;
+//   background: rgba(255, 0, 0, 0.1) !important;
+// }
