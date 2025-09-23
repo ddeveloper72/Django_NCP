@@ -14648,18 +14648,14 @@ input[type=checkbox] {
 }
 
 .clinical-section .clinical-tab-content {
-  display: none !important;
+  display: none;
   width: 100%;
   min-height: 200px;
-  background: #f8f9fa;
-  border: 2px solid red;
 }
 .clinical-section .clinical-tab-content.active {
-  display: block !important;
+  display: block;
   width: 100%;
   min-height: 200px;
-  background: #e8f5e8;
-  border: 2px solid green;
 }
 
 .extended-tab-content-container {

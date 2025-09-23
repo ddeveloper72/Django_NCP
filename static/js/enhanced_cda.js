@@ -68,21 +68,10 @@ function initializeEnhancedCDA() {
   initializeExtendedPatientEventDelegation();
 
   // Show Personal Information tab by default
-  console.log('🎯 Initializing default tab...');
   setTimeout(() => {
-    console.log('🎯 Delayed initialization - checking if elements exist...');
     const personalTab = document.getElementById('extended_patient_personal');
-    const healthcareTab = document.getElementById('extended_patient_healthcare');
-
-    console.log('🎯 Elements found:', {
-      personal: personalTab ? 'EXISTS' : 'MISSING',
-      healthcare: healthcareTab ? 'EXISTS' : 'MISSING'
-    });
-
     if (personalTab) {
       showExtendedTab('extended_patient', 'personal');
-    } else {
-      console.error('❌ Cannot initialize - personal tab element not found');
     }
   }, 100); // Small delay to ensure DOM is ready
 
@@ -95,8 +84,6 @@ function initializeEnhancedCDA() {
  * @param {string} tabType - Type of tab to show (personal, healthcare, system, clinical, pdfs)
  */
 function showExtendedTab(sectionId, tabType) {
-  console.log('🎯 SWITCHING TAB:', tabType, 'for section:', sectionId);
-
   // Get all tab content elements
   const personalTab = document.getElementById(sectionId + '_personal');
   const healthcareTab = document.getElementById(sectionId + '_healthcare');
@@ -106,45 +93,14 @@ function showExtendedTab(sectionId, tabType) {
 
   const allTabs = [personalTab, healthcareTab, systemTab, clinicalTab, pdfsTab].filter(tab => tab !== null);
 
-  console.log('📋 FOUND TABS:', allTabs.map(tab => tab ? tab.id : 'NULL'));
-  console.log('📋 TAB ELEMENTS:', {
-    personal: personalTab ? 'EXISTS' : 'MISSING',
-    healthcare: healthcareTab ? 'EXISTS' : 'MISSING',
-    system: systemTab ? 'EXISTS' : 'MISSING',
-    clinical: clinicalTab ? 'EXISTS' : 'MISSING',
-    pdfs: pdfsTab ? 'EXISTS' : 'MISSING'
-  });
-
-  // Check if the tab content divs actually exist in the DOM
-  const allPossibleTabIds = [
-    sectionId + '_personal',
-    sectionId + '_healthcare',
-    sectionId + '_system',
-    sectionId + '_clinical',
-    sectionId + '_pdfs'
-  ];
-
-  console.log('🔍 DOM CHECK:');
-  allPossibleTabIds.forEach(id => {
-    const element = document.getElementById(id);
-    if (element) {
-      console.log(`  ✅ ${id}: Found, innerHTML length: ${element.innerHTML.length}, children: ${element.children.length}`);
-      console.log(`     Classes: ${element.className}`);
-      console.log(`     Display: ${window.getComputedStyle(element).display}`);
-    } else {
-      console.log(`  ❌ ${id}: NOT FOUND IN DOM`);
-    }
-  });
-
-  // STEP 1: Remove active class from ALL tabs
-  allTabs.forEach((tab, index) => {
+  // Remove active class from ALL tabs
+  allTabs.forEach(tab => {
     if (tab) {
       tab.classList.remove('active');
-      console.log(`🔧 REMOVED active from: ${tab.id}`);
     }
   });
 
-  // STEP 2: Add active class to the selected tab
+  // Add active class to the selected tab
   let activeTab = null;
 
   if (tabType === 'personal' && personalTab) {
@@ -161,20 +117,8 @@ function showExtendedTab(sectionId, tabType) {
 
   if (activeTab) {
     activeTab.classList.add('active');
-    console.log(`✅ ADDED active to: ${activeTab.id}`);
-
     // Force refresh
     activeTab.offsetHeight;
-
-    // Check final state of ALL tabs
-    console.log('🔍 FINAL TAB STATES:');
-    allTabs.forEach((tab, index) => {
-      const isActive = tab.classList.contains('active');
-      const computedDisplay = window.getComputedStyle(tab).display;
-      console.log(`  ${tab.id}: active=${isActive}, display=${computedDisplay}, dims=${tab.offsetWidth}x${tab.offsetHeight}`);
-    });
-  } else {
-    console.error(`❌ NO TAB FOUND for type: ${tabType}`);
   }  // Update button states
   const container = activeTab ? activeTab.closest('.clinical-section') : document.querySelector('.clinical-section');
   if (container) {
@@ -186,7 +130,6 @@ function showExtendedTab(sectionId, tabType) {
 
     if (buttonIndex !== undefined && buttons[buttonIndex]) {
       buttons[buttonIndex].classList.add('active');
-      console.log(`🔘 ACTIVATED button: ${buttonIndex}`);
     }
   }
 }

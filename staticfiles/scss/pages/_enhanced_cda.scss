@@ -55,21 +55,17 @@
   }
 }
 
-// Clinical Tab Content - Strengthened CSS specificity
+// Clinical Tab Content - Clean production styling
 // ----------------------------------------------------------------------------
 .clinical-section .clinical-tab-content {
-  display: none !important;
+  display: none;
   width: 100%;
   min-height: 200px;
-  background: #f8f9fa; // Light background to see if element is there
-  border: 2px solid red; // Temporary border for debugging
 
   &.active {
-    display: block !important;
+    display: block;
     width: 100%;
     min-height: 200px;
-    background: #e8f5e8; // Light green background for active tab
-    border: 2px solid green; // Green border for active tab
   }
 }
 
