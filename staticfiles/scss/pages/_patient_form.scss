@@ -144,7 +144,7 @@
       font-size: $font-size-sm;
 
       &.required::after {
-        content: ' *';
+        content: " *";
         color: $error-red;
       }
     }
@@ -185,7 +185,7 @@
         width: 100%;
         font-size: $font-size-sm;
         padding: $space-sm $space-md;
-        
+
         // Responsive text for small screens
         .btn-text-full {
           display: none;
@@ -204,7 +204,7 @@
         width: 100%;
         max-width: 280px;
         font-size: $font-size-base;
-        
+
         .btn-text-full {
           display: inline;
         }
@@ -216,7 +216,7 @@
 
     @media (min-width: $breakpoint-sm) {
       flex-direction: row;
-      
+
       .btn {
         .btn-text-full {
           display: inline;
@@ -240,7 +240,7 @@
         padding: $space-lg $space-xxl;
         font-size: $font-size-lg;
         font-weight: $font-weight-semibold;
-        
+
         @media (max-width: $breakpoint-sm) {
           padding: $space-md $space-lg;
           font-size: $font-size-base;

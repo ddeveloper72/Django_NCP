@@ -69,6 +69,31 @@ body {
   border-color: var(--healthcare-dark-blue) !important;
 }
 
+/* Ensure Font Awesome icons in primary buttons are white */
+.btn-primary i,
+.btn-primary .fa-solid,
+.btn-primary .far,
+.btn-primary .fal,
+.btn-primary .fab,
+.btn-primary .fa {
+  color: white !important;
+}
+
+.btn-primary:hover i,
+.btn-primary:focus i,
+.btn-primary:hover .fa-solid,
+.btn-primary:focus .fa-solid,
+.btn-primary:hover .far,
+.btn-primary:focus .far,
+.btn-primary:hover .fal,
+.btn-primary:focus .fal,
+.btn-primary:hover .fab,
+.btn-primary:focus .fab,
+.btn-primary:hover .fa,
+.btn-primary:focus .fa {
+  color: white !important;
+}
+
 .text-primary {
   color: var(--healthcare-blue) !important;
 }

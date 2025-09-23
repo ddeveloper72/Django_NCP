@@ -319,6 +319,31 @@ body {
   border-color: var(--healthcare-dark-blue) !important;
 }
 
+/* Ensure Font Awesome icons in primary buttons are white */
+.btn-primary i,
+.btn-primary .fa-solid,
+.btn-primary .far,
+.btn-primary .fal,
+.btn-primary .fab,
+.btn-primary .fa {
+  color: white !important;
+}
+
+.btn-primary:hover i,
+.btn-primary:focus i,
+.btn-primary:hover .fa-solid,
+.btn-primary:focus .fa-solid,
+.btn-primary:hover .far,
+.btn-primary:focus .far,
+.btn-primary:hover .fal,
+.btn-primary:focus .fal,
+.btn-primary:hover .fab,
+.btn-primary:focus .fab,
+.btn-primary:hover .fa,
+.btn-primary:focus .fa {
+  color: white !important;
+}
+
 .text-primary {
   color: var(--healthcare-blue) !important;
 }
@@ -8828,7 +8853,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .btn-info i,
 .btn-warning i,
 .btn-danger i {
-  color: #ffffff !important;
+  color: #2d3748 !important;
 }
 
 .capability-icon i.fa-xs, .capability-icon i.fa-sm, .capability-icon i.fa-lg, .capability-icon i.fa-xl, .capability-icon i.fa-2xl, .capability-icon i.fa-2xs, .capability-icon i.fa-1x, .capability-icon i.fa-2x, .capability-icon i.fa-3x, .capability-icon i.fa-4x, .capability-icon i.fa-5x,
@@ -15600,18 +15625,39 @@ main {
   fill: white !important;
 }
 
+.card-header.bg-success:hover i,
+.card-header.bg-success:hover .fa-solid,
+.card-header.bg-success:hover .far,
+.card-header.bg-success:hover .fal,
+.card-header.bg-success:hover .fab,
+.card-header.bg-success:hover .fa {
+  color: white !important;
+  fill: white !important;
+  transform: none !important;
+}
+
 @media (max-width: 480px) {
   .card-header {
     padding: 0.75rem !important;
   }
-  .card-header h1, .card-header h2, .card-header h3, .card-header h4, .card-header h5, .card-header h6 {
+  .card-header h1,
+  .card-header h2,
+  .card-header h3,
+  .card-header h4,
+  .card-header h5,
+  .card-header h6 {
     font-size: 1rem !important;
     line-height: 1.3 !important;
     margin-bottom: 0.25rem !important;
     word-wrap: break-word;
     hyphens: auto;
   }
-  .card-header i, .card-header .fa-solid, .card-header .far, .card-header .fal, .card-header .fab, .card-header .fa {
+  .card-header i,
+  .card-header .fa-solid,
+  .card-header .far,
+  .card-header .fal,
+  .card-header .fab,
+  .card-header .fa {
     font-size: 0.875rem !important;
     margin-right: 0.5rem !important;
     flex-shrink: 0;
@@ -15627,21 +15673,41 @@ main {
   .card-header {
     padding: 1rem !important;
   }
-  .card-header h1, .card-header h2, .card-header h3, .card-header h4, .card-header h5, .card-header h6 {
+  .card-header h1,
+  .card-header h2,
+  .card-header h3,
+  .card-header h4,
+  .card-header h5,
+  .card-header h6 {
     font-size: 1.125rem !important;
     line-height: 1.4 !important;
   }
-  .card-header i, .card-header .fa-solid, .card-header .far, .card-header .fal, .card-header .fab, .card-header .fa {
+  .card-header i,
+  .card-header .fa-solid,
+  .card-header .far,
+  .card-header .fal,
+  .card-header .fab,
+  .card-header .fa {
     font-size: 1rem !important;
     margin-right: 0.625rem !important;
   }
 }
 @media (min-width: 769px) {
-  .card-header h1, .card-header h2, .card-header h3, .card-header h4, .card-header h5, .card-header h6 {
+  .card-header h1,
+  .card-header h2,
+  .card-header h3,
+  .card-header h4,
+  .card-header h5,
+  .card-header h6 {
     font-size: 1.25rem !important;
     line-height: 1.5 !important;
   }
-  .card-header i, .card-header .fa-solid, .card-header .far, .card-header .fal, .card-header .fab, .card-header .fa {
+  .card-header i,
+  .card-header .fa-solid,
+  .card-header .far,
+  .card-header .fal,
+  .card-header .fab,
+  .card-header .fa {
     font-size: 1.125rem !important;
     margin-right: 0.75rem !important;
   }

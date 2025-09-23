@@ -599,6 +599,18 @@ main {
   fill: white !important;
 }
 
+// Disable hover effects for informational bg-success headers (e.g., "Document Actions")
+.card-header.bg-success:hover i,
+.card-header.bg-success:hover .fa-solid,
+.card-header.bg-success:hover .far,
+.card-header.bg-success:hover .fal,
+.card-header.bg-success:hover .fab,
+.card-header.bg-success:hover .fa {
+  color: white !important;
+  fill: white !important;
+  transform: none !important;
+}
+
 // Mobile-first responsive design for card headers
 // ----------------------------------------------------------------------------
 .card-header {
