@@ -232,30 +232,30 @@
   font-weight: 500;
 }
 
-// Grey text on background - standardized HSE palette
+// White text on dark backgrounds - improved readability
 @mixin text-on-blue-bg {
-  color: var(--healthcare-text-grey) !important;
+  color: #ffffff !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 
-  // Icons should maintain grey color
+  // Icons should maintain white color
   i,
   .fa-solid,
   .fa-regular,
   .fa-light,
   .fa-brands {
-    color: var(--healthcare-text-grey) !important;
+    color: #ffffff !important;
   }
 
   // No hover effects on static headers
   &:hover {
-    color: var(--healthcare-text-grey) !important;
+    color: #ffffff !important;
 
     i,
     .fa-solid,
     .fa-regular,
     .fa-light,
     .fa-brands {
-      color: var(--healthcare-text-grey) !important;
+      color: #ffffff !important;
       transform: none !important;
     }
   }

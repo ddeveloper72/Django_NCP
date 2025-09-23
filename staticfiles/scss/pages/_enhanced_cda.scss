@@ -611,6 +611,49 @@ main {
   transform: none !important;
 }
 
+// Disable hover effects for ALL card headers with colored backgrounds
+.card-header.bg-primary:hover i,
+.card-header.bg-primary:hover .fa-solid,
+.card-header.bg-primary:hover .far,
+.card-header.bg-primary:hover .fal,
+.card-header.bg-primary:hover .fab,
+.card-header.bg-primary:hover .fa,
+.card-header.bg-secondary:hover i,
+.card-header.bg-secondary:hover .fa-solid,
+.card-header.bg-secondary:hover .far,
+.card-header.bg-secondary:hover .fal,
+.card-header.bg-secondary:hover .fab,
+.card-header.bg-secondary:hover .fa,
+.card-header.bg-info:hover i,
+.card-header.bg-info:hover .fa-solid,
+.card-header.bg-info:hover .far,
+.card-header.bg-info:hover .fal,
+.card-header.bg-info:hover .fab,
+.card-header.bg-info:hover .fa,
+.card-header.bg-warning:hover i,
+.card-header.bg-warning:hover .fa-solid,
+.card-header.bg-warning:hover .far,
+.card-header.bg-warning:hover .fal,
+.card-header.bg-warning:hover .fab,
+.card-header.bg-warning:hover .fa,
+.card-header.bg-danger:hover i,
+.card-header.bg-danger:hover .fa-solid,
+.card-header.bg-danger:hover .far,
+.card-header.bg-danger:hover .fal,
+.card-header.bg-danger:hover .fab,
+.card-header.bg-danger:hover .fa,
+.card-header.bg-dark:hover i,
+.card-header.bg-dark:hover .fa-solid,
+.card-header.bg-dark:hover .far,
+.card-header.bg-dark:hover .fal,
+.card-header.bg-dark:hover .fab,
+.card-header.bg-dark:hover .fa {
+  color: white !important;
+  fill: white !important;
+  transform: none !important;
+  transition: none !important;
+}
+
 // Mobile-first responsive design for card headers
 // ----------------------------------------------------------------------------
 .card-header {
