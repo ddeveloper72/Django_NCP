@@ -71,7 +71,7 @@
                 {% if has_l3_cda and not has_embedded_pdfs %}disabled title="No PDF documents available for this L3 CDA"{% elif not has_embedded_pdfs %}disabled title="No PDF documents available"{% endif %}>
             <i class="fa-solid fa-file-pdf me-1"></i>PDF Documents
             {% if has_embedded_pdfs %}
-            <span class="badge bg-danger ms-2">{{ embedded_pdfs|length }}</span>
+            <span class="badge bg-healthcare-teal ms-2">{{ embedded_pdfs|length }}</span>
             {% else %}
             <span class="badge bg-secondary ms-2">0</span>
             {% endif %}
@@ -136,8 +136,8 @@
         <div class="row g-3">
             {# PDF Documents Card #}
             <div class="col-12">
-                <div class="card border-danger">
-                    <div class="card-header bg-danger text-white">
+                <div class="card border-healthcare-teal">
+                    <div class="card-header bg-healthcare-teal text-white">
                         <h5 class="mb-0">
                             <i class="fa-solid fa-file-pdf me-2"></i>Embedded PDF Documents
                         </h5>
@@ -155,7 +155,7 @@
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div>
                                     <h6 class="mb-1">
-                                        <i class="fa-solid fa-file-pdf text-danger me-2"></i>
+                                        <i class="fa-solid fa-file-pdf text-healthcare-teal me-2"></i>
                                         {{ pdf.filename|default:"Clinical Document" }}
                                     </h6>
                                     <small class="text-muted">
@@ -167,11 +167,11 @@
                                     {% if pdf.content_base64 %}
                                     <a href="{% url 'patient_data:download_pdf' patient_id=patient_id pdf_index=forloop.counter0 %}"
                                        download="{{ pdf.filename|default:'clinical_document.pdf' }}"
-                                       class="btn btn-sm btn-outline-danger me-2">
+                                       class="btn btn-sm btn-outline-primary me-2">
                                         <i class="fa-solid fa-download me-1"></i>Download
                                     </a>
                                     {% endif %}
-                                    <button type="button" class="btn btn-sm btn-danger"
+                                    <button type="button" class="btn btn-sm btn-primary"
                                             data-action="show-pdf-viewer" data-pdf-index="{{ forloop.counter0 }}">
                                         <i class="fa-solid fa-eye me-1"></i>View
                                     </button>
@@ -183,7 +183,7 @@
                                 <div class="border rounded pdf-viewer-background">
                                     <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
                                         <span class="text-muted">
-                                            <i class="fa-solid fa-file-pdf text-danger me-1"></i>
+                                            <i class="fa-solid fa-file-pdf text-healthcare-teal me-1"></i>
                                             {{ pdf.filename|default:"Clinical Document" }}
                                         </span>
                                         <div class="btn-group">
