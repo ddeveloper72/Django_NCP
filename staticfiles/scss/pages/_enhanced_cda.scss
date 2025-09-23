@@ -599,6 +599,64 @@ main {
   fill: white !important;
 }
 
+// Mobile-first responsive design for card headers
+// ----------------------------------------------------------------------------
+.card-header {
+  // Mobile-first: prioritize readability and prevent text wrapping
+  @media (max-width: 480px) {
+    padding: 0.75rem !important;
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-size: 1rem !important;
+      line-height: 1.3 !important;
+      margin-bottom: 0.25rem !important;
+      word-wrap: break-word;
+      hyphens: auto;
+    }
+    
+    // Adjust icon size for mobile
+    i, .fa-solid, .far, .fal, .fab, .fa {
+      font-size: 0.875rem !important;
+      margin-right: 0.5rem !important;
+      flex-shrink: 0;
+    }
+    
+    // Flex layout for better control
+    display: flex !important;
+    align-items: flex-start !important;
+    flex-wrap: wrap !important;
+    gap: 0.25rem !important;
+  }
+  
+  // Small tablets and larger phones
+  @media (min-width: 481px) and (max-width: 768px) {
+    padding: 1rem !important;
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-size: 1.125rem !important;
+      line-height: 1.4 !important;
+    }
+    
+    i, .fa-solid, .far, .fal, .fab, .fa {
+      font-size: 1rem !important;
+      margin-right: 0.625rem !important;
+    }
+  }
+  
+  // Desktop and larger screens
+  @media (min-width: 769px) {
+    h1, h2, h3, h4, h5, h6 {
+      font-size: 1.25rem !important;
+      line-height: 1.5 !important;
+    }
+    
+    i, .fa-solid, .far, .fal, .fab, .fa {
+      font-size: 1.125rem !important;
+      margin-right: 0.75rem !important;
+    }
+  }
+}
+
 // ============================================================================
 // ADDITIONAL UNIFIED STYLES - EXTRACTED FROM TEMPLATE
 // ============================================================================

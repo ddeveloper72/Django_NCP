@@ -125,7 +125,7 @@
                 </div>
                 <div class="service-actions">
                     <button class="request-button">
-                        🔍 View Document with PS Guidelines
+                        🔍 <span class="btn-text-full">View Document with PS Guidelines</span><span class="btn-text-mobile">View Doc</span>
                     </button>
                 </div>
             </div>
@@ -234,7 +234,7 @@
                 </div>
 
                 <button class="request-button" data-action="request-service" data-service-id="{{ service.id }}" data-service-name="{{ service.service_name }}">
-                    Request {{ service.service_name }}
+                    <span class="btn-text-full">Request {{ service.service_name }}</span><span class="btn-text-mobile">Request</span>
                 </button>
             </div>
             {% endfor %}

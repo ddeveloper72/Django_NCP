@@ -1,0 +1,319 @@
+// Search Results Page Specific Styles - Mobile-First Design
+// ============================================================================
+
+.results-container {
+  padding: $space-lg;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  @media (max-width: 480px) {
+    padding: $space-md;
+  }
+}
+
+.results-header {
+  margin-bottom: $space-xl;
+
+  h1 {
+    font-size: $font-size-xxl;
+    color: $text-dark;
+    margin-bottom: $space-md;
+
+    @media (max-width: 480px) {
+      font-size: $font-size-xl;
+    }
+  }
+
+  .back-button {
+    display: inline-flex;
+    align-items: center;
+    color: $primary-color;
+    text-decoration: none;
+    margin-bottom: $space-md;
+    font-weight: $font-weight-medium;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Document action buttons - mobile-first responsive design
+.request-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-sm;
+  padding: $space-md $space-lg;
+  background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+  color: $white;
+  border: none;
+  border-radius: $border-radius-md;
+  font-weight: $font-weight-medium;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all $transition-hse;
+  border: 1px solid transparent;
+  min-height: 44px; // Touch-friendly minimum height
+
+  // Mobile-first sizing
+  @media (max-width: 480px) {
+    width: 100%;
+    padding: $space-sm $space-md;
+    font-size: $font-size-sm;
+    min-height: 40px;
+
+    // Simplified text for mobile
+    .btn-text-full {
+      display: none;
+    }
+    .btn-text-mobile {
+      display: inline;
+    }
+  }
+
+  @media (min-width: 481px) {
+    .btn-text-full {
+      display: inline;
+    }
+    .btn-text-mobile {
+      display: none;
+    }
+  }
+
+  &:hover {
+    background: linear-gradient(
+      135deg,
+      $primary-dark 0%,
+      darken($primary-dark, 10%) 100%
+    );
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba($primary-color, 0.3);
+    color: $white;
+    text-decoration: none;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba($primary-color, 0.2);
+  }
+
+  // Icon styling
+  i {
+    font-size: 1rem;
+    flex-shrink: 0;
+
+    @media (max-width: 480px) {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+// Service card improvements for mobile
+.service-card {
+  background: $white;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
+  border: 1px solid $neutral-lighter;
+  transition: all $transition-hse;
+  overflow: hidden;
+
+  @media (max-width: 480px) {
+    margin-bottom: $space-md;
+  }
+
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+
+  .service-header {
+    padding: $space-lg;
+    display: flex;
+    align-items: flex-start;
+    gap: $space-md;
+
+    @media (max-width: 480px) {
+      padding: $space-md;
+      flex-direction: column;
+      text-align: center;
+      gap: $space-sm;
+    }
+
+    .service-icon {
+      font-size: 2rem;
+      flex-shrink: 0;
+
+      @media (max-width: 480px) {
+        font-size: 1.5rem;
+      }
+    }
+
+    .service-title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $text-dark;
+      margin: 0;
+
+      @media (max-width: 480px) {
+        font-size: $font-size-base;
+      }
+    }
+  }
+
+  .service-description {
+    padding: 0 $space-lg $space-md $space-lg;
+    color: $text-muted;
+    line-height: $line-height-normal;
+
+    @media (max-width: 480px) {
+      padding: 0 $space-md $space-sm $space-md;
+      font-size: $font-size-sm;
+    }
+  }
+
+  .service-actions {
+    padding: 0 $space-lg $space-lg $space-lg;
+
+    @media (max-width: 480px) {
+      padding: 0 $space-md $space-md $space-md;
+    }
+  }
+}
+
+// Consent section mobile improvements
+.consent-section {
+  margin: $space-md 0;
+
+  h5 {
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: $text-dark;
+    margin-bottom: $space-sm;
+
+    @media (max-width: 480px) {
+      font-size: $font-size-sm;
+    }
+  }
+
+  .consent-options {
+    display: flex;
+    gap: $space-lg;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      gap: $space-sm;
+    }
+
+    .consent-option {
+      display: flex;
+      align-items: center;
+      gap: $space-sm;
+
+      input[type="radio"] {
+        accent-color: $primary-color;
+      }
+
+      label {
+        font-size: $font-size-sm;
+        color: $text-dark;
+        cursor: pointer;
+
+        @media (max-width: 480px) {
+          font-size: $font-size-xs;
+        }
+      }
+    }
+  }
+}
+
+// Remove duplicate alerts and improve mobile display
+.alert {
+  margin-bottom: $space-md;
+  padding: $space-md;
+  border-radius: $border-radius-md;
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+
+  @media (max-width: 480px) {
+    margin-bottom: $space-sm;
+    padding: $space-sm;
+    font-size: $font-size-sm;
+    flex-direction: column;
+    text-align: center;
+    gap: $space-xs;
+  }
+
+  i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+
+    @media (max-width: 480px) {
+      font-size: 1rem;
+    }
+  }
+
+  // Hide duplicate confidence alerts by combining similar messages
+  &:has-text("confidence") + .alert:has-text("confidence") {
+    display: none;
+  }
+}
+
+// Patient info section mobile improvements
+.patient-info {
+  background: $bg-light;
+  border-radius: $border-radius-lg;
+  padding: $space-xl;
+  margin-bottom: $space-xl;
+  border: 1px solid $neutral-lighter;
+
+  @media (max-width: 480px) {
+    padding: $space-md;
+    margin-bottom: $space-lg;
+  }
+
+  h3 {
+    color: $text-dark;
+    margin-bottom: $space-lg;
+
+    @media (max-width: 480px) {
+      font-size: $font-size-lg;
+      margin-bottom: $space-md;
+    }
+  }
+}
+
+.patient-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: $space-md;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: $space-sm;
+  }
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: $space-xs;
+
+  .detail-label {
+    font-weight: $font-weight-semibold;
+    color: $text-dark;
+    font-size: $font-size-sm;
+  }
+
+  .detail-value {
+    color: $text-muted;
+    font-size: $font-size-sm;
+    line-height: $line-height-normal;
+  }
+}

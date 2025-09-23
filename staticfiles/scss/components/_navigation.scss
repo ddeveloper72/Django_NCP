@@ -2506,14 +2506,132 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   }
 }
 
-// Responsive adjustments for homepage sections
-@media (max-width: 768px) {
+// Responsive adjustments for homepage sections and search results
+@media (max-width: 480px) {
+  // Extra small devices - mobile first priority
   .services-grid,
   .features-grid,
   .config-grid,
   .external-grid {
     grid-template-columns: 1fr;
+    gap: $space-md;
+  }
+
+  .service-card,
+  .config-card,
+  .external-card,
+  .feature-item {
+    padding: $space-md;
+    margin-bottom: $space-md;
+    
+    .service-header {
+      flex-direction: column;
+      text-align: center;
+      gap: $space-sm;
+      
+      .service-title {
+        font-size: 1rem;
+        line-height: 1.3;
+      }
+      
+      .service-icon {
+        margin-bottom: $space-xs;
+        font-size: 1.5rem;
+      }
+    }
+    
+    .service-description {
+      font-size: 0.875rem;
+      line-height: 1.4;
+      margin: $space-sm 0;
+    }
+    
+    .request-button,
+    .btn {
+      width: 100%;
+      padding: $space-sm $space-md;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    // Compact consent options for mobile
+    .consent-section {
+      margin: $space-sm 0;
+      
+      h5 {
+        font-size: 0.875rem;
+        margin-bottom: $space-xs;
+      }
+      
+      .consent-options {
+        display: flex;
+        flex-direction: column;
+        gap: $space-xs;
+        
+        .consent-option {
+          display: flex;
+          align-items: center;
+          gap: $space-xs;
+          
+          label {
+            font-size: 0.875rem;
+          }
+        }
+      }
+    }
+  }
+  
+  // Remove duplicate alerts for mobile
+  .alert {
+    margin-bottom: $space-sm;
+    padding: $space-sm;
+    font-size: 0.875rem;
+    
+    // Hide redundant confidence alerts on mobile
+    &:has-text("found") + .alert:has-text("found") {
+      display: none;
+    }
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  // Small tablets and larger phones
+  .services-grid,
+  .features-grid,
+  .config-grid,
+  .external-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: $space-lg;
+  }
+
+  .service-card,
+  .config-card,
+  .external-card,
+  .feature-item {
+    padding: $space-lg;
+    
+    .service-header {
+      .service-title {
+        font-size: 1.125rem;
+      }
+    }
+    
+    .request-button,
+    .btn {
+      padding: $space-sm $space-lg;
+    }
+  }
+}
+
+@media (min-width: 769px) {
+  .services-grid,
+  .features-grid,
+  .config-grid,
+  .external-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: $space-xl;
   }
 
   .services-section,
@@ -2532,7 +2650,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   .config-card,
   .external-card,
   .feature-item {
-    padding: $space-lg;
+    padding: $space-xl;
   }
 }
 

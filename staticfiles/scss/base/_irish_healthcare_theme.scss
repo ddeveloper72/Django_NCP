@@ -39,6 +39,7 @@ Generated: September 16, 2025
   --healthcare-orange-accent: #f39c12; /* Warm orange */
   --healthcare-purple: #8e44ad; /* Professional purple */
   --healthcare-teal: #16a085; /* Modern teal */
+  --healthcare-bright-green: #00ff3a; /* Bright green for hover/active effects */
 
   /* Typography */
   --healthcare-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -49,10 +50,10 @@ Generated: September 16, 2025
 
 /* Global Bootstrap Overrides */
 body {
-  font-family: var(--healthcare-font-family);
-  color: var(--healthcare-charcoal);
-  background-color: var(--healthcare-white);
-  line-height: 1.6;
+  font-family: var(--healthcare-font-family) !important;
+  color: var(--healthcare-charcoal) !important;
+  background-color: var(--healthcare-white) !important;
+  line-height: 1.6 !important;
 }
 
 /* Healthcare Primary Colors - Override Bootstrap Primary */
@@ -961,7 +962,7 @@ body {
 
 /* Footer Dark Background Enhancement */
 footer.bg-dark {
-  background-color: var(--healthcare-charcoal) !important;
+  background-color: var(--healthcare-green) !important;
   color: var(--healthcare-white) !important;
 }
 
@@ -1458,7 +1459,7 @@ i.fab {
 .btn:not(.navbar *):not(.tab-button):hover i.far,
 .btn:not(.navbar *):not(.tab-button):hover i.fab {
   transform: scale(1.1);
-  color: var(--healthcare-dark-blue) !important;
+  color: var(--healthcare-bright-green) !important;
 }
 
 /* Override for navigation elements - highest specificity */

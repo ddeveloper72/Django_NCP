@@ -144,7 +144,7 @@
       font-size: $font-size-sm;
 
       &.required::after {
-        content: ' *';
+        content: " *";
         color: $error-red;
       }
     }
@@ -175,13 +175,55 @@
     padding-top: $space-xl;
     border-top: 1px solid $neutral-lighter;
 
-    @media (max-width: $breakpoint-sm) {
+    // Mobile-first responsive design
+    @media (max-width: $breakpoint-xs) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: $space-md;
+
+      .btn {
+        width: 100%;
+        font-size: $font-size-sm;
+        padding: $space-sm $space-md;
+
+        // Responsive text for small screens
+        .btn-text-full {
+          display: none;
+        }
+        .btn-text-short {
+          display: inline;
+        }
+      }
+    }
+
+    @media (min-width: $breakpoint-xs) and (max-width: $breakpoint-sm) {
       flex-direction: column;
       align-items: center;
 
       .btn {
         width: 100%;
-        max-width: 250px;
+        max-width: 280px;
+        font-size: $font-size-base;
+
+        .btn-text-full {
+          display: inline;
+        }
+        .btn-text-short {
+          display: none;
+        }
+      }
+    }
+
+    @media (min-width: $breakpoint-sm) {
+      flex-direction: row;
+
+      .btn {
+        .btn-text-full {
+          display: inline;
+        }
+        .btn-text-short {
+          display: none;
+        }
       }
     }
 
@@ -190,15 +232,24 @@
       align-items: center;
       gap: $space-sm;
       padding: $space-md $space-xl;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
 
       &.btn-large {
         padding: $space-lg $space-xxl;
         font-size: $font-size-lg;
         font-weight: $font-weight-semibold;
+
+        @media (max-width: $breakpoint-sm) {
+          padding: $space-md $space-lg;
+          font-size: $font-size-base;
+        }
       }
 
       i {
         font-size: 1.1rem;
+        flex-shrink: 0; // Prevent icon shrinking
       }
     }
   }
