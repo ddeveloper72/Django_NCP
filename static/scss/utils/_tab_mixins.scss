@@ -9,7 +9,7 @@
   justify-content: flex-start !important;
   gap: 0.75rem !important;
   white-space: nowrap !important;
-  
+
   // Icon styling
   i {
     display: flex !important;
@@ -21,7 +21,7 @@
     flex-shrink: 0 !important;
     line-height: 1 !important;
   }
-  
+
   // Text container
   .tab-text {
     flex: 1 1 auto !important;
@@ -30,7 +30,7 @@
     font-weight: inherit !important;
     color: inherit !important;
   }
-  
+
   // Badge styling
   .badge {
     display: flex !important;
@@ -51,24 +51,24 @@
 // Enhanced tab layout for healthcare tabs
 @mixin healthcare-tab-layout {
   @include tab-layout-base;
-  
+
   // Enhanced spacing for better alignment
   padding: 1rem 1.5rem !important;
   min-height: 3rem !important;
-  
+
   // Icon enhancements
   i {
     min-width: 1.5rem !important;
     min-height: 1.5rem !important;
     font-size: 1.25rem !important;
   }
-  
+
   // Text styling
   .tab-text {
     font-size: 0.9rem !important;
     font-weight: 600 !important;
   }
-  
+
   // Badge enhancements
   .badge {
     min-width: 1.75rem !important;
@@ -81,24 +81,24 @@
 // Compact tab layout for smaller spaces
 @mixin compact-tab-layout {
   @include tab-layout-base;
-  
+
   gap: 0.5rem !important;
   padding: 0.75rem 1rem !important;
   min-height: 2.5rem !important;
-  
+
   // Smaller icons
   i {
     min-width: 1rem !important;
     min-height: 1rem !important;
     font-size: 1rem !important;
   }
-  
+
   // Compact text
   .tab-text {
     font-size: 0.85rem !important;
     font-weight: 500 !important;
   }
-  
+
   // Smaller badges
   .badge {
     min-width: 1.25rem !important;
@@ -113,17 +113,17 @@
   @media (min-width: 768px) {
     @include healthcare-tab-layout;
   }
-  
+
   // Mobile
   @media (max-width: 767px) {
     @include compact-tab-layout;
-    
+
     // Stack vertically on very small screens
     @media (max-width: 576px) {
       flex-direction: column !important;
       text-align: center !important;
       gap: 0.25rem !important;
-      
+
       .tab-text {
         text-align: center !important;
       }
@@ -137,14 +137,14 @@
   flex-direction: column !important;
   gap: 0.25rem !important;
   align-items: flex-start !important;
-  
+
   // Main content
   .tab-label {
     font-weight: inherit !important;
     color: inherit !important;
     margin: 0 !important;
   }
-  
+
   // Subtitle or description
   .tab-subtitle {
     font-size: 0.75rem !important;
@@ -165,7 +165,7 @@
     position: static !important;
     top: auto !important;
     left: auto !important;
-    
+
     &::before {
       transform: none !important;
       position: static !important;
