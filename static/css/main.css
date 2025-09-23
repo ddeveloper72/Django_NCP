@@ -700,73 +700,32 @@ body {
 
 .nav-tabs-healthcare .nav-link {
   display: flex !important;
+  flex-direction: column !important;
   align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 0.75rem !important;
+  justify-content: center !important;
+  padding: 0.75rem 1rem !important;
+  text-align: center !important;
+  position: relative !important;
+}
+.nav-tabs-healthcare .nav-link .tab-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  margin-bottom: 0.25rem !important;
+}
+.nav-tabs-healthcare .nav-link .tab-content i {
+  font-size: 1rem !important;
+  line-height: 1 !important;
+}
+.nav-tabs-healthcare .nav-link .tab-content .tab-text {
+  font-size: 0.9rem !important;
+  line-height: 1 !important;
   white-space: nowrap !important;
 }
-.nav-tabs-healthcare .nav-link i {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 1.25rem !important;
-  min-height: 1.25rem !important;
-  font-size: 1.125rem !important;
-  flex-shrink: 0 !important;
-  line-height: 1 !important;
-}
-.nav-tabs-healthcare .nav-link .tab-text {
-  flex: 1 1 auto !important;
-  text-align: left !important;
-  line-height: 1.2 !important;
-  font-weight: inherit !important;
-  color: inherit !important;
-}
 .nav-tabs-healthcare .nav-link .badge {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 1.5rem !important;
-  min-height: 1.5rem !important;
-  padding: 0.25rem 0.5rem !important;
-  font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  border-radius: 50% !important;
-  flex-shrink: 0 !important;
-  line-height: 1 !important;
-  margin: 0 !important;
-}
-.nav-tabs-healthcare .nav-link {
-  padding: 1rem 1.5rem !important;
-  min-height: 3rem !important;
-}
-.nav-tabs-healthcare .nav-link i {
-  min-width: 1.5rem !important;
-  min-height: 1.5rem !important;
-  font-size: 1.25rem !important;
-}
-.nav-tabs-healthcare .nav-link .tab-text {
-  font-size: 0.9rem !important;
-  font-weight: 600 !important;
-}
-.nav-tabs-healthcare .nav-link .badge {
-  min-width: 1.75rem !important;
-  min-height: 1.75rem !important;
-  font-size: 0.8rem !important;
-  border-radius: 50% !important;
-}
-.nav-tabs-healthcare .nav-link i {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transform: none !important;
-  position: static !important;
-  top: auto !important;
-  left: auto !important;
-}
-.nav-tabs-healthcare .nav-link i::before {
-  transform: none !important;
-  position: static !important;
+  align-self: center !important;
+  margin-top: 0 !important;
 }
 .nav-tabs-healthcare .nav-link {
   color: var(--healthcare-navy);
@@ -808,73 +767,32 @@ body {
 
 .card .nav-tabs-healthcare .nav-link {
   display: flex !important;
+  flex-direction: column !important;
   align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 0.75rem !important;
+  justify-content: center !important;
+  padding: 0.75rem 1rem !important;
+  text-align: center !important;
+  position: relative !important;
+}
+.card .nav-tabs-healthcare .nav-link .tab-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  margin-bottom: 0.25rem !important;
+}
+.card .nav-tabs-healthcare .nav-link .tab-content i {
+  font-size: 1rem !important;
+  line-height: 1 !important;
+}
+.card .nav-tabs-healthcare .nav-link .tab-content .tab-text {
+  font-size: 0.9rem !important;
+  line-height: 1 !important;
   white-space: nowrap !important;
 }
-.card .nav-tabs-healthcare .nav-link i {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 1.25rem !important;
-  min-height: 1.25rem !important;
-  font-size: 1.125rem !important;
-  flex-shrink: 0 !important;
-  line-height: 1 !important;
-}
-.card .nav-tabs-healthcare .nav-link .tab-text {
-  flex: 1 1 auto !important;
-  text-align: left !important;
-  line-height: 1.2 !important;
-  font-weight: inherit !important;
-  color: inherit !important;
-}
 .card .nav-tabs-healthcare .nav-link .badge {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 1.5rem !important;
-  min-height: 1.5rem !important;
-  padding: 0.25rem 0.5rem !important;
-  font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  border-radius: 50% !important;
-  flex-shrink: 0 !important;
-  line-height: 1 !important;
-  margin: 0 !important;
-}
-.card .nav-tabs-healthcare .nav-link {
-  padding: 1rem 1.5rem !important;
-  min-height: 3rem !important;
-}
-.card .nav-tabs-healthcare .nav-link i {
-  min-width: 1.5rem !important;
-  min-height: 1.5rem !important;
-  font-size: 1.25rem !important;
-}
-.card .nav-tabs-healthcare .nav-link .tab-text {
-  font-size: 0.9rem !important;
-  font-weight: 600 !important;
-}
-.card .nav-tabs-healthcare .nav-link .badge {
-  min-width: 1.75rem !important;
-  min-height: 1.75rem !important;
-  font-size: 0.8rem !important;
-  border-radius: 50% !important;
-}
-.card .nav-tabs-healthcare .nav-link i {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transform: none !important;
-  position: static !important;
-  top: auto !important;
-  left: auto !important;
-}
-.card .nav-tabs-healthcare .nav-link i::before {
-  transform: none !important;
-  position: static !important;
+  align-self: center !important;
+  margin-top: 0 !important;
 }
 .card .nav-tabs-healthcare .nav-link {
   color: var(--healthcare-navy);
@@ -953,76 +871,6 @@ body {
 }
 
 .tab-button {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 0.75rem !important;
-  white-space: nowrap !important;
-}
-.tab-button i {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 1.25rem !important;
-  min-height: 1.25rem !important;
-  font-size: 1.125rem !important;
-  flex-shrink: 0 !important;
-  line-height: 1 !important;
-}
-.tab-button .tab-text {
-  flex: 1 1 auto !important;
-  text-align: left !important;
-  line-height: 1.2 !important;
-  font-weight: inherit !important;
-  color: inherit !important;
-}
-.tab-button .badge {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 1.5rem !important;
-  min-height: 1.5rem !important;
-  padding: 0.25rem 0.5rem !important;
-  font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  border-radius: 50% !important;
-  flex-shrink: 0 !important;
-  line-height: 1 !important;
-  margin: 0 !important;
-}
-.tab-button {
-  padding: 1rem 1.5rem !important;
-  min-height: 3rem !important;
-}
-.tab-button i {
-  min-width: 1.5rem !important;
-  min-height: 1.5rem !important;
-  font-size: 1.25rem !important;
-}
-.tab-button .tab-text {
-  font-size: 0.9rem !important;
-  font-weight: 600 !important;
-}
-.tab-button .badge {
-  min-width: 1.75rem !important;
-  min-height: 1.75rem !important;
-  font-size: 0.8rem !important;
-  border-radius: 50% !important;
-}
-.tab-button i {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transform: none !important;
-  position: static !important;
-  top: auto !important;
-  left: auto !important;
-}
-.tab-button i::before {
-  transform: none !important;
-  position: static !important;
-}
-.tab-button {
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
   border: 1px solid #dee2e6 !important;
   cursor: pointer;
@@ -1034,6 +882,15 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8) !important;
   margin-right: 0 !important;
+  padding: 0.75rem 1rem;
+}
+.tab-button .badge {
+  vertical-align: middle;
+  margin-left: 0.5rem;
+}
+.tab-button i {
+  margin-right: 0.5rem;
+  vertical-align: middle;
 }
 
 .tab-button:hover {
@@ -1355,7 +1212,7 @@ body {
 /* Container Enhancement for Better Card Contrast */
 .container,
 .container-fluid {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.2);
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   border-radius: 1rem;
@@ -1385,7 +1242,7 @@ body {
 
 /* Footer Dark Background Enhancement */
 footer.bg-dark {
-  background-color: var(--healthcare-green) !important;
+  background-color: var(--healthcare-teal) !important;
   color: var(--healthcare-white) !important;
 }
 
@@ -2094,6 +1951,18 @@ h6.bg-secondary {
   font-size: 1.1rem;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
+}
+
+/* Disable hover transitions for green header icons */
+.bg-success:hover i.fa-solid,
+.bg-success:hover i.far,
+.bg-success:hover i.fab,
+.card-header.bg-success:hover i.fa-solid,
+.card-header.bg-success:hover i.far,
+.card-header.bg-success:hover i.fab {
+  transition: none !important;
+  transform: none !important;
+  color: var(--healthcare-text-light) !important;
 }
 
 /* Additional white icon rules for any element with dark healthcare colors */
@@ -15306,146 +15175,34 @@ input[type=checkbox] {
   gap: 0;
 }
 
-@media (min-width: 768px) {
-  .tab-button {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 0.75rem !important;
-    white-space: nowrap !important;
-  }
-  .tab-button i {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 1.25rem !important;
-    min-height: 1.25rem !important;
-    font-size: 1.125rem !important;
-    flex-shrink: 0 !important;
-    line-height: 1 !important;
-  }
-  .tab-button .tab-text {
-    flex: 1 1 auto !important;
-    text-align: left !important;
-    line-height: 1.2 !important;
-    font-weight: inherit !important;
-    color: inherit !important;
-  }
-  .tab-button .badge {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 1.5rem !important;
-    min-height: 1.5rem !important;
-    padding: 0.25rem 0.5rem !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    border-radius: 50% !important;
-    flex-shrink: 0 !important;
-    line-height: 1 !important;
-    margin: 0 !important;
-  }
-  .tab-button {
-    padding: 1rem 1.5rem !important;
-    min-height: 3rem !important;
-  }
-  .tab-button i {
-    min-width: 1.5rem !important;
-    min-height: 1.5rem !important;
-    font-size: 1.25rem !important;
-  }
-  .tab-button .tab-text {
-    font-size: 0.9rem !important;
-    font-weight: 600 !important;
-  }
-  .tab-button .badge {
-    min-width: 1.75rem !important;
-    min-height: 1.75rem !important;
-    font-size: 0.8rem !important;
-    border-radius: 50% !important;
-  }
+.tab-button {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.75rem 1rem !important;
+  text-align: center !important;
+  position: relative !important;
 }
-@media (max-width: 767px) {
-  .tab-button {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 0.75rem !important;
-    white-space: nowrap !important;
-  }
-  .tab-button i {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 1.25rem !important;
-    min-height: 1.25rem !important;
-    font-size: 1.125rem !important;
-    flex-shrink: 0 !important;
-    line-height: 1 !important;
-  }
-  .tab-button .tab-text {
-    flex: 1 1 auto !important;
-    text-align: left !important;
-    line-height: 1.2 !important;
-    font-weight: inherit !important;
-    color: inherit !important;
-  }
-  .tab-button .badge {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 1.5rem !important;
-    min-height: 1.5rem !important;
-    padding: 0.25rem 0.5rem !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    border-radius: 50% !important;
-    flex-shrink: 0 !important;
-    line-height: 1 !important;
-    margin: 0 !important;
-  }
-  .tab-button {
-    gap: 0.5rem !important;
-    padding: 0.75rem 1rem !important;
-    min-height: 2.5rem !important;
-  }
-  .tab-button i {
-    min-width: 1rem !important;
-    min-height: 1rem !important;
-    font-size: 1rem !important;
-  }
-  .tab-button .tab-text {
-    font-size: 0.85rem !important;
-    font-weight: 500 !important;
-  }
-  .tab-button .badge {
-    min-width: 1.25rem !important;
-    min-height: 1.25rem !important;
-    font-size: 0.7rem !important;
-  }
-}
-@media (max-width: 767px) and (max-width: 576px) {
-  .tab-button {
-    flex-direction: column !important;
-    text-align: center !important;
-    gap: 0.25rem !important;
-  }
-  .tab-button .tab-text {
-    text-align: center !important;
-  }
-}
-.tab-button i {
+.tab-button .tab-content {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transform: none !important;
-  position: static !important;
-  top: auto !important;
-  left: auto !important;
+  gap: 0.5rem !important;
+  margin-bottom: 0.25rem !important;
 }
-.tab-button i::before {
-  transform: none !important;
-  position: static !important;
+.tab-button .tab-content i {
+  font-size: 1rem !important;
+  line-height: 1 !important;
+}
+.tab-button .tab-content .tab-text {
+  font-size: 0.9rem !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+.tab-button .badge {
+  align-self: center !important;
+  margin-top: 0 !important;
 }
 .tab-button {
   background: none;

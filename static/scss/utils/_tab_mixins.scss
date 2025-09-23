@@ -1,174 +1,50 @@
 // ========================================
-// Tab Layout Mixins - Consistent Icon/Text/Badge Alignment
+// Simple Tab Layout - Icon/Text on top, Badge centered below
 // ========================================
 
-// Perfect tab layout with flex alignment
-@mixin tab-layout-base {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 0.75rem !important;
-  white-space: nowrap !important;
-
-  // Icon styling
-  i {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 1.25rem !important;
-    min-height: 1.25rem !important;
-    font-size: 1.125rem !important;
-    flex-shrink: 0 !important;
-    line-height: 1 !important;
-  }
-
-  // Text container
-  .tab-text {
-    flex: 1 1 auto !important;
-    text-align: left !important;
-    line-height: 1.2 !important;
-    font-weight: inherit !important;
-    color: inherit !important;
-  }
-
-  // Badge styling
-  .badge {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 1.5rem !important;
-    min-height: 1.5rem !important;
-    padding: 0.25rem 0.5rem !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    border-radius: 50% !important;
-    flex-shrink: 0 !important;
-    line-height: 1 !important;
-    margin: 0 !important;
-  }
-}
-
-// Enhanced tab layout for healthcare tabs
-@mixin healthcare-tab-layout {
-  @include tab-layout-base;
-
-  // Enhanced spacing for better alignment
-  padding: 1rem 1.5rem !important;
-  min-height: 3rem !important;
-
-  // Icon enhancements
-  i {
-    min-width: 1.5rem !important;
-    min-height: 1.5rem !important;
-    font-size: 1.25rem !important;
-  }
-
-  // Text styling
-  .tab-text {
-    font-size: 0.9rem !important;
-    font-weight: 600 !important;
-  }
-
-  // Badge enhancements
-  .badge {
-    min-width: 1.75rem !important;
-    min-height: 1.75rem !important;
-    font-size: 0.8rem !important;
-    border-radius: 50% !important;
-  }
-}
-
-// Compact tab layout for smaller spaces
-@mixin compact-tab-layout {
-  @include tab-layout-base;
-
-  gap: 0.5rem !important;
-  padding: 0.75rem 1rem !important;
-  min-height: 2.5rem !important;
-
-  // Smaller icons
-  i {
-    min-width: 1rem !important;
-    min-height: 1rem !important;
-    font-size: 1rem !important;
-  }
-
-  // Compact text
-  .tab-text {
-    font-size: 0.85rem !important;
-    font-weight: 500 !important;
-  }
-
-  // Smaller badges
-  .badge {
-    min-width: 1.25rem !important;
-    min-height: 1.25rem !important;
-    font-size: 0.7rem !important;
-  }
-}
-
-// Responsive tab layout adjustments
-@mixin responsive-tab-layout {
-  // Desktop and tablet
-  @media (min-width: 768px) {
-    @include healthcare-tab-layout;
-  }
-
-  // Mobile
-  @media (max-width: 767px) {
-    @include compact-tab-layout;
-
-    // Stack vertically on very small screens
-    @media (max-width: 576px) {
-      flex-direction: column !important;
-      text-align: center !important;
-      gap: 0.25rem !important;
-
-      .tab-text {
-        text-align: center !important;
-      }
-    }
-  }
-}
-
-// Tab content wrapper for consistent layout
-@mixin tab-content-layout {
+// Simple tab layout with proper badge alignment
+@mixin simple-tab-layout {
   display: flex !important;
   flex-direction: column !important;
-  gap: 0.25rem !important;
-  align-items: flex-start !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.75rem 1rem !important;
+  text-align: center !important;
+  position: relative !important;
 
-  // Main content
-  .tab-label {
-    font-weight: inherit !important;
-    color: inherit !important;
-    margin: 0 !important;
-  }
-
-  // Subtitle or description
-  .tab-subtitle {
-    font-size: 0.75rem !important;
-    opacity: 0.8 !important;
-    font-weight: 400 !important;
-    margin: 0 !important;
-    line-height: 1.1 !important;
-  }
-}
-
-// Perfect icon centering override
-@mixin tab-icon-center {
-  i {
+  // Top row: icon and text
+  .tab-content {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    transform: none !important;
-    position: static !important;
-    top: auto !important;
-    left: auto !important;
+    gap: 0.5rem !important;
+    margin-bottom: 0.25rem !important;
 
-    &::before {
-      transform: none !important;
-      position: static !important;
+    i {
+      font-size: 1rem !important;
+      line-height: 1 !important;
+    }
+
+    .tab-text {
+      font-size: 0.9rem !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
     }
   }
+
+  // Badge centered below
+  .badge {
+    align-self: center !important;
+    margin-top: 0 !important;
+  }
+}
+
+// Alias for healthcare tabs
+@mixin healthcare-tab-layout {
+  @include simple-tab-layout;
+}
+
+// Icon centering helper (for backward compatibility)
+@mixin tab-icon-center {
+  // This is now handled by simple-tab-layout
 }

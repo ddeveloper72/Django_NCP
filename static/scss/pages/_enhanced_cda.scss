@@ -14,9 +14,7 @@
 }
 
 .tab-button {
-  @include responsive-tab-layout;
-  @include tab-icon-center;
-
+  @include simple-tab-layout;
   background: none;
   border: none;
   cursor: pointer;
