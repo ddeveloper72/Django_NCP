@@ -4730,8 +4730,9 @@ def patient_cda_view(request, patient_id, cda_type=None):
                 f"✅ USING REAL XML DATA for patient {patient_id} - no mock data needed"
             )
 
-        # FORCE MOCK PROCESSED SECTIONS for testing template rendering
-        if not context.get("processed_sections") or patient_id in ["271867", "221935"]:
+        # FORCE MOCK PROCESSED SECTIONS for testing template rendering - ONLY FOR L3 DOCUMENTS
+        # L1 documents should NOT have detailed clinical sections
+        if (not context.get("processed_sections") or patient_id in ["271867", "221935"]) and actual_cda_type != "L1":
             mock_sections = [
                 {
                     "title": "Current Medications",
@@ -4779,24 +4780,31 @@ def patient_cda_view(request, patient_id, cda_type=None):
             ]
             context["processed_sections"] = mock_sections
             logger.info(
-                "🧪 ADDED MOCK PROCESSED SECTIONS for testing template rendering"
+                "🧪 ADDED MOCK PROCESSED SECTIONS for L3 document testing template rendering"
+            )
+        elif actual_cda_type == "L1":
+            # L1 documents should have no clinical sections - only basic patient info
+            context["processed_sections"] = []
+            logger.info(
+                "📄 L1 DOCUMENT: No clinical sections added (L1 contains only basic patient summary)"
             )
 
         # REFACTOR: Process sections for template display (move complex logic from template to Python)
-        # Only override mock data if we don't have debug parameter
+        # Only override mock data if we don't have debug parameter AND this is NOT an L1 document
         if (
             translation_result
             and translation_result.get("sections")
             and not request.GET.get("debug")
+            and actual_cda_type != "L1"
         ):
             logger.info(
-                f"Processing {len(translation_result.get('sections', []))} sections for template display"
+                f"Processing {len(translation_result.get('sections', []))} sections for L3 template display"
             )
             processed_sections = prepare_enhanced_section_data(
                 translation_result.get("sections", [])
             )
 
-            # DEMONSTRATION: Inject test allergies section when requested
+            # DEMONSTRATION: Inject test allergies section when requested (L3 only)
             if request.GET.get("show_allergies_demo"):
                 logger.info(
                     "🧪 DEMO: Injecting test allergies section for demonstration"
@@ -4945,49 +4953,53 @@ def patient_cda_view(request, patient_id, cda_type=None):
             logger.warning(
                 "No translation_result sections found - checking for alternative data sources"
             )
-            # INJECT TEST ALLERGIES SECTION when no real sections are found
-            logger.info("🧪 INJECTING TEST ALLERGIES SECTION for demonstration")
-            context["processed_sections"] = [
-                {
-                    "section_id": "psAllergiesAndOtherAdverseReactions",
-                    "section_title": "Allergies and Other Adverse Reactions",
-                    "title": "Allergies and Other Adverse Reactions",
-                    "code": "ALLERGIES",
-                    "has_entries": True,
-                    "entries": [
-                        {
-                            "display_name": "Penicillin Allergy",
-                            "allergen": "Penicillin",
-                            "reaction": "Skin rash, hives",
-                            "severity": "Moderate",
-                            "status": "Active",
-                            "medical_terminology": [
-                                {
-                                    "system": "SNOMED CT",
-                                    "code": "294505008",
-                                    "display_name": "Allergy to penicillin",
-                                }
-                            ],
-                            "has_medical_terminology": True,
-                        },
-                        {
-                            "display_name": "Shellfish Allergy",
-                            "allergen": "Shellfish",
-                            "reaction": "Anaphylaxis",
-                            "severity": "Severe",
-                            "status": "Active",
-                            "medical_terminology": [
-                                {
-                                    "system": "SNOMED CT",
-                                    "code": "300913006",
-                                    "display_name": "Shellfish allergy",
-                                }
-                            ],
-                            "has_medical_terminology": True,
-                        },
-                    ],
-                }
-            ]
+            # INJECT TEST ALLERGIES SECTION when no real sections are found - BUT NOT FOR L1 DOCUMENTS
+            if actual_cda_type != "L1":
+                logger.info("🧪 INJECTING TEST ALLERGIES SECTION for L3 document demonstration")
+                context["processed_sections"] = [
+                    {
+                        "section_id": "psAllergiesAndOtherAdverseReactions",
+                        "section_title": "Allergies and Other Adverse Reactions",
+                        "title": "Allergies and Other Adverse Reactions",
+                        "code": "ALLERGIES",
+                        "has_entries": True,
+                        "entries": [
+                            {
+                                "display_name": "Penicillin Allergy",
+                                "allergen": "Penicillin",
+                                "reaction": "Skin rash, hives",
+                                "severity": "Moderate",
+                                "status": "Active",
+                                "medical_terminology": [
+                                    {
+                                        "system": "SNOMED CT",
+                                        "code": "294505008",
+                                        "display_name": "Allergy to penicillin",
+                                    }
+                                ],
+                                "has_medical_terminology": True,
+                            },
+                            {
+                                "display_name": "Shellfish Allergy",
+                                "allergen": "Shellfish",
+                                "reaction": "Anaphylaxis",
+                                "severity": "Severe",
+                                "status": "Active",
+                                "medical_terminology": [
+                                    {
+                                        "system": "SNOMED CT",
+                                        "code": "300913006",
+                                        "display_name": "Shellfish allergy",
+                                    }
+                                ],
+                                "has_medical_terminology": True,
+                            },
+                        ],
+                    }
+                ]
+            else:
+                logger.info("📄 L1 DOCUMENT: No clinical sections injected (L1 contains only basic patient summary)")
+                context["processed_sections"] = []
 
         # SECTION PROCESSOR INTEGRATION: Add Python-processed section data
         from .services.section_processors import PatientSectionProcessor
@@ -5252,6 +5264,17 @@ def patient_cda_view(request, patient_id, cda_type=None):
         if target_language not in ["en", "fr"]:  # Only support en/fr for now
             target_language = "en"
         context["ui_labels"] = get_ui_labels(target_language)
+
+        # FINAL SAFETY CHECK: Ensure L1 documents never have clinical sections
+        if actual_cda_type == "L1":
+            context["processed_sections"] = []
+            # Also reset section counts for L1 documents
+            context["sections_count"] = 0
+            context["medical_terms_count"] = 0
+            context["coded_sections_count"] = 0
+            context["coded_sections_percentage"] = 0
+            context["uses_coded_sections"] = False
+            logger.info("📄 FINAL CHECK: L1 document - removed all clinical sections and reset counts")
 
         return render(
             request,
