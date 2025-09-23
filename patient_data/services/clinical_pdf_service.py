@@ -7,12 +7,13 @@ import base64
 import hashlib
 import os
 import tempfile
-from typing import List, Dict, Optional, Tuple
+import xml.etree.ElementTree as ET
+from typing import Dict, List, Optional, Tuple
+
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.http import HttpResponse, Http404
+from django.http import Http404, HttpResponse
 from django.utils import timezone
-import xml.etree.ElementTree as ET
 
 
 class ClinicalDocumentPDFService:
@@ -65,7 +66,9 @@ class ClinicalDocumentPDFService:
 
         attachment_index = 0
         processed_elements = set()  # Track processed elements to prevent duplicates
-        processed_content_hashes = set()  # Track PDF content hashes to prevent duplicate content
+        processed_content_hashes = (
+            set()
+        )  # Track PDF content hashes to prevent duplicate content
 
         for pattern in base64_patterns:
             try:
@@ -81,16 +84,16 @@ class ClinicalDocumentPDFService:
                 element_id = id(element)
                 if element_id in processed_elements:
                     continue
-                
+
                 pdf_data = self._extract_pdf_from_element(element)
                 if pdf_data:
                     # Create a hash of the PDF content to detect duplicate content
                     content_hash = hashlib.md5(pdf_data).hexdigest()
-                    
+
                     # Skip if we've already processed identical PDF content
                     if content_hash in processed_content_hashes:
                         continue
-                    
+
                     pdf_info = {
                         "data": pdf_data,
                         "filename": f"clinical_document_attachment_{attachment_index}.pdf",
