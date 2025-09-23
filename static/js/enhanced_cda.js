@@ -9,6 +9,31 @@
  * Called when DOM is ready
  */
 function initializeEnhancedCDA() {
+  console.log('🚀 ENHANCED CDA INITIALIZING - DEBUG VERSION');
+  console.log('🚀 DOM READY - Starting enhanced CDA initialization');
+  
+  // Check if the container exists
+  const extendedContainer = document.querySelector('#extendedPatientSection');
+  console.log('🔍 Extended container found:', extendedContainer ? 'YES' : 'NO');
+  if (extendedContainer) {
+    console.log('🔍 Container ID:', extendedContainer.id);
+    console.log('🔍 Container classes:', extendedContainer.className);
+  }
+  
+  // Check for tab buttons
+  const tabButtons = document.querySelectorAll('[data-action="show-extended-tab"]');
+  console.log('🔍 Tab buttons found:', tabButtons.length);
+  tabButtons.forEach((btn, index) => {
+    console.log(`🔍 Button ${index}:`, btn.dataset.tabType, btn.textContent.trim());
+  });
+  
+  // Check for tab content elements
+  const tabContents = document.querySelectorAll('.clinical-tab-content');
+  console.log('🔍 Tab contents found:', tabContents.length);
+  tabContents.forEach((content, index) => {
+    console.log(`🔍 Content ${index}:`, content.id, content.classList.contains('active') ? 'ACTIVE' : 'INACTIVE');
+  });
+
   console.log('Initializing Bootstrap tabs...');
 
   // Initialize Bootstrap tabs for Extended Patient Info
@@ -300,30 +325,39 @@ function showClinicalTab(sectionId, tabType) {
  * This handles the clicking of tab buttons that use data-action attributes
  */
 function initializeExtendedPatientEventDelegation() {
+  console.log('🔧 STARTING Event delegation setup...');
+  
   const extendedContainer = document.querySelector('#extendedPatientSection');
   if (!extendedContainer) {
+    console.error('❌ Extended patient container not found!');
     return;
   }
+
+  console.log('✅ Extended patient container found:', extendedContainer.id);
 
   // Prevent duplicate listeners
   if (extendedContainer.dataset.initialized === 'true') {
+    console.log('⚠️ Event delegation already initialized, skipping...');
     return;
   }
 
-  console.log('Initializing extended patient tabs...');
+  console.log('🔧 Setting up click listener on container...');
 
   extendedContainer.addEventListener('click', function (event) {
-    console.log('🔧 Click detected on:', event.target);
+    console.log('🎯 CLICK DETECTED! Target:', event.target.tagName, event.target.className);
+    console.log('🎯 Click event target text:', event.target.textContent.trim());
 
     // Find the closest button with data-action (in case user clicks on icon or text inside button)
     const target = event.target.closest('[data-action]') || event.target;
     const action = target.dataset.action;
 
-    console.log('🔧 Target element:', target);
+    console.log('🔧 Closest target with data-action:', target.tagName, target.className);
     console.log('🔧 Action found:', action);
+    console.log('🔧 All target dataset:', target.dataset);
 
     // If we found a button with an action, prevent Bootstrap from interfering
     if (action) {
+      console.log('✅ Action detected, preventing default behavior');
       event.preventDefault();
       event.stopPropagation();
 
