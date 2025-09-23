@@ -455,7 +455,7 @@ body {
 .nav-tabs-healthcare .nav-link {
   @include healthcare-tab-layout;
   @include tab-icon-center;
-  
+
   color: var(--healthcare-navy);
   background-color: transparent;
   border: 1px solid transparent;
@@ -504,7 +504,7 @@ body {
 .card .nav-tabs-healthcare .nav-link {
   @include healthcare-tab-layout;
   @include tab-icon-center;
-  
+
   color: var(--healthcare-navy);
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border: 1px solid #dee2e6;
@@ -603,7 +603,7 @@ body {
 .tab-button {
   @include healthcare-tab-layout;
   @include tab-icon-center;
-  
+
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
   border: 1px solid #dee2e6 !important;
   cursor: pointer;
@@ -2567,7 +2567,9 @@ body nav .badge:hover i.fa-user-injured,
   background-color: var(
     --healthcare-blue
   ) !important; // Blue background for badge
-  color: var(--healthcare-text-light) !important; // White text/number for contrast
+  color: var(
+    --healthcare-text-light
+  ) !important; // White text/number for contrast
   border: 2px solid var(--healthcare-text-light) !important; // White border for definition
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important; // Shadow for depth
 }
