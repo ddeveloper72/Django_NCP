@@ -4732,7 +4732,9 @@ def patient_cda_view(request, patient_id, cda_type=None):
 
         # FORCE MOCK PROCESSED SECTIONS for testing template rendering - ONLY FOR L3 DOCUMENTS
         # L1 documents should NOT have detailed clinical sections
-        if (not context.get("processed_sections") or patient_id in ["271867", "221935"]) and actual_cda_type != "L1":
+        if (
+            not context.get("processed_sections") or patient_id in ["271867", "221935"]
+        ) and actual_cda_type != "L1":
             mock_sections = [
                 {
                     "title": "Current Medications",
@@ -4955,7 +4957,9 @@ def patient_cda_view(request, patient_id, cda_type=None):
             )
             # INJECT TEST ALLERGIES SECTION when no real sections are found - BUT NOT FOR L1 DOCUMENTS
             if actual_cda_type != "L1":
-                logger.info("🧪 INJECTING TEST ALLERGIES SECTION for L3 document demonstration")
+                logger.info(
+                    "🧪 INJECTING TEST ALLERGIES SECTION for L3 document demonstration"
+                )
                 context["processed_sections"] = [
                     {
                         "section_id": "psAllergiesAndOtherAdverseReactions",
@@ -4998,7 +5002,9 @@ def patient_cda_view(request, patient_id, cda_type=None):
                     }
                 ]
             else:
-                logger.info("📄 L1 DOCUMENT: No clinical sections injected (L1 contains only basic patient summary)")
+                logger.info(
+                    "📄 L1 DOCUMENT: No clinical sections injected (L1 contains only basic patient summary)"
+                )
                 context["processed_sections"] = []
 
         # SECTION PROCESSOR INTEGRATION: Add Python-processed section data
@@ -5274,7 +5280,9 @@ def patient_cda_view(request, patient_id, cda_type=None):
             context["coded_sections_count"] = 0
             context["coded_sections_percentage"] = 0
             context["uses_coded_sections"] = False
-            logger.info("📄 FINAL CHECK: L1 document - removed all clinical sections and reset counts")
+            logger.info(
+                "📄 FINAL CHECK: L1 document - removed all clinical sections and reset counts"
+            )
 
         return render(
             request,
