@@ -11,29 +11,32 @@ URL Structure: /patients/cda/{session_id}/{cda_type}/
 Example: /patients/cda/549316/L3/ where 549316 is the temporary session ID
 """
 
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_http_methods
-from django.utils import timezone
-from django.core.exceptions import ValidationError
+import base64
 import html
+import json
+import logging
+import os
+import re
+import xml.etree.ElementTree as ET
+from io import BytesIO
+
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
+from django.utils import timezone
+from django.views.decorators.http import require_http_methods
+from xhtml2pdf import pisa
+
+from ncp_gateway.models import Patient  # Add import for NCP gateway Patient model
+
 from .forms import PatientDataForm
 from .models import PatientData
-from ncp_gateway.models import Patient  # Add import for NCP gateway Patient model
 from .services import EUPatientSearchService, PatientCredentials
 from .services.clinical_pdf_service import ClinicalDocumentPDFService
 from .services.section_processors import PatientSectionProcessor
-from xhtml2pdf import pisa
-from io import BytesIO
-import logging
-import os
-import base64
-import json
-import re
-import xml.etree.ElementTree as ET
 
 logger = logging.getLogger(__name__)
 
@@ -2106,9 +2109,10 @@ def patient_data_view(request):
                 match = matches[0]
 
                 # Create a PatientSession record for the new session management system
-                from .models import PatientSession
                 import uuid
                 from datetime import timedelta
+
+                from .models import PatientSession
 
                 # Generate a unique session ID
                 session_id = str(uuid.uuid4().int)[:10]  # 10-digit session ID
@@ -2272,6 +2276,7 @@ def direct_patient_view(request, patient_id):
     2. Actual patient identifiers (from CDA files)
     """
     import logging
+
     from django.http import HttpResponse
 
     try:
@@ -2471,7 +2476,9 @@ def direct_patient_view(request, patient_id):
 
         import uuid
         from datetime import timedelta
+
         from django.utils import timezone
+
         from .models import PatientSession
 
         # Generate a unique session ID (same pattern as normal search)
@@ -2608,8 +2615,8 @@ def patient_details_view(request, patient_id):
             f"No session data found for patient {patient_id}, attempting direct lookup"
         )
         try:
-            from .services.cda_document_index import get_cda_indexer
             from .services import EUPatientSearchService, PatientCredentials
+            from .services.cda_document_index import get_cda_indexer
 
             indexer = get_cda_indexer()
             all_patients = indexer.get_all_patients()
@@ -3519,12 +3526,12 @@ def patient_cda_view(request, patient_id, cda_type=None):
             )
 
         # Initialize Enhanced CDA Processor with JSON Field Mapping enhancement (hybrid approach)
-        from .services.enhanced_cda_processor import EnhancedCDAProcessor
         from .services.enhanced_cda_field_mapper import EnhancedCDAFieldMapper
+        from .services.enhanced_cda_processor import EnhancedCDAProcessor
         from .services.patient_search_service import PatientMatch
         from .translation_utils import (
-            get_template_translations,
             detect_document_language,
+            get_template_translations,
         )
 
         # Determine source language from country code with enhanced mapping
@@ -8263,10 +8270,11 @@ def enhanced_cda_display(request):
     Handles both GET (render template) and POST (AJAX processing) requests
     """
 
+    import json
+
     from .services.enhanced_cda_processor import EnhancedCDAProcessor
     from .translation_utils import detect_document_language
     from .ui_labels import get_ui_labels
-    import json
 
     if request.method == "POST":
         try:
@@ -8857,10 +8865,12 @@ def _create_dual_language_sections(original_result, translated_result, source_la
 @require_http_methods(["POST"])
 def upload_cda_document(request):
     """Handle CDA document upload and processing"""
-    from django.core.files.storage import default_storage
-    from django.core.files.base import ContentFile
-    from pathlib import Path
     import uuid
+    from pathlib import Path
+
+    from django.core.files.base import ContentFile
+    from django.core.files.storage import default_storage
+
     from .services.enhanced_cda_processor import EnhancedCDAProcessor
 
     try:
