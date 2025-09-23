@@ -81,7 +81,7 @@ function initializeEnhancedCDA() {
 /**
  * Extended Patient Tab Management Function - SIMPLIFIED DEBUG VERSION
  * @param {string} sectionId - ID of the section containing tabs
- * @param {string} tabType - Type of tab to show (personal, healthcare, system, clinical, pdfs)
+ * @param {string} tabType - Type of tab to show (personal, healthcare, system, clinical, orcd)
  */
 function showExtendedTab(sectionId, tabType) {
   // Get all tab content elements
@@ -120,16 +120,16 @@ function showExtendedTab(sectionId, tabType) {
     // Force refresh
     activeTab.offsetHeight;
     
-    // Auto-show first PDF when PDF tab is activated
+    // Auto-show first OrCD when Original Clinical Documents tab is activated
     if (tabType === 'pdfs') {
       setTimeout(() => {
         const firstPdfViewer = activeTab.querySelector('[data-action="show-pdf-viewer"]');
         if (firstPdfViewer) {
-          // Automatically show the first PDF viewer
+          // Automatically show the first OrCD viewer
           const pdfIndex = firstPdfViewer.dataset.pdfIndex;
-          console.log('Auto-loading PDF viewer for index:', pdfIndex);
+          console.log('Auto-loading OrCD viewer for index:', pdfIndex);
           
-          // Find the PDF viewer container and show it
+          // Find the OrCD viewer container and show it
           const viewerContainer = document.getElementById(`pdf-viewer-${pdfIndex}`);
           if (viewerContainer) {
             viewerContainer.classList.remove('hidden');
@@ -154,7 +154,7 @@ function showExtendedTab(sectionId, tabType) {
     const buttons = container.querySelectorAll('.tab-navigation .tab-button');
     buttons.forEach(btn => btn.classList.remove('active'));
 
-    const tabTypeMap = { 'personal': 0, 'healthcare': 1, 'system': 2, 'clinical': 3, 'pdfs': 4 };
+    const tabTypeMap = { 'personal': 0, 'healthcare': 1, 'system': 2, 'clinical': 3, 'pdfs': 4 }; // pdfs = OrCD tab
     const buttonIndex = tabTypeMap[tabType];
 
     if (buttonIndex !== undefined && buttons[buttonIndex]) {
@@ -366,17 +366,17 @@ function initializeExtendedPatientEventDelegation() {
           
           // Change button action to hide
           target.dataset.action = 'hide-pdf-viewer';
-          console.log('✅ PDF viewer shown for index:', pdfIndex1);
+          console.log('✅ OrCD viewer shown for index:', pdfIndex1);
         } else {
-          console.warn('❌ Could not find PDF viewer container for index:', pdfIndex1);
+          console.warn('❌ Could not find OrCD viewer container for index:', pdfIndex1);
         }
         break;
 
       case 'hide-pdf-viewer':
         const pdfIndex3 = target.dataset.pdfIndex;
-        console.log('PDF viewer hide requested for index:', pdfIndex3);
+        console.log('OrCD viewer hide requested for index:', pdfIndex3);
         
-        // Hide the PDF viewer container
+        // Hide the OrCD viewer container
         const viewerContainer3 = document.getElementById(`pdf-viewer-${pdfIndex3}`);
         if (viewerContainer3) {
           viewerContainer3.classList.add('hidden');
@@ -391,15 +391,15 @@ function initializeExtendedPatientEventDelegation() {
           
           // Change button action back to show
           target.dataset.action = 'show-pdf-viewer';
-          console.log('✅ PDF viewer hidden for index:', pdfIndex3);
+          console.log('✅ OrCD viewer hidden for index:', pdfIndex3);
         } else {
-          console.warn('❌ Could not find PDF viewer container for index:', pdfIndex3);
+          console.warn('❌ Could not find OrCD viewer container for index:', pdfIndex3);
         }
         break;
 
       case 'open-pdf-fullscreen':
         const pdfIndex2 = target.dataset.pdfIndex;
-        console.log('PDF fullscreen requested for index:', pdfIndex2);
+        console.log('OrCD fullscreen requested for index:', pdfIndex2);
         
         // Find the iframe for this PDF and attempt fullscreen
         const iframe = document.getElementById(`pdf-frame-${pdfIndex2}`);

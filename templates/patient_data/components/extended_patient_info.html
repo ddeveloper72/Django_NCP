@@ -66,10 +66,10 @@
                 data-action="show-extended-tab"
                 data-section-id="extended_patient"
                 data-tab-type="pdfs"
-                {% if has_l3_cda and not has_embedded_pdfs %}data-disabled="true" data-reason="No PDF documents available for this L3 CDA"{% elif not has_embedded_pdfs %}data-disabled="true" data-reason="No PDF documents available"{% endif %}
+                {% if has_l3_cda and not has_embedded_pdfs %}data-disabled="true" data-reason="No Original Clinical Documents available for this L3 CDA"{% elif not has_embedded_pdfs %}data-disabled="true" data-reason="No Original Clinical Documents available"{% endif %}
                 type="button"
-                {% if has_l3_cda and not has_embedded_pdfs %}disabled title="No PDF documents available for this L3 CDA"{% elif not has_embedded_pdfs %}disabled title="No PDF documents available"{% endif %}>
-            <i class="fa-solid fa-file-pdf me-1"></i>PDF Documents
+                {% if has_l3_cda and not has_embedded_pdfs %}disabled title="No Original Clinical Documents available for this L3 CDA"{% elif not has_embedded_pdfs %}disabled title="No Original Clinical Documents available"{% endif %}>
+            <i class="fa-solid fa-file-pdf me-1"></i>Original Clinical Document
             {% if has_embedded_pdfs %}
             <span class="badge bg-healthcare-teal ms-2">{{ embedded_pdfs|length }}</span>
             {% else %}
@@ -131,23 +131,23 @@
         {% include 'patient_data/components/clinical_information_content.html' %}
     </div>
 
-    {# PDF Documents Tab Content #}
+    {# Original Clinical Documents Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_pdfs">
         <div class="row g-3">
-            {# PDF Documents Card #}
+            {# Original Clinical Documents Card #}
             <div class="col-12">
                 <div class="card border-healthcare-teal">
                     <div class="card-header bg-healthcare-teal text-white">
                         <h5 class="mb-0">
-                            <i class="fa-solid fa-file-pdf me-2"></i>Embedded PDF Documents
+                            <i class="fa-solid fa-file-pdf me-2"></i>Original Clinical Documents
                         </h5>
                     </div>
                     <div class="card-body">
                         {% if has_embedded_pdfs and embedded_pdfs %}
                         <p class="text-muted mb-3">
                             <i class="fa-solid fa-info-circle me-1"></i>
-                            This L1 CDA document contains {{ embedded_pdfs|length }} embedded PDF document{{ embedded_pdfs|length|pluralize }}.
-                            These are the original clinical documents from the source healthcare system.
+                            This L1 CDA document contains {{ embedded_pdfs|length }} Original Clinical Document{{ embedded_pdfs|length|pluralize }} (OrCD).
+                            These are the original clinical documents from the source healthcare system in their native format.
                         </p>
 
                         {% for pdf in embedded_pdfs %}
@@ -250,13 +250,13 @@
 
                         {% else %}
                         <div class="alert alert-info">
-                            <h6><i class="fa-solid fa-info-circle me-2"></i>No PDF Documents Available</h6>
+                            <h6><i class="fa-solid fa-info-circle me-2"></i>No Original Clinical Documents Available</h6>
                             {% if has_l1_cda %}
-                            <p class="mb-0">This L1 CDA document does not contain any embedded PDF documents.</p>
+                            <p class="mb-0">This L1 CDA document does not contain any Original Clinical Documents (OrCD).</p>
                             {% elif has_l3_cda %}
-                            <p class="mb-0">This L3 CDA document contains structured clinical data only. PDF documents are typically found in L1 CDA documents.</p>
+                            <p class="mb-0">This L3 CDA document contains structured clinical data only. Original Clinical Documents (OrCD) are typically found in L1 CDA documents.</p>
                             {% else %}
-                            <p class="mb-0">No embedded PDF documents were found in this CDA document.</p>
+                            <p class="mb-0">No Original Clinical Documents (OrCD) were found in this CDA document.</p>
                             {% endif %}
                         </div>
                         {% endif %}
