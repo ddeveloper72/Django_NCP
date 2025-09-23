@@ -83,50 +83,52 @@
 
     {# Personal Information Tab Content #}
     <div class="clinical-tab-content active" id="extended_patient_personal">
-        <div class="card">
-            <div class="card-body">
-                {# Direct inclusion of contact component with its responsive card grid #}
-                {% include 'patient_data/components/extended_patient_contact_clean.html' %}
-            </div>
-        </div>
+        {# Direct inclusion of contact component with its responsive card grid #}
+        {% include 'patient_data/components/extended_patient_contact_clean.html' %}
     </div>
 
     {# Healthcare Team Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_healthcare">
-        <div class="card">
-            <div class="card-body">
-                {# Debug: Healthcare Team content loading #}
-                <div class="alert alert-info mb-3">
-                    <small>🔧 Debug: Healthcare Team tab is active and loading content... (ID: extended_patient_healthcare)</small>
+        <div class="row g-3">
+            {# Healthcare Provider Information Card #}
+            <div class="col-12">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fa-solid fa-user-md me-2"></i>Healthcare Provider Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% include 'patient_data/components/extended_patient_healthcare_clean.html' %}
+                    </div>
                 </div>
-                {# Direct inclusion of healthcare component with its responsive card grid #}
-                {% include 'patient_data/components/extended_patient_healthcare_clean.html' %}
             </div>
         </div>
     </div>
 
     {# System & Documentation Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_system">
-        <div class="card">
-            <div class="card-body">
-                {# Debug: System & Documentation content loading #}
-                <div class="alert alert-warning mb-3">
-                    <small>🔧 Debug: System & Documentation tab is active and loading content... (ID: extended_patient_system)</small>
+        <div class="row g-3">
+            {# Administrative Information Card #}
+            <div class="col-12">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fa-solid fa-cogs me-2"></i>Administrative & System Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% include 'patient_data/components/extended_patient_document_clean.html' %}
+                    </div>
                 </div>
-                {# Direct inclusion of document component with its responsive card grid #}
-                {% include 'patient_data/components/extended_patient_document_clean.html' %}
             </div>
         </div>
     </div>
 
     {# Clinical Information Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_clinical">
-        <div class="card">
-            <div class="card-body">
-                {# Direct Clinical Content - No Wrapper Card #}
-                {% include 'patient_data/components/clinical_information_content.html' %}
-            </div>
-        </div>
+        {# Direct Clinical Content - No Wrapper Card #}
+        {% include 'patient_data/components/clinical_information_content.html' %}
     </div>
 
     {# PDF Documents Tab Content #}
