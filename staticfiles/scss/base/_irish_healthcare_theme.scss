@@ -453,12 +453,14 @@ body {
 }
 
 .nav-tabs-healthcare .nav-link {
+  @include healthcare-tab-layout;
+  @include tab-icon-center;
+  
   color: var(--healthcare-navy);
   background-color: transparent;
   border: 1px solid transparent;
   border-radius: 0.5rem 0.5rem 0 0;
   font-weight: 500;
-  padding: 1rem 1.5rem;
   margin-bottom: -2px;
   transition: all 0.3s ease;
 }
@@ -482,13 +484,11 @@ body {
 }
 
 .nav-tabs-healthcare .nav-link i {
-  margin-right: 0.5rem;
-  font-size: 1rem;
+  // Icon styling handled by tab-icon-center mixin
 }
 
 .nav-tabs-healthcare .badge {
-  font-size: 0.7rem;
-  padding: 0.25rem 0.5rem;
+  // Badge styling handled by healthcare-tab-layout mixin
 }
 
 /* Integrated Patient Header Tabs - Enhanced 3D Effects */
@@ -502,11 +502,13 @@ body {
 }
 
 .card .nav-tabs-healthcare .nav-link {
+  @include healthcare-tab-layout;
+  @include tab-icon-center;
+  
   color: var(--healthcare-navy);
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border: 1px solid #dee2e6;
   border-radius: 0.75rem 0.75rem 0 0;
-  padding: 1rem 1.5rem;
   font-weight: 600;
   margin-bottom: -1px;
   margin-right: 0.5rem;
@@ -564,10 +566,8 @@ body {
 
 /* Enhanced Badge Styling in Tabs */
 .card .nav-tabs-healthcare .nav-link .badge {
-  font-size: 0.7rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
+  // Badge styling handled by healthcare-tab-layout mixin
+  border-radius: 50% !important; // Override to ensure circular badges
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
@@ -580,8 +580,7 @@ body {
 
 /* Tab Icons Enhancement */
 .card .nav-tabs-healthcare .nav-link i {
-  margin-right: 0.5rem;
-  font-size: 1rem;
+  // Icon styling handled by tab-icon-center mixin
   transition: transform 0.3s ease;
 }
 
@@ -602,9 +601,11 @@ body {
 }
 
 .tab-button {
+  @include healthcare-tab-layout;
+  @include tab-icon-center;
+  
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
   border: 1px solid #dee2e6 !important;
-  padding: 1rem 1.5rem !important;
   cursor: pointer;
   font-weight: 600 !important;
   color: var(--healthcare-navy) !important;

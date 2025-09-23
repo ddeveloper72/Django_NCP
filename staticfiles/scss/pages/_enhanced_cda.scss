@@ -14,9 +14,11 @@
 }
 
 .tab-button {
+  @include responsive-tab-layout;
+  @include tab-icon-center;
+  
   background: none;
   border: none;
-  padding: 0.75rem 1.5rem;
   cursor: pointer;
   font-weight: 500;
   color: #6c757d;
@@ -46,12 +48,6 @@
     background: #e9ecef !important; // Slightly darker gray on hover
     transform: translateY(-1px);
     box-shadow: 0 3px 12px rgba(0, 91, 184, 0.4);
-  }
-
-  .badge {
-    margin-left: 0.5rem;
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
   }
 }
 
