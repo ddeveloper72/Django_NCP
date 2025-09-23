@@ -1466,7 +1466,7 @@ h6.bg-secondary {
 .bg-secondary h4,
 .bg-secondary h5,
 .bg-secondary h6 {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .accordion-header h4 i,
@@ -1644,7 +1644,7 @@ h6.bg-secondary {
 .bg-secondary h6 .fa-regular,
 .bg-secondary h6 .fa-light,
 .bg-secondary h6 .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .accordion-header h4:hover,
 .accordion-header h5:hover,
@@ -1681,7 +1681,7 @@ h6.bg-secondary {
 .bg-secondary h4:hover,
 .bg-secondary h5:hover,
 .bg-secondary h6:hover {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .accordion-header h4:hover i,
 .accordion-header h4:hover .fa-solid,
@@ -1858,7 +1858,7 @@ h6.bg-secondary {
 .bg-secondary h6:hover .fa-regular,
 .bg-secondary h6:hover .fa-light,
 .bg-secondary h6:hover .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   transform: none !important;
 }
 
@@ -2708,7 +2708,7 @@ body nav .badge:hover i.fa-user-injured,
 .clinical-accordion-item .section-toggle-icon {
   font-size: 0.9em;
   font-weight: bold;
-  color: #ffffff;
+  color: var(--healthcare-text-light);
   transition: transform 0.2s ease;
   display: inline-block;
   width: 16px;
@@ -2938,8 +2938,8 @@ body nav .badge:hover i.fa-user-injured,
 /* Fix badge visibility on active tab buttons */
 .tab-button.active .badge {
   background-color: var(--healthcare-blue) !important;
-  color: #ffffff !important;
-  border: 2px solid #ffffff !important;
+  color: var(--healthcare-text-light) !important;
+  border: 2px solid var(--healthcare-text-light) !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -8689,7 +8689,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .admin-card .service-card-header .service-icon i,
 .external-service-card .service-card-header .service-icon i {
   font-size: 1.8em !important;
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .service-card .service-card-header .service-icon i.fa, .service-card .service-card-header .service-icon i.fas, .service-card .service-card-header .service-icon i.far, .service-card .service-card-header .service-icon i.fal, .service-card .service-card-header .service-icon i.fat, .service-card .service-card-header .service-icon i.fad, .service-card .service-card-header .service-icon i.fab, .service-card .service-card-header .service-icon i[class*=fa-],
 .services-section .service-card .service-card-header .service-icon i.fa,
@@ -8796,7 +8796,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   font-size: 1.1em !important;
   margin-right: 0.5em !important;
   vertical-align: middle !important;
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .service-card .service-card-footer .btn-service i.fa-xs, .service-card .service-card-footer .btn-service i.fa-sm, .service-card .service-card-footer .btn-service i.fa-lg, .service-card .service-card-footer .btn-service i.fa-xl, .service-card .service-card-footer .btn-service i.fa-2xl, .service-card .service-card-footer .btn-service i.fa-2xs, .service-card .service-card-footer .btn-service i.fa-1x, .service-card .service-card-footer .btn-service i.fa-2x, .service-card .service-card-footer .btn-service i.fa-3x, .service-card .service-card-footer .btn-service i.fa-4x, .service-card .service-card-footer .btn-service i.fa-5x,
 .btn-service i.fa-xs,
@@ -8827,13 +8827,13 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .bg-hse-teal i,
 .bg-primary i,
 .service-icon.bg-hse-teal i {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 
 .bg-hse-green i,
 .bg-success i,
 .service-icon.bg-hse-green i {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 
 .bg-warning i,
@@ -10928,7 +10928,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .hero-section {
   position: relative;
   background: linear-gradient(135deg, #007b7f 0%, #33969a 50%, #2d5a27 100%);
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .hero-section i,
@@ -10936,17 +10936,17 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .hero-section .fa-regular,
 .hero-section .fa-light,
 .hero-section .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .hero-section:hover {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .hero-section:hover i,
 .hero-section:hover .fa-solid,
 .hero-section:hover .fa-regular,
 .hero-section:hover .fa-light,
 .hero-section:hover .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   transform: none !important;
 }
 .hero-section {
@@ -15672,8 +15672,8 @@ main {
 .card-header.bg-dark:hover .fal,
 .card-header.bg-dark:hover .fab,
 .card-header.bg-dark:hover .fa {
-  color: white !important;
-  fill: white !important;
+  color: var(--healthcare-text-light) !important;
+  fill: var(--healthcare-text-light) !important;
   transform: none !important;
   transition: none !important;
 }
@@ -16207,7 +16207,7 @@ button.nav-link:hover i {
 button.nav-link.active {
   background-color: #0085e9 !important;
   border-color: #0085e9 !important;
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   box-shadow: 0 2px 8px rgba(0, 133, 233, 0.3) !important;
   opacity: 1 !important;
   text-shadow: none !important;
@@ -16216,7 +16216,7 @@ button.nav-link.active {
 .nav-tabs-healthcare .nav-link.active i,
 .nav-tabs .nav-link.active i,
 button.nav-link.active i {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   opacity: 1 !important;
 }
 .nav-tabs-healthcare .nav-link.active:hover,
@@ -16224,7 +16224,7 @@ button.nav-link.active i {
 button.nav-link.active:hover {
   background-color: #0070c7 !important;
   border-color: #0070c7 !important;
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   transform: translateY(-1px) !important;
   opacity: 1 !important;
   text-shadow: none !important;
@@ -16233,7 +16233,7 @@ button.nav-link.active:hover {
 .nav-tabs-healthcare .nav-link.active:hover i,
 .nav-tabs .nav-link.active:hover i,
 button.nav-link.active:hover i {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   opacity: 1 !important;
 }
 .nav-tabs-healthcare .nav-link i,
@@ -16924,7 +16924,7 @@ button.nav-link i {
 }
 
 .text-on-primary-bg {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .text-on-primary-bg i,
@@ -16932,17 +16932,17 @@ button.nav-link i {
 .text-on-primary-bg .fa-regular,
 .text-on-primary-bg .fa-light,
 .text-on-primary-bg .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .text-on-primary-bg:hover {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .text-on-primary-bg:hover i,
 .text-on-primary-bg:hover .fa-solid,
 .text-on-primary-bg:hover .fa-regular,
 .text-on-primary-bg:hover .fa-light,
 .text-on-primary-bg:hover .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   transform: none !important;
 }
 .text-on-primary-bg {
@@ -16950,7 +16950,7 @@ button.nav-link i {
 }
 
 .text-on-secondary-bg {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .text-on-secondary-bg i,
@@ -16958,17 +16958,17 @@ button.nav-link i {
 .text-on-secondary-bg .fa-regular,
 .text-on-secondary-bg .fa-light,
 .text-on-secondary-bg .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .text-on-secondary-bg:hover {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .text-on-secondary-bg:hover i,
 .text-on-secondary-bg:hover .fa-solid,
 .text-on-secondary-bg:hover .fa-regular,
 .text-on-secondary-bg:hover .fa-light,
 .text-on-secondary-bg:hover .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   transform: none !important;
 }
 .text-on-secondary-bg {
@@ -16976,7 +16976,7 @@ button.nav-link i {
 }
 
 .text-on-accent-bg {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .text-on-accent-bg i,
@@ -16984,17 +16984,17 @@ button.nav-link i {
 .text-on-accent-bg .fa-regular,
 .text-on-accent-bg .fa-light,
 .text-on-accent-bg .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .text-on-accent-bg:hover {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .text-on-accent-bg:hover i,
 .text-on-accent-bg:hover .fa-solid,
 .text-on-accent-bg:hover .fa-regular,
 .text-on-accent-bg:hover .fa-light,
 .text-on-accent-bg:hover .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   transform: none !important;
 }
 .text-on-accent-bg {
@@ -17002,7 +17002,7 @@ button.nav-link i {
 }
 
 .text-on-info-bg {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .text-on-info-bg i,
@@ -17010,17 +17010,17 @@ button.nav-link i {
 .text-on-info-bg .fa-regular,
 .text-on-info-bg .fa-light,
 .text-on-info-bg .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .text-on-info-bg:hover {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .text-on-info-bg:hover i,
 .text-on-info-bg:hover .fa-solid,
 .text-on-info-bg:hover .fa-regular,
 .text-on-info-bg:hover .fa-light,
 .text-on-info-bg:hover .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   transform: none !important;
 }
 .text-on-info-bg {
@@ -17028,7 +17028,7 @@ button.nav-link i {
 }
 
 .text-on-blue-bg {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .text-on-blue-bg i,
@@ -17036,17 +17036,17 @@ button.nav-link i {
 .text-on-blue-bg .fa-regular,
 .text-on-blue-bg .fa-light,
 .text-on-blue-bg .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .text-on-blue-bg:hover {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .text-on-blue-bg:hover i,
 .text-on-blue-bg:hover .fa-solid,
 .text-on-blue-bg:hover .fa-regular,
 .text-on-blue-bg:hover .fa-light,
 .text-on-blue-bg:hover .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   transform: none !important;
 }
 
@@ -17260,7 +17260,7 @@ button.nav-link i {
 }
 
 .text-on-blue-bg {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .text-on-blue-bg i,
@@ -17268,17 +17268,17 @@ button.nav-link i {
 .text-on-blue-bg .fa-regular,
 .text-on-blue-bg .fa-light,
 .text-on-blue-bg .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .text-on-blue-bg:hover {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
 }
 .text-on-blue-bg:hover i,
 .text-on-blue-bg:hover .fa-solid,
 .text-on-blue-bg:hover .fa-regular,
 .text-on-blue-bg:hover .fa-light,
 .text-on-blue-bg:hover .fa-brands {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   transform: none !important;
 }
 

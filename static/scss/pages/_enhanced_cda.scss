@@ -648,8 +648,8 @@ main {
 .card-header.bg-dark:hover .fal,
 .card-header.bg-dark:hover .fab,
 .card-header.bg-dark:hover .fa {
-  color: white !important;
-  fill: white !important;
+  color: var(--healthcare-text-light) !important;
+  fill: var(--healthcare-text-light) !important;
   transform: none !important;
   transition: none !important;
 }
@@ -1224,28 +1224,28 @@ button.nav-link {
   &.active {
     background-color: #0085e9 !important;
     border-color: #0085e9 !important;
-    color: #ffffff !important;
+    color: var(--healthcare-text-light) !important;
     box-shadow: 0 2px 8px rgba(0, 133, 233, 0.3) !important;
     opacity: 1 !important;
     text-shadow: none !important;
     border-bottom: 2px solid #0085e9 !important;
 
     i {
-      color: #ffffff !important;
+      color: var(--healthcare-text-light) !important;
       opacity: 1 !important;
     }
 
     &:hover {
       background-color: #0070c7 !important;
       border-color: #0070c7 !important;
-      color: #ffffff !important;
+      color: var(--healthcare-text-light) !important;
       transform: translateY(-1px) !important;
       opacity: 1 !important;
       text-shadow: none !important;
       border-bottom: 2px solid #0070c7 !important;
 
       i {
-        color: #ffffff !important;
+        color: var(--healthcare-text-light) !important;
         opacity: 1 !important;
       }
     }

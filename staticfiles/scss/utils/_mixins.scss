@@ -234,7 +234,7 @@
 
 // White text on dark backgrounds - improved readability
 @mixin text-on-blue-bg {
-  color: #ffffff !important;
+  color: var(--healthcare-text-light) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 
   // Icons should maintain white color
@@ -243,19 +243,19 @@
   .fa-regular,
   .fa-light,
   .fa-brands {
-    color: #ffffff !important;
+    color: var(--healthcare-text-light) !important;
   }
 
   // No hover effects on static headers
   &:hover {
-    color: #ffffff !important;
+    color: var(--healthcare-text-light) !important;
 
     i,
     .fa-solid,
     .fa-regular,
     .fa-light,
     .fa-brands {
-      color: #ffffff !important;
+      color: var(--healthcare-text-light) !important;
       transform: none !important;
     }
   }
@@ -386,7 +386,7 @@
 // Smart icon color mixin - automatically chooses light/dark based on background
 @mixin smart-icon-color(
   $bg-color: null,
-  $light-color: #ffffff,
+  $light-color: var(--healthcare-text-light),
   $dark-color: #2d3748
 ) {
   @if $bg-color {

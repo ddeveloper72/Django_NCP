@@ -2238,7 +2238,7 @@ body nav .badge:hover i.fa-user-injured,
 .clinical-accordion-item .section-toggle-icon {
   font-size: 0.9em;
   font-weight: bold;
-  color: #ffffff;
+  color: var(--healthcare-text-light);
   transition: transform 0.2s ease;
   display: inline-block;
   width: 16px;
@@ -2566,8 +2566,8 @@ body nav .badge:hover i.fa-user-injured,
   background-color: var(
     --healthcare-blue
   ) !important; // Blue background for badge
-  color: #ffffff !important; // White text/number for contrast
-  border: 2px solid #ffffff !important; // White border for definition
+  color: var(--healthcare-text-light) !important; // White text/number for contrast
+  border: 2px solid var(--healthcare-text-light) !important; // White border for definition
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important; // Shadow for depth
 }
 
