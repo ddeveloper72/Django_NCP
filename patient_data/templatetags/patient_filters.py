@@ -174,3 +174,13 @@ def has_administrative_data(administrative_info):
         or administrative_info.get("custodian")
         or administrative_info.get("authors")
     )
+
+
+@register.filter
+def basename(path):
+    """Extract the basename (filename) from a file path"""
+    import os
+
+    if not path:
+        return ""
+    return os.path.basename(path)
