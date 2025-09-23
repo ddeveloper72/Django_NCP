@@ -14647,23 +14647,27 @@ input[type=checkbox] {
   padding: 0.25rem 0.5rem;
 }
 
-.clinical-tab-content {
-  display: none;
+.clinical-section .clinical-tab-content {
+  display: none !important;
+  width: 100%;
+  min-height: 200px;
+  background: #f8f9fa;
+  border: 2px solid red;
 }
-.clinical-tab-content.active {
-  display: block;
-}
-
-.clinical-section {
-  background: white;
-  border-radius: 0.375rem;
-  border: 1px solid #dee2e6;
-  margin-bottom: 1.5rem;
+.clinical-section .clinical-tab-content.active {
+  display: block !important;
+  width: 100%;
+  min-height: 200px;
+  background: #e8f5e8;
+  border: 2px solid green;
 }
 
 .extended-tab-content-container {
   background: white;
   border-radius: 0 0 0.375rem 0.375rem;
+  width: 100%;
+  min-height: 300px;
+  position: relative;
 }
 
 @media (max-width: 768px) {
@@ -14677,7 +14681,20 @@ input[type=checkbox] {
     border-radius: 0.375rem;
     text-align: center;
   }
+  .clinical-tab-content.active {
+    display: block;
+    width: 100%;
+    min-height: 250px;
+    padding: 1rem;
+  }
 }
+.clinical-section {
+  background: white;
+  border-radius: 0.375rem;
+  border: 1px solid #dee2e6;
+  margin-bottom: 1.5rem;
+}
+
 .enhanced-cda-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }

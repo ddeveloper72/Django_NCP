@@ -83,12 +83,20 @@
 
     {# Personal Information Tab Content #}
     <div class="clinical-tab-content active" id="extended_patient_personal">
+        <div class="debug-content" style="padding: 20px; background: yellow; border: 3px solid red;">
+            <h3>DEBUG: Personal Information Tab</h3>
+            <p>This is test content for the Personal Information tab.</p>
+        </div>
         {# Direct inclusion of contact component with its responsive card grid #}
         {% include 'patient_data/components/extended_patient_contact_clean.html' %}
     </div>
 
     {# Healthcare Team Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_healthcare">
+        <div class="debug-content" style="padding: 20px; background: lightgreen; border: 3px solid blue;">
+            <h3>DEBUG: Healthcare Team Tab</h3>
+            <p>This is test content for the Healthcare Team tab.</p>
+        </div>
         <div class="row g-3">
             {# Healthcare Provider Information Card #}
             <div class="col-12">
@@ -108,6 +116,10 @@
 
     {# System & Documentation Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_system">
+        <div class="debug-content" style="padding: 20px; background: lightblue; border: 3px solid orange;">
+            <h3>DEBUG: System & Documentation Tab</h3>
+            <p>This is test content for the System & Documentation tab.</p>
+        </div>
         <div class="row g-3">
             {# Administrative Information Card #}
             <div class="col-12">
@@ -127,12 +139,20 @@
 
     {# Clinical Information Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_clinical">
+        <div class="debug-content" style="padding: 20px; background: lightcoral; border: 3px solid purple;">
+            <h3>DEBUG: Clinical Information Tab</h3>
+            <p>This is test content for the Clinical Information tab.</p>
+        </div>
         {# Direct Clinical Content - No Wrapper Card #}
         {% include 'patient_data/components/clinical_information_content.html' %}
     </div>
 
     {# PDF Documents Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_pdfs">
+        <div class="debug-content" style="padding: 20px; background: lightyellow; border: 3px solid brown;">
+            <h3>DEBUG: PDF Documents Tab</h3>
+            <p>This is test content for the PDF Documents tab.</p>
+        </div>
         <div class="row g-3">
             {# PDF Documents Card #}
             <div class="col-12">
@@ -265,6 +285,8 @@
             </div>
         </div>
     </div>
+
+    </div> {# End extended-tab-content-container #}
 </div> {# End Clinical Section #}
 
 

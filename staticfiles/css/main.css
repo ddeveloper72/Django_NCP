@@ -14647,79 +14647,27 @@ input[type=checkbox] {
   padding: 0.25rem 0.5rem;
 }
 
-#extended_patient_personal,
-#extended_patient_healthcare,
-#extended_patient_system,
-#extended_patient_clinical,
-#extended_patient_pdfs {
+.clinical-section .clinical-tab-content {
   display: none !important;
-  padding: 20px;
-  background: white;
-  border-radius: 0 0 0.375rem 0.375rem;
-  height: auto;
-  min-height: fit-content;
-  overflow: visible;
+  width: 100%;
+  min-height: 200px;
+  background: #f8f9fa;
+  border: 2px solid red;
 }
-
-.clinical-tab-content {
-  display: none !important;
-  width: 100% !important;
-  min-height: 300px !important;
-  padding: 1rem !important;
-  position: relative !important;
-  overflow: visible !important;
-}
-.clinical-tab-content.active {
+.clinical-section .clinical-tab-content.active {
   display: block !important;
-  height: auto !important;
-  visibility: visible !important;
-}
-.clinical-tab-content.active * {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-.clinical-tab-content.active .row, .clinical-tab-content.active .col-*, .clinical-tab-content.active .healthcare-info-unified, .clinical-tab-content.active .alert {
-  display: block !important;
-}
-
-.clinical-tabs-container,
-.extended-tab-content-container,
-.extended-tab-content-container.clinical-tabs-container {
-  width: 100% !important;
-  min-height: 400px !important;
-  position: relative !important;
-  overflow: visible !important;
-}
-
-#extended_patient_personal.active,
-#extended_patient_healthcare.active,
-#extended_patient_system.active,
-#extended_patient_clinical.active,
-#extended_patient_pdfs.active {
-  display: block !important;
-  height: auto !important;
-  min-height: 100px !important;
-  width: 100% !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  position: relative !important;
-  overflow: visible !important;
-  background-color: #d4edda !important;
-  border: 3px solid #28a745 !important;
-  padding: 15px !important;
-}
-
-.clinical-section {
-  background: white;
-  border-radius: 0.375rem;
-  border: 1px solid #dee2e6;
-  margin-bottom: 1.5rem;
+  width: 100%;
+  min-height: 200px;
+  background: #e8f5e8;
+  border: 2px solid green;
 }
 
 .extended-tab-content-container {
   background: white;
   border-radius: 0 0 0.375rem 0.375rem;
+  width: 100%;
+  min-height: 300px;
+  position: relative;
 }
 
 @media (max-width: 768px) {
@@ -14733,7 +14681,20 @@ input[type=checkbox] {
     border-radius: 0.375rem;
     text-align: center;
   }
+  .clinical-tab-content.active {
+    display: block;
+    width: 100%;
+    min-height: 250px;
+    padding: 1rem;
+  }
 }
+.clinical-section {
+  background: white;
+  border-radius: 0.375rem;
+  border: 1px solid #dee2e6;
+  margin-bottom: 1.5rem;
+}
+
 .enhanced-cda-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -16704,3 +16665,5 @@ small.text-secondary-accessible {
   font-weight: 500 !important;
   opacity: 1 !important;
 }
+
+/*# sourceMappingURL=main.css.map */

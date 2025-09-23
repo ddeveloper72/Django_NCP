@@ -55,89 +55,31 @@
   }
 }
 
-// Specific tab hiding rules first
-#extended_patient_personal,
-#extended_patient_healthcare,
-#extended_patient_system,
-#extended_patient_clinical,
-#extended_patient_pdfs {
+// Clinical Tab Content - Strengthened CSS specificity
+// ----------------------------------------------------------------------------
+.clinical-section .clinical-tab-content {
   display: none !important;
-  padding: 20px;
-  background: white;
-  border-radius: 0 0 0.375rem 0.375rem;
-  height: auto;
-  min-height: fit-content;
-  overflow: visible;
-}
+  width: 100%;
+  min-height: 200px;
+  background: #f8f9fa; // Light background to see if element is there
+  border: 2px solid red; // Temporary border for debugging
 
-// Simplified tab content approach - use display none/block instead of absolute positioning
-.clinical-tab-content {
-  display: none !important;
-  width: 100% !important;
-  min-height: 300px !important; // Increased from 100px
-  padding: 1rem !important;
-  position: relative !important; // Ensure proper positioning context
-  overflow: visible !important; // Don't clip content
-
-  // Only active tab is visible
   &.active {
     display: block !important;
-    height: auto !important; // Let content determine height
-    visibility: visible !important; // Explicitly set visibility
-    
-    // Force all children to be visible
-    * {
-      display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-    }
-    
-    // Override any flex/grid/inline that might be collapsed
-    .row, .col-*, .healthcare-info-unified, .alert {
-      display: block !important;
-    }
+    width: 100%;
+    min-height: 200px;
+    background: #e8f5e8; // Light green background for active tab
+    border: 2px solid green; // Green border for active tab
   }
 }
 
-// Ensure parent container has proper layout
-.clinical-tabs-container,
-.extended-tab-content-container,
-.extended-tab-content-container.clinical-tabs-container {
-  width: 100% !important;
-  min-height: 400px !important; // Increased from 200px
-  position: relative !important; // Ensure positioning context
-  overflow: visible !important; // Don't clip content
-}
-
-// Legacy specific tab rules for additional safety
-#extended_patient_personal.active,
-#extended_patient_healthcare.active,
-#extended_patient_system.active,
-#extended_patient_clinical.active,
-#extended_patient_pdfs.active {
-  display: block !important; // Force visibility with higher specificity
-  height: auto !important;
-  min-height: 100px !important; // Force minimum height
-  width: 100% !important; // Force full width
-  opacity: 1 !important; // Force full opacity
-  visibility: visible !important; // Force visibility
-  position: relative !important; // Ensure proper positioning
-  overflow: visible !important; // Ensure content isn't clipped
-  background-color: #d4edda !important; // Green background for active tabs
-  border: 3px solid #28a745 !important; // Green border for active tabs
-  padding: 15px !important; // More padding for active tabs
-} // Extended Patient Section Styling - Force visible layout
-// ----------------------------------------------------------------------------
-.clinical-section {
-  background: white;
-  border-radius: 0.375rem;
-  border: 1px solid #dee2e6;
-  margin-bottom: 1.5rem;
-}
-
+// Ensure tab containers have proper layout
 .extended-tab-content-container {
   background: white;
   border-radius: 0 0 0.375rem 0.375rem;
+  width: 100%;
+  min-height: 300px; // Ensure container height
+  position: relative;
 }
 
 // Responsive design for tabs
@@ -154,6 +96,25 @@
     border-radius: 0.375rem;
     text-align: center;
   }
+
+  // Ensure tab content is visible on mobile - but only when active
+  .clinical-tab-content {
+    &.active {
+      display: block;
+      width: 100%;
+      min-height: 250px;
+      padding: 1rem;
+    }
+  }
+}
+
+// Extended Patient Section Styling - Force visible layout
+// ----------------------------------------------------------------------------
+.clinical-section {
+  background: white;
+  border-radius: 0.375rem;
+  border: 1px solid #dee2e6;
+  margin-bottom: 1.5rem;
 }
 
 // Enhanced Card Styling
