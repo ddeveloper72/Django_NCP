@@ -14647,67 +14647,11 @@ input[type=checkbox] {
   padding: 0.25rem 0.5rem;
 }
 
-#extended_patient_personal,
-#extended_patient_healthcare,
-#extended_patient_system,
-#extended_patient_clinical,
-#extended_patient_pdfs {
-  display: none !important;
-  padding: 20px;
-  background: white;
-  border-radius: 0 0 0.375rem 0.375rem;
-  height: auto;
-  min-height: fit-content;
-  overflow: visible;
-}
-
 .clinical-tab-content {
-  display: none !important;
-  width: 100% !important;
-  min-height: 300px !important;
-  padding: 1rem !important;
-  position: relative !important;
-  overflow: visible !important;
+  display: none;
 }
 .clinical-tab-content.active {
-  display: block !important;
-  height: auto !important;
-  visibility: visible !important;
-}
-.clinical-tab-content.active * {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-.clinical-tab-content.active .row, .clinical-tab-content.active .col-*, .clinical-tab-content.active .healthcare-info-unified, .clinical-tab-content.active .alert {
-  display: block !important;
-}
-
-.clinical-tabs-container,
-.extended-tab-content-container,
-.extended-tab-content-container.clinical-tabs-container {
-  width: 100% !important;
-  min-height: 400px !important;
-  position: relative !important;
-  overflow: visible !important;
-}
-
-#extended_patient_personal.active,
-#extended_patient_healthcare.active,
-#extended_patient_system.active,
-#extended_patient_clinical.active,
-#extended_patient_pdfs.active {
-  display: block !important;
-  height: auto !important;
-  min-height: 100px !important;
-  width: 100% !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  position: relative !important;
-  overflow: visible !important;
-  background-color: #d4edda !important;
-  border: 3px solid #28a745 !important;
-  padding: 15px !important;
+  display: block;
 }
 
 .clinical-section {
@@ -16704,3 +16648,5 @@ small.text-secondary-accessible {
   font-weight: 500 !important;
   opacity: 1 !important;
 }
+
+/*# sourceMappingURL=main.css.map */
