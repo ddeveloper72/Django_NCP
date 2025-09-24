@@ -211,7 +211,9 @@ def smart_patient_search_view(request, patient_id):
             )
             return redirect("patient_data:test_patients")
 
-        print(f"=== FOUND PATIENT IN INDEX: {target_patient['given_name']} {target_patient['family_name']} ===")
+        print(
+            f"=== FOUND PATIENT IN INDEX: {target_patient['given_name']} {target_patient['family_name']} ==="
+        )
 
         # Import the search service and form
         from .forms import PatientDataForm
@@ -225,7 +227,9 @@ def smart_patient_search_view(request, patient_id):
         credentials = PatientCredentials(
             country_code=target_patient["country_code"], patient_id=patient_id
         )
-        print(f"Credentials: country_code={target_patient['country_code']}, patient_id={patient_id}")
+        print(
+            f"Credentials: country_code={target_patient['country_code']}, patient_id={patient_id}"
+        )
 
         logger.info(
             f"Smart search: Searching for patient_id='{patient_id}' in country='{target_patient['country_code']}'"
@@ -243,7 +247,9 @@ def smart_patient_search_view(request, patient_id):
                 "patient_data": {
                     "given_name": matches[0].given_name,
                     "family_name": matches[0].family_name,
-                    "birth_date": matches[0].birth_date,  # birth_date is already a string
+                    "birth_date": matches[
+                        0
+                    ].birth_date,  # birth_date is already a string
                     "gender": matches[0].gender,
                     "primary_patient_id": patient_id,
                     "country_code": target_patient["country_code"],
@@ -253,6 +259,14 @@ def smart_patient_search_view(request, patient_id):
                     if hasattr(matches[0], "cda_content")
                     else None
                 ),
+                "file_path": getattr(matches[0], "file_path", ""),
+                "confidence_score": getattr(matches[0], "confidence_score", 1.0),
+                "preferred_cda_type": getattr(matches[0], "preferred_cda_type", "L3"),
+                "country_code": target_patient["country_code"],  # Add at top level too
+                "has_l1": matches[0].has_l1_cda(),
+                "has_l3": matches[0].has_l3_cda(),
+                "l1_documents": getattr(matches[0], "l1_documents", []),
+                "l3_documents": getattr(matches[0], "l3_documents", []),
                 "search_timestamp": timezone.now().isoformat(),
             }
 
