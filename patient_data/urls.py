@@ -67,7 +67,7 @@ urlpatterns = [
         name="direct_patient",
     ),
     # Default CDA view (L3 preferred)
-    path("cda/<str:patient_id>/", main_views.patient_cda_view, name="patient_cda_view"),
+    path("cda/<str:session_id>/", main_views.patient_cda_view, name="patient_cda_view"),
     # Document selection for multiple CDA documents
     path(
         "select-document/<str:patient_id>/",
@@ -78,7 +78,7 @@ urlpatterns = [
     path("clean/<str:patient_id>/", clean_patient_cda_view, name="clean_cda_view"),
     # Specific CDA type view
     path(
-        "cda/<str:patient_id>/<str:cda_type>/",
+        "cda/<str:session_id>/<str:cda_type>/",
         main_views.patient_cda_view,
         name="patient_cda_view_typed",
     ),
