@@ -3,8 +3,8 @@
 // =============================================================================
 
 .page-breadcrumb {
-  background-color: rgba($hse-primary-teal, 0.1);
-  border-bottom: 1px solid rgba($hse-primary-teal, 0.2);
+  background-color: rgba($hco-primary-teal, 0.1);
+  border-bottom: 1px solid rgba($hco-primary-teal, 0.2);
   padding: $space-sm 0;
   margin-bottom: $space-md;
 
@@ -31,7 +31,7 @@
     gap: $space-sm;
 
     .page-location {
-      color: $hse-primary-teal-dark;
+      color: $hco-primary-teal-dark;
       font-weight: $font-weight-medium;
       font-size: $font-size-md;
       display: flex;
@@ -39,7 +39,7 @@
       gap: $space-xs;
 
       i {
-        color: $hse-primary-teal;
+        color: $hco-primary-teal;
         width: 20px;
         text-align: center;
       }
@@ -62,29 +62,29 @@
       font-size: $font-size-sm;
       padding: $space-xs $space-sm;
       border-radius: $border-radius-md;
-      transition: all $transition-hse;
+      transition: all $transition-hco;
 
       &.btn-outline-secondary {
-        color: $hse-primary-teal;
-        border-color: $hse-primary-teal;
+        color: $hco-primary-teal;
+        border-color: $hco-primary-teal;
         background-color: transparent;
 
         &:hover {
           color: $white;
-          background-color: $hse-primary-teal;
-          border-color: $hse-primary-teal;
+          background-color: $hco-primary-teal;
+          border-color: $hco-primary-teal;
         }
       }
 
       &.btn-outline-primary {
-        color: $hse-primary-teal;
-        border-color: $hse-primary-teal;
+        color: $hco-primary-teal;
+        border-color: $hco-primary-teal;
         background-color: transparent;
 
         &:hover {
           color: $white;
-          background-color: $hse-primary-teal;
-          border-color: $hse-primary-teal;
+          background-color: $hco-primary-teal;
+          border-color: $hco-primary-teal;
         }
       }
 

@@ -27,18 +27,18 @@
 
 // Enhanced Professional Medical Portal Navigation Bar - Maximum Specificity
 body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
-  // HSE Professional solid background - highly visible
+  // Healthcare Organisation Professional solid background - highly visible
   background: linear-gradient(
     135deg,
-    rgba($hse-primary-teal, 0.8) 0%,
-    rgba($hse-primary-teal-light, 0.9) 30%,
-    rgba($hse-primary-teal, 0.95) 50%,
-    rgba($hse-primary-teal-light, 0.9) 70%,
-    rgba($hse-primary-teal, 0.8) 100%
+    rgba($hco-primary-teal, 0.8) 0%,
+    rgba($hco-primary-teal-light, 0.9) 30%,
+    rgba($hco-primary-teal, 0.95) 50%,
+    rgba($hco-primary-teal-light, 0.9) 70%,
+    rgba($hco-primary-teal, 0.8) 100%
   ) !important;
 
   // Strong fallback background color
-  background-color: $hse-primary-teal !important;
+  background-color: $hco-primary-teal !important;
   background-image: none !important;
 
   // Professional HSE styling
@@ -47,9 +47,9 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   border-bottom: 3px solid transparent;
   border-image: linear-gradient(
       90deg,
-      $hse-primary-teal,
-      $hse-primary-teal-light,
-      $hse-secondary-green
+      $hco-primary-teal,
+      $hco-primary-teal-light,
+      $hco-secondary-green
     )
     1;
 
@@ -59,23 +59,23 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   z-index: 1030;
 
   // Professional HSE shadow with depth
-  box-shadow: 0 4px 20px rgba($hse-primary-teal, 0.15),
-    0 1px 3px rgba($hse-primary-teal, 0.12), inset 0 1px 0 rgba($white, 0.9);
+  box-shadow: 0 4px 20px rgba($hco-primary-teal, 0.15),
+    0 1px 3px rgba($hco-primary-teal, 0.12), inset 0 1px 0 rgba($white, 0.9);
 
-  transition: all $transition-hse;
+  transition: all $transition-hco;
 
   // Enhanced hover state for HSE professional effect
   &:hover {
-    box-shadow: 0 6px 28px rgba($hse-primary-teal, 0.18),
-      0 2px 8px rgba($hse-primary-teal, 0.15), inset 0 1px 0 rgba($white, 0.95);
+    box-shadow: 0 6px 28px rgba($hco-primary-teal, 0.18),
+      0 2px 8px rgba($hco-primary-teal, 0.15), inset 0 1px 0 rgba($white, 0.95);
 
     // Slightly enhance the HSE gradient on hover
     background: linear-gradient(
       135deg,
       rgba($white, 0.97) 0%,
-      rgba($hse-primary-teal, 0.12) 25%,
-      rgba($hse-primary-teal-light, 0.15) 50%,
-      rgba($hse-primary-teal, 0.12) 75%,
+      rgba($hco-primary-teal, 0.12) 25%,
+      rgba($hco-primary-teal-light, 0.15) 50%,
+      rgba($hco-primary-teal, 0.12) 75%,
       rgba($white, 0.97) 100%
     );
   }
@@ -89,7 +89,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
     // Solid white background for excellent contrast
     background-color: $white !important;
-    color: $hse-primary-teal !important;
+    color: $hco-primary-teal !important;
 
     text-decoration: none;
     padding: $space-md $space-lg;
@@ -99,10 +99,10 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
     // Strong definition with white background
     border: 2px solid $white;
-    box-shadow: 0 4px 16px rgba($hse-primary-teal, 0.3),
-      0 2px 8px rgba($hse-primary-teal, 0.2), inset 0 1px 0 rgba($white, 1);
+    box-shadow: 0 4px 16px rgba($hco-primary-teal, 0.3),
+      0 2px 8px rgba($hco-primary-teal, 0.2), inset 0 1px 0 rgba($white, 1);
 
-    transition: all $transition-hse;
+    transition: all $transition-hco;
 
     // Remove gradient text for better readability
     -webkit-background-clip: initial;
@@ -119,7 +119,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       background: linear-gradient(
         90deg,
         transparent,
-        rgba($hse-primary-teal, 0.05),
+        rgba($hco-primary-teal, 0.05),
         transparent
       );
       transition: left 0.6s ease;
@@ -128,9 +128,9 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     &:hover {
       transform: translateY(-2px) scale(1.03);
       background-color: $white !important;
-      color: $hse-primary-teal !important;
-      box-shadow: 0 6px 24px rgba($hse-primary-teal, 0.4),
-        0 3px 12px rgba($hse-primary-teal, 0.3), inset 0 1px 0 rgba($white, 1);
+      color: $hco-primary-teal !important;
+      box-shadow: 0 6px 24px rgba($hco-primary-teal, 0.4),
+        0 3px 12px rgba($hco-primary-teal, 0.3), inset 0 1px 0 rgba($white, 1);
       border-color: $white;
 
       &::before {
@@ -139,22 +139,22 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     }
 
     &:focus {
-      outline: 3px solid rgba($hse-primary-teal, 0.6);
+      outline: 3px solid rgba($hco-primary-teal, 0.6);
       outline-offset: 3px;
-      box-shadow: 0 0 0 6px rgba($hse-primary-teal, 0.3),
-        0 6px 24px rgba($hse-primary-teal, 0.4);
+      box-shadow: 0 0 0 6px rgba($hco-primary-teal, 0.3),
+        0 6px 24px rgba($hco-primary-teal, 0.4);
       transform: translateY(-1px);
       background-color: $white !important;
-      color: $hse-primary-teal !important;
+      color: $hco-primary-teal !important;
     }
 
     i {
       // HSE teal icon with excellent contrast
       font-size: 1.5em;
       margin-right: $space-sm;
-      color: $hse-primary-teal !important;
-      filter: drop-shadow(0 1px 3px rgba($hse-primary-teal, 0.3));
-      transition: all $transition-hse;
+      color: $hco-primary-teal !important;
+      filter: drop-shadow(0 1px 3px rgba($hco-primary-teal, 0.3));
+      transition: all $transition-hco;
 
       // Remove gradient for solid color
       background: initial;
@@ -168,21 +168,21 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       position: relative;
       z-index: 2;
       font-family: $font-family-primary;
-      color: $hse-primary-teal !important;
-      text-shadow: 0 1px 2px rgba($hse-primary-teal, 0.1);
+      color: $hco-primary-teal !important;
+      text-shadow: 0 1px 2px rgba($hco-primary-teal, 0.1);
 
       // Enhanced brand text styling with better contrast
       .brand-primary {
         font-weight: $font-weight-bold;
         letter-spacing: -0.005em;
-        color: $hse-primary-teal !important;
+        color: $hco-primary-teal !important;
       }
 
       .brand-secondary {
         font-weight: $font-weight-semibold;
         opacity: 0.85;
         margin-left: $space-xs;
-        color: $hse-primary-teal !important;
+        color: $hco-primary-teal !important;
       }
     }
   }
@@ -213,10 +213,10 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     height: 48px;
 
     // Strong shadow for definition and depth
-    box-shadow: 0 4px 16px rgba($hse-primary-teal, 0.4),
-      0 2px 8px rgba($hse-primary-teal, 0.3), inset 0 1px 0 rgba($white, 1);
+    box-shadow: 0 4px 16px rgba($hco-primary-teal, 0.4),
+      0 2px 8px rgba($hco-primary-teal, 0.3), inset 0 1px 0 rgba($white, 1);
 
-    transition: all $transition-hse;
+    transition: all $transition-hco;
     position: relative;
     overflow: hidden;
 
@@ -229,7 +229,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       height: 0;
       background: radial-gradient(
         circle,
-        rgba($hse-primary-teal, 0.1),
+        rgba($hco-primary-teal, 0.1),
         transparent
       );
       border-radius: 50%;
@@ -241,8 +241,8 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       transform: translateY(-2px) scale(1.08);
       background: $white !important;
       border-color: $white !important;
-      box-shadow: 0 6px 24px rgba($hse-primary-teal, 0.5),
-        0 3px 12px rgba($hse-primary-teal, 0.4), inset 0 1px 0 rgba($white, 1);
+      box-shadow: 0 6px 24px rgba($hco-primary-teal, 0.5),
+        0 3px 12px rgba($hco-primary-teal, 0.4), inset 0 1px 0 rgba($white, 1);
 
       &::before {
         width: 100%;
@@ -254,7 +254,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       outline: 3px solid rgba($white, 0.9);
       outline-offset: 3px;
       box-shadow: 0 0 0 6px rgba($white, 0.6),
-        0 6px 24px rgba($hse-primary-teal, 0.5);
+        0 6px 24px rgba($hco-primary-teal, 0.5);
       transform: translateY(-2px);
       background: $white !important;
     }
@@ -268,8 +268,8 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23007b7f' stroke-linecap='round' stroke-miterlimit='10' stroke-width='3.5' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
       width: 20px;
       height: 20px;
-      transition: all $transition-hse;
-      filter: drop-shadow(0 1px 3px rgba($hse-primary-teal, 0.4));
+      transition: all $transition-hco;
+      filter: drop-shadow(0 1px 3px rgba($hco-primary-teal, 0.4));
     }
 
     // Animation states with stronger icons
@@ -302,27 +302,27 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
           bottom: 25%;
           width: 1px;
           background: rgba($white, 0.25);
-          box-shadow: 0 0 2px rgba($hse-primary-teal, 0.1);
+          box-shadow: 0 0 2px rgba($hco-primary-teal, 0.1);
         }
       }
 
       // Enhanced logical grouping styles
       &.nav-group-primary {
         .nav-link {
-          border-left: 3px solid rgba($hse-primary-teal, 0.6);
+          border-left: 3px solid rgba($hco-primary-teal, 0.6);
 
           &::before {
             background: linear-gradient(
               135deg,
-              rgba($hse-primary-teal, 0.08) 0%,
-              rgba($hse-primary-teal-light, 0.06) 100%
+              rgba($hco-primary-teal, 0.08) 0%,
+              rgba($hco-primary-teal-light, 0.06) 100%
             );
           }
 
           &:hover,
           &:focus {
-            border-left-color: $hse-primary-teal;
-            background: $hse-primary-teal !important;
+            border-left-color: $hco-primary-teal;
+            background: $hco-primary-teal !important;
             color: $white !important;
 
             i {
@@ -334,20 +334,20 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
       &.nav-group-management {
         .nav-link {
-          border-left: 3px solid rgba($hse-secondary-green, 0.6);
+          border-left: 3px solid rgba($hco-secondary-green, 0.6);
 
           &::before {
             background: linear-gradient(
               135deg,
-              rgba($hse-secondary-green, 0.08) 0%,
-              rgba($hse-secondary-green, 0.06) 100%
+              rgba($hco-secondary-green, 0.08) 0%,
+              rgba($hco-secondary-green, 0.06) 100%
             );
           }
 
           &:hover,
           &:focus {
-            border-left-color: $hse-secondary-green;
-            background: $hse-secondary-green !important;
+            border-left-color: $hco-secondary-green;
+            background: $hco-secondary-green !important;
             color: $white !important;
 
             i {
@@ -376,10 +376,10 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
         border: 2px solid rgba($white, 0.8);
 
         // Professional depth with enhanced shadows
-        box-shadow: 0 3px 12px rgba($hse-primary-teal, 0.25),
-          0 1px 4px rgba($hse-primary-teal, 0.15), inset 0 1px 0 rgba($white, 1);
+        box-shadow: 0 3px 12px rgba($hco-primary-teal, 0.25),
+          0 1px 4px rgba($hco-primary-teal, 0.15), inset 0 1px 0 rgba($white, 1);
 
-        transition: all $transition-hse;
+        transition: all $transition-hco;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -400,22 +400,22 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
           bottom: 0;
           background: linear-gradient(
             135deg,
-            rgba($hse-primary-teal, 0.02) 0%,
-            rgba($hse-primary-teal-light, 0.05) 50%,
-            rgba($hse-primary-teal, 0.02) 100%
+            rgba($hco-primary-teal, 0.02) 0%,
+            rgba($hco-primary-teal-light, 0.05) 50%,
+            rgba($hco-primary-teal, 0.02) 100%
           );
           opacity: 0;
-          transition: opacity $transition-hse;
+          transition: opacity $transition-hco;
         }
 
         &:hover {
           color: $white !important;
-          background: $hse-primary-teal !important;
-          border-color: $hse-primary-teal;
+          background: $hco-primary-teal !important;
+          border-color: $hco-primary-teal;
           transform: translateY(-3px) scale(1.05);
 
-          box-shadow: 0 8px 24px rgba($hse-primary-teal, 0.4),
-            0 4px 12px rgba($hse-primary-teal, 0.3),
+          box-shadow: 0 8px 24px rgba($hco-primary-teal, 0.4),
+            0 4px 12px rgba($hco-primary-teal, 0.3),
             inset 0 1px 0 rgba($white, 0.2);
 
           &::before {
@@ -436,9 +436,9 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
           outline: 3px solid rgba($white, 0.8);
           outline-offset: 3px;
           box-shadow: 0 0 0 6px rgba($white, 0.3),
-            0 8px 24px rgba($hse-primary-teal, 0.4);
+            0 8px 24px rgba($hco-primary-teal, 0.4);
           color: $white !important;
-          background: $hse-primary-teal !important;
+          background: $hco-primary-teal !important;
         }
 
         &.active {
@@ -446,12 +446,12 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
           font-weight: $font-weight-bold;
           background: linear-gradient(
             135deg,
-            $hse-primary-teal,
-            $hse-primary-teal-light
+            $hco-primary-teal,
+            $hco-primary-teal-light
           ) !important;
-          border-color: $hse-primary-teal;
-          box-shadow: 0 6px 20px rgba($hse-primary-teal, 0.5),
-            0 3px 10px rgba($hse-primary-teal, 0.3),
+          border-color: $hco-primary-teal;
+          box-shadow: 0 6px 20px rgba($hco-primary-teal, 0.5),
+            0 3px 10px rgba($hco-primary-teal, 0.3),
             inset 0 1px 0 rgba($white, 0.3);
 
           // Professional active indicator with HSE green accent
@@ -465,16 +465,16 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
             height: 4px;
             background: linear-gradient(
               90deg,
-              $hse-secondary-green,
-              lighten($hse-secondary-green, 15%)
+              $hco-secondary-green,
+              lighten($hco-secondary-green, 15%)
             );
             border-radius: $border-radius-sm;
-            box-shadow: 0 2px 4px rgba($hse-secondary-green, 0.4);
+            box-shadow: 0 2px 4px rgba($hco-secondary-green, 0.4);
           }
 
           i {
             color: $white !important;
-            text-shadow: 0 1px 2px rgba($hse-primary-teal, 0.3);
+            text-shadow: 0 1px 2px rgba($hco-primary-teal, 0.3);
           }
 
           span {
@@ -484,13 +484,13 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
         i {
           // Larger, more prominent icons with HSE theming
-          color: $hse-primary-teal !important;
+          color: $hco-primary-teal !important;
           font-size: $font-size-lg;
           width: 24px;
           height: 24px;
           text-align: center;
-          filter: drop-shadow(0 1px 3px rgba($hse-primary-teal, 0.3));
-          transition: all $transition-hse;
+          filter: drop-shadow(0 1px 3px rgba($hco-primary-teal, 0.3));
+          transition: all $transition-hco;
           margin-bottom: $space-xs;
         }
 
@@ -504,7 +504,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
             font-size: 10px;
             color: currentColor;
             opacity: 0.7;
-            transition: all $transition-hse;
+            transition: all $transition-hco;
           }
 
           &:hover::after {
@@ -515,17 +515,17 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
         span {
           // Optimized text for better readability
-          color: $hse-primary-teal !important;
+          color: $hco-primary-teal !important;
           font-weight: inherit;
           font-size: $font-size-xs;
           text-transform: uppercase;
           letter-spacing: 0.04em;
-          transition: all $transition-hse;
+          transition: all $transition-hco;
           line-height: 1.1;
           white-space: nowrap;
         }
         letter-spacing: 0.05em;
-        transition: all $transition-hse;
+        transition: all $transition-hco;
         line-height: 1.2;
       }
     }
@@ -545,38 +545,38 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     // Dropdown menu styling for mega-menu implementation
     .dropdown-menu {
       background: rgba($white, 0.98);
-      border: 2px solid $hse-primary-teal;
+      border: 2px solid $hco-primary-teal;
       border-radius: $border-radius-lg;
-      box-shadow: 0 8px 32px rgba($hse-primary-teal, 0.25),
-        0 4px 16px rgba($hse-primary-teal, 0.15);
+      box-shadow: 0 8px 32px rgba($hco-primary-teal, 0.25),
+        0 4px 16px rgba($hco-primary-teal, 0.15);
       backdrop-filter: blur(20px);
       margin-top: $space-sm;
       min-width: 200px;
 
       .dropdown-item {
-        color: $hse-primary-teal;
+        color: $hco-primary-teal;
         padding: $space-sm $space-md;
         font-weight: $font-weight-medium;
         font-size: $font-size-sm;
         border-radius: $border-radius-sm;
         margin: $space-xs;
-        transition: all $transition-hse;
+        transition: all $transition-hco;
 
         &:hover {
-          background: rgba($hse-primary-teal, 0.1);
-          color: $hse-primary-teal;
+          background: rgba($hco-primary-teal, 0.1);
+          color: $hco-primary-teal;
           transform: translateX(2px);
         }
 
         i {
           margin-right: $space-sm;
-          color: $hse-primary-teal;
+          color: $hco-primary-teal;
           width: 16px;
         }
       }
 
       .dropdown-divider {
-        border-color: rgba($hse-primary-teal, 0.2);
+        border-color: rgba($hco-primary-teal, 0.2);
         margin: $space-sm 0;
       }
 
@@ -589,12 +589,12 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
           margin-bottom: $space-md;
 
           .section-title {
-            color: $hse-primary-teal;
+            color: $hco-primary-teal;
             font-weight: $font-weight-bold;
             font-size: $font-size-sm;
             margin-bottom: $space-sm;
             padding-bottom: $space-xs;
-            border-bottom: 1px solid rgba($hse-primary-teal, 0.2);
+            border-bottom: 1px solid rgba($hco-primary-teal, 0.2);
           }
         }
       }
@@ -643,7 +643,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     font-weight: $font-weight-medium;
     font-size: $font-size-sm;
     border-radius: $border-radius-lg;
-    transition: all $transition-hse;
+    transition: all $transition-hco;
     position: relative;
     overflow: hidden;
 
@@ -674,7 +674,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
     i {
       margin-right: $space-xs;
-      transition: transform $transition-hse;
+      transition: transform $transition-hco;
     }
 
     &:hover i {
@@ -686,24 +686,24 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     // HSE teal primary button with excellent contrast
     background: linear-gradient(
       135deg,
-      $hse-primary-teal,
-      $hse-primary-teal-light
+      $hco-primary-teal,
+      $hco-primary-teal-light
     ) !important;
-    border: 2px solid $hse-primary-teal !important;
+    border: 2px solid $hco-primary-teal !important;
     color: $white !important;
     font-weight: $font-weight-bold !important;
-    box-shadow: 0 3px 12px rgba($hse-primary-teal, 0.4),
+    box-shadow: 0 3px 12px rgba($hco-primary-teal, 0.4),
       inset 0 1px 0 rgba($white, 0.25);
 
     &:hover {
       background: linear-gradient(
         135deg,
-        darken($hse-primary-teal, 8%),
-        $hse-primary-teal
+        darken($hco-primary-teal, 8%),
+        $hco-primary-teal
       ) !important;
-      border-color: darken($hse-primary-teal, 8%) !important;
+      border-color: darken($hco-primary-teal, 8%) !important;
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba($hse-primary-teal, 0.5),
+      box-shadow: 0 6px 20px rgba($hco-primary-teal, 0.5),
         inset 0 1px 0 rgba($white, 0.3);
     }
 
@@ -720,18 +720,18 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   .btn-outline-primary {
     // HSE themed outline button for Guest Access
     border: 2px solid $white !important;
-    color: $hse-primary-teal !important;
+    color: $hco-primary-teal !important;
     background: rgba($white, 0.95) !important;
     font-weight: $font-weight-bold !important;
-    box-shadow: 0 3px 12px rgba($hse-primary-teal, 0.2),
+    box-shadow: 0 3px 12px rgba($hco-primary-teal, 0.2),
       inset 0 1px 0 rgba($white, 0.9);
 
     &:hover {
       background: rgba($white, 1) !important;
       border-color: $white !important;
-      color: $hse-primary-teal !important;
+      color: $hco-primary-teal !important;
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba($hse-primary-teal, 0.3),
+      box-shadow: 0 6px 20px rgba($hco-primary-teal, 0.3),
         inset 0 1px 0 rgba($white, 1);
     }
 
@@ -740,7 +740,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     }
 
     &:focus {
-      outline: 3px solid rgba($hse-primary-teal, 0.5);
+      outline: 3px solid rgba($hco-primary-teal, 0.5);
       outline-offset: 2px;
     }
   }
@@ -756,24 +756,24 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       background: linear-gradient(
         135deg,
         rgba($white, 0.98) 0%,
-        rgba($hse-primary-teal, 0.05) 25%,
-        rgba($hse-primary-teal-light, 0.08) 50%,
-        rgba($hse-primary-teal, 0.05) 75%,
+        rgba($hco-primary-teal, 0.05) 25%,
+        rgba($hco-primary-teal-light, 0.08) 50%,
+        rgba($hco-primary-teal, 0.05) 75%,
         rgba($white, 0.98) 100%
       );
       -webkit-backdrop-filter: blur(20px);
       backdrop-filter: blur(20px);
-      border: 1px solid rgba($hse-primary-teal, 0.2);
-      border-top: 3px solid $hse-primary-teal;
+      border: 1px solid rgba($hco-primary-teal, 0.2);
+      border-top: 3px solid $hco-primary-teal;
       border-radius: 0 0 $border-radius-lg $border-radius-lg;
       margin-top: $space-lg;
       padding: $space-lg;
 
       // Enhanced HSE shadow for professional depth
-      box-shadow: 0 8px 32px rgba($hse-primary-teal, 0.2),
-        0 4px 12px rgba($hse-primary-teal, 0.15),
+      box-shadow: 0 8px 32px rgba($hco-primary-teal, 0.2),
+        0 4px 12px rgba($hco-primary-teal, 0.15),
         inset 0 1px 0 rgba($white, 0.9),
-        inset 0 -1px 0 rgba($hse-primary-teal, 0.1);
+        inset 0 -1px 0 rgba($hco-primary-teal, 0.1);
 
       // Smooth slide animation with enhanced timing
       animation: mobileMenuSlide 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -793,16 +793,16 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       }
 
       &::-webkit-scrollbar-track {
-        background: rgba($hse-primary-teal, 0.1);
+        background: rgba($hco-primary-teal, 0.1);
         border-radius: $border-radius-sm;
       }
 
       &::-webkit-scrollbar-thumb {
-        background: rgba($hse-primary-teal, 0.4);
+        background: rgba($hco-primary-teal, 0.4);
         border-radius: $border-radius-sm;
 
         &:hover {
-          background: rgba($hse-primary-teal, 0.6);
+          background: rgba($hco-primary-teal, 0.6);
         }
       }
     }
@@ -836,13 +836,13 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
           background: linear-gradient(
             135deg,
             rgba($white, 0.9) 0%,
-            rgba($hse-primary-teal, 0.05) 100%
+            rgba($hco-primary-teal, 0.05) 100%
           );
-          border: 2px solid rgba($hse-primary-teal, 0.15);
+          border: 2px solid rgba($hco-primary-teal, 0.15);
 
           // Enhanced shadows for depth perception
-          box-shadow: 0 4px 12px rgba($hse-primary-teal, 0.15),
-            0 2px 6px rgba($hse-primary-teal, 0.1),
+          box-shadow: 0 4px 12px rgba($hco-primary-teal, 0.15),
+            0 2px 6px rgba($hco-primary-teal, 0.1),
             inset 0 1px 0 rgba($white, 0.8);
 
           // Smooth mobile interactions
@@ -853,7 +853,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
             font-size: $font-size-lg;
             width: 24px;
             text-align: center;
-            color: $hse-primary-teal;
+            color: $hco-primary-teal;
             transition: all 0.3s ease;
           }
 
@@ -869,40 +869,40 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
           &:active {
             background: linear-gradient(
               135deg,
-              rgba($hse-primary-teal, 0.12) 0%,
-              rgba($hse-primary-teal-light, 0.18) 100%
+              rgba($hco-primary-teal, 0.12) 0%,
+              rgba($hco-primary-teal-light, 0.18) 100%
             );
-            border-color: rgba($hse-primary-teal, 0.3);
+            border-color: rgba($hco-primary-teal, 0.3);
             transform: translateX(6px) scale(1.02);
 
             // Enhanced mobile feedback
-            box-shadow: 0 6px 20px rgba($hse-primary-teal, 0.25),
-              0 3px 10px rgba($hse-primary-teal, 0.15),
+            box-shadow: 0 6px 20px rgba($hco-primary-teal, 0.25),
+              0 3px 10px rgba($hco-primary-teal, 0.15),
               inset 0 1px 0 rgba($white, 0.9);
 
             i {
-              color: $hse-primary-teal;
+              color: $hco-primary-teal;
               transform: scale(1.1);
             }
 
             span {
-              color: $hse-primary-teal;
+              color: $hco-primary-teal;
             }
           }
 
           &.active {
             background: linear-gradient(
               135deg,
-              $hse-primary-teal,
-              $hse-primary-teal-light
+              $hco-primary-teal,
+              $hco-primary-teal-light
             );
-            border-color: $hse-primary-teal;
+            border-color: $hco-primary-teal;
             color: $white;
             transform: translateX(8px) scale(1.02);
 
             // Active state shadow
-            box-shadow: 0 8px 24px rgba($hse-primary-teal, 0.35),
-              0 4px 12px rgba($hse-primary-teal, 0.25),
+            box-shadow: 0 8px 24px rgba($hco-primary-teal, 0.35),
+              0 4px 12px rgba($hco-primary-teal, 0.25),
               inset 0 1px 0 rgba($white, 0.2);
 
             i,
@@ -945,7 +945,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
             border: none;
             border-radius: $border-radius-md;
             background: rgba($white, 0.95);
-            box-shadow: inset 0 2px 8px rgba($hse-primary-teal, 0.1);
+            box-shadow: inset 0 2px 8px rgba($hco-primary-teal, 0.1);
 
             .dropdown-item {
               padding: $space-sm $space-lg;
@@ -953,7 +953,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
               &:hover,
               &:focus {
-                background: rgba($hse-primary-teal, 0.08);
+                background: rgba($hco-primary-teal, 0.08);
                 transform: translateX(4px);
               }
             }
@@ -965,7 +965,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       .nav-group-end {
         margin-bottom: $space-lg;
         padding-bottom: $space-md;
-        border-bottom: 2px solid rgba($hse-primary-teal, 0.1);
+        border-bottom: 2px solid rgba($hco-primary-teal, 0.1);
 
         &::after {
           display: none; // Hide vertical separators on mobile
@@ -1109,7 +1109,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       text-decoration: none;
       font-weight: $font-weight-medium;
       font-size: $font-size-base;
-      transition: all $transition-hse;
+      transition: all $transition-hco;
       -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
       min-width: 180px;
@@ -1150,7 +1150,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   top: 0;
   z-index: $z-sticky;
   box-shadow: $shadow-sm;
-  transition: all $transition-hse;
+  transition: all $transition-hco;
 
   .navbar-container {
     @include container;
@@ -1165,7 +1165,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     color: $text-dark;
     font-weight: $font-weight-semibold;
     font-family: $font-family-primary;
-    transition: all $transition-hse;
+    transition: all $transition-hco;
 
     &:hover {
       color: $primary-color;
@@ -1208,7 +1208,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
         text-decoration: none;
         padding: $space-sm $space-md;
         border-radius: $border-radius-md;
-        transition: all $transition-hse;
+        transition: all $transition-hco;
         font-weight: $font-weight-medium;
         position: relative;
         font-size: $font-size-base;
@@ -1254,7 +1254,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     width: 44px;
     height: 44px;
     border-radius: $border-radius-md;
-    transition: all $transition-hse;
+    transition: all $transition-hco;
     cursor: pointer;
 
     @include tablet-up {
@@ -1282,7 +1282,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       width: 18px;
       height: 2px;
       background-color: currentColor;
-      transition: all $transition-hse;
+      transition: all $transition-hco;
 
       &:not(:last-child) {
         margin-bottom: 3px;
@@ -1341,7 +1341,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
         font-weight: $font-weight-medium;
         padding: $space-sm $space-md;
         border-radius: $border-radius-md;
-        transition: all $transition-hse;
+        transition: all $transition-hco;
         position: relative;
         display: flex;
         align-items: center;
@@ -1437,7 +1437,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
             &:hover {
               background: rgba($white, 0.9);
-              color: $hse-primary-teal;
+              color: $hco-primary-teal;
               border-color: $white;
             }
           }
@@ -1449,7 +1449,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
             &:hover {
               background: $white;
-              color: $hse-primary-teal;
+              color: $hco-primary-teal;
               border-color: $white;
             }
           }
@@ -1467,8 +1467,8 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 .navbar.hero-header {
   background: linear-gradient(
     135deg,
-    $hse-primary-teal 0%,
-    $hse-primary-teal-dark 100%
+    $hco-primary-teal 0%,
+    $hco-primary-teal-dark 100%
   );
   border-bottom: none;
   padding: $space-lg 0;
@@ -1525,7 +1525,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       border-radius: $border-radius-lg;
       background: rgba($white, 0.05);
       border: 1px solid rgba($white, 0.1);
-      transition: all $transition-hse;
+      transition: all $transition-hco;
 
       @media (max-width: $breakpoint-md) {
         padding: $space-xs $space-sm;
@@ -1607,7 +1607,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
             &:hover {
               background: rgba($white, 0.9);
-              color: $hse-primary-teal;
+              color: $hco-primary-teal;
               border-color: $white;
             }
           }
@@ -1619,7 +1619,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
             &:hover {
               background: $white;
-              color: $hse-primary-teal;
+              color: $hco-primary-teal;
               border-color: $white;
             }
           }
@@ -1650,8 +1650,8 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     align-items: center;
     gap: $space-lg;
     padding: $space-sm $space-md;
-    background: rgba($hse-primary-teal, 0.05);
-    border: 1px solid rgba($hse-primary-teal, 0.1);
+    background: rgba($hco-primary-teal, 0.05);
+    border: 1px solid rgba($hco-primary-teal, 0.1);
     border-radius: $border-radius-md;
 
     .page-info {
@@ -1661,7 +1661,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
         gap: $space-sm;
         font-size: $font-size-sm;
         font-weight: $font-weight-medium;
-        color: $hse-primary-teal;
+        color: $hco-primary-teal;
 
         .context-flag {
           width: 20px;
@@ -1685,7 +1685,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
         display: inline-flex;
         align-items: center;
         gap: $space-xs;
-        transition: all $transition-hse;
+        transition: all $transition-hco;
         line-height: 1;
 
         &.btn-outline-secondary {
@@ -1700,18 +1700,32 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
         }
 
         &.btn-outline-primary {
-          border: 1px solid $hse-primary-teal;
-          color: $hse-primary-teal;
+          border: 1px solid $hco-primary-teal;
+          color: $hco-primary-teal;
           background: transparent;
 
           &:hover {
-            background: $hse-primary-teal;
+            background: $hco-primary-teal;
             color: $white;
           }
         }
 
         i {
           font-size: $font-size-xs;
+
+          // Specific styling for page action icons to ensure visibility
+          // Override all other icon color rules including .btn i and theme rules
+          &.page-action-icon {
+            color: #2d3748 !important; // Dark gray for excellent contrast on light backgrounds
+
+            // Make this rule even more specific to override .btn i.fa-solid rules
+            &.fa,
+            &.fa-solid,
+            &.far,
+            &.fab {
+              color: #2d3748 !important;
+            }
+          }
         }
       }
     }
@@ -1761,7 +1775,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       color: $text-muted;
       font-size: $font-size-lg;
       cursor: pointer;
-      transition: all $transition-hse;
+      transition: all $transition-hco;
 
       &:hover {
         color: $primary-color;
@@ -1856,7 +1870,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       font-weight: $font-weight-medium;
       padding: $space-xs $space-sm;
       border-radius: $border-radius-sm;
-      transition: all $transition-hse;
+      transition: all $transition-hco;
       line-height: $line-height-normal;
 
       &:hover {
@@ -1956,7 +1970,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
     .breadcrumb-item a {
       color: $primary-color;
-      transition: all $transition-hse;
+      transition: all $transition-hco;
 
       &:hover {
         color: $primary-dark;
@@ -1983,7 +1997,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     .btn {
       border-radius: $border-radius-sm;
       font-weight: $font-weight-medium;
-      transition: all $transition-hse;
+      transition: all $transition-hco;
       padding: $space-sm $space-md;
       border: $border-width solid $primary-color;
 
@@ -2176,7 +2190,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   padding: $space-xl;
   border-radius: $border-radius-lg;
   box-shadow: 0 4px 15px rgba($primary-color, 0.08);
-  transition: all $transition-hse;
+  transition: all $transition-hco;
   border: 1px solid rgba($primary-color, 0.05);
   position: relative;
   overflow: hidden;
@@ -2191,7 +2205,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     background: linear-gradient(90deg, $primary-color, $primary-dark);
     transform: scaleX(0);
     transform-origin: left;
-    transition: transform $transition-hse;
+    transition: transform $transition-hco;
   }
 
   &:hover {
@@ -2216,7 +2230,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     color: $white;
     font-size: $font-size-xl;
     box-shadow: 0 4px 15px rgba($primary-color, 0.2);
-    transition: all $transition-hse;
+    transition: all $transition-hco;
 
     // FontAwesome icon centering and sizing
     i {
@@ -2274,7 +2288,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     padding: $space-md $space-lg;
     border: 2px solid $primary-color;
     border-radius: $border-radius-full;
-    transition: all $transition-hse;
+    transition: all $transition-hco;
     position: relative;
     overflow: hidden;
 
@@ -2286,7 +2300,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       width: 100%;
       height: 100%;
       background: $primary-color;
-      transition: left $transition-hse;
+      transition: left $transition-hco;
       z-index: -1;
     }
 
@@ -2304,7 +2318,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     }
 
     i {
-      transition: transform $transition-hse;
+      transition: transform $transition-hco;
     }
   }
 }
@@ -2315,7 +2329,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   background: $white;
   border-radius: $border-radius-lg;
   box-shadow: 0 2px 10px rgba($primary-color, 0.05);
-  transition: all $transition-hse;
+  transition: all $transition-hco;
 
   &:hover {
     transform: translateY(-4px);
@@ -2334,7 +2348,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     color: $white;
     font-size: $font-size-xxl;
     box-shadow: 0 6px 20px rgba($primary-color, 0.15);
-    transition: all $transition-hse;
+    transition: all $transition-hco;
   }
 
   &:hover .feature-icon {
@@ -2396,7 +2410,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     color: $primary-color;
     text-decoration: none;
     font-weight: $font-weight-medium;
-    transition: all $transition-hse;
+    transition: all $transition-hco;
 
     &:hover {
       text-decoration: underline;
@@ -2458,7 +2472,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       text-decoration: none;
       font-family: $font-family-mono;
       font-size: $font-size-sm;
-      transition: all $transition-hse;
+      transition: all $transition-hco;
 
       &:hover {
         text-decoration: underline;
@@ -2664,7 +2678,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       &::after {
         margin-left: $space-xs;
         font-size: 0.7em;
-        transition: transform $transition-hse;
+        transition: transform $transition-hco;
       }
 
       &[aria-expanded="true"]::after {
@@ -2681,30 +2695,30 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
     // Professional HSE styling
     background: rgba($white, 0.98);
-    border: 2px solid rgba($hse-primary-teal, 0.2);
+    border: 2px solid rgba($hco-primary-teal, 0.2);
     border-radius: $border-radius-lg;
 
     // Enhanced depth and professional shadows
-    box-shadow: 0 12px 40px rgba($hse-primary-teal, 0.2),
-      0 6px 20px rgba($hse-primary-teal, 0.15),
-      0 2px 8px rgba($hse-primary-teal, 0.1), inset 0 1px 0 rgba($white, 0.9);
+    box-shadow: 0 12px 40px rgba($hco-primary-teal, 0.2),
+      0 6px 20px rgba($hco-primary-teal, 0.15),
+      0 2px 8px rgba($hco-primary-teal, 0.1), inset 0 1px 0 rgba($white, 0.9);
 
     // Smooth animation
     animation: megaMenuSlide 0.3s ease-out;
     transform-origin: top center;
 
     .dropdown-header {
-      color: $hse-primary-teal;
+      color: $hco-primary-teal;
       font-weight: $font-weight-bold;
       font-size: $font-size-sm;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       padding: $space-sm $space-md;
       margin-bottom: $space-xs;
-      border-bottom: 2px solid rgba($hse-primary-teal, 0.1);
+      border-bottom: 2px solid rgba($hco-primary-teal, 0.1);
 
       i {
-        color: $hse-primary-teal;
+        color: $hco-primary-teal;
         font-size: $font-size-base;
       }
     }
@@ -2716,30 +2730,30 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       color: $text-dark;
       font-weight: $font-weight-medium;
       font-size: $font-size-sm;
-      transition: all $transition-hse;
+      transition: all $transition-hco;
       display: flex;
       align-items: center;
 
       i {
-        color: $hse-primary-teal;
+        color: $hco-primary-teal;
         width: 20px;
         text-align: center;
         opacity: 0.8;
-        transition: all $transition-hse;
+        transition: all $transition-hco;
       }
 
       &:hover,
       &:focus {
         background: linear-gradient(
           135deg,
-          rgba($hse-primary-teal, 0.08) 0%,
-          rgba($hse-primary-teal-light, 0.12) 100%
+          rgba($hco-primary-teal, 0.08) 0%,
+          rgba($hco-primary-teal-light, 0.12) 100%
         );
-        color: $hse-primary-teal;
+        color: $hco-primary-teal;
         transform: translateX(4px);
 
         i {
-          color: $hse-primary-teal;
+          color: $hco-primary-teal;
           opacity: 1;
           transform: scale(1.1);
         }
@@ -2752,7 +2766,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 
     .dropdown-divider {
       margin: $space-md 0;
-      border-top: 1px solid rgba($hse-primary-teal, 0.15);
+      border-top: 1px solid rgba($hco-primary-teal, 0.15);
       opacity: 1;
     }
 
@@ -2764,7 +2778,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       font-weight: $font-weight-bold;
 
       &.bg-secondary {
-        background-color: rgba($hse-primary-teal, 0.7) !important;
+        background-color: rgba($hco-primary-teal, 0.7) !important;
         color: $white;
       }
 
@@ -2785,7 +2799,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
 .nav-item {
   &[data-role="admin"] {
     .nav-link {
-      border-left-color: rgba($hse-secondary-green, 0.8);
+      border-left-color: rgba($hco-secondary-green, 0.8);
 
       &::after {
         content: "🔒";
@@ -2840,12 +2854,12 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   background: linear-gradient(
     135deg,
     rgba($white, 0.95) 0%,
-    rgba($hse-primary-teal, 0.12) 100%
+    rgba($hco-primary-teal, 0.12) 100%
   );
-  border: 2px solid rgba($hse-primary-teal, 0.3);
+  border: 2px solid rgba($hco-primary-teal, 0.3);
   border-radius: $border-radius-lg 0 0 $border-radius-lg;
-  box-shadow: 0 16px 48px rgba($hse-primary-teal, 0.35),
-    0 8px 24px rgba($hse-primary-teal, 0.25), inset 0 1px 0 rgba($white, 0.9);
+  box-shadow: 0 16px 48px rgba($hco-primary-teal, 0.35),
+    0 8px 24px rgba($hco-primary-teal, 0.25), inset 0 1px 0 rgba($white, 0.9);
   backdrop-filter: blur(10px);
   z-index: 1050;
   transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -2871,14 +2885,14 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 24px rgba($hse-primary-teal, 0.4),
-      0 4px 12px rgba($hse-primary-teal, 0.3);
+    box-shadow: 0 8px 24px rgba($hco-primary-teal, 0.4),
+      0 4px 12px rgba($hco-primary-teal, 0.3);
 
     &:hover {
       background: linear-gradient(135deg, #33c5d1 0%, #33969a 100%);
       transform: translateY(-50%) scale(1.05);
-      box-shadow: 0 12px 32px rgba($hse-primary-teal, 0.5),
-        0 6px 16px rgba($hse-primary-teal, 0.35);
+      box-shadow: 0 12px 32px rgba($hco-primary-teal, 0.5),
+        0 6px 16px rgba($hco-primary-teal, 0.35);
     }
 
     &:active {
@@ -2914,16 +2928,16 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     }
 
     &::-webkit-scrollbar-track {
-      background: rgba($hse-primary-teal, 0.1);
+      background: rgba($hco-primary-teal, 0.1);
       border-radius: $border-radius-sm;
     }
 
     &::-webkit-scrollbar-thumb {
-      background: rgba($hse-primary-teal, 0.4);
+      background: rgba($hco-primary-teal, 0.4);
       border-radius: $border-radius-sm;
 
       &:hover {
-        background: rgba($hse-primary-teal, 0.6);
+        background: rgba($hco-primary-teal, 0.6);
       }
     }
   }
@@ -2931,10 +2945,10 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   .sidebar-header {
     margin-bottom: $space-lg;
     padding-bottom: $space-md;
-    border-bottom: 2px solid rgba($hse-primary-teal, 0.1);
+    border-bottom: 2px solid rgba($hco-primary-teal, 0.1);
 
     .sidebar-title {
-      color: $hse-primary-teal;
+      color: $hco-primary-teal;
       font-weight: $font-weight-bold;
       font-size: $font-size-base;
       margin: 0;
@@ -2954,14 +2968,14 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       margin-bottom: $space-lg;
 
       .nav-section-title {
-        color: $hse-secondary-green;
+        color: $hco-secondary-green;
         font-weight: $font-weight-semibold;
         font-size: $font-size-sm;
         text-transform: uppercase;
         letter-spacing: 0.03em;
         margin: 0 0 $space-sm 0;
         padding: $space-xs $space-sm;
-        background: rgba($hse-secondary-green, 0.05);
+        background: rgba($hco-secondary-green, 0.05);
         border-radius: $border-radius-sm;
         display: flex;
         align-items: center;
@@ -2996,7 +3010,7 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
             top: 0;
             bottom: 0;
             width: 3px;
-            background: $hse-primary-teal;
+            background: $hco-primary-teal;
             transform: scaleY(0);
             transition: transform 0.3s ease;
           }
@@ -3018,10 +3032,10 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
           &:focus {
             background: linear-gradient(
               135deg,
-              rgba($hse-primary-teal, 0.08) 0%,
-              rgba($hse-primary-teal-light, 0.12) 100%
+              rgba($hco-primary-teal, 0.08) 0%,
+              rgba($hco-primary-teal-light, 0.12) 100%
             );
-            color: $hse-primary-teal;
+            color: $hco-primary-teal;
             transform: translateX(4px);
             text-decoration: none;
 
@@ -3067,4 +3081,13 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   .power-user-sidebar {
     display: none;
   }
+}
+
+// Override icon colors for page actions - High specificity rule to override all other icon styles
+.page-context .page-actions .btn i.page-action-icon,
+.page-context .page-actions .btn i.page-action-icon.fa,
+.page-context .page-actions .btn i.page-action-icon.fa-solid,
+.page-context .page-actions .btn i.page-action-icon.far,
+.page-context .page-actions .btn i.page-action-icon.fab {
+  color: #2d3748 !important; // Dark gray for excellent contrast on light backgrounds
 }

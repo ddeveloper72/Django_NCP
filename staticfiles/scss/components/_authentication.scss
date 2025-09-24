@@ -18,8 +18,8 @@
 .auth-card {
   background: $white;
   border-radius: $border-radius-xl;
-  box-shadow: 0 8px 32px rgba($hse-primary-teal, 0.1);
-  border: 1px solid rgba($hse-primary-teal, 0.1);
+  box-shadow: 0 8px 32px rgba($hco-primary-teal, 0.1);
+  border: 1px solid rgba($hco-primary-teal, 0.1);
   overflow: hidden;
   max-width: 420px;
   margin: 0 auto;
@@ -34,8 +34,8 @@
 .auth-header {
   background: linear-gradient(
     135deg,
-    $hse-primary-teal 0%,
-    $hse-primary-teal-dark 100%
+    $hco-primary-teal 0%,
+    $hco-primary-teal-dark 100%
   );
   color: $white;
   padding: $space-xxl;
@@ -127,7 +127,7 @@
 
   i {
     margin-right: $space-xs;
-    color: $hse-primary-teal;
+    color: $hco-primary-teal;
   }
 }
 
@@ -137,7 +137,7 @@
   border: 2px solid $border-light;
   border-radius: $border-radius-md;
   font-size: $font-size-base;
-  transition: all $transition-hse;
+  transition: all $transition-hco;
   background: $white;
   font-family: $font-family-primary;
 
@@ -148,8 +148,8 @@
 
   &:focus {
     outline: none;
-    border-color: $hse-primary-teal;
-    box-shadow: 0 0 0 3px rgba($hse-primary-teal, 0.1);
+    border-color: $hco-primary-teal;
+    box-shadow: 0 0 0 3px rgba($hco-primary-teal, 0.1);
     transform: translateY(-1px);
   }
 
@@ -178,8 +178,8 @@
   padding: $space-md $space-xl;
   background: linear-gradient(
     135deg,
-    $hse-primary-teal 0%,
-    $hse-primary-teal-dark 100%
+    $hco-primary-teal 0%,
+    $hco-primary-teal-dark 100%
   );
   color: $white;
   border: none;
@@ -187,13 +187,13 @@
   font-size: $font-size-base;
   font-weight: $font-weight-semibold;
   cursor: pointer;
-  transition: all $transition-hse;
+  transition: all $transition-hco;
   margin-bottom: $space-lg;
   text-decoration: none;
   display: inline-block;
   text-align: center;
   font-family: $font-family-primary;
-  box-shadow: 0 2px 4px rgba($hse-primary-teal, 0.2);
+  box-shadow: 0 2px 4px rgba($hco-primary-teal, 0.2);
 
   i {
     margin-right: $space-sm;
@@ -201,18 +201,18 @@
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba($hse-primary-teal, 0.3);
+    box-shadow: 0 6px 16px rgba($hco-primary-teal, 0.3);
     color: $white;
     text-decoration: none;
   }
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 2px 4px rgba($hse-primary-teal, 0.2);
+    box-shadow: 0 2px 4px rgba($hco-primary-teal, 0.2);
   }
 
   &:focus {
-    outline: 2px solid rgba($hse-primary-teal, 0.5);
+    outline: 2px solid rgba($hco-primary-teal, 0.5);
     outline-offset: 2px;
   }
 
@@ -384,7 +384,7 @@
 
     i {
       margin-right: $space-sm;
-      color: $hse-primary-teal;
+      color: $hco-primary-teal;
     }
   }
 
@@ -439,18 +439,18 @@
 
 // Authentication Links
 .auth-link {
-  color: $hse-primary-teal;
+  color: $hco-primary-teal;
   text-decoration: none;
   font-weight: $font-weight-medium;
-  transition: all $transition-hse;
+  transition: all $transition-hco;
 
   &:hover {
-    color: $hse-primary-teal-dark;
+    color: $hco-primary-teal-dark;
     text-decoration: underline;
   }
 
   &:focus {
-    outline: 2px solid rgba($hse-primary-teal, 0.3);
+    outline: 2px solid rgba($hco-primary-teal, 0.3);
     outline-offset: 2px;
   }
 
@@ -548,7 +548,7 @@
 
       .logout-icon {
         font-size: $font-size-display;
-        color: $hse-primary-teal;
+        color: $hco-primary-teal;
         margin-bottom: $space-xl;
       }
 

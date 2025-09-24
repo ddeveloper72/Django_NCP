@@ -58,10 +58,10 @@
 // ========================================
 
 .icon-healthcare {
-  color: $hse-primary-teal;
+  color: $hco-primary-teal;
 
   &.icon-success {
-    color: $hse-secondary-green;
+    color: $hco-secondary-green;
   }
 
   &.icon-warning {
@@ -73,7 +73,7 @@
   }
 
   &.icon-info {
-    color: $hse-accent-blue;
+    color: $hco-accent-blue;
   }
 
   &.icon-muted {
@@ -97,7 +97,7 @@
   transition: color 0.2s ease;
 
   &:hover {
-    color: $hse-primary-teal;
+    color: $hco-primary-teal;
   }
 }
 
@@ -127,7 +127,7 @@
 // Feature list icons - consistent sizing for bullet points
 .icon-feature {
   font-size: 1.1em;
-  color: $hse-secondary-green;
+  color: $hco-secondary-green;
   width: 1.5em;
   text-align: center;
   flex-shrink: 0;
@@ -138,7 +138,7 @@
   font-size: 1em;
 
   &.status-active {
-    color: $hse-secondary-green;
+    color: $hco-secondary-green;
   }
 
   &.status-pending {
@@ -157,16 +157,16 @@
 // Clinical section icons - for medical data display
 .icon-clinical {
   font-size: 1.2em;
-  color: $hse-primary-teal;
+  color: $hco-primary-teal;
   margin-right: 0.75em;
 
   &.icon-medical-code {
-    color: $hse-secondary-green;
+    color: $hco-secondary-green;
     font-size: 0.9em;
   }
 
   &.icon-terminology {
-    color: $hse-accent-blue;
+    color: $hco-accent-blue;
     font-size: 0.85em;
   }
 }
@@ -196,7 +196,7 @@
   transition: all 0.2s ease;
 
   &:focus {
-    outline: 2px solid $hse-primary-teal;
+    outline: 2px solid $hco-primary-teal;
     outline-offset: 2px;
   }
 
@@ -263,7 +263,7 @@
 
 // ========================================
 // BRAND SPECIFIC OVERRIDES
-// HSE and healthcare-specific styling
+// Healthcare Organisation and healthcare-specific styling
 // ========================================
 
 // Override any conflicting styles from other components
@@ -297,7 +297,7 @@
 // Service card feature icons - override any FontAwesome size/color classes
 .service-card .service-card-body .service-features li i {
   font-size: 1.1em !important;
-  color: $hse-secondary-green !important;
+  color: $hco-secondary-green !important;
   width: 1.5em !important;
   text-align: center !important;
   flex-shrink: 0 !important;
@@ -327,7 +327,7 @@
   &.text-dark,
   &.text-light,
   &.text-white {
-    color: $hse-secondary-green !important;
+    color: $hco-secondary-green !important;
   }
 }
 
@@ -387,7 +387,7 @@
 }
 
 // Apply HSE smart icon color system globally
-@include hse-smart-icons;
+@include hco-smart-icons;
 
 // Capability and stat icons
 .capability-icon i,
@@ -449,7 +449,7 @@
 .hero-stats .stat-icon i {
   font-size: 3.5em !important;
   margin-right: 0.5em !important;
-  color: $hse-primary-teal !important;
+  color: $hco-primary-teal !important;
   vertical-align: top !important;
   display: inline-block !important;
 
@@ -502,7 +502,7 @@
 
   i {
     font-size: 2.5em !important;
-    color: $hse-primary-teal !important;
+    color: $hco-primary-teal !important;
     margin: 0 !important; // Remove margin-bottom to avoid centering conflicts
     @include fontawesome-center-override; // Override FontAwesome positioning
 
@@ -526,7 +526,7 @@
 // Configuration card icons
 .config-card .config-icon i {
   font-size: 1.8em !important;
-  color: $hse-primary-teal !important;
+  color: $hco-primary-teal !important;
   margin-right: 0.75rem !important;
 
   // Override FontAwesome sizing classes
@@ -553,7 +553,7 @@
 .section-title i {
   font-size: 1.3em !important;
   margin-right: 0.75rem !important;
-  color: $hse-primary-teal !important;
+  color: $hco-primary-teal !important;
 
   // Override FontAwesome sizing classes
   &.fa-xs,
@@ -742,7 +742,7 @@
 .config-note i {
   font-size: 1.1em !important;
   margin-right: 0.5em !important;
-  color: $hse-accent-blue !important;
+  color: $hco-accent-blue !important;
 
   // Override FontAwesome sizing classes
   &.fa-xs,
