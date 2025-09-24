@@ -411,20 +411,20 @@
   }
 }
 
-// Predefined smart icon classes for common HSE backgrounds
-@mixin hse-smart-icons {
-  // HSE Teal background (dark) - white icons
-  .bg-hse-teal i,
+// Predefined smart icon classes for common Healthcare Organisation backgrounds
+@mixin hco-smart-icons {
+  // Healthcare Organisation Teal background (dark) - white icons
+  .bg-hco-teal i,
   .bg-primary i,
-  .service-icon.bg-hse-teal i {
-    @include smart-icon-color($hse-primary-teal);
+  .service-icon.bg-hco-teal i {
+    @include smart-icon-color($hco-primary-teal);
   }
 
-  // HSE Green background (dark) - white icons
-  .bg-hse-green i,
+  // Healthcare Organisation Green background (dark) - white icons
+  .bg-hco-green i,
   .bg-success i,
-  .service-icon.bg-hse-green i {
-    @include smart-icon-color($hse-secondary-green);
+  .service-icon.bg-hco-green i {
+    @include smart-icon-color($hco-secondary-green);
   }
 
   // Warning background (light) - dark icons

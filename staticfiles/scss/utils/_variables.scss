@@ -1,38 +1,38 @@
 // ========================================
-// Variables - HSE-Inspired Color Palette
+// Variables - Healthcare Organisation Color Palette
 // ========================================
 
-// HSE Primary Colors - Based on Irish Health Service Executive Brand
-$hse-primary-teal: #007b7f; // Main HSE teal color
-$hse-primary-teal-dark: #005b5f; // Darker teal for depth
-$hse-primary-teal-light: #33969a; // Lighter teal for highlights
-$hse-primary-teal-lighter: #80bebf; // Very light teal for backgrounds
+// Healthcare Organisation Primary Colors - Professional Healthcare Brand
+$hco-primary-teal: #007b7f; // Main healthcare organisation teal color
+$hco-primary-teal-dark: #005b5f; // Darker teal for depth
+$hco-primary-teal-light: #33969a; // Lighter teal for highlights
+$hco-primary-teal-lighter: #80bebf; // Very light teal for backgrounds
 
-// HSE Secondary Colors
-$hse-secondary-green: #2d5a27; // Professional healthcare green
-$hse-secondary-green-light: #4a7c59; // Lighter healthcare green
-$hse-accent-blue: #1e3a5f; // Deep professional blue
-$hse-accent-blue-light: #3a5a7f; // Lighter professional blue
+// Healthcare Organisation Secondary Colors
+$hco-secondary-green: #2d5a27; // Professional healthcare green
+$hco-secondary-green-light: #4a7c59; // Lighter healthcare green
+$hco-accent-blue: #1e3a5f; // Deep professional blue
+$hco-accent-blue-light: #3a5a7f; // Lighter professional blue
 
-// Main Color Palette (Updated with HSE colors)
-$primary-color: $hse-primary-teal;
-$primary-dark: $hse-primary-teal-dark;
-$primary-light: $hse-primary-teal-light;
-$primary-lighter: $hse-primary-teal-lighter;
+// Main Color Palette (Updated with Healthcare Organisation colors)
+$primary-color: $hco-primary-teal;
+$primary-dark: $hco-primary-teal-dark;
+$primary-light: $hco-primary-teal-light;
+$primary-lighter: $hco-primary-teal-lighter;
 
-$secondary-color: $hse-secondary-green;
-$secondary-light: $hse-secondary-green-light;
-$accent-color: $hse-accent-blue;
-$accent-light: $hse-accent-blue-light;
+$secondary-color: $hco-secondary-green;
+$secondary-light: $hco-secondary-green-light;
+$accent-color: $hco-accent-blue;
+$accent-light: $hco-accent-blue-light;
 
 // Legacy color mappings for backward compatibility
-$primary-blue: $hse-primary-teal;
-$secondary-blue: $hse-primary-teal-dark;
-$accent-blue: $hse-accent-blue;
+$primary-blue: $hco-primary-teal;
+$secondary-blue: $hco-primary-teal-dark;
+$accent-blue: $hco-accent-blue;
 $light-blue: #e8f6f7; // Very light teal background
 
-$primary-green: $hse-secondary-green;
-$accent-green: $hse-secondary-green-light;
+$primary-green: $hco-secondary-green;
+$accent-green: $hco-secondary-green-light;
 $light-green: #e8f5e8; // Light green background
 
 // Neutral Colors - Clean, accessible grays
@@ -50,15 +50,15 @@ $text-muted: $neutral-light;
 $bg-light: #f7fafc; // Very light gray-blue background
 $bg-dark: $neutral-dark; // Dark background
 $bg-white: #ffffff; // Pure white
-$bg-primary: rgba($hse-primary-teal, 0.05); // Very subtle teal background
-$bg-secondary: rgba($hse-secondary-green, 0.05); // Very subtle green background
+$bg-primary: rgba($hco-primary-teal, 0.05); // Very subtle teal background
+$bg-secondary: rgba($hco-secondary-green, 0.05); // Very subtle green background
 
 // Border Colors - Professional, subtle borders
 $border-light: #e2e8f0; // Light gray border
 $border-medium: #cbd5e0; // Medium gray border
-$border-primary: $hse-primary-teal; // Teal border for accents
+$border-primary: $hco-primary-teal; // Teal border for accents
 
-// Status Colors - HSE-compatible with accessibility in mind
+// Status Colors - Healthcare Organisation-compatible with accessibility in mind
 $white: #ffffff;
 $success: #22c55e; // Professional green (better contrast than default)
 $success-dark: #16a34a;
@@ -75,33 +75,33 @@ $warning-dark: #d97706;
 $warning-light: #fcd34d;
 $warning-lighter: #fef3c7;
 
-$info: $hse-primary-teal; // Use HSE teal for info
-$info-dark: $hse-primary-teal-dark;
-$info-light: $hse-primary-teal-light;
-$info-lighter: rgba($hse-primary-teal, 0.1);
+$info: $hco-primary-teal; // Use Healthcare Organisation teal for info
+$info-dark: $hco-primary-teal-dark;
+$info-light: $hco-primary-teal-light;
+$info-lighter: rgba($hco-primary-teal, 0.1);
 
-// Healthcare Theme Colors - Updated for HSE
-$healthcare-primary: $hse-primary-teal;
-$healthcare-secondary: $hse-secondary-green;
-$healthcare-accent: $hse-accent-blue;
+// Healthcare Theme Colors - Updated for Healthcare Organisation
+$healthcare-primary: $hco-primary-teal;
+$healthcare-secondary: $hco-secondary-green;
+$healthcare-accent: $hco-accent-blue;
 
 // Legacy mappings (keeping for compatibility)
 $primary-pink: #c2185b; // Keep existing pink if needed
 $secondary-pink: #e91e63;
 
-// Updated primary blue theme to use HSE colors
-$primary-blue: $hse-primary-teal;
-$primary-blue-light: $hse-primary-teal-light;
-$secondary-blue: $hse-primary-teal-dark;
+// Updated primary blue theme to use Healthcare Organisation colors
+$primary-blue: $hco-primary-teal;
+$primary-blue-light: $hco-primary-teal-light;
+$secondary-blue: $hco-primary-teal-dark;
 
-// Typography - HSE-inspired, accessible font stack
-$font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-  'Helvetica Neue', Arial, sans-serif;
-$font-family-secondary: 'Georgia', 'Times New Roman', serif; // For emphasis/headers
-$font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas,
-  'Courier New', monospace;
+// Typography - Healthcare Organisation-inspired, accessible font stack
+$font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+  "Helvetica Neue", Arial, sans-serif;
+$font-family-secondary: "Georgia", "Times New Roman", serif; // For emphasis/headers
+$font-family-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
+  "Courier New", monospace;
 
-// Font Sizes - HSE-compatible scale for accessibility
+// Font Sizes - Healthcare Organisation-compatible scale for accessibility
 $font-size-xs: 0.75rem; // 12px - Use sparingly
 $font-size-sm: 0.875rem; // 14px - Small text
 $font-size-base: 1rem; // 16px - Base text (recommended minimum)
@@ -134,14 +134,14 @@ $space-xxl: 3rem; // 48px - Section spacing
 $space-xxxl: 4rem; // 64px - Large section spacing
 $space-huge: 6rem; // 96px - Hero section spacing
 
-// Border & Radius - HSE professional styling
+// Border & Radius - Healthcare Organisation professional styling
 $border-width: 1px;
 $border-width-thick: 2px;
 $border-width-thicker: 3px;
 
 $border-radius-xs: 0.125rem; // 2px - Minimal rounding
 $border-radius-sm: 0.25rem; // 4px - Small rounding
-$border-radius-md: 0.375rem; // 6px - Medium rounding (HSE-preferred)
+$border-radius-md: 0.375rem; // 6px - Medium rounding (Healthcare Organisation-preferred)
 $border-radius-lg: 0.5rem; // 8px - Large rounding
 $border-radius-xl: 0.75rem; // 12px - Extra large rounding
 $border-radius-full: 9999px; // Perfect circle/pill shape
@@ -153,7 +153,7 @@ $shadow-base: 0 2px 4px rgba(0, 0, 0, 0.1);
 $shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
 $shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
-$shadow-focus: 0 0 0 3px rgba($hse-primary-teal, 0.2); // HSE focus shadow
+$shadow-focus: 0 0 0 3px rgba($hco-primary-teal, 0.2); // Healthcare Organisation focus shadow
 
 // Breakpoints for Responsive Design - Updated for modern devices
 $breakpoint-xs: 480px; // Small phones
@@ -179,10 +179,10 @@ $transition-normal: 0.2s cubic-bezier(0.4, 0, 0.2, 1); // Standard interactions
 $transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1); // Deliberate interactions
 $transition-slower: 0.5s cubic-bezier(0.4, 0, 0.2, 1); // Page transitions
 
-// HSE-specific animations
-$transition-hse: 0.2s ease-out; // HSE standard transition
+// Healthcare Organisation-specific animations
+$transition-hco: 0.2s ease-out; // Healthcare Organisation standard transition
 
-// Form Elements - HSE-compliant, accessible forms
+// Form Elements - Healthcare Organisation-compliant, accessible forms
 $input-height-sm: 2rem; // 32px - Compact forms
 $input-height-md: 2.5rem; // 40px - Standard forms
 $input-height-lg: 3rem; // 48px - Large forms
@@ -209,7 +209,7 @@ $button-padding-sm: $space-xs $space-md;
 $button-padding-md: $space-sm $space-lg;
 $button-padding-lg: $space-md $space-xl;
 
-// HSE Button Colors
+// Healthcare Organisation Button Colors
 $button-primary-bg: $primary-color;
 $button-primary-hover: $primary-dark;
 $button-primary-text: $white;
