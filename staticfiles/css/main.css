@@ -6849,6 +6849,12 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .page-context .page-context-content .page-actions .btn i {
   font-size: 0.75rem;
 }
+.page-context .page-context-content .page-actions .btn i.page-action-icon {
+  color: #2d3748 !important;
+}
+.page-context .page-context-content .page-actions .btn i.page-action-icon.fa, .page-context .page-context-content .page-actions .btn i.page-action-icon.fa-solid, .page-context .page-context-content .page-actions .btn i.page-action-icon.far, .page-context .page-context-content .page-actions .btn i.page-action-icon.fab {
+  color: #2d3748 !important;
+}
 
 .mobile-nav {
   position: fixed;
@@ -8109,6 +8115,14 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
     display: none;
   }
 }
+.page-context .page-actions .btn i.page-action-icon,
+.page-context .page-actions .btn i.page-action-icon.fa,
+.page-context .page-actions .btn i.page-action-icon.fa-solid,
+.page-context .page-actions .btn i.page-action-icon.far,
+.page-context .page-actions .btn i.page-action-icon.fab {
+  color: #2d3748 !important;
+}
+
 .modal {
   position: fixed;
   top: 0;
@@ -8885,15 +8899,15 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   font-size: 1.1em !important;
 }
 
-.bg-hse-teal i,
+.bg-hco-teal i,
 .bg-primary i,
-.service-icon.bg-hse-teal i {
+.service-icon.bg-hco-teal i {
   color: var(--healthcare-text-light) !important;
 }
 
-.bg-hse-green i,
+.bg-hco-green i,
 .bg-success i,
-.service-icon.bg-hse-green i {
+.service-icon.bg-hco-green i {
   color: var(--healthcare-text-light) !important;
 }
 
@@ -10945,27 +10959,27 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
     color: #ecf0f1;
   }
 }
-.text-hse-teal {
+.text-hco-teal {
   color: #007b7f !important;
 }
 
-.bg-hse-teal {
+.bg-hco-teal {
   background-color: #007b7f !important;
   color: #ffffff !important;
 }
 
-.bg-hse-green {
+.bg-hco-green {
   background-color: #2d5a27 !important;
   color: #ffffff !important;
 }
 
-.btn-hse-teal {
+.btn-hco-teal {
   background-color: #007b7f;
   border-color: #007b7f;
   color: #ffffff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
 }
-.btn-hse-teal:hover, .btn-hse-teal:focus {
+.btn-hco-teal:hover, .btn-hco-teal:focus {
   background-color: #005b5f;
   border-color: #005b5f;
   color: #ffffff;
@@ -10973,12 +10987,12 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   box-shadow: 0 6px 20px rgba(0, 123, 127, 0.3);
 }
 
-.btn-hse-green {
+.btn-hco-green {
   background-color: #2d5a27;
   border-color: #2d5a27;
   color: #ffffff;
 }
-.btn-hse-green:hover, .btn-hse-green:focus {
+.btn-hco-green:hover, .btn-hco-green:focus {
   background-color: #4a7c59;
   border-color: #4a7c59;
   color: #ffffff;
@@ -11182,16 +11196,16 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
     padding: 4.5rem 1.5rem;
   }
 }
-.services-section .service-card .service-card-header .service-icon.bg-hse-teal {
+.services-section .service-card .service-card-header .service-icon.bg-hco-teal {
   background: linear-gradient(135deg, #007b7f 0%, #005b5f 100%);
 }
-.services-section .service-card .service-card-header .service-icon.bg-hse-teal::after {
+.services-section .service-card .service-card-header .service-icon.bg-hco-teal::after {
   background: #007b7f;
 }
-.services-section .service-card .service-card-header .service-icon.bg-hse-green {
+.services-section .service-card .service-card-header .service-icon.bg-hco-green {
   background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
 }
-.services-section .service-card .service-card-header .service-icon.bg-hse-green::after {
+.services-section .service-card .service-card-header .service-icon.bg-hco-green::after {
   background: #2d5a27;
 }
 .services-section .service-card .service-card-header .service-icon.bg-primary {
@@ -11206,21 +11220,21 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .services-section .service-card .service-card-header .service-icon.bg-warning::after {
   background: #ffc107;
 }
-.services-section .service-card .service-card-footer .btn-hse-teal {
+.services-section .service-card .service-card-footer .btn-hco-teal {
   background: linear-gradient(135deg, #007b7f 0%, #005b5f 100%);
   border: none;
   color: white;
 }
-.services-section .service-card .service-card-footer .btn-hse-teal:hover {
+.services-section .service-card .service-card-footer .btn-hco-teal:hover {
   background: linear-gradient(135deg, #005b5f 0%, #004548 100%);
   color: white;
 }
-.services-section .service-card .service-card-footer .btn-hse-green {
+.services-section .service-card .service-card-footer .btn-hco-green {
   background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
   border: none;
   color: white;
 }
-.services-section .service-card .service-card-footer .btn-hse-green:hover {
+.services-section .service-card .service-card-footer .btn-hco-green:hover {
   background: linear-gradient(135deg, #4a7c59 0%, rgb(83.5303030303, 139.9696969697, 100.4621212121) 100%);
   color: white;
 }
