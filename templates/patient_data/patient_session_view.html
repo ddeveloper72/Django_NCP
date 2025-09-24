@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ sample_patient_info.given_name }} {{ sample_patient_info.family_name }} - Patient Session{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/patient_data.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="patient-session-container">
+    <!-- Navigation Header -->
+    <div class="results-header">
+        <a href="{% url 'patient_data:patient_data_form' %}" class="back-button">
+            ← Back to Search
+        </a>
+        <h1><i class="fa-solid fa-user me-2"></i>{{ sample_patient_info.given_name }} {{ sample_patient_info.family_name }}</h1>
+    </div>
+
+    <!-- Patient Information Card -->
+    <div class="patient-info-card mb-4">
+        <div class="card border-healthcare-teal">
+            <div class="card-header bg-healthcare-teal text-white">
+                <h3 class="mb-0"><i class="fa-solid fa-user-medical me-2"></i>Patient Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="detail-item mb-3">
+                            <span class="detail-label fw-bold">Patient ID:</span>
+                            <span class="detail-value">{{ patient_id }}</span>
+                        </div>
+                        <div class="detail-item mb-3">
+                            <span class="detail-label fw-bold">Full Name:</span>
+                            <span class="detail-value">{{ sample_patient_info.given_name }} {{ sample_patient_info.family_name }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        {% if sample_patient_info.birth_date %}
+                        <div class="detail-item mb-3">
+                            <span class="detail-label fw-bold">Birth Date:</span>
+                            <span class="detail-value">{{ sample_patient_info.birth_date }}</span>
+                        </div>
+                        {% endif %}
+                        {% if sample_patient_info.gender %}
+                        <div class="detail-item mb-3">
+                            <span class="detail-label fw-bold">Gender:</span>
+                            <span class="detail-value">{{ sample_patient_info.gender }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="detail-item mb-3">
+                            <span class="detail-label fw-bold">Source Country:</span>
+                            <span class="detail-value">{{ country_code }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CDA Documents Section -->
+    <div class="cda-documents-section">
+        <div class="card border-secondary">
+            <div class="card-header bg-light">
+                <h3 class="mb-0"><i class="fa-solid fa-file-medical me-2"></i>Available CDA Documents</h3>
+                <p class="mb-0 mt-2 text-muted">Select a CDA document type to view the patient's medical information</p>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if has_l1 %}
+                    <div class="col-md-6 mb-3">
+                        <div class="cda-option-card border border-primary rounded p-3">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="cda-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                    <i class="fa-solid fa-file-pdf fs-4"></i>
+                                </div>
+                                <div>
+                                    <h4 class="mb-1">L1 Original Document</h4>
+                                    <p class="mb-0 text-muted">Original clinical document from source country</p>
+                                </div>
+                            </div>
+                            <div class="cda-description mb-3">
+                                <p class="mb-2"><strong>Contains:</strong></p>
+                                <ul class="mb-3">
+                                    <li>Original Clinical Documents (OrCD) in PDF format</li>
+                                    <li>Native language medical reports</li>
+                                    <li>Scanned documents and images</li>
+                                </ul>
+                            </div>
+                            <a href="{% url 'patient_data:patient_cda_view_typed' patient_id 'L1' %}"
+                               class="btn btn-primary">
+                                <i class="fa-solid fa-eye me-2"></i>View L1 Document
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if has_l3 %}
+                    <div class="col-md-6 mb-3">
+                        <div class="cda-option-card border border-healthcare-teal rounded p-3">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="cda-icon bg-healthcare-teal text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                    <i class="fa-solid fa-table fs-4"></i>
+                                </div>
+                                <div>
+                                    <h4 class="mb-1">L3 Patient Summary</h4>
+                                    <p class="mb-0 text-muted">Standardized European Patient Summary</p>
+                                </div>
+                            </div>
+                            <div class="cda-description mb-3">
+                                <p class="mb-2"><strong>Contains:</strong></p>
+                                <ul class="mb-3">
+                                    <li>Structured clinical data sections</li>
+                                    <li>Allergies and intolerances</li>
+                                    <li>Medications and active problems</li>
+                                    <li>Cross-border healthcare optimized</li>
+                                </ul>
+                            </div>
+                            <a href="{% url 'patient_data:patient_cda_view_typed' patient_id 'L3' %}"
+                               class="btn bg-healthcare-teal text-white">
+                                <i class="fa-solid fa-eye me-2"></i>View L3 Summary
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if not has_l1 and not has_l3 %}
+                    <div class="col-12">
+                        <div class="alert alert-warning">
+                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                            No CDA documents are currently available for this patient.
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="help-section mt-4">
+        <div class="card border-info">
+            <div class="card-header bg-info bg-opacity-10">
+                <h5 class="mb-0"><i class="fa-solid fa-info-circle me-2"></i>Document Types Explained</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fa-solid fa-file-pdf me-2"></i>L1 Original Document</h6>
+                        <p class="small text-muted">
+                            Contains the original clinical documents (OrCD) as they were created by healthcare providers.
+                            These may include scanned reports, PDFs, and images in the original language.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fa-solid fa-table me-2"></i>L3 Patient Summary</h6>
+                        <p class="small text-muted">
+                            A standardized, structured summary following European Patient Summary guidelines.
+                            Optimized for cross-border healthcare with structured data sections.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.patient-session-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.results-header {
+    margin-bottom: 2rem;
+}
+
+.back-button {
+    color: #6c757d;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.back-button:hover {
+    color: #16a085;
+}
+
+.patient-info-card .detail-item {
+    border-bottom: 1px solid #f8f9fa;
+    padding-bottom: 0.5rem;
+}
+
+.patient-info-card .detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: #6c757d;
+    min-width: 120px;
+    display: inline-block;
+}
+
+.cda-option-card {
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.cda-option-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.cda-description ul {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.bg-healthcare-teal {
+    background-color: #16a085 !important;
+}
+
+.border-healthcare-teal {
+    border-color: #16a085 !important;
+}
+
+.text-healthcare-teal {
+    color: #16a085 !important;
+}
+</style>
+{% endblock %}
