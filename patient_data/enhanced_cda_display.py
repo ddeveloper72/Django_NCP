@@ -99,9 +99,23 @@ class EnhancedCDADisplayView(View):
                 source_language=source_language, target_language=target_language
             )
 
+            # Get patient identity from enhanced sections
+            patient_identity_data = enhanced_sections.get("patient_identity", {})
+            
+            # Create patient_identity object for template compatibility
+            patient_identity = type("PatientIdentity", (object,), {
+                "patient_id": patient_identity_data.get("primary_patient_id", patient_id),
+                "url_patient_id": patient_id,  # Use the URL patient_id for navigation
+                "given_name": patient_identity_data.get("given_name", ""),
+                "family_name": patient_identity_data.get("family_name", ""),
+                "birth_date": patient_identity_data.get("birth_date", ""),
+                "gender": patient_identity_data.get("gender", ""),
+            })()
+
             # Prepare context for template
             context = {
                 "patient_id": patient_id,
+                "patient_identity": patient_identity,
                 "enhanced_sections": enhanced_sections,
                 "template_translations": template_translations,
                 "source_language": source_language,
