@@ -35,7 +35,7 @@ What are the positive and negative impacts of this decision?
 | Date | Decision File | Status | Summary |
 |------|---------------|--------|---------|
 | 2025-09-20 | [001-vscode-automation-setup.md](./001-vscode-automation-setup.md) | Accepted | VS Code runOnSave and SASS compilation setup |
-| TBD | [002-bootstrap-to-sass-migration.md](./002-bootstrap-to-sass-migration.md) | Proposed | Migration from Bootstrap to custom SASS with HSE colors |
+| TBD | [002-bootstrap-to-sass-migration.md](./002-bootstrap-to-sass-migration.md) | Proposed | Migration from Bootstrap to custom SASS with healthcare colours |
 | TBD | [003-view-refactoring-strategy.md](./003-view-refactoring-strategy.md) | Proposed | Strategy for converting FBVs to CBVs |
 
 ---

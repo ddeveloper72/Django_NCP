@@ -14,7 +14,7 @@ Complete refactoring of `templates/patient_data/enhanced_patient_cda.html` to ac
 - **No inline CSS in HTML templates** - VIOLATED: 900+ lines of CSS in `<style>` blocks
 - **Keep Django templates simple** - VIOLATED: Complex conditional logic and extensive styling
 - **Use reusable view classes and methods** - REVIEW NEEDED: Template complexity suggests view logic needed
-- **Follow HSE colour palette** - AUDIT NEEDED: Color compliance verification required
+- **Follow healthcare organisation colour palette** - AUDIT NEEDED: Color compliance verification required
 
 ### 2.2 Secondary Issues (HIGH PRIORITY)
 
@@ -87,10 +87,10 @@ static/scss/pages/_enhanced_cda.scss
    - Navigation tab enhancements → `_navigation_tabs.scss`
    - Layout and responsive controls → `_enhanced_cda.scss`
 
-3. **HSE Color Palette Audit**
-   - Audit all color values against HSE palette
-   - Replace hardcoded colors with SASS variables
-   - Document color usage and compliance
+3. **Healthcare Organisation Colour Palette Audit**
+   - Audit all colour values against healthcare organisation palette
+   - Replace hardcoded colours with SASS variables
+   - Document colour usage and compliance
 
 4. **Remove inline CSS from template**
    - Delete `<style>` blocks from template
@@ -185,7 +185,7 @@ static/scss/pages/_enhanced_cda.scss
 
 - ✅ **No inline CSS** - All CSS moved to external SASS files
 - ✅ **Simple templates** - Template reduced to ~300 lines, logic in Python
-- ✅ **HSE color compliance** - All colors verified against HSE palette
+- ✅ **Healthcare colour compliance** - All colours verified against healthcare organisation palette
 - ✅ **HTML validation** - No validation warnings or errors
 
 ### 6.2 Technical Metrics

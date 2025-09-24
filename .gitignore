@@ -55,7 +55,7 @@ venv.bak/
 *~
 
 # Specifications and Documentation
-.specs/
+# .specs/
 
 # OS
 .DS_Store

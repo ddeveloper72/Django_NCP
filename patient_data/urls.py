@@ -4,35 +4,47 @@ Patient Data URL Configuration
 URL patterns for patient search, data retrieval, and document request functionality.
 """
 
+import os
+
+# Import the debug session function
+import sys
+
 from django.urls import path
+
 from patient_data import views as main_views
+
 from .cda_test_views import (
-    test_patients_view,
     refresh_cda_index_view,
     smart_patient_search_view,
+    test_patients_view,
 )
 from .debug_views import debug_cda_index
+
+sys.path.append(os.path.dirname(__file__))
+from debug_session_view import debug_session_view
+
 from .clean_cda_views import clean_patient_cda_view
-from .view_modules.enhanced_cda_view import (
-    EnhancedCDADocumentView,
-    toggle_translation_view,
-    get_section_translation,
-    export_translated_cda,
-)
 from .enhanced_cda_display import EnhancedCDADisplayView
+from .view_modules import enhanced_cda_translation_views
 from .view_modules.cda_views import (
-    cda_translation_display,
-    cda_translation_api,
     available_cda_files,
+    cda_translation_api,
+    cda_translation_display,
     patient_search_with_cda,
 )
-from .view_modules import enhanced_cda_translation_views
+from .view_modules.enhanced_cda_view import (
+    EnhancedCDADocumentView,
+    export_translated_cda,
+    get_section_translation,
+    toggle_translation_view,
+)
 
 app_name = "patient_data"
 
 urlpatterns = [
     # Debug views
     path("debug/cda-index/", debug_cda_index, name="debug_cda_index"),
+    path("debug/session/", debug_session_view, name="debug_session"),
     # Test CDA Documents Management
     path("test-patients/", test_patients_view, name="test_patients"),
     path("refresh-cda-index/", refresh_cda_index_view, name="refresh_cda_index"),
