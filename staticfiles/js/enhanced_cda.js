@@ -81,7 +81,7 @@ function initializeEnhancedCDA() {
 /**
  * Extended Patient Tab Management Function - SIMPLIFIED DEBUG VERSION
  * @param {string} sectionId - ID of the section containing tabs
- * @param {string} tabType - Type of tab to show (personal, healthcare, system, clinical, pdfs)
+ * @param {string} tabType - Type of tab to show (personal, healthcare, system, clinical, orcd)
  */
 function showExtendedTab(sectionId, tabType) {
   // Get all tab content elements
@@ -119,13 +119,42 @@ function showExtendedTab(sectionId, tabType) {
     activeTab.classList.add('active');
     // Force refresh
     activeTab.offsetHeight;
+
+    // Auto-show first OrCD when Original Clinical Documents tab is activated
+    if (tabType === 'pdfs') {
+      setTimeout(() => {
+        const firstPdfViewer = activeTab.querySelector('[data-action="show-pdf-viewer"]');
+        if (firstPdfViewer) {
+          // Automatically show the first OrCD viewer
+          const pdfIndex = firstPdfViewer.dataset.pdfIndex;
+          console.log('Auto-loading OrCD viewer for index:', pdfIndex);
+
+          // Find the OrCD viewer container and show it
+          const viewerContainer = document.getElementById(`pdf-viewer-${pdfIndex}`);
+          if (viewerContainer) {
+            viewerContainer.classList.remove('hidden');
+
+            // Update button to show "Hide" instead of "View"
+            const buttonIcon = firstPdfViewer.querySelector('i');
+            const buttonText = firstPdfViewer.childNodes[firstPdfViewer.childNodes.length - 1];
+            if (buttonIcon && buttonText) {
+              buttonIcon.className = 'fa-solid fa-eye-slash me-1';
+              buttonText.textContent = 'Hide';
+            }
+
+            // Change button action to hide
+            firstPdfViewer.dataset.action = 'hide-pdf-viewer';
+          }
+        }
+      }, 200); // Small delay to ensure tab is fully rendered
+    }
   }  // Update button states
   const container = activeTab ? activeTab.closest('.clinical-section') : document.querySelector('.clinical-section');
   if (container) {
     const buttons = container.querySelectorAll('.tab-navigation .tab-button');
     buttons.forEach(btn => btn.classList.remove('active'));
 
-    const tabTypeMap = { 'personal': 0, 'healthcare': 1, 'system': 2, 'clinical': 3, 'pdfs': 4 };
+    const tabTypeMap = { 'personal': 0, 'healthcare': 1, 'system': 2, 'clinical': 3, 'pdfs': 4 }; // pdfs = OrCD tab
     const buttonIndex = tabTypeMap[tabType];
 
     if (buttonIndex !== undefined && buttons[buttonIndex]) {
@@ -320,21 +349,78 @@ function initializeExtendedPatientEventDelegation() {
 
       case 'show-pdf-viewer':
         const pdfIndex1 = target.dataset.pdfIndex;
-        console.log('PDF viewer requested for index:', pdfIndex1);
-        // PDF functionality not implemented in enhanced_cda.js
-        console.warn('PDF viewer functionality not available in enhanced CDA view');
-        break;
+        console.log('PDF viewer show requested for index:', pdfIndex1);
 
-      case 'open-pdf-fullscreen':
-        const pdfIndex2 = target.dataset.pdfIndex;
-        console.log('PDF fullscreen requested for index:', pdfIndex2);
-        console.warn('PDF fullscreen functionality not available in enhanced CDA view');
+        // Show the PDF viewer container
+        const viewerContainer1 = document.getElementById(`pdf-viewer-${pdfIndex1}`);
+        if (viewerContainer1) {
+          viewerContainer1.classList.remove('hidden');
+
+          // Update button to show "Hide" instead of "View"
+          const buttonIcon = target.querySelector('i');
+          const buttonText = target.childNodes[target.childNodes.length - 1];
+          if (buttonIcon && buttonText) {
+            buttonIcon.className = 'fa-solid fa-eye-slash me-1';
+            buttonText.textContent = 'Hide';
+          }
+
+          // Change button action to hide
+          target.dataset.action = 'hide-pdf-viewer';
+          console.log('✅ OrCD viewer shown for index:', pdfIndex1);
+        } else {
+          console.warn('❌ Could not find OrCD viewer container for index:', pdfIndex1);
+        }
         break;
 
       case 'hide-pdf-viewer':
         const pdfIndex3 = target.dataset.pdfIndex;
-        console.log('Hide PDF viewer requested for index:', pdfIndex3);
-        console.warn('Hide PDF viewer functionality not available in enhanced CDA view');
+        console.log('OrCD viewer hide requested for index:', pdfIndex3);
+
+        // Hide the OrCD viewer container
+        const viewerContainer3 = document.getElementById(`pdf-viewer-${pdfIndex3}`);
+        if (viewerContainer3) {
+          viewerContainer3.classList.add('hidden');
+
+          // Update button to show "View" instead of "Hide"
+          const buttonIcon = target.querySelector('i');
+          const buttonText = target.childNodes[target.childNodes.length - 1];
+          if (buttonIcon && buttonText) {
+            buttonIcon.className = 'fa-solid fa-eye me-1';
+            buttonText.textContent = 'View';
+          }
+
+          // Change button action back to show
+          target.dataset.action = 'show-pdf-viewer';
+          console.log('✅ OrCD viewer hidden for index:', pdfIndex3);
+        } else {
+          console.warn('❌ Could not find OrCD viewer container for index:', pdfIndex3);
+        }
+        break;
+
+      case 'open-pdf-fullscreen':
+        const pdfIndex2 = target.dataset.pdfIndex;
+        console.log('OrCD fullscreen requested for index:', pdfIndex2);
+
+        // Find the iframe for this PDF and attempt fullscreen
+        const iframe = document.getElementById(`pdf-frame-${pdfIndex2}`);
+        if (iframe) {
+          if (iframe.requestFullscreen) {
+            iframe.requestFullscreen().catch(err => console.warn('Fullscreen error:', err));
+          } else if (iframe.webkitRequestFullscreen) {
+            iframe.webkitRequestFullscreen();
+          } else if (iframe.msRequestFullscreen) {
+            iframe.msRequestFullscreen();
+          } else {
+            console.warn('Fullscreen not supported by browser');
+            // Fallback: open in new window
+            const src = iframe.src;
+            if (src) {
+              window.open(src, '_blank', 'width=1200,height=800');
+            }
+          }
+        } else {
+          console.warn('❌ Could not find iframe for fullscreen:', pdfIndex2);
+        }
         break;
 
       case 'open-pdf-new-tab':

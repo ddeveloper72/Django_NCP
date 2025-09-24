@@ -119,7 +119,7 @@ function showExtendedTab(sectionId, tabType) {
     activeTab.classList.add('active');
     // Force refresh
     activeTab.offsetHeight;
-    
+
     // Auto-show first OrCD when Original Clinical Documents tab is activated
     if (tabType === 'pdfs') {
       setTimeout(() => {
@@ -128,12 +128,12 @@ function showExtendedTab(sectionId, tabType) {
           // Automatically show the first OrCD viewer
           const pdfIndex = firstPdfViewer.dataset.pdfIndex;
           console.log('Auto-loading OrCD viewer for index:', pdfIndex);
-          
+
           // Find the OrCD viewer container and show it
           const viewerContainer = document.getElementById(`pdf-viewer-${pdfIndex}`);
           if (viewerContainer) {
             viewerContainer.classList.remove('hidden');
-            
+
             // Update button to show "Hide" instead of "View"
             const buttonIcon = firstPdfViewer.querySelector('i');
             const buttonText = firstPdfViewer.childNodes[firstPdfViewer.childNodes.length - 1];
@@ -141,7 +141,7 @@ function showExtendedTab(sectionId, tabType) {
               buttonIcon.className = 'fa-solid fa-eye-slash me-1';
               buttonText.textContent = 'Hide';
             }
-            
+
             // Change button action to hide
             firstPdfViewer.dataset.action = 'hide-pdf-viewer';
           }
@@ -350,12 +350,12 @@ function initializeExtendedPatientEventDelegation() {
       case 'show-pdf-viewer':
         const pdfIndex1 = target.dataset.pdfIndex;
         console.log('PDF viewer show requested for index:', pdfIndex1);
-        
+
         // Show the PDF viewer container
         const viewerContainer1 = document.getElementById(`pdf-viewer-${pdfIndex1}`);
         if (viewerContainer1) {
           viewerContainer1.classList.remove('hidden');
-          
+
           // Update button to show "Hide" instead of "View"
           const buttonIcon = target.querySelector('i');
           const buttonText = target.childNodes[target.childNodes.length - 1];
@@ -363,7 +363,7 @@ function initializeExtendedPatientEventDelegation() {
             buttonIcon.className = 'fa-solid fa-eye-slash me-1';
             buttonText.textContent = 'Hide';
           }
-          
+
           // Change button action to hide
           target.dataset.action = 'hide-pdf-viewer';
           console.log('✅ OrCD viewer shown for index:', pdfIndex1);
@@ -375,12 +375,12 @@ function initializeExtendedPatientEventDelegation() {
       case 'hide-pdf-viewer':
         const pdfIndex3 = target.dataset.pdfIndex;
         console.log('OrCD viewer hide requested for index:', pdfIndex3);
-        
+
         // Hide the OrCD viewer container
         const viewerContainer3 = document.getElementById(`pdf-viewer-${pdfIndex3}`);
         if (viewerContainer3) {
           viewerContainer3.classList.add('hidden');
-          
+
           // Update button to show "View" instead of "Hide"
           const buttonIcon = target.querySelector('i');
           const buttonText = target.childNodes[target.childNodes.length - 1];
@@ -388,7 +388,7 @@ function initializeExtendedPatientEventDelegation() {
             buttonIcon.className = 'fa-solid fa-eye me-1';
             buttonText.textContent = 'View';
           }
-          
+
           // Change button action back to show
           target.dataset.action = 'show-pdf-viewer';
           console.log('✅ OrCD viewer hidden for index:', pdfIndex3);
@@ -400,7 +400,7 @@ function initializeExtendedPatientEventDelegation() {
       case 'open-pdf-fullscreen':
         const pdfIndex2 = target.dataset.pdfIndex;
         console.log('OrCD fullscreen requested for index:', pdfIndex2);
-        
+
         // Find the iframe for this PDF and attempt fullscreen
         const iframe = document.getElementById(`pdf-frame-${pdfIndex2}`);
         if (iframe) {
