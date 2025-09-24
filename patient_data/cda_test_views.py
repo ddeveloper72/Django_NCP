@@ -243,11 +243,7 @@ def smart_patient_search_view(request, patient_id):
                 "patient_data": {
                     "given_name": matches[0].given_name,
                     "family_name": matches[0].family_name,
-                    "birth_date": (
-                        matches[0].birth_date.strftime("%Y-%m-%d")
-                        if matches[0].birth_date
-                        else None
-                    ),
+                    "birth_date": matches[0].birth_date,  # birth_date is already a string
                     "gender": matches[0].gender,
                     "primary_patient_id": patient_id,
                     "country_code": target_patient["country_code"],
