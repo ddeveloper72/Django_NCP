@@ -4,13 +4,13 @@
 {% load patient_date_filters %}
 {% load tooltip_tags %}
 
-{# Django replacement for Jinja2 macro - use |document_date filter instead #}
+{# Django replacement for Jinja2 macro - use patient_date_filters.py format_medical_date filter instead #}
 {# format_medical_date functionality moved to patient_date_filters.py #}
 
 {% block title %}Enhanced CDA Display - {{ patient_identity.given_name }} {{ patient_identity.family_name }}{% endblock %}
 
 {% block extra_css %}
-<!-- Enhanced CDA styles are now externalized to _enhanced_cda.scss -->
+{# Enhanced CDA styles are now externalized to _enhanced_cda.scss #}
 {% endblock %}
 
 
@@ -27,9 +27,9 @@
                 <i class="fa-solid fa-search me-1"></i>Patient Search
             </a>
         </li>
-        {% if patient_id %}
+        {% if session_id %}
         <li class="breadcrumb-item">
-            <a href="{% url 'patient_data:smart_patient_search' patient_id %}"
+            <a href="{% url 'patient_data:smart_patient_search' session_id %}"
                 class="text-decoration-none">
                 <i class="fa-solid fa-user me-1"></i>{{ patient_identity.given_name }} {{
                 patient_identity.family_name }}
@@ -51,13 +51,13 @@
         </span>
     </div>
     <div class="page-actions">
-        {% if patient_id %}
-        <a href="{% url 'patient_data:smart_patient_search' patient_id %}"
+        {% if session_id %}
+        <a href="{% url 'patient_data:smart_patient_search' session_id %}"
             class="btn btn-outline-secondary btn-sm">
             <i class="fa fa-arrow-left page-action-icon"></i> Back to Patient
         </a>
-        {% elif patient_identity and patient_identity.url_patient_id %}
-        <a href="{% url 'patient_data:smart_patient_search' patient_identity.url_patient_id %}"
+        {% elif patient_identity and patient_identity.session_id %}
+        <a href="{% url 'patient_data:smart_patient_search' patient_identity.session_id %}"
             class="btn btn-outline-secondary btn-sm">
             <i class="fa fa-arrow-left page-action-icon"></i> Back to Patient
         </a>
@@ -172,17 +172,24 @@
                                 <div class="col-12">
                                     <div class="btn-group" role="group" aria-label="CDA Type Selection">
                                         {# Django: Replace {% set %} with conditional class assignment #}
-                                        <a href="{% url 'patient_data:patient_cda_view_typed' patient_id 'L1' %}"
+                                        {% if session_id %}
+                                        <a href="{% url 'patient_data:patient_cda_view_typed' session_id 'L1' %}"
                                             class="{% if cda_type == 'L1' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %} {% if not has_l1_cda %} disabled{% endif %}">
                                             <i class="fa-solid fa-file-medical me-1"></i>L1 Original Document
                                             {% if not has_l1_cda %}<small>(Not Available)</small>{% endif %}
                                         </a>
                                         {# Django: Replace {% set %} with conditional class assignment #}
-                                        <a href="{% url 'patient_data:patient_cda_view_typed' patient_id 'L3' %}"
+                                        <a href="{% url 'patient_data:patient_cda_view_typed' session_id 'L3' %}"
                                             class="{% if cda_type == 'L3' %}btn btn-primary{% else %}btn btn-outline-primary{% endif %} {% if not has_l3_cda %} disabled{% endif %}">
                                             <i class="fa-solid fa-language me-1"></i>L3 Patient Summary
                                             {% if not has_l3_cda %}<small>(Not Available)</small>{% endif %}
                                         </a>
+                                        {% else %}
+                                        <div class="alert alert-warning">
+                                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                            Session error - please restart your session
+                                        </div>
+                                        {% endif %}
                                     </div>
                                     <small class="text-muted d-block mt-1">
                                         <strong>L1:</strong> Original clinical document from source country |

@@ -14,10 +14,16 @@
                         <i class="fa-solid fa-file-medical"></i>
                         Select CDA Document for {{ patient_data.given_name }} {{ patient_data.family_name }}
                     </h5>
+                    {% if patient_id %}
                     <a href="{% url 'patient_data:patient_details' patient_id %}"
                         class="btn btn-secondary btn-sm">
                         <i class="fa-solid fa-arrow-left"></i> Back to Details
                     </a>
+                    {% else %}
+                    <div class="btn btn-secondary btn-sm disabled">
+                        <i class="fa-solid fa-exclamation-triangle"></i> Session Error
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="card-body">
 
@@ -155,20 +161,26 @@
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="d-flex justify-content-between">
+                                {% if patient_id %}
                                 <a href="{% url 'patient_data:patient_details' patient_id %}"
                                     class="btn btn-outline-secondary">
                                     <i class="fa-solid fa-arrow-left"></i> Back to Patient Details
                                 </a>
+                                {% else %}
+                                <div class="btn btn-outline-secondary disabled">
+                                    <i class="fa-solid fa-exclamation-triangle"></i> Session Error
+                                </div>
+                                {% endif %}
 
                                 {% if l1_documents or l3_documents %}
                                 <div class="btn-group">
-                                    {% if l1_documents %}
+                                    {% if l1_documents and patient_id %}
                                     <a href="{% url 'patient_data:patient_cda_view_typed' patient_id 'L1' %}"
                                         class="btn btn-outline-primary">
                                         <i class="fa-solid fa-eye"></i> View Selected L1
                                     </a>
                                     {% endif %}
-                                    {% if l3_documents %}
+                                    {% if l3_documents and patient_id %}
                                     <a href="{% url 'patient_data:patient_cda_view_typed' patient_id 'L3' %}"
                                         class="btn btn-outline-success">
                                         <i class="fa-solid fa-eye"></i> View Selected L3

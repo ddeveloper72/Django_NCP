@@ -154,6 +154,7 @@
                     <div class="d-grid gap-3">
                         <!-- View CDA Document - Dynamic type based on user selection -->
                         {% with selected_cda_type=preferred_cda_type|default:"L3" %}
+                        {% if patient_id %}
                         <a href="{% url 'patient_data:patient_cda_view_typed' patient_id selected_cda_type %}"
                             class="btn btn-primary d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
@@ -163,6 +164,16 @@
                                     <small class="d-block">{{ selected_cda_type }} Browser View</small>
                                 </div>
                             </div>
+                        {% else %}
+                        <div class="btn btn-secondary disabled d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                <div>
+                                    <div class="fw-bold">Session Error</div>
+                                    <small class="d-block">Please restart your session</small>
+                                </div>
+                            </div>
+                        {% endif %}
                         </a>
                         {% endwith %}
 

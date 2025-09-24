@@ -87,10 +87,16 @@
                                     <li>Scanned documents and images</li>
                                 </ul>
                             </div>
+                            {% if patient_id %}
                             <a href="{% url 'patient_data:patient_cda_view_typed' patient_id 'L1' %}"
                                class="btn btn-primary">
                                 <i class="fa-solid fa-eye me-2"></i>View L1 Document
                             </a>
+                            {% else %}
+                            <div class="btn btn-secondary disabled">
+                                <i class="fa-solid fa-exclamation-triangle me-2"></i>Session Error
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     {% endif %}
@@ -116,10 +122,16 @@
                                     <li>Cross-border healthcare optimized</li>
                                 </ul>
                             </div>
+                            {% if patient_id %}
                             <a href="{% url 'patient_data:patient_cda_view_typed' patient_id 'L3' %}"
                                class="btn bg-healthcare-teal text-white">
                                 <i class="fa-solid fa-eye me-2"></i>View L3 Summary
                             </a>
+                            {% else %}
+                            <div class="btn btn-secondary disabled">
+                                <i class="fa-solid fa-exclamation-triangle me-2"></i>Session Error
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     {% endif %}
