@@ -3,19 +3,20 @@ CDA Display Tool Integration
 Integrates the CTS-compliant Enhanced CDA Processor with the main CDA display system
 """
 
+import json
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
-import json
+from django.views.decorators.csrf import csrf_exempt
 
 from patient_data.services.enhanced_cda_processor import EnhancedCDAProcessor
 from patient_data.translation_utils import (
-    get_template_translations,
     detect_document_language,
+    get_template_translations,
 )
 
 logger = logging.getLogger(__name__)
@@ -101,16 +102,22 @@ class EnhancedCDADisplayView(View):
 
             # Get patient identity from enhanced sections
             patient_identity_data = enhanced_sections.get("patient_identity", {})
-            
+
             # Create patient_identity object for template compatibility
-            patient_identity = type("PatientIdentity", (object,), {
-                "patient_id": patient_identity_data.get("primary_patient_id", patient_id),
-                "url_patient_id": patient_id,  # Use the URL patient_id for navigation
-                "given_name": patient_identity_data.get("given_name", ""),
-                "family_name": patient_identity_data.get("family_name", ""),
-                "birth_date": patient_identity_data.get("birth_date", ""),
-                "gender": patient_identity_data.get("gender", ""),
-            })()
+            patient_identity = type(
+                "PatientIdentity",
+                (object,),
+                {
+                    "patient_id": patient_identity_data.get(
+                        "primary_patient_id", patient_id
+                    ),
+                    "url_patient_id": patient_id,  # Use the URL patient_id for navigation
+                    "given_name": patient_identity_data.get("given_name", ""),
+                    "family_name": patient_identity_data.get("family_name", ""),
+                    "birth_date": patient_identity_data.get("birth_date", ""),
+                    "gender": patient_identity_data.get("gender", ""),
+                },
+            )()
 
             # Prepare context for template
             context = {
@@ -161,7 +168,7 @@ class EnhancedCDADisplayView(View):
             <body>
                 <div class="patient-summary">
                     <h1>Patient {patient_id} - Résumé Médical</h1>
-                    
+
                     <section class="medication-summary" data-code="10160-0">
                         <h2>Résumé des médicaments</h2>
                         <table class="clinical-table">
@@ -189,7 +196,7 @@ class EnhancedCDADisplayView(View):
                             </tbody>
                         </table>
                     </section>
-                    
+
                     <section class="allergy-summary" data-code="48765-2">
                         <h2>Allergies et réactions indésirables</h2>
                         <table class="clinical-table">
@@ -211,7 +218,7 @@ class EnhancedCDADisplayView(View):
                             </tbody>
                         </table>
                     </section>
-                    
+
                     <section class="problem-list" data-code="11450-4">
                         <h2>Liste des problèmes</h2>
                         <table class="clinical-table">
@@ -239,7 +246,7 @@ class EnhancedCDADisplayView(View):
                             </tbody>
                         </table>
                     </section>
-                    
+
                     <section class="vital-signs" data-code="8716-3">
                         <h2>Signes vitaux</h2>
                         <table class="clinical-table">
