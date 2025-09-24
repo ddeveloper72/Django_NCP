@@ -52,12 +52,12 @@
     </div>
     <div class="page-actions">
         {% if patient_identity and patient_identity.patient_id %}
-        <a href="{% url 'patient_data:smart_patient_search' patient_identity.url_patient_id|default:patient_identity.patient_id %}"
+        <a href="{% url 'patient_data:patient_details' patient_identity.url_patient_id|default:patient_identity.patient_id %}"
             class="btn btn-outline-secondary btn-sm">
             <i class="fa fa-arrow-left page-action-icon"></i> Back to Patient
         </a>
         {% elif patient_id %}
-        <a href="{% url 'patient_data:smart_patient_search' patient_id %}"
+        <a href="{% url 'patient_data:patient_details' patient_id %}"
             class="btn btn-outline-secondary btn-sm">
             <i class="fa fa-arrow-left page-action-icon"></i> Back to Patient
         </a>
