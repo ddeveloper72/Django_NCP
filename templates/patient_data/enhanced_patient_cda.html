@@ -29,7 +29,7 @@
         </li>
         {% if patient_identity.patient_id %}
         <li class="breadcrumb-item">
-            <a href="{% url 'patient_data:patient_details' patient_identity.url_patient_id|default:patient_identity.patient_id %}"
+            <a href="{% url 'patient_data:smart_patient_search' patient_identity.url_patient_id|default:patient_identity.patient_id %}"
                 class="text-decoration-none">
                 <i class="fa-solid fa-user me-1"></i>{{ patient_identity.given_name }} {{
                 patient_identity.family_name }}
@@ -52,13 +52,13 @@
     </div>
     <div class="page-actions">
         {% if patient_identity.patient_id %}
-        <a href="{% url 'patient_data:patient_details' patient_identity.url_patient_id|default:patient_identity.patient_id %}"
+        <a href="{% url 'patient_data:smart_patient_search' patient_identity.url_patient_id|default:patient_identity.patient_id %}"
             class="btn btn-outline-secondary btn-sm">
-            <i class="fa fa-arrow-left"></i> Back to Patient
+            <i class="fa fa-arrow-left page-action-icon"></i> Back to Patient
         </a>
         {% else %}
         <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-outline-secondary btn-sm">
-            <i class="fa fa-arrow-left"></i> Back to Search
+            <i class="fa fa-arrow-left page-action-icon"></i> Back to Search
         </a>
         {% endif %}
     </div>
