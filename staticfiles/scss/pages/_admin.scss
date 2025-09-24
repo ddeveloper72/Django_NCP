@@ -1,6 +1,6 @@
 // ========================================
 // Admin Interface Styles
-// HSE-compliant styling for Django admin
+// Healthcare Organisation-compliant styling for Django admin
 // ========================================
 
 // Admin Login Page Styles
@@ -58,7 +58,7 @@
     margin-top: $space-lg;
 
     caption {
-      background: linear-gradient(135deg, $hse-accent-blue, $primary-color);
+      background: linear-gradient(135deg, $hco-accent-blue, $primary-color);
       color: $white;
       font-weight: $font-weight-bold;
       padding: $space-sm $space-md;
@@ -78,7 +78,7 @@
       th {
         background: $bg-light;
         font-weight: $font-weight-bold;
-        color: $hse-accent-blue;
+        color: $hco-accent-blue;
       }
 
       &:hover {
@@ -88,7 +88,7 @@
   }
 }
 
-// HSE Branding for Admin Interface
+// Healthcare Organisation Branding for Admin Interface
 .admin-header {
   background-color: $primary-color;
   border-bottom: 3px solid $primary-dark;

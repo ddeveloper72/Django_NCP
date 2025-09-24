@@ -1,50 +1,50 @@
 // =====================================================
-// MOBILE-FIRST HSE HOME PAGE STYLES
+// MOBILE-FIRST HEALTHCARE ORGANISATION HOME PAGE STYLES
 // =====================================================
 
-// HSE Color Utilities
-.text-hse-teal {
-  color: $hse-primary-teal !important;
+// Healthcare Organisation Color Utilities
+.text-hco-teal {
+  color: $hco-primary-teal !important;
 }
 
-.bg-hse-teal {
-  background-color: $hse-primary-teal !important;
+.bg-hco-teal {
+  background-color: $hco-primary-teal !important;
   color: $white !important;
 }
 
-.bg-hse-green {
-  background-color: $hse-secondary-green !important;
+.bg-hco-green {
+  background-color: $hco-secondary-green !important;
   color: $white !important;
 }
 
-.btn-hse-teal {
-  background-color: $hse-primary-teal;
-  border-color: $hse-primary-teal;
+.btn-hco-teal {
+  background-color: $hco-primary-teal;
+  border-color: $hco-primary-teal;
   color: $white;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
 
   &:hover,
   &:focus {
-    background-color: $hse-primary-teal-dark;
-    border-color: $hse-primary-teal-dark;
+    background-color: $hco-primary-teal-dark;
+    border-color: $hco-primary-teal-dark;
     color: $white;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba($hse-primary-teal, 0.3);
+    box-shadow: 0 6px 20px rgba($hco-primary-teal, 0.3);
   }
 }
 
-.btn-hse-green {
-  background-color: $hse-secondary-green;
-  border-color: $hse-secondary-green;
+.btn-hco-green {
+  background-color: $hco-secondary-green;
+  border-color: $hco-secondary-green;
   color: $white;
 
   &:hover,
   &:focus {
-    background-color: $hse-secondary-green-light;
-    border-color: $hse-secondary-green-light;
+    background-color: $hco-secondary-green-light;
+    border-color: $hco-secondary-green-light;
     color: $white;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba($hse-secondary-green, 0.3);
+    box-shadow: 0 6px 20px rgba($hco-secondary-green, 0.3);
   }
 }
 
@@ -56,9 +56,9 @@
   position: relative;
   background: linear-gradient(
     135deg,
-    $hse-primary-teal 0%,
-    $hse-primary-teal-light 50%,
-    $hse-secondary-green 100%
+    $hco-primary-teal 0%,
+    $hco-primary-teal-light 50%,
+    $hco-secondary-green 100%
   );
   @include text-on-blue-bg;
   padding: $space-xxl $space-md;
@@ -225,7 +225,7 @@
     }
 
     i {
-      color: $hse-primary-teal;
+      color: $hco-primary-teal;
     }
   }
 
@@ -252,7 +252,7 @@
   background: linear-gradient(
     180deg,
     rgba($white, 1) 0%,
-    rgba($hse-primary-teal, 0.02) 100%
+    rgba($hco-primary-teal, 0.02) 100%
   );
 
   @media (min-width: 768px) {
@@ -264,30 +264,30 @@
     // All service card styles now handled by _cards.scss
     // This ensures consistent layout across the application
 
-    // HSE specific color overrides for service icons
+    // Healthcare Organisation specific color overrides for service icons
     .service-card-header {
       .service-icon {
-        &.bg-hse-teal {
+        &.bg-hco-teal {
           background: linear-gradient(
             135deg,
-            $hse-primary-teal 0%,
-            $hse-primary-teal-dark 100%
+            $hco-primary-teal 0%,
+            $hco-primary-teal-dark 100%
           );
 
           &::after {
-            background: $hse-primary-teal;
+            background: $hco-primary-teal;
           }
         }
 
-        &.bg-hse-green {
+        &.bg-hco-green {
           background: linear-gradient(
             135deg,
-            $hse-secondary-green 0%,
-            $hse-secondary-green-light 100%
+            $hco-secondary-green 0%,
+            $hco-secondary-green-light 100%
           );
 
           &::after {
-            background: $hse-secondary-green;
+            background: $hco-secondary-green;
           }
         }
 
@@ -313,13 +313,13 @@
       }
     }
 
-    // HSE specific button styling
+    // Healthcare Organisation specific button styling
     .service-card-footer {
-      .btn-hse-teal {
+      .btn-hco-teal {
         background: linear-gradient(
           135deg,
-          $hse-primary-teal 0%,
-          $hse-primary-teal-dark 100%
+          $hco-primary-teal 0%,
+          $hco-primary-teal-dark 100%
         );
         border: none;
         color: white;
@@ -327,18 +327,18 @@
         &:hover {
           background: linear-gradient(
             135deg,
-            $hse-primary-teal-dark 0%,
+            $hco-primary-teal-dark 0%,
             #004548 100%
           );
           color: white;
         }
       }
 
-      .btn-hse-green {
+      .btn-hco-green {
         background: linear-gradient(
           135deg,
-          $hse-secondary-green 0%,
-          $hse-secondary-green-light 100%
+          $hco-secondary-green 0%,
+          $hco-secondary-green-light 100%
         );
         border: none;
         color: white;
@@ -346,8 +346,8 @@
         &:hover {
           background: linear-gradient(
             135deg,
-            $hse-secondary-green-light 0%,
-            lighten($hse-secondary-green-light, 5%) 100%
+            $hco-secondary-green-light 0%,
+            lighten($hco-secondary-green-light, 5%) 100%
           );
           color: white;
         }
@@ -366,7 +366,7 @@
           background: linear-gradient(
             135deg,
             $primary-dark 0%,
-            $hse-primary-teal-dark 100%
+            $hco-primary-teal-dark 100%
           );
           color: white;
         }
@@ -404,7 +404,7 @@
   padding: $space-xxl $space-md;
   background: linear-gradient(
     180deg,
-    rgba($hse-secondary-green, 0.02) 0%,
+    rgba($hco-secondary-green, 0.02) 0%,
     rgba($white, 1) 100%
   );
 
@@ -418,25 +418,25 @@
     padding: $space-xl;
     text-align: center;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba($hse-secondary-green, 0.1);
+    border: 1px solid rgba($hco-secondary-green, 0.1);
 
     // Enhanced mobile shadows
-    box-shadow: 0 6px 16px rgba($hse-secondary-green, 0.08),
-      0 3px 8px rgba($hse-secondary-green, 0.04);
+    box-shadow: 0 6px 16px rgba($hco-secondary-green, 0.08),
+      0 3px 8px rgba($hco-secondary-green, 0.04);
 
     // Enhanced tablet/desktop shadows
     @media (min-width: 768px) {
-      box-shadow: 0 10px 30px rgba($hse-secondary-green, 0.1),
-        0 6px 16px rgba($hse-secondary-green, 0.06),
-        0 3px 8px rgba($hse-secondary-green, 0.03);
+      box-shadow: 0 10px 30px rgba($hco-secondary-green, 0.1),
+        0 6px 16px rgba($hco-secondary-green, 0.06),
+        0 3px 8px rgba($hco-secondary-green, 0.03);
     }
 
     &:hover {
       transform: translateY(-6px);
-      box-shadow: 0 25px 50px rgba($hse-secondary-green, 0.15),
-        0 15px 30px rgba($hse-secondary-green, 0.1),
-        0 8px 16px rgba($hse-secondary-green, 0.08);
-      border-color: rgba($hse-secondary-green, 0.2);
+      box-shadow: 0 25px 50px rgba($hco-secondary-green, 0.15),
+        0 15px 30px rgba($hco-secondary-green, 0.1),
+        0 8px 16px rgba($hco-secondary-green, 0.08);
+      border-color: rgba($hco-secondary-green, 0.2);
     }
 
     .capability-icon {
@@ -446,11 +446,11 @@
       margin: 0 auto $space-lg;
       background: linear-gradient(
         135deg,
-        $hse-secondary-green,
-        $hse-secondary-green-light
+        $hco-secondary-green,
+        $hco-secondary-green-light
       );
       color: $white;
-      box-shadow: 0 8px 20px rgba($hse-secondary-green, 0.3);
+      box-shadow: 0 8px 20px rgba($hco-secondary-green, 0.3);
 
       // Remove conflicting alignment properties - let perfect-icon-center mixin handle this
       // The perfect-icon-center mixin will provide: display: flex, align-items: center, justify-content: center
@@ -509,7 +509,7 @@
   background: linear-gradient(
     180deg,
     rgba($white, 1) 0%,
-    rgba($hse-primary-teal, 0.02) 100%
+    rgba($hco-primary-teal, 0.02) 100%
   );
 
   @media (min-width: 768px) {
@@ -521,32 +521,32 @@
     border-radius: $border-radius-lg;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba($hse-primary-teal, 0.1);
+    border: 1px solid rgba($hco-primary-teal, 0.1);
 
     // Enhanced mobile shadows
-    box-shadow: 0 4px 12px rgba($hse-primary-teal, 0.1),
-      0 2px 6px rgba($hse-primary-teal, 0.05);
+    box-shadow: 0 4px 12px rgba($hco-primary-teal, 0.1),
+      0 2px 6px rgba($hco-primary-teal, 0.05);
 
     // Enhanced tablet/desktop shadows
     @media (min-width: 768px) {
-      box-shadow: 0 8px 24px rgba($hse-primary-teal, 0.12),
-        0 4px 12px rgba($hse-primary-teal, 0.08),
-        0 2px 6px rgba($hse-primary-teal, 0.04);
+      box-shadow: 0 8px 24px rgba($hco-primary-teal, 0.12),
+        0 4px 12px rgba($hco-primary-teal, 0.08),
+        0 2px 6px rgba($hco-primary-teal, 0.04);
     }
 
     &:hover {
       transform: translateY(-6px);
-      box-shadow: 0 20px 40px rgba($hse-primary-teal, 0.15),
-        0 10px 20px rgba($hse-primary-teal, 0.1),
-        0 6px 12px rgba($hse-primary-teal, 0.08);
-      border-color: rgba($hse-primary-teal, 0.2);
+      box-shadow: 0 20px 40px rgba($hco-primary-teal, 0.15),
+        0 10px 20px rgba($hco-primary-teal, 0.1),
+        0 6px 12px rgba($hco-primary-teal, 0.08);
+      border-color: rgba($hco-primary-teal, 0.2);
     }
 
     .config-card-header {
       background: linear-gradient(
         135deg,
-        $hse-primary-teal,
-        $hse-primary-teal-light
+        $hco-primary-teal,
+        $hco-primary-teal-light
       );
       color: $white;
       padding: $space-lg;
@@ -674,7 +674,7 @@
   padding: $space-xxl $space-md calc($space-xxl * 1.5);
   background: linear-gradient(
     180deg,
-    rgba($hse-secondary-green, 0.02) 0%,
+    rgba($hco-secondary-green, 0.02) 0%,
     rgba($white, 1) 100%
   );
 
@@ -831,7 +831,7 @@ html {
 .config-card,
 .external-service-card {
   &:focus-within {
-    outline: 2px solid $hse-primary-teal;
+    outline: 2px solid $hco-primary-teal;
     outline-offset: 2px;
   }
 }

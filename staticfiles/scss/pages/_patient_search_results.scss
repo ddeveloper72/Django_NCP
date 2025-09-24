@@ -52,7 +52,7 @@
   font-weight: $font-weight-medium;
   text-decoration: none;
   cursor: pointer;
-  transition: all $transition-hse;
+  transition: all $transition-hco;
   border: 1px solid transparent;
   min-height: 44px; // Touch-friendly minimum height
 
@@ -120,7 +120,7 @@
   border-radius: $border-radius-lg;
   box-shadow: $shadow-sm;
   border: 1px solid $neutral-lighter;
-  transition: all $transition-hse;
+  transition: all $transition-hco;
   overflow: hidden;
 
   @media (max-width: 480px) {
