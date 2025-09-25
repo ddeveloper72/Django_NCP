@@ -1,4 +1,5 @@
 {% load patient_filters %}
+{% load patient_filters %}
 
 {# =============================================== #}
 {# CLINICAL TABLE SECTION TEMPLATE #}
@@ -324,55 +325,78 @@
                             <td>
                                 {% if header.primary %}
                                 <div class="primary-field">
-                                    <strong>{{ cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:'N/A' }}</strong>
-                                    {% if cell_data|safe_get:"has_terminology" and medical_coverage >= 25 %}
-                                    <div class="medical-terminology mt-1 {% if medical_coverage >= 25 and medical_coverage < 75 %}collapse{% endif %}" {% if medical_coverage >= 25 and medical_coverage < 75 %}id="desktop_terminology_{{ section_index }}_{{ forloop.counter }}_primary"{% endif %}>
+                                    {# Clean primary field based on header type - prioritize showing codes for code columns #}
+                                    {% if 'code' in header.key|lower and 'display' not in header.key|lower %}
+                                        {% if 'active_ingredient' in header.key|lower or 'activeingredient' in header.key|lower %}
+                                        <strong>{{ cell_data|extract_active_ingredient_code }}</strong>
+                                        {% elif 'problem' in header.key|lower %}
+                                        <strong>{{ cell_data|extract_problem_code }}</strong>
+                                        {% elif 'medication' in header.key|lower %}
+                                        <strong>{{ cell_data|extract_medication_code }}</strong>
+                                        {% elif 'procedure' in header.key|lower %}
+                                        <strong>{{ cell_data|extract_procedure_code }}</strong>
+                                        {% else %}
+                                        <strong>{{ cell_data|extract_code }}</strong>
+                                        {% endif %}
+                                    {% elif 'display' in header.key|lower or 'name' in header.key|lower or 'description' in header.key|lower %}
+                                    <strong>{{ cell_data|extract_procedure_description }}</strong>
+                                    {% elif 'date' in header.key|lower %}
+                                    <strong>{{ cell_data|extract_date }}</strong>
+                                    {% elif 'status' in header.key|lower %}
+                                    <strong>{{ cell_data|extract_status }}</strong>
+                                    {% else %}
+                                    <strong>{{ cell_data|clean_clinical_value }}</strong>
+                                    {% endif %}
+
+                                    {# Show medical codes only if relevant and high coverage #}
+                                    {% if cell_data|safe_get:"has_terminology" and medical_coverage >= 75 %}
+                                    <div class="medical-terminology mt-1">
                                         {% for term in cell_data|safe_get:"terminology" %}
-                                        <span class="badge {% if medical_coverage >= 75 %}bg-success{% else %}bg-info{% endif %} me-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
-                                            {% if medical_coverage >= 75 %}<i class="fa-solid fa-star me-1"></i>{% endif %}{{ term.display_name|default:term.code }}
+                                        <span class="badge bg-success me-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
+                                            <i class="fa-solid fa-star me-1"></i>{{ term.display_name|default:term.code }}
                                         </span>
                                         {% endfor %}
                                     </div>
-                                    {% if medical_coverage >= 25 and medical_coverage < 75 and cell_data|safe_get:"has_terminology" %}
-                                    <button class="btn btn-link btn-sm p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#desktop_terminology_{{ section_index }}_{{ forloop.counter }}_primary">
-                                        <small class="text-muted"><i class="fa-solid fa-code me-1"></i>Show codes</small>
-                                    </button>
-                                    {% endif %}
                                     {% endif %}
                                 </div>
                                 {% else %}
                                 <div class="cell-content">
-                                    {% if cell_data|safe_get:"has_codes" and medical_coverage >= 25 %}
-                                    <div class="medical-codes-container {% if medical_coverage >= 25 and medical_coverage < 75 %}collapse{% endif %}" {% if medical_coverage >= 25 and medical_coverage < 75 %}id="desktop_codes_{{ section_index }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"{% endif %}>
+                                    {# Clean secondary field based on header type - prioritize showing codes for code columns #}
+                                    {% if 'code' in header.key|lower and 'display' not in header.key|lower %}
+                                        {% if 'active_ingredient' in header.key|lower or 'activeingredient' in header.key|lower %}
+                                        {{ cell_data|extract_active_ingredient_code }}
+                                        {% elif 'problem' in header.key|lower %}
+                                        {{ cell_data|extract_problem_code }}
+                                        {% elif 'medication' in header.key|lower %}
+                                        {{ cell_data|extract_medication_code }}
+                                        {% elif 'procedure' in header.key|lower %}
+                                        {{ cell_data|extract_procedure_code }}
+                                        {% else %}
+                                        {{ cell_data|extract_code }}
+                                        {% endif %}
+                                    {% elif 'display' in header.key|lower or 'name' in header.key|lower or 'description' in header.key|lower %}
+                                    {{ cell_data|extract_procedure_description }}
+                                    {% elif 'date' in header.key|lower %}
+                                    {{ cell_data|extract_date }}
+                                    {% elif 'status' in header.key|lower %}
+                                    {{ cell_data|extract_status }}
+                                    {% else %}
+                                    {{ cell_data|clean_clinical_value }}
+                                    {% endif %}
+
+                                    {# Show high-value medical codes only #}
+                                    {% if cell_data|safe_get:"has_codes" and medical_coverage >= 75 %}
+                                    <div class="medical-codes-container mt-1">
                                         <div class="medical-code-item d-flex flex-wrap align-items-center">
                                             {% for code in cell_data|safe_get:"codes" %}
                                             {% if code.badge %}
-                                            <span class="badge {{ code.badge|default:'bg-secondary' }} {% if medical_coverage >= 75 %}border border-warning{% endif %} me-1 mb-1"
+                                            <span class="badge {{ code.badge|default:'bg-secondary' }} border border-warning me-1 mb-1"
                                                 title="{{ code.system }}: {{ code.code }}">
-                                                {% if medical_coverage >= 75 %}<i class="fa-solid fa-certificate me-1"></i>{% endif %}{{ code.display_name|default:code.code }}
+                                                <i class="fa-solid fa-certificate me-1"></i>{{ code.display_name|default:code.code }}
                                             </span>
-                                            {% else %}
-                                            <code class="me-1 mb-1 {% if medical_coverage >= 75 %}bg-warning{% endif %}">{{ code.code|default:'Unknown' }}</code>
                                             {% endif %}
                                             {% endfor %}
                                         </div>
-                                    </div>
-                                    {% if medical_coverage >= 25 and medical_coverage < 75 and cell_data|safe_get:"has_codes" %}
-                                    <button class="btn btn-link btn-sm p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#desktop_codes_{{ section_index }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
-                                        <small class="text-muted"><i class="fa-solid fa-code me-1"></i>Show codes</small>
-                                    </button>
-                                    {% endif %}
-                                    {% else %}
-                                    {{ cell_data|safe_get:"display_value"|default:cell_data|safe_get:"value"|default:'N/A' }}
-                                    {% endif %}
-
-                                    {% if cell_data|safe_get:"has_terminology" %}
-                                    <div class="medical-terminology mt-1">
-                                        {% for term in cell_data|safe_get:"terminology" %}
-                                        <span class="badge bg-info me-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
-                                            <i class="fa-solid fa-tag me-1"></i>{{ term.display_name|default:term.code }}
-                                        </span>
-                                        {% endfor %}
                                     </div>
                                     {% endif %}
                                 </div>

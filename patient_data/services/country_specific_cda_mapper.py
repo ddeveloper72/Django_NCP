@@ -5,9 +5,9 @@ Handles member state variations in CDA implementation
 """
 
 import json
-import xml.etree.ElementTree as ET
-from typing import Dict, List, Any, Optional
 import logging
+import xml.etree.ElementTree as ET
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -347,101 +347,35 @@ class CountrySpecificCDAMapper:
 
                     if med_info.get("generic_name") or med_info.get("brand_name"):
                         # Format for table display - use standard field names expected by the processor
+                        # Create proper structure with both code and displayName for template filters
                         display_name = med_info.get(
                             "brand_name",
                             med_info.get("generic_name", "Unknown medication"),
                         )
                         formatted_med = {
                             "data": {
-                                "medication_display": display_name,
-                                "medication_code": med_info.get("code", ""),
-                                "ingredient_display": med_info.get("generic_name", ""),
-                                "ingredient_code": med_info.get("code", ""),
-                                "dosage": "Not specified",
-                                "posology": med_info.get("route", "Not specified"),
-                                "status": "active",
-                                "date": med_info.get("start_date", ""),
-                                "code_system": med_info.get("code_system", ""),
-                            }
-                        }
-                        medications.append(formatted_med)
-
-    def _extract_medications(
-        self, root: ET.Element, namespaces: Dict, country_config: Dict
-    ) -> List[Dict]:
-        """Extract medications using country-specific patterns"""
-        medications = []
-
-        section_codes = country_config.get("medication_section_codes", ["10160-0"])
-
-        for section_code in section_codes:
-            sections = root.findall(
-                f".//hl7:section[hl7:code/@code='{section_code}']", namespaces
-            )
-
-            for section in sections:
-                # Malta-specific: Look for substanceAdministration entries
-                substance_admins = section.findall(
-                    ".//hl7:substanceAdministration", namespaces
-                )
-                for sa in substance_admins:
-                    med_info = {}
-
-                    # Get medication info from pharm:ingredientSubstance > pharm:code
-                    ingredient_substances = sa.findall(
-                        ".//pharm:ingredientSubstance", namespaces
-                    )
-                    for ingredient in ingredient_substances:
-                        pharm_codes = ingredient.findall("pharm:code", namespaces)
-                        for pharm_code in pharm_codes:
-                            # Generic name from main code
-                            med_info["generic_name"] = pharm_code.get(
-                                "displayName", "Unknown medication"
-                            )
-                            med_info["code"] = pharm_code.get("code", "")
-                            med_info["code_system"] = pharm_code.get("codeSystem", "")
-
-                            # Brand name from pharm:translation
-                            translations = pharm_code.findall(
-                                "pharm:translation", namespaces
-                            )
-                            for trans in translations:
-                                brand_name = trans.get("displayName", "")
-                                if brand_name:
-                                    med_info["brand_name"] = brand_name
-
-                    # Get route of administration
-                    route_elem = sa.find("hl7:routeCode", namespaces)
-                    if route_elem is not None:
-                        med_info["route"] = route_elem.get(
-                            "displayName", "Unknown route"
-                        )
-
-                    # Get effective time - look for different patterns
-                    time_elem = sa.find(".//hl7:effectiveTime/hl7:low", namespaces)
-                    if time_elem is not None:
-                        med_info["start_date"] = time_elem.get("value", "")
-
-                    # Get end time
-                    end_time_elem = sa.find(".//hl7:effectiveTime/hl7:high", namespaces)
-                    if (
-                        end_time_elem is not None
-                        and end_time_elem.get("nullFlavor") != "UNK"
-                    ):
-                        med_info["end_date"] = end_time_elem.get("value", "")
-
-                    if med_info.get("generic_name") or med_info.get("brand_name"):
-                        # Format for table display - use standard field names expected by the processor
-                        display_name = med_info.get(
-                            "brand_name",
-                            med_info.get("generic_name", "Unknown medication"),
-                        )
-                        formatted_med = {
-                            "data": {
-                                "medication_display": display_name,
-                                "medication_code": med_info.get("code", ""),
-                                "ingredient_display": med_info.get("generic_name", ""),
-                                "ingredient_code": med_info.get("code", ""),
+                                "medication_display": {
+                                    "displayName": display_name,
+                                    "display_name": display_name,
+                                    "value": display_name,
+                                },
+                                "medication_code": {
+                                    "code": med_info.get("code", ""),
+                                    "value": med_info.get("code", ""),
+                                    "displayName": display_name,
+                                    "display_name": display_name,
+                                },
+                                "ingredient_display": {
+                                    "displayName": med_info.get("generic_name", ""),
+                                    "display_name": med_info.get("generic_name", ""),
+                                    "value": med_info.get("generic_name", ""),
+                                },
+                                "ingredient_code": {
+                                    "code": med_info.get("code", ""),
+                                    "value": med_info.get("code", ""),
+                                    "displayName": med_info.get("generic_name", ""),
+                                    "display_name": med_info.get("generic_name", ""),
+                                },
                                 "dosage": "Not specified",
                                 "posology": med_info.get("route", "Not specified"),
                                 "status": "active",
@@ -500,19 +434,63 @@ class CountrySpecificCDAMapper:
 
                     if problem_info.get("description"):
                         # Format for table display - use standard field names expected by the processor
+                        # Create proper structure with both code and displayName for template filters
                         formatted_problem = {
                             "data": {
-                                "condition_display": problem_info.get(
-                                    "description", "Unknown problem"
-                                ),
-                                "condition_code": problem_info.get("code", ""),
-                                "agent_display": problem_info.get(
-                                    "description", "Unknown problem"
-                                ),  # Fallback for display compatibility
-                                "agent_code": problem_info.get("code", ""),
-                                "value": problem_info.get(
-                                    "description", "Unknown problem"
-                                ),
+                                "condition_display": {
+                                    "displayName": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                    "display_name": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                    "value": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                },
+                                "condition_code": {
+                                    "code": problem_info.get("code", ""),
+                                    "value": problem_info.get("code", ""),
+                                    "displayName": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                    "display_name": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                },
+                                "agent_display": {
+                                    "displayName": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                    "display_name": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                    "value": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                },
+                                "agent_code": {
+                                    "code": problem_info.get("code", ""),
+                                    "value": problem_info.get("code", ""),
+                                    "displayName": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                    "display_name": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                },
+                                "value": {
+                                    "displayName": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                    "display_name": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                    "value": problem_info.get(
+                                        "description", "Unknown problem"
+                                    ),
+                                    "code": problem_info.get("code", ""),
+                                },
                                 "status": "active",
                                 "onset_date": problem_info.get("date", ""),
                                 "date": problem_info.get("date", ""),

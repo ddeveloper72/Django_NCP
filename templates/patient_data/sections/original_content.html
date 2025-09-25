@@ -1,4 +1,5 @@
 {% load patient_filters %}
+{% load patient_filters %}
 {% load patient_date_filters %}
 {# Original Content Template - Shared by all section types #}
 <div class="original-content">
@@ -35,38 +36,15 @@
                     {% for field_name, field_data in entry.fields|dict_items %}
                     <td>
                         {% if 'date' in field_name|lower or 'time' in field_name|lower %}
-                        <div class="original-value">{{ field_data|safe_get:"value"|default:"N/A"|document_date }}</div>
+                        <div class="clinical-value">{{ field_data|safe_get:"value"|default:"N/A"|document_date }}</div>
                         {% else %}
-                        <div class="original-value">{{ field_data|safe_get:"value"|default:"N/A" }}</div>
+                        <div class="clinical-value">{{ field_data|safe_get:"value"|default:"N/A" }}</div>
                         {% endif %}
 
-                        {% if field_data|safe_get:"xpath" %}
-                        <div class="text-muted mt-1">
-                            <small><strong>XPath:</strong> <code>{{ field_data|safe_get:"xpath" }}</code></small>
-                        </div>
-                        {% endif %}
-
-                        {% if field_data|safe_get:"has_valueset" %}
-                        <div class="text-muted mt-1">
-                            <small><i class="fa-solid fa-code"></i> Coded value available</small>
-                        </div>
-                        {% endif %}
-
-                        {% if field_data|safe_get:"needs_translation" %}
-                        <div class="text-muted mt-1">
-                            <small><i class="fa-solid fa-language"></i> Translation needed</small>
-                        </div>
-                        {% endif %}
-
-                        {% if entry.section_code %}
-                        <div class="text-muted mt-1">
-                            <small><strong>Section:</strong> <code>{{ entry.section_code }}</code></small>
-                        </div>
-                        {% endif %}
-
-                        {% if entry.section_type %}
-                        <div class="text-muted mt-1">
-                            <small><strong>Type:</strong> {{ entry.section_type }}</small>
+                        {# Only show essential clinical information - remove technical clutter #}
+                        {% if field_data|safe_get:"has_valueset" and field_data|safe_get:"code" %}
+                        <div class="clinical-code mt-1">
+                            <small class="text-muted">Code: <span class="badge bg-secondary">{{ field_data|safe_get:"code" }}</span></small>
                         </div>
                         {% endif %}
                     </td>
