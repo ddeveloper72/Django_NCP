@@ -1,0 +1,86 @@
+{# PROBLEMS SECTION - Customizable Template #}
+{# Easy to modify layout, styling, and data presentation #}
+
+{% if entries %}
+    <!-- Layout Option 1: Card-based (default) -->
+    <div class="problems-entries">
+        {% for entry in entries %}
+        <div class="clinical-entry" data-entry-type="problem">
+            <!-- Primary Information Row -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="primary-info">
+                        <span class="field-label">Problem Description:</span>
+                        <div class="field-value fw-bold">{{ entry.problem_description|default:"Not specified" }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="status-badge bg-{{ entry.status|lower|default:'secondary' }}">
+                        {{ entry.status|default:"Unknown" }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Secondary Information Row -->
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <span class="field-label">Problem Code:</span>
+                    <div class="field-value">
+                        <code class="code-value">{{ entry.problem_code|default:"Not specified" }}</code>
+                    </div>
+                </div>
+                {% if entry.onset_date %}
+                <div class="col-md-6">
+                    <span class="field-label">Onset Date:</span>
+                    <div class="field-value">{{ entry.onset_date }}</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Additional Fields (Easy to add/remove) -->
+            {% if entry.severity %}
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <span class="field-label">Severity:</span>
+                    <div class="field-value">
+                        <span class="badge bg-warning">{{ entry.severity }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Alternative Layout Option 2: Table (commented out - easy to switch) -->
+    <!--
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Code</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Onset Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td><code>{{ entry.problem_code|default:"N/A" }}</code></td>
+                    <td>{{ entry.problem_description|default:"Not specified" }}</td>
+                    <td><span class="badge bg-secondary">{{ entry.status|default:"Unknown" }}</span></td>
+                    <td>{{ entry.onset_date|default:"N/A" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    -->
+
+{% else %}
+    <div class="text-muted text-center py-4">
+        <i class="fa-solid fa-info-circle me-2"></i>
+        No problems recorded for this patient.
+    </div>
+{% endif %}

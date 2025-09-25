@@ -1,0 +1,108 @@
+{# ALLERGIES SECTION - Customizable Template #}
+{# Easy to modify layout, styling, and data presentation #}
+
+{% if entries %}
+    <!-- Layout Option 1: Alert-style cards (default) -->
+    <div class="allergies-entries">
+        {% for entry in entries %}
+        <div class="clinical-entry alert-style" data-entry-type="allergy">
+            <div class="d-flex align-items-start">
+                <div class="flex-grow-1">
+                    <!-- Primary Information -->
+                    <div class="primary-info">
+                        <span class="field-label">Allergen:</span>
+                        <div class="field-value fw-bold text-danger">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                            {{ entry.allergen|default:"Not specified" }}
+                        </div>
+                    </div>
+
+                    <!-- Secondary Information -->
+                    {% if entry.reaction %}
+                    <div class="mt-2">
+                        <span class="field-label">Reaction:</span>
+                        <div class="field-value">{{ entry.reaction }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if entry.allergy_code %}
+                    <div class="mt-2">
+                        <span class="field-label">Allergy Code:</span>
+                        <div class="field-value">
+                            <code class="code-value">{{ entry.allergy_code }}</code>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Severity Badge -->
+                <div class="ms-3">
+                    {% if entry.severity %}
+                    <span class="status-badge bg-danger">{{ entry.severity }}</span>
+                    {% else %}
+                    <span class="status-badge bg-warning">Unknown Severity</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            {% if entry.onset_date or entry.status %}
+            <div class="row mt-3">
+                {% if entry.onset_date %}
+                <div class="col-md-6">
+                    <span class="field-label">First Observed:</span>
+                    <div class="field-value">{{ entry.onset_date }}</div>
+                </div>
+                {% endif %}
+                {% if entry.status %}
+                <div class="col-md-6">
+                    <span class="field-label">Status:</span>
+                    <div class="field-value">
+                        <span class="badge bg-{{ entry.status|lower|default:'secondary' }}">
+                            {{ entry.status|default:"Active" }}
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Alternative Layout Option 2: Simple Table (commented out - easy to switch) -->
+    <!--
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="table-warning">
+                <tr>
+                    <th><i class="fa-solid fa-triangle-exclamation me-1"></i>Allergen</th>
+                    <th>Reaction</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td class="fw-bold text-danger">{{ entry.allergen|default:"Not specified" }}</td>
+                    <td>{{ entry.reaction|default:"N/A" }}</td>
+                    <td>
+                        <span class="badge bg-danger">{{ entry.severity|default:"Unknown" }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-warning">{{ entry.status|default:"Active" }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    -->
+
+{% else %}
+    <div class="text-muted text-center py-4">
+        <i class="fa-solid fa-shield-alt me-2"></i>
+        No known allergies recorded for this patient.
+    </div>
+{% endif %}

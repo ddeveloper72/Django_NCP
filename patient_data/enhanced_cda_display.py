@@ -7,6 +7,7 @@ import json
 import logging
 from typing import Any, Dict, Optional
 
+from django.contrib.sessions.models import Session
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
@@ -14,6 +15,10 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
 from patient_data.services.enhanced_cda_processor import EnhancedCDAProcessor
+from patient_data.simplified_clinical_view import (
+    SimplifiedClinicalDataView,
+    SimplifiedDataExtractor,
+)
 from patient_data.translation_utils import (
     detect_document_language,
     get_template_translations,
@@ -27,10 +32,17 @@ class EnhancedCDADisplayView(View):
 
     def get(self, request, patient_id=None):
         """Display CDA document with enhanced clinical sections"""
+        print(f"\n" + "="*80)
+        print(f"� ENHANCED CDA VIEW CALLED! Patient ID: {patient_id}")
+        print(f"🚀 Request method: {request.method}")
+        print(f"🚀 Request path: {request.path}")
+        print(f"="*80 + "\n")
         try:
             # Get patient CDA data (this would come from your existing patient data service)
             cda_content = self._get_patient_cda_content(patient_id)
+            print(f"🔍 DEBUG: CDA content found: {bool(cda_content)}")
             if not cda_content:
+                print(f"❌ DEBUG: No CDA content for patient {patient_id}")
                 return JsonResponse({"error": "Patient CDA data not found"}, status=404)
 
             # Detect document language
@@ -47,9 +59,19 @@ class EnhancedCDADisplayView(View):
             )
             logger.info(f"Content length: {len(cda_content)} characters")
 
+            # Get both enhanced sections (for compatibility) and simplified data (for flexible rendering)
             enhanced_sections = processor.process_clinical_sections(
                 cda_content=cda_content, source_language=source_language
             )
+
+            # Get simplified clinical data for flexible template rendering
+            simplified_extractor = SimplifiedDataExtractor()
+            simplified_data = simplified_extractor.get_simplified_clinical_data(
+                patient_id
+            )
+            logger.info(f"Simplified data result: success={simplified_data.get('success')}, sections={len(simplified_data.get('sections', []))}")
+            if not simplified_data.get('success'):
+                logger.warning(f"Simplified data failed for patient {patient_id}: {simplified_data.get('error')}")
 
             logger.info(f"Enhanced sections result: {enhanced_sections.keys()}")
             logger.info(
@@ -124,6 +146,7 @@ class EnhancedCDADisplayView(View):
                 "patient_id": patient_id,
                 "patient_identity": patient_identity,
                 "enhanced_sections": enhanced_sections,
+                "simplified_data": simplified_data,  # Add simplified data for flexible rendering
                 "template_translations": template_translations,
                 "source_language": source_language,
                 "target_language": target_language,
@@ -146,140 +169,69 @@ class EnhancedCDADisplayView(View):
                 },
             }
 
-            return render(
-                request, "jinja2/patient_data/enhanced_patient_cda.html", context
-            )
+            return render(request, "patient_data/enhanced_patient_cda.html", context)
 
         except Exception as e:
             logger.error(f"Error in enhanced CDA display: {e}")
             return JsonResponse({"error": str(e)}, status=500)
 
     def _get_patient_cda_content(self, patient_id: str) -> Optional[str]:
-        """Get patient CDA content - placeholder for your existing service"""
-        # This should integrate with your existing patient data service
-        # For now, return mock content to demonstrate the enhanced display
-
+        """Get patient CDA content from Django sessions - same logic as clinical debugger"""
         if not patient_id:
             return None
 
-        # Mock CDA content - replace with your actual service
-        mock_cda = f"""
-        <html>
-            <body>
-                <div class="patient-summary">
-                    <h1>Patient {patient_id} - Résumé Médical</h1>
+        try:
+            # Use the same session lookup logic as clinical debugger
+            session_key = f"patient_match_{patient_id}"
+            match_data = None
 
-                    <section class="medication-summary" data-code="10160-0">
-                        <h2>Résumé des médicaments</h2>
-                        <table class="clinical-table">
-                            <thead>
-                                <tr>
-                                    <th>Médicament</th>
-                                    <th>Dosage</th>
-                                    <th>Fréquence</th>
-                                    <th>Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Amoxicilline</td>
-                                    <td>500mg</td>
-                                    <td>3 fois par jour</td>
-                                    <td>Actif</td>
-                                </tr>
-                                <tr>
-                                    <td>Paracétamol</td>
-                                    <td>1000mg</td>
-                                    <td>Au besoin</td>
-                                    <td>Actif</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </section>
+            # Search across all Django sessions for the patient data
+            all_sessions = Session.objects.all()
+            for db_session in all_sessions:
+                try:
+                    db_session_data = db_session.get_decoded()
+                    if session_key in db_session_data:
+                        match_data = db_session_data[session_key]
+                        logger.info(
+                            f"Found patient {patient_id} data in session: {db_session.session_key}"
+                        )
+                        break
+                except Exception:
+                    continue  # Skip corrupted sessions
 
-                    <section class="allergy-summary" data-code="48765-2">
-                        <h2>Allergies et réactions indésirables</h2>
-                        <table class="clinical-table">
-                            <thead>
-                                <tr>
-                                    <th>Allergène</th>
-                                    <th>Réaction</th>
-                                    <th>Sévérité</th>
-                                    <th>Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Pénicilline</td>
-                                    <td>Éruption cutanée</td>
-                                    <td>Modéré</td>
-                                    <td>Confirmé</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </section>
+            if not match_data:
+                logger.warning(f"No session data found for patient {patient_id}")
+                return None
 
-                    <section class="problem-list" data-code="11450-4">
-                        <h2>Liste des problèmes</h2>
-                        <table class="clinical-table">
-                            <thead>
-                                <tr>
-                                    <th>Condition</th>
-                                    <th>Date de diagnostic</th>
-                                    <th>Statut</th>
-                                    <th>Code ICD-10</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Hypertension artérielle</td>
-                                    <td>2023-01-15</td>
-                                    <td>Actif</td>
-                                    <td>I10</td>
-                                </tr>
-                                <tr>
-                                    <td>Diabète type 2</td>
-                                    <td>2022-08-20</td>
-                                    <td>Actif</td>
-                                    <td>E11</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </section>
+            # Get CDA content based on user's current selection (same as debugger)
+            selected_cda_type = match_data.get("cda_type") or match_data.get(
+                "preferred_cda_type", "L3"
+            )
 
-                    <section class="vital-signs" data-code="8716-3">
-                        <h2>Signes vitaux</h2>
-                        <table class="clinical-table">
-                            <thead>
-                                <tr>
-                                    <th>Paramètre</th>
-                                    <th>Valeur</th>
-                                    <th>Unité</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Tension artérielle</td>
-                                    <td>140/90</td>
-                                    <td>mmHg</td>
-                                    <td>2025-08-05</td>
-                                </tr>
-                                <tr>
-                                    <td>Glycémie</td>
-                                    <td>7.2</td>
-                                    <td>mmol/L</td>
-                                    <td>2025-08-05</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </section>
-                </div>
-            </body>
-        </html>
-        """
+            if selected_cda_type == "L3":
+                cda_content = match_data.get("l3_cda_content")
+            elif selected_cda_type == "L1":
+                cda_content = match_data.get("l1_cda_content")
+            else:
+                # Fallback to original priority if no clear selection
+                cda_content = (
+                    match_data.get("l3_cda_content")
+                    or match_data.get("l1_cda_content")
+                    or match_data.get("cda_content")
+                )
 
-        return mock_cda
+            if cda_content:
+                logger.info(
+                    f"Retrieved {selected_cda_type} CDA content for patient {patient_id}: {len(cda_content)} characters"
+                )
+                return cda_content
+            else:
+                logger.warning(f"No CDA content found for patient {patient_id}")
+                return None
+
+        except Exception as e:
+            logger.error(f"Error retrieving CDA content for patient {patient_id}: {e}")
+            return None
 
 
 @method_decorator(csrf_exempt, name="dispatch")

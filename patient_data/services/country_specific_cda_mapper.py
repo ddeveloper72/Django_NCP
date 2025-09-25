@@ -362,8 +362,12 @@ class CountrySpecificCDAMapper:
                                 "medication_code": {
                                     "code": med_info.get("code", ""),
                                     "value": med_info.get("code", ""),
-                                    "displayName": display_name,
-                                    "display_name": display_name,
+                                    "displayName": med_info.get(
+                                        "code", ""
+                                    ),  # Use code for displayName in code column
+                                    "display_name": med_info.get(
+                                        "code", ""
+                                    ),  # Use code for display_name in code column
                                 },
                                 "ingredient_display": {
                                     "displayName": med_info.get("generic_name", ""),
@@ -373,8 +377,12 @@ class CountrySpecificCDAMapper:
                                 "ingredient_code": {
                                     "code": med_info.get("code", ""),
                                     "value": med_info.get("code", ""),
-                                    "displayName": med_info.get("generic_name", ""),
-                                    "display_name": med_info.get("generic_name", ""),
+                                    "displayName": med_info.get(
+                                        "code", ""
+                                    ),  # Use code for displayName in code column
+                                    "display_name": med_info.get(
+                                        "code", ""
+                                    ),  # Use code for display_name in code column
                                 },
                                 "dosage": "Not specified",
                                 "posology": med_info.get("route", "Not specified"),
@@ -452,11 +460,11 @@ class CountrySpecificCDAMapper:
                                     "code": problem_info.get("code", ""),
                                     "value": problem_info.get("code", ""),
                                     "displayName": problem_info.get(
-                                        "description", "Unknown problem"
-                                    ),
+                                        "code", ""
+                                    ),  # Use code for displayName in code column
                                     "display_name": problem_info.get(
-                                        "description", "Unknown problem"
-                                    ),
+                                        "code", ""
+                                    ),  # Use code for display_name in code column
                                 },
                                 "agent_display": {
                                     "displayName": problem_info.get(

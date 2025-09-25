@@ -198,6 +198,20 @@
                                 <i class="fa-solid fa-download me-2"></i>
                                 <div>
                                     <div class="fw-bold">CDA Download</div>
+
+                        <!-- Clinical Data Debugger -->
+                        {% if patient_id %}
+                        <a href="{% url 'patient_data:clinical_data_debugger' patient_id %}" class="btn btn-outline-info d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-microscope me-2"></i>
+                                <div>
+                                    <div class="fw-bold">Clinical Data Debugger</div>
+                                    <small class="d-block">Analyze extraction data</small>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-muted"></i>
+                        </a>
+                        {% endif %}
                                     <small class="d-block">
                                         {% if l1_available %}L1 Document (PDF Structure){% else %}{{ preferred_cda_type|default:"L3" }} Document{% endif %}
                                     </small>

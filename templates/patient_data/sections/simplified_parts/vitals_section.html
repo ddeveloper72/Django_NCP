@@ -1,0 +1,131 @@
+{# VITAL SIGNS SECTION - Customizable Template #}
+{# Easy to modify layout, styling, and data presentation #}
+
+{% if entries %}
+    <!-- Layout Option 1: Metric Cards (default) -->
+    <div class="vitals-entries">
+        <div class="row">
+            {% for entry in entries %}
+            <div class="col-md-4 mb-3">
+                <div class="clinical-entry vitals-card h-100" data-entry-type="vital">
+                    <div class="text-center">
+                        <!-- Vital Sign Icon and Name -->
+                        <div class="vital-icon mb-2">
+                            <i class="fa-solid fa-{{ entry.vital_type|default:'heartbeat' }} fa-2x text-info"></i>
+                        </div>
+
+                        <!-- Value and Unit -->
+                        <div class="vital-value">
+                            <h4 class="mb-1 text-primary">
+                                {{ entry.value|default:"--" }}
+                                <small class="text-muted">{{ entry.unit|default:"" }}</small>
+                            </h4>
+                            <p class="mb-1 fw-bold">{{ entry.vital_name|default:"Vital Sign" }}</p>
+                        </div>
+
+                        <!-- Status and Timestamp -->
+                        {% if entry.status %}
+                        <span class="status-badge bg-{{ entry.status|lower|default:'info' }}">
+                            {{ entry.status }}
+                        </span>
+                        {% endif %}
+
+                        {% if entry.measurement_time %}
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <i class="fa-solid fa-clock me-1"></i>
+                                {{ entry.measurement_time }}
+                            </small>
+                        </div>
+                        {% endif %}
+
+                        <!-- Code (if needed) -->
+                        {% if entry.vital_code %}
+                        <div class="mt-2">
+                            <code class="code-value small">{{ entry.vital_code }}</code>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add row break every 3 items for better responsive layout -->
+            {% if forloop.counter|divisibleby:3 %}
+                </div><div class="row">
+            {% endif %}
+
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Alternative Layout Option 2: Horizontal List (commented out - easy to switch) -->
+    <!--
+    <div class="vitals-horizontal">
+        {% for entry in entries %}
+        <div class="d-flex justify-content-between align-items-center clinical-entry">
+            <div>
+                <strong>{{ entry.vital_name|default:"Vital Sign" }}</strong>
+                {% if entry.vital_code %}
+                <br><small class="text-muted"><code>{{ entry.vital_code }}</code></small>
+                {% endif %}
+            </div>
+            <div class="text-center">
+                <h5 class="mb-0 text-primary">
+                    {{ entry.value|default:"--" }}
+                    <small class="text-muted">{{ entry.unit|default:"" }}</small>
+                </h5>
+                {% if entry.status %}
+                <span class="badge bg-info">{{ entry.status }}</span>
+                {% endif %}
+            </div>
+            <div class="text-end">
+                {% if entry.measurement_time %}
+                <small class="text-muted">{{ entry.measurement_time }}</small>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    -->
+
+    <!-- Alternative Layout Option 3: Compact Table (commented out - easy to switch) -->
+    <!--
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-info">
+                <tr>
+                    <th>Vital Sign</th>
+                    <th>Value</th>
+                    <th>Status</th>
+                    <th>Measured</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td>
+                        {{ entry.vital_name|default:"Unknown" }}
+                        {% if entry.vital_code %}
+                        <br><small class="text-muted"><code>{{ entry.vital_code }}</code></small>
+                        {% endif %}
+                    </td>
+                    <td class="fw-bold">{{ entry.value|default:"--" }} {{ entry.unit|default:"" }}</td>
+                    <td>
+                        {% if entry.status %}
+                        <span class="badge bg-info">{{ entry.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td><small>{{ entry.measurement_time|default:"N/A" }}</small></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    -->
+
+{% else %}
+    <div class="text-muted text-center py-4">
+        <i class="fa-solid fa-heartbeat me-2"></i>
+        No vital signs recorded for this patient.
+    </div>
+{% endif %}

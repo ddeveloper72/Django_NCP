@@ -1,0 +1,858 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Clinical Data Debugger - {{ patient_data.given_name }} {{ patient_data.family_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .clinical-debugger {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .section-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%) !important;
+        color: #ffffff !important;
+        padding: 1rem;
+        border-radius: 8px 8px 0 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid #2d3748;
+    }
+
+    .section-header:hover {
+        background: linear-gradient(135deg, #2c5282 0%, #4a5568 100%) !important;
+        color: #ffffff !important;
+    }
+
+    .section-header h3,
+    .section-header h4,
+    .section-header h5 {
+        color: #ffffff !important;
+        margin: 0;
+    }
+
+    .section-content {
+        padding: 1rem;
+        display: none;
+    }
+
+    .section-content.active {
+        display: block;
+    }
+
+    .json-viewer {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        padding: 1rem;
+        max-height: 400px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Section type specific styling */
+    .clinical-section-analysis {
+        background: #e6f3ff;
+        border-left: 4px solid #1e40af;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 4px 4px 0;
+        color: #1e3a8a;
+    }
+
+    .clinical-section-analysis h4,
+    .clinical-section-analysis h5 {
+        color: #1e3a8a !important;
+        margin-bottom: 0.5rem;
+    }
+
+    .allergy-specific {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 4px 4px 0;
+        color: #991b1b;
+    }
+
+    .allergy-specific h4,
+    .allergy-specific h5,
+    .allergy-specific strong {
+        color: #991b1b !important;
+    }
+
+    .medication-specific {
+        background: #f0fdf4;
+        border-left: 4px solid #16a34a;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 4px 4px 0;
+        color: #166534;
+    }
+
+    .medication-specific h4,
+    .medication-specific h5,
+    .medication-specific strong {
+        color: #166534 !important;
+    }
+
+    .problem-specific {
+        background: #fef3c7;
+        border-left: 4px solid #d97706;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 4px 4px 0;
+        color: #92400e;
+    }
+
+    .problem-specific h4,
+    .problem-specific h5,
+    .problem-specific strong {
+        color: #92400e !important;
+    }
+
+    .coding-badge {
+        display: inline-block;
+        background: #059669;
+        color: #ffffff;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        margin: 0.2rem;
+        font-weight: 500;
+        border: 1px solid transparent;
+    }
+
+    .coding-badge.snomed {
+        background: #0891b2;
+        color: #ffffff;
+    }
+
+    .coding-badge.loinc {
+        background: #d97706;
+        color: #ffffff;
+    }
+
+    .coding-badge.icd {
+        background: #dc2626;
+        color: #ffffff;
+    }
+
+    .field-mapping-opportunity {
+        background: #fffbeb;
+        border: 1px solid #f59e0b;
+        border-radius: 4px;
+        padding: 0.75rem;
+        margin: 0.5rem 0;
+        color: #92400e;
+    }
+
+    .field-mapping-opportunity strong,
+    .field-mapping-opportunity h5 {
+        color: #92400e !important;
+    }
+
+    .quality-score {
+        display: inline-block;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-weight: bold;
+        font-size: 1.1rem;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .quality-excellent {
+        background: #059669;
+        color: #ffffff;
+    }
+
+    .quality-good {
+        background: #d97706;
+        color: #ffffff;
+    }
+
+    .quality-fair {
+        background: #ea580c;
+        color: #ffffff;
+    }
+
+    .quality-poor {
+        background: #dc2626;
+        color: #ffffff;
+    }
+
+    .extraction-method {
+        display: inline-block;
+        background: #7c3aed;
+        color: #ffffff;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        margin: 0.2rem;
+        font-weight: 500;
+        border: 1px solid #6d28d9;
+    }
+
+    .toggle-btn {
+        background: none !important;
+        border: none !important;
+        color: #ffffff !important;
+        float: right;
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+        opacity: 0.9;
+    }
+
+    .toggle-btn:hover {
+        opacity: 1;
+        color: #e2e8f0 !important;
+    }
+
+    .toggle-btn.rotated {
+        transform: rotate(180deg);
+    }
+
+    .allergy-specific {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 4px 4px 0;
+        color: #991b1b;
+    }
+
+    .allergy-specific h4,
+    .allergy-specific h5,
+    .allergy-specific strong {
+        color: #991b1b !important;
+    }
+
+    .allergy-codes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Accessibility improvements */
+    .section-header:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+    }
+
+    .section-header[role="button"] {
+        cursor: pointer;
+    }
+
+    .section-header[role="button"]:focus {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+    }
+
+    /* Text contrast improvements */
+    .text-muted {
+        color: #6b7280 !important;
+    }
+
+    .clinical-debugger p,
+    .clinical-debugger li,
+    .clinical-debugger span {
+        color: #374151;
+    }
+
+    .clinical-debugger strong {
+        color: #111827;
+    }
+
+    /* JSON viewer improvements */
+    .json-viewer {
+        background: #f9fafb;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        padding: 1rem;
+        max-height: 400px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+        color: #1f2937;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="clinical-debugger">
+    <div class="container-fluid mt-4">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="display-6 mb-2">
+                            <i class="fas fa-microscope text-primary me-2"></i>
+                            Clinical Data Extraction Debugger
+                        </h1>
+                        <p class="text-muted mb-0">
+                            Patient: <strong>{{ patient_data.given_name }} {{ patient_data.family_name }}</strong> |
+                            Country: <strong>{{ country_code }}</strong> |
+                            CDA Type: <strong>{{ cda_type }}</strong> |
+                            Session: <strong>{{ session_id }}</strong>
+                        </p>
+                    </div>
+                    <div>
+                        <a href="{% url 'patient_data:patient_details' session_id %}" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Patient
+                        </a>
+                        <button class="btn btn-primary" onclick="downloadJSON()">
+                            <i class="fas fa-download me-1"></i>Download JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ extraction_results.extraction_statistics.total_extraction_methods }}</div>
+                <div class="stat-label">Extraction Methods</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ extraction_results.extraction_statistics.clinical_sections_found }}</div>
+                <div class="stat-label">Clinical Sections Found</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ extraction_results.extraction_statistics.total_clinical_codes }}</div>
+                <div class="stat-label">Clinical Codes Extracted</div>
+            </div>
+            <div class="stat-card">
+                <div class="quality-score {% if extraction_results.extraction_statistics.data_quality_score >= 80 %}quality-excellent{% elif extraction_results.extraction_statistics.data_quality_score >= 60 %}quality-good{% elif extraction_results.extraction_statistics.data_quality_score >= 40 %}quality-fair{% else %}quality-poor{% endif %}">
+                    {{ extraction_results.extraction_statistics.data_quality_score|floatformat:0 }}%
+                </div>
+                <div class="stat-label">Data Quality Score</div>
+            </div>
+        </div>
+
+        <!-- Extraction Methods Used -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)" role="button" tabindex="0" aria-expanded="false" aria-controls="extraction-methods-content">
+                <h3 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>Extraction Methods Used
+                    <button class="toggle-btn">▼</button>
+                </h3>
+            </div>
+            <div class="section-content" id="extraction-methods-content">
+                <p>The following extraction methods were used to analyze the clinical document:</p>
+                <div class="mb-3">
+                    {% for method in extraction_results.extraction_methods %}
+                    <span class="extraction-method">{{ method|title }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- All Clinical Sections Analysis -->
+        {% for section_item in clinical_sections_json %}
+        {% with section=section_item.section_data %}
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)" role="button" tabindex="0" aria-expanded="false" aria-controls="clinical-section-content-{{ forloop.counter }}">
+                <h3 class="mb-0">
+                    <i class="fas {% if section_item.section_type == 'allergies' %}fa-exclamation-triangle{% elif section_item.section_type == 'medications' %}fa-pills{% elif section_item.section_type == 'problems' %}fa-stethoscope{% elif section_item.section_type == 'vitals' %}fa-heartbeat{% elif section_item.section_type == 'procedures' %}fa-user-md{% elif section_item.section_type == 'immunizations' %}fa-syringe{% elif section_item.section_type == 'results' %}fa-flask{% elif section_item.section_type == 'social_history' %}fa-users{% elif section_item.section_type == 'family_history' %}fa-family{% elif section_item.section_type == 'care_plan' %}fa-clipboard-list{% else %}fa-file-medical{% endif %} me-2"></i>
+                    Clinical Section: {{ section.display_name }}
+                    <span class="badge bg-primary ms-2">{{ section_item.section_type|title }}</span>
+                    <button class="toggle-btn">▼</button>
+                </h3>
+            </div>
+            <div class="section-content" id="clinical-section-content-{{ forloop.counter }}">
+                <div class="{% if section_item.is_allergy_related %}allergy-specific{% elif section_item.section_type == 'medications' %}medication-specific{% elif section_item.section_type == 'problems' %}problem-specific{% else %}clinical-section-analysis{% endif %}">>
+                    <h4>🔍 {{ section.display_name }} Data Analysis</h4>
+                    {% if section_item.is_allergy_related %}
+                    <p><strong>This is an allergy-related section!</strong> Here's what we extracted:</p>
+                    {% else %}
+                    <p><strong>Clinical section analysis:</strong> Here's what we extracted:</p>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Clinical Codes Found:</h5>
+                            <div class="allergy-codes">
+                                {% for code in section.clinical_codes %}
+                                <span class="coding-badge {% if 'snomed' in code.system|lower %}snomed{% elif 'loinc' in code.system|lower %}loinc{% elif 'icd' in code.system|lower %}icd{% endif %}">
+                                    {{ code.code }} ({{ code.system|truncatechars:10 }})
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Section Statistics:</h5>
+                            <ul>
+                                <li><strong>Section Type:</strong> {{ section_item.section_type|title }}</li>
+                                <li><strong>Structured Entries:</strong> {{ section.structured_entries|length }}</li>
+                                <li><strong>Clinical Codes:</strong> {{ section.clinical_codes|length }}</li>
+                                <li><strong>Is Coded Section:</strong> {{ section.is_coded_section|yesno:"Yes,No" }}</li>
+                                <li><strong>Coding Density:</strong> {{ section.coding_density|floatformat:2 }}</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {% if section.narrative_text %}
+                    <h5>Narrative Text Preview:</h5>
+                    <div class="bg-light p-2 rounded mt-1" style="max-height: 150px; overflow-y: auto;">
+                        {{ section.narrative_text|truncatewords:100 }}
+                    </div>
+                    {% endif %}
+
+                    <h5>Raw JSON Data:</h5>
+                    <div class="json-viewer">{{ section_item.section_json|safe }}</div>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% empty %}
+        <div class="section-card">
+            <div class="section-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>No Clinical Sections Found
+                </h3>
+            </div>
+            <div class="section-content active">
+                <div class="alert alert-info">
+                    <p>No clinical sections were found in the current document.</p>
+                    <p>This could mean:</p>
+                    <ul>
+                        <li>The document has no structured clinical data</li>
+                        <li>Clinical information is in unrecognized sections</li>
+                        <li>The CDA structure doesn't follow expected conventions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Enhanced Parser Results -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h3 class="mb-0">
+                    <i class="fas fa-search-plus me-2"></i>Enhanced CDA XML Parser Results
+                    <button class="toggle-btn">▼</button>
+                </h3>
+            </div>
+            <div class="section-content">
+                {% if extraction_results.clinical_sections.enhanced_parser.error %}
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> {{ extraction_results.clinical_sections.enhanced_parser.error }}
+                </div>
+                {% else %}
+                <div class="clinical-section-analysis">
+                    <h4>Clinical Sections Found: {{ extraction_results.clinical_sections.enhanced_parser.sections_found|length }}</h4>
+
+                    {% for section in extraction_results.clinical_sections.enhanced_parser.sections_found %}
+                    <div class="mb-3 p-3 border rounded">
+                        <h5>{{ section.display_name }}</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Section ID:</strong> {{ section.section_id }}<br>
+                                <strong>Coded Section:</strong> {{ section.is_coded_section|yesno:"Yes,No" }}<br>
+                                <strong>Field Count:</strong> {{ section.field_count }}
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Clinical Codes:</strong> {{ section.clinical_codes|length }}<br>
+                                <strong>LOINC Codes:</strong> {{ section.loinc_codes|length }}<br>
+                                <strong>SNOMED Codes:</strong> {{ section.snomed_codes|length }}
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Coding Density:</strong> {{ section.coding_density|floatformat:2 }}<br>
+                                <strong>Structured Entries:</strong> {{ section.structured_entries|length }}
+                            </div>
+                        </div>
+
+                        {% if section.clinical_codes %}
+                        <div class="mt-2">
+                            <strong>Clinical Codes:</strong><br>
+                            {% for code in section.clinical_codes %}
+                            <span class="coding-badge {% if 'snomed' in code.system|lower %}snomed{% elif 'loinc' in code.system|lower %}loinc{% elif 'icd' in code.system|lower %}icd{% endif %}">
+                                {{ code.code }} - {{ code.display_name|default:"No Display" }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if section.narrative_text %}
+                        <div class="mt-2">
+                            <strong>Narrative Text:</strong>
+                            <div class="bg-light p-2 rounded mt-1" style="max-height: 100px; overflow-y: auto;">
+                                {{ section.narrative_text|truncatewords:50 }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- NEW: Structured CDA Extractor Results (Rich Hierarchical Data) -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)" role="button" tabindex="0" aria-expanded="false" aria-controls="structured-extractor-content">
+                <h3 class="mb-0">
+                    <i class="fas fa-sitemap me-2"></i>🔍 Structured CDA Extractor - Rich Data Analysis
+                    <button class="toggle-btn">▼</button>
+                </h3>
+            </div>
+            <div class="section-content" id="structured-extractor-content">
+                {% if extraction_results.clinical_sections.structured_extractor.error %}
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> {{ extraction_results.clinical_sections.structured_extractor.error }}
+                </div>
+                {% else %}
+                <div class="alert alert-success">
+                    <h4><i class="fas fa-magic me-2"></i>This is the MISSING DATA your current methods aren't capturing!</h4>
+                    <p>The Structured CDA Extractor reveals the rich hierarchical data hidden in your CDA XML, including effective times, SNOMED codes, participant substances, and entry relationships that your current parsers are missing.</p>
+                </div>
+
+                <!-- Extraction Depth Metrics -->
+                {% if extraction_results.clinical_sections.structured_extractor.extraction_depth %}
+                <div class="clinical-section-analysis mb-4">
+                    <h4>📊 Data Depth Analysis</h4>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-value">{{ extraction_results.clinical_sections.structured_extractor.extraction_depth.total_entries }}</div>
+                                <div class="stat-label">Total Structured Entries</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-value">{{ extraction_results.clinical_sections.structured_extractor.extraction_depth.code_coverage|floatformat:1 }}%</div>
+                                <div class="stat-label">Entries with Clinical Codes</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-value">{{ extraction_results.clinical_sections.structured_extractor.extraction_depth.temporal_data_coverage|floatformat:1 }}%</div>
+                                <div class="stat-label">Entries with Effective Times</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-value">{{ extraction_results.clinical_sections.structured_extractor.extraction_depth.participant_data_coverage|floatformat:1 }}%</div>
+                                <div class="stat-label">Entries with Participants</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Rich Data Found -->
+                {% if extraction_results.clinical_sections.structured_extractor.hierarchical_data_found %}
+                <div class="allergy-specific mb-4">
+                    <h4>🎯 Rich Clinical Data Available for Mapping</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul>
+                                <li><strong>Effective Times:</strong> {{ extraction_results.clinical_sections.structured_extractor.hierarchical_data_found.effective_times }} entries with temporal data</li>
+                                <li><strong>Participant Substances:</strong> {{ extraction_results.clinical_sections.structured_extractor.hierarchical_data_found.participant_substances }} entries with substance/agent data</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul>
+                                <li><strong>Entry Relationships:</strong> {{ extraction_results.clinical_sections.structured_extractor.hierarchical_data_found.entry_relationships }} relationship entries (severity, manifestations)</li>
+                                <li><strong>Template Usage:</strong> {{ extraction_results.clinical_sections.structured_extractor.hierarchical_data_found.template_usage }} template IDs found</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Structured Entries by Type -->
+                {% for section_type, type_data in extraction_results.clinical_sections.structured_extractor.structured_entries_by_type.items %}
+                <div class="mb-4">
+                    <h5>{{ section_type|title }} Section ({{ type_data.entry_count }} entries)</h5>
+
+                    {% for entry in type_data.entries %}
+                    <div class="border rounded p-3 mb-2" style="background: #f8f9fa;">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <strong>Entry ID:</strong> {{ entry.entry_id }}<br>
+                                <strong>Type:</strong>
+                                <span class="extraction-method">{{ entry.entry_type }}</span>
+
+                                {% if entry.template_ids %}
+                                <div class="mt-1">
+                                    <strong>Template IDs:</strong>
+                                    {% for template_id in entry.template_ids %}
+                                    <span class="coding-badge">{{ template_id }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-end">
+                                    {% if entry.has_code %}<span class="badge bg-success me-1">Code ✓</span>{% endif %}
+                                    {% if entry.has_value %}<span class="badge bg-info me-1">Value ✓</span>{% endif %}
+                                    {% if entry.has_effective_time %}<span class="badge bg-warning me-1">Time ✓</span>{% endif %}
+                                    {% if entry.has_participants %}<span class="badge bg-danger me-1">Participants ✓</span>{% endif %}
+                                    {% if entry.has_relationships %}<span class="badge bg-secondary me-1">Relations ✓</span>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if entry.rich_attributes %}
+                        <div class="mt-2">
+                            <strong>Rich Attributes Available:</strong>
+                            <div class="json-viewer mt-1" style="max-height: 150px;">{{ entry.rich_attributes|pprint }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- PS Table Renderer Results -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h3 class="mb-0">
+                    <i class="fas fa-table me-2"></i>PS Table Renderer Results
+                    <button class="toggle-btn">▼</button>
+                </h3>
+            </div>
+            <div class="section-content">
+                {% if extraction_results.rendering_data.ps_tables.error %}
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> {{ extraction_results.rendering_data.ps_tables.error }}
+                </div>
+                {% else %}
+                <div class="clinical-section-analysis">
+                    <h4>Rendered Tables: {{ extraction_results.rendering_data.ps_tables.rendered_tables|length }}</h4>
+
+                    {% for table_name, table_data in extraction_results.rendering_data.ps_tables.rendered_tables.items %}
+                    <div class="mb-3 p-3 border rounded">
+                        <h5>{{ table_name|title }}</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Table Rows:</strong> {{ table_data.table_rows }}
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Coded Entries:</strong> {{ table_data.coded_entries }}
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Display Format:</strong> {{ table_data.display_format }}
+                            </div>
+                            <div class="col-md-3">
+                                <strong>PS Compliant:</strong> {{ table_data.ps_compliance|yesno:"Yes,No" }}
+                            </div>
+                        </div>
+
+                        {% if table_data.columns %}
+                        <div class="mt-2">
+                            <strong>Columns:</strong> {{ table_data.columns|join:", " }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Clinical Coding Analysis -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h3 class="mb-0">
+                    <i class="fas fa-code me-2"></i>Clinical Coding Analysis
+                    <button class="toggle-btn">▼</button>
+                </h3>
+            </div>
+            <div class="section-content">
+                {% if extraction_results.coding_analysis.error %}
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> {{ extraction_results.coding_analysis.error }}
+                </div>
+                {% else %}
+                <div class="clinical-section-analysis">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>Terminology Distribution</h4>
+                            {% for system, count in extraction_results.coding_analysis.terminology_distribution.items %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="coding-badge {% if system == 'SNOMED_CT' %}snomed{% elif system == 'LOINC' %}loinc{% elif system == 'ICD' %}icd{% endif %}">
+                                    {{ system }}
+                                </span>
+                                <strong>{{ count }}</strong>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Interoperability Score</h4>
+                            <div class="quality-score {% if extraction_results.coding_analysis.interoperability_score >= 80 %}quality-excellent{% elif extraction_results.coding_analysis.interoperability_score >= 60 %}quality-good{% elif extraction_results.coding_analysis.interoperability_score >= 40 %}quality-fair{% else %}quality-poor{% endif %}">
+                                {{ extraction_results.coding_analysis.interoperability_score|floatformat:0 }}%
+                            </div>
+                            <p class="mt-2">Based on standard terminology usage (SNOMED CT, LOINC, ICD)</p>
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4">Coding Systems Found</h4>
+                    <div class="mt-2">
+                        {% for system in extraction_results.coding_analysis.coding_systems_found %}
+                        <span class="extraction-method">{{ system|truncatechars:50 }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Field Mapping Opportunities -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h3 class="mb-0">
+                    <i class="fas fa-map-signs me-2"></i>Field Mapping Opportunities
+                    <button class="toggle-btn">▼</button>
+                </h3>
+            </div>
+            <div class="section-content">
+                <div class="clinical-section-analysis">
+                    <h4>Unmapped Clinical Codes</h4>
+                    <p>These sections have rich clinical data but may not be fully rendered in PS tables:</p>
+
+                    {% for opportunity in extraction_results.field_mapping_opportunities.unmapped_clinical_codes %}
+                    <div class="field-mapping-opportunity">
+                        <h5>{{ opportunity.section }}</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Available Codes:</strong> {{ opportunity.available_codes }}
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Structured Entries:</strong> {{ opportunity.structured_entries }}
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Coding Density:</strong> {{ opportunity.coding_density|floatformat:2 }}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-success">✅ All clinical sections appear to be properly mapped for rendering.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Raw JSON Data -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h3 class="mb-0">
+                    <i class="fas fa-code me-2"></i>Raw JSON Data
+                    <button class="toggle-btn">▼</button>
+                </h3>
+            </div>
+            <div class="section-content">
+                <div class="json-viewer" id="raw-json">{{ extraction_json }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden data for JavaScript -->
+<div id="extraction-data" style="display: none;">{{ extraction_json|safe }}</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleSection(header) {
+    const content = header.nextElementSibling;
+    const toggleBtn = header.querySelector('.toggle-btn');
+
+    if (content.classList.contains('active')) {
+        content.classList.remove('active');
+        toggleBtn.classList.remove('rotated');
+    } else {
+        content.classList.add('active');
+        toggleBtn.classList.add('rotated');
+    }
+}
+
+function downloadJSON() {
+    const jsonData = document.getElementById('extraction-data').textContent;
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `clinical_data_extraction_{{ session_id }}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Auto-expand first few clinical sections for better user experience
+document.addEventListener('DOMContentLoaded', function() {
+    const clinicalSections = document.querySelectorAll('[id^="clinical-section-content-"]');
+    // Auto-expand first 3 sections
+    clinicalSections.forEach((section, index) => {
+        if (index < 3) {
+            section.classList.add('active');
+            const toggleBtn = section.previousElementSibling.querySelector('.toggle-btn');
+            if (toggleBtn) {
+                toggleBtn.classList.add('rotated');
+            }
+        }
+    });
+
+    // Keep allergy sections expanded (backward compatibility)
+    const allergySections = document.querySelectorAll('.section-content.active');
+    allergySections.forEach(section => {
+        const toggleBtn = section.previousElementSibling.querySelector('.toggle-btn');
+        if (toggleBtn) {
+            toggleBtn.classList.add('rotated');
+        }
+    });
+});
+</script>
+{% endblock %}

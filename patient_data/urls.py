@@ -24,7 +24,9 @@ sys.path.append(os.path.dirname(__file__))
 from debug_session_view import debug_session_view
 
 from .clean_cda_views import clean_patient_cda_view
+from .clinical_data_debugger import clinical_data_api, clinical_data_debugger
 from .enhanced_cda_display import EnhancedCDADisplayView
+from .simplified_clinical_view import SimplifiedClinicalDataView
 from .view_modules import enhanced_cda_translation_views
 from .view_modules.cda_views import (
     available_cda_files,
@@ -45,6 +47,13 @@ urlpatterns = [
     # Debug views
     path("debug/cda-index/", debug_cda_index, name="debug_cda_index"),
     path("debug/session/", debug_session_view, name="debug_session"),
+    # Clinical Data Debugger
+    path(
+        "debug/clinical/<str:session_id>/",
+        clinical_data_debugger,
+        name="clinical_data_debugger",
+    ),
+    path("api/clinical/<str:session_id>/", clinical_data_api, name="clinical_data_api"),
     # Test CDA Documents Management
     path("test-patients/", test_patients_view, name="test_patients"),
     path("refresh-cda-index/", refresh_cda_index_view, name="refresh_cda_index"),
@@ -76,7 +85,21 @@ urlpatterns = [
     ),
     # Clean CDA view with structured data extraction
     path("clean/<str:patient_id>/", clean_patient_cda_view, name="clean_cda_view"),
-    # Specific CDA type view
+    
+    # Enhanced CDA Display with Patient ID (using our working view) - MUST BE BEFORE GENERIC PATTERN
+    path(
+        "cda/enhanced_display/<str:patient_id>/",
+        EnhancedCDADisplayView.as_view(),
+        name="enhanced_cda_display_with_id",
+    ),
+    # Simplified Clinical Data View - MUST BE BEFORE GENERIC PATTERN
+    path(
+        "cda/simplified/<str:patient_id>/",
+        SimplifiedClinicalDataView.as_view(),
+        name="simplified_clinical_view",
+    ),
+    
+    # Specific CDA type view (GENERIC PATTERN - KEEP AFTER SPECIFIC PATTERNS)
     path(
         "cda/<str:session_id>/<str:cda_type>/",
         main_views.patient_cda_view,
@@ -154,12 +177,6 @@ urlpatterns = [
         "enhanced_cda_display/",
         main_views.enhanced_cda_display,
         name="enhanced_cda_display",
-    ),
-    # Enhanced CDA Display with Patient ID (using our working view)
-    path(
-        "cda/enhanced_display/<str:patient_id>/",
-        EnhancedCDADisplayView.as_view(),
-        name="enhanced_cda_display_with_id",
     ),
     # Enhanced CDA Translation Views
     path(

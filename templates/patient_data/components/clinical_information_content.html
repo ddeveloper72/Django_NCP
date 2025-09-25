@@ -6,28 +6,58 @@
     <!-- Check if we have any clinical data -->
     {% if processed_sections and processed_sections|length > 0 %}
 
-    <!-- Clinical Information Master Controls -->
-    <div class="clinical-master-controls mb-3 d-flex justify-content-between align-items-center">
-        <div class="control-buttons">
-            <button type="button" class="btn btn-outline-primary btn-sm me-2" id="expandAllClinical">
-                <i class="fa-solid fa-expand-arrows-alt me-1"></i>
-                Expand All
-            </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm" id="collapseAllClinical">
-                <i class="fa-solid fa-compress-arrows-alt me-1"></i>
-                Collapse All
-            </button>
+    <!-- Clinical Information Master Controls with View Toggle -->
+    <div class="clinical-master-controls mb-3">
+        <!-- View Toggle Tabs -->
+        <div class="clinical-view-tabs mb-3">
+            <ul class="nav nav-tabs" id="clinicalViewTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="enhanced-tab" data-bs-toggle="tab"
+                            data-bs-target="#enhanced-clinical-view" type="button" role="tab"
+                            aria-controls="enhanced-clinical-view" aria-selected="true">
+                        <i class="fa-solid fa-chart-bar me-1"></i>
+                        Enhanced View
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="simplified-tab" data-bs-toggle="tab"
+                            data-bs-target="#simplified-clinical-view" type="button" role="tab"
+                            aria-controls="simplified-clinical-view" aria-selected="false">
+                        <i class="fa-solid fa-table me-1"></i>
+                        Simplified View
+                    </button>
+                </li>
+            </ul>
         </div>
-        <div class="section-count text-muted">
-            <small>
-                <i class="fa-solid fa-info-circle me-1"></i>
-                Clinical sections can be expanded/collapsed independently
-            </small>
+
+        <!-- Controls for Enhanced View Only -->
+        <div class="enhanced-controls d-flex justify-content-between align-items-center" id="enhancedViewControls">
+            <div class="control-buttons">
+                <button type="button" class="btn btn-outline-primary btn-sm me-2" id="expandAllClinical">
+                    <i class="fa-solid fa-expand-arrows-alt me-1"></i>
+                    Expand All
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="collapseAllClinical">
+                    <i class="fa-solid fa-compress-arrows-alt me-1"></i>
+                    Collapse All
+                </button>
+            </div>
+            <div class="section-count text-muted">
+                <small>
+                    <i class="fa-solid fa-info-circle me-1"></i>
+                    Clinical sections can be expanded/collapsed independently
+                </small>
+            </div>
         </div>
     </div>
 
-    <!-- Clinical Information Accordion -->
-    <div class="accordion" id="clinicalInformationAccordion">
+    <!-- Tab Content Container -->
+    <div class="tab-content" id="clinicalViewTabContent">
+
+        <!-- Enhanced View Tab -->
+        <div class="tab-pane fade show active" id="enhanced-clinical-view" role="tabpanel" aria-labelledby="enhanced-tab">
+            <!-- Clinical Information Accordion -->
+            <div class="accordion" id="clinicalInformationAccordion">
 
         <!-- Dynamic Clinical Sections from processed_sections -->
         {% for section in processed_sections %}
@@ -107,6 +137,22 @@
         </div>
         {% endif %}
 
+            </div>
+        </div>
+
+        <!-- Simplified View Tab -->
+        <div class="tab-pane fade" id="simplified-clinical-view" role="tabpanel" aria-labelledby="simplified-tab">
+            {% if simplified_data %}
+                {% include 'patient_data/sections/simplified_clinical_section_enhanced.html' %}
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fa-solid fa-info-circle me-2"></i>
+                    <strong>Simplified View Not Available</strong><br>
+                    Simplified clinical data is not available for this patient.
+                </div>
+            {% endif %}
+        </div>
+
     </div>
 
     {% else %}
@@ -120,3 +166,75 @@
     </div>
     {% endif %}
 </div>
+
+<!-- JavaScript for Tab and Accordion Functionality -->
+<script>
+    function toggleSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        const button = document.querySelector(`[aria-controls="${sectionId}"]`);
+
+        if (section.classList.contains('show')) {
+            section.classList.remove('show');
+            button.setAttribute('aria-expanded', 'false');
+            button.classList.add('collapsed');
+        } else {
+            section.classList.add('show');
+            button.setAttribute('aria-expanded', 'true');
+            button.classList.remove('collapsed');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Bootstrap tabs
+        const clinicalViewTabs = document.querySelectorAll('#clinicalViewTabs button[data-bs-toggle="tab"]');
+        clinicalViewTabs.forEach(tab => {
+            new bootstrap.Tab(tab);
+        });
+
+        // Show/hide enhanced controls based on active tab
+        function updateControlsVisibility() {
+            const enhancedTab = document.getElementById('enhanced-tab');
+            const enhancedControls = document.getElementById('enhancedViewControls');
+
+            if (enhancedTab && enhancedControls) {
+                if (enhancedTab.classList.contains('active')) {
+                    enhancedControls.style.display = 'flex';
+                } else {
+                    enhancedControls.style.display = 'none';
+                }
+            }
+        }
+
+        // Listen for tab changes
+        clinicalViewTabs.forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function() {
+                updateControlsVisibility();
+            });
+        });
+
+        // Initial controls visibility setup
+        updateControlsVisibility();
+
+        // Expand All functionality
+        document.getElementById('expandAllClinical')?.addEventListener('click', function() {
+            document.querySelectorAll('.accordion-collapse').forEach(function(section) {
+                section.classList.add('show');
+            });
+            document.querySelectorAll('.accordion-button').forEach(function(button) {
+                button.setAttribute('aria-expanded', 'true');
+                button.classList.remove('collapsed');
+            });
+        });
+
+        // Collapse All functionality
+        document.getElementById('collapseAllClinical')?.addEventListener('click', function() {
+            document.querySelectorAll('.accordion-collapse').forEach(function(section) {
+                section.classList.remove('show');
+            });
+            document.querySelectorAll('.accordion-button').forEach(function(button) {
+                button.setAttribute('aria-expanded', 'false');
+                button.classList.add('collapsed');
+            });
+        });
+    });
+</script>

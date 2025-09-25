@@ -1,0 +1,221 @@
+{% load patient_filters %}
+
+{# =============================================== #}
+{# SIMPLIFIED CLINICAL DATA TEMPLATE #}
+{# Clean, flexible data structures for easy customization #}
+{# =============================================== #}
+
+<div class="simplified-clinical-data">
+    {% if simplified_data.success %}
+
+    <div class="alert alert-info mb-4">
+        <h5><i class="fa-solid fa-info-circle me-2"></i>Simplified Clinical Data</h5>
+        <p class="mb-0">This shows clean, accessible clinical data that you can easily customize and restructure.</p>
+    </div>
+
+    {% for section in simplified_data.sections %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-stethoscope me-2"></i>
+                {{ section.title }}
+                <small class="ms-2">({{ section.section_code }} - {{ section.type|title }})</small>
+            </h5>
+        </div>
+
+        <div class="card-body">
+            {% if section.type == "problems" %}
+                {# PROBLEMS SECTION - Clean and customizable #}
+                <h6>Problems/Diagnoses ({{ section.entries|length }} entries)</h6>
+
+                {% for entry in section.entries %}
+                <div class="clinical-entry mb-3 p-3 border rounded">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Problem Code:</label>
+                                <code class="problem-code">{{ entry.problem_code|default:"Not specified" }}</code>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Status:</label>
+                                <span class="badge bg-secondary">{{ entry.status|default:"Unknown" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="field-group">
+                                <label class="field-label">Problem Description:</label>
+                                <p class="problem-description">{{ entry.problem_description|default:"Not specified" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% if entry.onset_date %}
+                    <div class="row mt-2">
+                        <div class="col-md-4">
+                            <div class="field-group">
+                                <label class="field-label">Onset Date:</label>
+                                <span class="onset-date">{{ entry.onset_date }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+            {% elif section.type == "medications" %}
+                {# MEDICATIONS SECTION - Clean and customizable #}
+                <h6>Medications ({{ section.entries|length }} entries)</h6>
+
+                {% for entry in section.entries %}
+                <div class="clinical-entry mb-3 p-3 border rounded">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="field-group">
+                                <label class="field-label">Medication Code:</label>
+                                <code class="medication-code">{{ entry.medication_code|default:"Not specified" }}</code>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="field-group">
+                                <label class="field-label">Ingredient Code:</label>
+                                <code class="ingredient-code">{{ entry.ingredient_code|default:"Not specified" }}</code>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="field-group">
+                                <label class="field-label">Status:</label>
+                                <span class="badge bg-success">{{ entry.status|default:"Active" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-8">
+                            <div class="field-group">
+                                <label class="field-label">Medication Name:</label>
+                                <p class="medication-name">{{ entry.medication_name|default:"Not specified" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="field-group">
+                                <label class="field-label">Route:</label>
+                                <span class="medication-route">{{ entry.route|default:"Not specified" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% if entry.active_ingredient %}
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="field-group">
+                                <label class="field-label">Active Ingredient:</label>
+                                <p class="active-ingredient">{{ entry.active_ingredient }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+            {% elif section.type == "allergies" %}
+                {# ALLERGIES SECTION - Clean and customizable #}
+                <h6>Allergies ({{ section.entries|length }} entries)</h6>
+
+                {% for entry in section.entries %}
+                <div class="clinical-entry mb-3 p-3 border rounded">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Allergen Code:</label>
+                                <code class="allergen-code">{{ entry.allergen_code|default:"Not specified" }}</code>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Severity:</label>
+                                <span class="badge bg-warning">{{ entry.severity|default:"Unknown" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="field-group">
+                                <label class="field-label">Allergen:</label>
+                                <p class="allergen-name">{{ entry.allergen_name|default:"Not specified" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            {% else %}
+                {# GENERIC SECTION - Flexible for any clinical data #}
+                <h6>{{ section.type|title }} Data ({{ section.entries|length }} entries)</h6>
+
+                {% for entry in section.entries %}
+                <div class="clinical-entry mb-3 p-3 border rounded">
+                    <div class="debug-data">
+                        <h7>Available Fields:</h7>
+                        <ul>
+                        {% for key, value in entry.items %}
+                            {% if key != "original_data" %}
+                            <li><strong>{{ key }}:</strong> {{ value|truncatewords:10 }}</li>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endfor %}
+
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+    {% else %}
+        <div class="alert alert-danger">
+            <h5><i class="fa-solid fa-exclamation-triangle me-2"></i>Error</h5>
+            <p>{{ simplified_data.error|default:"Unable to load simplified clinical data." }}</p>
+        </div>
+    {% endif %}
+</div>
+
+{# Custom CSS for clean presentation #}
+<style>
+.field-group {
+    margin-bottom: 0.5rem;
+}
+
+.field-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.clinical-entry {
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.clinical-entry:hover {
+    background-color: #e9ecef;
+}
+
+.problem-code, .medication-code, .ingredient-code, .allergen-code {
+    background-color: #e7f3ff;
+    color: #0066cc;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.problem-description, .medication-name, .allergen-name, .active-ingredient {
+    color: #333;
+    margin-bottom: 0;
+    line-height: 1.4;
+}
+</style>

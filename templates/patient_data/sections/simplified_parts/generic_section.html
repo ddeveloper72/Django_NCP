@@ -1,0 +1,161 @@
+{# GENERIC SECTION - Customizable Template #}
+{# Fallback for any clinical section type not specifically handled #}
+{# Easy to modify layout, styling, and data presentation #}
+
+{% if entries %}
+    <!-- Layout Option 1: Flexible card layout (default) -->
+    <div class="generic-entries">
+        {% for entry in entries %}
+        <div class="clinical-entry" data-entry-type="{{ section_type|default:'generic' }}">
+            <div class="row">
+                <!-- Primary Display Name/Title -->
+                <div class="col-md-8">
+                    <div class="primary-info">
+                        <span class="field-label">{{ section_type|title }} Entry:</span>
+                        <div class="field-value fw-bold">
+                            {{ entry.display_name|default:entry.title|default:entry.name|default:"Clinical Entry" }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status/Type Badge -->
+                <div class="col-md-4 text-end">
+                    {% if entry.status %}
+                    <span class="status-badge bg-info">{{ entry.status }}</span>
+                    {% endif %}
+                    {% if entry.type %}
+                    <span class="badge bg-secondary">{{ entry.type }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Code Information -->
+            {% if entry.code %}
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <span class="field-label">Code:</span>
+                    <div class="field-value">
+                        <code class="code-value">{{ entry.code }}</code>
+                    </div>
+                </div>
+                {% if entry.code_system %}
+                <div class="col-md-6">
+                    <span class="field-label">Code System:</span>
+                    <div class="field-value">{{ entry.code_system }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Description/Content -->
+            {% if entry.description or entry.content %}
+            <div class="row mt-2">
+                <div class="col-12">
+                    <span class="field-label">Description:</span>
+                    <div class="field-value">{{ entry.description|default:entry.content|default:"No description available" }}</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Date Information -->
+            {% if entry.date or entry.effective_time or entry.start_date %}
+            <div class="row mt-2">
+                {% if entry.date %}
+                <div class="col-md-6">
+                    <span class="field-label">Date:</span>
+                    <div class="field-value">{{ entry.date }}</div>
+                </div>
+                {% elif entry.effective_time %}
+                <div class="col-md-6">
+                    <span class="field-label">Effective Time:</span>
+                    <div class="field-value">{{ entry.effective_time }}</div>
+                </div>
+                {% elif entry.start_date %}
+                <div class="col-md-6">
+                    <span class="field-label">Start Date:</span>
+                    <div class="field-value">{{ entry.start_date }}</div>
+                </div>
+                {% endif %}
+
+                {% if entry.end_date %}
+                <div class="col-md-6">
+                    <span class="field-label">End Date:</span>
+                    <div class="field-value">{{ entry.end_date }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Additional Flexible Fields -->
+            {% if entry.value %}
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <span class="field-label">Value:</span>
+                    <div class="field-value">
+                        {{ entry.value }}
+                        {% if entry.unit %} {{ entry.unit }}{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Raw data debug (for development - easy to remove) -->
+            {% if entry.debug_info %}
+            <div class="row mt-2">
+                <div class="col-12">
+                    <details>
+                        <summary class="small text-muted">Debug Info</summary>
+                        <pre class="small mt-1">{{ entry.debug_info|safe }}</pre>
+                    </details>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Alternative Layout Option 2: Simple List (commented out - easy to switch) -->
+    <!--
+    <div class="generic-list">
+        {% for entry in entries %}
+        <div class="clinical-entry border-start border-4 border-info ps-3">
+            <h6 class="mb-1">{{ entry.display_name|default:entry.title|default:entry.name|default:"Clinical Entry" }}</h6>
+            {% if entry.code %}
+            <small class="text-muted"><code>{{ entry.code }}</code></small>
+            {% endif %}
+            {% if entry.description or entry.content %}
+            <p class="mb-1 small">{{ entry.description|default:entry.content|truncatewords:20 }}</p>
+            {% endif %}
+            {% if entry.status %}
+            <span class="badge bg-info small">{{ entry.status }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    -->
+
+    <!-- Alternative Layout Option 3: Key-Value Pairs (commented out - easy to switch) -->
+    <!--
+    {% for entry in entries %}
+    <div class="clinical-entry">
+        <h6 class="border-bottom pb-2">{{ section_type|title }} Entry {{ forloop.counter }}</h6>
+        <div class="row">
+            {% for key, value in entry.items %}
+            {% if value %}
+            <div class="col-md-6 mb-2">
+                <strong>{{ key|title }}:</strong>
+                <span class="ms-2">{{ value }}</span>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    -->
+
+{% else %}
+    <div class="text-muted text-center py-4">
+        <i class="fa-solid fa-clipboard-list me-2"></i>
+        No {{ section_type|default:"clinical" }} data recorded for this patient.
+    </div>
+{% endif %}

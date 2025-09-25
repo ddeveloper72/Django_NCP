@@ -7,7 +7,7 @@ with specialized support for EU member state variations including Italian L3 doc
 
 Key EU Compatibility Features:
 - Dynamic namespace detection for varying document structures
-- Enhanced 8-strategy section discovery system for complex nested structures  
+- Enhanced 8-strategy section discovery system for complex nested structures
 - Multi-namespace code extraction supporting Italian healthcare OIDs
 - Robust handling of Italian L3 document patterns with 8+ sections
 - Extended OID mappings for Italian, German, French, Dutch, Swedish healthcare systems
@@ -18,7 +18,7 @@ Key EU Compatibility Features:
 
 Tested and validated against:
 - Italian L3 Patient Summary documents (8 sections)
-- Malta CDA documents (5 sections)  
+- Malta CDA documents (5 sections)
 - Standard HL7 CDA R2 documents
 - Cross-border eHDSI documents
 """
@@ -174,18 +174,18 @@ class ClinicalSection:
 
 class EnhancedCDAXMLParser:
     """Enhanced parser for HL7 CDA XML with clinical coding extraction
-    
+
     Enhanced for EU member state compatibility including Italian L3 documents
     """
 
     def __init__(self):
         # Default namespaces - will be dynamically enhanced per document
         self.namespaces = {"cda": "urn:hl7-org:v3", "pharm": "urn:ihe:pharm:medication"}
-        
+
         # Common EU namespace variations for better compatibility
         self.common_namespaces = {
             "hl7": "urn:hl7-org:v3",
-            "cda": "urn:hl7-org:v3", 
+            "cda": "urn:hl7-org:v3",
             "pharm": "urn:ihe:pharm:medication",
             "xsi": "http://www.w3.org/2001/XMLSchema-instance",
             "voc": "urn:hl7-org:v3/voc",
@@ -194,7 +194,7 @@ class EnhancedCDAXMLParser:
             "it": "urn:oid:2.16.840.1.113883.2.9.10.1.1",
             "crs": "urn:oid:2.16.840.1.113883.2.9.10.1.1.1",
         }
-        
+
         # Initialize administrative extractor with date formatter
         if CDAAdministrativeExtractor:
             self.admin_extractor = CDAAdministrativeExtractor()
@@ -204,7 +204,7 @@ class EnhancedCDAXMLParser:
     def _detect_and_update_namespaces(self, xml_content: str) -> None:
         """
         Dynamically detect namespaces from XML document for EU member state compatibility
-        
+
         This enhances parsing of Italian L3 and other EU CDA documents that may use
         different namespace prefixes or additional namespaces
         """
@@ -212,32 +212,34 @@ class EnhancedCDAXMLParser:
             # Extract namespace declarations from XML root element
             namespace_pattern = r'xmlns(?::(\w+))?="([^"]+)"'
             matches = re.findall(namespace_pattern, xml_content)
-            
+
             detected_namespaces = {}
-            
+
             for prefix, uri in matches:
                 # Use default 'cda' prefix for default namespace
-                namespace_key = prefix if prefix else 'cda'
+                namespace_key = prefix if prefix else "cda"
                 detected_namespaces[namespace_key] = uri
-                
+
                 # Map common URI patterns to standard prefixes
-                if 'hl7-org:v3' in uri and namespace_key not in ['cda', 'hl7']:
-                    detected_namespaces['cda'] = uri
-                elif 'pharm' in uri and namespace_key != 'pharm':
-                    detected_namespaces['pharm'] = uri
-            
+                if "hl7-org:v3" in uri and namespace_key not in ["cda", "hl7"]:
+                    detected_namespaces["cda"] = uri
+                elif "pharm" in uri and namespace_key != "pharm":
+                    detected_namespaces["pharm"] = uri
+
             # Merge with common namespaces, giving priority to detected ones
             merged_namespaces = self.common_namespaces.copy()
             merged_namespaces.update(detected_namespaces)
-            
+
             # Update parser namespaces
             old_count = len(self.namespaces)
             self.namespaces = merged_namespaces
             new_count = len(self.namespaces)
-            
+
             if new_count > old_count:
-                logger.info(f"🌍 Enhanced namespaces for EU compatibility: {new_count} namespaces ({new_count - old_count} new)")
-                
+                logger.info(
+                    f"🌍 Enhanced namespaces for EU compatibility: {new_count} namespaces ({new_count - old_count} new)"
+                )
+
         except Exception as e:
             logger.warning(f"Namespace detection failed, using defaults: {e}")
 
@@ -249,7 +251,7 @@ class EnhancedCDAXMLParser:
         try:
             # Detect and update namespaces for this document
             self._detect_and_update_namespaces(xml_content)
-            
+
             # Clean and parse XML
             cleaned_xml = self._clean_xml_content(xml_content)
             root = ET.fromstring(cleaned_xml)
@@ -332,31 +334,38 @@ class EnhancedCDAXMLParser:
 
         # Strategy 5: Italian L3 specific patterns - nested component structures
         nested_sections = root.findall(
-            ".//cda:component/cda:structuredBody/cda:component/cda:section", self.namespaces
+            ".//cda:component/cda:structuredBody/cda:component/cda:section",
+            self.namespaces,
         )
-        logger.info(f"Strategy 5 - Italian nested sections found: {len(nested_sections)}")
+        logger.info(
+            f"Strategy 5 - Italian nested sections found: {len(nested_sections)}"
+        )
         for elem in nested_sections:
             discovered_elements.add(elem)
-            
+
         # Strategy 6: Multi-level component discovery for complex EU documents
         multi_level_sections = []
         for level in range(2, 5):  # Check 2-4 levels deep
             xpath = "/".join(["cda:component"] * level) + "/cda:section"
             level_sections = root.findall(f".//{xpath}", self.namespaces)
             multi_level_sections.extend(level_sections)
-        
-        logger.info(f"Strategy 6 - Multi-level sections found: {len(multi_level_sections)}")
+
+        logger.info(
+            f"Strategy 6 - Multi-level sections found: {len(multi_level_sections)}"
+        )
         for elem in multi_level_sections:
             discovered_elements.add(elem)
-            
+
         # Strategy 7: Alternative namespace patterns (for documents with mixed namespaces)
         alt_namespace_sections = []
         for ns_key in self.namespaces.keys():
-            if ns_key != 'cda':
+            if ns_key != "cda":
                 alt_sections = root.findall(f".//{ns_key}:section", self.namespaces)
                 alt_namespace_sections.extend(alt_sections)
-        
-        logger.info(f"Strategy 7 - Alternative namespace sections found: {len(alt_namespace_sections)}")
+
+        logger.info(
+            f"Strategy 7 - Alternative namespace sections found: {len(alt_namespace_sections)}"
+        )
         for elem in alt_namespace_sections:
             discovered_elements.add(elem)
 
@@ -365,16 +374,20 @@ class EnhancedCDAXMLParser:
             # Find elements that end with 'section' regardless of namespace
             broad_sections = []
             for elem in root.iter():
-                if elem.tag.endswith('}section') or elem.tag.lower() == 'section':
+                if elem.tag.endswith("}section") or elem.tag.lower() == "section":
                     broad_sections.append(elem)
-            
-            logger.info(f"Strategy 8 - Broad section discovery found: {len(broad_sections)}")
+
+            logger.info(
+                f"Strategy 8 - Broad section discovery found: {len(broad_sections)}"
+            )
             for elem in broad_sections:
                 discovered_elements.add(elem)
         except Exception as e:
             logger.warning(f"Strategy 8 broad discovery failed: {e}")
 
-        logger.info(f"✅ Total unique sections discovered: {len(discovered_elements)} (enhanced for EU compatibility)")
+        logger.info(
+            f"✅ Total unique sections discovered: {len(discovered_elements)} (enhanced for EU compatibility)"
+        )
 
         # Process all discovered sections
         for idx, section_elem in enumerate(discovered_elements):
@@ -458,17 +471,21 @@ class EnhancedCDAXMLParser:
 
         # Find all entry elements in this section with enhanced discovery
         entries = section_elem.findall("cda:entry", self.namespaces)
-        
+
         # Also search for entries in alternative namespace patterns (Italian L3 support)
         alt_entries = []
         for ns_key in self.namespaces.keys():
-            if ns_key != 'cda':
-                alt_ns_entries = section_elem.findall(f"{ns_key}:entry", self.namespaces)
+            if ns_key != "cda":
+                alt_ns_entries = section_elem.findall(
+                    f"{ns_key}:entry", self.namespaces
+                )
                 alt_entries.extend(alt_ns_entries)
-        
+
         # Combine all discovered entries
         all_entries = list(entries) + alt_entries
-        logger.info(f"🔍 Processing {len(all_entries)} entries for coded elements (enhanced for EU compatibility)...")
+        logger.info(
+            f"🔍 Processing {len(all_entries)} entries for coded elements (enhanced for EU compatibility)..."
+        )
 
         for entry_idx, entry in enumerate(all_entries):
             logger.debug(f"Processing entry {entry_idx}")
@@ -479,7 +496,7 @@ class EnhancedCDAXMLParser:
             # Strategy 1: Extract all elements with codes (comprehensive)
             self._extract_coded_elements_systematic_enhanced(entry, entry_codes)
 
-            # Strategy 2: Extract all text elements with references  
+            # Strategy 2: Extract all text elements with references
             self._extract_text_elements_systematic(entry, entry_codes)
 
             # Strategy 3: Extract all time elements with context
@@ -490,17 +507,19 @@ class EnhancedCDAXMLParser:
 
             # Strategy 5: Extract all value/quantity elements
             self._extract_value_elements_systematic(entry, entry_codes)
-            
+
             # Strategy 6: Enhanced nested entry discovery for Italian L3 patterns
             self._extract_nested_entries_systematic(entry, entry_codes)
-            
+
             # Strategy 7: Extract medication-specific codes (important for Italian L3)
             self._extract_medication_codes_systematic(entry, entry_codes)
 
             # Add discovered codes to main collection
             codes.extend(entry_codes)
 
-        logger.info(f"✅ Extracted {len(codes)} total coded elements (enhanced EU extraction)")
+        logger.info(
+            f"✅ Extracted {len(codes)} total coded elements (enhanced EU extraction)"
+        )
         return ClinicalCodesCollection(codes=codes)
 
     def _extract_coded_elements_systematic(
@@ -656,10 +675,10 @@ class EnhancedCDAXMLParser:
         self, entry: ET.Element, codes: List[ClinicalCode]
     ):
         """Enhanced extraction for Italian L3 and EU member state compatibility"""
-        
+
         # Original systematic extraction
         self._extract_coded_elements_systematic(entry, codes)
-        
+
         # Enhanced: Search across all namespaces
         for ns_prefix in self.namespaces.keys():
             # Find code elements with alternative namespace prefixes
@@ -668,9 +687,11 @@ class EnhancedCDAXMLParser:
                 code = self._extract_clinical_code(code_elem)
                 if code:
                     codes.append(code)
-                    
+
             # Find value elements with codes in alternative namespaces
-            value_elements = entry.findall(f".//{ns_prefix}:value[@code]", self.namespaces)
+            value_elements = entry.findall(
+                f".//{ns_prefix}:value[@code]", self.namespaces
+            )
             for value_elem in value_elements:
                 code = self._extract_clinical_code(value_elem)
                 if code:
@@ -680,18 +701,18 @@ class EnhancedCDAXMLParser:
         self, entry: ET.Element, codes: List[ClinicalCode]
     ):
         """Extract codes from nested entry structures (Italian L3 pattern)"""
-        
+
         # Find nested entryRelationship elements (common in Italian L3)
         nested_relations = entry.findall(".//cda:entryRelationship", self.namespaces)
         for relation in nested_relations:
             # Extract codes from nested observations/acts
             for child in relation:
-                if child.tag.endswith('}observation') or child.tag.endswith('}act'):
+                if child.tag.endswith("}observation") or child.tag.endswith("}act"):
                     # Recursively extract codes from nested elements
                     nested_codes = []
                     self._extract_coded_elements_systematic(child, nested_codes)
                     codes.extend(nested_codes)
-        
+
         # Find component elements within entries (another Italian L3 pattern)
         components = entry.findall(".//cda:component", self.namespaces)
         for comp in components:
@@ -703,21 +724,21 @@ class EnhancedCDAXMLParser:
         self, entry: ET.Element, codes: List[ClinicalCode]
     ):
         """Extract medication-specific codes important for Italian L3 documents"""
-        
+
         # Find manufacturedProduct elements (medication codes)
         products = entry.findall(".//cda:manufacturedProduct", self.namespaces)
         for product in products:
             product_codes = []
             self._extract_coded_elements_systematic(product, product_codes)
             codes.extend(product_codes)
-        
+
         # Find substance administration codes
         substances = entry.findall(".//cda:substanceAdministration", self.namespaces)
         for substance in substances:
             substance_codes = []
             self._extract_coded_elements_systematic(substance, substance_codes)
             codes.extend(substance_codes)
-        
+
         # Find pharmacy-specific elements
         pharm_elements = entry.findall(".//pharm:*", self.namespaces)
         for pharm_elem in pharm_elements:
@@ -733,7 +754,7 @@ class EnhancedCDAXMLParser:
         system_mappings = {
             # International Standards
             "2.16.840.1.113883.6.96": "SNOMED CT",
-            "2.16.840.1.113883.6.1": "LOINC", 
+            "2.16.840.1.113883.6.1": "LOINC",
             "2.16.840.1.113883.6.73": "ATC",
             "2.16.840.1.113883.6.3": "ICD-10",
             "2.16.840.1.113883.6.42": "ICD-9",
@@ -742,7 +763,6 @@ class EnhancedCDAXMLParser:
             "2.16.840.1.113883.5.1": "AdministrativeGender",
             "0.4.0.127.0.16.1.1.2.1": "EDQM",
             "2.16.840.1.113883.6.8": "UCUM",
-            
             # Italian Healthcare System OIDs
             "2.16.840.1.113883.2.9": "Italian Ministry of Health",
             "2.16.840.1.113883.2.9.4.3.2": "Italian Regional Healthcare Codes",
@@ -751,19 +771,16 @@ class EnhancedCDAXMLParser:
             "2.16.840.1.113883.2.9.6.1.11": "Italian Healthcare Professional Roles",
             "2.16.840.1.113883.2.9.2.10.4.1": "Italian Prescription Codes",
             "2.16.840.1.113883.2.9.2.80.3.1": "Italian Patient Identification",
-            
-            # Italian Clinical Classifications  
+            # Italian Clinical Classifications
             "2.16.840.1.113883.2.9.77.22.11.2": "Italian Clinical Procedures",
             "2.16.840.1.113883.2.9.77.22.11.3": "Italian Diagnostic Codes",
             "2.16.840.1.113883.2.9.4.3.1": "Italian Healthcare Structure Codes",
             "2.16.840.1.113883.2.9.4.3.15": "Italian Medical Device Codes",
-            
             # Other EU Member State Systems
             "1.2.276.0.76.5.409": "German Healthcare Codes",
             "1.2.250.1.213.1.1.4.2": "French Healthcare Classification",
             "2.16.840.1.113883.2.4.3": "Dutch Healthcare Codes",
             "1.2.752.78.1.1": "Swedish Healthcare Classification",
-            
             # EU eHealth Digital Service Infrastructure (eHDSI)
             "1.3.6.1.4.1.12559.11.10.1.3.1.44.1": "eHDSI Patient Summary",
             "1.3.6.1.4.1.12559.11.10.1.3.1.44.2": "eHDSI ePrescription",
@@ -803,7 +820,7 @@ class EnhancedCDAXMLParser:
         """Calculate statistics about sections and coding"""
         total_sections = len(sections)
         coded_sections = sum(1 for s in sections if s["is_coded_section"])
-        total_codes = sum(s["content"]["medical_terms_count"] for s in sections)
+        total_codes = sum(s["content"]["medical_terms"] for s in sections)
         coded_percentage = (
             int((coded_sections / total_sections * 100)) if total_sections > 0 else 0
         )

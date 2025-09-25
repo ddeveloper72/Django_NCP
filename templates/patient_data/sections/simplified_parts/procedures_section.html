@@ -1,0 +1,158 @@
+{# PROCEDURES SECTION - Customizable Template #}
+{# Easy to modify layout, styling, and data presentation #}
+
+{% if entries %}
+    <!-- Layout Option 1: Timeline-style cards (default) -->
+    <div class="procedures-entries">
+        {% for entry in entries %}
+        <div class="clinical-entry timeline-entry" data-entry-type="procedure">
+            <div class="row">
+                <!-- Procedure Information -->
+                <div class="col-md-8">
+                    <div class="primary-info">
+                        <span class="field-label">Procedure Name:</span>
+                        <div class="field-value fw-bold">{{ entry.procedure_name|default:"Not specified" }}</div>
+                    </div>
+
+                    {% if entry.procedure_description %}
+                    <div class="mt-2">
+                        <span class="field-label">Description:</span>
+                        <div class="field-value">{{ entry.procedure_description }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-2">
+                        <span class="field-label">Procedure Code:</span>
+                        <div class="field-value">
+                            <code class="code-value">{{ entry.procedure_code|default:"Not specified" }}</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status and Date -->
+                <div class="col-md-4 text-end">
+                    <div class="procedure-meta">
+                        {% if entry.status %}
+                        <span class="status-badge bg-{{ entry.status|lower|default:'secondary' }}">
+                            {{ entry.status|default:"Completed" }}
+                        </span>
+                        {% endif %}
+
+                        {% if entry.procedure_date %}
+                        <div class="mt-2">
+                            <span class="field-label">Date:</span>
+                            <div class="field-value">
+                                <i class="fa-solid fa-calendar me-1"></i>
+                                {{ entry.procedure_date }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            {% if entry.performer or entry.location %}
+            <div class="row mt-3">
+                {% if entry.performer %}
+                <div class="col-md-6">
+                    <span class="field-label">Performed by:</span>
+                    <div class="field-value">{{ entry.performer }}</div>
+                </div>
+                {% endif %}
+                {% if entry.location %}
+                <div class="col-md-6">
+                    <span class="field-label">Location:</span>
+                    <div class="field-value">{{ entry.location }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Outcome/Results -->
+            {% if entry.outcome or entry.complications %}
+            <div class="row mt-3">
+                {% if entry.outcome %}
+                <div class="col-md-6">
+                    <span class="field-label">Outcome:</span>
+                    <div class="field-value">
+                        <span class="badge bg-success">{{ entry.outcome }}</span>
+                    </div>
+                </div>
+                {% endif %}
+                {% if entry.complications %}
+                <div class="col-md-6">
+                    <span class="field-label">Complications:</span>
+                    <div class="field-value text-warning">{{ entry.complications }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Alternative Layout Option 2: Simple List (commented out - easy to switch) -->
+    <!--
+    <div class="procedures-list">
+        {% for entry in entries %}
+        <div class="clinical-entry d-flex justify-content-between align-items-start">
+            <div class="flex-grow-1">
+                <h6 class="mb-1">{{ entry.procedure_name|default:"Unknown Procedure" }}</h6>
+                <small class="text-muted">
+                    <code>{{ entry.procedure_code|default:"No code" }}</code>
+                    {% if entry.procedure_date %} | {{ entry.procedure_date }}{% endif %}
+                </small>
+                {% if entry.procedure_description %}
+                <p class="mb-0 mt-1 small">{{ entry.procedure_description }}</p>
+                {% endif %}
+            </div>
+            <div class="ms-3">
+                <span class="badge bg-primary">{{ entry.status|default:"Completed" }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    -->
+
+    <!-- Alternative Layout Option 3: Table View (commented out - easy to switch) -->
+    <!--
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th>Procedure</th>
+                    <th>Code</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Performer</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td>
+                        <strong>{{ entry.procedure_name|default:"Unknown" }}</strong>
+                        {% if entry.procedure_description %}
+                        <br><small class="text-muted">{{ entry.procedure_description|truncatewords:10 }}</small>
+                        {% endif %}
+                    </td>
+                    <td><code class="small">{{ entry.procedure_code|default:"N/A" }}</code></td>
+                    <td>{{ entry.procedure_date|default:"N/A" }}</td>
+                    <td>
+                        <span class="badge bg-primary">{{ entry.status|default:"Completed" }}</span>
+                    </td>
+                    <td><small>{{ entry.performer|default:"N/A" }}</small></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    -->
+
+{% else %}
+    <div class="text-muted text-center py-4">
+        <i class="fa-solid fa-user-md me-2"></i>
+        No procedures recorded for this patient.
+    </div>
+{% endif %}
