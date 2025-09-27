@@ -34,15 +34,15 @@ class EnhancedCDADisplayView(View):
         """Display CDA document with enhanced clinical sections"""
         print(f"\n" + "="*80)
         print(f"� ENHANCED CDA VIEW CALLED! Patient ID: {patient_id}")
-        print(f"🚀 Request method: {request.method}")
-        print(f"🚀 Request path: {request.path}")
+        print(f"[ROCKET] Request method: {request.method}")
+        print(f"[ROCKET] Request path: {request.path}")
         print(f"="*80 + "\n")
         try:
             # Get patient CDA data (this would come from your existing patient data service)
             cda_content = self._get_patient_cda_content(patient_id)
-            print(f"🔍 DEBUG: CDA content found: {bool(cda_content)}")
+            print(f"[SEARCH] DEBUG: CDA content found: {bool(cda_content)}")
             if not cda_content:
-                print(f"❌ DEBUG: No CDA content for patient {patient_id}")
+                print(f"[ERROR] DEBUG: No CDA content for patient {patient_id}")
                 return JsonResponse({"error": "Patient CDA data not found"}, status=404)
 
             # Detect document language
