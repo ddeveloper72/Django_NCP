@@ -3010,33 +3010,33 @@ def patient_cda_view(request, session_id, cda_type=None):
                                 and len(entry.values) > 0
                                 and entry.values[0].display
                             ):
-                            processed_entry["display_name"] = entry.values[0].display
-                        else:
-                            processed_entry["display_name"] = (
-                                f"Unknown {entry.entry_type.title()}"
-                            )
-
-                        # Add section-specific fields based on section type
-                        if hasattr(section, 'section_type') and section.section_type == "ALLERGIES AND ADVERSE REACTIONS":
-                            if entry.participants:
-                                processed_entry["reaction"] = ", ".join(
-                                    entry.participants
+                                processed_entry["display_name"] = entry.values[0].display
+                            else:
+                                processed_entry["display_name"] = (
+                                    f"Unknown {entry.entry_type.title()}"
                                 )
-                            if entry.values:
-                                reactions = [
-                                    v.display
-                                    for v in entry.values
-                                    if v.display and "nausea" in v.display.lower()
-                                ]
-                                if reactions:
-                                    processed_entry["reaction"] = ", ".join(reactions)
 
-                        elif hasattr(section, 'section_type') and section.section_type == "MEDICATIONS":
-                            if entry.values:
-                                dosages = [v.display for v in entry.values if v.display]
-                                if dosages:
-                                    processed_entry["dosage"] = ", ".join(dosages)
+                            # Add section-specific fields based on section type
+                            if hasattr(section, 'section_type') and section.section_type == "ALLERGIES AND ADVERSE REACTIONS":
+                                if entry.participants:
+                                    processed_entry["reaction"] = ", ".join(
+                                        entry.participants
+                                    )
+                                if entry.values:
+                                    reactions = [
+                                        v.display
+                                        for v in entry.values
+                                        if v.display and "nausea" in v.display.lower()
+                                    ]
+                                    if reactions:
+                                        processed_entry["reaction"] = ", ".join(reactions)
 
+                            elif hasattr(section, 'section_type') and section.section_type == "MEDICATIONS":
+                                if entry.values:
+                                    dosages = [v.display for v in entry.values if v.display]
+                                    if dosages:
+                                        processed_entry["dosage"] = ", ".join(dosages)
+                        
                         else:
                             # Enhanced parser entry (dict format) - create basic entry
                             processed_entry = {
@@ -3045,9 +3045,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                                 "status": entry.get('status', 'Unknown'),
                             }
 
-                        processed_section["entries"].append(processed_entry)
-
-                    processed_sections.append(processed_section)
+                        processed_section["entries"].append(processed_entry)                    processed_sections.append(processed_section)
 
                 # Calculate totals for the existing template
                 total_medical_terms = sum(
