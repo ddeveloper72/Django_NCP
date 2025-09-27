@@ -3045,7 +3045,9 @@ def patient_cda_view(request, session_id, cda_type=None):
                                 "status": entry.get('status', 'Unknown'),
                             }
 
-                        processed_section["entries"].append(processed_entry)                    processed_sections.append(processed_section)
+                        processed_section["entries"].append(processed_entry)
+
+                    processed_sections.append(processed_section)
 
                 # Calculate totals for the existing template
                 total_medical_terms = sum(
