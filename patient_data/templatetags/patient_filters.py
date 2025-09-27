@@ -349,3 +349,98 @@ def extract_date(value):
 def extract_status(value):
     """Extract just the status from complex data"""
     return clean_clinical_value(value, "status")
+
+
+@register.filter
+def country_flag(country_code):
+    """Return flag image path for a given country code"""
+    if not country_code:
+        return None
+
+    # Convert to uppercase for consistency
+    country_code = country_code.upper()
+
+    # Map of all available flag files in static/flags/
+    available_flags = {
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "EU",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IS",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK",
+        "UK",
+    }
+
+    # Return flag path if available, otherwise return EU flag as fallback
+    if country_code in available_flags:
+        return f"flags/{country_code}.webp"
+    else:
+        return "flags/EU.webp"
+
+
+@register.filter
+def country_name(country_code):
+    """Return full country name for a given country code"""
+    if not country_code:
+        return "Unknown"
+
+    # Map of country codes to full names
+    country_names = {
+        "AT": "Austria",
+        "BE": "Belgium",
+        "BG": "Bulgaria",
+        "CY": "Cyprus",
+        "CZ": "Czech Republic",
+        "DE": "Germany",
+        "DK": "Denmark",
+        "EE": "Estonia",
+        "ES": "Spain",
+        "EU": "European Union",
+        "FI": "Finland",
+        "FR": "France",
+        "GR": "Greece",
+        "HR": "Croatia",
+        "HU": "Hungary",
+        "IE": "Ireland",
+        "IS": "Iceland",
+        "IT": "Italy",
+        "LT": "Lithuania",
+        "LU": "Luxembourg",
+        "LV": "Latvia",
+        "MT": "Malta",
+        "NL": "Netherlands",
+        "NO": "Norway",
+        "PL": "Poland",
+        "PT": "Portugal",
+        "RO": "Romania",
+        "SE": "Sweden",
+        "SI": "Slovenia",
+        "SK": "Slovakia",
+        "UK": "United Kingdom",
+    }
+
+    return country_names.get(country_code.upper(), country_code.upper())

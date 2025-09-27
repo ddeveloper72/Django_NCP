@@ -8445,6 +8445,56 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   background-color: #f59e0b;
 }
 
+.badge.bg-primary {
+  background-color: #0d6efd !important;
+}
+.badge.bg-success {
+  background-color: #198754 !important;
+}
+.badge.bg-warning {
+  background-color: #fd7e14 !important;
+}
+.badge.bg-danger {
+  background-color: #dc3545 !important;
+}
+.badge.bg-info {
+  background-color: #0dcaf0 !important;
+}
+.badge.bg-secondary {
+  background-color: #6c757d !important;
+}
+.badge.bg-dark {
+  background-color: #212529 !important;
+}
+.badge.bg-outline-secondary {
+  color: #6c757d !important;
+  border-color: #6c757d !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.flag-icon {
+  height: 16px !important;
+  width: auto !important;
+  max-width: 20px !important;
+  max-height: 16px !important;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  vertical-align: middle;
+  display: inline-block;
+}
+.badge .flag-icon {
+  margin-right: 4px;
+}
+
 .fa.fa-xs,
 .fas.fa-xs,
 .far.fa-xs,
