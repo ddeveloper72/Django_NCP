@@ -6,6 +6,7 @@ from CDA documents and translation services. It helps identify what data is bein
 extracted, how it's structured, and what fields are available for clinical section mapping.
 """
 
+import io
 import json
 import logging
 from typing import Any, Dict, List, Optional
@@ -161,9 +162,11 @@ class ClinicalDataExtractor:
                 extraction_results["field_mapping_opportunities"] = (
                     self._identify_mapping_opportunities(extraction_results)
                 )
-                logger.info("✅ Field mapping opportunities identified successfully")
+                logger.info(
+                    "[SUCCESS] Field mapping opportunities identified successfully"
+                )
             except Exception as e:
-                logger.error(f"❌ Field mapping opportunities failed: {e}")
+                logger.error(f"[ERROR] Field mapping opportunities failed: {e}")
                 extraction_results["field_mapping_opportunities"] = {"error": str(e)}
 
             # Generate extraction statistics
@@ -171,9 +174,9 @@ class ClinicalDataExtractor:
                 extraction_results["extraction_statistics"] = (
                     self._generate_extraction_statistics(extraction_results)
                 )
-                logger.info("✅ Extraction statistics generated successfully")
+                logger.info("[SUCCESS] Extraction statistics generated successfully")
             except Exception as e:
-                logger.error(f"❌ Extraction statistics failed: {e}")
+                logger.error(f"[ERROR] Extraction statistics failed: {e}")
                 extraction_results["extraction_statistics"] = {"error": str(e)}
 
             # Ensure we have basic structure for template compatibility
@@ -289,7 +292,7 @@ class ClinicalDataExtractor:
 
         return analysis
 
-    def _analyze_ps_table_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _analyze_ps_table_data(self, data) -> Dict[str, Any]:
         """Analyze data from PS Table Renderer"""
         analysis = {
             "rendered_tables": {},
@@ -298,10 +301,36 @@ class ClinicalDataExtractor:
             "display_guidelines_compliance": {},
         }
 
+        # Handle both list and dict data formats
+        sections_to_analyze = []
+        if isinstance(data, list):
+            # PS Table Renderer returns List[Dict]
+            sections_to_analyze = data
+        elif isinstance(data, dict):
+            # Handle case where data is a dict with section names as keys
+            sections_to_analyze = list(data.values())
+        else:
+            logger.warning(f"Unexpected data type for PS Table analysis: {type(data)}")
+            return analysis
+
         # Analyze each rendered section
-        for section_name, section_data in data.items():
+        for section_data in sections_to_analyze:
             if isinstance(section_data, dict):
-                analysis["rendered_tables"][section_name] = {
+                # Get section name from the data
+                section_name = section_data.get(
+                    "section_title",
+                    section_data.get(
+                        "title", section_data.get("display_name", "unknown_section")
+                    ),
+                )
+
+                # Handle cases where section_name might be a dict
+                if isinstance(section_name, dict):
+                    section_name = section_name.get(
+                        "translated", section_name.get("coded", "unknown_section")
+                    )
+
+                analysis["rendered_tables"][str(section_name)] = {
                     "table_rows": len(section_data.get("rows", [])),
                     "columns": list(section_data.get("headers", [])),
                     "coded_entries": len(
@@ -313,6 +342,8 @@ class ClinicalDataExtractor:
                     ),
                     "display_format": section_data.get("format", "unknown"),
                     "ps_compliance": section_data.get("ps_compliant", False),
+                    "has_ps_table": section_data.get("has_ps_table", False),
+                    "section_code": section_data.get("section_code", "unknown"),
                 }
 
         return analysis
@@ -326,26 +357,78 @@ class ClinicalDataExtractor:
             "section_breakdown": {},
         }
 
+        def safe_get(obj, key, default=None):
+            """Safely get attribute or dict key from object"""
+            if hasattr(obj, "get") and callable(getattr(obj, "get")):
+                # It's a dict-like object
+                return obj.get(key, default)
+            elif hasattr(obj, key):
+                # It's an object with attributes
+                return getattr(obj, key, default)
+            elif isinstance(obj, dict):
+                # It's a plain dictionary
+                return obj.get(key, default)
+            else:
+                return default
+
+        def safe_len(obj, default=0):
+            """Safely get length of object"""
+            try:
+                if obj is None:
+                    return default
+                elif hasattr(obj, "__len__"):
+                    return len(obj)
+                else:
+                    return default
+            except:
+                return default
+
+        def safe_keys(obj):
+            """Safely get keys from object"""
+            try:
+                if hasattr(obj, "keys"):
+                    return list(obj.keys())
+                elif hasattr(obj, "__dict__"):
+                    return list(obj.__dict__.keys())
+                else:
+                    return []
+            except:
+                return []
+
         if "patient_summary" in data:
             patient_data = data["patient_summary"]
             analysis["patient_demographics"] = {
-                "identifiers_found": len(patient_data.get("identifiers", [])),
-                "demographic_fields": list(patient_data.keys()),
-                "contact_info_available": bool(patient_data.get("contact_info")),
-                "emergency_contacts": len(patient_data.get("emergency_contacts", [])),
+                "identifiers_found": safe_len(
+                    safe_get(patient_data, "identifiers", [])
+                ),
+                "demographic_fields": safe_keys(patient_data),
+                "contact_info_available": bool(safe_get(patient_data, "contact_info")),
+                "emergency_contacts": safe_len(
+                    safe_get(patient_data, "emergency_contacts", [])
+                ),
             }
 
         if "clinical_sections" in data:
-            for section in data["clinical_sections"]:
-                section_name = section.get("title", "unknown")
-                analysis["section_breakdown"][section_name] = {
-                    "content_length": len(section.get("content", "")),
-                    "has_structured_data": bool(section.get("structured_entries")),
-                    "coding_present": bool(section.get("codes")),
-                    "translation_quality": section.get(
-                        "translation_quality", "unknown"
-                    ),
-                }
+            clinical_sections = data["clinical_sections"]
+            if clinical_sections:
+                for section in clinical_sections:
+                    section_name = safe_get(section, "title", "unknown")
+                    if not isinstance(section_name, str):
+                        section_name = str(section_name) if section_name else "unknown"
+
+                    content = safe_get(section, "content", "")
+                    content_length = len(content) if isinstance(content, str) else 0
+
+                    analysis["section_breakdown"][section_name] = {
+                        "content_length": content_length,
+                        "has_structured_data": bool(
+                            safe_get(section, "structured_entries")
+                        ),
+                        "coding_present": bool(safe_get(section, "codes")),
+                        "translation_quality": safe_get(
+                            section, "translation_quality", "unknown"
+                        ),
+                    }
 
         return analysis
 
@@ -767,6 +850,234 @@ def clinical_data_debugger(request, session_id):
             cda_content, match_data
         )
 
+        # ENHANCED: Extract comprehensive CDA structure including headers, administrative data, and patient data
+        comprehensive_data = {}
+
+        try:
+            from .cda_display_data_helper import CDADisplayDataHelper
+            from .services.enhanced_cda_xml_parser import EnhancedCDAXMLParser
+
+            # Initialize enhanced parsers for comprehensive extraction
+            display_helper = CDADisplayDataHelper()
+            enhanced_parser = EnhancedCDAXMLParser()
+
+            # 1. Extract CDA Headers and Document Metadata
+            try:
+                parsed_cda = enhanced_parser.parse_cda_content(cda_content)
+                comprehensive_data["cda_headers"] = {
+                    "document_metadata": parsed_cda.get("document_metadata", {}),
+                    "patient_identity": parsed_cda.get("patient_identity", {}),
+                    "document_structure": {
+                        "has_administrative_data": bool(
+                            parsed_cda.get("administrative_data")
+                        ),
+                        "has_clinical_sections": bool(
+                            parsed_cda.get("clinical_sections")
+                        ),
+                        "total_sections": len(parsed_cda.get("clinical_sections", [])),
+                    },
+                }
+                logger.info(
+                    f"[SUCCESS] CDA Headers extracted: {len(comprehensive_data['cda_headers'])} categories"
+                )
+            except Exception as e:
+                logger.error(f"[ERROR] CDA Headers extraction failed: {e}")
+                comprehensive_data["cda_headers"] = {"error": str(e)}
+
+            # 2. Extract Extended Patient Data (Administrative Data)
+            try:
+                extended_data = display_helper.extract_extended_patient_data(
+                    cda_content
+                )
+                if extended_data:
+                    # Enhanced healthcare data mapping using the same logic as patient views
+                    admin_data = extended_data.get("administrative_data", {})
+                    enhanced_healthcare_data = {}
+
+                    # Use Enhanced CDA Parser logic for healthcare data mapping
+                    if (
+                        admin_data.get("author_hcp")
+                        or admin_data.get("author_information")
+                        or admin_data.get("custodian_organization")
+                        or admin_data.get("legal_authenticator")
+                    ):
+                        # Map author information - prefer single author_hcp, fallback to first author_information
+                        if admin_data.get("author_hcp"):
+                            enhanced_healthcare_data["author"] = admin_data.get(
+                                "author_hcp"
+                            )
+                        elif admin_data.get("author_information"):
+                            author_info_list = admin_data.get("author_information")
+                            if (
+                                isinstance(author_info_list, list)
+                                and len(author_info_list) > 0
+                            ):
+                                # Take the first author and flatten person info to top level
+                                first_author = author_info_list[0]
+                                if (
+                                    isinstance(first_author, dict)
+                                    and "person" in first_author
+                                ):
+                                    # Flatten person info to top level for template compatibility
+                                    enhanced_healthcare_data["author"] = {
+                                        "family_name": first_author["person"].get(
+                                            "family_name"
+                                        ),
+                                        "given_name": first_author["person"].get(
+                                            "given_name"
+                                        ),
+                                        "full_name": first_author["person"].get(
+                                            "full_name"
+                                        ),
+                                        "title": first_author["person"].get("title"),
+                                        "role": first_author["person"].get("role"),
+                                        "organization": first_author.get(
+                                            "organization", {}
+                                        ),
+                                    }
+                                else:
+                                    enhanced_healthcare_data["author"] = first_author
+                            else:
+                                enhanced_healthcare_data["author"] = author_info_list
+
+                        # Map organization - prefer custodian_organization, fallback to organization
+                        if admin_data.get("custodian_organization"):
+                            enhanced_healthcare_data["custodian"] = admin_data.get(
+                                "custodian_organization"
+                            )
+                        elif admin_data.get("organization"):
+                            enhanced_healthcare_data["custodian"] = admin_data.get(
+                                "organization"
+                            )
+
+                        # Map legal authenticator
+                        if admin_data.get("legal_authenticator"):
+                            enhanced_healthcare_data["legal_authenticator"] = (
+                                admin_data.get("legal_authenticator")
+                            )
+
+                        logger.info(
+                            f"[SUCCESS] Enhanced clinical debugger healthcare_data: {list(enhanced_healthcare_data.keys())}"
+                        )
+                        logger.info(
+                            f"[DEBUG] Enhanced Author: {enhanced_healthcare_data.get('author', {}).get('full_name', 'None')}"
+                        )
+                        logger.info(
+                            f"[DEBUG] Enhanced Custodian: {enhanced_healthcare_data.get('custodian', {}).get('name', 'None')}"
+                        )
+
+                    # Use enhanced healthcare data if available, otherwise fallback to original
+                    final_healthcare_data = (
+                        enhanced_healthcare_data
+                        if enhanced_healthcare_data
+                        else extended_data.get("healthcare_data", {})
+                    )
+
+                    comprehensive_data["extended_patient_data"] = {
+                        "administrative_data": extended_data.get(
+                            "administrative_data", {}
+                        ),
+                        "contact_data": extended_data.get("contact_data", {}),
+                        "healthcare_data": final_healthcare_data,
+                        "document_details": extended_data.get("document_details", {}),
+                        "patient_extended_data": extended_data.get(
+                            "patient_extended_data", {}
+                        ),
+                    }
+
+                    # Add summary statistics
+                    admin_data = extended_data.get("administrative_data", {})
+                    comprehensive_data["administrative_summary"] = {
+                        "guardian_present": bool(
+                            admin_data.get("guardian", {}).get("family_name")
+                        ),
+                        "other_contacts_count": len(
+                            admin_data.get("other_contacts", [])
+                        ),
+                        "patient_contact_addresses": len(
+                            admin_data.get("patient_contact_info", {}).get(
+                                "addresses", []
+                            )
+                        ),
+                        "patient_contact_telecoms": len(
+                            admin_data.get("patient_contact_info", {}).get(
+                                "telecoms", []
+                            )
+                        ),
+                        "has_legal_authenticator": bool(
+                            admin_data.get("legal_authenticator", {}).get("family_name")
+                        ),
+                        "has_preferred_hcp": bool(
+                            admin_data.get("preferred_hcp", {}).get("name")
+                        ),
+                        "document_creation_date": admin_data.get(
+                            "document_creation_date"
+                        ),
+                        "document_title": admin_data.get("document_title"),
+                        "custodian_name": admin_data.get("custodian_name"),
+                    }
+                    logger.info(
+                        f"[SUCCESS] Extended Patient Data extracted: {len(comprehensive_data['extended_patient_data'])} categories"
+                    )
+                else:
+                    comprehensive_data["extended_patient_data"] = {
+                        "error": "No extended patient data found"
+                    }
+                    comprehensive_data["administrative_summary"] = {
+                        "error": "No administrative data available"
+                    }
+            except Exception as e:
+                logger.error(f"[ERROR] Extended Patient Data extraction failed: {e}")
+                comprehensive_data["extended_patient_data"] = {"error": str(e)}
+                comprehensive_data["administrative_summary"] = {"error": str(e)}
+
+            # 3. Extract Raw CDA Structure Analysis
+            try:
+                import xml.etree.ElementTree as ET
+
+                root = ET.fromstring(cda_content)
+
+                # Analyze CDA structure
+                namespaces = dict(
+                    [
+                        node
+                        for _, node in ET.iterparse(
+                            io.StringIO(cda_content), events=["start-ns"]
+                        )
+                    ]
+                )
+
+                def count_elements_by_tag(element):
+                    tag_counts = {}
+                    for child in element.iter():
+                        tag = (
+                            child.tag.split("}")[-1] if "}" in child.tag else child.tag
+                        )
+                        tag_counts[tag] = tag_counts.get(tag, 0) + 1
+                    return tag_counts
+
+                comprehensive_data["cda_structure_analysis"] = {
+                    "root_tag": (
+                        root.tag.split("}")[-1] if "}" in root.tag else root.tag
+                    ),
+                    "namespaces": namespaces,
+                    "element_counts": count_elements_by_tag(root),
+                    "total_elements": len(list(root.iter())),
+                    "has_structured_body": bool(root.find(".//{*}structuredBody")),
+                    "has_component": bool(root.find(".//{*}component")),
+                    "sections_count": len(root.findall(".//{*}section")),
+                }
+                logger.info(
+                    f"[SUCCESS] CDA Structure Analysis complete: {comprehensive_data['cda_structure_analysis']['total_elements']} elements analyzed"
+                )
+            except Exception as e:
+                logger.error(f"[ERROR] CDA Structure Analysis failed: {e}")
+                comprehensive_data["cda_structure_analysis"] = {"error": str(e)}
+
+        except Exception as e:
+            logger.error(f"[ERROR] Comprehensive data extraction failed: {e}")
+            comprehensive_data = {"error": f"Comprehensive extraction failed: {str(e)}"}
+
         # Prepare context for template
         try:
             # Create a safe serializable copy for JSON
@@ -798,15 +1109,27 @@ def clinical_data_debugger(request, session_id):
 
             safe_extraction_results = make_serializable(extraction_results)
             extraction_json = json.dumps(safe_extraction_results, indent=2, default=str)
+
+            # Serialize comprehensive data for JSON display
+            safe_comprehensive_data = make_serializable(comprehensive_data)
+            comprehensive_json = json.dumps(
+                safe_comprehensive_data, indent=2, default=str
+            )
         except Exception as e:
             logger.error(f"Error serializing extraction results: {e}")
             extraction_json = f'{{"error": "Serialization failed: {str(e)}"}}'
+            comprehensive_json = (
+                f'{{"error": "Comprehensive data serialization failed: {str(e)}"}}'
+            )
+            safe_comprehensive_data = {"error": str(e)}
 
         context = {
             "session_id": session_id,
             "patient_data": match_data.get("patient_data", {}),
             "extraction_results": safe_extraction_results,  # Use serialized version for template
             "extraction_json": extraction_json,
+            "comprehensive_data": safe_comprehensive_data,  # Enhanced comprehensive data
+            "comprehensive_json": comprehensive_json,  # JSON version for display
             "country_code": match_data.get("country_code", "Unknown"),
             "confidence_score": match_data.get("confidence_score", 0),
             "cda_type": selected_cda_type,  # Use the actual selected CDA type
@@ -857,6 +1180,27 @@ def clinical_data_debugger(request, session_id):
                 # Keep allergy-specific for backward compatibility
                 if section_item["is_allergy_related"]:
                     context["allergy_sections_json"].append(section_item)
+
+        # Debug logging: Verify healthcare data before template rendering
+        healthcare_data = (
+            context.get("comprehensive_data", {})
+            .get("extended_patient_data", {})
+            .get("healthcare_data", {})
+        )
+        logger.info(
+            f"[TEMPLATE DEBUG] Healthcare data keys being passed to template: {list(healthcare_data.keys())}"
+        )
+        if healthcare_data.get("author"):
+            author_name = healthcare_data["author"].get("full_name", "No name")
+            logger.info(f"[TEMPLATE DEBUG] Author data: {author_name}")
+        if healthcare_data.get("custodian"):
+            custodian_name = healthcare_data["custodian"].get("name", "No name")
+            logger.info(f"[TEMPLATE DEBUG] Custodian data: {custodian_name}")
+        if healthcare_data.get("legal_authenticator"):
+            legal_name = healthcare_data["legal_authenticator"].get(
+                "full_name", "No name"
+            )
+            logger.info(f"[TEMPLATE DEBUG] Legal authenticator data: {legal_name}")
 
         return render(request, "patient_data/clinical_data_debugger.html", context)
 
