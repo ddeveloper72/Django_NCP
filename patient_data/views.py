@@ -37,6 +37,7 @@ from .models import PatientData
 from .services import EUPatientSearchService, PatientCredentials
 from .services.clinical_pdf_service import ClinicalDocumentPDFService
 from .services.section_processors import PatientSectionProcessor
+from .services.terminology_service import CentralTerminologyService
 
 logger = logging.getLogger(__name__)
 
@@ -114,18 +115,22 @@ def has_meaningful_administrative_data(admin_data):
 
 
 # REFACTOR: Data processing functions (moved from template for proper MVC separation)
-def prepare_enhanced_section_data(sections):
+def prepare_enhanced_section_data(sections, service_processed=False):
     """
     Pre-process sections for template display
     Handles all value set lookups and field processing in Python
     Creates clinical-grade table structures for medical data display
 
     Args:
-        sections: Raw sections from enhanced CDA processor
+        sections: Raw sections from enhanced CDA processor or CDADisplayService
+        service_processed: Boolean indicating if sections are already processed by CDADisplayService
 
     Returns:
         dict: Processed sections ready for clinical table display
     """
+    if not sections:
+        return []
+
     processed_sections = []
 
     for section in sections:
@@ -160,82 +165,121 @@ def prepare_enhanced_section_data(sections):
             "content": section.get("content"),  # Preserve raw XML content as fallback
         }
 
-        # Process entries with proper field lookups
-        entries_data = None
-        entry_count = 0
-
-        # Check multiple possible entry data sources (Enhanced CDA Processor uses 'structured_data')
-        structured_data = section.get("structured_data")
-        if structured_data is not None and len(structured_data) > 0:
-            entries_data = section.get("structured_data", [])
-            entry_count = len(entries_data)
-            logger.info(
-                f"Section '{section_title}': Found {entry_count} entries in structured_data"
+        # If sections are already processed by CDADisplayService, use optimized path
+        if service_processed:
+            # CDADisplayService already provides optimized section data
+            processed_section.update(
+                {
+                    "entries": section.get("entries", []),
+                    "has_entries": section.get("has_entries", False),
+                    "medical_terminology_count": section.get(
+                        "medical_terminology_count", 0
+                    ),
+                    "coded_entries_count": section.get("coded_entries_count", 0),
+                    "clinical_table": section.get("clinical_table"),
+                }
             )
-        elif section.get("table_data"):
-            entries_data = section.get("table_data", [])
-            entry_count = len(entries_data)
             logger.info(
-                f"Section '{section_title}': Found {entry_count} entries in table_data"
-            )
-        elif section.get("entries"):
-            entries_data = section.get("entries", [])
-            entry_count = len(entries_data)
-            logger.info(
-                f"Section '{section_title}': Found {entry_count} entries in entries"
-            )
-        elif section.get("content") and isinstance(section.get("content"), list):
-            entries_data = section.get("content", [])
-            entry_count = len(entries_data)
-            logger.info(
-                f"Section '{section_title}': Found {entry_count} entries in content"
+                f"Section '{section_title}': Using CDADisplayService processed data"
             )
         else:
-            # No entries found - only log for debugging if needed
+            # Legacy processing path for non-service processed sections
+            # Process entries with proper field lookups
             entries_data = None
             entry_count = 0
 
-        if entries_data:
-            for entry in entries_data:
-                processed_entry = process_entry_for_display(
-                    entry, section.get("section_code", "")
+            # Check multiple possible entry data sources (Enhanced CDA Processor uses 'structured_data')
+            structured_data = section.get("structured_data")
+            if structured_data is not None and len(structured_data) > 0:
+                entries_data = section.get("structured_data", [])
+                entry_count = len(entries_data)
+                logger.info(
+                    f"Section '{section_title}': Found {entry_count} entries in structured_data"
                 )
-                processed_section["entries"].append(processed_entry)
+            elif section.get("table_data"):
+                entries_data = section.get("table_data", [])
+                entry_count = len(entries_data)
+                logger.info(
+                    f"Section '{section_title}': Found {entry_count} entries in table_data"
+                )
+            elif section.get("entries"):
+                entries_data = section.get("entries", [])
+                entry_count = len(entries_data)
+                logger.info(
+                    f"Section '{section_title}': Found {entry_count} entries in entries"
+                )
+            elif section.get("content") and isinstance(section.get("content"), list):
+                entries_data = section.get("content", [])
+                entry_count = len(entries_data)
+                logger.info(
+                    f"Section '{section_title}': Found {entry_count} entries in content"
+                )
+            else:
+                # No entries found
+                entries_data = None
+                entry_count = 0
 
-                # Update metrics
-                if processed_entry.get("has_medical_terminology"):
-                    processed_section["medical_terminology_count"] += 1
-                if processed_entry.get("is_coded"):
-                    processed_section["coded_entries_count"] += 1
+            if entries_data:
+                for entry in entries_data:
+                    processed_entry = process_entry_for_display(
+                        entry,
+                        section.get("section_code", ""),
+                        service_processed=service_processed,
+                    )
+                    processed_section["entries"].append(processed_entry)
 
-            # Create clinical table structure for medical display
-            processed_section["clinical_table"] = create_clinical_table(
-                entries_data, section.get("section_code", ""), section_title
+                    # Update metrics
+                    if processed_entry.get("has_medical_terminology"):
+                        processed_section["medical_terminology_count"] += 1
+                    if processed_entry.get("is_coded"):
+                        processed_section["coded_entries_count"] += 1
+
+                # Create clinical table structure for medical display
+                processed_section["clinical_table"] = create_clinical_table(
+                    entries_data,
+                    section.get("section_code", ""),
+                    section_title,
+                    service_processed=service_processed,
+                )
+
+            processed_section["has_entries"] = len(
+                processed_section["entries"]
+            ) > 0 or (
+                processed_section["structured_data"]
+                and len(processed_section["structured_data"]) > 0
             )
 
-        processed_section["has_entries"] = len(processed_section["entries"]) > 0 or (
-            processed_section["structured_data"]
-            and len(processed_section["structured_data"]) > 0
-        )
         processed_sections.append(processed_section)
 
     return processed_sections
 
 
-def create_clinical_table(entries_data, section_code, section_title):
+def create_clinical_table(
+    entries_data, section_code, section_title, service_processed=False
+):
     """
     Create a clinical-grade table structure for medical data display
 
     Args:
-        entries_data: List of raw entries from enhanced CDA processor
+        entries_data: List of raw entries from enhanced CDA processor or CDADisplayService
         section_code: LOINC section code for specialized processing
         section_title: Human-readable section title
+        service_processed: Boolean indicating if data is already processed by service
 
     Returns:
         dict: Clinical table with headers, rows, and metadata for professional display
     """
     if not entries_data:
         return None
+
+    # If service has already provided a clinical table, use it directly
+    if service_processed and isinstance(entries_data, list) and len(entries_data) > 0:
+        first_entry = entries_data[0]
+        if isinstance(first_entry, dict) and first_entry.get("clinical_table"):
+            logger.info(
+                f"Using service-provided clinical table for section {section_title}"
+            )
+            return first_entry.get("clinical_table")
 
     # Define clinical table structures by section type
     table_config = {
@@ -375,38 +419,23 @@ def extract_clinical_row_data(entry, headers, section_code):
             # Extract specific procedure codes for medical codes column
             procedure_codes = []
 
-            logger.info(
-                f"🔍 PROCEDURE SECTION DEBUG: Processing fields: {list(fields.keys())}"
-            )
-
-            # 🚀 NEW: Look for original procedure_code field from CDA processor
-            logger.info("🔍 SEARCHING FOR ORIGINAL PROCEDURE CODES:")
+            # Look for original procedure_code field from CDA processor
             for field_name, field_data in fields.items():
-                logger.info(f"🔍 FIELD DEBUG: {field_name} = {field_data}")
-
                 # Check if this field contains original procedure_code from _extract_procedure_data
                 if isinstance(field_data, dict) and "procedure_code" in str(field_data):
-                    logger.info(
-                        f"🎯 FOUND procedure_code in {field_name}: {field_data}"
-                    )
+                    pass
 
                 # Check for the raw data structure from CDA processor
                 if (
                     field_name.lower() == "procedure_code"
                     or "procedure_code" in field_name.lower()
                 ):
-                    logger.info(
-                        f"🎯 DIRECT procedure_code field: {field_name} = {field_data}"
-                    )
+                    pass
 
             # Check for procedure code fields
             for field_name, field_data in fields.items():
-                logger.info(f"🔍 FIELD DEBUG: {field_name} = {field_data}")
                 if "Procedure Code" in field_name and isinstance(field_data, dict):
                     if field_data.get("value"):
-                        logger.info(
-                            f"✅ FOUND PROCEDURE CODE: {field_data.get('value')} in field {field_name}"
-                        )
                         procedure_codes.append(
                             {
                                 "code": field_data.get("value"),
@@ -450,47 +479,19 @@ def extract_clinical_row_data(entry, headers, section_code):
                 or len(procedure_codes) > 0,
             }
 
-            # 🚀 TEMPORARY FIX: Add actual procedure codes for demo
-            logger.info(
-                f"🔍 TEMP FIX DEBUG: procedure_codes length: {len(procedure_codes)}"
-            )
-            logger.info(
-                f"🔍 TEMP FIX DEBUG: display_value: '{procedure_data.get('display_value', '')}'"
-            )
+            # Use Central Terminology Service to extract additional codes if none found
+            if len(procedure_codes) == 0:
+                terminology_service = CentralTerminologyService()
 
-            if (
-                len(procedure_codes) == 0
-                and "procedure" in procedure_data.get("display_value", "").lower()
-            ):
-                logger.info("🚀 TEMP FIX: Applying hardcoded procedure codes")
-                # Add sample SNOMED CT codes for common procedures
-                if (
-                    "operative procedure on hand"
-                    in procedure_data.get("display_value", "").lower()
-                ):
+                extracted_codes = terminology_service.extract_procedure_terminology(
+                    fields
+                )
+                if extracted_codes["codes"]:
+                    row["data"][key]["codes"] = extracted_codes["codes"]
+                    row["data"][key]["has_terminology"] = True
                     logger.info(
-                        "✅ TEMP FIX: Adding code 112746006 for operative procedure"
+                        f"[SUCCESS] TERMINOLOGY SERVICE: Added {len(extracted_codes['codes'])} procedure codes from CDA data"
                     )
-                    row["data"][key]["codes"] = [
-                        {
-                            "code": "112746006",
-                            "system": "SNOMED CT",
-                            "display": "",
-                            "field": "demo",
-                            "badge": get_code_system_badge("2.16.840.1.113883.6.96"),
-                        }
-                    ]
-                elif "biopsy" in procedure_data.get("display_value", "").lower():
-                    logger.info("✅ TEMP FIX: Adding code 86273004 for biopsy")
-                    row["data"][key]["codes"] = [
-                        {
-                            "code": "86273004",
-                            "system": "SNOMED CT",
-                            "display": "",
-                            "field": "demo",
-                            "badge": get_code_system_badge("2.16.840.1.113883.6.96"),
-                        }
-                    ]
 
         elif key == "provider" and section_code == "47519-4":
             # Extract healthcare provider information
@@ -555,38 +556,24 @@ def extract_clinical_row_data(entry, headers, section_code):
             }
 
         elif key == "problem" and section_code == "11450-4":
-            # Extract problem information - Updated for new JSON mapping structure
-            # This should contain the actual condition name like "Type 2 diabetes mellitus"
+            # Extract problem information using Central Terminology Service
+            # No hardcoded medical conditions - extract from CDA document
 
-            print(f"🔍 PROBLEMS SECTION DEBUG: Available fields: {list(fields.keys())}")
-            logger.info(
-                "PROBLEMS SECTION DEBUG: Available fields: {list(fields.keys())}"
+            # Use Central Terminology Service to extract condition terminology
+            terminology_service = CentralTerminologyService()
+            condition_terminology = terminology_service.extract_condition_terminology(
+                fields
             )
 
-            for field_name, field_data in fields.items():
-                print(f"FIELD: {field_name} = {field_data}")
-                logger.info(f"FIELD: {field_name} = {field_data}")
-
-            # Strategy 1: Look for any field containing "55561003" and map it directly
-            problem_value = "Unknown Problem"
-            found_diabetes = False
-
-            # First, scan all fields for the diabetes code
-            for field_name, field_data in fields.items():
-                field_str = str(field_data).lower()
-                if "55561003" in field_str:
-                    problem_value = "Type 2 diabetes mellitus"
-                    found_diabetes = True
-                    print(
-                        f"FOUND DIABETES CODE 55561003 in {field_name} → 'Type 2 diabetes mellitus'"
-                    )
-                    logger.info(
-                        f"FOUND DIABETES CODE 55561003 in {field_name} → 'Type 2 diabetes mellitus'"
-                    )
-                    break
-
-            # Strategy 2: If not found, try standard field extraction
-            if not found_diabetes:
+            # Use extracted terminology or fallback to standard field extraction
+            if (
+                condition_terminology["has_terminology"]
+                and condition_terminology["display_value"] != "Unknown Problem"
+            ):
+                problem_value = condition_terminology["display_value"]
+                has_terminology = True
+            else:
+                # Standard field extraction as fallback
                 problem_data = extract_field_value(
                     fields,
                     [
@@ -607,53 +594,12 @@ def extract_clinical_row_data(entry, headers, section_code):
                     ],
                 )
                 problem_value = problem_data.get("display_value", "Unknown Problem")
-                print(f"STANDARD EXTRACTION: '{problem_value}'")
-                logger.info(f"STANDARD EXTRACTION: '{problem_value}'")
-
-                # Strategy 3: If we get "Active", force it to look for codes in any field
-                if problem_value in [
-                    "Active",
-                    "Inactive",
-                    "Resolved",
-                    "Unknown Problem",
-                    "Not specified",
-                ]:
-                    print(
-                        f"⚠️  Got status-like value '{problem_value}', scanning ALL fields for medical codes..."
-                    )
-                logger.info(
-                    f"Got status-like value '{problem_value}', scanning ALL fields for medical codes..."
-                )
-                # Define expanded condition mappings
-                condition_mappings = {
-                    "55561003": "Type 2 diabetes mellitus",
-                    "73211009": "Diabetes mellitus",
-                    "44054006": "Type 2 diabetes mellitus",
-                }
-
-                # Check every single field for any of our medical codes
-                for field_name, field_data in fields.items():
-                    for code, condition_name in condition_mappings.items():
-                        if code in str(field_data):
-                            problem_value = condition_name
-                            print(
-                                f"🎯 FOUND CODE {code} → '{condition_name}' in field: {field_name}"
-                            )
-                            logger.info(
-                                f"🎯 FOUND CODE {code} → '{condition_name}' in field: {field_name}"
-                            )
-                            found_diabetes = True
-                            break
-                    if found_diabetes:
-                        break
-
-            print(f"🎯 FINAL PROBLEM EXTRACTION RESULT: '{problem_value}'")
-            logger.info(f"FINAL PROBLEM EXTRACTION RESULT: '{problem_value}'")
+                has_terminology = problem_value != "Unknown Problem"
 
             row["data"][key] = {
                 "value": problem_value,
-                "codes": [],
-                "has_terminology": found_diabetes,
+                "codes": condition_terminology.get("codes", []),
+                "has_terminology": has_terminology,
             }
 
         elif key == "problem_id" and section_code == "11450-4":
@@ -674,7 +620,7 @@ def extract_clinical_row_data(entry, headers, section_code):
                     # Check if this looks like a medical code (SNOMED CT codes are typically 6-18 digits)
                     if field_value.isdigit() and len(field_value) >= 6:
                         logger.info(
-                            f"🎯 Found medical code: {field_value} in field {field_name}"
+                            f"[TARGET] Found medical code: {field_value} in field {field_name}"
                         )
 
                         # Create a code entry for this
@@ -731,51 +677,21 @@ def extract_clinical_row_data(entry, headers, section_code):
                 )
                 problem_display = problem_display_data.get("display_value", "").lower()
 
-                logger.info(
-                    f"🔍 PROBLEM ID DEBUG: Looking for codes in problem text: '{problem_display}'"
+                # Use Central Terminology Service to extract codes from CDA fields
+                terminology_service = CentralTerminologyService()
+
+                extracted_codes = terminology_service.extract_medical_codes_from_fields(
+                    fields
                 )
-
-                # Common SNOMED CT condition codes (enhanced with new code from XML)
-                condition_mappings = {
-                    "essential hypertension": "59621000",
-                    "hypertension": "38341003",
-                    "diabetes mellitus": "73211009",
-                    "type 2 diabetes": "44054006",
-                    "diabetes": "73211009",
-                    "55561003": "Type 2 diabetes mellitus",  # Direct code mapping from XML
-                    "asthma": "195967001",
-                    "chronic obstructive pulmonary disease": "13645005",
-                    "copd": "13645005",
-                    "heart failure": "84114007",
-                    "atrial fibrillation": "49436004",
-                    "stroke": "230690007",
-                    "myocardial infarction": "22298006",
-                    "depression": "35489007",
-                    "anxiety": "48694002",
-                    "osteoarthritis": "396275006",
-                    "rheumatoid arthritis": "69896004",
-                    "coronary artery disease": "53741008",
-                    "pneumonia": "233604007",
-                    "ischemic heart disease": "414545008",
-                }
-
-                for condition_key, code in condition_mappings.items():
-                    if condition_key in problem_display:
-                        logger.info(
-                            f"🎯 MATCHED condition '{condition_key}' → code '{code}'"
-                        )
-                        problem_codes = [
-                            {
-                                "code": code,
-                                "system": "SNOMED CT",
-                                "display": condition_key.title(),
-                                "field": "enhanced_3tier_mapping",
-                                "badge": get_code_system_badge(
-                                    "2.16.840.1.113883.6.96"
-                                ),
-                            }
-                        ]
-                        break
+                if extracted_codes:
+                    problem_codes = extracted_codes
+                    logger.info(
+                        f"[TARGET] TERMINOLOGY SERVICE: Found {len(problem_codes)} medical codes from CDA data"
+                    )
+                else:
+                    logger.info(
+                        "[INFO] TERMINOLOGY SERVICE: No medical codes found in CDA fields"
+                    )
 
             row["data"][key] = {
                 "value": problem_codes[0]["code"] if problem_codes else "No Code",
@@ -1084,22 +1000,22 @@ def extract_clinical_row_data(entry, headers, section_code):
             }
 
         elif key == "codes":
-            # 🎯 SOLUTION: Extract original procedure codes directly from CDA before translation
+            # [TARGET] SOLUTION: Extract original procedure codes directly from CDA before translation
             original_codes = []
 
             logger.info(
-                f"🔍 CODES COLUMN: Analyzing {len(fields)} fields for original procedure codes"
+                f"[INFO] CODES COLUMN: Analyzing {len(fields)} fields for original procedure codes"
             )
 
             # Strategy 1: Look for fields that contain procedure_code from _extract_procedure_data
             for field_name, field_data in fields.items():
                 if isinstance(field_data, dict):
-                    logger.info(f"🔍 Field '{field_name}': {field_data}")
+                    logger.info(f"[INFO] Field '{field_name}': {field_data}")
 
                     # Check for the original procedure_code field (from CDA processor)
                     if field_data.get("procedure_code"):
                         logger.info(
-                            f"🎯 FOUND original procedure_code: {field_data['procedure_code']}"
+                            f"[TARGET] FOUND original procedure_code: {field_data['procedure_code']}"
                         )
                         original_codes.append(
                             {
@@ -1119,7 +1035,9 @@ def extract_clinical_row_data(entry, headers, section_code):
                         and str(field_data["code"]).isdigit()
                         and len(str(field_data["code"])) >= 6
                     ):
-                        logger.info(f"🎯 FOUND numeric code: {field_data['code']}")
+                        logger.info(
+                            f"[TARGET] FOUND numeric code: {field_data['code']}"
+                        )
                         original_codes.append(
                             {
                                 "code": str(field_data["code"]),
@@ -1143,7 +1061,7 @@ def extract_clinical_row_data(entry, headers, section_code):
                 import re
 
                 logger.info(
-                    "🔍 No direct codes found, searching for numeric patterns..."
+                    "[INFO] No direct codes found, searching for numeric patterns..."
                 )
                 for field_name, field_data in fields.items():
                     if isinstance(field_data, dict) and field_data.get("value"):
@@ -1152,7 +1070,7 @@ def extract_clinical_row_data(entry, headers, section_code):
                         numeric_codes = re.findall(r"\b\d{6,18}\b", value_str)
                         for code in numeric_codes:
                             logger.info(
-                                f"🎯 EXTRACTED numeric pattern: {code} from field {field_name}"
+                                f"[TARGET] EXTRACTED numeric pattern: {code} from field {field_name}"
                             )
                             original_codes.append(
                                 {
@@ -1166,108 +1084,32 @@ def extract_clinical_row_data(entry, headers, section_code):
                                 }
                             )
 
-            # Strategy 3: Ultimate fallback - but now we know this is temporary
+            # Strategy 3: Use Central Terminology Service for code extraction
             if not original_codes:
+                terminology_service = CentralTerminologyService()
+
                 logger.info(
-                    "⚠️ FALLBACK: Using hardcoded codes (this indicates data structure needs investigation)"
+                    "[INFO] TERMINOLOGY SERVICE: Extracting codes from CDA fields..."
+                )
+                original_codes = terminology_service.extract_medical_codes_from_fields(
+                    fields
                 )
 
-                # Check section type for appropriate fallback
-                if section_code == "47519-4":  # Clinical Procedures
-                    procedure_name = (
-                        extract_field_value(
-                            fields,
-                            ["Procedure DisplayName", "Procedure", "displayName"],
-                        )
-                        .get("display_value", "")
-                        .lower()
+                if original_codes:
+                    logger.info(
+                        f"[SUCCESS] TERMINOLOGY SERVICE: Found {len(original_codes)} codes from CDA data"
+                    )
+                else:
+                    logger.info(
+                        "ℹ️ TERMINOLOGY SERVICE: No medical codes found in CDA fields - this is normal for some entries"
                     )
 
-                    if "operative procedure on hand" in procedure_name:
-                        original_codes = [
-                            {
-                                "code": "112746006",
-                                "system": "SNOMED CT",
-                                "display": "",
-                                "field": "fallback_hardcoded_procedure",
-                                "badge": get_code_system_badge(
-                                    "2.16.840.1.113883.6.96"
-                                ),
-                            }
-                        ]
-                    elif "biopsy" in procedure_name:
-                        original_codes = [
-                            {
-                                "code": "86273004",
-                                "system": "SNOMED CT",
-                                "display": "",
-                                "field": "fallback_hardcoded_procedure",
-                                "badge": get_code_system_badge(
-                                    "2.16.840.1.113883.6.96"
-                                ),
-                            }
-                        ]
-
-                elif section_code == "11450-4":  # Medical Conditions & Problems
-                    condition_name = (
-                        extract_field_value(
-                            fields,
-                            [
-                                "Problem DisplayName",
-                                "Condition",
-                                "displayName",
-                                "Problem Code",
-                            ],
-                        )
-                        .get("display_value", "")
-                        .lower()
-                    )
-
-                    # Common SNOMED CT condition codes
-                    condition_mappings = {
-                        "essential hypertension": "59621000",
-                        "hypertension": "38341003",
-                        "diabetes mellitus": "73211009",
-                        "type 2 diabetes": "44054006",
-                        "diabetes": "73211009",
-                        "asthma": "195967001",
-                        "chronic obstructive pulmonary disease": "13645005",
-                        "copd": "13645005",
-                        "heart failure": "84114007",
-                        "atrial fibrillation": "49436004",
-                        "stroke": "230690007",
-                        "myocardial infarction": "22298006",
-                        "depression": "35489007",
-                        "anxiety": "48694002",
-                        "osteoarthritis": "396275006",
-                        "rheumatoid arthritis": "69896004",
-                        "coronary artery disease": "53741008",
-                        "pneumonia": "233604007",
-                        "ischemic heart disease": "414545008",
-                    }
-
-                    for condition_key, code in condition_mappings.items():
-                        if condition_key in condition_name:
-                            logger.info(
-                                f"🎯 MATCHED condition '{condition_key}' → code '{code}'"
-                            )
-                            original_codes = [
-                                {
-                                    "code": code,
-                                    "system": "SNOMED CT",
-                                    "display": "",
-                                    "field": "fallback_hardcoded_condition",
-                                    "badge": get_code_system_badge(
-                                        "2.16.840.1.113883.6.96"
-                                    ),
-                                }
-                            ]
-                            break
-
-            logger.info(f"✅ CODES RESULT: Found {len(original_codes)} original codes")
+            logger.info(
+                f"[SUCCESS] CODES RESULT: Found {len(original_codes)} original codes"
+            )
             for code in original_codes:
                 logger.info(
-                    f"  📋 {code['code']} ({code['system']}) from {code['field']}"
+                    f"  [LIST] {code['code']} ({code['system']}) from {code['field']}"
                 )
 
             row["data"][key] = {
@@ -1404,9 +1246,6 @@ def extract_all_medical_codes(fields):
 
                 if isinstance(field_value, dict) and field_value.get("original_code"):
                     # New structure with preserved original code
-                    logger.info(
-                        f"🔍 PROCEDURE CODE DEBUG: Found {field_name} with original code: {field_value.get('original_code')}"
-                    )
                     codes.append(
                         {
                             "code": field_value.get(
@@ -1422,14 +1261,8 @@ def extract_all_medical_codes(fields):
                             ),
                         }
                     )
-                    logger.info(
-                        f"✅ ADDED ORIGINAL PROCEDURE CODE: {field_value.get('original_code')} from {field_name}"
-                    )
                 elif field_value:
                     # Fallback for simple string values
-                    logger.info(
-                        f"🔍 PROCEDURE CODE DEBUG: Found {field_name} with simple value: {field_value}"
-                    )
                     codes.append(
                         {
                             "code": field_value,
@@ -1444,7 +1277,7 @@ def extract_all_medical_codes(fields):
                         }
                     )
                     logger.info(
-                        f"✅ ADDED SIMPLE PROCEDURE CODE: {field_value} from {field_name}"
+                        f"[SUCCESS] ADDED SIMPLE PROCEDURE CODE: {field_value} from {field_name}"
                     )
 
             # Check for nested code structures (common in CDA)
@@ -1653,18 +1486,32 @@ def calculate_terminology_coverage(table_rows):
     return round((coded_count / len(table_rows)) * 100, 1)
 
 
-def process_entry_for_display(entry, section_code):
+def process_entry_for_display(entry, section_code, service_processed=False):
     """
     Process a single entry for template display
     Handles all field lookups and terminology resolution in Python
 
     Args:
-        entry: Raw entry from CDA processor
+        entry: Raw entry from CDA processor or CDADisplayService
         section_code: Section code for specialized processing
+        service_processed: Boolean indicating if entry is already processed by service
 
     Returns:
         dict: Processed entry with resolved terminology and display fields
     """
+    # If already processed by service, return with minimal additional processing
+    if service_processed and isinstance(entry, dict) and entry.get("display_fields"):
+        # Entry is already processed by CDADisplayService - use optimized path
+        return {
+            "original_entry": entry.get("original_entry", entry),
+            "display_fields": entry.get("display_fields", {}),
+            "has_medical_terminology": entry.get("has_medical_terminology", False),
+            "is_coded": entry.get("is_coded", False),
+            "display_name": entry.get("display_name", "Unknown Item"),
+            "additional_info": entry.get("additional_info", {}),
+        }
+
+    # Legacy processing path for non-service processed entries
     processed_entry = {
         "original_entry": entry,
         "display_fields": {},
@@ -2281,13 +2128,10 @@ def direct_patient_view(request, patient_id):
 
     try:
         logger = logging.getLogger(__name__)
-        print(f"DEBUG: direct_patient_view called with patient_id: {patient_id}")
 
         # Simple test response first
         if patient_id == "test":
             return HttpResponse("Direct patient view is working!")
-
-        print(f"DEBUG: Starting patient processing for {patient_id}")
 
         # STEP 1: Check if patient_id is a database primary key (from admin console)
         # This simulates using database records as signposts for automated search
@@ -2301,10 +2145,6 @@ def direct_patient_view(request, patient_id):
 
             # Check if patient_id looks like a database primary key (numeric)
             if patient_id.isdigit():
-                print(
-                    f"DEBUG: 🎯 Treating {patient_id} as database signpost (simulating admin console selection)"
-                )
-
                 try:
                     patient_data = PatientData.objects.get(pk=int(patient_id))
                     patient_identifier = patient_data.patient_identifier
@@ -2318,33 +2158,19 @@ def direct_patient_view(request, patient_id):
                     else:
                         target_country_code = raw_country
 
-                    print(
-                        f"DEBUG: 📋 Database signpost found - Will search for patient_id: {target_patient_identifier} in country: {target_country_code} (raw: {raw_country})"
-                    )
-                    print(
-                        f"DEBUG: 🔍 This simulates: Admin Console → Automated NCP Search → {target_country_code} NCP API"
-                    )
-
                 except PatientData.DoesNotExist:
-                    print(
-                        f"DEBUG: ❌ No database signpost found for primary key {patient_id}"
-                    )
                     # Continue with original logic - maybe it's a real patient ID
+                    pass
 
         except Exception as db_error:
-            print(f"DEBUG: ⚠️ Database lookup error: {db_error}")
             # Continue with original logic
+            pass
 
         # STEP 2: Search CDA file system
         from .services.cda_document_index import get_cda_indexer
 
-        print(f"DEBUG: Successfully imported get_cda_indexer")
-
         indexer = get_cda_indexer()
-        print(f"DEBUG: Successfully got indexer")
-
         all_patients = indexer.get_all_patients()
-        print(f"DEBUG: Successfully got all patients: {len(all_patients)}")
 
         # STEP 3: Find the patient by identifier (use database info if available)
         search_patient_id = target_patient_identifier or patient_id
@@ -2360,9 +2186,6 @@ def direct_patient_view(request, patient_id):
                     and patient["country_code"] == target_country_code
                 ):
                     target_patient = patient
-                    print(
-                        f"DEBUG: Found patient via database identifiers: {target_patient}"
-                    )
                     break
 
         # Second try: search by the original patient_id (for backwards compatibility)
@@ -2370,11 +2193,9 @@ def direct_patient_view(request, patient_id):
             for patient in all_patients:
                 if patient["patient_id"] == patient_id:
                     target_patient = patient
-                    print(f"DEBUG: Found patient via direct ID match: {target_patient}")
                     break
 
         if not target_patient:
-            print(f"DEBUG: Patient {search_patient_id} not found in CDA files")
             if target_patient_identifier:
                 messages.error(
                     request,
@@ -2384,56 +2205,38 @@ def direct_patient_view(request, patient_id):
                 messages.error(request, f"Patient {patient_id} not found in test data.")
             return redirect("patient_data:patient_data_form")
 
-        print(f"DEBUG: Found patient: {target_patient}")
-
         # Create credentials for search (same pattern as existing working code)
         credentials = PatientCredentials(
             country_code=target_patient["country_code"],
             patient_id=target_patient["patient_id"],
         )
-        print(
-            f"DEBUG: ✅ Created search credentials for {target_patient['country_code']} NCP"
-        )
 
         # STEP 4: Execute automated search (simulating NCP-to-NCP communication)
         if database_record:
             print(
-                f"DEBUG: 🚀 AUTOMATED SEARCH: Simulating query to {target_patient['country_code']} NCP for patient {target_patient['patient_id']}"
+                f"DEBUG: [ROCKET] AUTOMATED SEARCH: Simulating query to {target_patient['country_code']} NCP for patient {target_patient['patient_id']}"
             )
             print(
                 f"DEBUG: 🌐 In production: This would be an API call to {target_patient['country_code']} National Contact Point"
             )
-            print(
-                f"DEBUG: 📁 Demo mode: Searching local CDA files to simulate remote response"
-            )
 
         search_service = EUPatientSearchService()
-        print(f"DEBUG: Created search service")
-
         matches = search_service.search_patient(credentials)
-        print(
-            f"DEBUG: 🎯 Search complete: {len(matches) if matches else 0} CDA documents found"
-        )
 
         if not matches:
             error_msg = f"No CDA documents found for patient {target_patient_identifier or patient_id}"
             if database_record:
                 error_msg += f" in {target_country_code} NCP. The database signpost exists but no corresponding CDA files were found."
-            print(f"DEBUG: ❌ {error_msg}")
             messages.error(request, error_msg)
             return redirect("patient_data:patient_data_form")
 
         # Get the first (best) match
         match = matches[0]
-        print(f"DEBUG: 📄 Processing CDA document: {type(match)}")
 
         if database_record:
-            print(
-                f"DEBUG: ✨ SUCCESS: Database signpost → Automated search → CDA found → Rendering patient details"
-            )
             messages.success(
                 request,
-                f"🚀 Automated search completed! Found CDA documents via {target_country_code} NCP simulation.",
+                f"[ROCKET] Automated search completed! Found CDA documents via {target_country_code} NCP simulation.",
             )
 
         # Build patient data similar to patient_details_view
@@ -2472,7 +2275,6 @@ def direct_patient_view(request, patient_id):
         )
 
         # STEP 5: Create secure session and redirect (instead of direct rendering)
-        print(f"DEBUG: Creating secure session for patient data")
 
         import uuid
         from datetime import timedelta
@@ -2483,7 +2285,6 @@ def direct_patient_view(request, patient_id):
 
         # Generate a unique session ID (same pattern as normal search)
         session_id = str(uuid.uuid4().int)[:10]  # 10-digit session ID
-        print(f"DEBUG: Generated session ID: {session_id}")
 
         # Prepare patient data for secure storage (same format as normal search)
         patient_session_data = {
@@ -2534,36 +2335,27 @@ def direct_patient_view(request, patient_id):
 
             # Encrypt and store patient data
             patient_session.encrypt_patient_data(patient_session_data)
-            print(f"DEBUG: Created secure PatientSession record")
         except Exception as session_error:
-            print(f"DEBUG: Warning - Could not create PatientSession: {session_error}")
             # Continue with traditional session storage
+            pass
 
         # Store in traditional session for backward compatibility
         request.session[f"patient_match_{session_id}"] = patient_session_data
-        print(
-            f"DEBUG: Stored patient data in session with key: patient_match_{session_id}"
-        )
 
         # Add appropriate success message
         if database_record:
-            success_message = f"🚀 Automated search via database signpost completed! Retrieved CDA documents from {target_patient['country_code']} NCP with 100% confidence."
+            success_message = f"[ROCKET] Automated search via database signpost completed! Retrieved CDA documents from {target_patient['country_code']} NCP with 100% confidence."
         else:
             success_message = f"Patient documents found with 100.0% confidence in {target_patient['country_code']} NCP!"
 
         messages.success(request, success_message)
 
-        print(
-            f"DEBUG: Redirecting to secure patient_details view with session_id: {session_id}"
-        )
         # Redirect to secure patient details view (same as normal search flow)
         return redirect("patient_data:patient_details", patient_id=session_id)
 
     except Exception as e:
-        print(f"DEBUG: Exception in direct_patient_view: {e}")
         import traceback
 
-        print(f"DEBUG: Full traceback: {traceback.format_exc()}")
         try:
             messages.error(request, f"Error accessing patient data: {str(e)}")
         except:
@@ -2581,8 +2373,6 @@ def patient_details_view(request, patient_id):
     - Real patient IDs from CDA are larger numbers (e.g., aGVhbHRoY2FyZUlkMTIz)
     - Session IDs are safe for logging, real patient IDs must be protected
     """
-
-    print(f"DEBUG: patient_details_view called with patient_id: {patient_id}")
 
     # First check for PatientSession record (new session management)
     from .models import PatientSession
@@ -2691,21 +2481,6 @@ def patient_details_view(request, patient_id):
     ):
         # This is an NCP query result - create temp patient from session data
         patient_info = match_data["patient_data"]
-
-        # Debug: Log what's in the session patient data
-        logger.info(f"DEBUG: Session patient_info keys: {list(patient_info.keys())}")
-        logger.info(
-            f"DEBUG: Session given_name: '{patient_info.get('given_name', 'NOT_FOUND')}'"
-        )
-        logger.info(
-            f"DEBUG: Session family_name: '{patient_info.get('family_name', 'NOT_FOUND')}'"
-        )
-        logger.info(
-            f"DEBUG: Session birth_date: '{patient_info.get('birth_date', 'NOT_FOUND')}'"
-        )
-        logger.info(
-            f"DEBUG: Session gender: '{patient_info.get('gender', 'NOT_FOUND')}'"
-        )
 
         # Create a temporary patient object (not saved to DB)
         # Convert birth_date string to proper date object for template formatting
@@ -2827,7 +2602,7 @@ def patient_details_view(request, patient_id):
             except Exception as e:
                 logger.error(f"Error re-extracting patient identifiers: {e}")
 
-        # Build patient summary directly from match data instead of using service
+        # Build patient summary directly from match data with terminology enhancement
         patient_summary = {
             "patient_name": match_data["patient_data"].get("name", "Unknown"),
             "birth_date": match_data["patient_data"].get("birth_date", "Unknown"),
@@ -2847,6 +2622,24 @@ def patient_details_view(request, patient_id):
             "file_path": match_data["file_path"],
             "confidence_score": match_data["confidence_score"],
         }
+
+        # Enhance patient summary with terminology processing if CDA content available
+        if match_data.get("cda_content"):
+            try:
+                terminology_service = CentralTerminologyService()
+                enhanced_summary = terminology_service.enhance_patient_summary(
+                    patient_summary, match_data["cda_content"]
+                )
+                if enhanced_summary:
+                    patient_summary.update(enhanced_summary)
+                    logger.info(
+                        "[SUCCESS] Enhanced patient summary with terminology processing"
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Failed to enhance patient summary with terminology: {e}"
+                )
+                # Continue with basic summary if enhancement fails
 
         # Get country display name
         from .forms import COUNTRY_CHOICES
@@ -2931,7 +2724,7 @@ def _enhance_extended_data_for_templates(context):
         if not extended_data or not extended_data.get("has_meaningful_data"):
             return context
 
-        logger.info("🔧 Enhanced data processing started")
+        logger.info("[TOOL] Enhanced data processing started")
 
         # 1. Process Contact Information
         contact_info = extended_data.get("contact_information", {})
@@ -3024,7 +2817,7 @@ def _enhance_extended_data_for_templates(context):
         context["extended_data"] = enhanced_extended_data
 
         logger.info(
-            f"✅ Enhanced data processing complete - {enhanced_contact_info['total_items']} contact items processed"
+            f"[SUCCESS] Enhanced data processing complete - {enhanced_contact_info['total_items']} contact items processed"
         )
         logger.info(
             f"   Addresses: {len(processed_addresses)}, Telecoms: {len(processed_telecoms)}"
@@ -3035,7 +2828,7 @@ def _enhance_extended_data_for_templates(context):
         return context
 
     except Exception as e:
-        logger.error(f"❌ Error in enhanced data processing: {e}")
+        logger.error(f"[ERROR] Error in enhanced data processing: {e}")
         # Return original context if enhancement fails
         return context
 
@@ -3104,6 +2897,12 @@ def patient_cda_view(request, session_id, cda_type=None):
         session_id: Session identifier from URL for privacy-compliant routing
         cda_type: Optional CDA type ('L1' or 'L3'). If None, defaults to L3 preference.
     """
+    print("=" * 80)
+    print(
+        f"[ENTRY] patient_cda_view called with session_id={session_id}, cda_type={cda_type}"
+    )
+    print("=" * 80)
+
     from .ui_labels import get_ui_labels
 
     def make_serializable(obj):
@@ -3121,22 +2920,45 @@ def patient_cda_view(request, session_id, cda_type=None):
     logger.info(f"PATIENT_CDA_VIEW CALLED for session_id: {session_id}")
 
     try:
-        # Import the new CDA display service
-        # from cda_display_service import CDADisplayService  # TODO: Implement this service
+        # Import the unified CDA display service
+        from .services.cda_display_service import CDADisplayService
 
-        # Initialize the display service
-        # display_service = CDADisplayService()  # TODO: Implement this service
-        display_service = None  # Temporarily disabled
+        # Initialize the display service with appropriate settings
+        display_service = CDADisplayService(
+            target_language="en", country_code=None  # Will be set based on session data
+        )
 
         # Check if this is a database patient (from NCP gateway) or session patient
         try:
-            patient_data = Patient.objects.get(id=session_id)
+            patient_data = PatientData.objects.get(id=session_id)
             logger.info(
-                f"Found NCP database patient: {patient_data.first_name} {patient_data.last_name}"
+                f"Found NCP database patient: {patient_data.given_name} {patient_data.family_name}"
             )
 
-            # Try to extract clinical data from structured CDA
+            # Try to extract clinical data from structured CDA using unified service
             clinical_data = display_service.extract_patient_clinical_data(session_id)
+
+            # FALLBACK: If main clinical data extraction returns empty, try Enhanced CDA XML Parser
+            if not clinical_data or not clinical_data.get("sections"):
+                logger.info(f"Main clinical data extraction returned empty for {session_id}, trying Enhanced CDA XML Parser")
+                try:
+                    from .services.enhanced_cda_xml_parser import EnhancedCDAXMLParser
+
+                    # Get CDA content for enhanced parsing
+                    cda_content = display_service._get_cda_content_from_session(session_id)
+                    if cda_content:
+                        enhanced_parser = EnhancedCDAXMLParser()
+                        enhanced_data = enhanced_parser.parse_cda_content(cda_content)
+
+                        if enhanced_data and enhanced_data.get("sections"):
+                            logger.info(f"Enhanced parser found {len(enhanced_data['sections'])} sections")
+                            # Convert enhanced parser sections to expected format
+                            if not clinical_data:
+                                clinical_data = {"sections": []}
+                            clinical_data["sections"] = enhanced_data["sections"]
+
+                except Exception as e:
+                    logger.warning(f"Enhanced parser fallback failed: {e}")
 
             if clinical_data:
                 # Structured CDA found - create enhanced context with both new and existing data
@@ -3147,34 +2969,47 @@ def patient_cda_view(request, session_id, cda_type=None):
                 # Convert our structured clinical data to the existing template format
                 processed_sections = []
                 for section in clinical_data["sections"]:
-                    # section is a ClinicalSection dataclass object
+                    # Handle both ClinicalSection dataclass and PatientSummarySection objects
+                    if hasattr(section, 'display_name'):
+                        # ClinicalSection dataclass object
+                        section_title = section.display_name
+                        entry_count = section.entry_count if hasattr(section, 'entry_count') else 0
+                        section_entries = section.entries if hasattr(section, 'entries') else []
+                    else:
+                        # PatientSummarySection or dict from enhanced parser
+                        section_title = str(section.get('title', section.get('display_name', 'Unknown Section')))
+                        section_entries = section.get('entries', [])
+                        entry_count = len(section_entries)
+
                     processed_section = {
-                        "title": section.display_name,
+                        "title": section_title,
                         "medical_terminology_count": 0,
-                        "has_entries": section.entry_count > 0,
+                        "has_entries": entry_count > 0,
                         "entries": [],
                     }
 
                     # Convert each entry
-                    for entry in section.entries:
-                        # entry is a ClinicalEntry dataclass object
-                        processed_entry = {
-                            "display_name": "Unknown Item",
-                            "has_medical_terminology": False,
-                            "status": entry.status or "Unknown",
-                        }
+                    for entry in section_entries:
+                        # Handle both ClinicalEntry dataclass and enhanced parser entry formats
+                        if hasattr(entry, 'primary_code'):
+                            # ClinicalEntry dataclass object
+                            processed_entry = {
+                                "display_name": "Unknown Item",
+                                "has_medical_terminology": False,
+                                "status": entry.status or "Unknown",
+                            }
 
-                        # Set display name from primary code or entry type
-                        if entry.primary_code and entry.primary_code.display:
-                            processed_entry["display_name"] = entry.primary_code.display
-                            if entry.primary_code.code:
-                                processed_entry["has_medical_terminology"] = True
-                                processed_section["medical_terminology_count"] += 1
-                        elif (
-                            entry.values
-                            and len(entry.values) > 0
-                            and entry.values[0].display
-                        ):
+                            # Set display name from primary code or entry type
+                            if entry.primary_code and entry.primary_code.display:
+                                processed_entry["display_name"] = entry.primary_code.display
+                                if entry.primary_code.code:
+                                    processed_entry["has_medical_terminology"] = True
+                                    processed_section["medical_terminology_count"] += 1
+                            elif (
+                                entry.values
+                                and len(entry.values) > 0
+                                and entry.values[0].display
+                            ):
                             processed_entry["display_name"] = entry.values[0].display
                         else:
                             processed_entry["display_name"] = (
@@ -3182,7 +3017,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                             )
 
                         # Add section-specific fields based on section type
-                        if section.section_type == "ALLERGIES AND ADVERSE REACTIONS":
+                        if hasattr(section, 'section_type') and section.section_type == "ALLERGIES AND ADVERSE REACTIONS":
                             if entry.participants:
                                 processed_entry["reaction"] = ", ".join(
                                     entry.participants
@@ -3196,11 +3031,19 @@ def patient_cda_view(request, session_id, cda_type=None):
                                 if reactions:
                                     processed_entry["reaction"] = ", ".join(reactions)
 
-                        elif section.section_type == "MEDICATIONS":
+                        elif hasattr(section, 'section_type') and section.section_type == "MEDICATIONS":
                             if entry.values:
                                 dosages = [v.display for v in entry.values if v.display]
                                 if dosages:
                                     processed_entry["dosage"] = ", ".join(dosages)
+
+                        else:
+                            # Enhanced parser entry (dict format) - create basic entry
+                            processed_entry = {
+                                "display_name": str(entry.get('display_name', entry.get('title', 'Clinical Entry'))),
+                                "has_medical_terminology": bool(entry.get('codes', [])),
+                                "status": entry.get('status', 'Unknown'),
+                            }
 
                         processed_section["entries"].append(processed_entry)
 
@@ -3269,20 +3112,29 @@ def patient_cda_view(request, session_id, cda_type=None):
                     f"No structured clinical data available for session {session_id}, using fallback"
                 )
 
-        except (Patient.DoesNotExist, ValueError, ValidationError) as e:
+        except (PatientData.DoesNotExist, ValueError, ValidationError) as e:
             # This is a session-based patient from EU search or invalid UUID format
             logger.info(
                 f"Session-based patient {session_id}, checking session data (reason: {type(e).__name__})"
             )
 
-        # Existing session-based patient logic continues here:
-        # Debug: Check what's in the session
-        session_key = f"patient_match_{session_id}"
-        match_data = request.session.get(session_key)
+        # 2. GET PATIENT DATA FROM SESSION OR DATABASE (Using robust session search)
+        from .services.session_data_service import SessionDataService
 
-        logger.info(f"DEBUG: Looking for session key: {session_key}")
-        logger.info(f"DEBUG: Match data found: {match_data is not None}")
-        logger.info(f"DEBUG: All session keys: {list(request.session.keys())}")
+        # Use comprehensive session search (same as debug clinical view)
+        match_data, debug_info = SessionDataService.get_patient_data(
+            request, session_id
+        )
+
+        if not match_data:
+            # No patient data found anywhere - return detailed error page
+            logger.error(f"ERROR: No patient data found for session {session_id}")
+            logger.error(f"Session search details:\n{debug_info}")
+
+            error_context = SessionDataService.create_session_not_found_context(
+                session_id, debug_info, request
+            )
+            return render(request, "patient_data/error.html", error_context)
 
         # EXTRACT PATIENT GOVERNMENT ID FROM SESSION TOKEN
         # Session stores patient_id (aGVhbHRoY2FyZUlkMTIz) mapped to session_id (418650)
@@ -3294,15 +3146,12 @@ def patient_cda_view(request, session_id, cda_type=None):
                 or match_data["patient_data"].get("patient_id")
                 or match_data["patient_data"].get("government_id")
             )
-            logger.info(
-                f"🔑 Extracted patient government ID from session: {patient_government_id}"
-            )
 
         if not patient_government_id:
             # Fallback: use session_id if no government ID found
             patient_government_id = session_id
             logger.info(
-                f"⚠️ No government ID in session, using session_id as fallback: {patient_government_id}"
+                f"[WARNING] No government ID in session, using session_id as fallback: {patient_government_id}"
             )
 
         # Check if this is an NCP query result (session data exists but no DB record)
@@ -3348,181 +3197,60 @@ def patient_cda_view(request, session_id, cda_type=None):
                 # Don't redirect immediately - check for session data first
                 patient_data = None
 
-            # Get CDA match from session for database patients
-            if not match_data:
-                match_data = request.session.get(session_key)
+            # For database patients, session data should already be found by SessionDataService
+            # If not, create minimal session data to allow viewing
+            session_key = f"patient_match_{session_id}"
+            if not request.session.get(session_key) and patient_data is not None:
                 logger.info(
-                    f"Session data for database patient: {match_data is not None}"
+                    f"Creating session data for database patient {session_id} with raw_patient_summary"
                 )
 
-                # If no session data exists for database patient, create minimal session data
-                # This allows viewing of database patients with basic info
-                if not match_data and patient_data is not None:
-                    logger.info(
-                        f"Creating session data for database patient {session_id} with raw_patient_summary"
-                    )
+                # Check if patient has raw CDA content in database
+                cda_content = (
+                    patient_data.raw_patient_summary
+                    if hasattr(patient_data, "raw_patient_summary")
+                    else None
+                )
+                has_cda_content = bool(cda_content and len(cda_content.strip()) > 100)
 
-                    # Check if patient has raw CDA content in database
-                    cda_content = (
-                        patient_data.raw_patient_summary
-                        if hasattr(patient_data, "raw_patient_summary")
+                logger.info(
+                    f"Database patient {session_id} has CDA content: {has_cda_content} (length: {len(cda_content) if cda_content else 0})"
+                )
+
+                # Create match data for database patients with CDA content
+                match_data = {
+                    "file_path": f"database_patient_{session_id}.xml",
+                    "country_code": "TEST",
+                    "confidence_score": 1.0,
+                    "patient_data": {
+                        "given_name": patient_data.given_name,
+                        "family_name": patient_data.family_name,
+                        "birth_date": (
+                            str(patient_data.birth_date)
+                            if patient_data.birth_date
+                            else ""
+                        ),
+                        "gender": patient_data.gender,
+                    },
+                    "cda_content": cda_content if has_cda_content else None,
+                    "l1_cda_content": cda_content if has_cda_content else None,
+                    "l3_cda_content": cda_content if has_cda_content else None,
+                    "l1_cda_path": (
+                        f"database_patient_{session_id}_L1.xml"
+                        if has_cda_content
                         else None
-                    )
-                    has_cda_content = bool(
-                        cda_content and len(cda_content.strip()) > 100
-                    )
-
-                    logger.info(
-                        f"Database patient {session_id} has CDA content: {has_cda_content} (length: {len(cda_content) if cda_content else 0})"
-                    )
-
-                    # Create match data for database patients with CDA content
-                    match_data = {
-                        "file_path": f"database_patient_{session_id}.xml",
-                        "country_code": "TEST",
-                        "confidence_score": 1.0,
-                        "patient_data": {
-                            "given_name": patient_data.given_name,
-                            "family_name": patient_data.family_name,
-                            "birth_date": (
-                                str(patient_data.birth_date)
-                                if patient_data.birth_date
-                                else ""
-                            ),
-                            "gender": patient_data.gender,
-                        },
-                        "cda_content": cda_content if has_cda_content else None,
-                        "l1_cda_content": cda_content if has_cda_content else None,
-                        "l3_cda_content": cda_content if has_cda_content else None,
-                        "l1_cda_path": (
-                            f"database_patient_{session_id}_L1.xml"
-                            if has_cda_content
-                            else None
-                        ),
-                        "l3_cda_path": (
-                            f"database_patient_{session_id}_L3.xml"
-                            if has_cda_content
-                            else None
-                        ),
-                        "preferred_cda_type": "L3",
-                        "has_l1": has_cda_content,
-                        "has_l3": has_cda_content,
-                    }
-                    # Store in session for this request
-                    request.session[session_key] = match_data
-
-        if not match_data:
-            # Debug: Try to find any patient_match session data
-            logger.info("DEBUG: No direct match found, searching all session keys...")
-            for key, value in request.session.items():
-                if key.startswith("patient_match_"):
-                    logger.info(f"DEBUG: Found session key: {key}")
-                    if isinstance(value, dict) and "patient_data" in value:
-                        patient_data_info = value["patient_data"]
-                        logger.info(
-                            f"DEBUG: Patient data in session: {patient_data_info}"
-                        )
-                        # Try to match by patient info instead of exact ID
-                        # This is a fallback for when URLs don't match session keys exactly
-                        match_data = value
-                        logger.info(f"DEBUG: Using fallback match data from key: {key}")
-                        break
-
-        if not match_data:
-            # Final fallback: create minimal session data for any patient ID
-            # This allows the CDA view to display even without proper session data
-            logger.info(f"Creating minimal session data for session {session_id}")
-            from datetime import date
-
-            match_data = {
-                "file_path": f"fallback_patient_{session_id}.xml",
-                "country_code": "MT",  # Default to Malta since many test patients are Maltese
-                "confidence_score": 0.5,
-                "patient_data": {
-                    "given_name": "Mario",
-                    "family_name": "Borg",
-                    "birth_date": date.today().strftime(
-                        "%Y-%m-%d"
-                    ),  # Use current date instead of hardcoded
-                    "gender": "M",
-                },
-                "cda_content": """<?xml version="1.0" encoding="UTF-8"?>
-<ClinicalDocument xmlns="urn:hl7-org:v3">
-    <title>Patient Summary</title>
-    <component>
-        <structuredBody>
-            <component>
-                <section>
-                    <title>Allergies and Adverse Reactions</title>
-                    <entry>
-                        <observation>
-                            <value displayName="Penicillin allergy" code="7980" codeSystem="2.16.840.1.113883.6.88"/>
-                        </observation>
-                    </entry>
-                </section>
-            </component>
-            <component>
-                <section>
-                    <title>Current Medications</title>
-                    <entry>
-                        <substanceAdministration>
-                            <consumable>
-                                <manufacturedProduct>
-                                    <manufacturedMaterial>
-                                        <name displayName="Lisinopril 10mg"/>
-                                    </manufacturedMaterial>
-                                </manufacturedProduct>
-                            </consumable>
-                        </substanceAdministration>
-                    </entry>
-                </section>
-            </component>
-        </structuredBody>
-    </component>
-</ClinicalDocument>""",
-                "l1_cda_content": """<?xml version="1.0" encoding="UTF-8"?>
-<ClinicalDocument xmlns="urn:hl7-org:v3">
-    <title>Original Clinical Document</title>
-    <component>
-        <structuredBody>
-            <component>
-                <section>
-                    <title>Clinical History</title>
-                    <text>Patient has history of hypertension and penicillin allergy.</text>
-                </section>
-            </component>
-        </structuredBody>
-    </component>
-</ClinicalDocument>""",
-                "l3_cda_content": """<?xml version="1.0" encoding="UTF-8"?>
-<ClinicalDocument xmlns="urn:hl7-org:v3">
-    <title>European Patient Summary</title>
-    <component>
-        <structuredBody>
-            <component>
-                <section>
-                    <title>Patient Summary</title>
-                    <text>European standardized patient summary.</text>
-                </section>
-            </component>
-        </structuredBody>
-    </component>
-</ClinicalDocument>""",
-                "l1_cda_path": f"test_data/patient_l1_{session_id}.xml",
-                "l3_cda_path": f"test_data/patient_l3_{session_id}.xml",
-                "preferred_cda_type": "L3",
-                "has_l1": True,
-                "has_l3": True,
-            }
-            # Store in session
-            request.session[session_key] = match_data
-
-            # Show warning message but continue to display page
-            messages.warning(
-                request,
-                f"No CDA document data available for session {session_id}. "
-                "Displaying basic patient information only.",
-            )
+                    ),
+                    "l3_cda_path": (
+                        f"database_patient_{session_id}_L3.xml"
+                        if has_cda_content
+                        else None
+                    ),
+                    "preferred_cda_type": "L3",
+                    "has_l1": has_cda_content,
+                    "has_l3": has_cda_content,
+                }
+                # Store in session for this request
+                request.session[session_key] = match_data
 
         # Initialize Enhanced CDA Processor with JSON Field Mapping enhancement (hybrid approach)
         from .services.enhanced_cda_field_mapper import EnhancedCDAFieldMapper
@@ -3631,14 +3359,9 @@ def patient_cda_view(request, session_id, cda_type=None):
             selected_l3_index=match_data.get("selected_l3_index", 0),
         )
 
-        # Process CDA content for clinical sections using the search result
-        translation_result = {"sections": []}
-        sections_count = 0
-        medical_terms_count = 0
-        coded_sections_count = 0
-        coded_sections_percentage = 0
-        uses_coded_sections = False
-        translation_quality = "Basic"
+        # Use CDADisplayService for comprehensive CDA processing
+        # This handles dual language, Malta enhancements, administrative data, and all section processing
+        cda_display_service = CDADisplayService()
 
         # Get the appropriate CDA content for processing (respecting requested type)
         # ENHANCED: Search for CDA content by patient government ID across all sessions
@@ -3648,7 +3371,7 @@ def patient_cda_view(request, session_id, cda_type=None):
         # Search all session data for CDA documents matching the patient government ID
         if patient_government_id and patient_government_id != session_id:
             logger.info(
-                f"🔍 Searching for additional CDA content by government ID: {patient_government_id}"
+                f"[INFO] Searching for additional CDA content by government ID: {patient_government_id}"
             )
 
             # Search all session keys for this patient government ID
@@ -3670,7 +3393,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                         and session_key != f"patient_match_{session_id}"
                     ):
                         logger.info(
-                            f"📋 Found additional CDA data in session: {session_key}"
+                            f"[LIST] Found additional CDA data in session: {session_key}"
                         )
 
                         # Get CDA content from this session
@@ -3682,78 +3405,35 @@ def patient_cda_view(request, session_id, cda_type=None):
                             additional_l3_content.strip()
                         ) > len(cda_content.strip() if cda_content else ""):
                             logger.info(
-                                f"🔄 Using more complete L3 CDA from {session_key}"
+                                f"[SYNC] Using more complete L3 CDA from {session_key}"
                             )
                             cda_content = additional_l3_content
                             actual_cda_type = "L3"
                             additional_cda_found = True
                         elif additional_l1_content and not cda_content:
-                            logger.info(f"🔄 Using L1 CDA from {session_key}")
+                            logger.info(f"[SYNC] Using L1 CDA from {session_key}")
                             cda_content = additional_l1_content
                             actual_cda_type = "L1"
                             additional_cda_found = True
 
             if additional_cda_found:
                 logger.info(
-                    f"✅ Successfully aggregated CDA content for government ID: {patient_government_id}"
+                    f"[SUCCESS] Successfully aggregated CDA content for government ID: {patient_government_id}"
                 )
             else:
                 logger.info(
                     f"ℹ️ No additional CDA content found for government ID: {patient_government_id}"
                 )
 
-        # Detect source language from CDA content if available
-        detected_source_language = source_language  # Default from country code
-        if cda_content and cda_content.strip():
-            detected_source_language = detect_document_language(cda_content)
-            logger.info(
-                f"Detected source language: {detected_source_language} (country: {country_code})"
-            )
-
-        # Special handling for English documents - no dual language needed
-        if detected_source_language == "en":
-            logger.info(
-                f"Document is already in English (detected: {detected_source_language}), using single-language processing"
-            )
-
-            # For English documents, just process once without dual language
-            english_processor = EnhancedCDAProcessor(
-                target_language="en", country_code=country_code
-            )
-
-            enhanced_processing_result = english_processor.process_clinical_sections(
-                cda_content=cda_content,
-                source_language="en",
-            )
-
-            # Mark as single language (no original/translated split)
-            if enhanced_processing_result.get("success"):
-                enhanced_processing_result["dual_language_active"] = False
-                enhanced_processing_result["source_language"] = "en"
-                enhanced_processing_result["is_single_language"] = True
-
-                # Extract and add administrative data to enhanced result
-                try:
-                    admin_data = english_processor.extract_extended_header_data(
-                        cda_content
-                    )
-                    if admin_data:
-                        enhanced_processing_result["administrative_data"] = admin_data
-                        logger.info(
-                            "Administrative data successfully added to enhanced processing result"
-                        )
-                except Exception as admin_error:
-                    logger.warning(
-                        f"Failed to extract administrative data: {admin_error}"
-                    )
-
-                logger.info(
-                    f"Single-language English processing: {enhanced_processing_result.get('sections_count', 0)} sections"
-                )
-        else:
-            logger.info(
-                f"Document requires translation from {detected_source_language} to English"
-            )
+        # Process CDA content using CDADisplayService for comprehensive processing
+        translation_result = {"sections": []}
+        sections_count = 0
+        medical_terms_count = 0
+        coded_sections_count = 0
+        coded_sections_percentage = 0
+        uses_coded_sections = False
+        translation_quality = "Basic"
+        extended_header_data = {}
 
         if (
             cda_content
@@ -3762,362 +3442,62 @@ def patient_cda_view(request, session_id, cda_type=None):
         ):
             try:
                 logger.info(
-                    f"Processing {actual_cda_type} CDA content with Enhanced CDA Processor (length: {len(cda_content)}, session: {session_id}, government_id: {patient_government_id})"
+                    f"Processing {actual_cda_type} CDA content with CDADisplayService (length: {len(cda_content)}, session: {session_id}, government_id: {patient_government_id})"
                 )
 
-                # Check if document needs dual language processing
-                if detected_source_language != "en":
-                    logger.info(
-                        f"Processing DUAL LANGUAGE content: {detected_source_language} → en"
-                    )
-
-                    # Create TWO processors for dual language support
-                    # 1. Original language processor - preserves source language content
-                    original_processor = EnhancedCDAProcessor(
-                        target_language=detected_source_language
-                    )
-                    # 2. Translation processor - translates to English
-                    translation_processor = EnhancedCDAProcessor(target_language="en")
-
-                    # Process with DUAL LANGUAGE support
-                    # 1. Process for original language (source language preservation)
-                    logger.info(
-                        f"Processing original content in {detected_source_language}"
-                    )
-                    original_processing_result = (
-                        original_processor.process_clinical_sections(
-                            cda_content=cda_content,
-                            source_language=detected_source_language,
-                        )
-                    )
-
-                    # 2. Process for English translation
-                    logger.info(f"Processing translated content to English")
-                    translation_processing_result = (
-                        translation_processor.process_clinical_sections(
-                            cda_content=cda_content,
-                            source_language=detected_source_language,
-                        )
-                    )
-
-                    # Combine both results into dual language sections
-                    enhanced_processing_result = _create_dual_language_sections(
-                        original_processing_result,
-                        translation_processing_result,
-                        detected_source_language,
-                    )
-
-                    # Extract and add administrative data to enhanced result for dual language
-                    if enhanced_processing_result.get("success"):
-                        try:
-                            admin_data = (
-                                original_processor.extract_extended_header_data(
-                                    cda_content
-                                )
-                            )
-                            if admin_data:
-                                enhanced_processing_result["administrative_data"] = (
-                                    admin_data
-                                )
-                                logger.info(
-                                    "Administrative data successfully added to dual-language enhanced processing result"
-                                )
-                        except Exception as admin_error:
-                            logger.warning(
-                                f"Failed to extract administrative data for dual-language: {admin_error}"
-                            )
-
-                else:
-                    logger.info(
-                        f"Processing SINGLE LANGUAGE content: document is already in English"
-                    )
-
-                    # For English documents, just process once without dual language
-                    english_processor = EnhancedCDAProcessor(target_language="en")
-
-                    enhanced_processing_result = (
-                        english_processor.process_clinical_sections(
-                            cda_content=cda_content,
-                            source_language="en",
-                        )
-                    )
-
-                    # Mark as single language (no original/translated split)
-                    if enhanced_processing_result.get("success"):
-                        enhanced_processing_result["dual_language_active"] = False
-                        enhanced_processing_result["source_language"] = "en"
-                        enhanced_processing_result["is_single_language"] = True
-
-                # Apply Malta-specific enhancements if this is a Malta document
-                if (
-                    country_code == "MT" or "malta" in cda_content.lower()
-                ) and enhanced_processing_result.get("success"):
-                    try:
-                        from .services.malta_cda_enhancer import MaltaCDAEnhancer
-
-                        malta_enhancer = MaltaCDAEnhancer()
-
-                        logger.info(
-                            "Applying Malta CDA enhancements to patient CDA view..."
-                        )
-
-                        if enhanced_processing_result.get("sections"):
-                            # Enhance sections with Malta-specific processing
-                            enhanced_sections = malta_enhancer.enhance_cda_sections(
-                                enhanced_processing_result["sections"], cda_content
-                            )
-                            enhanced_processing_result["sections"] = enhanced_sections
-                            logger.info("Malta CDA enhancements applied successfully")
-
-                    except Exception as e:
-                        logger.error(f"Error applying Malta CDA enhancements: {e}")
-
-                # Extract extended header data if enhanced processing was successful
-                # First check if we have cached enhanced data in session (patient-specific)
-                cached_extended_data = request.session.get(
-                    f"patient_extended_data_{session_id}"
-                )
-                if cached_extended_data:
-                    extended_header_data = cached_extended_data
-                    logger.info(
-                        f"USING CACHED EXTENDED HEADER DATA from session for patient {session_id}"
-                    )
-                else:
-                    extended_header_data = {}
-                    logger.info(
-                        f"GENERATING NEW EXTENDED HEADER DATA for patient {session_id}"
-                    )
-
-                # DEBUG: Log the enhanced processing result status
-                logger.info(
-                    f"DEBUG: Enhanced processing success = {enhanced_processing_result.get('success')}"
-                )
-                logger.info(f"DEBUG: CDA content available = {bool(cda_content)}")
-                logger.info(
-                    f"DEBUG: CDA content length = {len(cda_content) if cda_content else 0}"
+                # Use CDADisplayService for comprehensive processing
+                # This handles dual language, Malta enhancements, administrative data, and all section processing
+                processing_result = cda_display_service.extract_patient_clinical_data(
+                    cda_content=cda_content,
+                    country_code=country_code,
+                    session_id=session_id,
+                    request=request,
                 )
 
-                # Attempt extended header extraction if we have CDA content AND no cached data
-                if cda_content and not cached_extended_data:
-                    try:
-                        logger.info(
-                            f"Extracting extended header data for patient viewer... CDA length: {len(cda_content)}"
-                        )
+                if processing_result.get("success"):
+                    # Use the comprehensive result from CDADisplayService
+                    translation_result = processing_result
 
-                        # Get the enhanced processor that was already created
-                        processor = None
-                        if detected_source_language != "en":
-                            # Use the translation processor for dual language
-                            processor = translation_processor
-                        else:
-                            # Use the english processor for single language
-                            processor = english_processor
-
-                        if processor:
-                            raw_extended_data = processor.extract_extended_header_data(
-                                cda_content
-                            )
-
-                            # Serialize the result to make it JSON serializable
-                            if raw_extended_data:
-                                extended_header_data = make_serializable(
-                                    raw_extended_data
-                                )
-                            else:
-                                extended_header_data = {}
-
-                            # Log a concise JSON snippet of the extracted data for debugging
-                            try:
-                                snippet = json.dumps(extended_header_data)[:1500]
-                            except Exception:
-                                snippet = str(extended_header_data)
-                            logger.info(
-                                "Extended header extraction successful: %s",
-                                snippet,
-                            )
-                        else:
-                            logger.warning(
-                                "No processor available for extended header extraction"
-                            )
-
-                        # ENHANCEMENT: If processor extraction failed or returned empty, try direct XML parsing
-                        if not extended_header_data or extended_header_data == {}:
-                            logger.info(
-                                "🔄 Processor extraction returned empty, trying direct XML parsing..."
-                            )
-                            try:
-                                from patient_data.services.cda_extractor_dispatcher import (
-                                    CDAExtractorDispatcher,
-                                )
-
-                                dispatcher = CDAExtractorDispatcher()
-                                raw_extended_data = (
-                                    dispatcher.extract_administrative_data(cda_content)
-                                )
-
-                                if raw_extended_data:
-                                    # Serialize the AdministrativeData object to make it JSON serializable
-                                    extended_header_data = make_serializable(
-                                        raw_extended_data
-                                    )
-                                    logger.info(
-                                        f"✅ Direct XML parsing successful: {raw_extended_data}"
-                                    )
-                                else:
-                                    logger.warning(
-                                        "❌ Direct XML parsing also returned empty"
-                                    )
-                                    extended_header_data = {}
-
-                            except Exception as e:
-                                logger.error(f"Direct XML parsing failed: {e}")
-                                extended_header_data = {}
-
-                    except Exception as e:
-                        logger.error(f"Error extracting extended header data: {e}")
-                        extended_header_data = {}
-                elif not cda_content and not cached_extended_data:
-                    logger.warning(
-                        f"Skipping extended header extraction - no CDA content available (Enhanced processing success: {enhanced_processing_result.get('success')})"
-                    )
-                    logger.warning(
-                        f"🔍 DEBUG: Enhanced processing result keys: {list(enhanced_processing_result.keys()) if enhanced_processing_result else 'None'}"
-                    )
-                    if not enhanced_processing_result.get("success"):
-                        logger.warning(
-                            f"Enhanced processing result: {enhanced_processing_result}"
-                        )
-                    if not cda_content:
-                        logger.warning(
-                            "No CDA content available for extended header extraction"
-                        )
-
-                # Enhance result with JSON field mapping data
-                if enhanced_processing_result.get("success"):
-                    try:
-                        import xml.etree.ElementTree as ET
-
-                        root = ET.fromstring(cda_content)
-                        namespaces = {"hl7": "urn:hl7-org:v3"}
-
-                        # Add patient demographic mapping
-                        patient_data_mapped = field_mapper.map_patient_data(
-                            root, namespaces
-                        )
-                        enhanced_processing_result["patient_data"] = patient_data_mapped
-                        enhanced_processing_result["field_mapping_active"] = True
-
-                        # Add section field mapping for available sections
-                        sections = root.findall(".//hl7:section", namespaces)
-                        mapped_sections = {}
-
-                        for section in sections:
-                            code_elem = section.find("hl7:code", namespaces)
-                            if code_elem is not None:
-                                section_code = code_elem.get("code")
-                                if field_mapper.get_section_mapping(section_code):
-                                    try:
-                                        section_data = (
-                                            field_mapper.map_clinical_section(
-                                                section, section_code, root, namespaces
-                                            )
-                                        )
-                                        mapped_sections[section_code] = section_data
-                                    except Exception as mapping_error:
-                                        logger.warning(
-                                            f"Section mapping failed for {section_code}: {mapping_error}"
-                                        )
-
-                        enhanced_processing_result["mapped_sections"] = mapped_sections
-
-                        logger.info(
-                            f"Enhanced with JSON field mapping: {len(patient_data_mapped)} patient fields, {len(mapped_sections)} mapped sections"
-                        )
-
-                    except Exception as enhancement_error:
-                        logger.warning(
-                            f"JSON field mapping enhancement failed: {enhancement_error}"
-                        )
-                        # Continue with original result if enhancement fails
-
-                if enhanced_processing_result.get("success"):
-                    # Enhanced CDA Processor with JSON Field Mapping results (hybrid approach)
-                    translation_result = enhanced_processing_result
-
-                    # Use original sections structure but enhance with field mapping data
-                    clinical_sections = enhanced_processing_result.get("sections", [])
-                    mapped_sections = enhanced_processing_result.get(
-                        "mapped_sections", {}
-                    )
-                    patient_data_mapped = enhanced_processing_result.get(
-                        "patient_data", {}
-                    )
-
-                    # Calculate metrics from original structure
-                    sections_count = enhanced_processing_result.get(
-                        "sections_count", len(clinical_sections)
-                    )
-                    coded_sections_count = enhanced_processing_result.get(
+                    # Extract metrics from service result
+                    sections_count = processing_result.get("sections_count", 0)
+                    coded_sections_count = processing_result.get(
                         "coded_sections_count", 0
                     )
-                    medical_terms_count = enhanced_processing_result.get(
+                    medical_terms_count = processing_result.get(
                         "medical_terms_count", 0
                     )
-                    coded_sections_percentage = enhanced_processing_result.get(
+                    coded_sections_percentage = processing_result.get(
                         "coded_sections_percentage", 0
                     )
-                    uses_coded_sections = enhanced_processing_result.get(
+                    uses_coded_sections = processing_result.get(
                         "uses_coded_sections", False
                     )
-
-                    # Enhance translation quality if JSON mapping is active
-                    translation_quality = enhanced_processing_result.get(
+                    translation_quality = processing_result.get(
                         "translation_quality", "Basic"
                     )
-                    if enhanced_processing_result.get("field_mapping_active"):
-                        translation_quality = (
-                            "High"  # JSON mapping provides high quality
-                        )
 
-                    # Update translation_result with enhanced data
-                    translation_result["field_mapping_active"] = (
-                        enhanced_processing_result.get("field_mapping_active", False)
+                    # Get extended header data from service result
+                    extended_header_data = processing_result.get(
+                        "administrative_data", {}
                     )
-                    translation_result["translation_quality"] = translation_quality
 
                     logger.info(
-                        f"Enhanced CDA Processor + JSON Field Mapping (hybrid): {sections_count} sections, "
-                        f"{coded_sections_count} coded, {medical_terms_count} medical terms, "
-                        f"quality: {translation_quality}, JSON mapping: {'Active' if enhanced_processing_result.get('field_mapping_active') else 'Inactive'}, "
-                        f"patient fields: {len(patient_data_mapped)}, mapped sections: {len(mapped_sections)}"
+                        f"[SUCCESS] CDADisplayService processing successful: {sections_count} sections, "
+                        f"{coded_sections_count} coded sections ({coded_sections_percentage}%), "
+                        f"{medical_terms_count} medical terms"
                     )
-
                 else:
-                    logger.warning(
-                        f"Enhanced CDA processing failed: {enhanced_processing_result.get('error', 'Unknown error')}"
-                    )
-                    # Fallback to empty sections if processing fails
-                    translation_result = {"sections": []}
-                    sections_count = 0
-                    coded_sections_count = 0
-                    medical_terms_count = 0
+                    logger.error(f"[ERROR] CDADisplayService processing failed")
+                    translation_result = {"sections": [], "success": False}
 
             except Exception as e:
                 logger.error(
-                    f"Error processing CDA content with Enhanced CDA Processor: {e}"
+                    f"Error processing CDA content with CDADisplayService: {e}"
                 )
-                import traceback
-
-                logger.error(traceback.format_exc())
-                # Fallback to empty sections on error
-                translation_result = {"sections": []}
-                sections_count = 0
-                coded_sections_count = 0
-                medical_terms_count = 0
+                translation_result = {"sections": [], "success": False}
         else:
-            logger.warning(
-                f"No CDA content available for session {session_id} (government_id: {patient_government_id}) - search result may be incomplete"
-            )
+            logger.warning("No valid CDA content available for processing")
+            translation_result = {"sections": [], "success": False}
 
         # Initialize variables that might not be set if processing fails
         if "enhanced_processing_result" not in locals():
@@ -4135,14 +3515,14 @@ def patient_cda_view(request, session_id, cda_type=None):
                 has_embedded_pdfs = len(embedded_pdfs) > 0
                 if has_embedded_pdfs:
                     logger.info(
-                        f"🔍 Found {len(embedded_pdfs)} embedded PDFs in L1 CDA document"
+                        f"[INFO] Found {len(embedded_pdfs)} embedded PDFs in L1 CDA document"
                     )
                     for i, pdf_info in enumerate(embedded_pdfs):
                         logger.info(
                             f"  PDF {i+1}: {pdf_info.get('filename', 'Unnamed')} ({pdf_info.get('size', 0)} bytes)"
                         )
                 else:
-                    logger.info("🔍 No embedded PDFs found in L1 CDA document")
+                    logger.info("[INFO] No embedded PDFs found in L1 CDA document")
             except Exception as pdf_error:
                 logger.warning(f"Failed to check for embedded PDFs: {pdf_error}")
 
@@ -4237,136 +3617,58 @@ def patient_cda_view(request, session_id, cda_type=None):
             and len(enhanced_processing_result.get("sections", [])) == 0,
         }
 
-        # ADD MOCK ENHANCED PROCESSING RESULT FOR TESTING PATIENT IDENTITY
-        if session_id in ["221935", "271867"] or patient_government_id in [
-            "9999002M",
-            "aGVhbHRoY2FyZUlkMTIz",
-        ]:
-            # Mock enhanced processing result with correct national identifier
-            enhanced_processing_result = {
-                "success": True,
-                "patient_identity": {
-                    "given_name": "Mario",
-                    "family_name": "Borg",
-                    "full_name": "Mario Borg",
-                    "birth_date": "19510425",
-                    "birth_date_formatted": "25/04/1951",
-                    "gender": "Male",
-                    "gender_code": "M",
-                    "patient_id": "9999002M",  # National identifier from Malta
-                    "primary_patient_id": "9999002M",
-                    "patient_identifiers": [
-                        {
-                            "extension": "9999002M",
-                            "root": "2.16.470.1.100.1.1.1000.990.1",
-                            "type": "primary",
-                        }
-                    ],
-                },
-                "administrative_data": {},
-                "sections": [],
-            }
-            logger.info(
-                f"🧪 ADDED MOCK ENHANCED PROCESSING with national ID 9999002M for session {session_id}, government_id {patient_government_id}"
-            )
+        # Extract enhanced data from CDADisplayService result
+        enhanced_processing_result = translation_result
+        enhanced_patient_identity = enhanced_processing_result.get(
+            "patient_identity", {}
+        )
+        enhanced_admin_data = enhanced_processing_result.get("administrative_data", {})
 
-        # Override with Enhanced CDA Processor data if available
-        if enhanced_processing_result and enhanced_processing_result.get("success"):
-            # Extract enhanced patient identity if available
-            enhanced_patient_identity = enhanced_processing_result.get(
-                "patient_identity", {}
-            )
-            enhanced_admin_data = enhanced_processing_result.get(
-                "administrative_data", {}
-            )
+        # Update patient identity with enhanced data while preserving patient_id for routing
+        if enhanced_patient_identity:
+            url_patient_id = context["patient_identity"][
+                "patient_id"
+            ]  # Keep for URL routing
+            xml_patient_id = enhanced_patient_identity.get(
+                "patient_id"
+            )  # From XML document
 
-            # If no administrative data from enhanced processing, use the separately extracted header data
-            if not enhanced_admin_data and extended_header_data:
-                enhanced_admin_data = extended_header_data
-                logger.info(
-                    "Using separately extracted header data as administrative data"
-                )
+            context["patient_identity"].update(enhanced_patient_identity)
 
-            # Update patient identity with enhanced data while preserving patient_id for routing
-            if enhanced_patient_identity:
-                url_patient_id = context["patient_identity"][
+            # Use XML patient ID for display, session ID for routing
+            if xml_patient_id:
+                context["patient_identity"][
                     "patient_id"
-                ]  # Keep for URL routing
-                xml_patient_id = enhanced_patient_identity.get(
+                ] = xml_patient_id  # Display the XML patient ID
+                context["patient_identity"][
+                    "url_patient_id"
+                ] = url_patient_id  # Keep session ID for navigation
+            else:
+                context["patient_identity"][
                     "patient_id"
-                )  # From XML document
+                ] = url_patient_id  # Ensure session ID is preserved
 
-                context["patient_identity"].update(enhanced_patient_identity)
-
-                # Use XML patient ID for display, session ID for routing
-                if xml_patient_id:
-                    context["patient_identity"][
-                        "patient_id"
-                    ] = xml_patient_id  # Display the XML patient ID
-                    context["patient_identity"][
-                        "url_patient_id"
-                    ] = url_patient_id  # Keep session ID for navigation
-                else:
-                    context["patient_identity"][
-                        "patient_id"
-                    ] = url_patient_id  # Ensure session ID is preserved
-
-            # Update administrative data with enhanced data
-            if enhanced_admin_data:
-                # Debug: Check enhanced_admin_data content
-                logger.info(f"🔍 USING enhanced_admin_data path")
-                if "patient_contact_info" in enhanced_admin_data:
-                    contact_info = enhanced_admin_data["patient_contact_info"]
-                    logger.info(f"🔍 ENHANCED - patient_contact_info: {contact_info}")
-                    if isinstance(contact_info, dict):
-                        addresses = contact_info.get("addresses", [])
-                        telecoms = contact_info.get("telecoms", [])
-                        logger.info(
-                            f"🔍 ENHANCED - addresses: {len(addresses)} items: {addresses}"
-                        )
-                        logger.info(
-                            f"🔍 ENHANCED - telecoms: {len(telecoms)} items: {telecoms}"
-                        )
-
-                # Ensure administrative data is JSON serializable
-                context["administrative_data"] = make_serializable(enhanced_admin_data)
-                # Use our helper function to properly detect meaningful content
-                context["has_administrative_data"] = has_meaningful_administrative_data(
-                    enhanced_admin_data
-                )
-
-        # Fallback: If no enhanced processing result but we have extracted header data, use it
-        elif extended_header_data:
-            # Debug: Check extended_header_data content
-            logger.info(f"🔍 USING extended_header_data fallback path")
-            if "patient_contact_info" in extended_header_data:
-                contact_info = extended_header_data["patient_contact_info"]
-                logger.info(f"🔍 FALLBACK - patient_contact_info: {contact_info}")
-                if isinstance(contact_info, dict):
-                    addresses = contact_info.get("addresses", [])
-                    telecoms = contact_info.get("telecoms", [])
-                    logger.info(
-                        f"🔍 FALLBACK - addresses: {len(addresses)} items: {addresses}"
-                    )
-                    logger.info(
-                        f"🔍 FALLBACK - telecoms: {len(telecoms)} items: {telecoms}"
-                    )
-
-            context["administrative_data"] = make_serializable(extended_header_data)
+        # Update administrative data with enhanced data
+        if enhanced_admin_data:
+            # Ensure administrative data is JSON serializable
+            context["administrative_data"] = make_serializable(enhanced_admin_data)
+            # Use our helper function to properly detect meaningful content
             context["has_administrative_data"] = has_meaningful_administrative_data(
-                extended_header_data
-            )
-            logger.info("Using extracted header data as fallback administrative data")
-
-        # Add single language flag to context if available
-        if enhanced_processing_result and enhanced_processing_result.get("success"):
-            context["is_single_language"] = enhanced_processing_result.get(
-                "is_single_language", False
+                enhanced_admin_data
             )
         else:
-            context["is_single_language"] = False
+            context["administrative_data"] = {}
+            context["has_administrative_data"] = False
+
+        # Add single language flag to context
+        context["is_single_language"] = enhanced_processing_result.get(
+            "is_single_language", False
+        )
 
         # Add template translations for dynamic UI text
+        detected_source_language = enhanced_processing_result.get(
+            "source_language", "en"
+        )
         template_translations = get_template_translations(
             source_language=detected_source_language, target_language="en"
         )
@@ -4377,323 +3679,254 @@ def patient_cda_view(request, session_id, cda_type=None):
             f"Added template translations for {detected_source_language} → en with {len(template_translations)} strings"
         )
 
-        # Add extended header data to context for enhanced patient information display
-        if extended_header_data:
-            context["patient_extended_data"] = extended_header_data
-            # Store patient-specific extended data in session to prevent cross-contamination
-            request.session[f"patient_extended_data_{session_id}"] = (
-                extended_header_data
-            )
+        # NEW: Use CDA Display Data Helper to extract comprehensive extended patient data
+        try:
+            from .cda_display_data_helper import CDADisplayDataHelper
+
             logger.info(
-                f"Successfully Added extended header data to context AND SESSION - Contact info: {extended_header_data.get('patient_contact_info', {}) if isinstance(extended_header_data, dict) else 'Available'}, "
-                f"Author HCP: {extended_header_data.get('author_hcp', {}) if isinstance(extended_header_data, dict) else 'Available'}, "
-                f"Custodian: {extended_header_data.get('custodian_organization', {}) if isinstance(extended_header_data, dict) else 'Available'}"
+                "[INFO] Extracting extended patient data using CDA Display Data Helper..."
             )
-        else:
-            context["patient_extended_data"] = None
-            logger.info("No extended header data available for context")
+            display_helper = CDADisplayDataHelper()
 
-        # FORCE DEBUG: Always add some test data to verify template is working
-        context["debug_message"] = "✅ Template context is being set correctly!"
-        logger.info("🔧 DEBUG: Added debug_message to context")
-
-        # ADD MOCK EXTENDED DATA ONLY WHEN REAL DATA IS INSUFFICIENT
-        # Check if we have meaningful real data first
-        has_real_data = False
-        if extended_header_data:
-            # Check if we have meaningful content (not just empty structures)
-            doc_info = extended_header_data.get("document_info", {})
-            healthcare_team = extended_header_data.get("healthcare_team", {})
-            patient_contact = extended_header_data.get("patient_contact", {})
-
-            # Real data is sufficient only if we have actual healthcare team OR contact info
-            # Document title alone is not sufficient
-            healthcare_team_sufficient = healthcare_team.get(
-                "has_healthcare_team", False
-            )
-            contact_info_sufficient = patient_contact.get("has_contact_info", False)
-
-            has_real_data = healthcare_team_sufficient or contact_info_sufficient
-
-            logger.info(f"🔍 REAL DATA CHECK for patient {session_id}:")
-            logger.info(f"   Document title: {doc_info.get('title', 'None')}")
-            logger.info(f"   Healthcare team sufficient: {healthcare_team_sufficient}")
-            logger.info(f"   Contact info sufficient: {contact_info_sufficient}")
-            logger.info(
-                f"   Has healthcare team: {healthcare_team.get('has_healthcare_team', False)}"
-            )
-            logger.info(
-                f"   Has contact info: {patient_contact.get('has_contact_info', False)}"
-            )
-            logger.info(f"   Real data sufficient: {has_real_data}")
-            logger.info(f"   Should use mock data: {not has_real_data}")
-
-        # DISABLED: Mock data generation for testing real XML data extraction
-        # Only add mock data if no meaningful real data AND it's a test patient OR known patient
-        mock_data_disabled = True  # Set to False to re-enable mock data
-        if (
-            not mock_data_disabled
-            and not has_real_data
-            and (
-                not extended_header_data
-                or session_id in ["271867", "221935", "607669", "887817", "186887"]
-            )
-        ):
-            # Get patient's country from session data to create appropriate mock data
-            session_key = f"patient_match_{session_id}"
-            match_data = request.session.get(session_key)
-
-            # Hardcode known patients for testing
-            known_irish_patients = ["887817"]  # Patrick Murphy
-            known_malta_patients = ["186887"]  # Known Malta patients
-
-            if session_id in known_irish_patients:
-                patient_country_code = "IE"
-                logger.info(
-                    f"🔧 HARDCODED: Patient {session_id} recognized as Irish patient"
+            # Extract extended patient data if we have CDA content
+            enhanced_extended_data = None
+            if cda_content and cda_content.strip():
+                enhanced_extended_data = display_helper.extract_extended_patient_data(
+                    cda_content
                 )
-            elif session_id in known_malta_patients:
-                patient_country_code = "MT"
+
+            if enhanced_extended_data:
+                # Use the enhanced extraction result
+                context["patient_extended_data"] = enhanced_extended_data
+                # Also add administrative_data to context for template compatibility
+                context["administrative_data"] = enhanced_extended_data.get(
+                    "administrative_data", {}
+                )
+                # Add template-expected variables for compatibility (using standardized keys)
+                context["contact_data"] = enhanced_extended_data.get("contact_data", {})
+                context["contact_info"] = enhanced_extended_data.get(
+                    "contact_data", {}
+                )  # Template compatibility
+
+                # Enhanced CDA Parser healthcare data override (always prefer fresh extraction)
+                enhanced_healthcare_data = {}
+                admin_data = enhanced_extended_data.get("administrative_data", {})
+
+                # Use Enhanced CDA Parser logic for healthcare data mapping
+                if (
+                    admin_data.get("author_hcp")
+                    or admin_data.get("author_information")
+                    or admin_data.get("custodian_organization")
+                    or admin_data.get("legal_authenticator")
+                ):
+                    # Map author information - prefer single author_hcp, fallback to first author_information
+                    if admin_data.get("author_hcp"):
+                        enhanced_healthcare_data["author_hcp"] = admin_data.get(
+                            "author_hcp"
+                        )
+                    elif admin_data.get("author_information"):
+                        author_info_list = admin_data.get("author_information")
+                        if (
+                            isinstance(author_info_list, list)
+                            and len(author_info_list) > 0
+                        ):
+                            # Take the first author and flatten person info to top level
+                            first_author = author_info_list[0]
+                            if (
+                                isinstance(first_author, dict)
+                                and "person" in first_author
+                            ):
+                                # Flatten person info to top level for template compatibility
+                                enhanced_healthcare_data["author_hcp"] = {
+                                    "family_name": first_author["person"].get(
+                                        "family_name"
+                                    ),
+                                    "given_name": first_author["person"].get(
+                                        "given_name"
+                                    ),
+                                    "full_name": first_author["person"].get(
+                                        "full_name"
+                                    ),
+                                    "title": first_author["person"].get("title"),
+                                    "role": first_author["person"].get("role"),
+                                    "organization": first_author.get(
+                                        "organization", {}
+                                    ),
+                                }
+                            else:
+                                enhanced_healthcare_data["author_hcp"] = first_author
+                        else:
+                            enhanced_healthcare_data["author_hcp"] = author_info_list
+
+                    # Map organization - prefer custodian_organization, fallback to organization
+                    if admin_data.get("custodian_organization"):
+                        enhanced_healthcare_data["organization"] = admin_data.get(
+                            "custodian_organization"
+                        )
+                    elif admin_data.get("organization"):
+                        enhanced_healthcare_data["organization"] = admin_data.get(
+                            "organization"
+                        )
+
+                    # Map legal authenticator
+                    if admin_data.get("legal_authenticator"):
+                        enhanced_healthcare_data["legal_authenticator"] = (
+                            admin_data.get("legal_authenticator")
+                        )
+
+                    logger.info(
+                        f"[SUCCESS] Enhanced healthcare_data mapping: {list(enhanced_healthcare_data.keys())}"
+                    )
+                    logger.info(
+                        f"[DEBUG] Enhanced Author HCP: {enhanced_healthcare_data.get('author_hcp', {}).get('full_name', 'None')}"
+                    )
+                    logger.info(
+                        f"[DEBUG] Enhanced Organization: {enhanced_healthcare_data.get('organization', {}).get('name', 'None')}"
+                    )
+
+                # Use enhanced healthcare data if available, otherwise fallback to original
+                context["healthcare_data"] = (
+                    enhanced_healthcare_data
+                    if enhanced_healthcare_data
+                    else enhanced_extended_data.get("healthcare_data", {})
+                )
+                # Store patient-specific extended data in session
+                request.session[f"patient_extended_data_{session_id}"] = (
+                    enhanced_extended_data
+                )
                 logger.info(
-                    f"🔧 HARDCODED: Patient {session_id} recognized as Malta patient"
+                    f"[SUCCESS] Successfully extracted enhanced extended patient data for session {session_id}"
+                )
+                logger.info(
+                    f"   - Administrative data: {'Yes' if enhanced_extended_data.get('administrative_data') else 'No'}"
+                )
+                logger.info(
+                    f"   - Contact information: {'Yes' if enhanced_extended_data.get('contact_data') else 'No'}"
+                )
+                logger.info(
+                    f"   - Healthcare providers: {'Yes' if enhanced_extended_data.get('healthcare_data') else 'No'}"
+                )
+                logger.info(
+                    f"   - Document details: {'Yes' if enhanced_extended_data.get('document_details') else 'No'}"
                 )
             else:
-                patient_country_code = (
-                    match_data.get("country_code", "MT") if match_data else "MT"
-                )
-
-            # DEBUG: Log the country detection
-            logger.info(f"🌍 COUNTRY DEBUG for patient {session_id}:")
-            logger.info(f"   Session key: {session_key}")
-            logger.info(f"   Match data found: {match_data is not None}")
-            logger.info(f"   Country code: {patient_country_code}")
-
-            # Create country-specific mock data
-            if patient_country_code == "IE":
-                logger.info(f"🇮🇪 Creating IRISH mock data for patient {session_id}")
-                # Irish patient mock data
-                mock_extended_data = {
-                    "patient_contact": {
-                        "has_contact_info": True,
-                        "addresses": [
-                            {
-                                "street": "New Vista, Prosperous Road",
-                                "city": "Clane",
-                                "postal_code": "W91 XP83",
-                                "country": "IE",
-                                "use": "H",
-                                "use_code": "H",
-                                "use_label": "Home",
-                                "display_label": "Home:",
-                                "is_primary": True,
-                            }
-                        ],
-                        "phone_numbers": [
-                            {
-                                "number": "+353-87-34376462",
-                                "use": "HP",
-                                "use_code": "HP",
-                                "use_label": "Home",
-                                "display_label": "Home:",
-                                "type": "phone",
-                                "priority_score": 100,
-                                "is_primary": True,
-                            },
-                            {
-                                "number": "+353-87-9875465",
-                                "use": "MC",
-                                "use_code": "MC",
-                                "use_label": "Mobile",
-                                "display_label": "Mobile:",
-                                "type": "phone",
-                                "priority_score": 80,
-                                "is_primary": False,
-                            },
-                        ],
-                        "email_addresses": [
-                            {
-                                "email": "patrick.murphy@email.ie",
-                                "use": "H",
-                                "use_code": "H",
-                                "use_label": "Home",
-                                "display_label": "Home:",
-                                "type": "email",
-                                "priority_score": 90,
-                                "is_primary": True,
-                            }
-                        ],
-                        "primary_phone": {
-                            "number": "+353-87-34376462",
-                            "use": "HP",
-                            "use_code": "HP",
-                            "use_label": "Home",
-                            "display_label": "Home:",
-                            "type": "phone",
-                            "is_primary": True,
-                        },
-                        "primary_email": {
-                            "email": "patrick.murphy@email.ie",
-                            "use": "H",
-                            "use_code": "H",
-                            "use_label": "Home",
-                            "display_label": "Home:",
-                            "type": "email",
-                            "is_primary": True,
-                        },
-                        "primary_address": {
-                            "street": "New Vista, Prosperous Road",
-                            "city": "Clane",
-                            "postal_code": "W91 XP83",
-                            "country": "IE",
-                            "use": "H",
-                            "use_code": "H",
-                            "use_label": "Home",
-                            "display_label": "Home:",
-                            "is_primary": True,
-                        },
-                    },
-                    "healthcare_team": {
-                        "has_healthcare_team": True,
-                        "total_count": 3,
-                        "authors": [
-                            {
-                                "name": "Dr. Sinead O'Brien",
-                                "role": "General Practitioner",
-                                "organization": "St. James's Hospital",
-                                "time": date.today().strftime("%Y-%m-%d"),
-                            }
-                        ],
-                        "legal_authenticator": {
-                            "name": "Dr. Michael Kelly",
-                            "role": "Legal Authenticator",
-                            "organization": "Health Service Executive",
-                            "authentication_time": date.today().strftime(
-                                "%Y-%m-%dT15:30:00"
-                            ),
-                        },
-                        "custodian_organization": {
-                            "name": "Department of Health, Ireland",
-                            "contact_info": {
-                                "addresses": [
-                                    "Miesian Plaza, 50-58 Baggot Street Lower, Dublin 2, D02 XW14"
-                                ],
-                                "phone_numbers": ["+353 1 635 4000"],
-                            },
-                        },
-                    },
-                    "emergency_contacts": {
-                        "total_count": 1,
-                        "contacts": [
-                            {
-                                "name": "Mary Murphy",
-                                "relationship": "Spouse",
-                                "phone_numbers": [
-                                    {
-                                        "number": "+353-87-1234567",
-                                        "use": "MC",
-                                        "use_code": "MC",
-                                        "use_label": "Mobile",
-                                        "display_label": "Mobile:",
-                                        "type": "phone",
-                                        "is_primary": True,
-                                    }
-                                ],
-                            }
-                        ],
-                    },
-                    "next_of_kin": {
-                        "total_count": 1,
-                        "contacts": [
-                            {
-                                "name": "Sean Murphy",
-                                "relationship": "Son",
-                                "phone_numbers": [
-                                    {
-                                        "number": "+353-87-7654321",
-                                        "use": "MC",
-                                        "use_code": "MC",
-                                        "use_label": "Mobile",
-                                        "display_label": "Mobile:",
-                                        "type": "phone",
-                                        "is_primary": True,
-                                    }
-                                ],
-                            }
-                        ],
-                    },
-                    "performers": {
-                        "medical_doctors": [
-                            {
-                                "name": "Dr. Sinead O'Brien",
-                                "role": "General Practitioner",
-                                "organization": "St. James's Hospital",
-                                "phone_numbers": [
-                                    {
-                                        "number": "+353-1-4103000",
-                                        "use": "WP",
-                                        "use_code": "WP",
-                                        "use_label": "Work",
-                                        "display_label": "Work:",
-                                        "type": "phone",
-                                        "is_primary": True,
-                                    }
-                                ],
-                            }
-                        ]
-                    },
-                    "dependants": {"total_count": 0, "contacts": []},
-                    "document_info": {
-                        "title": "Patient Summary - Ireland",
-                        "creation_date": date.today().strftime("%Y-%m-%d"),
-                        "language": "en-IE",
-                        "document_id": {
-                            "extension": f"IE-PS-{session_id}-{date.today().year}"
-                        },
-                        "version": "1.0",
-                    },
-                }
-            else:
+                # Fallback to existing extraction method
                 logger.info(
-                    f"🇲🇹 Creating MALTA mock data for patient {session_id} (country: {patient_country_code})"
+                    "[WARNING] Enhanced extraction failed, falling back to existing method..."
                 )
-                # Default Malta patient mock data (for backwards compatibility)
-                mock_extended_data = {
-                    "patient_contact": {
-                        "has_contact_info": True,
-                        "addresses": [
-                            {
-                                "street": "123 Triq il-Kbira",
-                                "city": "Valletta",
-                                "postal_code": "VLT 1234",
-                                "country": "Malta",
-                                "use": "Home",
-                            }
-                        ],
-                        "phone_numbers": [
-                            {"number": "+356 2123 4567", "use": "Home"},
-                            {"number": "+356 7912 3456", "use": "Mobile"},
-                        ],
-                        "email_addresses": [
-                            {"email": "mario.borg@email.mt", "use": "Personal"}
-                        ],
-                    },
-                    "healthcare_team": {
-                        "has_healthcare_team": True,
-                        "total_count": 3,
-                        "authors": [
-                            {
-                                "name": "Dr. Sarah Mifsud",
-                                "role": "Primary Care Physician",
-                                "organization": "Mater Dei Hospital",
-                                "time": date.today().strftime("%Y-%m-%d"),
-                            }
-                        ],
-                        "legal_authenticator": {
-                            "name": "Dr. Joseph Borg",
-                            "role": "Legal Authenticator",
-                            "organization": "Malta Health Authority",
-                            "authentication_time": date.today().strftime(
-                                "%Y-%m-%dT15:30:00"
+
+                if extended_header_data:
+                    context["patient_extended_data"] = extended_header_data
+                    context["administrative_data"] = (
+                        extended_header_data  # Template compatibility
+                    )
+                    context["contact_data"] = {}  # Empty for template compatibility
+                    context["contact_info"] = {}  # Template compatibility
+                    context["healthcare_data"] = {}  # Empty for template compatibility
+                    request.session[f"patient_extended_data_{session_id}"] = (
+                        extended_header_data
+                    )
+                    logger.info(
+                        f"[LIST] Using fallback extended header data for session {session_id}"
+                    )
+                else:
+                    context["patient_extended_data"] = None
+                    context["administrative_data"] = {}  # Empty dict for template
+                    context["contact_data"] = {}  # Empty for template compatibility
+                    context["contact_info"] = {}  # Template compatibility
+                    context["healthcare_data"] = {}  # Empty for template compatibility
+                    logger.warning(
+                        "[ERROR] No extended patient data available from any extraction method"
+                    )
+
+        except Exception as helper_error:
+            logger.error(f"[ERROR] CDA Display Data Helper failed: {helper_error}")
+
+            # Fallback to original method
+            if extended_header_data:
+                context["patient_extended_data"] = extended_header_data
+                context["administrative_data"] = (
+                    extended_header_data  # Template compatibility
+                )
+                context["contact_data"] = {}  # Empty for template compatibility
+                context["contact_info"] = {}  # Template compatibility
+                context["healthcare_data"] = {}  # Empty for template compatibility
+                request.session[f"patient_extended_data_{session_id}"] = (
+                    extended_header_data
+                )
+                logger.info("[LIST] Using original extended header data as fallback")
+            else:
+                context["patient_extended_data"] = None
+                context["administrative_data"] = {}  # Empty dict for template
+                context["contact_data"] = {}  # Empty for template compatibility
+                context["healthcare_data"] = {}  # Empty for template compatibility
+                logger.warning("[ERROR] No extended header data available for fallback")
+
+        # Prepare template context - use enhanced template with proper content
+        return render(request, "patient_data/enhanced_patient_cda.html", context)
+
+    except Exception as e:
+        logger.error(f"Error in patient_cda_view: {e}")
+        return render(request, "patient_data/error.html", {"error": str(e)})
+
+
+@login_required
+@require_http_methods(["POST"])
+def cda_translation_toggle(request, patient_id):
+    """AJAX endpoint for toggling CDA translation sections"""
+    try:
+        data = json.loads(request.body)
+        section_id = data.get("section_id")
+        show_translation = data.get("show_translation", True)
+        target_language = data.get("target_language", "en")
+
+        # Placeholder implementation
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Function temporarily disabled during refactoring",
+            }
+        )
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def cda_translation_toggle(request, patient_id):
+    """AJAX endpoint for toggling CDA translation sections"""
+    try:
+        data = json.loads(request.body)
+        section_id = data.get("section_id")
+        show_translation = data.get("show_translation", True)
+        target_language = data.get("target_language", "en")
+
+        # Placeholder implementation
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Function temporarily disabled during refactoring",
+            }
+        )
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+# Next function should start here...
+
+# TEMPORARILY COMMENTED OUT CORRUPTED LEFTOVER CODE FROM REFACTORING
+# TODO: Clean up this section properly
+
+# @login_required
+# @require_http_methods(["POST"])
+# CORRUPTED LEFTOVER DATA COMMENTED OUT:
+#                                "%Y-%m-%dT15:30:00"
+
+"""
+LARGE BLOCK OF CORRUPTED LEFTOVER CODE FROM REFACTORING - TEMPORARILY COMMENTED OUT
+TODO: Remove this entire corrupted section
                             ),
                         },
                         "custodian_organization": {
@@ -4726,7 +3959,7 @@ def patient_cda_view(request, session_id, cda_type=None):
             )
         else:
             logger.info(
-                f"✅ USING REAL XML DATA for patient {session_id} - no mock data needed"
+                f"[SUCCESS] USING REAL XML DATA for patient {session_id} - no mock data needed"
             )
 
         # FORCE MOCK PROCESSED SECTIONS for testing template rendering - ONLY FOR L3 DOCUMENTS
@@ -4792,6 +4025,15 @@ def patient_cda_view(request, session_id, cda_type=None):
 
         # REFACTOR: Process sections for template display (move complex logic from template to Python)
         # Only override mock data if we don't have debug parameter AND this is NOT an L1 document
+
+        # DEBUG: Check translation_result before clinical integration
+        print(f"[DEBUG] translation_result exists: {bool(translation_result)}")
+        if translation_result:
+            print(f"[DEBUG] translation_result has sections: {bool(translation_result.get('sections'))}")
+            print(f"[DEBUG] section count: {len(translation_result.get('sections', []))}")
+        print(f"[DEBUG] debug parameter: {request.GET.get('debug')}")
+        print(f"[DEBUG] actual_cda_type: {actual_cda_type}")
+
         if (
             translation_result
             and translation_result.get("sections")
@@ -4801,9 +4043,95 @@ def patient_cda_view(request, session_id, cda_type=None):
             logger.info(
                 f"Processing {len(translation_result.get('sections', []))} sections for L3 template display"
             )
-            processed_sections = prepare_enhanced_section_data(
-                translation_result.get("sections", [])
-            )
+
+            # NEW: Integrate comprehensive clinical data extraction
+            try:
+                from .clinical_data_integration_service import ClinicalDataIntegrationService
+
+                # DEBUG: Add explicit logging
+                print("[CLINICAL INTEGRATION] Starting clinical data integration service")
+
+                clinical_integration_service = ClinicalDataIntegrationService()
+
+                # Extract comprehensive clinical data using our proven methods
+                integrated_clinical_data = clinical_integration_service.extract_and_format_clinical_data(
+                    cda_content, match_data
+                )
+
+                print(f"[CLINICAL INTEGRATION] Integration completed. has_clinical_data: {integrated_clinical_data.get('has_clinical_data')}")
+
+                if integrated_clinical_data.get('has_clinical_data'):
+                    logger.info(f"[SUCCESS] Integrated clinical data extraction completed:")
+                    logger.info(f"   - Processed sections: {integrated_clinical_data.get('total_sections', 0)}")
+                    logger.info(f"   - Clinical codes: {integrated_clinical_data.get('total_clinical_codes', 0)}")
+                    logger.info(f"   - Medications: {len(integrated_clinical_data.get('medications', []))}")
+                    logger.info(f"   - Allergies: {len(integrated_clinical_data.get('allergies', []))}")
+                    logger.info(f"   - Problems: {len(integrated_clinical_data.get('problems', []))}")
+                    logger.info(f"   - Procedures: {len(integrated_clinical_data.get('procedures', []))}")
+
+                    # Use the comprehensive clinical data instead of basic sections
+                    processed_sections = integrated_clinical_data['processed_sections']
+
+                    # Add individual clinical data arrays for template use
+                    context.update({
+                        'medications': integrated_clinical_data.get('medications', []),
+                        'allergies': integrated_clinical_data.get('allergies', []),
+                        'problems': integrated_clinical_data.get('problems', []),
+                        'procedures': integrated_clinical_data.get('procedures', []),
+                        'vital_signs': integrated_clinical_data.get('vital_signs', []),
+                        'results': integrated_clinical_data.get('results', []),
+                        'immunizations': integrated_clinical_data.get('immunizations', []),
+                        'total_clinical_codes': integrated_clinical_data.get('total_clinical_codes', 0),
+                        'extraction_quality_score': integrated_clinical_data.get('extraction_quality_score', 0),
+                    })
+
+                    # DEBUG: Log context variables for Clinical Information tab badge
+                    logger.info(f"[CONTEXT DEBUG] Clinical arrays added to context:")
+                    logger.info(f"   - medications: {len(integrated_clinical_data.get('medications', []))} items")
+                    logger.info(f"   - allergies: {len(integrated_clinical_data.get('allergies', []))} items")
+                    logger.info(f"   - problems: {len(integrated_clinical_data.get('problems', []))} items")
+                    logger.info(f"   - procedures: {len(integrated_clinical_data.get('procedures', []))} items")
+                    logger.info(f"   - vital_signs: {len(integrated_clinical_data.get('vital_signs', []))} items")
+
+                    # Test template condition
+                    template_condition = bool(
+                        integrated_clinical_data.get('medications', []) or
+                        integrated_clinical_data.get('allergies', []) or
+                        integrated_clinical_data.get('problems', []) or
+                        integrated_clinical_data.get('vital_signs', []) or
+                        integrated_clinical_data.get('procedures', [])
+                    )
+                    logger.info(f"[CONTEXT DEBUG] Template badge condition: {template_condition}")
+                else:
+                    # Fallback to original section processing
+                    logger.info("[INFO] Using fallback section processing - no comprehensive clinical data available")
+                    processed_sections = prepare_enhanced_section_data(
+                        translation_result.get("sections", []), service_processed=True
+                    )
+        else:
+            # Clinical integration conditions not met
+            print("[WARNING] Clinical integration conditions not met:")
+            print(f"   - translation_result: {bool(translation_result)}")
+            if translation_result:
+                print(f"   - has sections: {bool(translation_result.get('sections'))}")
+            print(f"   - debug parameter: {request.GET.get('debug')}")
+            print(f"   - actual_cda_type: {actual_cda_type}")
+            print("[INFO] Falling back to standard section processing")
+
+            if translation_result and translation_result.get("sections"):
+                processed_sections = prepare_enhanced_section_data(
+                    translation_result.get("sections", []), service_processed=True
+                )
+
+            except Exception as clinical_error:
+                logger.error(f"[ERROR] Clinical data integration failed: {clinical_error}")
+                logger.error(f"[ERROR] Exception type: {type(clinical_error).__name__}")
+                import traceback
+                logger.error(f"[ERROR] Traceback: {traceback.format_exc()}")
+                # Fallback to original processing
+                processed_sections = prepare_enhanced_section_data(
+                    translation_result.get("sections", []), service_processed=True
+                )
 
             # DEMONSTRATION: Inject test allergies section when requested (L3 only)
             if request.GET.get("show_allergies_demo"):
@@ -5084,94 +4412,79 @@ def patient_cda_view(request, session_id, cda_type=None):
         context["extended_data"] = extended_data
         context["summary_data"] = summary_data
 
-        logger.info("✅ PROCESSOR INTEGRATION: Added processed section data to context")
+        logger.info("[SUCCESS] PROCESSOR INTEGRATION: Added processed section data to context")
         logger.info(f"   Header data keys: {list(header_data.keys())}")
         logger.info(f"   Extended data keys: {list(extended_data.keys())}")
         logger.info(f"   Summary data keys: {list(summary_data.keys())}")
 
-        # Debug: Print context being passed to template
-        logger.info(
-            f"🔍 FINAL CONTEXT - Patient ID: {context.get('patient_identity', {}).get('patient_id', 'NOT_FOUND')}"
-        )
-        logger.info(
-            f"🔍 FINAL CONTEXT - Primary Patient ID: {context.get('patient_identity', {}).get('primary_patient_id', 'NOT_FOUND')}"
-        )
-        logger.info(
-            f"🔍 FINAL CONTEXT - Patient Name: {context.get('patient_identity', {}).get('given_name', 'NOT_FOUND')} {context.get('patient_identity', {}).get('family_name', 'NOT_FOUND')}"
-        )
-
         # Debug administrative data structure being passed to template
         admin_data = context.get("administrative_data", {})
         logger.info(
-            f"🔍 TEMPLATE CONTEXT - has_administrative_data: {context.get('has_administrative_data', False)}"
+            f"[INFO] TEMPLATE CONTEXT - has_administrative_data: {context.get('has_administrative_data', False)}"
         )
         logger.info(
-            f"🔍 TEMPLATE CONTEXT - administrative_data keys: {list(admin_data.keys()) if admin_data else 'None'}"
+            f"[INFO] TEMPLATE CONTEXT - administrative_data keys: {list(admin_data.keys()) if admin_data else 'None'}"
         )
         if admin_data and "patient_contact_info" in admin_data:
             contact_info = admin_data["patient_contact_info"]
             logger.info(
-                f"🔍 TEMPLATE CONTEXT - patient_contact_info type: {type(contact_info)}"
+                f"[INFO] TEMPLATE CONTEXT - patient_contact_info type: {type(contact_info)}"
             )
             logger.info(
-                f"🔍 TEMPLATE CONTEXT - patient_contact_info keys: {list(contact_info.keys()) if isinstance(contact_info, dict) else 'Not a dict'}"
+                f"[INFO] TEMPLATE CONTEXT - patient_contact_info keys: {list(contact_info.keys()) if isinstance(contact_info, dict) else 'Not a dict'}"
             )
             if isinstance(contact_info, dict):
                 addresses = contact_info.get("addresses", [])
                 telecoms = contact_info.get("telecoms", [])
                 logger.info(
-                    f"🔍 TEMPLATE CONTEXT - addresses count: {len(addresses) if addresses else 0}"
+                    f"[INFO] TEMPLATE CONTEXT - addresses count: {len(addresses) if addresses else 0}"
                 )
                 logger.info(
-                    f"🔍 TEMPLATE CONTEXT - telecoms count: {len(telecoms) if telecoms else 0}"
+                    f"[INFO] TEMPLATE CONTEXT - telecoms count: {len(telecoms) if telecoms else 0}"
                 )
                 if addresses:
-                    logger.info(f"🔍 TEMPLATE CONTEXT - first address: {addresses[0]}")
+                    logger.info(f"[INFO] TEMPLATE CONTEXT - first address: {addresses[0]}")
                 if telecoms:
-                    logger.info(f"🔍 TEMPLATE CONTEXT - first telecom: {telecoms[0]}")
+                    logger.info(f"[INFO] TEMPLATE CONTEXT - first telecom: {telecoms[0]}")
 
         # Enhanced Data Processing - Move complex logic from templates to views
         context = _enhance_extended_data_for_templates(context)
 
-        # DEBUG: Check final enhanced data structure being passed to template
         if context.get("extended_data", {}).get("has_meaningful_data"):
             enhanced_contact_info = context["extended_data"].get(
                 "contact_information", {}
-            )
-            logger.info(
-                f"🔍 FINAL TEMPLATE DATA - Enhanced contact_info keys: {list(enhanced_contact_info.keys())}"
             )
 
             if enhanced_contact_info.get("addresses"):
                 first_addr = enhanced_contact_info["addresses"][0]
                 logger.info(
-                    f"🔍 FINAL TEMPLATE DATA - First enhanced address keys: {list(first_addr.keys())}"
+                    f"[INFO] FINAL TEMPLATE DATA - First enhanced address keys: {list(first_addr.keys())}"
                 )
                 logger.info(
-                    f"🔍 FINAL TEMPLATE DATA - street_address_line: '{first_addr.get('street_address_line')}'"
+                    f"[INFO] FINAL TEMPLATE DATA - street_address_line: '{first_addr.get('street_address_line')}'"
                 )
                 logger.info(
-                    f"🔍 FINAL TEMPLATE DATA - formatted_address: '{first_addr.get('formatted_address')}'"
+                    f"[INFO] FINAL TEMPLATE DATA - formatted_address: '{first_addr.get('formatted_address')}'"
                 )
 
             if enhanced_contact_info.get("telecoms"):
                 first_telecom = enhanced_contact_info["telecoms"][0]
                 logger.info(
-                    f"🔍 FINAL TEMPLATE DATA - First enhanced telecom keys: {list(first_telecom.keys())}"
+                    f"[INFO] FINAL TEMPLATE DATA - First enhanced telecom keys: {list(first_telecom.keys())}"
                 )
                 logger.info(
-                    f"🔍 FINAL TEMPLATE DATA - display_value: '{first_telecom.get('display_value')}'"
+                    f"[INFO] FINAL TEMPLATE DATA - display_value: '{first_telecom.get('display_value')}'"
                 )
                 logger.info(
-                    f"🔍 FINAL TEMPLATE DATA - is_primary: {first_telecom.get('is_primary')}"
+                    f"[INFO] FINAL TEMPLATE DATA - is_primary: {first_telecom.get('is_primary')}"
                 )
 
         # Map administrative data to template variables for component compatibility
-        logger.info(f"🔍 Starting data mapping for extended patient cards...")
+        logger.info(f"[INFO] Starting data mapping for extended patient cards...")
 
         if "administrative_data" in context and context["administrative_data"]:
             admin_data = context["administrative_data"]
-            logger.info(f"🔍 ADMIN DATA STRUCTURE: {list(admin_data.keys())}")
+            logger.info(f"[INFO] ADMIN DATA STRUCTURE: {list(admin_data.keys())}")
 
             # Map contact data from administrative_data.patient_contact_info
             if admin_data.get("patient_contact_info"):
@@ -5184,7 +4497,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                 ):
                     addresses_count = len(contact_info.get("addresses", []))
                     logger.info(
-                        f"✅ Mapped contact_data with addresses: {addresses_count}"
+                        f"[SUCCESS] Mapped contact_data with addresses: {addresses_count}"
                     )
 
                 if hasattr(contact_info, "telecoms") or (
@@ -5192,77 +4505,112 @@ def patient_cda_view(request, session_id, cda_type=None):
                 ):
                     telecoms_count = len(contact_info.get("telecoms", []))
                     logger.info(
-                        f"✅ Mapped contact_data with telecoms: {telecoms_count}"
+                        f"[SUCCESS] Mapped contact_data with telecoms: {telecoms_count}"
                     )
 
-                logger.info(f"🔍 CONTACT DATA TYPE: {type(contact_info)}")
+                logger.info(f"[INFO] CONTACT DATA TYPE: {type(contact_info)}")
                 if isinstance(contact_info, dict):
-                    logger.info(f"🔍 CONTACT DATA KEYS: {list(contact_info.keys())}")
+                    logger.info(f"[INFO] CONTACT DATA KEYS: {list(contact_info.keys())}")
                 else:
-                    logger.info(f"🔍 CONTACT DATA ATTRIBUTES: {dir(contact_info)}")
+                    logger.info(f"[INFO] CONTACT DATA ATTRIBUTES: {dir(contact_info)}")
 
             else:
                 logger.warning(
-                    f"❌ NO patient_contact_info found in administrative_data"
+                    f"[ERROR] NO patient_contact_info found in administrative_data"
                 )
-                logger.info(f"🔍 Available admin_data keys: {list(admin_data.keys())}")
+                logger.info(f"[INFO] Available admin_data keys: {list(admin_data.keys())}")
 
             # Map healthcare data from administrative_data
             if (
                 admin_data.get("author_hcp")
-                or admin_data.get("organization")
                 or admin_data.get("author_information")
+                or admin_data.get("custodian_organization")
+                or admin_data.get("legal_authenticator")
             ):
                 healthcare_data = {}
+
+                # Map author information - prefer single author_hcp, fallback to first author_information
                 if admin_data.get("author_hcp"):
                     healthcare_data["author_hcp"] = admin_data.get("author_hcp")
                 elif admin_data.get("author_information"):
-                    # Handle case where author data is in author_information
-                    healthcare_data["author_hcp"] = admin_data.get("author_information")
+                    author_info_list = admin_data.get("author_information")
+                    if isinstance(author_info_list, list) and len(author_info_list) > 0:
+                        # Take the first author and flatten person info to top level
+                        first_author = author_info_list[0]
+                        if isinstance(first_author, dict) and "person" in first_author:
+                            # Flatten person info to top level for template compatibility
+                            healthcare_data["author_hcp"] = {
+                                "family_name": first_author["person"].get("family_name"),
+                                "given_name": first_author["person"].get("given_name"),
+                                "full_name": first_author["person"].get("full_name"),
+                                "title": first_author["person"].get("title"),
+                                "role": first_author["person"].get("role"),
+                                "organization": first_author.get("organization", {})
+                            }
+                        else:
+                            healthcare_data["author_hcp"] = first_author
+                    else:
+                        healthcare_data["author_hcp"] = author_info_list
 
-                if admin_data.get("organization"):
+                # Map organization - prefer custodian_organization, fallback to organization
+                if admin_data.get("custodian_organization"):
+                    healthcare_data["organization"] = admin_data.get("custodian_organization")
+                elif admin_data.get("organization"):
                     healthcare_data["organization"] = admin_data.get("organization")
+
+                # Map legal authenticator
+                if admin_data.get("legal_authenticator"):
+                    healthcare_data["legal_authenticator"] = admin_data.get("legal_authenticator")
 
                 context["healthcare_data"] = healthcare_data
                 logger.info(
-                    f"✅ Mapped healthcare_data: {list(healthcare_data.keys())}"
+                    f"[SUCCESS] Mapped healthcare_data: {list(healthcare_data.keys())}"
+                )
+                logger.info(
+                    f"[DEBUG] Author HCP type: {type(healthcare_data.get('author_hcp'))}"
+                )
+                logger.info(
+                    f"[DEBUG] Organization: {healthcare_data.get('organization', {}).get('name', 'None')}"
+                )
+                logger.info(
+                    f"[DEBUG] Legal authenticator: {healthcare_data.get('legal_authenticator', {}).get('full_name', 'None')}"
                 )
             else:
                 logger.warning(
-                    f"❌ NO author_hcp or organization found in administrative_data"
+                    f"[ERROR] NO author_hcp or organization found in administrative_data"
                 )
 
         else:
-            logger.warning(f"❌ NO administrative_data found in context")
+            logger.warning(f"[ERROR] NO administrative_data found in context")
 
         # Also check patient_extended_data for contact information
         if "patient_extended_data" in context and context["patient_extended_data"]:
             extended_data = context["patient_extended_data"]
-            logger.info(f"🔍 EXTENDED DATA STRUCTURE: {list(extended_data.keys())}")
+            logger.info(f"[INFO] EXTENDED DATA STRUCTURE: {list(extended_data.keys())}")
 
             # Check if contact data is in extended data
             if extended_data.get("patient_contact"):
-                logger.info(f"🔍 Found patient_contact in extended_data")
+                logger.info(f"[INFO] Found patient_contact in extended_data")
                 if not context.get(
                     "contact_data"
                 ):  # Only map if we don't already have contact_data
                     context["contact_data"] = extended_data["patient_contact"]
-                    logger.info(f"✅ Mapped contact_data from patient_extended_data")
+                    logger.info(f"[SUCCESS] Mapped contact_data from patient_extended_data")
 
         # Final verification
         final_context_keys = list(context.keys())
-        logger.info(f"🔍 Final context keys: {final_context_keys}")
-        logger.info(f"🔍 Has contact_data: {'contact_data' in context}")
-        logger.info(f"🔍 Has healthcare_data: {'healthcare_data' in context}")
+        logger.info(f"[INFO] Final context keys: {final_context_keys}")
+        logger.info(f"[INFO] Has contact_data: {'contact_data' in context}")
+        logger.info(f"[INFO] Has healthcare_data: {'healthcare_data' in context}")
 
         if "contact_data" in context:
             contact_data = context["contact_data"]
             if isinstance(contact_data, dict):
                 logger.info(
-                    f"🔍 Contact data final check - addresses: {len(contact_data.get('addresses', []))}, telecoms: {len(contact_data.get('telecoms', []))}"
+                    f"[INFO] Contact data final check - addresses: {len(contact_data.get('addresses', []))}, telecoms: {len(contact_data.get('telecoms', []))}"
                 )
             else:
-                logger.info(f"🔍 Contact data is not a dict: {type(contact_data)}")
+                logger.info(f"[INFO] Contact data is not a dict: {type(contact_data)}")
 
         # Add dynamic UI labels for internationalization
         target_language = context.get("detected_source_language", "en")
@@ -5282,6 +4630,65 @@ def patient_cda_view(request, session_id, cda_type=None):
             logger.info(
                 "📄 FINAL CHECK: L1 document - removed all clinical sections and reset counts"
             )
+
+        # Extract simplified clinical data for Simplified View tab
+        try:
+            from patient_data.simplified_clinical_view import SimplifiedDataExtractor
+
+            # Extract patient_id from session data instead of using session_id
+            patient_id = None
+            if hasattr(request, "session") and request.session:
+                for key in request.session.keys():
+                    if key.startswith("patient_match_"):
+                        patient_id = key.replace("patient_match_", "")
+                        logger.info(
+                            f"DEBUG: Found patient_id {patient_id} from session key {key}"
+                        )
+                        break
+
+            if patient_id:
+                simplified_extractor = SimplifiedDataExtractor()
+                simplified_data = simplified_extractor.get_simplified_clinical_data(
+                    patient_id, request
+                )
+
+                if simplified_data and simplified_data.get("sections"):
+                    context["simplified_data"] = simplified_data
+                    logger.info(
+                        f"DEBUG: Added simplified_data to context with {len(simplified_data.get('sections', []))} sections"
+                    )
+                else:
+                    logger.info("DEBUG: SimplifiedDataExtractor returned no data")
+            else:
+                logger.info("DEBUG: Could not extract patient_id from session data")
+
+        except Exception as e:
+            logger.error(f"DEBUG: Error extracting simplified clinical data: {e}")
+            import traceback
+
+            traceback.print_exc()
+
+        # Final context update - ensure sections are included from CDADisplayService
+        context.update({
+            "translation_result": translation_result,
+            "sections_count": sections_count,
+            "medical_terms_count": medical_terms_count,
+            "coded_sections_count": coded_sections_count,
+            "coded_sections_percentage": coded_sections_percentage,
+            "uses_coded_sections": uses_coded_sections,
+            "translation_quality": translation_quality,
+        })
+
+        # Ensure we have processed sections for the template
+        if translation_result.get("sections"):
+            logger.info(f"Processing {len(translation_result.get('sections', []))} sections from CDADisplayService")
+            processed_sections = prepare_enhanced_section_data(
+                translation_result.get("sections", []),
+                service_processed=True  # Indicate these are already processed by CDADisplayService
+            )
+            context["processed_sections"] = processed_sections
+
+        logger.info(f"[SUCCESS] CDADisplayService integration complete - {sections_count} sections, {medical_terms_count} terms")
 
         return render(
             request,
@@ -5351,6 +4758,9 @@ def patient_cda_view(request, session_id, cda_type=None):
                 f"<h1>Critical CDA View Error</h1><p>Session ID: {session_id}</p><p>Error: {str(e)}</p><pre>{full_traceback}</pre>",
                 status=500,
             )
+
+"""
+# END OF CORRUPTED LEFTOVER CODE BLOCK COMMENT
 
 
 @login_required
@@ -5860,7 +5270,6 @@ def generate_structured_cda_html(
                 f"Section {i}: '{section_title}' with {len(section_entries)} entries"
             )
 
-            # Debug: Log first entry structure if available
             if section_entries:
                 logger.info(f"First entry structure: {section_entries[0]}")
 
@@ -5892,7 +5301,7 @@ def generate_structured_cda_html(
                 <div class="section-content expanded" id="{section_id}_content">
                     <div class="section-tabs">
                         <button class="tab-button active" onclick="showTab('{section_id}', 'structured')">
-                            📊 Structured View
+                            [DATA] Structured View
                         </button>
                         <button class="tab-button" onclick="showTab('{section_id}', 'original')">
                             📄 Original Content
@@ -8502,296 +7911,63 @@ def enhanced_cda_display(request):
             "supported_languages": supported_languages,
             "default_target_language": "en",
             "ui_labels": get_ui_labels("en"),  # Add dynamic UI labels
-            # TEST: Inject sample allergies section for template testing
-            "processed_sections": [
-                {
-                    "section_id": "psAllergiesAndOtherAdverseReactions",
-                    "section_title": "Allergies and Other Adverse Reactions",
-                    "title": "Allergies and Other Adverse Reactions",
-                    "code": "ALLERGIES",
-                    "has_entries": True,
-                    "entries": [
-                        {
-                            "display_name": "Penicillin Allergy",
-                            "allergen": "Penicillin",
-                            "reaction": "Skin rash, hives",
-                            "severity": "Moderate",
-                            "status": "Active",
-                            "medical_terminology": [
-                                {
-                                    "system": "SNOMED CT",
-                                    "code": "294505008",
-                                    "display_name": "Allergy to penicillin",
-                                }
-                            ],
-                            "has_medical_terminology": True,
-                        },
-                        {
-                            "display_name": "Shellfish Allergy",
-                            "allergen": "Shellfish",
-                            "reaction": "Anaphylaxis",
-                            "severity": "Severe",
-                            "status": "Active",
-                            "medical_terminology": [
-                                {
-                                    "system": "SNOMED CT",
-                                    "code": "300913006",
-                                    "display_name": "Shellfish allergy",
-                                }
-                            ],
-                            "has_medical_terminology": True,
-                        },
-                    ],
-                    "clinical_table": {
-                        "headers": [
-                            {
-                                "key": "allergen",
-                                "label": "Allergen",
-                                "type": "allergen",
-                                "primary": True,
-                                "icon": "fas fa-bug",
-                                "tooltip": "Allergen substance",
-                            },
-                            {
-                                "key": "reaction",
-                                "label": "Reaction",
-                                "type": "reaction",
-                                "primary": False,
-                                "icon": "fas fa-fire",
-                                "tooltip": "Allergic reaction",
-                            },
-                            {
-                                "key": "severity",
-                                "label": "Severity",
-                                "type": "severity",
-                                "primary": False,
-                                "icon": "fas fa-thermometer-full",
-                                "tooltip": "Severity level",
-                            },
-                            {
-                                "key": "status",
-                                "label": "Status",
-                                "type": "status",
-                                "primary": False,
-                            },
-                        ],
-                        "rows": [
-                            {
-                                "data": {
-                                    "allergen": {
-                                        "display_value": "Penicillin",
-                                        "value": "Penicillin",
-                                        "has_terminology": True,
-                                        "terminology": [
-                                            {
-                                                "system": "SNOMED CT",
-                                                "code": "294505008",
-                                                "display_name": "Allergy to penicillin",
-                                            }
-                                        ],
-                                        "has_codes": False,
-                                        "codes": [],
-                                    },
-                                    "reaction": {
-                                        "display_value": "Skin rash, hives",
-                                        "value": "Skin rash, hives",
-                                        "has_terminology": False,
-                                        "terminology": [],
-                                        "has_codes": False,
-                                        "codes": [],
-                                    },
-                                    "severity": {
-                                        "display_value": "Moderate",
-                                        "value": "Moderate",
-                                        "has_terminology": False,
-                                        "terminology": [],
-                                        "has_codes": True,
-                                        "codes": [
-                                            {
-                                                "system": "SNOMED CT",
-                                                "code": "6736007",
-                                                "display_name": "Moderate severity",
-                                            }
-                                        ],
-                                    },
-                                    "status": {
-                                        "display_value": "Active",
-                                        "value": "Active",
-                                        "has_terminology": False,
-                                        "terminology": [],
-                                        "has_codes": False,
-                                        "codes": [],
-                                    },
-                                }
-                            },
-                            {
-                                "data": {
-                                    "allergen": {
-                                        "display_value": "Shellfish",
-                                        "value": "Shellfish",
-                                        "has_terminology": True,
-                                        "terminology": [
-                                            {
-                                                "system": "SNOMED CT",
-                                                "code": "300913006",
-                                                "display_name": "Shellfish allergy",
-                                            }
-                                        ],
-                                        "has_codes": False,
-                                        "codes": [],
-                                    },
-                                    "reaction": {
-                                        "display_value": "Anaphylaxis",
-                                        "value": "Anaphylaxis",
-                                        "has_terminology": True,
-                                        "terminology": [
-                                            {
-                                                "system": "SNOMED CT",
-                                                "code": "39579001",
-                                                "display_name": "Anaphylaxis",
-                                            }
-                                        ],
-                                        "has_codes": False,
-                                        "codes": [],
-                                    },
-                                    "severity": {
-                                        "display_value": "Severe",
-                                        "value": "Severe",
-                                        "has_terminology": False,
-                                        "terminology": [],
-                                        "has_codes": True,
-                                        "codes": [
-                                            {
-                                                "system": "SNOMED CT",
-                                                "code": "24484000",
-                                                "display_name": "Severe",
-                                            }
-                                        ],
-                                    },
-                                    "status": {
-                                        "display_value": "Active",
-                                        "value": "Active",
-                                        "has_terminology": False,
-                                        "terminology": [],
-                                        "has_codes": False,
-                                        "codes": [],
-                                    },
-                                }
-                            },
-                        ],
-                    },
-                }
-            ],
-            # TEST: Add sample patient identity for breadcrumb and header
-            "patient_identity": {
-                "given_name": "John",
-                "family_name": "Doe",
-                "patient_id": "TEST123",
-                "url_patient_id": "TEST123",
-            },
-            # TEST: Add sample extended patient data for Extended Patient Information tabs
-            "contact_data": {
-                "addresses": [
-                    {
-                        "type": "Physical",
-                        "use": "Primary Residence",
-                        "street": "123 Main Street",
-                        "city": "Dublin",
-                        "state": "Leinster",
-                        "postal_code": "D02 XY45",
-                        "country": "Ireland",
-                        "country_code": "IE",
-                    },
-                    {
-                        "type": "Postal",
-                        "use": "Mailing Address",
-                        "street": "P.O. Box 456",
-                        "city": "Cork",
-                        "state": "Munster",
-                        "postal_code": "T12 AB78",
-                        "country": "Ireland",
-                        "country_code": "IE",
-                    },
-                ],
-                "telecoms": [
-                    {"type": "Phone", "use": "Mobile", "value": "+353 86 123 4567"},
-                    {"type": "Email", "use": "Primary", "value": "john.doe@email.ie"},
-                    {"type": "Phone", "use": "Home", "value": "+353 21 456 7890"},
-                ],
-            },
-            "healthcare_data": {
-                "author_hcp": {
-                    "name": "Dr. Sarah O'Connor",
-                    "role": "General Practitioner",
-                    "organization": "Dublin Primary Care Centre",
-                    "specialty": "Family Medicine",
-                    "phone": "+353 1 234 5678",
-                    "email": "sarah.oconnor@dublinpcc.ie",
-                },
-                "organization": {
-                    "name": "Dublin Primary Care Centre",
-                    "address": "456 Healthcare Avenue, Dublin 4, Ireland",
-                    "phone": "+353 1 234 5678",
-                    "type": "Primary Care Practice",
-                    "identifier": "IE-HCP-001234",
-                },
-                "legal_authenticator": {
-                    "name": "Dr. Michael Walsh",
-                    "role": "Medical Director",
-                    "organization": "Dublin Primary Care Centre",
-                    "specialty": "Internal Medicine",
-                    "authentication_time": "2024-01-15T14:30:00Z",
-                },
-            },
-            "administrative_data": {
-                "document_id": "IE-CDA-2024-001234",
-                "creation_time": "2024-01-15T14:30:00Z",
-                "language_code": "en-IE",
-                "confidentiality": "Normal",
-                "version": "1.0",
-                "template_id": "2.16.840.1.113883.10.20.22.1.1",
-                "custodian": {
-                    "organization": "Health Service Executive (HSE)",
-                    "identifier": "IE-HSE-CUSTODIAN",
-                },
-            },
-            "patient_extended_data": {
-                "birth_details": {
-                    "birth_date": "1985-03-20",
-                    "birth_place": "Dublin, Ireland",
-                    "multiple_birth": False,
-                },
-                "demographics": {
-                    "gender": "Male",
-                    "marital_status": "Married",
-                    "race": "Caucasian",
-                    "ethnicity": "Irish",
-                    "language": "English (Ireland)",
-                },
-                "identifiers": [
-                    {
-                        "type": "National Health Number",
-                        "value": "IE123456789",
-                        "system": "HSE Patient ID",
-                    },
-                    {
-                        "type": "Social Security Number",
-                        "value": "IE-SSN-123456789",
-                        "system": "Revenue Ireland",
-                    },
-                ],
-                "emergency_contacts": [
-                    {
-                        "name": "Jane Doe",
-                        "relationship": "Spouse",
-                        "phone": "+353 86 987 6543",
-                        "email": "jane.doe@email.ie",
-                    }
-                ],
-            },
         }
 
-        return render(request, "patient_data/enhanced_patient_cda.html", context)
+        return render(request, "patient_data/enhanced_cda_display.html", context)
+
+
+def _create_dual_language_sections(original_result, translated_result, source_language):
+    """
+    Create dual language sections by combining original and translated processing results
+
+    Args:
+        original_result: Processing result with source language content
+        translated_result: Processing result with English translation
+        source_language: Source language code (pt, fr, de, etc.)
+
+    Returns:
+        Combined result with dual language sections
+    """
+    if not original_result.get("success") or not translated_result.get("success"):
+        logger.warning(
+            "One or both processing results failed, falling back to single language"
+        )
+        return (
+            translated_result if translated_result.get("success") else original_result
+        )
+
+    # Start with the translated result structure
+    dual_result = dict(translated_result)
+
+    original_sections = original_result.get("sections", [])
+    translated_sections = translated_result.get("sections", [])
+
+    # Create dual language sections
+    dual_sections = []
+
+    for i, translated_section in enumerate(translated_sections):
+        # Find corresponding original section
+        original_section = None
+        if i < len(original_sections):
+            original_section = original_sections[i]
+
+        # Create dual language section (simplified implementation)
+        dual_section = dict(translated_section)
+        if original_section:
+            dual_section["original"] = original_section
+
+        dual_sections.append(dual_section)
+
+    # Update the result with dual language sections
+    dual_result["sections"] = dual_sections
+
+    return dual_result
+
+
+# Enhanced CDA Document Display View
+
+
+from django.views import View
 
 
 def _create_dual_language_sections(original_result, translated_result, source_language):
@@ -9145,10 +8321,10 @@ def generate_medication_table_html_interactive(entries):
     <table class="clinical-table">
         <thead>
             <tr>
-                <th>💊 Medication</th>
+                <th>[MEDICINE] Medication</th>
                 <th>📏 Dosage & Strength</th>
                 <th>⏰ Frequency</th>
-                <th>📊 Status</th>
+                <th>[DATA] Status</th>
                 <th>📅 Start Date</th>
                 <th>🔬 Codes</th>
             </tr>
@@ -9203,10 +8379,10 @@ def generate_allergy_table_html_interactive(entries):
     <table class="clinical-table">
         <thead>
             <tr>
-                <th>⚠️ Allergen</th>
+                <th>[WARNING] Allergen</th>
                 <th>🔥 Reaction</th>
-                <th>📊 Severity</th>
-                <th>📋 Status</th>
+                <th>[DATA] Severity</th>
+                <th>[LIST] Status</th>
                 <th>📅 First Noted</th>
                 <th>🔬 Codes</th>
             </tr>
@@ -9261,9 +8437,9 @@ def generate_procedure_table_html_interactive(entries):
     <table class="clinical-table">
         <thead>
             <tr>
-                <th>🏥 Procedure</th>
+                <th>[HOSPITAL] Procedure</th>
                 <th>📅 Date Performed</th>
-                <th>📊 Status</th>
+                <th>[DATA] Status</th>
                 <th>👨‍⚕️ Healthcare Provider</th>
                 <th>🔬 Medical Codes</th>
             </tr>
@@ -9316,10 +8492,10 @@ def generate_problem_table_html_interactive(entries):
     <table class="clinical-table">
         <thead>
             <tr>
-                <th>🩺 Problem/Diagnosis</th>
-                <th>📊 Status</th>
+                <th>[STETHOSCOPE] Problem/Diagnosis</th>
+                <th>[DATA] Status</th>
                 <th>📅 Onset Date</th>
-                <th>📝 Notes</th>
+                <th>[NOTE] Notes</th>
                 <th>🔬 Medical Codes</th>
             </tr>
         </thead>
@@ -9642,3 +8818,40 @@ def download_embedded_pdf(request, patient_id, pdf_index):
             f"Error downloading embedded PDF {pdf_index} for patient {patient_id}: {e}"
         )
         return HttpResponse("Error downloading PDF", status=500)
+
+
+import json
+
+from django.http import HttpResponse
+
+# Placeholder for InteroperableHealthcareView
+from django.views import View
+
+
+class InteroperableHealthcareView(View):
+    """
+    Placeholder view for interoperable healthcare functionality.
+    This is a temporary implementation to keep the application running.
+    """
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponse(
+            json.dumps(
+                {
+                    "status": "placeholder",
+                    "message": "InteroperableHealthcareView placeholder",
+                }
+            ),
+            content_type="application/json",
+        )
+
+    def post(self, request, *args, **kwargs):
+        return HttpResponse(
+            json.dumps(
+                {
+                    "status": "placeholder",
+                    "message": "InteroperableHealthcareView placeholder",
+                }
+            ),
+            content_type="application/json",
+        )
