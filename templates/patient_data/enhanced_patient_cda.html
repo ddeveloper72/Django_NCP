@@ -132,19 +132,36 @@
                         <div class="p-4">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <p><strong>Birth Date:</strong>
+                                    <p><i class="fa-solid fa-calendar text-info me-1"></i>
+                                        <strong>Birth Date:</strong>
                                         {% if patient_identity.birth_date and patient_identity.birth_date != "Unknown" %}
                                         {{ patient_identity.birth_date|document_date }}
                                         {% else %}
                                         Unknown
                                         {% endif %}
                                     </p>
-                                    <p><strong>Gender:</strong> {{ patient_identity.gender|default:"Unknown" }}</p>
-                                    <p><strong>Patient ID:</strong> {{ patient_identity.patient_id|default:"Unknown" }}</p>
+                                    <p><i class="fa-solid fa-venus-mars text-info me-1"></i>
+                                        <strong>Gender:</strong> {{ patient_identity.gender|default:"Unknown" }}</p>
+                                    <p><i class="fa-solid fa-fingerprint text-info me-1"></i>
+                                        <strong>Patient ID:</strong>
+                                        {{ patient_identity.patient_id|default:"Unknown" }}</p>
                                     {% if patient_identity.patient_identifiers %}
                                     {% for identifier in patient_identity.patient_identifiers %}
-                                    <p><strong>{{ identifier.assigningAuthorityName|default:"Additional ID" }}:</strong> {{ identifier.extension }}</p>
+                                    <p><i class="fa-solid fa-fingerprint text-info me-1"></i>
+                                        <strong>{{ identifier.assigningAuthorityName|default:"Additional ID" }}:</strong>
+                                        {{ identifier.extension }}</p>
                                     {% endfor %}
+                                    {% endif %}
+
+                                    {# Display patient root identifier if available #}
+                                    {% if patient_identity.patient_identifiers and patient_identity.patient_identifiers|length > 0 %}
+                                        {% if patient_identity.patient_identifiers.0.root %}
+                                        <span class="text-secondary-accessible">
+                                            <i class="fa-solid fa-key me-1"></i>
+                                            <strong>Root ID:</strong>
+                                            {{ patient_identity.patient_identifiers.0.root }}
+                                        </span>
+                                        {% endif %}
                                     {% endif %}
                                 </div>
                                 <div class="col-md-6">
