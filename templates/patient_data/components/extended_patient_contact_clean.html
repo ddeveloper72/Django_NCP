@@ -63,7 +63,7 @@ This is not data duplication but necessary clinical context preservation.
                         <div class="mb-2">
                             <small class="text-secondary-accessible">
                                 <i class="fa-solid fa-calendar text-info me-1"></i>
-                                <strong>Birth Date:</strong><br>
+                                <strong>Birth Date:</strong>
                                 {{ patient_identity.birth_date|default:"Unknown" }}
                             </small>
                         </div>
@@ -71,30 +71,32 @@ This is not data duplication but necessary clinical context preservation.
 
                         {% if patient_identity.gender %}
                         <div class="mb-2">
-                            <small class="text-secondary-accessible">
+                            <span class="text-secondary-accessible">
                                 <i class="fa-solid fa-venus-mars text-info me-1"></i>
-                                <strong>Gender:</strong><br>
+                                <strong>Gender:</strong>
                                 {{ patient_identity.gender|capfirst }}
-                            </small>
+                            </span>
                         </div>
                         {% endif %}
 
                         {% if patient_identity.patient_id %}
                         <div class="mb-2">
-                            <small class="text-secondary-accessible">
+                            <span class="text-secondary-accessible">
                                 <i class="fa-solid fa-fingerprint text-info me-1"></i>
-                                <strong>Patient ID:</strong><br>
-                                <code class="small">{{ patient_identity.patient_id }}</code>
-                                
+                                <strong>Patient ID:</strong>
+                                <small>{{ patient_identity.patient_id }}</small>
+
                                 {# Display patient root identifier if available #}
                                 {% if patient_identity.patient_identifiers and patient_identity.patient_identifiers|length > 0 %}
                                     {% if patient_identity.patient_identifiers.0.root %}
-                                    <br><span class="small" style="font-size: 0.7rem;">
-                                        <i class="fa-solid fa-key me-1"></i>{{ patient_identity.patient_identifiers.0.root }}
+                                    <br><span class="text-secondary-accessible">
+                                        <i class="fa-solid fa-key me-1"></i>
+                                        <strong>Root ID:</strong>
+                                        {{ patient_identity.patient_identifiers.0.root }}
                                     </span>
                                     {% endif %}
                                 {% endif %}
-                            </small>
+                            </span>
                         </div>
                         {% endif %}
                     </div>
