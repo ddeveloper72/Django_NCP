@@ -78,6 +78,21 @@ This is not data duplication but necessary clinical context preservation.
                             </small>
                         </div>
                         {% endif %}
+
+                        {% if patient_identity.patient_id %}
+                        <div class="mb-2">
+                            <small class="text-secondary-accessible">
+                                <i class="fa-solid fa-fingerprint text-info me-1"></i>
+                                <strong>Patient ID:</strong><br>
+                                <code class="small">{{ patient_identity.patient_id }}</code>
+                                {% if patient_identity.patient_identifiers.0.root %}
+                                <br><span class="text-muted" style="font-size: 0.7rem;">
+                                    <i class="fa-solid fa-key me-1"></i>{{ patient_identity.patient_identifiers.0.root }}
+                                </span>
+                                {% endif %}
+                            </small>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -102,12 +117,15 @@ This is not data duplication but necessary clinical context preservation.
                                 <i class="fa-solid fa-fingerprint text-secondary me-1"></i>
                                 {% if identifier.assigningAuthorityName %}
                                 <strong>{{ identifier.assigningAuthorityName }}:</strong><br>
-                                {% elif identifier.root %}
-                                <strong>{{ identifier.root|truncatechars:20 }}:</strong><br>
                                 {% else %}
                                 <strong>Patient ID:</strong><br>
                                 {% endif %}
                                 <code class="small">{{ identifier.extension }}</code>
+                                {% if identifier.root %}
+                                <br><span class="text-muted" style="font-size: 0.75rem;">
+                                    <i class="fa-solid fa-key me-1"></i>Root: {{ identifier.root }}
+                                </span>
+                                {% endif %}
                             </small>
                         </div>
                         {% if not forloop.last %}<hr class="my-2">{% endif %}
@@ -118,6 +136,11 @@ This is not data duplication but necessary clinical context preservation.
                                 <i class="fa-solid fa-fingerprint text-secondary me-1"></i>
                                 <strong>Patient ID:</strong><br>
                                 <code class="small">{{ patient_identity.patient_id }}</code>
+                                {% if patient_identity.patient_identifiers.0.root %}
+                                <br><span class="text-muted" style="font-size: 0.75rem;">
+                                    <i class="fa-solid fa-key me-1"></i>Root: {{ patient_identity.patient_identifiers.0.root }}
+                                </span>
+                                {% endif %}
                             </small>
                         </div>
                         {% endif %}

@@ -32,6 +32,11 @@
                     <p><strong>Type:</strong> {{ document.type }}</p>
                     <p><strong>Format:</strong> {{ document.format }}</p>
                     <p><strong>Patient ID:</strong> {{ patient_id }}</p>
+                    {% if patient_identity.patient_identifiers.0.root %}
+                    <p><strong>Root ID:</strong>
+                        <small class="text-muted font-monospace">{{ patient_identity.patient_identifiers.0.root }}</small>
+                    </p>
+                    {% endif %}
                     <p><strong>Country:</strong> {{ country_code|upper }}</p>
 
                     <div class="mt-3">
