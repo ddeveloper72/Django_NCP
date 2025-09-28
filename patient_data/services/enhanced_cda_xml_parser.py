@@ -237,7 +237,7 @@ class EnhancedCDAXMLParser:
 
             if new_count > old_count:
                 logger.info(
-                    f"🌍 Enhanced namespaces for EU compatibility: {new_count} namespaces ({new_count - old_count} new)"
+                    f"[GLOBAL] Enhanced namespaces for EU compatibility: {new_count} namespaces ({new_count - old_count} new)"
                 )
 
         except Exception as e:
@@ -298,7 +298,9 @@ class EnhancedCDAXMLParser:
         sections = []
         discovered_elements = set()  # Track to avoid duplicates
 
-        logger.info("🔍 Starting enhanced section discovery for EU compatibility...")
+        logger.info(
+            "[SEARCH] Starting enhanced section discovery for EU compatibility..."
+        )
 
         # Strategy 1: Direct section discovery (all namespaces)
         section_elements = root.findall(".//cda:section", self.namespaces)
@@ -386,7 +388,7 @@ class EnhancedCDAXMLParser:
             logger.warning(f"Strategy 8 broad discovery failed: {e}")
 
         logger.info(
-            f"✅ Total unique sections discovered: {len(discovered_elements)} (enhanced for EU compatibility)"
+            f"[SUCCESS] Total unique sections discovered: {len(discovered_elements)} (enhanced for EU compatibility)"
         )
 
         # Process all discovered sections
@@ -399,7 +401,7 @@ class EnhancedCDAXMLParser:
                 logger.warning(f"Failed to parse section {idx}: {str(e)}")
                 continue
 
-        logger.info(f"🎯 Successfully parsed {len(sections)} sections")
+        logger.info(f"[TARGET] Successfully parsed {len(sections)} sections")
         return sections
 
     def _parse_single_section(
@@ -425,14 +427,15 @@ class EnhancedCDAXMLParser:
             else f"Section {idx + 1}"
         )
 
-        # Extract text content (narrative)
+        # Extract text content (narrative) - make it optional
         text_elem = section_elem.find("cda:text", self.namespaces)
-        if text_elem is None:
-            return None
+        original_text = ""
+        if text_elem is not None:
+            original_text = self._extract_text_content(text_elem)
 
-        original_text = self._extract_text_content(text_elem)
+        # If no text content, use a fallback based on title or section code
         if not original_text.strip():
-            return None
+            original_text = f"<p>Clinical section: {title}</p>"
 
         # Extract template IDs
         template_ids = [
@@ -484,7 +487,7 @@ class EnhancedCDAXMLParser:
         # Combine all discovered entries
         all_entries = list(entries) + alt_entries
         logger.info(
-            f"🔍 Processing {len(all_entries)} entries for coded elements (enhanced for EU compatibility)..."
+            f"[SEARCH] Processing {len(all_entries)} entries for coded elements (enhanced for EU compatibility)..."
         )
 
         for entry_idx, entry in enumerate(all_entries):
@@ -518,7 +521,7 @@ class EnhancedCDAXMLParser:
             codes.extend(entry_codes)
 
         logger.info(
-            f"✅ Extracted {len(codes)} total coded elements (enhanced EU extraction)"
+            f"[SUCCESS] Extracted {len(codes)} total coded elements (enhanced EU extraction)"
         )
         return ClinicalCodesCollection(codes=codes)
 
@@ -1256,7 +1259,38 @@ class EnhancedCDAXMLParser:
                 {
                     "family_name": (
                         admin_data.guardian.family_name if admin_data.guardian else None
-                    )
+                    ),
+                    "given_name": (
+                        admin_data.guardian.given_name if admin_data.guardian else None
+                    ),
+                    "role": (admin_data.guardian.role if admin_data.guardian else None),
+                    "relationship": (
+                        admin_data.guardian.relationship
+                        if admin_data.guardian
+                        else None
+                    ),
+                    "contact_info": DotDict(
+                        {
+                            "addresses": (
+                                [
+                                    DotDict(addr)
+                                    for addr in admin_data.guardian.contact_info.addresses
+                                ]
+                                if admin_data.guardian
+                                and admin_data.guardian.contact_info
+                                else []
+                            ),
+                            "telecoms": (
+                                [
+                                    DotDict(telecom)
+                                    for telecom in admin_data.guardian.contact_info.telecoms
+                                ]
+                                if admin_data.guardian
+                                and admin_data.guardian.contact_info
+                                else []
+                            ),
+                        }
+                    ),
                 }
             ),
             "other_contacts": (
@@ -1384,7 +1418,12 @@ class EnhancedCDAXMLParser:
             ),
             "custodian_organization": DotDict({"name": custodian_name}),
             "preferred_hcp": DotDict({"name": None}),
-            "guardian": DotDict({"family_name": None}),
+            "guardian": DotDict(
+                {
+                    "family_name": None,
+                    "contact_info": DotDict({"addresses": [], "telecoms": []}),
+                }
+            ),
             "other_contacts": [],
         }
 
@@ -1430,7 +1469,15 @@ class EnhancedCDAXMLParser:
                 {"family_name": None, "organization": DotDict({"name": None})}
             ),
             "preferred_hcp": DotDict({"name": None}),
-            "guardian": DotDict({"family_name": None}),
+            "guardian": DotDict(
+                {
+                    "family_name": None,
+                    "given_name": None,
+                    "role": None,
+                    "relationship": None,
+                    "contact_info": DotDict({"addresses": [], "telecoms": []}),
+                }
+            ),
             "other_contacts": [],
         }
 
