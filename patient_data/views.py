@@ -2915,6 +2915,51 @@ def patient_cda_view(request, session_id, cda_type=None):
         else:
             return obj
 
+    def _check_actual_cda_availability(session_id, cda_type):
+        """Check if CDA document is actually available when session data is missing"""
+        try:
+            from django.contrib.sessions.models import Session
+
+            # Search for session data directly
+            session_key = f"patient_match_{session_id}"
+            all_sessions = Session.objects.all()
+
+            for db_session in all_sessions:
+                try:
+                    session_data = db_session.get_decoded()
+                    if session_key in session_data:
+                        match_data = session_data[session_key]
+
+                        # Check for the specific CDA type content
+                        if cda_type.upper() == "L3":
+                            cda_content = match_data.get("l3_cda_content")
+                        elif cda_type.upper() == "L1":
+                            cda_content = match_data.get("l1_cda_content")
+                        else:
+                            cda_content = match_data.get("cda_content")
+
+                        # If we found content, the CDA type is available
+                        is_available = bool(cda_content and len(cda_content) > 100)
+
+                        logger.info(
+                            f"Direct CDA availability check for {session_id}/{cda_type}: {is_available}"
+                        )
+                        return is_available
+
+                except Exception:
+                    continue  # Skip corrupted sessions
+
+            logger.warning(
+                f"No session data found for direct CDA availability check: {session_id}/{cda_type}"
+            )
+            return False
+
+        except Exception as e:
+            logger.warning(
+                f"Failed to check actual CDA availability for {session_id}/{cda_type}: {e}"
+            )
+            return False
+
     logger.info(f"PATIENT_CDA_VIEW CALLED for session_id: {session_id}")
 
     # IMMEDIATE TEST: Check if our code is reachable
@@ -3189,35 +3234,53 @@ def patient_cda_view(request, session_id, cda_type=None):
 
                 # Add administrative data to context if available
                 if admin_data:
-                    logger.info(f"[ADMIN DATA DEBUG] admin_data keys: {admin_data.keys()}")
+                    logger.info(
+                        f"[ADMIN DATA DEBUG] admin_data keys: {admin_data.keys()}"
+                    )
                     if "patient_identity" in admin_data:
                         patient_identity_data = admin_data["patient_identity"]
-                        logger.info(f"[ADMIN DATA DEBUG] patient_identity keys: {patient_identity_data.keys()}")
-                        logger.info(f"[ADMIN DATA DEBUG] patient_identifiers present: {'patient_identifiers' in patient_identity_data}")
+                        logger.info(
+                            f"[ADMIN DATA DEBUG] patient_identity keys: {patient_identity_data.keys()}"
+                        )
+                        logger.info(
+                            f"[ADMIN DATA DEBUG] patient_identifiers present: {'patient_identifiers' in patient_identity_data}"
+                        )
                         if "patient_identifiers" in patient_identity_data:
                             identifiers = patient_identity_data["patient_identifiers"]
-                            logger.info(f"[ADMIN DATA DEBUG] patient_identifiers length: {len(identifiers) if identifiers else 0}")
+                            logger.info(
+                                f"[ADMIN DATA DEBUG] patient_identifiers length: {len(identifiers) if identifiers else 0}"
+                            )
                             if identifiers:
-                                logger.info(f"[ADMIN DATA DEBUG] first identifier: {identifiers[0]}")
-                    
+                                logger.info(
+                                    f"[ADMIN DATA DEBUG] first identifier: {identifiers[0]}"
+                                )
+
                     # ENHANCED MERGE: Properly merge patient_identity instead of overriding
-                    logger.info(f"[DATABASE MERGE DEBUG] Before merge - context patient_identity: {context['patient_identity'].keys()}")
-                    
+                    logger.info(
+                        f"[DATABASE MERGE DEBUG] Before merge - context patient_identity: {context['patient_identity'].keys()}"
+                    )
+
                     # Preserve the existing patient_identity and merge with admin_data
                     existing_patient_identity = context["patient_identity"].copy()
                     admin_patient_identity = admin_data.get("patient_identity", {})
-                    
+
                     # Merge admin patient identity into existing, preserving all fields
                     merged_patient_identity = existing_patient_identity.copy()
                     merged_patient_identity.update(admin_patient_identity)
-                    
+
                     # Ensure patient_identifiers from admin_data is preserved
                     if "patient_identifiers" in admin_patient_identity:
-                        merged_patient_identity["patient_identifiers"] = admin_patient_identity["patient_identifiers"]
-                        logger.info(f"[DATABASE MERGE DEBUG] Preserved patient_identifiers from admin_data: {len(admin_patient_identity['patient_identifiers'])}")
-                    
-                    logger.info(f"[DATABASE MERGE DEBUG] After merge - merged patient_identity has patient_identifiers: {'patient_identifiers' in merged_patient_identity}")
-                    
+                        merged_patient_identity["patient_identifiers"] = (
+                            admin_patient_identity["patient_identifiers"]
+                        )
+                        logger.info(
+                            f"[DATABASE MERGE DEBUG] Preserved patient_identifiers from admin_data: {len(admin_patient_identity['patient_identifiers'])}"
+                        )
+
+                    logger.info(
+                        f"[DATABASE MERGE DEBUG] After merge - merged patient_identity has patient_identifiers: {'patient_identifiers' in merged_patient_identity}"
+                    )
+
                     context.update(
                         {
                             "administrative_data": admin_data["document_metadata"],
@@ -3230,12 +3293,18 @@ def patient_cda_view(request, session_id, cda_type=None):
                             ),
                         }
                     )
-                    logger.info(f"[ADMIN DATA DEBUG] After context update - patient_identity has patient_identifiers: {'patient_identifiers' in context['patient_identity']}")
-                    if 'patient_identifiers' in context['patient_identity']:
-                        identifiers = context['patient_identity']['patient_identifiers']
-                        logger.info(f"[ADMIN DATA DEBUG] Final patient_identifiers count: {len(identifiers)}")
+                    logger.info(
+                        f"[ADMIN DATA DEBUG] After context update - patient_identity has patient_identifiers: {'patient_identifiers' in context['patient_identity']}"
+                    )
+                    if "patient_identifiers" in context["patient_identity"]:
+                        identifiers = context["patient_identity"]["patient_identifiers"]
+                        logger.info(
+                            f"[ADMIN DATA DEBUG] Final patient_identifiers count: {len(identifiers)}"
+                        )
                         if identifiers:
-                            logger.info(f"[ADMIN DATA DEBUG] Final first identifier root: {identifiers[0].get('root', 'NO ROOT')}")
+                            logger.info(
+                                f"[ADMIN DATA DEBUG] Final first identifier root: {identifiers[0].get('root', 'NO ROOT')}"
+                            )
                     logger.info(
                         f"[ADMIN SERVICE] Added comprehensive administrative data to context for session {session_id}"
                     )
@@ -3757,7 +3826,11 @@ def patient_cda_view(request, session_id, cda_type=None):
                         "has_l1_cda"
                     )
                     if f"patient_extended_data_{session_id}" in request.session
-                    else search_result.has_l1_cda()
+                    else (
+                        search_result.has_l1_cda()
+                        if search_result
+                        else _check_actual_cda_availability(session_id, "L1")
+                    )
                 )
             ),
             "has_l3_cda": (
@@ -3768,7 +3841,11 @@ def patient_cda_view(request, session_id, cda_type=None):
                         "has_l3_cda"
                     )
                     if f"patient_extended_data_{session_id}" in request.session
-                    else search_result.has_l3_cda()
+                    else (
+                        search_result.has_l3_cda()
+                        if search_result
+                        else _check_actual_cda_availability(session_id, "L3")
+                    )
                 )
             ),
             "confidence": int(match_data.get("confidence_score", 0.95) * 100),
@@ -3815,13 +3892,21 @@ def patient_cda_view(request, session_id, cda_type=None):
 
         # Update patient identity with enhanced data while preserving patient_id for routing
         if enhanced_patient_identity:
-            logger.info(f"[ENHANCED MERGE DEBUG] Before merge - patient_identity has patient_identifiers: {'patient_identifiers' in context['patient_identity']}")
-            if 'patient_identifiers' in context['patient_identity']:
-                logger.info(f"[ENHANCED MERGE DEBUG] Before merge - patient_identifiers: {context['patient_identity']['patient_identifiers']}")
-            
-            logger.info(f"[ENHANCED MERGE DEBUG] enhanced_patient_identity keys: {enhanced_patient_identity.keys()}")
-            logger.info(f"[ENHANCED MERGE DEBUG] enhanced_patient_identity has patient_identifiers: {'patient_identifiers' in enhanced_patient_identity}")
-            
+            logger.info(
+                f"[ENHANCED MERGE DEBUG] Before merge - patient_identity has patient_identifiers: {'patient_identifiers' in context['patient_identity']}"
+            )
+            if "patient_identifiers" in context["patient_identity"]:
+                logger.info(
+                    f"[ENHANCED MERGE DEBUG] Before merge - patient_identifiers: {context['patient_identity']['patient_identifiers']}"
+                )
+
+            logger.info(
+                f"[ENHANCED MERGE DEBUG] enhanced_patient_identity keys: {enhanced_patient_identity.keys()}"
+            )
+            logger.info(
+                f"[ENHANCED MERGE DEBUG] enhanced_patient_identity has patient_identifiers: {'patient_identifiers' in enhanced_patient_identity}"
+            )
+
             url_patient_id = context["patient_identity"][
                 "patient_id"
             ]  # Keep for URL routing
@@ -3833,40 +3918,58 @@ def patient_cda_view(request, session_id, cda_type=None):
             existing_patient_identifiers = context["patient_identity"].get(
                 "patient_identifiers", []
             )
-            logger.info(f"[ENHANCED MERGE DEBUG] Preserving {len(existing_patient_identifiers)} patient identifiers before merge")
+            logger.info(
+                f"[ENHANCED MERGE DEBUG] Preserving {len(existing_patient_identifiers)} patient identifiers before merge"
+            )
 
             # Store the enhanced data temporarily to check for patient_identifiers
             enhanced_has_valid_identifiers = (
-                enhanced_patient_identity.get("patient_identifiers") and 
-                len(enhanced_patient_identity.get("patient_identifiers", [])) > 0
+                enhanced_patient_identity.get("patient_identifiers")
+                and len(enhanced_patient_identity.get("patient_identifiers", [])) > 0
             )
-            logger.info(f"[ENHANCED MERGE DEBUG] Enhanced data has valid patient_identifiers: {enhanced_has_valid_identifiers}")
+            logger.info(
+                f"[ENHANCED MERGE DEBUG] Enhanced data has valid patient_identifiers: {enhanced_has_valid_identifiers}"
+            )
 
             context["patient_identity"].update(enhanced_patient_identity)
-            
-            logger.info(f"[ENHANCED MERGE DEBUG] After merge - patient_identity has patient_identifiers: {'patient_identifiers' in context['patient_identity']}")
-            current_identifiers = context["patient_identity"].get("patient_identifiers", [])
-            logger.info(f"[ENHANCED MERGE DEBUG] After merge - patient_identifiers length: {len(current_identifiers) if current_identifiers else 0}")
+
+            logger.info(
+                f"[ENHANCED MERGE DEBUG] After merge - patient_identity has patient_identifiers: {'patient_identifiers' in context['patient_identity']}"
+            )
+            current_identifiers = context["patient_identity"].get(
+                "patient_identifiers", []
+            )
+            logger.info(
+                f"[ENHANCED MERGE DEBUG] After merge - patient_identifiers length: {len(current_identifiers) if current_identifiers else 0}"
+            )
 
             # Always restore existing patient_identifiers if they exist and the merged data doesn't have valid ones
             if existing_patient_identifiers and (
-                not context["patient_identity"].get("patient_identifiers") or 
-                len(context["patient_identity"].get("patient_identifiers", [])) == 0
+                not context["patient_identity"].get("patient_identifiers")
+                or len(context["patient_identity"].get("patient_identifiers", [])) == 0
             ):
-                context["patient_identity"]["patient_identifiers"] = existing_patient_identifiers
+                context["patient_identity"][
+                    "patient_identifiers"
+                ] = existing_patient_identifiers
                 logger.info(
                     f"[PATIENT IDENTITY] Restored {len(existing_patient_identifiers)} patient identifiers after merge overwrote them"
                 )
             elif existing_patient_identifiers and not enhanced_has_valid_identifiers:
                 # Enhanced data had empty/invalid patient_identifiers, so preserve the original
-                context["patient_identity"]["patient_identifiers"] = existing_patient_identifiers
+                context["patient_identity"][
+                    "patient_identifiers"
+                ] = existing_patient_identifiers
                 logger.info(
                     f"[PATIENT IDENTITY] Preserved {len(existing_patient_identifiers)} patient identifiers over empty enhanced data"
                 )
             elif context["patient_identity"].get("patient_identifiers"):
-                logger.info(f"[ENHANCED MERGE DEBUG] patient_identifiers already present after merge: {len(context['patient_identity']['patient_identifiers'])}")
+                logger.info(
+                    f"[ENHANCED MERGE DEBUG] patient_identifiers already present after merge: {len(context['patient_identity']['patient_identifiers'])}"
+                )
             else:
-                logger.info(f"[ENHANCED MERGE DEBUG] No patient_identifiers to preserve and none in enhanced data")
+                logger.info(
+                    f"[ENHANCED MERGE DEBUG] No patient_identifiers to preserve and none in enhanced data"
+                )
 
             # Use XML patient ID for display, session ID for routing
             if xml_patient_id:
@@ -4145,1052 +4248,6 @@ def cda_translation_toggle(request, patient_id):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
-
-# Next function should start here...
-
-# TEMPORARILY COMMENTED OUT CORRUPTED LEFTOVER CODE FROM REFACTORING
-# TODO: Clean up this section properly
-
-# @login_required
-# @require_http_methods(["POST"])
-# CORRUPTED LEFTOVER DATA COMMENTED OUT:
-#                                "%Y-%m-%dT15:30:00"
-
-"""
-LARGE BLOCK OF CORRUPTED LEFTOVER CODE FROM REFACTORING - TEMPORARILY COMMENTED OUT
-TODO: Remove this entire corrupted section
-                            ),
-                        },
-                        "custodian_organization": {
-                            "name": "Ministry for Health, Malta",
-                            "contact_info": {
-                                "addresses": [
-                                    "Palazzo Castelletti, 15, Merchants Street, Valletta VLT 1444"
-                                ],
-                                "phone_numbers": ["+356 2599 7000"],
-                            },
-                        },
-                    },
-                    "document_info": {
-                        "title": "Patient Summary - Malta",
-                        "creation_date": date.today().strftime("%Y-%m-%d"),
-                        "language": "en-GB",
-                        "document_id": {
-                            "extension": f"MT-PS-{session_id}-{date.today().year}"
-                        },
-                        "version": "1.0",
-                    },
-                }
-
-            # TEMPORARILY ENABLED: Mock data application - testing extended patient templates
-            context["patient_extended_data"] = mock_extended_data
-            # Store patient-specific mock data in session to prevent cross-contamination
-            request.session[f"patient_extended_data_{session_id}"] = mock_extended_data
-            logger.info(
-                f"🧪 MOCK DATA ENABLED - Testing extended patient templates for {patient_country_code} patient {session_id}"
-            )
-        else:
-            logger.info(
-                f"[SUCCESS] USING REAL XML DATA for patient {session_id} - no mock data needed"
-            )
-
-        # FORCE MOCK PROCESSED SECTIONS for testing template rendering - ONLY FOR L3 DOCUMENTS
-        # L1 documents should NOT have detailed clinical sections
-        if (
-            not context.get("processed_sections") or session_id in ["271867", "221935"]
-        ) and actual_cda_type != "L1":
-            mock_sections = [
-                {
-                    "title": "Current Medications",
-                    "type": "medication",
-                    "section_code": "10160-0",
-                    "has_entries": True,
-                    "medical_terminology_count": 2,
-                    "coded_entries_count": 2,
-                    "entries": [
-                        {
-                            "display_name": "Lisinopril 10mg Tablets",
-                            "has_medical_terminology": True,
-                            "status": "Active",
-                            "dosage": "10mg once daily",
-                        },
-                        {
-                            "display_name": "Metformin 500mg",
-                            "has_medical_terminology": True,
-                            "status": "Active",
-                            "dosage": "500mg twice daily",
-                        },
-                    ],
-                    # Temporarily disable clinical_table to use simple list format
-                    # "clinical_table": { ... }
-                },
-                {
-                    "title": "Allergies and Adverse Reactions",
-                    "type": "allergy",
-                    "section_code": "48765-2",
-                    "has_entries": True,
-                    "medical_terminology_count": 1,
-                    "coded_entries_count": 1,
-                    "entries": [
-                        {
-                            "display_name": "Penicillin Allergy",
-                            "has_medical_terminology": True,
-                            "status": "Active",
-                            "reaction": "Skin rash",
-                            "severity": "Moderate",
-                        }
-                    ],
-                    # Temporarily disable clinical_table to use simple list format
-                    # "clinical_table": { ... }
-                },
-            ]
-            context["processed_sections"] = mock_sections
-            logger.info(
-                "🧪 ADDED MOCK PROCESSED SECTIONS for L3 document testing template rendering"
-            )
-        elif actual_cda_type == "L1":
-            # L1 documents should have no clinical sections - only basic patient info
-            context["processed_sections"] = []
-            logger.info(
-                "📄 L1 DOCUMENT: No clinical sections added (L1 contains only basic patient summary)"
-            )
-
-        # REFACTOR: Process sections for template display (move complex logic from template to Python)
-        # Only override mock data if we don't have debug parameter AND this is NOT an L1 document
-
-        # DEBUG: Check translation_result before clinical integration
-        print(f"[DEBUG] translation_result exists: {bool(translation_result)}")
-        if translation_result:
-            print(f"[DEBUG] translation_result has sections: {bool(translation_result.get('sections'))}")
-            print(f"[DEBUG] section count: {len(translation_result.get('sections', []))}")
-        print(f"[DEBUG] debug parameter: {request.GET.get('debug')}")
-        print(f"[DEBUG] actual_cda_type: {actual_cda_type}")
-
-        if (
-            translation_result
-            and translation_result.get("sections")
-            and not request.GET.get("debug")
-            and actual_cda_type != "L1"
-        ):
-            logger.info(
-                f"Processing {len(translation_result.get('sections', []))} sections for L3 template display"
-            )
-
-            # NEW: Integrate comprehensive clinical data extraction
-            try:
-                from .clinical_data_integration_service import ClinicalDataIntegrationService
-
-                # DEBUG: Add explicit logging
-                print("[CLINICAL INTEGRATION] Starting clinical data integration service")
-
-                clinical_integration_service = ClinicalDataIntegrationService()
-
-                # Extract comprehensive clinical data using our proven methods
-                integrated_clinical_data = clinical_integration_service.extract_and_format_clinical_data(
-                    cda_content, match_data
-                )
-
-                print(f"[CLINICAL INTEGRATION] Integration completed. has_clinical_data: {integrated_clinical_data.get('has_clinical_data')}")
-
-                if integrated_clinical_data.get('has_clinical_data'):
-                    logger.info(f"[SUCCESS] Integrated clinical data extraction completed:")
-                    logger.info(f"   - Processed sections: {integrated_clinical_data.get('total_sections', 0)}")
-                    logger.info(f"   - Clinical codes: {integrated_clinical_data.get('total_clinical_codes', 0)}")
-                    logger.info(f"   - Medications: {len(integrated_clinical_data.get('medications', []))}")
-                    logger.info(f"   - Allergies: {len(integrated_clinical_data.get('allergies', []))}")
-                    logger.info(f"   - Problems: {len(integrated_clinical_data.get('problems', []))}")
-                    logger.info(f"   - Procedures: {len(integrated_clinical_data.get('procedures', []))}")
-
-                    # Use the comprehensive clinical data instead of basic sections
-                    processed_sections = integrated_clinical_data['processed_sections']
-
-                    # Add individual clinical data arrays for template use
-                    context.update({
-                        'medications': integrated_clinical_data.get('medications', []),
-                        'allergies': integrated_clinical_data.get('allergies', []),
-                        'problems': integrated_clinical_data.get('problems', []),
-                        'procedures': integrated_clinical_data.get('procedures', []),
-                        'vital_signs': integrated_clinical_data.get('vital_signs', []),
-                        'results': integrated_clinical_data.get('results', []),
-                        'immunizations': integrated_clinical_data.get('immunizations', []),
-                        'total_clinical_codes': integrated_clinical_data.get('total_clinical_codes', 0),
-                        'extraction_quality_score': integrated_clinical_data.get('extraction_quality_score', 0),
-                    })
-
-                    # DEBUG: Log context variables for Clinical Information tab badge
-                    logger.info(f"[CONTEXT DEBUG] Clinical arrays added to context:")
-                    logger.info(f"   - medications: {len(integrated_clinical_data.get('medications', []))} items")
-                    logger.info(f"   - allergies: {len(integrated_clinical_data.get('allergies', []))} items")
-                    logger.info(f"   - problems: {len(integrated_clinical_data.get('problems', []))} items")
-                    logger.info(f"   - procedures: {len(integrated_clinical_data.get('procedures', []))} items")
-                    logger.info(f"   - vital_signs: {len(integrated_clinical_data.get('vital_signs', []))} items")
-
-                    # Test template condition
-                    template_condition = bool(
-                        integrated_clinical_data.get('medications', []) or
-                        integrated_clinical_data.get('allergies', []) or
-                        integrated_clinical_data.get('problems', []) or
-                        integrated_clinical_data.get('vital_signs', []) or
-                        integrated_clinical_data.get('procedures', [])
-                    )
-                    logger.info(f"[CONTEXT DEBUG] Template badge condition: {template_condition}")
-                    # Fallback to Comprehensive Clinical Data Service when clinical integration doesn't provide data
-                    logger.info("[INFO] Clinical integration service did not provide clinical data, using Comprehensive Clinical Data Service")
-
-                    try:
-                        from patient_data.services.comprehensive_clinical_data_service import ComprehensiveClinicalDataService
-
-                        # Initialize Comprehensive Clinical Data Service for reliable extraction
-                        clinical_service = ComprehensiveClinicalDataService()
-
-                        # Extract clinical arrays directly for template use
-                        clinical_arrays = clinical_service.get_clinical_arrays_for_display(cda_content, session_data)
-                        logger.info(f"[CLINICAL SERVICE] Clinical arrays extracted: med={len(clinical_arrays['medications'])}, all={len(clinical_arrays['allergies'])}, prob={len(clinical_arrays['problems'])}, proc={len(clinical_arrays['procedures'])}, vs={len(clinical_arrays['vital_signs'])}")
-
-                        # Also get comprehensive data for processed_sections and administrative data
-                        comprehensive_data = clinical_service.extract_comprehensive_clinical_data(cda_content, session_data)
-
-                        # Extract administrative data for template
-                        admin_data = clinical_service.get_administrative_data_for_display(comprehensive_data)
-                        logger.info(f"[ADMIN SERVICE] Administrative data extracted: patient={admin_data['patient_identity'].get('full_name', 'Unknown')}, document={admin_data['document_metadata'].get('document_title', 'Unknown')}")
-
-                        # Update context with comprehensive administrative data
-                        context.update({
-                            'administrative_data': admin_data['document_metadata'],
-                            'contact_data': admin_data['contact_data'],
-                            'patient_identity': admin_data['patient_identity'],
-                            'healthcare_data': admin_data['healthcare_provider_data'],
-                            'has_administrative_data': bool(admin_data['document_metadata'] or admin_data['patient_identity']),
-                        })
-
-                        # Extract sections from comprehensive data for processed_sections
-                        enhanced_data = comprehensive_data.get('clinical_sections', {}).get('enhanced_parser', {})
-                        enhanced_sections = enhanced_data.get('sections_found', [])
-
-                        if enhanced_sections or any(clinical_arrays.values()):
-                            # Process sections if available
-                            if enhanced_sections:
-                                processed_sections = prepare_enhanced_section_data(
-                                    enhanced_sections, service_processed=True
-                                )
-                                logger.info(f"[CLINICAL SERVICE] Successfully processed {len(processed_sections)} sections")
-                            else:
-                                processed_sections = []
-
-                            # Set clinical arrays in context for template
-                            context.update({
-                                'medications': clinical_arrays['medications'],
-                                'allergies': clinical_arrays['allergies'],
-                                'problems': clinical_arrays['problems'],
-                                'procedures': clinical_arrays['procedures'],
-                                'vital_signs': clinical_arrays['vital_signs'],
-                                'results': clinical_arrays['results'],
-                                'immunizations': clinical_arrays['immunizations'],
-                                'total_clinical_codes': sum(len(arr) for arr in clinical_arrays.values()),
-                            })
-
-                            logger.info(f"[CLINICAL SERVICE] Clinical arrays added to context:")
-                            logger.info(f"   - medications: {len(clinical_arrays['medications'])} items")
-                            logger.info(f"   - allergies: {len(clinical_arrays['allergies'])} items")
-                            logger.info(f"   - problems: {len(clinical_arrays['problems'])} items")
-                            logger.info(f"   - procedures: {len(clinical_arrays['procedures'])} items")
-                            logger.info(f"   - vital_signs: {len(clinical_arrays['vital_signs'])} items")
-
-                        else:
-                            # No clinical data found through any method
-                            logger.info("[CLINICAL SERVICE] No clinical data extracted through any parsing method")
-                            processed_sections = []
-
-                    except Exception as clinical_error:
-                        logger.error(f"[CLINICAL SERVICE ERROR] Comprehensive Clinical Data Service failed: {clinical_error}")
-                        # Final fallback to original section processing
-                        processed_sections = prepare_enhanced_section_data(
-                            translation_result.get("sections", []), service_processed=True
-                        )
-
-            except Exception as clinical_error:
-                logger.error(f"[ERROR] Clinical data integration failed: {clinical_error}")
-                logger.error(f"[ERROR] Exception type: {type(clinical_error).__name__}")
-                import traceback
-                logger.error(f"[ERROR] Traceback: {traceback.format_exc()}")
-
-                # Comprehensive Clinical Data Service fallback on clinical integration failure
-                try:
-                    from patient_data.services.comprehensive_clinical_data_service import ComprehensiveClinicalDataService
-
-                    logger.info("[ERROR RECOVERY] Attempting Comprehensive Clinical Data Service fallback after clinical integration failure")
-                    comprehensive_service = ComprehensiveClinicalDataService()
-                    comprehensive_result = comprehensive_service.extract_comprehensive_clinical_data(cda_content)
-                    comprehensive_sections = comprehensive_result.get('sections', [])
-
-                    if comprehensive_sections:
-                        logger.info(f"[ERROR RECOVERY] Comprehensive service found {len(comprehensive_sections)} sections")
-                        processed_sections = prepare_enhanced_section_data(
-                            comprehensive_sections, service_processed=True
-                        )
-
-                        # Extract clinical arrays for template
-                        clinical_arrays = comprehensive_service.get_clinical_arrays_for_display(comprehensive_result)
-                        context.update(clinical_arrays)
-
-                        logger.info(f"[ERROR RECOVERY] Clinical arrays added from comprehensive service:")
-                        logger.info(f"   - medications: {len(clinical_arrays['medications'])} items")
-                        logger.info(f"   - allergies: {len(clinical_arrays['allergies'])} items")
-                        logger.info(f"   - problems: {len(clinical_arrays['problems'])} items")
-                        logger.info(f"   - procedures: {len(clinical_arrays['procedures'])} items")
-                        logger.info(f"   - vital_signs: {len(clinical_arrays['vital_signs'])} items")
-
-                    elif translation_result and translation_result.get("sections"):
-                        # Fallback to original sections
-                        processed_sections = prepare_enhanced_section_data(
-                            translation_result.get("sections", []), service_processed=True
-                        )
-                    else:
-                        processed_sections = []
-
-                except Exception as service_error:
-                    logger.error(f"[ERROR RECOVERY] Comprehensive service also failed: {service_error}")
-
-                        # Extract individual clinical arrays for template
-                        medications_list = []
-                        allergies_list = []
-                        problems_list = []
-                        procedures_list = []
-                        vital_signs_list = []
-                        results_list = []
-                        immunizations_list = []
-
-                        for section in enhanced_sections:
-                            section_code = section.get('section_code', '')
-                            section_entries = section.get('table_rows', [])
-
-                            # Map sections to clinical arrays based on section codes
-                            if section_code == '10160-0':  # Medications
-                                medications_list.extend(section_entries)
-                            elif section_code == '48765-2':  # Allergies
-                                allergies_list.extend(section_entries)
-                            elif section_code == '11450-4':  # Problems
-                                problems_list.extend(section_entries)
-                            elif section_code == '47519-4':  # Procedures
-                                procedures_list.extend(section_entries)
-                            elif section_code == '8716-3':  # Vital Signs
-                                vital_signs_list.extend(section_entries)
-                            elif section_code == '30954-2':  # Results/Investigations
-                                results_list.extend(section_entries)
-                            elif section_code == '11369-6':  # Immunizations
-                                immunizations_list.extend(section_entries)
-
-                        # Add clinical arrays to context for template
-                        context.update({
-                            'medications': medications_list,
-                            'allergies': allergies_list,
-                            'problems': problems_list,
-                            'procedures': procedures_list,
-                            'vital_signs': vital_signs_list,
-                            'results': results_list,
-                            'immunizations': immunizations_list,
-                            'total_clinical_codes': sum(len(section.get('clinical_codes', [])) for section in enhanced_sections),
-                        })
-
-                        logger.info(f"[ERROR RECOVERY] Clinical arrays added to context")
-
-                    else:
-                        # Final fallback to original processing
-                        processed_sections = prepare_enhanced_section_data(
-                            translation_result.get("sections", []), service_processed=True
-                        )
-
-                except Exception as service_error:
-                    logger.error(f"[ERROR RECOVERY] Comprehensive service also failed: {service_error}")
-                    # Final fallback to original processing
-                    processed_sections = prepare_enhanced_section_data(
-                        translation_result.get("sections", []), service_processed=True
-                    )
-        else:
-            # Clinical integration conditions not met - use Comprehensive Clinical Data Service
-            logger.info("[INFO] Clinical integration conditions not met, using Comprehensive Clinical Data Service")
-            logger.info(f"   - translation_result: {bool(translation_result)}")
-            if translation_result:
-                logger.info(f"   - has sections: {bool(translation_result.get('sections'))}")
-            logger.info(f"   - debug parameter: {request.GET.get('debug')}")
-            logger.info(f"   - actual_cda_type: {actual_cda_type}")
-
-            try:
-                from patient_data.services.comprehensive_clinical_data_service import ComprehensiveClinicalDataService
-
-                # Use Comprehensive Clinical Data Service as primary approach
-                comprehensive_service = ComprehensiveClinicalDataService()
-                comprehensive_result = comprehensive_service.extract_comprehensive_clinical_data(cda_content)
-
-                # Get clinical arrays for template display
-                clinical_arrays = comprehensive_service.get_clinical_arrays_for_display(comprehensive_result)
-
-                logger.info(f"[COMPREHENSIVE SERVICE] Extracted clinical data:")
-                logger.info(f"   - medications: {len(clinical_arrays.get('medications', []))} items")
-                logger.info(f"   - allergies: {len(clinical_arrays.get('allergies', []))} items")
-                logger.info(f"   - problems: {len(clinical_arrays.get('problems', []))} items")
-                logger.info(f"   - procedures: {len(clinical_arrays.get('procedures', []))} items")
-                logger.info(f"   - vital_signs: {len(clinical_arrays.get('vital_signs', []))} items")
-
-                # Add clinical arrays to context for template
-                context.update(clinical_arrays)
-
-                # Use comprehensive sections for display if available
-                if comprehensive_result.get('sections'):
-                    processed_sections = prepare_enhanced_section_data(
-                        comprehensive_result.get('sections', []), service_processed=True
-                    )
-                    logger.info(f"[COMPREHENSIVE SERVICE] Successfully processed {len(processed_sections)} sections")
-                elif translation_result and translation_result.get("sections"):
-                    # Secondary fallback to original sections
-                    logger.info("[COMPREHENSIVE SERVICE] Using original sections as fallback")
-                    processed_sections = prepare_enhanced_section_data(
-                        translation_result.get("sections", []), service_processed=True
-                    )
-                else:
-                    # No sections available
-                    logger.info("[COMPREHENSIVE SERVICE] No sections available from any source")
-                    processed_sections = []
-
-            except Exception as service_error:
-                logger.error(f"[COMPREHENSIVE SERVICE ERROR] Service failed: {service_error}")
-                if translation_result and translation_result.get("sections"):
-                    # Final fallback to original sections
-                    processed_sections = prepare_enhanced_section_data(
-                        translation_result.get("sections", []), service_processed=True
-                    )
-                else:
-                    processed_sections = []
-
-            # DEMONSTRATION: Inject test allergies section when requested (L3 only)
-            if request.GET.get("show_allergies_demo"):
-                logger.info(
-                    "🧪 DEMO: Injecting test allergies section for demonstration"
-                )
-                test_allergies_section = {
-                    "section_id": "psAllergiesAndOtherAdverseReactions",
-                    "section_title": "Allergies and Other Adverse Reactions",
-                    "title": "Allergies and Other Adverse Reactions",
-                    "code": "ALLERGIES",
-                    "has_entries": True,
-                    "entries": [
-                        {
-                            "display_name": "Penicillin Allergy",
-                            "allergen": "Penicillin",
-                            "reaction": "Skin rash, hives",
-                            "severity": "Moderate",
-                            "status": "Active",
-                            "medical_terminology": [
-                                {
-                                    "system": "SNOMED CT",
-                                    "code": "294505008",
-                                    "display_name": "Allergy to penicillin",
-                                }
-                            ],
-                            "has_medical_terminology": True,
-                        },
-                        {
-                            "display_name": "Shellfish Allergy",
-                            "allergen": "Shellfish",
-                            "reaction": "Anaphylaxis",
-                            "severity": "Severe",
-                            "status": "Active",
-                            "medical_terminology": [
-                                {
-                                    "system": "SNOMED CT",
-                                    "code": "300913006",
-                                    "display_name": "Shellfish allergy",
-                                }
-                            ],
-                            "has_medical_terminology": True,
-                        },
-                    ],
-                    "clinical_table": {
-                        "headers": [
-                            {
-                                "label": "Allergen",
-                                "key": "allergen",
-                                "type": "allergen",
-                                "primary": True,
-                            },
-                            {
-                                "label": "Reaction",
-                                "key": "reaction",
-                                "type": "reaction",
-                                "primary": False,
-                            },
-                            {
-                                "label": "Severity",
-                                "key": "severity",
-                                "type": "severity",
-                                "primary": False,
-                            },
-                            {
-                                "label": "Status",
-                                "key": "status",
-                                "type": "status",
-                                "primary": False,
-                            },
-                        ],
-                        "rows": [
-                            {
-                                "data": {
-                                    "allergen": {
-                                        "display_value": "Penicillin",
-                                        "value": "Penicillin",
-                                        "has_terminology": True,
-                                        "terminology": [
-                                            {
-                                                "system": "SNOMED CT",
-                                                "code": "294505008",
-                                                "display_name": "Allergy to penicillin",
-                                            }
-                                        ],
-                                    },
-                                    "reaction": {
-                                        "display_value": "Skin rash, hives",
-                                        "value": "Skin rash, hives",
-                                    },
-                                    "severity": {
-                                        "display_value": "Moderate",
-                                        "value": "Moderate",
-                                    },
-                                    "status": {
-                                        "display_value": "Active",
-                                        "value": "Active",
-                                    },
-                                }
-                            },
-                            {
-                                "data": {
-                                    "allergen": {
-                                        "display_value": "Shellfish",
-                                        "value": "Shellfish",
-                                        "has_terminology": True,
-                                        "terminology": [
-                                            {
-                                                "system": "SNOMED CT",
-                                                "code": "300913006",
-                                                "display_name": "Shellfish allergy",
-                                            }
-                                        ],
-                                    },
-                                    "reaction": {
-                                        "display_value": "Anaphylaxis",
-                                        "value": "Anaphylaxis",
-                                    },
-                                    "severity": {
-                                        "display_value": "Severe",
-                                        "value": "Severe",
-                                    },
-                                    "status": {
-                                        "display_value": "Active",
-                                        "value": "Active",
-                                    },
-                                }
-                            },
-                        ],
-                    },
-                }
-                # Insert at the beginning of the sections list
-                processed_sections.insert(0, test_allergies_section)
-
-            context["processed_sections"] = processed_sections
-            logger.info(
-                f"Processed {len(processed_sections)} sections for simplified template display (including injected allergies)"
-            )
-        elif (
-            translation_result
-            and translation_result.get("sections")
-            and request.GET.get("debug")
-        ):
-            logger.info(
-                "🧪 DEBUG MODE: Keeping mock processed sections for testing (not overriding with real data)"
-            )
-        else:
-            logger.warning(
-                "No translation_result sections found - checking for alternative data sources"
-            )
-            # INJECT TEST ALLERGIES SECTION when no real sections are found - BUT NOT FOR L1 DOCUMENTS
-            if actual_cda_type != "L1":
-                logger.info(
-                    "🧪 INJECTING TEST ALLERGIES SECTION for L3 document demonstration"
-                )
-                context["processed_sections"] = [
-                    {
-                        "section_id": "psAllergiesAndOtherAdverseReactions",
-                        "section_title": "Allergies and Other Adverse Reactions",
-                        "title": "Allergies and Other Adverse Reactions",
-                        "code": "ALLERGIES",
-                        "has_entries": True,
-                        "entries": [
-                            {
-                                "display_name": "Penicillin Allergy",
-                                "allergen": "Penicillin",
-                                "reaction": "Skin rash, hives",
-                                "severity": "Moderate",
-                                "status": "Active",
-                                "medical_terminology": [
-                                    {
-                                        "system": "SNOMED CT",
-                                        "code": "294505008",
-                                        "display_name": "Allergy to penicillin",
-                                    }
-                                ],
-                                "has_medical_terminology": True,
-                            },
-                            {
-                                "display_name": "Shellfish Allergy",
-                                "allergen": "Shellfish",
-                                "reaction": "Anaphylaxis",
-                                "severity": "Severe",
-                                "status": "Active",
-                                "medical_terminology": [
-                                    {
-                                        "system": "SNOMED CT",
-                                        "code": "300913006",
-                                        "display_name": "Shellfish allergy",
-                                    }
-                                ],
-                                "has_medical_terminology": True,
-                            },
-                        ],
-                    }
-                ]
-            else:
-                logger.info(
-                    "📄 L1 DOCUMENT: No clinical sections injected (L1 contains only basic patient summary)"
-                )
-                context["processed_sections"] = []
-
-        # SECTION PROCESSOR INTEGRATION: Add Python-processed section data
-        from .services.section_processors import PatientSectionProcessor
-
-        section_processor = PatientSectionProcessor()
-
-        # Process section data using Python processors for consistent architecture
-        header_data = section_processor.prepare_patient_header_data(
-            patient_identity=context.get("patient_identity", {}),
-            source_country=context.get("source_country", ""),
-            cda_type=context.get("cda_type", ""),
-            translation_quality=context.get("translation_quality", ""),
-            confidence=context.get("confidence", 0),
-            file_name=context.get("file_name", ""),
-            has_l1_cda=context.get("has_l1_cda", False),
-            has_l3_cda=context.get("has_l3_cda", True),
-        )
-
-        extended_data = section_processor.prepare_extended_patient_data(
-            administrative_data=context.get("administrative_data", {}),
-            patient_extended_data=context.get("patient_extended_data", {}),
-            has_administrative_data=context.get("has_administrative_data", False),
-            xml_content=cda_content,
-        )
-
-        # Debug the CDA content being passed to extended data processor
-        logger.info(
-            f"DEBUG: CDA content length passed to extended_data: {len(cda_content) if cda_content else 0}"
-        )
-        if cda_content:
-            # Look for patient ID in CDA content
-            import re
-
-            patient_id_match = re.search(r'<id extension="([^"]*)"', cda_content)
-            if patient_id_match:
-                cda_patient_id = patient_id_match.group(1)
-                logger.info(f"DEBUG: Patient ID found in CDA: {cda_patient_id}")
-                logger.info(f"DEBUG: URL Session ID: {session_id}")
-                logger.info(
-                    f"DEBUG: Patient ID match: {cda_patient_id == str(session_id)}"
-                )
-
-        # Debug the extended data result - NO EMOJIS to avoid Unicode issues
-        print(
-            f"DEBUG EXTENDED DATA RESULT - has_meaningful_data: {extended_data.get('has_meaningful_data', False)}"
-        )
-        print(
-            f"DEBUG EXTENDED DATA RESULT - contact_information: {extended_data.get('contact_information', {})}"
-        )
-        print(
-            f"DEBUG EXTENDED DATA RESULT - navigation_tabs count: {len(extended_data.get('navigation_tabs', []))}"
-        )
-
-        # Debug raw administrative data structure
-        admin_data = context.get("administrative_data", {})
-        print(
-            f"DEBUG RAW ADMIN DATA keys: {list(admin_data.keys()) if admin_data else 'None'}"
-        )
-        if admin_data and "patient_contact_info" in admin_data:
-            contact_info = admin_data["patient_contact_info"]
-            print(f"DEBUG RAW CONTACT INFO type: {type(contact_info)}")
-            print(f"DEBUG RAW CONTACT INFO content: {contact_info}")
-        else:
-            print("DEBUG RAW CONTACT INFO: NOT FOUND in admin_data")
-
-        summary_data = section_processor.prepare_summary_statistics_data(
-            sections_count=context.get("sections_count", 0),
-            medical_terms_count=context.get("medical_terms_count", 0),
-            coded_sections_count=context.get("coded_sections_count", 0),
-            coded_sections_percentage=context.get("coded_sections_percentage", 0),
-            translation_quality=context.get("translation_quality", ""),
-            uses_coded_sections=context.get("uses_coded_sections", False),
-        )
-
-        # Add processed section data to context
-        context["header_data"] = header_data
-        context["extended_data"] = extended_data
-        context["summary_data"] = summary_data
-
-        logger.info("[SUCCESS] PROCESSOR INTEGRATION: Added processed section data to context")
-        logger.info(f"   Header data keys: {list(header_data.keys())}")
-        logger.info(f"   Extended data keys: {list(extended_data.keys())}")
-        logger.info(f"   Summary data keys: {list(summary_data.keys())}")
-
-        # Debug administrative data structure being passed to template
-        admin_data = context.get("administrative_data", {})
-        logger.info(
-            f"[INFO] TEMPLATE CONTEXT - has_administrative_data: {context.get('has_administrative_data', False)}"
-        )
-        logger.info(
-            f"[INFO] TEMPLATE CONTEXT - administrative_data keys: {list(admin_data.keys()) if admin_data else 'None'}"
-        )
-        if admin_data and "patient_contact_info" in admin_data:
-            contact_info = admin_data["patient_contact_info"]
-            logger.info(
-                f"[INFO] TEMPLATE CONTEXT - patient_contact_info type: {type(contact_info)}"
-            )
-            logger.info(
-                f"[INFO] TEMPLATE CONTEXT - patient_contact_info keys: {list(contact_info.keys()) if isinstance(contact_info, dict) else 'Not a dict'}"
-            )
-            if isinstance(contact_info, dict):
-                addresses = contact_info.get("addresses", [])
-                telecoms = contact_info.get("telecoms", [])
-                logger.info(
-                    f"[INFO] TEMPLATE CONTEXT - addresses count: {len(addresses) if addresses else 0}"
-                )
-                logger.info(
-                    f"[INFO] TEMPLATE CONTEXT - telecoms count: {len(telecoms) if telecoms else 0}"
-                )
-                if addresses:
-                    logger.info(f"[INFO] TEMPLATE CONTEXT - first address: {addresses[0]}")
-                if telecoms:
-                    logger.info(f"[INFO] TEMPLATE CONTEXT - first telecom: {telecoms[0]}")
-
-        # Enhanced Data Processing - Move complex logic from templates to views
-        context = _enhance_extended_data_for_templates(context)
-
-        if context.get("extended_data", {}).get("has_meaningful_data"):
-            enhanced_contact_info = context["extended_data"].get(
-                "contact_information", {}
-            )
-
-            if enhanced_contact_info.get("addresses"):
-                first_addr = enhanced_contact_info["addresses"][0]
-                logger.info(
-                    f"[INFO] FINAL TEMPLATE DATA - First enhanced address keys: {list(first_addr.keys())}"
-                )
-                logger.info(
-                    f"[INFO] FINAL TEMPLATE DATA - street_address_line: '{first_addr.get('street_address_line')}'"
-                )
-                logger.info(
-                    f"[INFO] FINAL TEMPLATE DATA - formatted_address: '{first_addr.get('formatted_address')}'"
-                )
-
-            if enhanced_contact_info.get("telecoms"):
-                first_telecom = enhanced_contact_info["telecoms"][0]
-                logger.info(
-                    f"[INFO] FINAL TEMPLATE DATA - First enhanced telecom keys: {list(first_telecom.keys())}"
-                )
-                logger.info(
-                    f"[INFO] FINAL TEMPLATE DATA - display_value: '{first_telecom.get('display_value')}'"
-                )
-                logger.info(
-                    f"[INFO] FINAL TEMPLATE DATA - is_primary: {first_telecom.get('is_primary')}"
-                )
-
-        # Map administrative data to template variables for component compatibility
-        logger.info(f"[INFO] Starting data mapping for extended patient cards...")
-
-        if "administrative_data" in context and context["administrative_data"]:
-            admin_data = context["administrative_data"]
-            logger.info(f"[INFO] ADMIN DATA STRUCTURE: {list(admin_data.keys())}")
-
-            # Map contact data from administrative_data.patient_contact_info
-            if admin_data.get("patient_contact_info"):
-                contact_info = admin_data["patient_contact_info"]
-                context["contact_data"] = contact_info
-
-                # Log detailed structure for debugging
-                if hasattr(contact_info, "addresses") or (
-                    isinstance(contact_info, dict) and "addresses" in contact_info
-                ):
-                    addresses_count = len(contact_info.get("addresses", []))
-                    logger.info(
-                        f"[SUCCESS] Mapped contact_data with addresses: {addresses_count}"
-                    )
-
-                if hasattr(contact_info, "telecoms") or (
-                    isinstance(contact_info, dict) and "telecoms" in contact_info
-                ):
-                    telecoms_count = len(contact_info.get("telecoms", []))
-                    logger.info(
-                        f"[SUCCESS] Mapped contact_data with telecoms: {telecoms_count}"
-                    )
-
-                logger.info(f"[INFO] CONTACT DATA TYPE: {type(contact_info)}")
-                if isinstance(contact_info, dict):
-                    logger.info(f"[INFO] CONTACT DATA KEYS: {list(contact_info.keys())}")
-                else:
-                    logger.info(f"[INFO] CONTACT DATA ATTRIBUTES: {dir(contact_info)}")
-
-            else:
-                logger.warning(
-                    f"[ERROR] NO patient_contact_info found in administrative_data"
-                )
-                logger.info(f"[INFO] Available admin_data keys: {list(admin_data.keys())}")
-
-            # Map healthcare data from administrative_data
-            if (
-                admin_data.get("author_hcp")
-                or admin_data.get("author_information")
-                or admin_data.get("custodian_organization")
-                or admin_data.get("legal_authenticator")
-            ):
-                healthcare_data = {}
-
-                # Map author information - prefer single author_hcp, fallback to first author_information
-                if admin_data.get("author_hcp"):
-                    healthcare_data["author_hcp"] = admin_data.get("author_hcp")
-                elif admin_data.get("author_information"):
-                    author_info_list = admin_data.get("author_information")
-                    if isinstance(author_info_list, list) and len(author_info_list) > 0:
-                        # Take the first author and flatten person info to top level
-                        first_author = author_info_list[0]
-                        if isinstance(first_author, dict) and "person" in first_author:
-                            # Flatten person info to top level for template compatibility
-                            healthcare_data["author_hcp"] = {
-                                "family_name": first_author["person"].get("family_name"),
-                                "given_name": first_author["person"].get("given_name"),
-                                "full_name": first_author["person"].get("full_name"),
-                                "title": first_author["person"].get("title"),
-                                "role": first_author["person"].get("role"),
-                                "organization": first_author.get("organization", {})
-                            }
-                        else:
-                            healthcare_data["author_hcp"] = first_author
-                    else:
-                        healthcare_data["author_hcp"] = author_info_list
-
-                # Map organization - prefer custodian_organization, fallback to organization
-                if admin_data.get("custodian_organization"):
-                    healthcare_data["organization"] = admin_data.get("custodian_organization")
-                elif admin_data.get("organization"):
-                    healthcare_data["organization"] = admin_data.get("organization")
-
-                # Map legal authenticator
-                if admin_data.get("legal_authenticator"):
-                    healthcare_data["legal_authenticator"] = admin_data.get("legal_authenticator")
-
-                context["healthcare_data"] = healthcare_data
-                logger.info(
-                    f"[SUCCESS] Mapped healthcare_data: {list(healthcare_data.keys())}"
-                )
-                logger.info(
-                    f"[DEBUG] Author HCP type: {type(healthcare_data.get('author_hcp'))}"
-                )
-                logger.info(
-                    f"[DEBUG] Organization: {healthcare_data.get('organization', {}).get('name', 'None')}"
-                )
-                logger.info(
-                    f"[DEBUG] Legal authenticator: {healthcare_data.get('legal_authenticator', {}).get('full_name', 'None')}"
-                )
-            else:
-                logger.warning(
-                    f"[ERROR] NO author_hcp or organization found in administrative_data"
-                )
-
-        else:
-            logger.warning(f"[ERROR] NO administrative_data found in context")
-
-        # Also check patient_extended_data for contact information
-        if "patient_extended_data" in context and context["patient_extended_data"]:
-            extended_data = context["patient_extended_data"]
-            logger.info(f"[INFO] EXTENDED DATA STRUCTURE: {list(extended_data.keys())}")
-
-            # Check if contact data is in extended data
-            if extended_data.get("patient_contact"):
-                logger.info(f"[INFO] Found patient_contact in extended_data")
-                if not context.get(
-                    "contact_data"
-                ):  # Only map if we don't already have contact_data
-                    context["contact_data"] = extended_data["patient_contact"]
-                    logger.info(f"[SUCCESS] Mapped contact_data from patient_extended_data")
-
-        # Final verification
-        final_context_keys = list(context.keys())
-        logger.info(f"[INFO] Final context keys: {final_context_keys}")
-        logger.info(f"[INFO] Has contact_data: {'contact_data' in context}")
-        logger.info(f"[INFO] Has healthcare_data: {'healthcare_data' in context}")
-
-        if "contact_data" in context:
-            contact_data = context["contact_data"]
-            if isinstance(contact_data, dict):
-                logger.info(
-                    f"[INFO] Contact data final check - addresses: {len(contact_data.get('addresses', []))}, telecoms: {len(contact_data.get('telecoms', []))}"
-                )
-            else:
-                logger.info(f"[INFO] Contact data is not a dict: {type(contact_data)}")
-
-        # Add dynamic UI labels for internationalization
-        target_language = context.get("detected_source_language", "en")
-        if target_language not in ["en", "fr"]:  # Only support en/fr for now
-            target_language = "en"
-        context["ui_labels"] = get_ui_labels(target_language)
-
-        # FINAL SAFETY CHECK: Ensure L1 documents never have clinical sections
-        if actual_cda_type == "L1":
-            context["processed_sections"] = []
-            # Also reset section counts for L1 documents
-            context["sections_count"] = 0
-            context["medical_terms_count"] = 0
-            context["coded_sections_count"] = 0
-            context["coded_sections_percentage"] = 0
-            context["uses_coded_sections"] = False
-            logger.info(
-                "📄 FINAL CHECK: L1 document - removed all clinical sections and reset counts"
-            )
-
-        # Extract simplified clinical data for Simplified View tab
-        try:
-            from patient_data.simplified_clinical_view import SimplifiedDataExtractor
-
-            # Extract patient_id from session data instead of using session_id
-            patient_id = None
-            if hasattr(request, "session") and request.session:
-                for key in request.session.keys():
-                    if key.startswith("patient_match_"):
-                        patient_id = key.replace("patient_match_", "")
-                        logger.info(
-                            f"DEBUG: Found patient_id {patient_id} from session key {key}"
-                        )
-                        break
-
-            if patient_id:
-                simplified_extractor = SimplifiedDataExtractor()
-                simplified_data = simplified_extractor.get_simplified_clinical_data(
-                    patient_id, request
-                )
-
-                if simplified_data and simplified_data.get("sections"):
-                    context["simplified_data"] = simplified_data
-                    logger.info(
-                        f"DEBUG: Added simplified_data to context with {len(simplified_data.get('sections', []))} sections"
-                    )
-                else:
-                    logger.info("DEBUG: SimplifiedDataExtractor returned no data")
-            else:
-                logger.info("DEBUG: Could not extract patient_id from session data")
-
-        except Exception as e:
-            logger.error(f"DEBUG: Error extracting simplified clinical data: {e}")
-            import traceback
-
-            traceback.print_exc()
-
-        # Final context update - ensure sections are included from CDADisplayService
-        context.update({
-            "translation_result": translation_result,
-            "sections_count": sections_count,
-            "medical_terms_count": medical_terms_count,
-            "coded_sections_count": coded_sections_count,
-            "coded_sections_percentage": coded_sections_percentage,
-            "uses_coded_sections": uses_coded_sections,
-            "translation_quality": translation_quality,
-        })
-
-        # Ensure we have processed sections for the template
-        if translation_result.get("sections"):
-            logger.info(f"Processing {len(translation_result.get('sections', []))} sections from CDADisplayService")
-            processed_sections = prepare_enhanced_section_data(
-                translation_result.get("sections", []),
-                service_processed=True  # Indicate these are already processed by CDADisplayService
-            )
-            context["processed_sections"] = processed_sections
-
-        logger.info(f"[SUCCESS] CDADisplayService integration complete - {sections_count} sections, {medical_terms_count} terms")
-
-        return render(
-            request,
-            "patient_data/enhanced_patient_cda.html",
-            context,
-        )
-
-    except Exception as e:
-        logger.error(
-            f"CRITICAL ERROR in patient_cda_view for session {session_id}: {e}"
-        )
-        import traceback
-
-        full_traceback = traceback.format_exc()
-        logger.error(f"Full traceback:\n{full_traceback}")
-
-        # Try to provide a more helpful error page instead of immediate redirect
-        try:
-            context = {
-                "patient_identity": {
-                    "patient_id": session_id,
-                    "given_name": "Error",
-                    "family_name": "Loading Patient",
-                    "birth_date": "Unknown",
-                    "gender": "Unknown",
-                    "patient_identifiers": [],
-                    "primary_patient_id": session_id,
-                },
-                "source_country": "ERROR",
-                "source_language": "en",
-                "cda_type": "ERROR",
-                "confidence": 0,
-                "file_name": "error.xml",
-                "translation_quality": "Failed",
-                "sections_count": 0,
-                "medical_terms_count": 0,
-                "coded_sections_count": 0,
-                "coded_sections_percentage": 0,
-                "uses_coded_sections": False,
-                "translation_result": {"sections": []},
-                "safety_alerts": [],
-                "allergy_alerts": [],
-                "has_safety_alerts": False,
-                "administrative_data": {},
-                "has_administrative_data": False,
-                "error_message": str(e),
-                "error_traceback": full_traceback,
-                "template_translations": get_template_translations(),  # Default English translations for error page
-                "detected_source_language": "en",
-                "ui_labels": get_ui_labels("en"),  # Add UI labels to error context
-            }
-
-            messages.error(request, f"Technical error loading CDA document: {str(e)}")
-
-            return render(
-                request,
-                "patient_data/enhanced_patient_cda.html",
-                context,
-            )
-
-        except Exception as render_error:
-            logger.error(f"Even error rendering failed: {render_error}")
-            # Show error instead of redirecting
-            from django.http import HttpResponse
-
-            return HttpResponse(
-                f"<h1>Critical CDA View Error</h1><p>Session ID: {session_id}</p><p>Error: {str(e)}</p><pre>{full_traceback}</pre>",
-                status=500,
-            )
-
-"""
-# END OF CORRUPTED LEFTOVER CODE BLOCK COMMENT
 
 
 @login_required
