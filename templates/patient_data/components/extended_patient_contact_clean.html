@@ -194,7 +194,7 @@ This is not data duplication but necessary clinical context preservation.
                                 {% endif %}
                                 {% if address.city or address.postal_code or address.postalCode or address.country %}
                                     {% if address.street_lines or address.street %}<br>{% endif %}
-                                    {% if address.city %}{{ address.city }}{% endif %}{% if address.postal_code or address.postalCode %}{% if address.city %}, {% endif %}{{ address.postal_code|default:address.postalCode }}{% endif %}{% if address.country %}{% if address.city or address.postal_code or address.postalCode %}<br>{% endif %}{{ address.country|country_flag|safe }}{{ address.country|country_name }}{% endif %}
+                                    {% if address.city %}{{ address.city }}{% endif %}{% if address.postal_code or address.postalCode %}{% if address.city %}, {% endif %}{{ address.postal_code|default:address.postalCode }}{% endif %}{% if address.country %}{% if address.city or address.postal_code or address.postalCode %}<br>{% endif %}{{ address.country|country_name }}{% endif %}
                                 {% endif %}
                             </small>
                         </div>
@@ -345,7 +345,6 @@ This is not data duplication but necessary clinical context preservation.
                                 {% if address.city %}<br>{{ address.city }}{% endif %}
                                 {% if address.postalCode %} {{ address.postalCode }}{% endif %}
                                 {% if address.country %}<br>
-                                <span class="flag-icon">{{ address.country|country_flag|safe }}</span>
                                 {{ address.country|country_name }}
                                 {% endif %}
                             </small>
@@ -412,7 +411,6 @@ This is not data duplication but necessary clinical context preservation.
                                 {% if address.city %}<br>{{ address.city }}{% endif %}
                                 {% if address.postalCode %} {{ address.postalCode }}{% endif %}
                                 {% if address.country %}<br>
-                                <span class="flag-icon">{{ address.country|country_flag|safe }}</span>
                                 {{ address.country|country_name }}
                                 {% endif %}
                             </small>
