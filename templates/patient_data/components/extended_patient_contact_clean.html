@@ -33,7 +33,9 @@ in valid clinical scenarios (e.g., minor patients, caregiver arrangements, famil
 This is not data duplication but necessary clinical context preservation.
 {% endcomment %}
 
-{% if contact_data and contact_data.addresses or contact_data.telecoms or administrative_data %}
+
+
+{% if contact_data or patient_identity %}
 
 {% comment %} RESPONSIVE CONTACT GRID: Mobile-first card layout {% endcomment %}
 <div class="contact-info-grid">
@@ -57,22 +59,22 @@ This is not data duplication but necessary clinical context preservation.
                     {% endif %}
 
                     <div class="flex-grow-1">
-                        {% if patient_identity.birth_date or patient_identity.birth_date_formatted %}
+                        {% if patient_identity.birth_date %}
                         <div class="mb-2">
                             <small class="text-secondary-accessible">
                                 <i class="fa-solid fa-calendar text-info me-1"></i>
                                 <strong>Birth Date:</strong><br>
-                                {{ patient_identity.birth_date_formatted|default:patient_identity.birth_date }}
+                                {{ patient_identity.birth_date|default:"Unknown" }}
                             </small>
                         </div>
                         {% endif %}
 
-                        {% if patient_identity.administrative_gender or patient_identity.gender %}
+                        {% if patient_identity.gender %}
                         <div class="mb-2">
                             <small class="text-secondary-accessible">
                                 <i class="fa-solid fa-venus-mars text-info me-1"></i>
                                 <strong>Gender:</strong><br>
-                                {{ patient_identity.administrative_gender|default:patient_identity.gender|capfirst }}
+                                {{ patient_identity.gender|capfirst }}
                             </small>
                         </div>
                         {% endif %}
@@ -83,7 +85,7 @@ This is not data duplication but necessary clinical context preservation.
         {% endif %}
 
         {% comment %} PATIENT IDENTIFIERS CARD: Medical record numbers and IDs {% endcomment %}
-        {% if patient_identity.patient_identifiers or administrative_data.patient_id %}
+        {% if patient_identity.patient_identifiers or patient_identity.patient_id %}
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card service-card border-secondary h-100">
                 <div class="card-header bg-secondary text-white">
@@ -110,12 +112,12 @@ This is not data duplication but necessary clinical context preservation.
                         </div>
                         {% if not forloop.last %}<hr class="my-2">{% endif %}
                         {% endfor %}
-                        {% elif administrative_data.patient_id %}
+                        {% elif patient_identity.patient_id %}
                         <div class="mb-2">
                             <small class="text-secondary-accessible">
                                 <i class="fa-solid fa-fingerprint text-secondary me-1"></i>
                                 <strong>Patient ID:</strong><br>
-                                <code class="small">{{ administrative_data.patient_id }}</code>
+                                <code class="small">{{ patient_identity.patient_id }}</code>
                             </small>
                         </div>
                         {% endif %}
@@ -190,9 +192,9 @@ This is not data duplication but necessary clinical context preservation.
                                 {% elif address.street %}
                                     {{ address.street }}
                                 {% endif %}
-                                {% if address.city or address.postal_code or address.country %}
+                                {% if address.city or address.postal_code or address.postalCode or address.country %}
                                     {% if address.street_lines or address.street %}<br>{% endif %}
-                                    {% if address.city %}{{ address.city }}{% endif %}{% if address.postal_code or address.postalCode %}{% if address.city %}, {% endif %}{{ address.postal_code|default:address.postalCode }}{% endif %}{% if address.country %}{% if address.city or address.postal_code or address.postalCode %}<br>{% endif %}{{ address.country }}{% endif %}
+                                    {% if address.city %}{{ address.city }}{% endif %}{% if address.postal_code or address.postalCode %}{% if address.city %}, {% endif %}{{ address.postal_code|default:address.postalCode }}{% endif %}{% if address.country %}{% if address.city or address.postal_code or address.postalCode %}<br>{% endif %}{{ address.country|country_flag|safe }}{{ address.country|country_name }}{% endif %}
                                 {% endif %}
                             </small>
                         </div>
@@ -235,17 +237,17 @@ This is not data duplication but necessary clinical context preservation.
                         {% for telecom in contact_data.telecoms %}
                         <div class="mb-2">
                             <div class="d-flex align-items-center">
-                                {% if telecom.system == 'phone' %}
+                                {% if telecom.type == 'phone' %}
                                 <i class="fa-solid fa-phone text-info me-2"></i>
-                                {% elif telecom.system == 'email' %}
+                                {% elif telecom.type == 'email' %}
                                 <i class="fa-solid fa-envelope text-info me-2"></i>
-                                {% elif telecom.system == 'fax' %}
+                                {% elif telecom.type == 'fax' %}
                                 <i class="fa-solid fa-fax text-info me-2"></i>
                                 {% else %}
                                 <i class="fa-solid fa-info-circle text-info me-2"></i>
                                 {% endif %}
                                 <small class="text-secondary-accessible flex-grow-1">
-                                    <strong>{{ telecom.value }}</strong>
+                                    <strong>{{ telecom.display_value }}</strong>
                                     {% if telecom.use %}<br><em>{{ telecom.use|capfirst }}</em>{% endif %}
                                 </small>
                             </div>
@@ -280,7 +282,7 @@ This is not data duplication but necessary clinical context preservation.
         {% endif %}
 
         {% comment %} PATIENT LANGUAGES CARD: Communication language preferences {% endcomment %}
-        {% if administrative_data.patient_languages %}
+        {% if patient_identity.patient_languages or administrative_data.patient_languages %}
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card service-card border-success h-100">
                 <div class="card-header bg-success text-white">
@@ -290,11 +292,19 @@ This is not data duplication but necessary clinical context preservation.
                 </div>
                 <div class="card-body d-flex flex-column">
                     <div class="flex-grow-1">
-                        {% for language in administrative_data.patient_languages %}
-                        <span class="badge bg-light text-dark me-2 mb-2">
-                            <i class="fa-solid fa-language me-1"></i>{{ language }}
-                        </span>
-                        {% endfor %}
+                        {% if patient_identity.patient_languages %}
+                            {% for language in patient_identity.patient_languages %}
+                            <span class="badge bg-light text-dark me-2 mb-2">
+                                <i class="fa-solid fa-language me-1"></i>{{ language }}
+                            </span>
+                            {% endfor %}
+                        {% elif administrative_data.patient_languages %}
+                            {% for language in administrative_data.patient_languages %}
+                            <span class="badge bg-light text-dark me-2 mb-2">
+                                <i class="fa-solid fa-language me-1"></i>{{ language }}
+                            </span>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                     <small class="text-secondary-accessible mt-auto">
                         <i class="fa-solid fa-info-circle me-1"></i>Communication Languages
@@ -304,8 +314,7 @@ This is not data duplication but necessary clinical context preservation.
         </div>
         {% endif %}
         {% comment %} GUARDIAN INFORMATION CARD: Legal guardian or next-of-kin contact details {% endcomment %}
-        {% if administrative_data.guardian and administrative_data.guardian.contact_info %}
-            {% if administrative_data.guardian.contact_info.addresses or administrative_data.guardian.contact_info.telecoms or administrative_data.guardian.given_name or administrative_data.guardian.family_name %}
+        {% if administrative_data.guardian and administrative_data.guardian.family_name %}
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card service-card border-warning h-100">
                 <div class="card-header bg-warning text-dark">
@@ -314,71 +323,63 @@ This is not data duplication but necessary clinical context preservation.
                     </h6>
                 </div>
                 <div class="card-body d-flex flex-column">
-                    {% if administrative_data.guardian.given_name or administrative_data.guardian.family_name %}
                     <div class="mb-2">
                         <strong class="text-secondary-accessible">
-                            {% if administrative_data.guardian.given_name and administrative_data.guardian.family_name %}
-                                {{ administrative_data.guardian.given_name }} {{ administrative_data.guardian.family_name }}
-                            {% elif administrative_data.guardian.given_name %}
-                                {{ administrative_data.guardian.given_name }}
-                            {% elif administrative_data.guardian.family_name %}
-                                {{ administrative_data.guardian.family_name }}
-                            {% endif %}
+                            {% if administrative_data.guardian.given_name %}{{ administrative_data.guardian.given_name }} {% endif %}{{ administrative_data.guardian.family_name }}
                         </strong>
                         {% if administrative_data.guardian.relationship %}
                         <br><span class="badge bg-info">{{ administrative_data.guardian.relationship }}</span>
-                        {% elif administrative_data.guardian.contact_type %}
-                        <br><span class="badge bg-info">{{ administrative_data.guardian.contact_type }}</span>
                         {% elif administrative_data.guardian.role %}
                         <br><span class="badge bg-info">{{ administrative_data.guardian.role }}</span>
                         {% endif %}
                     </div>
-                    {% endif %}
 
-                    {% comment %} Guardian contact information display {% endcomment %}
+                    {% if administrative_data.guardian.contact_info %}
                     <div class="flex-grow-1">
                         {% if administrative_data.guardian.contact_info.addresses %}
+                        {% for address in administrative_data.guardian.contact_info.addresses %}
                         <div class="mb-2">
                             <small class="text-secondary-accessible">
                                 <i class="fa-solid fa-map-marker-alt text-warning me-1"></i>
-                                {% for address in administrative_data.guardian.contact_info.addresses %}
-                                {% if address.street_lines %}
-                                    {% for line in address.street_lines %}{{ line }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                                {% elif address.street %}
-                                    {{ address.street }}
+                                {% if address.street %}{{ address.street }}{% endif %}
+                                {% if address.city %}<br>{{ address.city }}{% endif %}
+                                {% if address.postalCode %} {{ address.postalCode }}{% endif %}
+                                {% if address.country %}<br>
+                                <span class="flag-icon">{{ address.country|country_flag|safe }}</span>
+                                {{ address.country|country_name }}
                                 {% endif %}
-                                {% if address.city %}{{ address.city }}{% endif %}
-                                {% endfor %}
                             </small>
                         </div>
+                        {% endfor %}
                         {% endif %}
 
                         {% if administrative_data.guardian.contact_info.telecoms %}
                         {% for telecom in administrative_data.guardian.contact_info.telecoms %}
                         <div class="mb-1">
                             <small class="text-secondary-accessible">
-                                {% if telecom.system == 'phone' %}
+                                {% if telecom.type == 'phone' %}
                                 <i class="fa-solid fa-phone text-warning me-1"></i>
-                                {% elif telecom.system == 'email' %}
+                                {% elif telecom.type == 'email' %}
                                 <i class="fa-solid fa-envelope text-warning me-1"></i>
                                 {% else %}
                                 <i class="fa-solid fa-info-circle text-warning me-1"></i>
                                 {% endif %}
-                                {{ telecom.value }}
+                                {{ telecom.display_value }}
                             </small>
                         </div>
                         {% endfor %}
                         {% endif %}
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-            {% endif %}
         {% endif %}
 
         {% comment %} EMERGENCY CONTACTS CARDS: Additional emergency contact persons {% endcomment %}
         {% if administrative_data.other_contacts %}
         {% for contact in administrative_data.other_contacts %}
+        {% if contact.given_name or contact.family_name %}
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card service-card border-secondary h-100">
                 <div class="card-header bg-secondary text-white">
@@ -388,7 +389,9 @@ This is not data duplication but necessary clinical context preservation.
                 </div>
                 <div class="card-body d-flex flex-column">
                     <div class="mb-2">
-                        <strong class="text-secondary-accessible">{{ contact.given_name }} {{ contact.family_name }}</strong>
+                        <strong class="text-secondary-accessible">
+                            {% if contact.given_name %}{{ contact.given_name }} {% endif %}{{ contact.family_name }}
+                        </strong>
                         {% if contact.relationship %}
                         <br><span class="badge bg-info">{{ contact.relationship }}</span>
                         {% elif contact.contact_type %}
@@ -398,39 +401,47 @@ This is not data duplication but necessary clinical context preservation.
                         {% endif %}
                     </div>
 
+                    {% if contact.contact_info %}
                     <div class="flex-grow-1">
                         {% if contact.contact_info.addresses %}
+                        {% for address in contact.contact_info.addresses %}
                         <div class="mb-2">
                             <small class="text-secondary-accessible">
                                 <i class="fa-solid fa-map-marker-alt text-secondary me-1"></i>
-                                {% for address in contact.contact_info.addresses %}
-                                {% if address.street %}{{ address.street }}, {% endif %}
-                                {% if address.city %}{{ address.city }}{% endif %}
-                                {% endfor %}
+                                {% if address.street %}{{ address.street }}{% endif %}
+                                {% if address.city %}<br>{{ address.city }}{% endif %}
+                                {% if address.postalCode %} {{ address.postalCode }}{% endif %}
+                                {% if address.country %}<br>
+                                <span class="flag-icon">{{ address.country|country_flag|safe }}</span>
+                                {{ address.country|country_name }}
+                                {% endif %}
                             </small>
                         </div>
+                        {% endfor %}
                         {% endif %}
 
                         {% if contact.contact_info.telecoms %}
                         {% for telecom in contact.contact_info.telecoms %}
                         <div class="mb-1">
                             <small class="text-secondary-accessible">
-                                {% if telecom.system == 'phone' %}
+                                {% if telecom.type == 'phone' %}
                                 <i class="fa-solid fa-phone text-secondary me-1"></i>
-                                {% elif telecom.system == 'email' %}
+                                {% elif telecom.type == 'email' %}
                                 <i class="fa-solid fa-envelope text-secondary me-1"></i>
                                 {% else %}
                                 <i class="fa-solid fa-info-circle text-secondary me-1"></i>
                                 {% endif %}
-                                {{ telecom.value }}
+                                {{ telecom.display_value }}
                             </small>
                         </div>
                         {% endfor %}
                         {% endif %}
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
+        {% endif %}
         {% endfor %}
         {% endif %}
 
