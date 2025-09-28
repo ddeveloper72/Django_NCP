@@ -85,61 +85,14 @@ This is not data duplication but necessary clinical context preservation.
                                 <i class="fa-solid fa-fingerprint text-info me-1"></i>
                                 <strong>Patient ID:</strong><br>
                                 <code class="small">{{ patient_identity.patient_id }}</code>
-                                {% if patient_identity.patient_identifiers.0.root %}
-                                <br><span class="text-muted" style="font-size: 0.7rem;">
-                                    <i class="fa-solid fa-key me-1"></i>{{ patient_identity.patient_identifiers.0.root }}
-                                </span>
-                                {% endif %}
-                            </small>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        {% comment %} PATIENT IDENTIFIERS CARD: Medical record numbers and IDs {% endcomment %}
-        {% if patient_identity.patient_identifiers or patient_identity.patient_id %}
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="card service-card border-secondary h-100">
-                <div class="card-header bg-secondary text-white">
-                    <h6 class="mb-0">
-                        <i class="fa-solid fa-id-card me-2"></i>Patient Identifiers
-                    </h6>
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <div class="flex-grow-1">
-                        {% if patient_identity.patient_identifiers %}
-                        {% for identifier in patient_identity.patient_identifiers %}
-                        <div class="mb-2">
-                            <small class="text-secondary-accessible">
-                                <i class="fa-solid fa-fingerprint text-secondary me-1"></i>
-                                {% if identifier.assigningAuthorityName %}
-                                <strong>{{ identifier.assigningAuthorityName }}:</strong><br>
-                                {% else %}
-                                <strong>Patient ID:</strong><br>
-                                {% endif %}
-                                <code class="small">{{ identifier.extension }}</code>
-                                {% if identifier.root %}
-                                <br><span class="text-muted" style="font-size: 0.75rem;">
-                                    <i class="fa-solid fa-key me-1"></i>Root: {{ identifier.root }}
-                                </span>
-                                {% endif %}
-                            </small>
-                        </div>
-                        {% if not forloop.last %}<hr class="my-2">{% endif %}
-                        {% endfor %}
-                        {% elif patient_identity.patient_id %}
-                        <div class="mb-2">
-                            <small class="text-secondary-accessible">
-                                <i class="fa-solid fa-fingerprint text-secondary me-1"></i>
-                                <strong>Patient ID:</strong><br>
-                                <code class="small">{{ patient_identity.patient_id }}</code>
-                                {% if patient_identity.patient_identifiers.0.root %}
-                                <br><span class="text-muted" style="font-size: 0.75rem;">
-                                    <i class="fa-solid fa-key me-1"></i>Root: {{ patient_identity.patient_identifiers.0.root }}
-                                </span>
+                                
+                                {# Display patient root identifier if available #}
+                                {% if patient_identity.patient_identifiers and patient_identity.patient_identifiers|length > 0 %}
+                                    {% if patient_identity.patient_identifiers.0.root %}
+                                    <br><span class="small" style="font-size: 0.7rem;">
+                                        <i class="fa-solid fa-key me-1"></i>{{ patient_identity.patient_identifiers.0.root }}
+                                    </span>
+                                    {% endif %}
                                 {% endif %}
                             </small>
                         </div>
