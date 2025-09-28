@@ -32,20 +32,20 @@
                     <div class="document-details mt-3">
                         <div class="detail-item">
                             <span class="detail-label">Creation Date:</span>
-                            <span class="detail-value">{{ administrative_data.effective_time|default:"Not specified" }}</span>
+                            <span class="detail-value">{{ administrative_data.document_creation_date }}</span>
                         </div>
 
-                        {% if administrative_data.version_number %}
+                        {% if administrative_data.document_version_number %}
                         <div class="detail-item">
                             <span class="detail-label">Document Version:</span>
-                            <span class="detail-value">{{ administrative_data.version_number }}</span>
+                            <span class="detail-value">{{ administrative_data.document_version_number }}</span>
                         </div>
                         {% endif %}
 
                         {% if administrative_data.document_id %}
                         <div class="detail-item">
                             <span class="detail-label">Document ID:</span>
-                            <span class="detail-value">{{ administrative_data.document_id.extension|default:"Not specified" }}</span>
+                            <span class="detail-value">{{ administrative_data.document_id }}</span>
                         </div>
                         {% endif %}
                     </div>
