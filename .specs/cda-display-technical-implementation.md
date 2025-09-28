@@ -197,7 +197,7 @@ This document provides the technical implementation details for the Enhanced CDA
                 <h6 class="text-success">
                     <i class="fa-solid fa-user-md me-2"></i>Healthcare Provider
                 </h6>
-                <p class="mb-1">{{ administrative_data.author_hcp.full_name|default:"António Pereira" }}</p>
+                <p class="mb-1">{{ administrative_data.author_hcp.full_name }}</p>
             </div>
 
             <!-- Healthcare Organization -->
@@ -238,7 +238,7 @@ This document provides the technical implementation details for the Enhanced CDA
                 <i class="fa-solid fa-gavel me-2"></i>Legal Authenticator
             </h6>
             <p class="mb-1"><strong>AUTHENTICATOR</strong></p>
-            <p class="mb-0">{{ administrative_data.legal_authenticator.full_name|default:"António Pereira" }}</p>
+            <p class="mb-0">{{ administrative_data.legal_authenticator.full_name }}</p>
         </div>
     </div>
 </div>
@@ -260,7 +260,7 @@ This document provides the technical implementation details for the Enhanced CDA
                 <h6 class="text-primary">
                     <i class="fa-solid fa-file-medical me-2"></i>Document Information
                 </h6>
-                <p class="mb-1">{{ administrative_data.document_title|default:"Patient Summary" }} (PS)</p>
+                <p class="mb-1">{{ administrative_data.document_title }} (PS)</p>
                 <p class="mb-1 small text-muted">European eHealth Standard</p>
 
                 <div class="mt-2">
@@ -272,8 +272,8 @@ This document provides the technical implementation details for the Enhanced CDA
 
                 <div class="mt-2">
                     <small class="text-muted">
-                        Creation Date: {{ administrative_data.document_creation_date|default:"Not specified" }}<br>
-                        Document ID: {{ administrative_data.document_id|default:"Not specified" }}
+                        Creation Date: {{ administrative_data.document_creation_date }}<br>
+                        Document ID: {{ administrative_data.document_id }}
                     </small>
                 </div>
             </div>
