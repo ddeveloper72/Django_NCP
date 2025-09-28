@@ -2920,15 +2920,28 @@ def patient_cda_view(request, session_id, cda_type=None):
         try:
             from django.contrib.sessions.models import Session
 
+            logger.info(
+                f"[HELPER] Checking actual CDA availability for {session_id}/{cda_type}"
+            )
+
             # Search for session data directly
             session_key = f"patient_match_{session_id}"
             all_sessions = Session.objects.all()
 
-            for db_session in all_sessions:
+            logger.info(f"[HELPER] Found {all_sessions.count()} total sessions")
+
+            for i, db_session in enumerate(all_sessions):
                 try:
                     session_data = db_session.get_decoded()
                     if session_key in session_data:
                         match_data = session_data[session_key]
+
+                        logger.info(
+                            f"[HELPER] Found session data for {session_id} in session {i}"
+                        )
+                        logger.info(
+                            f"[HELPER] Match data keys: {list(match_data.keys())}"
+                        )
 
                         # Check for the specific CDA type content
                         if cda_type.upper() == "L3":
@@ -2938,25 +2951,31 @@ def patient_cda_view(request, session_id, cda_type=None):
                         else:
                             cda_content = match_data.get("cda_content")
 
+                        content_length = len(cda_content) if cda_content else 0
+                        logger.info(
+                            f"[HELPER] {cda_type} content length: {content_length}"
+                        )
+
                         # If we found content, the CDA type is available
                         is_available = bool(cda_content and len(cda_content) > 100)
 
                         logger.info(
-                            f"Direct CDA availability check for {session_id}/{cda_type}: {is_available}"
+                            f"[HELPER] Direct CDA availability check for {session_id}/{cda_type}: {is_available} (content: {content_length} chars)"
                         )
                         return is_available
 
-                except Exception:
+                except Exception as e:
+                    logger.warning(f"[HELPER] Error processing session {i}: {e}")
                     continue  # Skip corrupted sessions
 
             logger.warning(
-                f"No session data found for direct CDA availability check: {session_id}/{cda_type}"
+                f"[HELPER] No session data found for direct CDA availability check: {session_id}/{cda_type}"
             )
             return False
 
         except Exception as e:
             logger.warning(
-                f"Failed to check actual CDA availability for {session_id}/{cda_type}: {e}"
+                f"[HELPER] Failed to check actual CDA availability for {session_id}/{cda_type}: {e}"
             )
             return False
 
@@ -3817,71 +3836,97 @@ def patient_cda_view(request, session_id, cda_type=None):
             "source_country": match_data.get("country_code", "Unknown"),
             "source_language": source_language,
             "cda_type": actual_cda_type,
-            # Prioritize session extended data over search result for L1/L3 flags
-            "has_l1_cda": (
-                request.session.get(f"patient_match_{session_id}", {}).get("has_l1")
-                if f"patient_match_{session_id}" in request.session
-                else (
-                    request.session.get(f"patient_extended_data_{session_id}", {}).get(
-                        "has_l1_cda"
-                    )
-                    if f"patient_extended_data_{session_id}" in request.session
-                    else (
-                        search_result.has_l1_cda()
-                        if search_result
-                        else _check_actual_cda_availability(session_id, "L1")
-                    )
-                )
-            ),
-            "has_l3_cda": (
-                request.session.get(f"patient_match_{session_id}", {}).get("has_l3")
-                if f"patient_match_{session_id}" in request.session
-                else (
-                    request.session.get(f"patient_extended_data_{session_id}", {}).get(
-                        "has_l3_cda"
-                    )
-                    if f"patient_extended_data_{session_id}" in request.session
-                    else (
-                        search_result.has_l3_cda()
-                        if search_result
-                        else _check_actual_cda_availability(session_id, "L3")
-                    )
-                )
-            ),
-            "confidence": int(match_data.get("confidence_score", 0.95) * 100),
-            "file_name": match_data.get("file_path", "unknown.xml"),
-            "translation_quality": translation_quality,
-            "sections_count": sections_count,
-            "medical_terms_count": medical_terms_count,
-            "coded_sections_count": coded_sections_count,
-            "coded_sections_percentage": coded_sections_percentage,
-            "uses_coded_sections": uses_coded_sections,
-            "translation_result": translation_result,
-            "safety_alerts": [],
-            "allergy_alerts": [],
-            "has_safety_alerts": False,
-            "administrative_data": {
-                "document_creation_date": None,
-                "document_last_update_date": None,
-                "document_version_number": None,
-                "patient_contact_info": {"addresses": [], "telecoms": []},
-                "author_hcp": {"family_name": None, "organization": {"name": None}},
-                "legal_authenticator": {
-                    "family_name": None,
-                    "organization": {"name": None},
-                },
-                "custodian_organization": {"name": None},
-                "preferred_hcp": {"name": None},
-                "guardian": {"family_name": None},
-                "other_contacts": [],
-            },
-            "has_administrative_data": False,
-            # PDF content information for L1 CDAs
-            "embedded_pdfs": embedded_pdfs,
-            "has_embedded_pdfs": has_embedded_pdfs,
-            "is_pdf_only_cda": has_embedded_pdfs
-            and len(enhanced_processing_result.get("sections", [])) == 0,
         }
+
+        # DEBUG: Check session state before building has_l3_cda logic
+        session_has_match = f"patient_match_{session_id}" in request.session
+        session_has_extended = f"patient_extended_data_{session_id}" in request.session
+        search_result_has_l3 = search_result.has_l3_cda() if search_result else None
+
+        logger.info(f"[DEBUG] L3 Button Logic Debug for session {session_id}:")
+        logger.info(f"[DEBUG] - Session has patient_match: {session_has_match}")
+        logger.info(f"[DEBUG] - Session has extended data: {session_has_extended}")
+        logger.info(f"[DEBUG] - Search result exists: {search_result is not None}")
+        logger.info(f"[DEBUG] - Search result has_l3_cda: {search_result_has_l3}")
+
+        # Prioritize session extended data over search result for L1/L3 flags
+        context.update(
+            {
+                "has_l1_cda": (
+                    request.session.get(f"patient_match_{session_id}", {}).get("has_l1")
+                    if f"patient_match_{session_id}" in request.session
+                    else (
+                        request.session.get(
+                            f"patient_extended_data_{session_id}", {}
+                        ).get("has_l1_cda")
+                        if f"patient_extended_data_{session_id}" in request.session
+                        else (
+                            search_result.has_l1_cda()
+                            if search_result
+                            else _check_actual_cda_availability(session_id, "L1")
+                        )
+                    )
+                ),
+                "has_l3_cda": (
+                    request.session.get(f"patient_match_{session_id}", {}).get("has_l3")
+                    if f"patient_match_{session_id}" in request.session
+                    else (
+                        request.session.get(
+                            f"patient_extended_data_{session_id}", {}
+                        ).get("has_l3_cda")
+                        if f"patient_extended_data_{session_id}" in request.session
+                        else (
+                            search_result.has_l3_cda()
+                            if search_result
+                            else _check_actual_cda_availability(session_id, "L3")
+                        )
+                    )
+                ),
+            }
+        )
+
+        logger.info(f"[DEBUG] Final context has_l3_cda: {context.get('has_l3_cda')}")
+        logger.info(
+            f"[DEBUG] L3 Button should be: {'ENABLED' if context.get('has_l3_cda') else 'DISABLED'}"
+        )
+
+        context.update(
+            {
+                "confidence": int(match_data.get("confidence_score", 0.95) * 100),
+                "file_name": match_data.get("file_path", "unknown.xml"),
+                "translation_quality": translation_quality,
+                "sections_count": sections_count,
+                "medical_terms_count": medical_terms_count,
+                "coded_sections_count": coded_sections_count,
+                "coded_sections_percentage": coded_sections_percentage,
+                "uses_coded_sections": uses_coded_sections,
+                "translation_result": translation_result,
+                "safety_alerts": [],
+                "allergy_alerts": [],
+                "has_safety_alerts": False,
+                "administrative_data": {
+                    "document_creation_date": None,
+                    "document_last_update_date": None,
+                    "document_version_number": None,
+                    "patient_contact_info": {"addresses": [], "telecoms": []},
+                    "author_hcp": {"family_name": None, "organization": {"name": None}},
+                    "legal_authenticator": {
+                        "family_name": None,
+                        "organization": {"name": None},
+                    },
+                    "custodian_organization": {"name": None},
+                    "preferred_hcp": {"name": None},
+                    "guardian": {"family_name": None},
+                    "other_contacts": [],
+                },
+                "has_administrative_data": False,
+                # PDF content information for L1 CDAs
+                "embedded_pdfs": embedded_pdfs,
+                "has_embedded_pdfs": has_embedded_pdfs,
+                "is_pdf_only_cda": has_embedded_pdfs
+                and len(enhanced_processing_result.get("sections", [])) == 0,
+            }
+        )
 
         # Extract enhanced data from CDADisplayService result
         enhanced_processing_result = translation_result
