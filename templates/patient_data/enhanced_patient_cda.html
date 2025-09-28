@@ -92,14 +92,7 @@
                     <div class="d-flex align-items-center">
                         <span class="badge bg-light text-dark border me-2"
                               {% tooltip "source_country_flag" %}>
-                            {% if source_country|country_flag %}
-                                <img src="{% static source_country|country_flag %}"
-                                     alt="{{ source_country|country_name }}"
-                                     class="flag-icon me-1"
-                                     style="max-width: 20px; max-height: 16px;">
-                            {% else %}
-                                <i class="fa-solid fa-flag me-1"></i>
-                            {% endif %}
+                            {{ source_country|country_flag|safe }}
                             {{ source_country|country_name }}
                         </span>
                         <span class="badge {% if 'High' in translation_quality %}bg-success{% elif 'Medium' in translation_quality %}bg-warning{% else %}bg-secondary{% endif %}"
@@ -156,12 +149,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <p><strong>Source Country:</strong>
-                                        {% if source_country|country_flag %}
-                                            <img src="{% static source_country|country_flag %}"
-                                                 alt="{{ source_country|country_name }}"
-                                                 class="flag-icon me-1"
-                                                 style="max-width: 20px; max-height: 16px;">
-                                        {% endif %}
+                                        {{ source_country|country_flag|safe }}
                                         {{ source_country|country_name }}
                                     </p>
                                     <p><strong>CDA Type:</strong> {{ cda_type }}</p>
