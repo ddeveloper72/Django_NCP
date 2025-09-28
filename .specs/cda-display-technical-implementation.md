@@ -1,8 +1,8 @@
 # CDA Display Technical Implementation Reference
 
-**Document Version:** 1.0  
-**Last Updated:** September 28, 2025  
-**Status:** Production Implementation Guide  
+**Document Version:** 1.0
+**Last Updated:** September 28, 2025
+**Status:** Production Implementation Guide
 **Purpose:** Technical reference for implementing the CDA Display wireframes
 
 ---
@@ -20,6 +20,7 @@ This document provides the technical implementation details for the Enhanced CDA
 ### Primary Template: `enhanced_patient_cda.html`
 
 #### Navigation Tabs Structure
+
 ```html
 <!-- Primary Level Navigation -->
 <ul class="nav nav-tabs nav-tabs-healthcare" id="patientTabs" role="tablist">
@@ -43,7 +44,7 @@ This document provides the technical implementation details for the Enhanced CDA
     <div class="tab-pane fade show active" id="overview-content" role="tabpanel">
         <!-- Static patient information display -->
     </div>
-    
+
     <!-- Extended Patient Information Content -->
     <div class="tab-pane fade" id="contact-content" role="tabpanel">
         <!-- Secondary navigation and card layout -->
@@ -52,18 +53,19 @@ This document provides the technical implementation details for the Enhanced CDA
 ```
 
 #### Secondary Navigation (Pills) Structure
+
 ```html
 <!-- Secondary Level Navigation (Pills) -->
 <div class="nav nav-pills nav-fill mb-3" role="tablist">
-    <button class="nav-link active btn-sm" id="personal-info-tab" 
+    <button class="nav-link active btn-sm" id="personal-info-tab"
             data-bs-toggle="pill" data-bs-target="#personal-info" type="button" role="tab">
         <i class="fa-solid fa-user me-1"></i>Personal Information
     </button>
-    <button class="nav-link btn-sm" id="healthcare-team-tab" 
+    <button class="nav-link btn-sm" id="healthcare-team-tab"
             data-bs-toggle="pill" data-bs-target="#healthcare-team" type="button" role="tab">
         <i class="fa-solid fa-user-md me-1"></i>Healthcare Team
     </button>
-    <button class="nav-link btn-sm" id="system-doc-tab" 
+    <button class="nav-link btn-sm" id="system-doc-tab"
             data-bs-toggle="pill" data-bs-target="#system-doc" type="button" role="tab">
         <i class="fa-solid fa-cog me-1"></i>System & Documentation
     </button>
@@ -195,39 +197,48 @@ This document provides the technical implementation details for the Enhanced CDA
                 <h6 class="text-success">
                     <i class="fa-solid fa-user-md me-2"></i>Healthcare Provider
                 </h6>
-                <p class="mb-1">{{ administrative_data.healthcare_provider|default:"António Pereira" }}</p>
+                <p class="mb-1">{{ administrative_data.author_hcp.full_name|default:"António Pereira" }}</p>
             </div>
-            
+
             <!-- Healthcare Organization -->
             <div class="col-md-6">
                 <h6 class="text-success">
                     <i class="fa-solid fa-hospital me-2"></i>Healthcare Organization
                 </h6>
                 <p class="mb-1">{{ administrative_data.custodian_name }}</p>
-                
+
                 <div class="mt-2">
                     <strong>CONTACT INFORMATION</strong><br>
                     <small class="text-muted">
-                        <i class="fa-solid fa-envelope me-1"></i>{{ administrative_data.contact_email }}
+                        {% if administrative_data.author_hcp.organization.telecoms %}
+                        {% for telecom in administrative_data.author_hcp.organization.telecoms %}
+                        <i class="fa-solid fa-envelope me-1"></i>{{ telecom.display_value }}<br>
+                        {% endfor %}
+                        {% endif %}
                     </small>
                 </div>
-                
+
                 <div class="mt-2">
                     <strong>ORGANIZATION ADDRESS</strong><br>
                     <small class="text-muted">
-                        {{ administrative_data.organization_address }}
+                        {% if administrative_data.author_hcp.organization.addresses %}
+                        {% for address in administrative_data.author_hcp.organization.addresses %}
+                        {{ address.street }}<br>
+                        {{ address.city }}, {{ address.postalCode }}
+                        {% endfor %}
+                        {% endif %}
                     </small>
                 </div>
             </div>
         </div>
-        
+
         <!-- Legal Authenticator -->
         <div class="mt-3 pt-3 border-top">
             <h6 class="text-success">
                 <i class="fa-solid fa-gavel me-2"></i>Legal Authenticator
             </h6>
             <p class="mb-1"><strong>AUTHENTICATOR</strong></p>
-            <p class="mb-0">{{ administrative_data.legal_authenticator }}</p>
+            <p class="mb-0">{{ administrative_data.legal_authenticator.full_name|default:"António Pereira" }}</p>
         </div>
     </div>
 </div>
@@ -249,42 +260,51 @@ This document provides the technical implementation details for the Enhanced CDA
                 <h6 class="text-primary">
                     <i class="fa-solid fa-file-medical me-2"></i>Document Information
                 </h6>
-                <p class="mb-1">{{ document_metadata.title }} (PS)</p>
+                <p class="mb-1">{{ administrative_data.document_title|default:"Patient Summary" }} (PS)</p>
                 <p class="mb-1 small text-muted">European eHealth Standard</p>
-                
+
                 <div class="mt-2">
                     <strong>DOCUMENT STATUS</strong><br>
                     <span class="badge bg-success me-1">ACTIVE</span>
                     <span class="badge bg-primary me-1">SECURE</span>
                     <span class="badge bg-warning text-dark">NORMAL CONFIDENTIALITY</span>
                 </div>
-                
+
                 <div class="mt-2">
                     <small class="text-muted">
-                        Creation Date: {{ document_metadata.creation_date|default:"Not specified" }}<br>
-                        Document ID: {{ document_metadata.document_id|default:"Not specified" }}
+                        Creation Date: {{ administrative_data.document_creation_date|default:"Not specified" }}<br>
+                        Document ID: {{ administrative_data.document_id|default:"Not specified" }}
                     </small>
                 </div>
             </div>
-            
+
             <!-- Document Custodian -->
             <div class="col-md-6">
                 <h6 class="text-primary">
                     <i class="fa-solid fa-shield-alt me-2"></i>Document Custodian
                 </h6>
                 <p class="mb-1">{{ administrative_data.custodian_name }}</p>
-                
+
                 <div class="mt-2">
                     <strong>CONTACT INFORMATION</strong><br>
                     <small class="text-muted">
-                        <i class="fa-solid fa-envelope me-1"></i>{{ administrative_data.contact_email }}
+                        {% if administrative_data.custodian_organization.telecoms %}
+                        {% for telecom in administrative_data.custodian_organization.telecoms %}
+                        <i class="fa-solid fa-envelope me-1"></i>{{ telecom.display_value }}<br>
+                        {% endfor %}
+                        {% endif %}
                     </small>
                 </div>
-                
+
                 <div class="mt-2">
                     <strong>ORGANIZATION ADDRESS</strong><br>
                     <small class="text-muted">
-                        {{ administrative_data.organization_location }}
+                        {% if administrative_data.custodian_organization.addresses %}
+                        {% for address in administrative_data.custodian_organization.addresses %}
+                        {{ address.street }}<br>
+                        {{ address.city }}, {{ address.postalCode }}
+                        {% endfor %}
+                        {% endif %}
                     </small>
                 </div>
             </div>
@@ -298,24 +318,25 @@ This document provides the technical implementation details for the Enhanced CDA
 ## CSS Implementation Notes
 
 ### Card Styling
+
 ```scss
 .card {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    
+
     .card-header {
         border-radius: 8px 8px 0 0;
         font-weight: 600;
-        
+
         h6 {
             font-size: 0.9rem;
             margin-bottom: 0;
         }
     }
-    
+
     .card-body {
         padding: 0.75rem;
-        
+
         small.text-muted {
             line-height: 1.4;
         }
@@ -337,14 +358,15 @@ This document provides the technical implementation details for the Enhanced CDA
 ```
 
 ### Navigation Styling
+
 ```scss
 .nav-tabs-healthcare {
     border-bottom: 2px solid #dee2e6;
-    
+
     .nav-link {
         border: none;
         border-bottom: 3px solid transparent;
-        
+
         &.active {
             border-bottom-color: var(--bs-primary);
             background-color: transparent;
@@ -365,39 +387,57 @@ This document provides the technical implementation details for the Enhanced CDA
 ## Data Binding Requirements
 
 ### Django Context Variables
+
 ```python
 # Required context data for template rendering
 context = {
     'patient_identity': {
         'given_name': str,
         'family_name': str,
-        'birth_date_formatted': str,
-        'administrative_gender': str,
+        'birth_date': str,
+        'gender': str,
         'patient_id': str,
+        'patient_identifiers': [IdentifierObject],
     },
     'contact_data': {
-        'patient_contact_info': {
-            'addresses': [AddressObject],
-            'telecoms': [TelecomObject],
-        }
+        'addresses': [AddressObject],
+        'telecoms': [TelecomObject],
     },
     'administrative_data': {
         'custodian_name': str,
-        'healthcare_provider': str,
-        'contact_email': str,
-        'organization_address': str,
-        'legal_authenticator': str,
-        'organization_location': str,
-    },
-    'document_metadata': {
-        'title': str,
-        'creation_date': datetime,
+        'custodian_organization': {
+            'name': str,
+            'addresses': [AddressObject],
+            'telecoms': [TelecomObject],
+        },
+        'author_hcp': {
+            'full_name': str,
+            'family_name': str,
+            'given_name': str,
+            'organization': {
+                'name': str,
+                'addresses': [AddressObject],
+                'telecoms': [TelecomObject],
+            },
+        },
+        'legal_authenticator': {
+            'full_name': str,
+            'family_name': str,
+            'given_name': str,
+            'organization': OrganizationObject,
+        },
+        'document_title': str,
+        'document_creation_date': str,
         'document_id': str,
-    }
+        'document_type': str,
+        'guardian': ContactPersonObject,
+        'other_contacts': [ContactPersonObject],
+    },
 }
 ```
 
 ### Service Integration Points
+
 - `ComprehensiveClinicalDataService.get_administrative_data_for_display()`
 - `EnhancedCDAXMLParser` for patient identity data
 - `CDAAdministrativeExtractor` for healthcare provider information
@@ -407,6 +447,7 @@ context = {
 ## JavaScript Requirements
 
 ### Tab Navigation
+
 ```javascript
 // Bootstrap 5 tab initialization
 document.addEventListener('DOMContentLoaded', function() {
@@ -418,7 +459,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Primary tab activated:', event.target.id);
         });
     });
-    
+
     // Secondary pills
     const secondaryPills = document.querySelectorAll('button[data-bs-toggle="pill"]');
     secondaryPills.forEach(pill => {
@@ -435,12 +476,14 @@ document.addEventListener('DOMContentLoaded', function() {
 ## Responsive Design Implementation
 
 ### Breakpoints
+
 - **Mobile (xs):** Single column layout, stacked cards
 - **Tablet (md):** Two-column card layout
 - **Desktop (lg):** Three-column card layout for Personal Information
 - **Large Desktop (xl):** Maintains three-column with better spacing
 
 ### Card Responsiveness
+
 ```html
 <div class="col-12 col-md-6 col-lg-4">
     <!-- Card content adapts to screen size -->
@@ -452,6 +495,7 @@ document.addEventListener('DOMContentLoaded', function() {
 ## Testing Checklist
 
 ### Functional Testing
+
 - [ ] Primary tab navigation works correctly
 - [ ] Secondary pill navigation functions properly
 - [ ] Cards display appropriate data
@@ -459,12 +503,14 @@ document.addEventListener('DOMContentLoaded', function() {
 - [ ] Icons and fonts load correctly
 
 ### Accessibility Testing
+
 - [ ] Keyboard navigation through tabs and pills
 - [ ] Screen reader compatibility
 - [ ] Color contrast meets WCAG standards
 - [ ] ARIA labels are properly implemented
 
 ### Data Integration Testing
+
 - [ ] Patient demographic data displays correctly
 - [ ] Healthcare provider information populates
 - [ ] Contact information renders properly
@@ -472,6 +518,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 ---
 
-**Implementation Status:** ✅ Production Ready  
-**Last Tested:** September 28, 2025  
+**Implementation Status:** ✅ Production Ready
+**Last Tested:** September 28, 2025
 **Browser Compatibility:** Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
