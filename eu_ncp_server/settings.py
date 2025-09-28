@@ -7,6 +7,7 @@ Based on analysis of DomiSMP and OpenNCP Java implementations
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -26,6 +27,11 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-me-in-production")
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",")
+
+# Configure session management based on environment
+from patient_data.session_management import configure_session_settings
+
+configure_session_settings(globals())
 
 
 # Application definition
