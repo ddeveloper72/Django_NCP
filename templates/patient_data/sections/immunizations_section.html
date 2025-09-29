@@ -22,7 +22,7 @@
         <div class="card-header bg-success text-white">
             <h5 class="mb-0">
                 <i class="fa-solid fa-syringe me-2"></i>
-                {% firstof section.title Immunizations %}
+                {{ section.title|extract_section_title|default:"Immunizations" }}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
                 {% endif %}

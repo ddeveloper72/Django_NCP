@@ -7,7 +7,7 @@
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">
                 <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                {% firstof section.title "Allergies and Other Adverse Reactions" %}
+                {{ section.title|extract_section_title|default:"Allergies and Other Adverse Reactions" }}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
                 {% endif %}

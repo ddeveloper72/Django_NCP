@@ -10,7 +10,7 @@
         <div class="card-header {% if generic_config %}{{ generic_config.header_class|default:'bg-secondary' }}{% else %}{{ section.header_class|default:'bg-secondary' }}{% endif %} text-white">
             <h5 class="mb-0">
                 <i class="{% if generic_config %}{{ generic_config.icon|default:'fa-solid fa-file-medical' }}{% else %}{{ section.icon|default:'fa-solid fa-file-medical' }}{% endif %} me-2"></i>
-                {{ section.title|default:'Clinical Section' }}
+                {{ section.title|extract_section_title|default:'Clinical Section' }}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
                 {% endif %}

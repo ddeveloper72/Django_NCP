@@ -1,0 +1,409 @@
+{% load patient_filters %}
+
+{# Enhanced Clinical Section Template - Professional Healthcare UX Optimized #}
+
+<!-- Optimized Clinical Section with Healthcare Professional Focus -->
+<div class="medical-section enhanced-clinical-section-pro"
+     id="{{ section.section_id|default:'enhanced-section' }}">
+    <div class="card clinical-section-card-pro">
+
+        <!-- Professional Section Header -->
+        <div class="card-header clinical-header-pro">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="section-title-group">
+                    <h5 class="section-title mb-1">
+                        <i class="{% if section.section_type == 'allergies' %}fas fa-exclamation-triangle text-danger{% elif section.section_type == 'medications' %}fas fa-pills text-primary{% elif section.section_type == 'problems' %}fas fa-stethoscope text-warning{% elif section.section_type == 'vitals' %}fas fa-heartbeat text-success{% elif section.section_type == 'procedures' %}fas fa-user-md text-info{% elif section.section_type == 'immunizations' %}fas fa-syringe text-secondary{% elif section.section_type == 'results' %}fas fa-flask text-purple{% else %}fas fa-file-medical text-muted{% endif %} me-2"></i>
+                        {{ section.display_name|extract_section_title|default:section.title|extract_section_title }}
+                    </h5>
+
+                    <!-- Enhanced Translation Context -->
+                    {% if section.original and section.translated %}
+                    <div class="translation-context small text-muted">
+                        {% if section.original != section.translated %}
+                            <span class="translation-badge me-2">
+                                <i class="fas fa-language me-1"></i>Translated from {{ source_language|default:'original language' }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Professional Metrics Dashboard -->
+                <div class="clinical-metrics-pro">
+                    {% if section.structured_entries %}
+                    <div class="metric-item">
+                        <span class="metric-value">{{ section.structured_entries|length }}</span>
+                        <span class="metric-label">entries</span>
+                    </div>
+                    {% endif %}
+                    {% if section.clinical_codes %}
+                    <div class="metric-item coded">
+                        <span class="metric-value">{{ section.clinical_codes|length }}</span>
+                        <span class="metric-label">codes</span>
+                    </div>
+                    {% endif %}
+                    {% if section.coding_density %}
+                    <div class="metric-item quality">
+                        <span class="metric-value">{{ section.coding_density|floatformat:0 }}%</span>
+                        <span class="metric-label">coded</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Clinical Section Content -->
+        <div class="card-body clinical-body-pro">
+
+            <!-- Enhanced Professional Tabs -->
+            <div class="clinical-tabs-pro mb-4">
+                <nav class="nav nav-pills clinical-nav-pills" role="tablist">
+                    <button class="nav-link active clinical-tab-pro"
+                            id="primary-{{ section_index }}-tab"
+                            data-bs-toggle="pill"
+                            data-bs-target="#primary-{{ section_index }}"
+                            type="button" role="tab"
+                            aria-controls="primary-{{ section_index }}"
+                            aria-selected="true"
+                            title="Primary clinical data view optimized for healthcare professionals">
+                        <i class="fas fa-user-md me-2"></i>
+                        <span class="tab-label">Primary View</span>
+                        <span class="tab-sublabel">Clinical Data</span>
+                    </button>
+
+                    <button class="nav-link clinical-tab-pro"
+                            id="codes-{{ section_index }}-tab"
+                            data-bs-toggle="pill"
+                            data-bs-target="#codes-{{ section_index }}"
+                            type="button" role="tab"
+                            aria-controls="codes-{{ section_index }}"
+                            aria-selected="false"
+                            title="Medical terminology and coding systems">
+                        <i class="fas fa-tags me-2"></i>
+                        <span class="tab-label">Medical Codes</span>
+                        <span class="tab-sublabel">Terminology</span>
+                    </button>
+
+                    <button class="nav-link clinical-tab-pro"
+                            id="source-{{ section_index }}-tab"
+                            data-bs-toggle="pill"
+                            data-bs-target="#source-{{ section_index }}"
+                            type="button" role="tab"
+                            aria-controls="source-{{ section_index }}"
+                            aria-selected="false"
+                            title="Original source data and multilingual content">
+                        <i class="fas fa-file-code me-2"></i>
+                        <span class="tab-label">Source Data</span>
+                        <span class="tab-sublabel">Original</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tab Content Container -->
+            <div class="tab-content clinical-content-pro">
+
+                <!-- Primary View Tab - Healthcare Professional Focus -->
+                <div class="tab-pane fade show active"
+                     id="primary-{{ section_index }}"
+                     role="tabpanel"
+                     aria-labelledby="primary-{{ section_index }}-tab">
+
+                    {% if section.structured_entries %}
+                    <div class="clinical-entries-pro">
+
+                        <!-- Enhanced Entry Display -->
+                        {% for entry in section.structured_entries %}
+                        <div class="clinical-entry-pro mb-4">
+                            <div class="entry-card">
+
+                                <!-- Entry Header with Professional Layout -->
+                                <div class="entry-header-pro">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="entry-primary-info">
+                                            <h6 class="entry-title">
+                                                {{ entry|safe_clinical_display:"display_name" }}
+                                            </h6>
+                                            {% if entry.entry_type %}
+                                            <span class="entry-type-badge">{{ entry.entry_type|title }}</span>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Status with Professional Styling -->
+                                        {% if entry.status_code %}
+                                        <span class="status-badge status-{{ entry.status_code|default:'unknown' }}">
+                                            {{ entry.status_code|handle_null_flavor|title }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Clinical Details Grid -->
+                                <div class="clinical-details-grid">
+
+                                    <!-- Temporal Information -->
+                                    {% if entry.effective_time %}
+                                    <div class="detail-item temporal">
+                                        <div class="detail-icon">
+                                            <i class="fas fa-clock text-primary"></i>
+                                        </div>
+                                        <div class="detail-content">
+                                            <span class="detail-label">Effective Time</span>
+                                            <span class="detail-value">{{ entry.effective_time|format_clinical_value:"date" }}</span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Substances/Medications -->
+                                    {% if entry.participant_substances %}
+                                    <div class="detail-item substances">
+                                        <div class="detail-icon">
+                                            <i class="fas fa-flask text-success"></i>
+                                        </div>
+                                        <div class="detail-content">
+                                            <span class="detail-label">Substances</span>
+                                            <div class="substance-list">
+                                                {% for substance in entry.participant_substances %}
+                                                <span class="substance-tag">{{ substance|handle_null_flavor }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Dosage Information -->
+                                    {% if entry.dosage_instruction %}
+                                    <div class="detail-item dosage">
+                                        <div class="detail-icon">
+                                            <i class="fas fa-prescription-bottle text-info"></i>
+                                        </div>
+                                        <div class="detail-content">
+                                            <span class="detail-label">Dosage</span>
+                                            <span class="detail-value">{{ entry.dosage_instruction|handle_null_flavor }}</span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Clinical Value/Result -->
+                                    {% if entry.value or entry.result %}
+                                    <div class="detail-item result">
+                                        <div class="detail-icon">
+                                            <i class="fas fa-chart-bar text-warning"></i>
+                                        </div>
+                                        <div class="detail-content">
+                                            <span class="detail-label">Value/Result</span>
+                                            <span class="detail-value highlight">{{ entry|format_clinical_value:"numeric" }}</span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Clinical Codes Inline -->
+                                {% if entry.clinical_codes %}
+                                <div class="entry-codes-inline mt-3">
+                                    <div class="codes-header">
+                                        <i class="fas fa-barcode me-2"></i>
+                                        <span class="codes-label">Medical Codes</span>
+                                    </div>
+                                    <div class="codes-list">
+                                        {% for code in entry.clinical_codes %}
+                                        <span class="code-badge code-{{ code.system|lower|truncatechars:10 }}">
+                                            <span class="code-value">{{ code.code|handle_null_flavor }}</span>
+                                            {% if code.display %}
+                                            <span class="code-display">({{ code.display|truncatechars:40 }})</span>
+                                            {% endif %}
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Entry Relationships -->
+                                {% if entry.entry_relationships %}
+                                <div class="entry-relationships mt-3">
+                                    <div class="relationships-header">
+                                        <i class="fas fa-project-diagram me-2"></i>
+                                        <span class="relationships-label">Clinical Relationships</span>
+                                    </div>
+                                    <div class="relationships-list">
+                                        {% for relationship in entry.entry_relationships %}
+                                        <div class="relationship-item">
+                                            <span class="relationship-type">{{ relationship.type|handle_null_flavor|title }}</span>
+                                            <span class="relationship-target">{{ relationship.target|handle_null_flavor }}</span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Narrative Text -->
+                                {% if entry.text_content %}
+                                <div class="entry-narrative mt-3">
+                                    <div class="narrative-header">
+                                        <i class="fas fa-align-left me-2"></i>
+                                        <span class="narrative-label">Clinical Notes</span>
+                                    </div>
+                                    <div class="narrative-content">
+                                        {{ entry.text_content|handle_null_flavor|truncatewords:100 }}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                    {% else %}
+                    <div class="empty-state-pro">
+                        <div class="empty-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <h6 class="empty-title">No Structured Clinical Data</h6>
+                        <p class="empty-message">This section does not contain structured clinical entries. Check the Source Data tab for original content.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Medical Codes Tab - Enhanced Terminology View -->
+                <div class="tab-pane fade"
+                     id="codes-{{ section_index }}"
+                     role="tabpanel"
+                     aria-labelledby="codes-{{ section_index }}-tab">
+
+                    {% if section.clinical_codes %}
+                    <div class="medical-codes-pro">
+
+                        <!-- Coding Systems Overview -->
+                        <div class="coding-overview mb-4">
+                            <h6 class="overview-title">
+                                <i class="fas fa-tags me-2"></i>
+                                Medical Terminology Systems
+                            </h6>
+                            <div class="systems-grid">
+                                {% if section.snomed_codes %}
+                                <div class="system-card snomed">
+                                    <div class="system-icon">
+                                        <i class="fas fa-medical-kit"></i>
+                                    </div>
+                                    <div class="system-info">
+                                        <span class="system-name">SNOMED CT</span>
+                                        <span class="system-count">{{ section.snomed_codes|length }} codes</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if section.loinc_codes %}
+                                <div class="system-card loinc">
+                                    <div class="system-icon">
+                                        <i class="fas fa-flask"></i>
+                                    </div>
+                                    <div class="system-info">
+                                        <span class="system-name">LOINC</span>
+                                        <span class="system-count">{{ section.loinc_codes|length }} codes</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if section.icd_codes %}
+                                <div class="system-card icd">
+                                    <div class="system-icon">
+                                        <i class="fas fa-list-alt"></i>
+                                    </div>
+                                    <div class="system-info">
+                                        <span class="system-name">ICD</span>
+                                        <span class="system-count">{{ section.icd_codes|length }} codes</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Detailed Code List -->
+                        <div class="codes-detailed">
+                            <h6 class="codes-title">Complete Code List</h6>
+                            {% for code in section.clinical_codes %}
+                            <div class="code-item-pro">
+                                <div class="code-main">
+                                    <span class="code-value-main">{{ code.code|handle_null_flavor }}</span>
+                                    <span class="code-system-badge system-{{ code.system|lower|truncatechars:10 }}">
+                                        {{ code.system|handle_null_flavor }}
+                                    </span>
+                                </div>
+                                <div class="code-description">
+                                    {{ code|format_clinical_value:"code" }}
+                                </div>
+                                {% if code.version %}
+                                <div class="code-metadata">
+                                    <small class="text-muted">Version: {{ code.version|handle_null_flavor }}</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                    {% else %}
+                    <div class="empty-state-pro">
+                        <div class="empty-icon">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <h6 class="empty-title">No Medical Codes Available</h6>
+                        <p class="empty-message">This section does not contain standardized medical terminology codes.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Source Data Tab - Original Content with Translation Context -->
+                <div class="tab-pane fade"
+                     id="source-{{ section_index }}"
+                     role="tabpanel"
+                     aria-labelledby="source-{{ section_index }}-tab">
+
+                    {% if section.narrative_text %}
+                    <div class="source-data-pro">
+
+                        <!-- Translation Context -->
+                        {% if section.original and section.translated and section.original != section.translated %}
+                        <div class="translation-context-detailed mb-4">
+                            <div class="context-header">
+                                <i class="fas fa-language me-2"></i>
+                                <span>Multilingual Content</span>
+                            </div>
+                            <div class="translation-comparison">
+                                <div class="original-content">
+                                    <h6 class="content-label">Original ({{ source_language|default:'Source Language' }})</h6>
+                                    <div class="content-text">{{ section.original }}</div>
+                                </div>
+                                <div class="translated-content">
+                                    <h6 class="content-label">English Translation</h6>
+                                    <div class="content-text">{{ section.translated }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Original XML/Narrative Content -->
+                        <div class="narrative-section">
+                            <h6 class="narrative-title">
+                                <i class="fas fa-file-code me-2"></i>
+                                Original Clinical Narrative
+                            </h6>
+                            <div class="narrative-display">
+                                {{ section.narrative_text|safe }}
+                            </div>
+                        </div>
+
+                    </div>
+                    {% else %}
+                    <div class="empty-state-pro">
+                        <div class="empty-icon">
+                            <i class="fas fa-file-code"></i>
+                        </div>
+                        <h6 class="empty-title">No Source Data Available</h6>
+                        <p class="empty-message">Original source content is not available for this section.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,356 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced CDA Display - [&#x27;Diana&#x27;] Ferreira</title>
+
+    <!-- CLEAN CSS ARCHITECTURE - September 20, 2025 -->
+    <!-- External Dependencies (DMZ Compliant) -->
+    <link href="/static/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/vendor/fontawesome/fontawesome.min.css">
+
+    <!-- All Custom Styles - Compiled from SASS -->
+    <link href="/static/css/main.css?v=1758969436" rel="stylesheet" media="screen">
+
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#005eb8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="EU NCP Portal">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+    <meta name="msapplication-TileColor" content="#005eb8">
+    <meta name="msapplication-TileImage" content="/static/icons/icon-144x144.png">
+
+    
+
+
+</head>
+
+<body>
+    <!-- Professional Medical Portal Navigation Bar - Hidden on Home Page -->
+    
+    <nav id="main-navigation" class="navbar navbar-expand-lg navbar-light navbar-enhanced" role="navigation" aria-label="Main navigation">
+        <div class="container-fluid px-4">
+            <!-- Skip to main content link for accessibility -->
+            <a href="#main-content" class="visually-hidden-focusable btn btn-primary">Skip to main content</a>
+
+            <!-- Enhanced Brand with Professional Medical Identity -->
+            <a href="/" class="navbar-brand d-flex align-items-center" aria-label="EU NCP Portal - International Medical Portal Home">
+                <i class="fa-solid fa-hospital-user text-primary fa-2xl" aria-hidden="true" title="Medical Portal"></i>
+                <span class="fw-bold text-primary">
+                    <span class="brand-primary">EU NCP</span>
+                    <span class="brand-secondary">Home</span>
+                </span>
+            </a>
+
+            <!-- Enhanced Mobile toggle button -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-nav"
+                    aria-controls="navbar-nav" aria-expanded="false" aria-label="Toggle navigation menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Professional Medical Navigation with Logical Grouping -->
+            <div class="collapse navbar-collapse" id="navbar-nav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" role="menubar">
+                    <!-- Primary Navigation Group -->
+                    <li class="nav-item nav-group-primary" role="none">
+                        <a href="/patients/search/" class="nav-link active"
+                           role="menuitem" aria-current="page">
+                            <i class="fa-solid fa-user-md fa-1xl" aria-hidden="true" title="Patient Search"></i>
+                            <span>Patient Search</span>
+                        </a>
+                    </li>
+                    <li class="nav-item nav-group-primary nav-group-end" role="none">
+                        <a href="/portal/" class="nav-link "
+                           role="menuitem" aria-current="">
+                            <i class="fa-solid fa-globe-europe fa-1xl" aria-hidden="true" title="European Portal"></i>
+                            <span>Portal</span>
+                        </a>
+                    </li>
+
+                    <!-- Management Group - Role-Based Access -->
+                    
+                </ul>
+
+                <!-- Enhanced Authentication Status with Professional Design -->
+                <div class="d-flex align-items-center" role="region" aria-label="User authentication status">
+                    
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted me-3" role="status" aria-live="polite">
+                            <i class="fa-solid fa-user-slash fa-1xl" aria-hidden="true" title="Not Authenticated"></i>
+                            <span>Guest Access</span>
+                        </span>
+                        <a href="/accounts/login/" class="btn btn-primary btn-sm"
+                           title="Sign in to your account" aria-label="Login to EU NCP Portal">
+                            <i class="fa-solid fa-sign-in-alt fa-1xl" aria-hidden="true"></i>
+                            <span>Login</span>
+                        </a>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+
+    <!-- Power User Sidebar for Admin/Staff Users -->
+    
+
+    <!-- Page Breadcrumb/Context Area -->
+    
+<div class="page-context-content">
+    <div class="page-info">
+        <span class="page-location">
+            <i class="fa fa-file-medical"></i> CDA Document
+        </span>
+    </div>
+    <div class="page-actions">
+        
+        <a href="/patients/" class="btn btn-outline-secondary btn-sm">
+            <i class="fa fa-arrow-left page-action-icon"></i> Back to Search
+        </a>
+        
+    </div>
+</div>
+
+
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="container-fluid py-4" role="main" aria-label="Main content">
+        
+
+        
+<div class="p-0">
+    <!-- Patient Header with Tabbed Interface -->
+    <div class="section-wrapper">
+        <!-- Main Patient Header Card with Integrated Tabs -->
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Primary patient identification extracted from the Clinical Document Architecture. May include given name, family name, and patient identifiers from the source healthcare system.">
+                        <i class="fa-solid fa-user-injured me-2"></i>
+                        
+                        
+                        [&#x27;Diana&#x27;] Ferreira
+                        
+                    </h2>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-secondary text-white me-2"
+                              data-bs-toggle="tooltip" data-bs-placement="bottom" title="Shows the country where this Clinical Document Architecture (CDA) was originally created. Detected automatically from document language code, custodian organization name, or patient address information.">
+                            <i class="fa-solid fa-flag me-1"></i>
+                        </span>
+                        <span class="badge bg-secondary"
+                              data-bs-toggle="tooltip" data-bs-placement="bottom" title="Indicates the level of structured data extraction success. &quot;High&quot; means enhanced JSON field mapping is active and structured medical data was successfully extracted from the CDA document. &quot;Basic&quot; indicates standard text extraction only.">
+                            <i class="fa-solid fa-check-circle me-1"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integrated Navigation Tabs -->
+            <div class="card-body p-0">
+                <ul class="nav nav-tabs nav-tabs-healthcare border-0" id="patientTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab"
+                            data-bs-target="#overview-content" type="button" role="tab"
+                            aria-controls="overview-content" aria-selected="true">
+                            <i class="fa-solid fa-user me-2"></i>
+                            Patient Overview
+                        </button>
+                    </li>
+
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="extended-tab" data-bs-toggle="tab"
+                            data-bs-target="#extended-content" type="button" role="tab"
+                            aria-controls="extended-content" aria-selected="false">
+                            <i class="fa-solid fa-user-plus me-2"></i>
+                            Extended Patient Information
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Integrated Tab Content -->
+                <div class="tab-content" id="patientTabContent">
+                    <!-- Patient Overview Tab Content -->
+                    <div class="tab-pane fade show active" id="overview-content" role="tabpanel" aria-labelledby="overview-tab">
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Birth Date:</strong>
+                                        
+                                        Unknown
+                                        
+                                    </p>
+                                    <p><strong>Gender:</strong> Unknown</p>
+                                    <p><strong>Patient ID:</strong> 2-1234-W7</p>
+                                    
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Source Country:</strong> </p>
+                                    <p><strong>CDA Type:</strong> </p>
+                                    <p><strong>Translation Quality:</strong>
+                                        <span class="badge bg-secondary"
+                                              data-bs-toggle="tooltip" data-bs-placement="bottom" title="Indicates the level of structured data extraction success. &quot;High&quot; means enhanced JSON field mapping is active and structured medical data was successfully extracted from the CDA document. &quot;Basic&quot; indicates standard text extraction only.">
+                                            
+                                        </span>
+                                    </p>
+                                    
+                                </div>
+                            </div>
+
+                            <!-- CDA Type Toggle Buttons -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="btn-group" role="group" aria-label="CDA Type Selection">
+                                        
+                                        
+                                        <div class="alert alert-warning">
+                                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                            Session error - please restart your session
+                                        </div>
+                                        
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        <strong>L1:</strong> Original clinical document from source country |
+                                        <strong>L3:</strong> Standardized European Patient Summary
+                                        
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Extended Patient Information Tab Content -->
+                    <div class="tab-pane fade" id="extended-content" role="tabpanel" aria-labelledby="extended-tab">
+                        <div class="p-4">
+                            
+
+
+
+<div class="alert alert-info">
+    <h6>Extended Patient Information</h6>
+    <p class="mb-0">Extended patient information is not available for this document. The system was unable to extract additional patient data from the CDA content.</p>
+</div>
+
+
+                        </div>
+                    </div>
+
+                </div> <!-- End Integrated Tab Content -->
+            </div> <!-- End card-body -->
+        </div> <!-- End Main Patient Header Card -->
+    </div>
+</div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5" role="contentinfo" aria-label="Site footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5 class="text-primary">EU eHealth NCP Portal</h5>
+                    <p class="small">Cross-border healthcare document exchange system built with Django and powered by secure medical data standards.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-light">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-light text-decoration-none">Home</a></li>
+                        <li><a href="/patients/search/" class="text-light text-decoration-none">Patient Search</a></li>
+                        <li><a href="/portal/" class="text-light text-decoration-none">Portal</a></li>
+                        <li><a href="/admin/" class="text-light text-decoration-none">Administration</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-light">Technical Info</h6>
+                    <p class="small mb-1">Django  | Python </p>
+                    <p class="small">Built for DMZ deployment</p>
+                </div>
+            </div>
+            <hr class="text-secondary">
+            <div class="text-center">
+                <p class="small mb-0">&copy; 2024 EU eHealth NCP Portal. Compliant with European Cross-Border Healthcare Standards.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <!-- Navigation JavaScript -->
+    <script src="/static/js/navigation.js"></script>
+
+    <!-- Base JavaScript functionality -->
+    <script src="/static/js/base.js"></script>
+
+    <!-- Accessibility enhancements -->
+    <script src="/static/js/accessibility.js"></script>
+
+    <!-- Bootstrap 5.3.3 Local JavaScript (DMZ Compliant) -->
+    <script src="/static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+
+    <!-- Power User Sidebar JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('powerUserSidebar');
+            const toggle = sidebar?.querySelector('.sidebar-toggle');
+
+            if (toggle && sidebar) {
+                toggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+
+                    // Update ARIA attributes for accessibility
+                    const isActive = sidebar.classList.contains('active');
+                    toggle.setAttribute('aria-expanded', isActive);
+                    sidebar.setAttribute('aria-hidden', !isActive);
+                });
+
+                // Close sidebar when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!sidebar.contains(event.target) && sidebar.classList.contains('active')) {
+                        sidebar.classList.remove('active');
+                        toggle.setAttribute('aria-expanded', 'false');
+                        sidebar.setAttribute('aria-hidden', 'true');
+                    }
+                });
+
+                // Escape key to close sidebar
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape' && sidebar.classList.contains('active')) {
+                        sidebar.classList.remove('active');
+                        toggle.setAttribute('aria-expanded', 'false');
+                        sidebar.setAttribute('aria-hidden', 'true');
+                        toggle.focus();
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful: ', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+    </script>
+
+    
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Enhanced CDA JavaScript functionality is now externalized -->
+<script src="/static/js/enhanced_cda.js"></script>
+
+</body>
+
+</html>

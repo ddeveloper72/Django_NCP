@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Clinical View Error{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">Clinical Data Error</h4>
+        <p>{{ error_message|default:"An error occurred while loading the clinical data view." }}</p>
+
+        {% if debug %}
+        <hr>
+        <h5>Debug Information:</h5>
+        <pre class="small">{{ debug_info|safe }}</pre>
+        {% endif %}
+
+        <hr>
+        <div class="mt-3">
+            <a href="{% url 'patient_data:patient_search' %}" class="btn btn-primary">
+                <i class="fa-solid fa-arrow-left me-1"></i>
+                Back to Patient Search
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

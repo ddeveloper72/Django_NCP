@@ -4,10 +4,10 @@
 <!-- Render individual clinical section (called within loop from main template) -->
 {% if section and section.title %}
     <!-- Route to specialized section templates based on section type -->
-    {% if section.section_id == 'psAllergiesAndOtherAdverseReactions' or section.section_id == 'allergies' or section.section_id == 'allergies_and_intolerances' or 'allergies' in section.title|lower or 'adverse' in section.title|lower %}
+    {% if section.section_id == 'psAllergiesAndOtherAdverseReactions' or section.section_id == 'allergies' or section.section_id == 'allergies_and_intolerances' or 'allergies' in section.title|safe_title_text or 'adverse' in section.title|safe_title_text %}
         {% with section_index=forloop.counter0 %}
             {% if section.structured_entries or section.clinical_codes %}
-                {% include 'patient_data/sections/enhanced_clinical_section.html' %}
+                {% include 'patient_data/sections/enhanced_clinical_section_optimized.html' %}
             {% else %}
                 {% include 'patient_data/sections/allergies_section.html' %}
             {% endif %}
@@ -16,7 +16,7 @@
     {% elif section.section_id == 'psActiveProblems' or section.section_id == 'active_problems' or section.section_id == 'problems' or section.section_id == 'conditions' %}
         {% with section_index=forloop.counter0 %}
             {% if section.structured_entries or section.clinical_codes %}
-                {% include 'patient_data/sections/enhanced_clinical_section.html' %}
+                {% include 'patient_data/sections/enhanced_clinical_section_optimized.html' %}
             {% else %}
                 {% include 'patient_data/sections/problems_section.html' %}
             {% endif %}
@@ -25,7 +25,7 @@
     {% elif section.section_id == 'psMedicationSummary' or section.section_id == 'medication_summary' or section.section_id == 'medications' %}
         {% with section_index=forloop.counter0 %}
             {% if section.structured_entries or section.clinical_codes %}
-                {% include 'patient_data/sections/enhanced_clinical_section.html' %}
+                {% include 'patient_data/sections/enhanced_clinical_section_optimized.html' %}
             {% else %}
                 {% include 'patient_data/sections/medication_section.html' %}
             {% endif %}
@@ -34,7 +34,7 @@
     {% elif section.section_id == 'psCodedResults' or section.section_id == 'coded_results' or section.section_id == 'laboratory_results' or section.section_id == 'lab_results' or section.section_id == 'results' %}
         {% with section_index=forloop.counter0 %}
             {% if section.structured_entries or section.clinical_codes %}
-                {% include 'patient_data/sections/enhanced_clinical_section.html' %}
+                {% include 'patient_data/sections/enhanced_clinical_section_optimized.html' %}
             {% else %}
                 {% include 'patient_data/sections/lab_results_section.html' %}
             {% endif %}
@@ -43,7 +43,7 @@
     {% elif section.section_id == 'psImmunizations' or section.section_id == 'immunizations' or section.section_id == 'vaccinations' %}
         {% with section_index=forloop.counter0 %}
             {% if section.structured_entries or section.clinical_codes %}
-                {% include 'patient_data/sections/enhanced_clinical_section.html' %}
+                {% include 'patient_data/sections/enhanced_clinical_section_optimized.html' %}
             {% else %}
                 {% include 'patient_data/sections/immunizations_section.html' %}
             {% endif %}
@@ -52,7 +52,7 @@
     {% elif section.section_id == 'psListOfSurgeries' or section.section_id == 'list_of_surgeries' or section.section_id == 'surgeries' or section.section_id == 'surgical_procedures' or section.section_id == 'procedures' %}
         {% with section_index=forloop.counter0 %}
             {% if section.structured_entries or section.clinical_codes %}
-                {% include 'patient_data/sections/enhanced_clinical_section.html' %}
+                {% include 'patient_data/sections/enhanced_clinical_section_optimized.html' %}
             {% else %}
                 {% include 'patient_data/sections/surgeries_section.html' %}
             {% endif %}
@@ -99,7 +99,7 @@
         {% with section_index=forloop.counter0 %}
             <!-- Use enhanced template for sections with rich clinical data -->
             {% if section.structured_entries or section.clinical_codes or section.coding_density %}
-                {% include 'patient_data/sections/enhanced_clinical_section.html' %}
+                {% include 'patient_data/sections/enhanced_clinical_section_optimized.html' %}
             {% else %}
                 {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='unknown' section_icon='fa-solid fa-file-medical' header_class='bg-light text-dark' table_header_class='table-light' text_class='text-muted' badge_class='bg-light text-dark' border_class='border-light' entries_label='entries' empty_title='Clinical Information' empty_message='Clinical information available for this patient' %}
             {% endif %}

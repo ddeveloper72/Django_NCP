@@ -3,7 +3,7 @@
 {% load patient_date_filters %}
 {# Original Content Template - Shared by all section types #}
 <div class="original-content">
-    <h4>Original Clinical Data from NCPeH-A{% if section.title %} - {{ section.title }}{% endif %}</h4>
+    <h4>Original Clinical Data from NCPeH-A{% if section.title %} - {{ section.title|extract_section_title }}{% endif %}</h4>
 
     {% if section.structured_data %}
     <div class="alert alert-info mb-3">

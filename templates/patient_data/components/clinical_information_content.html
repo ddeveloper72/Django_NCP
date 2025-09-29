@@ -68,7 +68,7 @@
                         aria-expanded="true"
                         aria-controls="collapse-{{ section.code|default:forloop.counter }}">
                     <i class="fa-solid fa-stethoscope me-2"></i>
-                    <strong>{% firstof section.title section.section_title "Clinical Section" %}</strong>
+                    <strong>{{ section.title|extract_section_title|default:"Clinical Section" }}</strong>
                     {% if section.code %}
                     <span class="badge bg-primary ms-2">{{ section.code }}</span>
                     {% endif %}

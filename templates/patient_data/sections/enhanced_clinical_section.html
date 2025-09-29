@@ -12,7 +12,7 @@
                 <div>
                     <h5 class="mb-1">
                         <i class="{% if section.section_type == 'allergies' %}fa-solid fa-exclamation-triangle{% elif section.section_type == 'medications' %}fa-solid fa-pills{% elif section.section_type == 'problems' %}fa-solid fa-stethoscope{% elif section.section_type == 'vitals' %}fa-solid fa-heartbeat{% elif section.section_type == 'procedures' %}fa-solid fa-user-md{% elif section.section_type == 'immunizations' %}fa-solid fa-syringe{% elif section.section_type == 'results' %}fa-solid fa-flask{% elif section.section_type == 'social_history' %}fa-solid fa-users{% elif section.section_type == 'family_history' %}fa-solid fa-family{% elif section.section_type == 'care_plan' %}fa-solid fa-clipboard-list{% else %}fa-solid fa-file-medical{% endif %} me-2"></i>
-                        {{ section.display_name|default:section.title }}
+                        {{ section.display_name|extract_section_title|default:section.title|extract_section_title }}
                     </h5>
                     {% if section.original and section.translated %}
                     <small class="opacity-75">

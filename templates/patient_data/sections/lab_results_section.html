@@ -8,7 +8,7 @@
         <div class="card-header bg-info text-white">
             <h5 class="mb-0">
                 <i class="fa-solid fa-flask me-2"></i>
-                {% firstof section.title "Laboratory Results" %}
+                {{ section.title|extract_section_title|default:"Laboratory Results" }}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
                 {% endif %}

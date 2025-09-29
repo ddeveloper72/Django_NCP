@@ -8,7 +8,7 @@
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">
                 <i class="fa-solid fa-pills me-2"></i>
-                {% firstof section.title "Medication Summary" %}
+                {{ section.title|extract_section_title|default:"Medication Summary" }}
                 {% if section.code %}
                 <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
                 {% endif %}

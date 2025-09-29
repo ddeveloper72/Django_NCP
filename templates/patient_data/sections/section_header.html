@@ -6,7 +6,7 @@
         {{ section.clinical_table.title }}
         {% else %}
         <i class="fa-solid fa-clipboard-list me-2"></i>
-        {{ section.title }}
+        {{ section.title|extract_section_title }}
         {% endif %}
 
         {% if section.medical_terminology_count > 0 %}

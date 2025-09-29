@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Session Manager - Development{% endblock %}
+
+{% block extra_css %}
+<style>
+    .session-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+    }
+    .session-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .session-info {
+        font-family: monospace;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    .patient-list {
+        margin: 0.5rem 0;
+    }
+    .patient-tag {
+        display: inline-block;
+        background: #007bff;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        margin-right: 0.5rem;
+        font-size: 0.8rem;
+    }
+    .url-list {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+    }
+    .url-list a {
+        display: block;
+        color: #28a745;
+        text-decoration: none;
+        margin: 0.2rem 0;
+    }
+    .url-list a:hover {
+        text-decoration: underline;
+    }
+    .create-form {
+        background: #e9ecef;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1>🔧 Development Session Manager</h1>
+            <p class="text-muted">Manage patient sessions for development and testing</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Create New Session -->
+            <div class="create-form">
+                <h3>➕ Create Test Session</h3>
+                <form method="post" class="form-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create">
+                    <div class="form-group mr-3">
+                        <label for="patient_id" class="sr-only">Patient ID</label>
+                        <input type="text" class="form-control" id="patient_id" name="patient_id"
+                               placeholder="Enter Patient ID (e.g., 2845672827)" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Session</button>
+                </form>
+                <small class="form-text text-muted">
+                    This will create a session with test CDA data for the specified patient ID.
+                </small>
+            </div>
+
+            <!-- Session List -->
+            <h3>📋 Active Sessions ({{ sessions|length }})</h3>
+
+            {% if not sessions %}
+                <div class="alert alert-warning">
+                    <h5>⚠️ No active sessions found</h5>
+                    <p>Create a test session above to begin development testing.</p>
+                </div>
+            {% endif %}
+
+            {% for session_key, info in sessions.items %}
+                <div class="session-card">
+                    <div class="session-header">
+                        <h5>🔑 Session: <code>{{ session_key|truncatechars:20 }}...</code></h5>
+                        <form method="post" style="margin: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="session_key" value="{{ session_key }}">
+                            <button type="submit" class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Delete this session?')">Delete</button>
+                        </form>
+                    </div>
+
+                    <div class="session-info">
+                        📅 Expires: {{ info.expiry|date:"Y-m-d H:i:s" }}
+                    </div>
+
+                    <div class="patient-list">
+                        <strong>👥 Patients ({{ info.patient_count }}):</strong>
+                        {% for patient_id in info.patients %}
+                            <span class="patient-tag">{{ patient_id }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Test URLs for each patient -->
+                    {% for patient_id in info.patients %}
+                        <div class="url-list">
+                            <strong>🔗 Test URLs for {{ patient_id }}:</strong>
+                            <a href="{% url 'patient_data:simplified_clinical_view' patient_id %}" target="_blank">
+                                📊 Simplified Clinical View
+                            </a>
+                            <a href="{% url 'patient_data:clinical_data_debugger' patient_id %}" target="_blank">
+                                🐛 Clinical Data Debugger
+                            </a>
+                            <a href="{% url 'patient_data:patient_cda_view' patient_id %}" target="_blank">
+                                📄 CDA Document View
+                            </a>
+                            <a href="{% url 'patient_data:enhanced_cda_display' patient_id %}" target="_blank">
+                                ⚡ Enhanced CDA Display
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <!-- Development Tips -->
+            <div class="alert alert-info mt-4">
+                <h5>💡 Development Tips</h5>
+                <ul>
+                    <li><strong>Session Duration:</strong> Development sessions last 7 days (vs 2 hours in production)</li>
+                    <li><strong>Auto-Creation:</strong> Missing sessions will be auto-created in development mode</li>
+                    <li><strong>CLI Management:</strong> Use <code>python manage.py manage_sessions list</code> for command line access</li>
+                    <li><strong>Debug Mode:</strong> Add <code>?debug=true</code> to any patient URL for extra debugging info</li>
+                </ul>
+            </div>
+
+            <!-- Management Commands -->
+            <div class="alert alert-secondary">
+                <h5>🖥️ CLI Commands</h5>
+                <pre><code># List all sessions
+python manage.py manage_sessions list
+
+# Create session for patient
+python manage.py manage_sessions create --patient-id 2845672827
+
+# Clean expired sessions
+python manage.py manage_sessions clean
+
+# Delete specific session
+python manage.py manage_sessions delete --session-key abc123...</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh sessions every 30 seconds
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+</script>
+{% endblock %}
