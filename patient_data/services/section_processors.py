@@ -93,11 +93,11 @@ class PatientSectionProcessor:
                 },
             }
 
-            logger.info(f"✅ Patient header data processed for {display_name}")
+            logger.info(f"[SUCCESS] Patient header data processed for {display_name}")
             return header_data
 
         except Exception as e:
-            logger.error(f"❌ Error processing patient header data: {e}")
+            logger.error(f"[ERROR] Error processing patient header data: {e}")
             return self._get_fallback_header_data(patient_identity)
 
     def prepare_enhanced_extended_patient_data(
@@ -128,7 +128,7 @@ class PatientSectionProcessor:
                     )
 
                     logger.info(
-                        "🔄 Using EnhancedCDAAdministrativeExtractor (EU PS XSL-based)"
+                        "[SYNC] Using EnhancedCDAAdministrativeExtractor (EU PS XSL-based)"
                     )
 
                     extractor = EnhancedCDAAdministrativeExtractor()
@@ -136,7 +136,7 @@ class PatientSectionProcessor:
 
                     if enhanced_data and enhanced_data.has_meaningful_data:
                         logger.info(
-                            f"✅ Enhanced extraction successful: {enhanced_data.extraction_summary}"
+                            f"[SUCCESS] Enhanced extraction successful: {enhanced_data.extraction_summary}"
                         )
 
                         # Process the enhanced data into template-ready format
@@ -147,13 +147,13 @@ class PatientSectionProcessor:
                 except ImportError as e:
                     logger.warning(f"⚠️ Enhanced extractor not available: {e}")
                 except Exception as e:
-                    logger.error(f"❌ Enhanced extraction failed: {e}")
+                    logger.error(f"[ERROR] Enhanced extraction failed: {e}")
 
             # Fallback to empty structure with informative placeholders
             return self._get_fallback_enhanced_extended_data()
 
         except Exception as e:
-            logger.error(f"❌ Error in enhanced extended patient data preparation: {e}")
+            logger.error(f"[ERROR] Error in enhanced extended patient data preparation: {e}")
             return self._get_fallback_enhanced_extended_data()
 
     def _process_enhanced_admin_data(self, enhanced_data) -> Dict[str, Any]:
@@ -567,7 +567,7 @@ class PatientSectionProcessor:
                     )
 
                     logger.info(
-                        "🔄 Using EnhancedCDAAdministrativeExtractor for comprehensive EU PS data extraction"
+                        "[SYNC] Using EnhancedCDAAdministrativeExtractor for comprehensive EU PS data extraction"
                     )
                     print(
                         "DEBUG: Enhanced extractor starting with XML content length:",
@@ -579,7 +579,7 @@ class PatientSectionProcessor:
                     )
 
                     if enhanced_admin_data:
-                        logger.info("✅ Enhanced administrative extraction successful")
+                        logger.info("[SUCCESS] Enhanced administrative extraction successful")
                         print(
                             f"DEBUG: Enhanced extraction found data - Patient contact info: {enhanced_admin_data.patient_contact_info is not None}"
                         )
@@ -614,7 +614,7 @@ class PatientSectionProcessor:
                     print(f"DEBUG: Import error - {e}")
                 except Exception as e:
                     logger.error(
-                        f"❌ Enhanced extraction failed: {e}, using basic data"
+                        f"[ERROR] Enhanced extraction failed: {e}, using basic data"
                     )
                     print(f"DEBUG: Enhanced extraction exception - {e}")
             else:
@@ -660,12 +660,12 @@ class PatientSectionProcessor:
             }
 
             logger.info(
-                f"✅ Extended patient data processed - {contact_info.get('total_items', 0)} contact items"
+                f"[SUCCESS] Extended patient data processed - {contact_info.get('total_items', 0)} contact items"
             )
             return extended_data
 
         except Exception as e:
-            logger.error(f"❌ Error processing extended patient data: {e}")
+            logger.error(f"[ERROR] Error processing extended patient data: {e}")
             return self._get_fallback_extended_data()
 
     def _convert_enhanced_admin_data(self, enhanced_admin_data) -> Dict[str, Any]:
@@ -1001,12 +1001,12 @@ class PatientSectionProcessor:
             )
 
             logger.info(
-                f"✅ Successfully converted enhanced admin data - found {len(converted_data['other_contacts'])} other contacts"
+                f"[SUCCESS] Successfully converted enhanced admin data - found {len(converted_data['other_contacts'])} other contacts"
             )
             return converted_data
 
         except Exception as e:
-            logger.error(f"❌ Error converting enhanced admin data: {e}")
+            logger.error(f"[ERROR] Error converting enhanced admin data: {e}")
             return {}  # Return empty dict to fall back to basic data
 
     def _convert_enhanced_data_to_admin_format(self, enhanced_data) -> Dict[str, Any]:
@@ -1175,12 +1175,12 @@ class PatientSectionProcessor:
                     ] = la.contact_info.telecoms
 
             logger.info(
-                f"✅ Successfully converted enhanced data - found {len(converted_data['other_contacts'])} other contacts"
+                f"[SUCCESS] Successfully converted enhanced data - found {len(converted_data['other_contacts'])} other contacts"
             )
             return converted_data
 
         except Exception as e:
-            logger.error(f"❌ Error converting enhanced data: {e}")
+            logger.error(f"[ERROR] Error converting enhanced data: {e}")
             return {}  # Return empty dict to fall back to basic data
 
     def prepare_summary_statistics_data(
@@ -1253,12 +1253,12 @@ class PatientSectionProcessor:
             }
 
             logger.info(
-                f"✅ Summary statistics processed - {sections_count} sections, {medical_terms_count} terms"
+                f"[SUCCESS] Summary statistics processed - {sections_count} sections, {medical_terms_count} terms"
             )
             return summary_data
 
         except Exception as e:
-            logger.error(f"❌ Error processing summary statistics: {e}")
+            logger.error(f"[ERROR] Error processing summary statistics: {e}")
             return self._get_fallback_summary_data()
 
     # Helper methods
@@ -1391,7 +1391,7 @@ class PatientSectionProcessor:
 
         if not administrative_data:
             logger.warning(
-                "🔍 _has_meaningful_extended_data: No administrative_data provided"
+                "[SEARCH] _has_meaningful_extended_data: No administrative_data provided"
             )
             print("DEBUG _has_meaningful_extended_data: RETURNING FALSE - No data")
             return False
@@ -1399,11 +1399,11 @@ class PatientSectionProcessor:
         # Check for meaningful contact info
         contact_info = administrative_data.get("patient_contact_info", {})
         print(f"DEBUG _has_meaningful_extended_data: contact_info = {contact_info}")
-        logger.info(f"🔍 _has_meaningful_extended_data: contact_info = {contact_info}")
+        logger.info(f"[SEARCH] _has_meaningful_extended_data: contact_info = {contact_info}")
 
         if contact_info.get("addresses") or contact_info.get("telecoms"):
             logger.info(
-                "🔍 _has_meaningful_extended_data: Found addresses or telecoms - returning True"
+                "[SEARCH] _has_meaningful_extended_data: Found addresses or telecoms - returning True"
             )
             print(
                 "DEBUG _has_meaningful_extended_data: RETURNING TRUE - Found addresses or telecoms"
@@ -1418,12 +1418,12 @@ class PatientSectionProcessor:
         preferred_hcp = administrative_data.get("preferred_hcp", {}).get("name")
 
         logger.info(
-            f"🔍 _has_meaningful_extended_data: author_hcp={author_hcp}, legal_auth={legal_auth}, preferred_hcp={preferred_hcp}"
+            f"[SEARCH] _has_meaningful_extended_data: author_hcp={author_hcp}, legal_auth={legal_auth}, preferred_hcp={preferred_hcp}"
         )
 
         if author_hcp or legal_auth or preferred_hcp:
             logger.info(
-                "🔍 _has_meaningful_extended_data: Found healthcare team info - returning True"
+                "[SEARCH] _has_meaningful_extended_data: Found healthcare team info - returning True"
             )
             return True
 
@@ -1434,17 +1434,17 @@ class PatientSectionProcessor:
         )
 
         logger.info(
-            f"🔍 _has_meaningful_extended_data: doc_date={doc_date}, custodian_name={custodian_name}"
+            f"[SEARCH] _has_meaningful_extended_data: doc_date={doc_date}, custodian_name={custodian_name}"
         )
 
         if doc_date or custodian_name:
             logger.info(
-                "🔍 _has_meaningful_extended_data: Found document info - returning True"
+                "[SEARCH] _has_meaningful_extended_data: Found document info - returning True"
             )
             return True
 
         logger.warning(
-            "🔍 _has_meaningful_extended_data: No meaningful data found - returning False"
+            "[SEARCH] _has_meaningful_extended_data: No meaningful data found - returning False"
         )
         return False
 

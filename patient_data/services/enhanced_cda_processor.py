@@ -135,7 +135,7 @@ class EnhancedCDAProcessor:
                     # Only write to debug file if needed, no console spam
                     if total_items > 0:
                         logger.info(
-                            f"✅ Country extraction found {total_items} clinical items"
+                            f"[SUCCESS] Country extraction found {total_items} clinical items"
                         )
                         try:
                             debug_summary = f"Malta extraction: {total_items} items\n"
@@ -150,7 +150,7 @@ class EnhancedCDAProcessor:
                         except Exception:
                             pass  # Ignore file write errors
                     else:
-                        logger.info("❌ Country extraction found no clinical items")
+                        logger.info("[ERROR] Country extraction found no clinical items")
 
                     if any(country_data.values()):  # If any data was extracted
                         logger.info(

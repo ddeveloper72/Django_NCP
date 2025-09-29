@@ -3763,18 +3763,88 @@ def patient_cda_view(request, session_id, cda_type=None):
                         f"{coded_sections_count} coded sections ({coded_sections_percentage}%), "
                         f"{medical_terms_count} medical terms"
                     )
+
+                    # Extract processed sections for Clinical Information tab
+                    raw_sections = processing_result.get("sections", [])
+                    processed_sections = []
+
+                    logger.info(
+                        f"[DEBUG] Converting {len(raw_sections)} raw sections to processed_sections"
+                    )
+
+                    for section in raw_sections:
+                        # Convert each section to the format expected by the Clinical Information template
+                        if hasattr(section, "display_name"):
+                            # ClinicalSection dataclass object
+                            section_title = section.display_name
+                            entries = getattr(section, "entries", [])
+                        else:
+                            # Dictionary format from enhanced processor
+                            section_title = section.get(
+                                "title", section.get("display_name", "Unknown Section")
+                            )
+                            entries = section.get("entries", [])
+
+                        processed_section = {
+                            "title": section_title,
+                            "has_entries": len(entries) > 0,
+                            "entries": [],
+                            "medical_terminology_count": 0,
+                        }
+
+                        # Convert entries
+                        for entry in entries:
+                            if hasattr(entry, "primary_code"):
+                                # ClinicalEntry dataclass
+                                display_name = (
+                                    entry.primary_code.display
+                                    if entry.primary_code
+                                    else "Unknown Item"
+                                )
+                                has_terminology = bool(
+                                    entry.primary_code and entry.primary_code.code
+                                )
+                            else:
+                                # Dictionary format
+                                display_name = entry.get(
+                                    "display_name", entry.get("name", "Unknown Item")
+                                )
+                                has_terminology = bool(entry.get("code"))
+
+                            processed_entry = {
+                                "display_name": display_name,
+                                "has_medical_terminology": has_terminology,
+                                "status": getattr(
+                                    entry, "status", entry.get("status", "Active")
+                                ),
+                            }
+
+                            processed_section["entries"].append(processed_entry)
+
+                            if has_terminology:
+                                processed_section["medical_terminology_count"] += 1
+
+                        processed_sections.append(processed_section)
+
+                    logger.info(
+                        f"[DEBUG] Created {len(processed_sections)} processed sections for Clinical Information tab"
+                    )
+
                 else:
                     logger.error(f"[ERROR] CDADisplayService processing failed")
                     translation_result = {"sections": [], "success": False}
+                    processed_sections = []  # Initialize empty for failed processing
 
             except Exception as e:
                 logger.error(
                     f"Error processing CDA content with CDADisplayService: {e}"
                 )
                 translation_result = {"sections": [], "success": False}
+                processed_sections = []  # Initialize empty for exception case
         else:
             logger.warning("No valid CDA content available for processing")
             translation_result = {"sections": [], "success": False}
+            processed_sections = []  # Initialize empty for no CDA content case
 
         # Initialize variables that might not be set if processing fails
         if "enhanced_processing_result" not in locals():
@@ -3889,6 +3959,12 @@ def patient_cda_view(request, session_id, cda_type=None):
         logger.info(
             f"[DEBUG] L3 Button should be: {'ENABLED' if context.get('has_l3_cda') else 'DISABLED'}"
         )
+        logger.info(
+            f"[DEBUG] Processed sections count: {len(processed_sections) if 'processed_sections' in locals() else 'NOT_DEFINED'}"
+        )
+        logger.info(
+            f"[DEBUG] Clinical Info tab should be: {'ENABLED' if len(processed_sections) > 0 else 'DISABLED'}"
+        )
 
         context.update(
             {
@@ -3896,6 +3972,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                 "file_name": match_data.get("file_path", "unknown.xml"),
                 "translation_quality": translation_quality,
                 "sections_count": sections_count,
+                "processed_sections": processed_sections,  # Add processed sections for Clinical Information tab
                 "medical_terms_count": medical_terms_count,
                 "coded_sections_count": coded_sections_count,
                 "coded_sections_percentage": coded_sections_percentage,
