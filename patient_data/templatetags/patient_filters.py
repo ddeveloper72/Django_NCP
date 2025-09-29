@@ -353,9 +353,12 @@ def extract_status(value):
 
 @register.filter
 def country_flag(country_code):
-    """Return flag image path for a given country code"""
+    """Return flag image HTML for a given country code"""
+    from django.templatetags.static import static
+    from django.utils.safestring import mark_safe
+
     if not country_code:
-        return None
+        return ""
 
     # Convert to uppercase for consistency
     country_code = country_code.upper()
@@ -395,11 +398,54 @@ def country_flag(country_code):
         "UK",
     }
 
-    # Return flag path if available, otherwise return EU flag as fallback
+    # Map of country codes to full names
+    country_names = {
+        "AT": "Austria",
+        "BE": "Belgium",
+        "BG": "Bulgaria",
+        "CY": "Cyprus",
+        "CZ": "Czech Republic",
+        "DE": "Germany",
+        "DK": "Denmark",
+        "EE": "Estonia",
+        "ES": "Spain",
+        "EU": "European Union",
+        "FI": "Finland",
+        "FR": "France",
+        "GR": "Greece",
+        "HR": "Croatia",
+        "HU": "Hungary",
+        "IE": "Ireland",
+        "IS": "Iceland",
+        "IT": "Italy",
+        "LT": "Lithuania",
+        "LU": "Luxembourg",
+        "LV": "Latvia",
+        "MT": "Malta",
+        "NL": "Netherlands",
+        "NO": "Norway",
+        "PL": "Poland",
+        "PT": "Portugal",
+        "RO": "Romania",
+        "SE": "Sweden",
+        "SI": "Slovenia",
+        "SK": "Slovakia",
+        "UK": "United Kingdom",
+    }
+
+    # Get flag path
     if country_code in available_flags:
-        return f"flags/{country_code}.webp"
+        flag_path = f"flags/{country_code}.webp"
     else:
-        return "flags/EU.webp"
+        flag_path = "flags/EU.webp"
+
+    # Get full country name for alt text
+    country_name = country_names.get(country_code, country_code)
+
+    # Return proper HTML img tag
+    static_path = static(flag_path)
+    html = f'<img src="{static_path}" alt="{country_name}" class="flag-img" width="20" height="15" style="margin-right: 5px;">'
+    return mark_safe(html)
 
 
 @register.filter
@@ -444,3 +490,138 @@ def country_name(country_code):
     }
 
     return country_names.get(country_code.upper(), country_code.upper())
+
+
+@register.filter
+def handle_null_flavor(value, null_flavor=None):
+    """
+    Handle nullFlavor values according to HL7 CDA specification.
+
+    HL7 CDA nullFlavor codes:
+    - UNK: Unknown - information is not available
+    - NA: Not Applicable - information is not relevant
+    - NI: No Information - no information whatsoever can be inferred
+    - NINF: Negative Infinity - value is exceptionally low
+    - PINF: Positive Infinity - value is exceptionally high
+    - OTH: Other - information is available but not represented
+    - ASKU: Asked but Unknown - information was sought but not found
+    - NAV: Not Available - information is not available at this time
+    - MSK: Masked - information is available but has been suppressed
+    - NP: Not Present - value is not present
+    - TRC: Trace - value is below the limit of detection
+    """
+    # If value exists and is not empty/None, return it
+    if value and str(value).strip():
+        return value
+
+    # Handle nullFlavor parameter or check if value itself contains nullFlavor info
+    flavor = null_flavor
+    if hasattr(value, "get") and isinstance(value, dict):
+        flavor = value.get("nullFlavor", flavor)
+    elif isinstance(value, str) and value.strip() == "":
+        flavor = flavor or "UNK"
+
+    # Return human-readable text for nullFlavor codes
+    null_flavor_mappings = {
+        "UNK": "Unknown",
+        "NA": "Not Applicable",
+        "NI": "No Information",
+        "NINF": "Very Low",
+        "PINF": "Very High",
+        "OTH": "Other",
+        "ASKU": "Unknown (Asked)",
+        "NAV": "Not Available",
+        "MSK": "Masked",
+        "NP": "Not Present",
+        "TRC": "Trace Amount",
+    }
+
+    if flavor and flavor in null_flavor_mappings:
+        return null_flavor_mappings[flavor]
+
+    # Default fallback for empty/None values
+    return "Unknown" if not value else value
+
+
+@register.filter
+def extract_null_flavor(data):
+    """
+    Extract nullFlavor from complex data structures (dict, object with null_flavor attribute).
+    Used in combination with handle_null_flavor filter.
+    """
+    if isinstance(data, dict):
+        return data.get("nullFlavor") or data.get("null_flavor")
+    elif hasattr(data, "null_flavor"):
+        return getattr(data, "null_flavor")
+    elif hasattr(data, "nullFlavor"):
+        return getattr(data, "nullFlavor")
+    return None
+
+
+@register.filter
+def safe_clinical_display(entry, field_name="display_name"):
+    """
+    Safely extract clinical display values with nullFlavor handling.
+    Used for clinical entries that might have missing data.
+
+    Usage: {{ entry|safe_clinical_display:"display_name" }}
+    """
+    if not entry:
+        return handle_null_flavor(None)
+
+    # Try to get the field value
+    if isinstance(entry, dict):
+        value = entry.get(field_name)
+        null_flavor = extract_null_flavor(entry)
+    else:
+        value = getattr(entry, field_name, None)
+        null_flavor = extract_null_flavor(entry)
+
+    return handle_null_flavor(value, null_flavor)
+
+
+@register.filter
+def format_clinical_value(value, value_type="text"):
+    """
+    Format clinical values with proper nullFlavor handling and type-specific formatting.
+
+    value_type options:
+    - 'text': Standard text display
+    - 'date': Date formatting
+    - 'numeric': Numeric with units
+    - 'code': Clinical code display
+    """
+    if not value:
+        return handle_null_flavor(value)
+
+    # Handle different value types
+    if value_type == "date":
+        # Handle date values
+        if hasattr(value, "get") and isinstance(value, dict):
+            date_val = value.get("value", value.get("date"))
+            if date_val:
+                return date_val
+        return handle_null_flavor(value)
+
+    elif value_type == "numeric":
+        # Handle numeric values with units
+        if hasattr(value, "get") and isinstance(value, dict):
+            num_val = value.get("value")
+            unit = value.get("unit", "")
+            if num_val is not None:
+                return f"{num_val} {unit}".strip()
+        return handle_null_flavor(value)
+
+    elif value_type == "code":
+        # Handle clinical codes
+        if hasattr(value, "get") and isinstance(value, dict):
+            display = value.get("displayName", value.get("display"))
+            code = value.get("code")
+            if display:
+                return display
+            elif code:
+                return f"Code: {code}"
+        return handle_null_flavor(value)
+
+    # Default text handling
+    return handle_null_flavor(value)
