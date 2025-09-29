@@ -1,5 +1,6 @@
 {# Clinical Section Router Template - Routes to appropriate child template based on section type #}
 {# Django-compatible version - no {% set %} variables allowed #}
+{% load patient_filters %}
 
 <!-- Render individual clinical section (called within loop from main template) -->
 {% if section and section.title %}

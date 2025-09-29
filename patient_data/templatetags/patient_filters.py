@@ -631,64 +631,64 @@ def format_clinical_value(value, value_type="text"):
 def extract_section_title(title_data, prefer="translated"):
     """
     Extract section title from dictionary structure or return string directly
-    
+
     Args:
         title_data: Either a string or dict with keys: coded, translated, original
         prefer: Which version to prefer ('translated', 'coded', 'original')
-    
+
     Returns:
         Clean section title string
     """
     if not title_data:
         return "Clinical Section"
-    
+
     # If it's already a string, return it
     if isinstance(title_data, str):
         return title_data
-    
+
     # If it's a dictionary, extract the preferred version
     if isinstance(title_data, dict):
         # Try preferred version first
         if prefer in title_data and title_data[prefer]:
             return str(title_data[prefer])
-        
+
         # Fallback order: translated -> coded -> original -> any available
-        for key in ['translated', 'coded', 'original']:
+        for key in ["translated", "coded", "original"]:
             if key in title_data and title_data[key]:
                 return str(title_data[key])
-        
+
         # If none of the standard keys work, try any available key
         for key, value in title_data.items():
             if value:
                 return str(value)
-    
+
     # Final fallback
     return "Clinical Section"
 
 
-@register.filter 
+@register.filter
 def extract_display_name(data, prefer="translated"):
     """
     Extract display name from various data structures
-    
+
     Args:
         data: Could be string, dict, or object with display_name/title attributes
         prefer: Which version to prefer for dictionaries
-        
+
     Returns:
         Clean display name string
     """
     if not data:
         return "Unknown Item"
-    
+
     # If it's already a string, return it
     if isinstance(data, str):
         return data
-    
+
     # If it's a dictionary, try to extract title/display_name
     if isinstance(data, dict):
         # Check for common title fields
-        for field in ['display_name', 'title', 'name']:
+        for field in ["display_name", "title", "name"]:
             if field in data:
                 field_data = data[field]
                 if isinstance(field_data, dict):
@@ -696,19 +696,19 @@ def extract_display_name(data, prefer="translated"):
                     return extract_section_title(field_data, prefer)
                 elif field_data:
                     return str(field_data)
-        
+
         # If it's a translation dictionary, extract using section title logic
-        if any(key in data for key in ['coded', 'translated', 'original']):
+        if any(key in data for key in ["coded", "translated", "original"]):
             return extract_section_title(data, prefer)
-    
+
     # If it's an object with attributes, try common attribute names
-    if hasattr(data, 'display_name'):
+    if hasattr(data, "display_name"):
         return str(data.display_name)
-    elif hasattr(data, 'title'):
+    elif hasattr(data, "title"):
         return str(data.title)
-    elif hasattr(data, 'name'):
+    elif hasattr(data, "name"):
         return str(data.name)
-    
+
     # Final fallback
     return "Unknown Item"
 
@@ -721,9 +721,9 @@ def safe_title_text(title_data):
     """
     if not title_data:
         return ""
-    
+
     # Extract clean title first
     clean_title = extract_section_title(title_data)
-    
+
     # Return lowercase for safe matching
     return clean_title.lower() if clean_title else ""
