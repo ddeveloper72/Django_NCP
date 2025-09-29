@@ -53,10 +53,10 @@ class DocumentMapperIntegration:
             total_items = sum(len(items) for items in results.values())
             if total_items > 0:
                 logger.info(
-                    f"✅ Document mapping extracted {total_items} clinical items"
+                    f"[SUCCESS] Document mapping extracted {total_items} clinical items"
                 )
             else:
-                logger.info("❌ Document mapping found no clinical items")
+                logger.info("[ERROR] Document mapping found no clinical items")
 
             return results
 
@@ -140,15 +140,15 @@ def test_document_mapping_approach():
     # Get Malta patient
     malta_patient = Patient.objects.filter(source_country="MT").first()
     if not malta_patient:
-        print("❌ No Malta patient found!")
+        print("[ERROR] No Malta patient found!")
         return
 
-    print(f"📋 Testing with patient: {malta_patient.patient_id}")
+    print(f"[LIST] Testing with patient: {malta_patient.patient_id}")
 
     # Get CDA content
     cda_content = malta_patient.get_cda_content()
     if not cda_content:
-        print("❌ No CDA content!")
+        print("[ERROR] No CDA content!")
         return
 
     print(f"📄 CDA content: {len(cda_content)} characters")
@@ -156,27 +156,27 @@ def test_document_mapping_approach():
     # Test document mapping
     integration = DocumentMapperIntegration()
 
-    print("\n🔍 CREATING DOCUMENT MAP...")
+    print("\n[SEARCH] CREATING DOCUMENT MAP...")
     analysis = integration.get_document_analysis(cda_content, malta_patient.patient_id)
 
-    print(f"📊 DOCUMENT ANALYSIS:")
+    print(f"[CHART] DOCUMENT ANALYSIS:")
     print(f"   Total sections: {analysis.get('total_sections', 0)}")
     print(f"   Clinical sections: {analysis.get('clinical_sections', 0)}")
     print(f"   Extraction patterns: {analysis.get('extraction_patterns_count', 0)}")
 
-    print(f"\n📋 SECTIONS SUMMARY:")
+    print(f"\n[LIST] SECTIONS SUMMARY:")
     for section_code, info in analysis.get("sections_summary", {}).items():
         print(f"   {section_code}: {info['title']}")
         print(f"      Type: {info['clinical_type']}")
         print(f"      Entries: {info['entry_count']}")
         print(f"      Complexity: {info['complexity']}")
 
-    print("\n🎯 EXTRACTING CLINICAL DATA...")
+    print("\n[TARGET] EXTRACTING CLINICAL DATA...")
     results = integration.extract_clinical_data_with_mapping(
         cda_content, "MT", malta_patient.patient_id
     )
 
-    print(f"📈 EXTRACTION RESULTS:")
+    print(f"[GRAPH] EXTRACTION RESULTS:")
     total_items = 0
     for section_name, items in results.items():
         item_count = len(items)

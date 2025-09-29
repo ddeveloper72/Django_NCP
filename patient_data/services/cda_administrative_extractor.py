@@ -4,11 +4,11 @@ Extracts comprehensive administrative data from European L1/L3 CDA documents
 including contact information, healthcare providers, legal authenticators, etc.
 """
 
-import xml.etree.ElementTree as ET
-from typing import Dict, List, Optional
-import re
 import logging
+import re
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +44,7 @@ class OrganizationInfo:
 
 
 @dataclass
+@dataclass
 class PersonInfo:
     """Represents person information (HCP, legal authenticator, etc.)"""
 
@@ -51,6 +52,7 @@ class PersonInfo:
     given_name: str = ""
     title: str = ""
     role: str = ""
+    relationship: str = ""  # Guardian/contact relationship type
     specialty: str = ""
     organization: OrganizationInfo = None
     contact_info: ContactInfo = None

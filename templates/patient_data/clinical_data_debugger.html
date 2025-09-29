@@ -299,7 +299,7 @@
     .clinical-debugger p,
     .clinical-debugger li,
     .clinical-debugger span {
-        color: #374151;
+        color: #495360;
     }
 
     .clinical-debugger strong {
@@ -375,6 +375,241 @@
             </div>
         </div>
 
+        <!-- ENHANCED: CDA Headers and Document Metadata -->
+        {% if comprehensive_data.cda_headers %}
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)" role="button" tabindex="0" aria-expanded="false" aria-controls="cda-headers-content">
+                <h3><i class="fas fa-file-medical-alt me-2"></i>CDA Headers & Document Metadata</h3>
+                <p class="mb-0">Document structure, patient identity, and metadata analysis</p>
+            </div>
+            <div class="section-content" id="cda-headers-content">
+                {% if comprehensive_data.cda_headers.error %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error: {{ comprehensive_data.cda_headers.error }}
+                    </div>
+                {% else %}
+                    <!-- Document Structure Overview -->
+                    {% if comprehensive_data.cda_headers.document_structure %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-sitemap me-2"></i>Document Structure</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded {% if comprehensive_data.cda_headers.document_structure.has_administrative_data %}bg-success text-white{% else %}bg-light{% endif %}">
+                                    <i class="fas fa-user-cog me-2"></i>Administrative Data:
+                                    {% if comprehensive_data.cda_headers.document_structure.has_administrative_data %}✅ Present{% else %}❌ Missing{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded {% if comprehensive_data.cda_headers.document_structure.has_clinical_sections %}bg-success text-white{% else %}bg-light{% endif %}">
+                                    <i class="fas fa-notes-medical me-2"></i>Clinical Sections:
+                                    {% if comprehensive_data.cda_headers.document_structure.has_clinical_sections %}✅ Present{% else %}❌ Missing{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded bg-info text-white">
+                                    <i class="fas fa-list-ol me-2"></i>Total Sections: {{ comprehensive_data.cda_headers.document_structure.total_sections }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Document Metadata -->
+                    {% if comprehensive_data.cda_headers.document_metadata %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-info-circle me-2"></i>Document Metadata</h5>
+                        <div class="bg-light p-3 rounded">
+                            <pre><code class="language-json">{{ comprehensive_data.cda_headers.document_metadata|pprint }}</code></pre>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Patient Identity -->
+                    {% if comprehensive_data.cda_headers.patient_identity %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-user me-2"></i>Patient Identity</h5>
+                        <div class="bg-light p-3 rounded">
+                            <pre><code class="language-json">{{ comprehensive_data.cda_headers.patient_identity|pprint }}</code></pre>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ENHANCED: Administrative Data Structure -->
+        {% if comprehensive_data.extended_patient_data %}
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)" role="button" tabindex="0" aria-expanded="false" aria-controls="admin-data-content">
+                <h3><i class="fas fa-user-shield me-2"></i>Administrative Data & Extended Patient Information</h3>
+                <p class="mb-0">Guardian, contacts, healthcare providers, and document details</p>
+            </div>
+            <div class="section-content" id="admin-data-content">
+                {% if comprehensive_data.extended_patient_data.error %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error: {{ comprehensive_data.extended_patient_data.error }}
+                    </div>
+                {% else %}
+                    <!-- Administrative Summary -->
+                    {% if comprehensive_data.administrative_summary %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-chart-bar me-2"></i>Administrative Summary</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded {% if comprehensive_data.administrative_summary.guardian_present %}bg-success text-white{% else %}bg-light{% endif %}">
+                                    <i class="fas fa-user-friends me-2"></i>Guardian Present:
+                                    {% if comprehensive_data.administrative_summary.guardian_present %}✅ Yes{% else %}❌ No{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-2 mt-md-0">
+                                <div class="p-3 border rounded bg-info text-white">
+                                    <i class="fas fa-address-book me-2"></i>Other Contacts: {{ comprehensive_data.administrative_summary.other_contacts_count }}
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <div class="p-3 border rounded {% if comprehensive_data.administrative_summary.has_legal_authenticator %}bg-success text-white{% else %}bg-light{% endif %}">
+                                    <i class="fas fa-certificate me-2"></i>Legal Authenticator:
+                                    {% if comprehensive_data.administrative_summary.has_legal_authenticator %}✅ Present{% else %}❌ None{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <div class="p-3 border rounded {% if comprehensive_data.administrative_summary.has_preferred_hcp %}bg-success text-white{% else %}bg-light{% endif %}">
+                                    <i class="fas fa-user-md me-2"></i>Preferred HCP:
+                                    {% if comprehensive_data.administrative_summary.has_preferred_hcp %}✅ Present{% else %}❌ None{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="bg-light p-3 rounded">
+                                <p class="mb-2"><strong><i class="fas fa-file-alt me-2"></i>Document:</strong> {{ comprehensive_data.administrative_summary.document_title|default:"Not specified" }}</p>
+                                <p class="mb-2"><strong><i class="fas fa-calendar me-2"></i>Created:</strong> {{ comprehensive_data.administrative_summary.document_creation_date|default:"Not specified" }}</p>
+                                <p class="mb-0"><strong><i class="fas fa-hospital me-2"></i>Custodian:</strong> {{ comprehensive_data.administrative_summary.custodian_name|default:"Not specified" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Detailed Administrative Data -->
+                    <div class="mb-4">
+                        <h5><i class="fas fa-database me-2"></i>Detailed Administrative Data</h5>
+                        <div class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;">
+                            <pre><code class="language-json">{{ comprehensive_data.extended_patient_data.administrative_data|pprint }}</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Contact Data -->
+                    {% if comprehensive_data.extended_patient_data.contact_data %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-address-card me-2"></i>Contact Data</h5>
+                        <div class="bg-light p-3 rounded" style="max-height: 300px; overflow-y: auto;">
+                            <pre><code class="language-json">{{ comprehensive_data.extended_patient_data.contact_data|pprint }}</code></pre>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Healthcare Data -->
+                    {% if comprehensive_data.extended_patient_data.healthcare_data %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-user-md me-2"></i>Healthcare Provider Data</h5>
+                        <div class="bg-light p-3 rounded" style="max-height: 300px; overflow-y: auto;">
+                            <pre><code class="language-json">{{ comprehensive_data.extended_patient_data.healthcare_data|pprint }}</code></pre>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ENHANCED: CDA Structure Analysis -->
+        {% if comprehensive_data.cda_structure_analysis %}
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)" role="button" tabindex="0" aria-expanded="false" aria-controls="structure-analysis-content">
+                <h3><i class="fas fa-code me-2"></i>CDA Structure Analysis</h3>
+                <p class="mb-0">XML structure, namespaces, and element analysis</p>
+            </div>
+            <div class="section-content" id="structure-analysis-content">
+                {% if comprehensive_data.cda_structure_analysis.error %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error: {{ comprehensive_data.cda_structure_analysis.error }}
+                    </div>
+                {% else %}
+                    <!-- Structure Overview -->
+                    <div class="mb-4">
+                        <h5><i class="fas fa-sitemap me-2"></i>Structure Overview</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="p-3 border rounded bg-primary text-white">
+                                    <i class="fas fa-tag me-2"></i>Root Tag: {{ comprehensive_data.cda_structure_analysis.root_tag }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 border rounded bg-info text-white">
+                                    <i class="fas fa-cubes me-2"></i>Total Elements: {{ comprehensive_data.cda_structure_analysis.total_elements }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 border rounded {% if comprehensive_data.cda_structure_analysis.has_structured_body %}bg-success text-white{% else %}bg-warning text-dark{% endif %}">
+                                    <i class="fas fa-list me-2"></i>Structured Body:
+                                    {% if comprehensive_data.cda_structure_analysis.has_structured_body %}✅ Yes{% else %}❌ No{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 border rounded bg-secondary text-white">
+                                    <i class="fas fa-layer-group me-2"></i>Sections: {{ comprehensive_data.cda_structure_analysis.sections_count }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Namespaces -->
+                    {% if comprehensive_data.cda_structure_analysis.namespaces %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-globe me-2"></i>XML Namespaces ({{ comprehensive_data.cda_structure_analysis.namespaces|length }})</h5>
+                        <div class="bg-light p-3 rounded" style="max-height: 200px; overflow-y: auto;">
+                            <pre><code class="language-json">{{ comprehensive_data.cda_structure_analysis.namespaces|pprint }}</code></pre>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Element Counts -->
+                    {% if comprehensive_data.cda_structure_analysis.element_counts %}
+                    <div class="mb-4">
+                        <h5><i class="fas fa-chart-pie me-2"></i>Element Type Counts</h5>
+                        <div class="bg-light p-3 rounded" style="max-height: 300px; overflow-y: auto;">
+                            <pre><code class="language-json">{{ comprehensive_data.cda_structure_analysis.element_counts|pprint }}</code></pre>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ENHANCED: Complete JSON Data Export -->
+        {% if comprehensive_json %}
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)" role="button" tabindex="0" aria-expanded="false" aria-controls="comprehensive-json-content">
+                <h3><i class="fas fa-download me-2"></i>Complete Comprehensive Data (JSON Export)</h3>
+                <p class="mb-0">All extracted data in structured JSON format for export/analysis</p>
+            </div>
+            <div class="section-content" id="comprehensive-json-content">
+                <div class="mb-3">
+                    <button onclick="copyToClipboard('comprehensive-json-data')" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-copy me-2"></i>Copy JSON to Clipboard
+                    </button>
+                    <button onclick="downloadJson('comprehensive-data.json', 'comprehensive-json-data')" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-download me-2"></i>Download JSON File
+                    </button>
+                </div>
+                <div class="bg-dark text-light p-3 rounded" style="max-height: 600px; overflow-y: auto;">
+                    <pre id="comprehensive-json-data"><code class="language-json">{{ comprehensive_json }}</code></pre>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Extraction Methods Used -->
         <div class="section-card">
             <div class="section-header" onclick="toggleSection(this)" role="button" tabindex="0" aria-expanded="false" aria-controls="extraction-methods-content">
@@ -406,7 +641,7 @@
                 </h3>
             </div>
             <div class="section-content" id="clinical-section-content-{{ forloop.counter }}">
-                <div class="{% if section_item.is_allergy_related %}allergy-specific{% elif section_item.section_type == 'medications' %}medication-specific{% elif section_item.section_type == 'problems' %}problem-specific{% else %}clinical-section-analysis{% endif %}">>
+                <div class="{% if section_item.is_allergy_related %}allergy-specific{% elif section_item.section_type == 'medications' %}medication-specific{% elif section_item.section_type == 'problems' %}problem-specific{% else %}clinical-section-analysis{% endif %}">
                     <h4>🔍 {{ section.display_name }} Data Analysis</h4>
                     {% if section_item.is_allergy_related %}
                     <p><strong>This is an allergy-related section!</strong> Here's what we extracted:</p>
@@ -829,6 +1064,68 @@ function downloadJSON() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+}
+
+// ENHANCED: Copy JSON to clipboard
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.textContent;
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() {
+            showNotification('JSON copied to clipboard!', 'success');
+        }).catch(function(err) {
+            console.error('Failed to copy text: ', err);
+            showNotification('Failed to copy JSON', 'error');
+        });
+    } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            showNotification('JSON copied to clipboard!', 'success');
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            showNotification('Failed to copy JSON', 'error');
+        }
+        document.body.removeChild(textArea);
+    }
+}
+
+// ENHANCED: Download JSON file
+function downloadJson(filename, elementId) {
+    const element = document.getElementById(elementId);
+    const jsonData = element.textContent;
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showNotification(`Downloaded ${filename}`, 'success');
+}
+
+// Show notification helper
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>${message}`;
+
+    document.body.appendChild(notification);
+
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
 }
 
 // Auto-expand first few clinical sections for better user experience

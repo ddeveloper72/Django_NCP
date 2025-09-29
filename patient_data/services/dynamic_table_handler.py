@@ -88,13 +88,13 @@ class DynamicClinicalTableHandler:
             clinical_table.update(self._calculate_table_metrics(clinical_table["rows"]))
 
             logger.info(
-                f"✅ Created dynamic table: {len(clinical_table['rows'])} rows, {len(clinical_table['headers'])} columns"
+                f"[SUCCESS] Created dynamic table: {len(clinical_table['rows'])} rows, {len(clinical_table['headers'])} columns"
             )
 
             return clinical_table
 
         except Exception as e:
-            logger.error(f"❌ Dynamic table creation failed: {e}")
+            logger.error(f"[ERROR] Dynamic table creation failed: {e}")
             return self._create_fallback_table(entries_data, section_code)
 
     def _get_section_column_config(self, section_code: str) -> List[Dict[str, Any]]:
@@ -107,14 +107,14 @@ class DynamicClinicalTableHandler:
             ).order_by("display_order", "display_label")
 
             if configs.exists():
-                logger.info(f"📋 Using admin-configured columns for {section_code}")
+                logger.info(f"[LIST] Using admin-configured columns for {section_code}")
                 return [self._config_to_dict(config) for config in configs]
 
         except Exception as e:
             logger.warning(f"⚠️ Could not load admin config: {e}")
 
         # Fallback to defaults
-        logger.info(f"📋 Using default columns for {section_code}")
+        logger.info(f"[LIST] Using default columns for {section_code}")
         return self.default_configs.get(section_code, self.default_configs["default"])
 
     def _config_to_dict(self, config) -> Dict[str, Any]:
