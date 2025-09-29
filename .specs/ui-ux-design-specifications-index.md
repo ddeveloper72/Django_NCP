@@ -1,7 +1,7 @@
 # UI/UX Design Specifications Index
 
-**Document Version:** 1.0  
-**Last Updated:** September 28, 2025  
+**Document Version:** 1.0
+**Last Updated:** September 28, 2025
 **Purpose:** Index of all UI/UX design specifications and wireframe guides
 
 ---
@@ -48,17 +48,20 @@
 ### Component Standards
 
 #### Navigation Components
+
 - **Primary Tabs**: Bootstrap nav-tabs with healthcare styling
 - **Secondary Pills**: Nav-pills for sub-section navigation
 - **Responsive Behavior**: Stacks on mobile, horizontal on desktop
 
 #### Card Components
+
 - **Information Cards**: Colored headers with consistent iconography
 - **Grid Layout**: Bootstrap responsive grid (col-12, col-md-6, col-lg-4)
 - **Height Consistency**: Equal height cards using Bootstrap h-100 class
 - **Content Overflow**: Scroll behavior for cards exceeding height limits
 
 #### Icon System
+
 - **FontAwesome Integration**: Consistent icon usage throughout interface
 - **Semantic Icons**: Medical, administrative, and contact-specific icons
 - **Icon Sizing**: Standardized sizing with proper spacing
@@ -66,6 +69,7 @@
 ### Color Palette
 
 #### Primary Colors
+
 - **Primary Blue**: Navigation, primary actions (#0d6efd)
 - **Success Green**: Healthcare information (#198754)
 - **Info Blue**: Address and location data (#0dcaf0)
@@ -73,6 +77,7 @@
 - **Secondary Gray**: Supporting information (#6c757d)
 
 #### Semantic Usage
+
 - Patient Demographics: Primary Blue
 - Healthcare Information: Success Green
 - Contact/Address: Info Blue
@@ -84,21 +89,27 @@
 ## Integration Points
 
 ### SCSS Architecture
+
 Integrates with [SCSS Standards Index](./scss-standards-index.md):
+
 - Component-based SCSS structure
 - Variable-driven design tokens
 - Context-aware styling patterns
 - Zero duplication principles
 
 ### Django Template Standards
+
 Follows [Django Template Commenting Standards](./django-template-commenting-standards.md):
+
 - Semantic HTML structure
 - Proper template commenting
 - Context variable documentation
 - Component inclusion patterns
 
 ### Technical Architecture
+
 Aligns with [Technical Architecture](./technical-architecture-and-information-flow.md):
+
 - Service layer integration
 - Data flow patterns
 - Component modularity
@@ -109,6 +120,7 @@ Aligns with [Technical Architecture](./technical-architecture-and-information-fl
 ## Development Workflow
 
 ### New Design Implementation
+
 1. **Reference Wireframes**: Start with wireframe design guide
 2. **Technical Implementation**: Follow technical implementation guide
 3. **Component Creation**: Use SCSS component patterns
@@ -116,6 +128,7 @@ Aligns with [Technical Architecture](./technical-architecture-and-information-fl
 5. **Documentation**: Update relevant specifications
 
 ### Design Modifications
+
 1. **Impact Assessment**: Evaluate against existing wireframes
 2. **Approval Process**: Get approval for structural changes
 3. **Implementation**: Follow technical implementation guide
@@ -123,6 +136,7 @@ Aligns with [Technical Architecture](./technical-architecture-and-information-fl
 5. **Documentation Update**: Update both design and technical specs
 
 ### Quality Assurance
+
 - [ ] Wireframe compliance check
 - [ ] Responsive design validation
 - [ ] Accessibility testing (WCAG AA)

@@ -33,6 +33,82 @@ graph TD
 4. **Data Layer** - Document Storage, Session Data, Configuration
 5. **External Layer** - CDA Documents, FHIR Services, Translation APIs
 
+## Central Terminology Service Architecture
+
+### NCPeH Terminology Processing Flow
+
+The European NCP (National Contact Point for eHealth) system utilizes a Central Terminology Service for multilingual medical terminology support across Member States. This architecture ensures proper medical terminology translation and consistency.
+
+#### Terminology Service Flow Diagram
+
+```mermaid
+graph TD
+    A[Country A - Original CDA] --> B[Country A NCPeH]
+    B --> C{Original Language?}
+    C -->|Non-English| D[Central Terminology Service]
+    C -->|English| E[Direct Processing]
+    D --> F[Add English Terminology]
+    F --> G[Friendly CDA Creation]
+    G --> H[Send to Country B NCPeH]
+    E --> H
+    H --> I{Country B Language?}
+    I -->|English| J[Extract English Terminology]
+    I -->|Other Language| K[Central Terminology Service]
+    K --> L[Translate to Country B Language]
+    L --> M[L3 Pivot CDA Creation]
+    J --> N[Render in English]
+    M --> O[Render in Country B Language]
+```
+
+#### Terminology Processing Stages
+
+**Stage 1: Country A (Source) - Friendly CDA Creation**
+
+- Original CDA contains coded structured data in native language
+- Central Terminology Service matches codes to National Medicinal Catalogues
+- English terminology added alongside original language
+- Result: "Friendly CDA" with dual-language terminology
+
+**Stage 2: Cross-Border Transmission**
+
+- Friendly CDA transmitted from Country A NCPeH to Country B NCPeH
+- Contains both original language and English terminology
+- Medical codes preserved for terminology consistency
+
+**Stage 3: Country B (Destination) - Language Adaptation**
+
+- **If English-speaking**: Extract English terminology directly from Friendly CDA
+- **If Non-English**: Use Central Terminology Service to translate English to local language
+- Create L3 Pivot CDA with appropriate language terminology
+- Render patient summary in Country B's language
+
+#### Implementation in Django NCP (English-Speaking Member State)
+
+Since our Django NCP application represents an English-speaking Member State:
+
+**Receiving Data (from affiliate countries):**
+
+```python
+# Process incoming Friendly CDA documents
+# Extract English terminology directly from dual-language structure
+# No translation required - use English terminology as provided
+```
+
+**Sending Data (to other Member States):**
+
+```python
+# Our original CDA documents are already in English
+# No Central Terminology Service required for outgoing data
+# Receiving Member State handles translation if needed
+```
+
+#### Architectural Principles
+
+1. **No Hardcoded Terminology**: All medical terminology must come from CDA documents or Central Terminology Service
+2. **Code-Based Terminology**: Use medical codes (SNOMED CT, ICD-10, etc.) as the foundation for terminology
+3. **Language Agnostic Processing**: System processes structured data, not language-specific content
+4. **Terminology Separation**: Terminology logic belongs in dedicated services, not in views or templates
+
 ## Patient Data Processing Flow
 
 ### Complete Patient Journey
@@ -80,7 +156,11 @@ Patient Data Matching & Retrieval
 
 #### 2. CDA Document Processing Pipeline
 
-**Flow:** `Raw CDA XML → Parsing → Translation → Rendering → Display`
+**Process Flow for English-speaking Country B (Django NCP):**
+`Raw CDA XML → Parsing → Terminology Extraction → Template Rendering → User Display`
+
+**Process Flow for non-English speaking Country B:**
+`Raw CDA XML → Parsing → Translation → Terminology Extraction → Template Rendering → User Display`
 
 ```python
 # Core Processing Chain:
@@ -92,12 +172,16 @@ CDAProcessor (patient_data/document_services.py)
   ├── _extract_sections() - Clinical sections
   └── _is_level3() - Document type detection
   ↓
-Enhanced Translation Service
-  ├── Translation Engine (translation_services/)
-  ├── Terminology Translator (translation_services/)
-  └── Quality Assessment
+Language Detection & Processing
+  ├── English-speaking: Direct Terminology Extraction
+  └── Non-English: Translation Service → Terminology Extraction
   ↓
-Template Rendering (templates/patient_data/)
+Central Terminology Service
+  ├── extract_medical_codes_from_fields() - Medical code extraction
+  ├── extract_condition_terminology() - Condition codes
+  └── extract_procedure_terminology() - Procedure codes
+  ↓
+Template Rendering (templates/patient_data/) - Django Template Engine
   ├── enhanced_patient_cda.html - Main template
   ├── patient_details.html - Detail view
   └── Component templates

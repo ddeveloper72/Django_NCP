@@ -1,8 +1,8 @@
 # CDA Display Wireframe Design Guide
 
-**Document Version:** 1.0  
-**Last Updated:** September 28, 2025  
-**Status:** Production Reference  
+**Document Version:** 1.0
+**Last Updated:** September 28, 2025
+**Status:** Production Reference
 **Purpose:** Wireframe specification for Enhanced CDA Patient Display interface
 
 ---
@@ -20,10 +20,12 @@ This document serves as the definitive wireframe and design specification for th
 ### Primary Navigation Layout
 
 #### Top-Level Tabs
+
 - **Patient Overview** (Default active state)
 - **Extended Patient Information** (Tabbed sub-navigation)
 
 #### Sub-Navigation Pills (Extended Patient Information)
+
 - Personal Information (Default active)
 - Healthcare Team
 - System & Documentation
@@ -37,6 +39,7 @@ This document serves as the definitive wireframe and design specification for th
 **File Reference:** Screenshot 1 - Personal Information active tab
 
 ### Layout Structure
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ [Patient Overview] [Extended Patient Information]               │
@@ -64,10 +67,11 @@ This document serves as the definitive wireframe and design specification for th
 ```
 
 ### Design Specifications
+
 - **Card Layout:** 3-column grid for demographic information
-- **Card Colors:** 
+- **Card Colors:**
   - Patient Demographics: Blue header (Primary)
-  - Patient Identifiers: Gray header (Secondary)  
+  - Patient Identifiers: Gray header (Secondary)
   - Patient Address: Blue header (Info)
   - Contact Methods: Blue header (Primary), spans full width
 - **Typography:** Clean, medical-grade typography with clear hierarchy
@@ -81,6 +85,7 @@ This document serves as the definitive wireframe and design specification for th
 **File Reference:** Screenshot 2 - Healthcare Team navigation active
 
 ### Layout Structure
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ [Personal Information] [Healthcare Team] [System & Doc] etc...  │
@@ -108,9 +113,10 @@ This document serves as the definitive wireframe and design specification for th
 ```
 
 ### Design Specifications
+
 - **Card Layout:** Single large card with internal sections
 - **Card Color:** Green header (Success/Healthcare theme)
-- **Information Hierarchy:** 
+- **Information Hierarchy:**
   - Healthcare Provider (Left column)
   - Healthcare Organization (Right column)
   - Contact Information (Centered)
@@ -125,6 +131,7 @@ This document serves as the definitive wireframe and design specification for th
 **File Reference:** Screenshot 3 - System & Documentation active
 
 ### Layout Structure
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ [Personal Information] [Healthcare Team] [System & Doc] etc...  │
@@ -150,11 +157,12 @@ This document serves as the definitive wireframe and design specification for th
 ```
 
 ### Design Specifications
+
 - **Card Layout:** Single comprehensive card with two-column internal layout
 - **Card Color:** Blue header (Primary/System theme)
 - **Status Badges:** Color-coded status indicators
   - ACTIVE: Green badge
-  - SECURE: Blue badge  
+  - SECURE: Blue badge
   - NORMAL CONFIDENTIALITY: Yellow badge
 - **Information Architecture:**
   - Document Information (Left column)
@@ -166,12 +174,14 @@ This document serves as the definitive wireframe and design specification for th
 ## Design Principles
 
 ### Visual Hierarchy
+
 1. **Primary Navigation:** Bold, clear tab distinction
 2. **Secondary Navigation:** Pill-style buttons for sub-sections
 3. **Content Cards:** Bordered cards with colored headers
 4. **Information Density:** Balanced spacing, not cluttered
 
 ### Color Scheme
+
 - **Primary Blue:** Main navigation and primary actions
 - **Secondary Gray:** Supporting information and identifiers
 - **Success Green:** Healthcare-related information
@@ -179,12 +189,14 @@ This document serves as the definitive wireframe and design specification for th
 - **Warning Yellow:** Status and administrative information
 
 ### Typography
+
 - **Headers:** Bold, medical-grade sans-serif
 - **Body Text:** Clean, readable font with proper contrast
 - **Labels:** Semi-bold for field labels
 - **Data:** Regular weight for actual patient data
 
 ### Accessibility
+
 - **Color Contrast:** WCAG AA compliant
 - **Icon Usage:** Icons paired with text labels
 - **Navigation:** Keyboard accessible tab navigation
@@ -195,12 +207,14 @@ This document serves as the definitive wireframe and design specification for th
 ## Technical Implementation Notes
 
 ### Bootstrap Integration
+
 - Utilizes Bootstrap 5 card components
 - Responsive grid system (col-12, col-md-6, col-lg-4)
 - Nav pills for sub-navigation
 - Badge components for status indicators
 
 ### Component Structure
+
 ```html
 <!-- Primary Tab Navigation -->
 <ul class="nav nav-tabs">
@@ -229,6 +243,7 @@ This document serves as the definitive wireframe and design specification for th
 ```
 
 ### Data Binding Requirements
+
 - Patient demographic data from CDA parser
 - Healthcare provider information from administrative data
 - System status from document metadata
@@ -239,18 +254,21 @@ This document serves as the definitive wireframe and design specification for th
 ## Maintenance Guidelines
 
 ### DO NOT MODIFY
+
 - Overall layout structure (two-level navigation)
 - Card-based information architecture
 - Color scheme and visual hierarchy
 - Responsive breakpoints
 
 ### SAFE TO ENHANCE
+
 - Individual card content (within existing structure)
 - Additional data fields (following existing patterns)
 - Icon improvements (maintaining current icon system)
 - Accessibility improvements
 
 ### REQUIRES APPROVAL
+
 - Navigation structure changes
 - Layout modifications
 - Color scheme alterations
@@ -261,12 +279,14 @@ This document serves as the definitive wireframe and design specification for th
 ## Future Enhancement Areas
 
 ### Potential Improvements
+
 1. **Additional Tabs:** Clinical Information, Original Clinical Document
 2. **Enhanced Cards:** More detailed patient information cards
 3. **Interactive Elements:** Expandable sections within cards
 4. **Mobile Optimization:** Enhanced mobile navigation patterns
 
 ### Integration Points
+
 - Clinical data service integration
 - Enhanced CDA parser data binding
 - Administrative data extraction
@@ -275,11 +295,13 @@ This document serves as the definitive wireframe and design specification for th
 ---
 
 **Reference Files:**
+
 - `templates/patient_data/enhanced_patient_cda.html`
 - `static/scss/_enhanced_cda.scss`
 - `patient_data/services/comprehensive_clinical_data_service.py`
 
 **Related Specifications:**
+
 - CSS Architecture Guide
 - Component Standards
 - Django Template Commenting Standards

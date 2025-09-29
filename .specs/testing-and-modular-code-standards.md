@@ -537,6 +537,142 @@ class PerformanceTests(TestCase):
         self.assertLess(response_time, 1.0)  # Less than 1 second
 ```
 
+## Test Data Management
+
+### **CRITICAL RULE: NO TEST DATA IN PRODUCTION VIEWS**
+
+**Mandatory Requirement**: All test data, mock data, sample XML, or hardcoded content **MUST** be kept out of production view files.
+
+### Prohibited Patterns
+
+❌ **NEVER ALLOWED in views.py**:
+
+```python
+# ❌ FORBIDDEN: Hardcoded test XML data
+"l1_cda_content": """<?xml version="1.0" encoding="UTF-8"?>
+<ClinicalDocument xmlns="urn:hl7-org:v3">
+    <title>Original Clinical Document</title>
+    <component>
+        <structuredBody>
+            <component>
+                <section>
+                    <title>Clinical History</title>
+                    <text>Patient has history of hypertension and penicillin allergy.</text>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>""",
+
+# ❌ FORBIDDEN: Sample medical data
+sample_patient_data = {
+    "given_name": "Mario",
+    "family_name": "Borg",
+    "conditions": ["Penicillin allergy", "Hypertension"],
+    "medications": ["Lisinopril 10mg"]
+}
+
+# ❌ FORBIDDEN: Mock CDA content
+mock_cda_sections = [
+    {"title": "Allergies", "content": "Sample allergy data"},
+    {"title": "Medications", "content": "Sample medication data"}
+]
+```
+
+### Required Test Data Location
+
+✅ **CORRECT**: Test data belongs in dedicated test files:
+
+```
+patient_data/
+├── tests/
+│   ├── fixtures/
+│   │   ├── sample_cda_documents.xml
+│   │   ├── test_patient_data.json
+│   │   └── mock_medical_conditions.json
+│   ├── factories.py
+│   ├── test_views.py
+│   └── test_models.py
+└── views.py  # NO TEST DATA HERE
+```
+
+### Approved Test Data Patterns
+
+✅ **USE THESE METHODS**:
+
+1. **Django Fixtures**:
+
+```python
+# tests/fixtures/patient_test_data.json
+[{
+    "model": "patient_data.patientdata",
+    "pk": 1,
+    "fields": {
+        "given_name": "Test Patient",
+        "family_name": "Sample",
+        "cda_content": "<?xml version='1.0'?>..."
+    }
+}]
+```
+
+2. **Factory Classes**:
+
+```python
+# tests/factories.py
+import factory
+from patient_data.models import PatientData
+
+class PatientDataFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = PatientData
+
+    given_name = factory.Faker('first_name')
+    family_name = factory.Faker('last_name')
+    cda_content = factory.LazyFunction(generate_sample_cda)
+```
+
+3. **Test-Only Service Methods**:
+
+```python
+# services/test_data_service.py (test environment only)
+class TestDataService:
+    @staticmethod
+    def create_sample_cda_document():
+        """Generate sample CDA for testing only."""
+        return """<?xml version="1.0" encoding="UTF-8"?>..."""
+```
+
+### Fallback Data Strategy
+
+When views need fallback data for missing patient information:
+
+✅ **CORRECT**: Generic placeholders
+
+```python
+fallback_patient_data = {
+    "given_name": "Unknown",
+    "family_name": "Patient",
+    "birth_date": None,
+    "cda_content": None  # No sample XML content
+}
+```
+
+❌ **WRONG**: Specific test scenarios
+
+```python
+fallback_patient_data = {
+    "given_name": "Mario",  # Specific test name
+    "family_name": "Borg",  # Specific test name
+    "conditions": ["Diabetes", "Hypertension"]  # Medical test data
+}
+```
+
+### Enforcement
+
+- **Code Review**: All PRs checked for test data violations
+- **Automated Scanning**: CI/CD scans for hardcoded medical data
+- **Development Rule**: Any test data in views.py = immediate refactoring required
+
 ## Integration with Existing Specs
 
 ### 1. SCSS Architecture Integration
