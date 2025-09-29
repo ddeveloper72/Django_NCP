@@ -6,19 +6,20 @@ Provides automatic session management, security enforcement, and audit logging
 for patient data access sessions with healthcare-specific security requirements.
 """
 
-import logging
 import hashlib
+import logging
 import time
-from typing import Optional, Dict, Any
+from datetime import timedelta
+from typing import Any, Dict, Optional
+
+from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
+from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect
-from django.contrib.auth.models import AnonymousUser
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
-from django.core.exceptions import PermissionDenied
-from django.conf import settings
-from django.urls import reverse
-from datetime import timedelta
 
 from patient_data.models import PatientSession, SessionAuditLog
 
@@ -54,6 +55,11 @@ class PatientSessionMiddleware(MiddlewareMixin):
         "/api/health/",
         "/patients/test-patients/",  # Allow access to test patients list
         "/patients/direct/",  # Allow direct patient access from admin console
+        "/patients/cda/enhanced_display/",  # Allow direct access to enhanced clinical view
+        "/patients/cda/simplified/",  # Allow direct access to simplified clinical view
+        "/patients/cda/",  # Allow access to session-based CDA views for testing
+        "/patient_data/api/clinical/",  # Allow access to clinical API for testing
+        "/patient_data/debug/clinical/",  # Allow access to clinical debugger for testing
     ]
 
     # Maximum requests per session per minute

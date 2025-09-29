@@ -8,33 +8,68 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from django.contrib.sessions.models import Session
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render
 from django.views import View
+
+from .session_management import FlexibleSessionMixin
 
 logger = logging.getLogger(__name__)
 
 
-class SimplifiedClinicalDataView(View):
+class SimplifiedClinicalDataView(View, FlexibleSessionMixin):
     """Django view that provides clean, simple clinical data for flexible template rendering"""
 
     def get(self, request, patient_id):
         """Handle GET request for simplified clinical data view"""
-        print(f"\n" + "="*80)
-        print(f"� SIMPLIFIED VIEW CALLED! Patient ID: {patient_id}")
-        print(f"🚀 Request method: {request.method}")
-        print(f"🚀 Request path: {request.path}")
-        print(f"="*80 + "\n")
+        print(f"\n" + "=" * 80)
+        print(f"🟢 SIMPLIFIED VIEW CALLED! Patient ID: {patient_id}")
+        print(f"[ROCKET] Request method: {request.method}")
+        print(f"[ROCKET] Request path: {request.path}")
+        print(f"[ROCKET] Full URL: {request.build_absolute_uri()}")
+        print(f"=" * 80 + "\n")
+
         try:
+            # Ensure session exists for this patient
+            if not self.ensure_patient_session_exists(request, patient_id):
+                print(f"[ERROR] No session data available for patient {patient_id}")
+                return render(
+                    request,
+                    "patient_data/clinical_view_error.html",
+                    {
+                        "patient_id": patient_id,
+                        "error": "No patient data available. Please search for a patient first.",
+                        "debug": True,
+                    },
+                )
+
             # Get simplified clinical data
             data_extractor = SimplifiedDataExtractor()
-            simplified_data = data_extractor.get_simplified_clinical_data(patient_id)
-            print(f"🔍 DEBUG: Simplified data success: {simplified_data.get('success', False)}")
-            print(f"🔍 DEBUG: Sections count: {len(simplified_data.get('sections', []))}")
+            print(f"[SEARCH] DEBUG: Created SimplifiedDataExtractor instance")
+
+            simplified_data = data_extractor.get_simplified_clinical_data(
+                patient_id, request
+            )
+            print(f"[SEARCH] DEBUG: Got simplified data: {bool(simplified_data)}")
+
+            if simplified_data:
+                print(
+                    f"[SEARCH] DEBUG: Sections count: {len(simplified_data.get('sections', []))}"
+                )
 
             # Get patient identity for header
-            patient_identity = self._get_patient_identity(patient_id)
-            print(f"🔍 DEBUG: Patient identity found: {bool(patient_identity)}")
+            patient_identity = self.get_patient_data_from_session(request, patient_id)
+            if patient_identity:
+                # Extract basic identity info
+                patient_info = patient_identity.get("patient_data", {})
+                patient_identity = {
+                    "name": f"{patient_info.get('given_name', '')} {patient_info.get('family_name', '')}".strip(),
+                    "birth_date": patient_info.get("birth_date", ""),
+                    "gender": patient_info.get("gender", ""),
+                    "id": patient_id,
+                }
+
+            print(f"[SEARCH] DEBUG: Patient identity found: {bool(patient_identity)}")
 
             context = {
                 "patient_id": patient_id,
@@ -43,366 +78,350 @@ class SimplifiedClinicalDataView(View):
                 "debug": request.GET.get("debug", False),
             }
 
+            print(
+                f"[SEARCH] DEBUG: Rendering template with context keys: {list(context.keys())}"
+            )
             return render(
                 request, "patient_data/simplified_clinical_view.html", context
             )
 
         except Exception as e:
-            print(f"❌ DEBUG: Error in SimplifiedClinicalDataView: {e}")
-            logger.error(f"Error in SimplifiedClinicalDataView: {e}")
-            raise Http404("Patient data not found")
+            print(f"[ERROR] ERROR in simplified clinical view: {e}")
+            import traceback
+
+            traceback.print_exc()
+            return render(
+                request,
+                "patient_data/clinical_view_error.html",
+                {
+                    "patient_id": patient_id,
+                    "error": str(e),
+                    "debug": True,
+                },
+            )
 
     def _get_patient_identity(self, patient_id: str) -> Optional[Dict[str, Any]]:
         """Get basic patient identity information"""
         try:
-            # Use the same session lookup logic as other views
-            session_key = f"patient_match_{patient_id}"
-
-            try:
-                session = Session.objects.get(session_key=session_key)
-                session_data = session.get_decoded()
-                cda_content = session_data.get("cda_content", "")
-
-                if cda_content:
-                    # Extract patient identity
-                    from patient_data.services.enhanced_cda_processor import (
-                        EnhancedCDAProcessor,
-                    )
-
-                    processor = EnhancedCDAProcessor(target_language="en")
-                    result = processor.process_administrative_data(cda_content)
-
-                    if result.get("success") and result.get("patient_identity"):
-                        return result["patient_identity"]
-            except Session.DoesNotExist:
-                logger.warning(f"No session found for patient {patient_id}")
-
+            # Find session with patient data
+            sessions = Session.objects.all()
+            for session in sessions:
+                data = session.get_decoded()
+                patient_key = f"patient_match_{patient_id}"
+                if patient_key in data:
+                    patient_data = data[patient_key]
+                    return {
+                        "name": patient_data.get("name", "Unknown Patient"),
+                        "birth_date": patient_data.get("birth_date", ""),
+                        "gender": patient_data.get("gender", ""),
+                        "id": patient_id,
+                    }
             return None
-
         except Exception as e:
             logger.error(f"Error getting patient identity for {patient_id}: {e}")
             return None
 
 
-class SimplifiedDataExtractor:
-    """Extracts and simplifies clinical data from CDA documents"""
+class SimplifiedDataExtractor(FlexibleSessionMixin):
+    """Extract and transform clinical data to simple, accessible format"""
 
-    def get_simplified_clinical_data(self, patient_id: str) -> Dict[str, Any]:
-        """
-        Get clean, simple clinical data organized by section type
-        Returns simple dictionaries and lists that templates can easily work with
-        """
+    def get_simplified_clinical_data(
+        self, patient_id: str, request=None
+    ) -> Dict[str, Any]:
+        """Get all clinical data in simplified format"""
         try:
-            # Get patient CDA content using the same session lookup as debugger
-            cda_content = self._get_patient_cda_content(patient_id)
+            logger.info(f"Starting simplified data extraction for patient {patient_id}")
+
+            # Get the CDA content using flexible session management
+            cda_content = self._get_patient_cda_content(patient_id, request)
             if not cda_content:
-                return {"error": "No patient data found", "success": False}
+                logger.warning(f"No CDA content found for patient {patient_id}")
+                return {"sections": []}
 
-            # Process with enhanced processor to get raw data
-            from patient_data.services.enhanced_cda_processor import (
-                EnhancedCDAProcessor,
-            )
+            # Process with Enhanced CDA Processor
+            try:
+                from patient_data.services.enhanced_cda_processor import (
+                    EnhancedCDAProcessor,
+                )
 
-            processor = EnhancedCDAProcessor(target_language="en")
-            enhanced_result = processor.process_clinical_sections(cda_content)
+                processor = EnhancedCDAProcessor(target_language="en")
+                enhanced_result = processor.process_clinical_sections(cda_content)
 
-            if not enhanced_result.get("success"):
-                return {"error": "Failed to process clinical data", "success": False}
+                if not enhanced_result.get("success"):
+                    logger.error(
+                        f"Enhanced CDA processing failed: {enhanced_result.get('error', 'Unknown error')}"
+                    )
+                    return {"sections": []}
 
-            # Convert to simple, accessible format
-            simplified_data = {
-                "success": True,
-                "patient_id": patient_id,
-                "sections": [],
-            }
+                # Convert to simplified format
+                enhanced_sections = enhanced_result.get("sections", [])
+                simplified_sections = []
 
-            for section in enhanced_result.get("sections", []):
-                simplified_section = self._simplify_section(section)
-                if simplified_section:
-                    simplified_data["sections"].append(simplified_section)
+                for section in enhanced_sections:
+                    simplified_section = self._simplify_section(section)
+                    if simplified_section:
+                        simplified_sections.append(simplified_section)
 
-            logger.info(
-                f"Simplified {len(simplified_data['sections'])} sections for patient {patient_id}"
-            )
-            return simplified_data
+                logger.info(
+                    f"Simplified {len(simplified_sections)} sections for patient {patient_id}"
+                )
+
+                return {
+                    "sections": simplified_sections,
+                    "patient_id": patient_id,
+                    "total_sections": len(simplified_sections),
+                }
+
+            except ImportError as e:
+                logger.error(f"Could not import Enhanced CDA Processor: {e}")
+                return {"sections": []}
 
         except Exception as e:
-            logger.error(f"Error getting simplified clinical data: {e}")
-            return {"error": str(e), "success": False}
+            logger.error(f"Error in simplified data extraction: {e}")
+            return {"sections": []}
+
+    def _get_patient_cda_content(self, patient_id: str, request=None) -> Optional[str]:
+        """Get patient CDA content using flexible session management"""
+        try:
+            # Use flexible session management to get patient data
+            if request:
+                patient_data = self.get_patient_data_from_session(request, patient_id)
+            else:
+                # Fallback to old method for backward compatibility
+                patient_data = self._legacy_get_patient_data(patient_id)
+
+            if not patient_data:
+                logger.warning(f"No patient data found for patient {patient_id}")
+                return None
+
+            # Try L3 first, then L1 (same as debugger)
+            for content_type in ["l3_cda_content", "l1_cda_content"]:
+                if content_type in patient_data and patient_data[content_type]:
+                    cda_content = patient_data[content_type]
+                    cda_type = "L3" if content_type == "l3_cda_content" else "L1"
+                    logger.info(
+                        f"Successfully retrieved CDA content for patient {patient_id}, type: {cda_type}"
+                    )
+                    return cda_content
+
+            logger.warning(f"Patient {patient_id} found but no CDA content available")
+            return None
+
+        except Exception as e:
+            logger.error(f"Error retrieving CDA content for patient {patient_id}: {e}")
+            return None
+
+    def _legacy_get_patient_data(self, patient_id: str) -> Optional[Dict]:
+        """Legacy method to get patient data from sessions"""
+        try:
+            sessions = Session.objects.all()
+            for session in sessions:
+                data = session.get_decoded()
+                patient_key = f"patient_match_{patient_id}"
+                if patient_key in data:
+                    return data[patient_key]
+            return None
+        except Exception as e:
+            logger.error(f"Error in legacy patient data retrieval: {e}")
+            return None
 
     def _simplify_section(self, section: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Convert complex section data to simple, accessible format"""
+        """Convert enhanced section to simple, accessible format"""
         try:
-            # Get basic section info
-            simplified = {
-                "section_code": section.get("section_code", ""),
-                "title": self._get_section_title(section),
-                "type": self._determine_section_type(section.get("section_code", "")),
-                "entries": [],
+            # Enhanced CDA Processor returns sections with 'title' and 'structured_data'
+            section_title = section.get("title", section.get("name", "Unknown Section"))
+
+            # Handle title that might be a dict with translation info
+            if isinstance(section_title, dict):
+                # Use 'translated' or 'coded' or 'original' from title dict
+                section_name = (
+                    section_title.get("translated")
+                    or section_title.get("coded")
+                    or section_title.get("original")
+                    or "Unknown Section"
+                )
+            else:
+                section_name = (
+                    str(section_title) if section_title else "Unknown Section"
+                )
+
+            section_items = section.get("structured_data", section.get("items", []))
+
+            if not section_items:
+                logger.debug(
+                    f"Section '{section_name}' has no structured_data or items"
+                )
+                return None
+
+            # Create simplified section structure
+            simplified_section = {
+                "name": section_name,
+                "display_name": self._get_display_name(section_name),
+                "items": [],
             }
 
-            # Process entries from different possible sources
-            entries_data = []
+            for item in section_items:
+                simplified_item = self._simplify_item(item)
+                if simplified_item:
+                    simplified_section["items"].append(simplified_item)
 
-            # Try to get from table_data (country-specific extraction)
-            if "table_data" in section:
-                entries_data.extend(section["table_data"])
-
-            # Try to get from structured_data
-            elif "structured_data" in section:
-                entries_data.extend(section["structured_data"])
-
-            # Process each entry into simple format
-            for entry_data in entries_data:
-                simplified_entry = self._simplify_entry(entry_data, simplified["type"])
-                if simplified_entry:
-                    simplified["entries"].append(simplified_entry)
-
-            # Only return section if it has entries
-            if simplified["entries"]:
-                logger.info(
-                    f"Simplified section {simplified['section_code']}: {len(simplified['entries'])} entries"
-                )
-                return simplified
-
-            return None
+            logger.debug(
+                f"Section '{section_name}' simplified to {len(simplified_section['items'])} items"
+            )
+            return simplified_section if simplified_section["items"] else None
 
         except Exception as e:
             logger.error(f"Error simplifying section: {e}")
             return None
 
-    def _simplify_entry(
-        self, entry_data: Dict[str, Any], section_type: str
-    ) -> Optional[Dict[str, Any]]:
-        """Convert complex entry data to simple, clean format"""
+    def _simplify_item(self, item: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Convert enhanced item to simple format"""
         try:
-            if "data" not in entry_data:
+            # Handle both enhanced processor format and original format
+            if isinstance(item, dict):
+                # Enhanced processor format has 'fields' with detailed data
+                if "fields" in item and item["fields"]:
+                    item_data = item["fields"]  # Use fields data
+                elif "data" in item and item["data"]:
+                    item_data = item["data"]  # Use nested data
+                else:
+                    item_data = item  # Use item directly
+
+                # Extract key information - handle multiple possible structures
+                simplified_item = {
+                    "text": self._extract_text(item_data),
+                    "code": self._extract_code(item_data),
+                    "date": self._extract_date(item_data),
+                    "status": self._extract_status(item_data),
+                }
+
+                # Clean up empty fields
+                simplified_item = {k: v for k, v in simplified_item.items() if v}
+
+                return simplified_item if simplified_item else None
+            else:
                 return None
 
-            data = entry_data["data"]
-            simplified = {
-                "original_data": data,  # Keep original for debugging
-            }
-
-            # Extract based on section type
-            if section_type == "problems":
-                simplified.update(self._extract_problem_data(data))
-            elif section_type == "medications":
-                simplified.update(self._extract_medication_data(data))
-            elif section_type == "allergies":
-                simplified.update(self._extract_allergy_data(data))
-            else:
-                simplified.update(self._extract_generic_data(data))
-
-            return simplified
-
         except Exception as e:
-            logger.error(f"Error simplifying entry: {e}")
+            logger.error(f"Error simplifying item: {e}")
             return None
 
-    def _extract_problem_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract clean problem/diagnosis data"""
-        return {
-            # Main fields - extract both code and description from nested structures
-            "problem_code": self._extract_code(
-                data.get("condition_code") or data.get("agent_code")
-            ),
-            "problem_description": self._extract_description(
-                data.get("condition_display") or data.get("agent_display")
-            ),
-            "problem_full": self._extract_any_value(data.get("value")),
-            # Additional fields
-            "onset_date": self._clean_date(data.get("onset_date") or data.get("date")),
-            "status": self._extract_any_value(data.get("status")),
-            "severity": self._extract_any_value(data.get("severity")),
-            "code_system": data.get("code_system", ""),
+    def _extract_text(self, item_data: Dict[str, Any]) -> str:
+        """Extract display text from item data"""
+        # Enhanced CDA processor uses nested field structure with 'value' keys
+        # Try fields that typically contain display text
+        display_fields = [
+            "Medication DisplayName",
+            "Medication Name",
+            "Procedure DisplayName",
+            "Problem DisplayName",
+            "Reaction DisplayName",
+            "Device DisplayName",
+            "displayName",
+            "text",
+            "display_text",
+            "value",
+            "description",
+            "content",
+        ]
+
+        for field in display_fields:
+            if field in item_data:
+                field_data = item_data[field]
+                if isinstance(field_data, dict) and "value" in field_data:
+                    return str(field_data["value"])
+                elif field_data:
+                    return str(field_data)
+
+        # Fallback - try to get any meaningful text
+        for key, value in item_data.items():
+            if isinstance(value, dict) and "value" in value and value["value"]:
+                text_value = str(value["value"]).strip()
+                if text_value and not text_value.isdigit():  # Prefer text over numbers
+                    return text_value
+
+        return ""
+
+    def _extract_code(self, item_data: Dict[str, Any]) -> str:
+        """Extract code from item data"""
+        # Enhanced CDA processor uses nested field structure with 'value' keys
+        code_fields = [
+            "Medication Code",
+            "Procedure Code",
+            "Problem Code",
+            "Reaction Code",
+            "Device Code",
+            "Status Code",
+            "code",
+            "codeValue",
+            "concept_code",
+        ]
+
+        for field in code_fields:
+            if field in item_data:
+                field_data = item_data[field]
+                if isinstance(field_data, dict) and "value" in field_data:
+                    return str(field_data["value"])
+                elif field_data:
+                    return str(field_data)
+        return ""
+
+    def _extract_date(self, item_data: Dict[str, Any]) -> str:
+        """Extract date from item data"""
+        # Enhanced CDA processor uses nested field structure with 'value' keys
+        date_fields = [
+            "Treatment Start Date",
+            "Treatment End Date",
+            "Procedure Start Date",
+            "effectiveTime",
+            "date",
+            "effective_time",
+            "timestamp",
+            "time",
+        ]
+
+        for field in date_fields:
+            if field in item_data:
+                field_data = item_data[field]
+                if isinstance(field_data, dict) and "value" in field_data:
+                    return str(field_data["value"])
+                elif field_data:
+                    return str(field_data)
+        return ""
+
+    def _extract_status(self, item_data: Dict[str, Any]) -> str:
+        """Extract status from item data"""
+        # Enhanced CDA processor uses nested field structure with 'value' keys
+        status_fields = [
+            "Status Code",
+            "Procedure Status Code",
+            "status",
+            "statusCode",
+            "state",
+        ]
+
+        for field in status_fields:
+            if field in item_data:
+                field_data = item_data[field]
+                if isinstance(field_data, dict) and "value" in field_data:
+                    return str(field_data["value"])
+                elif field_data:
+                    return str(field_data)
+        return ""
+
+    def _get_display_name(self, section_name: str) -> str:
+        """Get user-friendly display name for section"""
+        # Ensure section_name is a string
+        if not isinstance(section_name, str):
+            section_name = str(section_name) if section_name else "Unknown Section"
+
+        display_names = {
+            "conditions": "Medical Conditions",
+            "medications": "Current Medications",
+            "allergies": "Allergies & Intolerances",
+            "procedures": "Medical Procedures",
+            "immunizations": "Vaccinations",
+            "vital_signs": "Vital Signs",
+            "lab_results": "Laboratory Results",
         }
-
-    def _extract_medication_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract clean medication data"""
-        return {
-            # Main fields
-            "medication_name": self._extract_description(
-                data.get("medication_display")
-            ),
-            "medication_code": self._extract_code(data.get("medication_code")),
-            "active_ingredient": self._extract_description(
-                data.get("ingredient_display")
-            ),
-            "ingredient_code": self._extract_code(data.get("ingredient_code")),
-            # Additional fields
-            "dosage": self._extract_any_value(data.get("dosage")),
-            "route": self._extract_any_value(data.get("posology")),
-            "start_date": self._clean_date(data.get("date")),
-            "status": self._extract_any_value(data.get("status")),
-            "code_system": data.get("code_system", ""),
-        }
-
-    def _extract_allergy_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract clean allergy data"""
-        return {
-            # Main fields
-            "allergen_name": self._extract_description(data.get("agent_display")),
-            "allergen_code": self._extract_code(data.get("agent_code")),
-            "reaction": self._extract_description(data.get("manifestation_display")),
-            # Additional fields
-            "severity": self._extract_any_value(data.get("severity")),
-            "status": self._extract_any_value(data.get("status")),
-            "onset_date": self._clean_date(data.get("date")),
-            "code_system": data.get("code_system", ""),
-        }
-
-    def _extract_generic_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract generic clinical data"""
-        extracted = {}
-
-        # Extract all fields we can find
-        for key, value in data.items():
-            if key.endswith("_code"):
-                # This is a code field
-                base_name = key.replace("_code", "")
-                extracted[f"{base_name}_code"] = self._extract_code(value)
-            elif key.endswith("_display"):
-                # This is a description field
-                base_name = key.replace("_display", "")
-                extracted[f"{base_name}_description"] = self._extract_description(value)
-            else:
-                # Generic field
-                extracted[key] = self._extract_any_value(value)
-
-        return extracted
-
-    def _extract_code(self, value: Any) -> str:
-        """Extract code from potentially nested structure"""
-        if not value:
-            return ""
-
-        if isinstance(value, dict):
-            # Try different code keys
-            return value.get("code") or value.get("value") or str(value)
-
-        return str(value)
-
-    def _extract_description(self, value: Any) -> str:
-        """Extract description from potentially nested structure"""
-        if not value:
-            return ""
-
-        if isinstance(value, dict):
-            # Try different description keys
-            return (
-                value.get("displayName")
-                or value.get("display_name")
-                or value.get("value")
-                or str(value)
-            )
-
-        return str(value)
-
-    def _extract_any_value(self, value: Any) -> str:
-        """Extract any value, trying description first then code"""
-        if not value:
-            return ""
-
-        if isinstance(value, dict):
-            return (
-                value.get("displayName")
-                or value.get("display_name")
-                or value.get("value")
-                or value.get("code")
-                or str(value)
-            )
-
-        return str(value)
-
-    def _clean_date(self, date_value: Any) -> str:
-        """Clean up date formatting"""
-        if not date_value:
-            return ""
-
-        date_str = str(date_value).strip()
-
-        # Basic date cleaning - you can enhance this
-        import re
-
-        # Try to extract date patterns
-        date_match = re.search(r"(\d{1,2}[/-]\d{1,2}[/-]\d{4})", date_str)
-        if date_match:
-            return date_match.group(1)
-
-        # Try ISO format
-        iso_match = re.search(r"(\d{4}-\d{2}-\d{2})", date_str)
-        if iso_match:
-            return iso_match.group(1)
-
-        return date_str
-
-    def _get_section_title(self, section: Dict[str, Any]) -> str:
-        """Get clean section title"""
-        title_data = section.get("title", {})
-        if isinstance(title_data, dict):
-            return (
-                title_data.get("coded")
-                or title_data.get("original")
-                or title_data.get("translated")
-                or "Clinical Section"
-            )
-        return str(title_data) or "Clinical Section"
-
-    def _determine_section_type(self, section_code: str) -> str:
-        """Determine section type from code"""
-        type_mapping = {
-            "11450-4": "problems",
-            "46240-8": "problems",
-            "10160-0": "medications",
-            "29549-3": "medications",
-            "48765-2": "allergies",
-            "10155-0": "allergies",
-        }
-        return type_mapping.get(section_code, "generic")
-
-    def _get_patient_cda_content(self, patient_id: str) -> Optional[str]:
-        """Get patient CDA content - same logic as clinical debugger"""
-        if not patient_id:
-            return None
-
-        try:
-            session_key = f"patient_match_{patient_id}"
-            match_data = None
-
-            # Search across all Django sessions
-            all_sessions = Session.objects.all()
-            for db_session in all_sessions:
-                try:
-                    db_session_data = db_session.get_decoded()
-                    if session_key in db_session_data:
-                        match_data = db_session_data[session_key]
-                        logger.info(f"Found patient {patient_id} data in session")
-                        break
-                except Exception:
-                    continue
-
-            if not match_data:
-                return None
-
-            # Get CDA content based on selection
-            selected_cda_type = match_data.get("cda_type") or match_data.get(
-                "preferred_cda_type", "L3"
-            )
-
-            if selected_cda_type == "L3":
-                cda_content = match_data.get("l3_cda_content")
-            elif selected_cda_type == "L1":
-                cda_content = match_data.get("l1_cda_content")
-            else:
-                cda_content = (
-                    match_data.get("l3_cda_content")
-                    or match_data.get("l1_cda_content")
-                    or match_data.get("cda_content")
-                )
-
-            return cda_content
-
-        except Exception as e:
-            logger.error(f"Error retrieving CDA content: {e}")
-            return None
+        return display_names.get(section_name.lower(), section_name.title())

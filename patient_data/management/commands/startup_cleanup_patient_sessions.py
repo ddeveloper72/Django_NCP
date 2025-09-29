@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write(
-            self.style.SUCCESS("🔧 SERVER STARTUP PATIENT SESSION CLEANUP")
+            self.style.SUCCESS("[TOOL] SERVER STARTUP PATIENT SESSION CLEANUP")
         )
         self.stdout.write("=" * 60)
 
@@ -56,9 +56,9 @@ class Command(BaseCommand):
         total_sessions = Session.objects.count()
         old_sessions = Session.objects.filter(expire_date__lt=cutoff_time)
 
-        self.stdout.write(f"📊 Total sessions: {total_sessions}")
+        self.stdout.write(f"[CHART] Total sessions: {total_sessions}")
         self.stdout.write(
-            f"📊 Sessions older than {options['older_than_hours']} hours: {old_sessions.count()}"
+            f"[CHART] Sessions older than {options['older_than_hours']} hours: {old_sessions.count()}"
         )
 
         sessions_with_patient_data = []
@@ -102,13 +102,13 @@ class Command(BaseCommand):
 
         if not sessions_with_patient_data:
             self.stdout.write(
-                self.style.SUCCESS("✅ No patient session data needs cleanup")
+                self.style.SUCCESS("[SUCCESS] No patient session data needs cleanup")
             )
             return
 
         # Show details
         if options["dry_run"] or not options["force"]:
-            self.stdout.write("\n📋 Sessions to be cleaned:")
+            self.stdout.write("\n[LIST] Sessions to be cleaned:")
             for session_info in sessions_with_patient_data:
                 auth_status = (
                     "🔒 Auth" if session_info["is_authenticated"] else "🔓 Unauth"
@@ -119,7 +119,7 @@ class Command(BaseCommand):
                 )
 
         if options["dry_run"]:
-            self.stdout.write(self.style.WARNING("\n🔍 DRY RUN - No changes made"))
+            self.stdout.write(self.style.WARNING("\n[SEARCH] DRY RUN - No changes made"))
             return
 
         # Confirmation
@@ -154,7 +154,7 @@ class Command(BaseCommand):
 
                 cleaned_sessions += 1
                 self.stdout.write(
-                    f"  ✅ Cleaned session {session_info['session_key'][:20]}..."
+                    f"  [SUCCESS] Cleaned session {session_info['session_key'][:20]}..."
                 )
 
             except Session.DoesNotExist:
@@ -164,7 +164,7 @@ class Command(BaseCommand):
             except Exception as e:
                 errors += 1
                 self.stdout.write(
-                    f"  ❌ Error cleaning session {session_info['session_key'][:20]}: {e}"
+                    f"  [ERROR] Error cleaning session {session_info['session_key'][:20]}: {e}"
                 )
                 logger.error(
                     f"Error cleaning session {session_info['session_key']}: {e}"
@@ -173,10 +173,10 @@ class Command(BaseCommand):
         # Summary
         self.stdout.write("\n" + "=" * 60)
         self.stdout.write(self.style.SUCCESS("🎉 SERVER STARTUP CLEANUP COMPLETE"))
-        self.stdout.write(f"✅ Sessions cleaned: {cleaned_sessions}")
-        self.stdout.write(f"✅ Patient data items removed: {cleaned_items}")
+        self.stdout.write(f"[SUCCESS] Sessions cleaned: {cleaned_sessions}")
+        self.stdout.write(f"[SUCCESS] Patient data items removed: {cleaned_items}")
         if errors > 0:
-            self.stdout.write(self.style.ERROR(f"❌ Errors encountered: {errors}"))
+            self.stdout.write(self.style.ERROR(f"[ERROR] Errors encountered: {errors}"))
 
         # Log the cleanup
         logger.info(
