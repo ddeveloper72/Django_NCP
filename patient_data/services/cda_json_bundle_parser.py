@@ -547,11 +547,11 @@ def test_json_bundle_parser():
     try:
         result = parser.parse_cda_file(italian_cda_path)
         print(
-            f"✅ JSON Bundle Parser: {result['total_sections']} sections, {result['total_clinical_codes']} codes"
+            f"[SUCCESS] JSON Bundle Parser: {result['total_sections']} sections, {result['total_clinical_codes']} codes"
         )
         return result
     except Exception as e:
-        print(f"❌ JSON Bundle Parser Error: {e}")
+        print(f"[ERROR] JSON Bundle Parser Error: {e}")
         return None
 
 

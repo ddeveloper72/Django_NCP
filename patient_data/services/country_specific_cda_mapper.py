@@ -269,7 +269,7 @@ class CountrySpecificCDAMapper:
         logger.info(f"Total allergies extracted: {len(allergies)}")
 
         # DEBUG OUTPUT to help with troubleshooting
-        print(f"\n🔍 MALTA ALLERGY EXTRACTION DEBUG:")
+        print(f"\n[SEARCH] MALTA ALLERGY EXTRACTION DEBUG:")
         print(f"   Total allergies found: {len(allergies)}")
         if allergies:
             for i, allergy in enumerate(allergies[:2]):
@@ -277,7 +277,7 @@ class CountrySpecificCDAMapper:
                     f"   Allergy {i+1}: {allergy['data']['agent_display']} ({allergy['data']['type_display']})"
                 )
         else:
-            print("   ❌ No allergies extracted")
+            print("   [ERROR] No allergies extracted")
 
         return allergies
 

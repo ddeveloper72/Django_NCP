@@ -64,7 +64,7 @@ class DeepXMLExtractor:
             }
 
             for section in sections:
-                logger.info(f"🔍 Deep extraction for section {section_code}")
+                logger.info(f"[SEARCH] Deep extraction for section {section_code}")
 
                 # Extract all entries in this section
                 entries = section.findall(".//hl7:entry", self.namespaces)
@@ -88,13 +88,13 @@ class DeepXMLExtractor:
             )
 
             logger.info(
-                f"✅ Extracted {len(all_endpoints['entries'])} entries with {len(all_endpoints['discovered_fields'])} unique fields"
+                f"[SUCCESS] Extracted {len(all_endpoints['entries'])} entries with {len(all_endpoints['discovered_fields'])} unique fields"
             )
 
             return all_endpoints
 
         except Exception as e:
-            logger.error(f"❌ Deep extraction failed: {e}")
+            logger.error(f"[ERROR] Deep extraction failed: {e}")
             return {"error": str(e), "entries": []}
 
     def _extract_entry_endpoints(
