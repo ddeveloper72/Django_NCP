@@ -1,6 +1,7 @@
 {% load patient_filters %}
 {# Immunizations Section Template #}
-<!--                                        {% if cell_data|safe_get:"has_terminology" %}
+{#
+                                        {% if cell_data|safe_get:"has_terminology" %}
                                         {% with terminology_data=cell_data|safe_get:"terminology" %}
                                         {% if terminology_data %}
                                         <div class="medical-terminology mt-1">
@@ -15,25 +16,16 @@
                                         </div>
                                         {% endif %}
                                         {% endwith %}
-                                        {% endif %}ions Section -->
+#}
+{# Immunizations Section #}
 <div class="medical-section" id="immunizations-section">
-    <div class="card">
-        <!-- Section Header -->
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0">
-                <i class="fa-solid fa-syringe me-2"></i>
-                {{ section.title|extract_section_title|default:"Immunizations" }}
-                {% if section.code %}
-                <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
-                {% endif %}
-            </h5>
-        </div>
+    {# Remove card wrapper - content goes directly in accordion body #}
 
-        <!-- Clinical Section Content with Tabs -->
+        {# Clinical Section Content with Tabs #}
         {% if section.has_entries and section.clinical_table %}
-        <!-- Clinical Table Section -->
+        {# Clinical Table Section #}
         <div class="card-body p-0">
-            <!-- Section Tabs -->
+            {# Section Tabs #}
             <div class="section-tabs">
                 <button class="tab-button active"
                     onclick="showClinicalTab('immunizations_{{ section_index }}', 'structured')">
@@ -44,7 +36,7 @@
                 </button>
             </div>
 
-            <!-- Structured View Tab Content -->
+            {# Structured View Tab Content #}
             <div id="immunizations_{{ section_index }}_structured" class="clinical-tab-content active">
                 <div class="clinical-table">
                     <table class="table table-striped table-hover">
@@ -116,7 +108,7 @@
                     </table>
                 </div>
 
-                <!-- Immunizations Table Summary -->
+                {# Immunizations Table Summary #}
                 <div class="card-footer bg-light border-success">
                     <div class="row text-center">
                         <div class="col-md-4">
@@ -141,18 +133,18 @@
                 </div>
             </div>
 
-            <!-- Original Content Tab -->
+            {# Original Content Tab #}
             <div id="immunizations_{{ section_index }}_original" class="clinical-tab-content">
                 {% include 'patient_data/sections/original_content.html' %>
             </div>
         </div>
 
         {% elif section.has_entries %}
-        <!-- Simple List Section for immunizations without clinical tables -->
+        {# Simple List Section for immunizations without clinical tables #}
         {% include 'patient_data/sections/simple_list_section.html' %}
 
         {% else %}
-        <!-- Empty Immunizations Section -->
+        {# Empty Immunizations Section #}
         <div class="card-body text-center py-5">
             <div class="text-warning">
                 <i class="fa-solid fa-exclamation-triangle fa-3x mb-3"></i>

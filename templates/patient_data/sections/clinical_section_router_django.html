@@ -1,11 +1,11 @@
 {# Clinical Section Router Template - Routes to appropriate child template based on section type #}
 {# Django-compatible version - no {% set %} variables allowed #}
 
-<!-- Render clinical sections if available -->
+{# Render clinical sections if available #}
 {% if clinical_sections_list %}
     {% for section in clinical_sections_list %}
         {% if section.section_title and section.entries %}
-            <!-- Route to specialized section templates based on section type -->
+            {# Route to specialized section templates based on section type #}
             {% if section.section_id == 'psAllergiesAndOtherAdverseReactions' or section.section_id == 'allergies' or section.section_id == 'allergies_and_intolerances' %}
                 {% include 'patient_data/sections/allergies_section.html' %}
 
@@ -30,7 +30,7 @@
             {% elif section.section_id == 'psMedicalDevices' or section.section_id == 'medical_devices' or section.section_id == 'devices' %}
                 {% include 'patient_data/sections/medical_devices_section.html' %}
 
-            <!-- Generic sections with predefined configurations -->
+            {# Generic sections with predefined configurations #}
             {% elif section.section_id == 'psHistoryOfPastIllnesses' %}
                 {% include 'patient_data/sections/generic_section.html' with section_config_id='past_illnesses' section_icon='fa-solid fa-history' header_class='bg-warning text-dark' table_header_class='table-warning' text_class='text-warning' badge_class='bg-warning text-dark' border_class='border-warning' entries_label='past illnesses' empty_title='No Past Illness History' empty_message='No history of past illnesses reported for this patient' %}
 
@@ -46,7 +46,7 @@
             {% elif section.section_id == 'psPregnancies' %}
                 {% include 'patient_data/sections/generic_section.html' with section_config_id='pregnancies' section_icon='fa-solid fa-baby' header_class='bg-pink' table_header_class='table-pink' text_class='text-pink' badge_class='bg-pink' border_class='border-pink' entries_label='pregnancy records' empty_title='No Pregnancy History' empty_message='No pregnancy history available for this patient' %}
 
-            <!-- Default fallback for unknown section types -->
+            {# Default fallback for unknown section types #}
             {% else %}
                 {% include 'patient_data/sections/generic_section.html' with section_config_id='unknown' section_icon='fa-solid fa-file-medical' header_class='bg-light text-dark' table_header_class='table-light' text_class='text-muted' badge_class='bg-light text-dark' border_class='border-light' entries_label='entries' empty_title='Clinical Information' empty_message='Clinical information available for this patient' %}
             {% endif %}
@@ -54,7 +54,7 @@
     {% endfor %}
 
 {% else %}
-    <!-- No clinical sections available -->
+    {# No clinical sections available #}
     <div class="alert alert-info">
         <i class="fa-solid fa-info-circle me-2"></i>
         <strong>No Clinical Sections Available</strong><br>
@@ -62,7 +62,7 @@
     </div>
 {% endif %}
 
-<!-- Debug information (development only) -->
+{# Debug information (development only) #}
 {% comment %}
 Django Template Syntax Notes:
 - Replaced {% set %} with conditional {% if %} logic

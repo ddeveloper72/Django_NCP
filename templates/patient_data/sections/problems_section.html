@@ -14,25 +14,16 @@
                                         </div>
                                         {% endif %}
                                         {% endwith %}
-                                        {% endif %}ve Problems/Conditions Section -->
+<!-- Active Problems/Conditions Section -->
 <div class="medical-section" id="problems-section">
-    <div class="card">
-        <!-- Section Header -->
-        <div class="card-header bg-warning text-dark">
-            <h5 class="mb-0">
-                <i class="fa-solid fa-stethoscope me-2"></i>
-                {{ section.title|extract_section_title|default:"Active Problems" }}
-                {% if section.code %}
-                <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
-                {% endif %}
-            </h5>
-        </div>
+    <!-- Remove card wrapper - content goes directly in accordion body -->
 
         <!-- Clinical Section Content with Tabs -->
         {% if section.has_entries and section.clinical_table %}
         <!-- Clinical Table Section -->
-        <div class="card-body p-0">
+        <div class="section-content-area p-3">
             <!-- Section Tabs -->
+            <div class="section-tabs mb-3">
             <div class="section-tabs">
                 <button class="tab-button active"
                     onclick="showClinicalTab('problems_{{ section_index }}', 'structured')">
@@ -149,7 +140,7 @@
 
         {% else %}
         <!-- Empty Problems Section -->
-        <div class="card-body text-center py-5">
+        <div class="section-content-area p-3 text-center py-5">
             <div class="text-success">
                 <i class="fa-solid fa-check-circle fa-3x mb-3"></i>
                 <h6 class="text-success">No Active Problems</h6>
@@ -157,5 +148,4 @@
             </div>
         </div>
         {% endif %}
-    </div>
 </div>

@@ -1,69 +1,52 @@
 {% load patient_filters %}
-{# Surgical Procedures / List of Surger                                        {% if cell_data|safe_get:"has_terminology" %}
-                                        {% with terminology_data=cell_data|safe_get:"terminology" %}
-                                        {% if terminology_data %}
-                                        <div class="medical-terminology mt-1">
-                                            {% for term in terminology_data %}
-                                            {% if term %}
-                                            <span class="badge bg-dark me-1" title="{{ term.system|default:'' }}: {{ term.code|default:'' }}">
-                                                {% firstof term.display_name term.code "Unknown" %}
-                                            </span>
-                                            {% endif %}
-                                            {% endfor %}
-                                        </div>
-                                        {% endif %}
-                                        {% endwith %}
-                                        {% endif %}on Template #}
-<!-- Surgical Procedures Section -->
+{# Surgical Procedures / List of Surgeries Template - Also handles History of Procedures #}
+
+{# Surgical Procedures / History of Procedures Section #}
 <div class="medical-section" id="surgeries-section">
-    <div class="card">
-        <!-- Section Header -->
-        <div class="card-header bg-dark text-white">
-            <h5 class="mb-0">
-                <i class="fa-solid fa-user-md me-2"></i>
-                {{ section.title|extract_section_title|default:"Surgical Procedures" }}
-                {% if section.code %}
-                <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
-                {% endif %}
-            </h5>
+    {# Remove card wrapper - content goes directly in accordion body #}
+
+    {# Clinical Section Content with Tabs #}
+    {% if section.has_entries and section.clinical_table %}
+    {# Clinical Table Section #}
+    <div class="section-content-area p-3">
+        {# Section Tabs #}
+        <div class="section-tabs mb-3">
+            <button class="tab-button active"
+                onclick="showClinicalTab('surgeries_{{ section_index }}', 'structured')">
+                📊 Structured Procedures Data
+            </button>
+            <button class="tab-button" onclick="showClinicalTab('surgeries_{{ section_index }}', 'original')">
+                📄 Original Content
+            </button>
         </div>
 
-        <!-- Clinical Section Content with Tabs -->
-        {% if section.has_entries and section.clinical_table %}
-        <!-- Clinical Table Section -->
-        <div class="card-body p-0">
-            <!-- Section Tabs -->
-            <div class="section-tabs">
-                <button class="tab-button active"
-                    onclick="showClinicalTab('surgeries_{{ section_index }}', 'structured')">
-                    📊 Structured Surgery Data
-                </button>
-                <button class="tab-button" onclick="showClinicalTab('surgeries_{{ section_index }}', 'original')">
-                    📄 Original Content
-                </button>
-            </div>
-
-            <!-- Structured View Tab Content -->
-            <div id="surgeries_{{ section_index }}_structured" class="clinical-tab-content active">
-                <div class="clinical-table">
-                    <table class="table table-striped table-hover">
+        {# Structured View Tab Content #}
+        <div id="surgeries_{{ section_index }}_structured" class="clinical-tab-content active">
+            <div class="clinical-table">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover clinical-table">
                         <thead class="table-dark">
                             <tr>
                                 {% for header in section.clinical_table.headers %}
                                 <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
-                                    {{ header.label }}
-                                    {% if header.type == 'procedure' %}
-                                    <i class="fa-solid fa-scalpel ms-1 terminology-indicator" title="Surgical Procedure"></i>
-                                    {% elif header.type == 'date' %}
-                                    <i class="fa-solid fa-calendar-alt ms-1 terminology-indicator" title="Surgery Date"></i>
-                                    {% elif header.type == 'surgeon' %}
-                                    <i class="fa-solid fa-user-md ms-1 terminology-indicator" title="Surgeon"></i>
-                                    {% elif header.type == 'outcome' %}
-                                    <i class="fa-solid fa-chart-line ms-1 terminology-indicator" title="Outcome"></i>
-                                    {% elif header.type == 'complications' %}
-                                    <i class="fa-solid fa-exclamation-triangle ms-1 terminology-indicator"
-                                        title="Complications"></i>
-                                    {% endif %}
+                                    <div class="th-content">
+                                        <span class="th-label">{{ header.label }}</span>
+                                        {% if header.type == 'procedure' %}
+                                        <i class="fa-solid fa-procedures ms-1 terminology-indicator" title="Medical Procedure"></i>
+                                        {% elif header.type == 'surgery' %}
+                                        <i class="fa-solid fa-user-md ms-1 terminology-indicator" title="Surgical Procedure"></i>
+                                        {% elif header.type == 'date' %}
+                                        <i class="fa-solid fa-calendar-alt ms-1 terminology-indicator" title="Procedure Date"></i>
+                                        {% elif header.type == 'performer' or header.type == 'surgeon' %}
+                                        <i class="fa-solid fa-user-md ms-1 terminology-indicator" title="Healthcare Provider"></i>
+                                        {% elif header.type == 'outcome' %}
+                                        <i class="fa-solid fa-chart-line ms-1 terminology-indicator" title="Outcome"></i>
+                                        {% elif header.type == 'complications' %}
+                                        <i class="fa-solid fa-exclamation-triangle ms-1 terminology-indicator" title="Complications"></i>
+                                        {% elif header.type == 'status' %}
+                                        <i class="fa-solid fa-info-circle ms-1 terminology-indicator" title="Status"></i>
+                                        {% endif %}
+                                    </div>
                                 </th>
                                 {% endfor %}
                             </tr>
@@ -103,7 +86,8 @@
                                         {% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}
                                         {% endif %}
                                     </div>
-                                    {% endif %}                                </td>
+                                    {% endif %}
+                                </td>
                                 {% endwith %}
                                 {% endfor %}
                             </tr>
@@ -112,50 +96,66 @@
                     </table>
                 </div>
 
-                <!-- Surgery Table Summary -->
-                <div class="card-footer bg-light border-dark">
+                {# Procedures Table Summary #}
+                <div class="section-summary bg-light border border-dark rounded p-3 mt-3">
                     <div class="row text-center">
                         <div class="col-md-4">
                             <small class="text-muted">
-                                <i class="fa-solid fa-user-md me-1 text-dark"></i>
-                                <strong>{{ section.clinical_table.rows|length }}</strong> surgical procedures
+                                <i class="fa-solid fa-procedures me-1 text-dark"></i>
+                                <strong>{{ section.clinical_table.rows|length }}</strong>
+                                {% if 'surgery' in section.title|safe_title_text|lower or 'surgical' in section.title|safe_title_text|lower %}
+                                    surgical procedures
+                                {% else %}
+                                    medical procedures
+                                {% endif %}
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
                                 <i class="fa-solid fa-history me-1 text-info"></i>
-                                Complete surgical history
+                                Complete procedural history
                             </small>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted">
                                 <i class="fa-solid fa-heartbeat me-1 text-success"></i>
-                                Post-operative status
+                                Clinical outcomes
                             </small>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Original Content Tab -->
+            {# Original Content Tab #}
             <div id="surgeries_{{ section_index }}_original" class="clinical-tab-content">
                 {% include 'patient_data/sections/original_content.html' %}
             </div>
         </div>
 
-        {% elif section.has_entries %}
-        <!-- Simple List Section for surgeries without clinical tables -->
-        {% include 'patient_data/sections/simple_list_section.html' %}
+    {% elif section.has_entries %}
+    {# Simple List Section for procedures without clinical tables #}
+    {% include 'patient_data/sections/simple_list_section.html' %}
 
-        {% else %}
-        <!-- Empty Surgeries Section -->
-        <div class="card-body text-center py-5">
-            <div class="text-success">
-                <i class="fa-solid fa-check-circle fa-3x mb-3"></i>
-                <h6 class="text-success">No Surgical History</h6>
-                <p class="text-muted">No surgical procedures reported for this patient</p>
-            </div>
+    {% else %}
+    {# Empty Procedures Section #}
+    <div class="section-content-area p-3 text-center py-5">
+        <div class="text-success">
+            <i class="fa-solid fa-check-circle fa-3x mb-3"></i>
+            <h6 class="text-success">
+                {% if 'surgery' in section.title|safe_title_text|lower or 'surgical' in section.title|safe_title_text|lower %}
+                    No Surgical History
+                {% else %}
+                    No Procedural History
+                {% endif %}
+            </h6>
+            <p class="text-muted">
+                {% if 'surgery' in section.title|safe_title_text|lower or 'surgical' in section.title|safe_title_text|lower %}
+                    No surgical procedures reported for this patient
+                {% else %}
+                    No medical procedures reported for this patient
+                {% endif %}
+            </p>
         </div>
-        {% endif %}
     </div>
+    {% endif %}
 </div>

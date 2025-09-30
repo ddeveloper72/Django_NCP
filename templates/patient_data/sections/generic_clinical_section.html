@@ -2,90 +2,44 @@
 
 {# Generic Clinical Section Template #}
 
-<!-- Generic Clinical Section -->
+{# Generic Clinical Section - Optimized (no card wrapper) #}
 <div class="medical-section"
     id="{% if generic_config %}{{ generic_config.section_id|default:'generic-section' }}{% else %}{{ section.section_id|default:'generic-section' }}{% endif %}">
-    <div class="card">
-        <!-- Section Header -->
-        <div class="card-header {% if generic_config %}{{ generic_config.header_class|default:'bg-secondary' }}{% else %}{{ section.header_class|default:'bg-secondary' }}{% endif %} text-white">
-            <h5 class="mb-0">
-                <i class="{% if generic_config %}{{ generic_config.icon|default:'fa-solid fa-file-medical' }}{% else %}{{ section.icon|default:'fa-solid fa-file-medical' }}{% endif %} me-2"></i>
-                {{ section.title|extract_section_title|default:'Clinical Section' }}
-                {% if section.code %}
-                <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
-                {% endif %}
-            </h5>
-        </div>
+    {# Remove card wrapper - content goes directly in accordion body #}
 
-        <!-- Clinical Section Content with Tabs -->
+        {# Clinical Section Content with Tabs #}
         {% if section.has_entries and section.clinical_table %}
-        <!-- Clinical Table Section -->
-        <div class="card-body p-0">
-            {% if not hide_tabs %}
-            <!-- Section Tabs -->
-            <div class="section-tabs">
-                <button class="tab-button active" onclick="showClinicalTab('generic_{{ section_index }}', 'structured')">
-                    <i class="fa-solid fa-chart-bar"></i> Structured View
-                </button>
-                <button class="tab-button" onclick="showClinicalTab('generic_{{ section_index }}', 'original')">
-                    <i class="fa-solid fa-file-text"></i> Original Content
-                </button>
-            </div>
-            {% endif %}
+        {# Optimized Clinical Table Section - Tabs now in parent header #}
 
-            <!-- Structured Content Tab -->
+            {# Structured Content Tab #}
             <div id="generic_{{ section_index }}_structured" class="clinical-tab-content active">
                 {% include 'patient_data/sections/clinical_table_section.html' with hide_tabs=True %}
             </div>
 
-            <!-- Original Content Tab -->
+            {# Original Content Tab #}
             <div id="generic_{{ section_index }}_original" class="clinical-tab-content">
                 {% include 'patient_data/sections/original_content.html' %}
             </div>
-        </div>
 
         {% elif section.has_entries %}
-        <!-- Simple List Section -->
-        <div class="card-body p-0">
-            {% if not hide_tabs %}
-            <!-- Section Tabs -->
-            <div class="section-tabs">
-                <button class="tab-button active" onclick="showClinicalTab('generic_{{ section_index }}', 'structured')">
-                    <i class="fa-solid fa-list"></i> Structured View
-                </button>
-                <button class="tab-button" onclick="showClinicalTab('generic_{{ section_index }}', 'original')">
-                    <i class="fa-solid fa-file-text"></i> Original Content
-                </button>
-            </div>
-            {% endif %}
+        {# Optimized Simple List Section - Tabs now in parent header #}
 
-            <!-- Structured Content Tab -->
+            {# Structured Content Tab #}
             <div id="generic_{{ section_index }}_structured" class="clinical-tab-content active">
                 {% include 'patient_data/sections/simple_list_section.html' with hide_tabs=True %}
             </div>
 
-            <!-- Original Content Tab -->
+            {# Original Content Tab #}
             <div id="generic_{{ section_index }}_original" class="clinical-tab-content">
                 {% include 'patient_data/sections/original_content.html' %}
             </div>
-        </div>
 
         {% else %}
-        <!-- Text-only Section -->
-        <div class="card-body">
-            {% if not hide_tabs %}
-            <div class="section-tabs">
-                <button class="tab-button active" onclick="showClinicalTab('generic_{{ section_index }}', 'original')">
-                    <i class="fa-solid fa-file-text"></i> Original Content
-                </button>
-            </div>
-            {% endif %}
+        {# Optimized Text-only Section - Tabs now in parent header #}
 
-            <!-- Original Content Tab -->
+            {# Original Content Tab #}
             <div id="generic_{{ section_index }}_original" class="clinical-tab-content active">
                 {% include 'patient_data/sections/original_content.html' %}
             </div>
-        </div>
         {% endif %}
-    </div>
 </div>

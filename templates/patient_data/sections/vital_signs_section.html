@@ -3,17 +3,7 @@
 
 <!-- Vital Signs Section -->
 <div class="medical-section" id="vital-signs-section">
-    <div class="card">
-        <!-- Section Header -->
-        <div class="card-header bg-secondary text-white">
-            <h5 class="mb-0">
-                <i class="fa-solid fa-heartbeat me-2"></i>
-                {{ section.title|extract_section_title|default:"Vital Signs" }}
-                {% if section.code %}
-                <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
-                {% endif %}
-            </h5>
-        </div>
+    <!-- Remove card wrapper - content goes directly in accordion body -->
 
         <!-- Clinical Section Content with Tabs -->
         {% if section.has_entries and section.clinical_table %}
@@ -101,7 +91,7 @@
                                     </div>
                                     {% endwith %}
                                     {% endfor %}
-                                </div>
+                                </div> <!-- End card-body -->
                             </div>
                             {% endfor %}
                         </div>
@@ -178,7 +168,7 @@
                             </table>
                         </div>
                     </div>
-                </div>
+                </div> <!-- End card-body for main clinical table -->
             </div>
 
             <!-- Original Content Tab -->

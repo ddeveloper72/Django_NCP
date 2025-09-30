@@ -3,24 +3,14 @@
 
 <!-- Medication Summary Section -->
 <div class="medical-section" id="medications-section">
-    <div class="card">
-        <!-- Section Header -->
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">
-                <i class="fa-solid fa-pills me-2"></i>
-                {{ section.title|extract_section_title|default:"Medication Summary" }}
-                {% if section.code %}
-                <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
-                {% endif %}
-            </h5>
-        </div>
+    <!-- Remove card wrapper - content goes directly in accordion body -->
 
         <!-- Clinical Section Content with Tabs -->
         {% if section.has_entries and section.clinical_table %}
         <!-- Clinical Table Section -->
-        <div class="card-body p-0">
+        <div class="section-content-area p-3">
             <!-- Section Tabs -->
-            <div class="section-tabs">
+            <div class="section-tabs mb-3">
                 <button class="tab-button active"
                     onclick="showClinicalTab('medications_{{ section_index }}', 'structured')">
                     📊 Structured Medication Data
@@ -103,7 +93,7 @@
                                     </div>
                                     {% endwith %}
                                     {% endfor %}
-                                </div>
+                                </div> <!-- End card-body -->
                             </div>
                             {% endfor %}
                         </div>
@@ -178,7 +168,7 @@
                             </table>
                         </div>
                     </div>
-                </div>
+                </div> <!-- End card-body for main clinical table -->
             </div>
 
             <!-- Original Content Tab -->
@@ -199,7 +189,7 @@
         </div>
         {% else %}
         <!-- No Entries State -->
-        <div class="card-body">
+        <div class="section-content-area p-3">
             <div class="no-entries-message text-center py-4">
                 <i class="fa-solid fa-pills fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">No Medication Data Available</h6>
@@ -207,5 +197,4 @@
             </div>
         </div>
         {% endif %}
-    </div>
 </div>

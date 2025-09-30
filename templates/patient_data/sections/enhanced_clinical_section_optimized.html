@@ -1,61 +1,19 @@
 {% load patient_filters %}
 
 {# Enhanced Clinical Section Template - Professional Healthcare UX Optimized #}
+{# Now integrated directly into accordion structure without card wrapper #}
 
-<!-- Optimized Clinical Section with Healthcare Professional Focus -->
-<div class="medical-section enhanced-clinical-section-pro"
-     id="{{ section.section_id|default:'enhanced-section' }}">
-    <div class="card clinical-section-card-pro">
+{# Clinical Section Content - Direct Integration #}
+<div class="clinical-section-content"
+     id="section-{{ section.section_id|default:'enhanced-section' }}">
 
-        <!-- Professional Section Header -->
-        <div class="card-header clinical-header-pro">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="section-title-group">
-                    <h5 class="section-title mb-1">
-                        <i class="{% if section.section_type == 'allergies' %}fas fa-exclamation-triangle text-danger{% elif section.section_type == 'medications' %}fas fa-pills text-primary{% elif section.section_type == 'problems' %}fas fa-stethoscope text-warning{% elif section.section_type == 'vitals' %}fas fa-heartbeat text-success{% elif section.section_type == 'procedures' %}fas fa-user-md text-info{% elif section.section_type == 'immunizations' %}fas fa-syringe text-secondary{% elif section.section_type == 'results' %}fas fa-flask text-purple{% else %}fas fa-file-medical text-muted{% endif %} me-2"></i>
-                        {{ section.display_name|extract_section_title|default:section.title|extract_section_title }}
-                    </h5>
+    {# Content Display Container with Toggle Support #}
+    <div class="content-display-container">
 
-                    <!-- Enhanced Translation Context -->
-                    {% if section.original and section.translated %}
-                    <div class="translation-context small text-muted">
-                        {% if section.original != section.translated %}
-                            <span class="translation-badge me-2">
-                                <i class="fas fa-language me-1"></i>Translated from {{ source_language|default:'original language' }}
-                            </span>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                </div>
+        {# Translated Content (Default Visible) #}
+        <div class="translated-content" id="translated-content-{{ section.code|default:forloop.counter }}">
 
-                <!-- Professional Metrics Dashboard -->
-                <div class="clinical-metrics-pro">
-                    {% if section.structured_entries %}
-                    <div class="metric-item">
-                        <span class="metric-value">{{ section.structured_entries|length }}</span>
-                        <span class="metric-label">entries</span>
-                    </div>
-                    {% endif %}
-                    {% if section.clinical_codes %}
-                    <div class="metric-item coded">
-                        <span class="metric-value">{{ section.clinical_codes|length }}</span>
-                        <span class="metric-label">codes</span>
-                    </div>
-                    {% endif %}
-                    {% if section.coding_density %}
-                    <div class="metric-item quality">
-                        <span class="metric-value">{{ section.coding_density|floatformat:0 }}%</span>
-                        <span class="metric-label">coded</span>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Professional Clinical Section Content -->
-        <div class="card-body clinical-body-pro">
-
-            <!-- Enhanced Professional Tabs -->
+            {# Enhanced Professional Tabs #}
             <div class="clinical-tabs-pro mb-4">
                 <nav class="nav nav-pills clinical-nav-pills" role="tablist">
                     <button class="nav-link active clinical-tab-pro"
@@ -99,10 +57,10 @@
                 </nav>
             </div>
 
-            <!-- Tab Content Container -->
+            {# Tab Content Container #}
             <div class="tab-content clinical-content-pro">
 
-                <!-- Primary View Tab - Healthcare Professional Focus -->
+                {# Primary View Tab - Healthcare Professional Focus #}
                 <div class="tab-pane fade show active"
                      id="primary-{{ section_index }}"
                      role="tabpanel"
@@ -111,12 +69,12 @@
                     {% if section.structured_entries %}
                     <div class="clinical-entries-pro">
 
-                        <!-- Enhanced Entry Display -->
+                        {# Enhanced Entry Display #}
                         {% for entry in section.structured_entries %}
                         <div class="clinical-entry-pro mb-4">
-                            <div class="entry-card">
+                            <div class="entry-card-flat">
 
-                                <!-- Entry Header with Professional Layout -->
+                                {# Entry Header with Professional Layout #}
                                 <div class="entry-header-pro">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div class="entry-primary-info">
@@ -128,7 +86,7 @@
                                             {% endif %}
                                         </div>
 
-                                        <!-- Status with Professional Styling -->
+                                        {# Status with Professional Styling #}
                                         {% if entry.status_code %}
                                         <span class="status-badge status-{{ entry.status_code|default:'unknown' }}">
                                             {{ entry.status_code|handle_null_flavor|title }}
@@ -404,6 +362,33 @@
                 </div>
 
             </div>
+
         </div>
+
+        <!-- Original Content (Hidden by Default) -->
+        <div class="original-content d-none" id="original-content-{{ section.code|default:forloop.counter }}">
+            {% if section.original %}
+            <div class="original-narrative-display">
+                <div class="original-header mb-3">
+                    <h6 class="original-title">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Original Content ({{ source_language|default:'Source Language' }})
+                    </h6>
+                </div>
+                <div class="original-text">
+                    {{ section.original|safe }}
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state-pro">
+                <div class="empty-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h6 class="empty-title">No Original Content Available</h6>
+                <p class="empty-message">Original language content is not available for this section.</p>
+            </div>
+            {% endif %}
+        </div>
+
     </div>
 </div>

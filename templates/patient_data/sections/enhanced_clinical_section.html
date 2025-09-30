@@ -2,13 +2,12 @@
 
 {# Enhanced Clinical Section Template - Rich Data Display #}
 
-<!-- Enhanced Clinical Section with Rich Data Analysis -->
+{# Enhanced Clinical Section with Rich Data Analysis - NO CARD WRAPPER #}
 <div class="medical-section enhanced-clinical-section"
     id="{{ section.section_id|default:'enhanced-section' }}">
-    <div class="card clinical-section-card">
-        <!-- Enhanced Section Header with Metrics -->
-        <div class="card-header bg-gradient-primary text-white">
-            <div class="d-flex justify-content-between align-items-center">
+    {# Enhanced Section Header with Metrics - NO CARD HEADER #}
+    <div class="enhanced-section-header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-1">
                         <i class="{% if section.section_type == 'allergies' %}fa-solid fa-exclamation-triangle{% elif section.section_type == 'medications' %}fa-solid fa-pills{% elif section.section_type == 'problems' %}fa-solid fa-stethoscope{% elif section.section_type == 'vitals' %}fa-solid fa-heartbeat{% elif section.section_type == 'procedures' %}fa-solid fa-user-md{% elif section.section_type == 'immunizations' %}fa-solid fa-syringe{% elif section.section_type == 'results' %}fa-solid fa-flask{% elif section.section_type == 'social_history' %}fa-solid fa-users{% elif section.section_type == 'family_history' %}fa-solid fa-family{% elif section.section_type == 'care_plan' %}fa-solid fa-clipboard-list{% else %}fa-solid fa-file-medical{% endif %} me-2"></i>
@@ -44,10 +43,10 @@
             </div>
         </div>
 
-        <!-- Enhanced Clinical Section Content -->
-        <div class="card-body">
+        {# Enhanced Clinical Section Content - NO CARD BODY #}
+        <div class="enhanced-section-content">
             {% if not hide_tabs %}
-            <!-- Enhanced Section Tabs -->
+            {# Enhanced Section Tabs #}
             <div class="section-tabs mb-3">
                 <button class="tab-button active" onclick="showClinicalTab('enhanced_{{ section_index }}', 'structured')"
                         data-bs-toggle="tooltip" title="View structured clinical data with codes and relationships">
@@ -64,7 +63,7 @@
             </div>
             {% endif %}
 
-            <!-- Rich Data View Tab -->
+            {# Rich Data View Tab #}
             <div id="enhanced_{{ section_index }}_structured" class="clinical-tab-content active">
                 {% if section.structured_entries %}
                 <div class="structured-entries">
@@ -75,7 +74,7 @@
 
                     {% for entry in section.structured_entries %}
                     <div class="clinical-entry mb-3 p-3 border rounded {% if entry.entry_type == 'observation' %}border-primary{% elif entry.entry_type == 'act' %}border-success{% elif entry.entry_type == 'procedure' %}border-warning{% elif entry.entry_type == 'substanceAdministration' %}border-info{% else %}border-secondary{% endif %}">
-                        <!-- Entry Header with nullFlavor-aware display -->
+                        {# Entry Header with nullFlavor-aware display #}
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
                                 <h6 class="mb-1">
@@ -92,7 +91,7 @@
                             {% endif %}
                         </div>
 
-                        <!-- Entry Details with improved nullFlavor handling -->
+                        {# Entry Details with improved nullFlavor handling #}
                         <div class="entry-details">
                             {% if entry.effective_time %}
                             <div class="mb-2">
@@ -147,7 +146,7 @@
                             {% endif %}
                         </div>
 
-                        <!-- Entry Value/Result with nullFlavor handling -->
+                        {# Entry Value/Result with nullFlavor handling #}
                         {% if entry.value or entry.result %}
                         <div class="entry-value mt-2 p-2 bg-light rounded">
                             <strong><i class="fa-solid fa-chart-bar me-1"></i>Value/Result:</strong>
@@ -155,7 +154,7 @@
                         </div>
                         {% endif %}
 
-                        <!-- Entry Text Content with nullFlavor handling -->
+                        {# Entry Text Content with nullFlavor handling #}
                         {% if entry.text_content %}
                         <div class="entry-text mt-2">
                             <strong><i class="fa-solid fa-align-left me-1"></i>Description:</strong>
@@ -175,7 +174,7 @@
                 {% endif %}
             </div>
 
-            <!-- Clinical Codes Tab -->
+            {# Clinical Codes Tab #}
             <div id="enhanced_{{ section_index }}_codes" class="clinical-tab-content">
                 {% if section.clinical_codes %}
                 <div class="clinical-codes-section">
@@ -184,7 +183,7 @@
                         Clinical Terminology & Coding Systems ({{ section.clinical_codes|length }})
                     </h6>
 
-                    <!-- Coding System Statistics -->
+                    {# Coding System Statistics #}
                     <div class="coding-stats mb-4">
                         <div class="row">
                             {% if section.snomed_codes %}
@@ -214,7 +213,7 @@
                         </div>
                     </div>
 
-                    <!-- All Clinical Codes with nullFlavor handling -->
+                    {# All Clinical Codes with nullFlavor handling #}
                     <div class="all-codes">
                         {% for code in section.clinical_codes %}
                         <div class="code-item mb-2 p-2 border rounded {% if 'snomed' in code.system|lower %}border-success bg-success bg-opacity-10{% elif 'loinc' in code.system|lower %}border-primary bg-primary bg-opacity-10{% elif 'icd' in code.system|lower %}border-warning bg-warning bg-opacity-10{% else %}border-secondary bg-light{% endif %}">
@@ -244,7 +243,7 @@
                 {% endif %}
             </div>
 
-            <!-- Original XML Tab -->
+            {# Original XML Tab #}
             <div id="enhanced_{{ section_index }}_original" class="clinical-tab-content">
                 {% if section.narrative_text %}
                 <div class="original-content">
@@ -264,10 +263,9 @@
                 {% endif %}
             </div>
         </div>
-    </div>
 </div>
 
-<!-- Enhanced CSS for clinical coding badges -->
+{# Enhanced CSS for clinical coding badges #}
 <style>
 .coding-badge {
     display: inline-block;

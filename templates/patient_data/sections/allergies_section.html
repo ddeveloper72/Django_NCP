@@ -1,38 +1,17 @@
 {% load patient_filters %}
 {# Allergies and Other Adverse Reactions Section Template #}
-<!-- Allergies and Intolerances Section -->
+{# Allergies and Intolerances Section #}
 <div class="medical-section" id="allergies-section">
-    <div class="card">
-        <!-- Section Header -->
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">
-                <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                {{ section.title|extract_section_title|default:"Allergies and Other Adverse Reactions" }}
-                {% if section.code %}
-                <span class="badge bg-light text-dark ms-2">{{ section.code }}</span>
-                {% endif %}
-            </h5>
-        </div>
+    {# Remove card wrapper - content goes directly in accordion body #}
 
-        <!-- Clinical Section Content with Tabs -->
+        {# Clinical Section Content with Tabs #}
         {% if section.has_entries and section.clinical_table %}
-        <!-- Clinical Table Section -->
-        <div class="card-body p-0">
-            <!-- Section Tabs -->
-            <div class="section-tabs">
-                <button class="tab-button active"
-                    onclick="showClinicalTab('allergies_{{ section_index }}', 'structured')">
-                    📊 Structured Allergy Data
-                </button>
-                <button class="tab-button" onclick="showClinicalTab('allergies_{{ section_index }}', 'original')">
-                    📄 Original Content
-                </button>
-            </div>
+        {# Optimized Clinical Table Section - Tabs now in parent header #}
 
-            <!-- Structured View Tab Content -->
+            {# Structured View Tab Content #}
             <div id="allergies_{{ section_index }}_structured" class="clinical-tab-content active">
                 <div class="clinical-table">
-                    <!-- Mobile Card Layout (hidden on desktop) -->
+                    {# Mobile Card Layout (hidden on desktop) #}
                     <div class="d-block d-md-none">
                         <div class="clinical-cards-container">
                             {% for row in section.clinical_table.rows %}
@@ -100,13 +79,13 @@
                                     </div>
                                     {% endwith %}
                                     {% endfor %}
-                                </div>
+                                </div> <!-- End card-body -->
                             </div>
                             {% endfor %}
                         </div>
                     </div>
 
-                    <!-- Desktop Table Layout (hidden on mobile) -->
+                    {# Desktop Table Layout (hidden on mobile) #}
                     <div class="d-none d-md-block">
                         <div class="table-responsive">
                             <table class="table table-striped table-hover clinical-table">
@@ -179,9 +158,9 @@
                             </table>
                         </div>
                     </div>
-                </div>
+                </div> <!-- End card-body for main clinical table -->
 
-                <!-- Allergy Table Summary -->
+                {# Allergy Table Summary #}
                 <div class="card-footer bg-light border-primary">
                     <div class="row text-center">
                         <div class="col-md-4">
@@ -206,19 +185,18 @@
                 </div>
             </div>
 
-            <!-- Original Content Tab -->
+            {# Original Content Tab #}
             <div id="allergies_{{ section_index }}_original" class="clinical-tab-content">
                 {% include 'patient_data/sections/original_content.html' %}
             </div>
-        </div>
 
         {% elif section.has_entries %}
-        <!-- Simple List Section for allergies without clinical tables -->
+        {# Simple List Section for allergies without clinical tables #}
         {% include 'patient_data/sections/simple_list_section.html' %}
 
         {% else %}
-        <!-- Empty Allergies Section -->
-        <div class="card-body text-center py-5">
+        {# Empty Allergies Section - Optimized (no wrapper) #}
+        <div class="text-center py-5">
             <div class="text-success">
                 <i class="fa-solid fa-check-circle fa-3x mb-3"></i>
                 <h6 class="text-success">No Known Allergies</h6>
@@ -226,5 +204,4 @@
             </div>
         </div>
         {% endif %}
-    </div>
 </div>

@@ -2,7 +2,7 @@
 {% load patient_date_filters %}
 {# Empty Section Template - For sections without entries #}
 <div class="card-body">
-    <!-- Section Tabs (even for empty sections) -->
+    {# Section Tabs (even for empty sections) #}
     <div class="section-tabs">
         <button class="tab-button active" onclick="showTab('section_{{ section_index }}', 'structured')">
             📊 Structured View
@@ -12,11 +12,11 @@
         </button>
     </div>
 
-    <!-- Structured View Tab Content -->
+    {# Structured View Tab Content #}
     <div id="section_{{ section_index }}_structured" class="tab-content active">
         {% if section.structured_data %}
         <div class="clinical-table">
-            <!-- Check if we have data to display -->
+            {# Check if we have data to display #}
             {% if section.structured_data %}
             {% with section.structured_data.0 as first_entry %}
             {% if first_entry and first_entry.fields and first_entry.fields|length > 1 %}
@@ -53,7 +53,7 @@
                 </tbody>
             </table>
 
-            <!-- Table Summary -->
+            {# Table Summary #}
             <div class="card-footer bg-light">
                 <div class="row text-center">
                     <div class="col-12">
@@ -75,7 +75,7 @@
         {% endif %}
     </div>
 
-    <!-- Original Content Tab -->
+    {# Original Content Tab #}
     <div id="section_{{ section_index }}_original" class="tab-content">
         {% include 'patient_data/sections/original_content.html' %}
     </div>

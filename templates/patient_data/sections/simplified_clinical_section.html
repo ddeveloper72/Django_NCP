@@ -14,8 +14,8 @@
     </div>
 
     {% for section in simplified_data.sections %}
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
+    <div class="simplified-section mb-4 border border-primary rounded">
+        <div class="simplified-section-header bg-primary text-white p-3">
             <h5 class="mb-0">
                 <i class="fa-solid fa-stethoscope me-2"></i>
                 {{ section.title }}
@@ -23,7 +23,7 @@
             </h5>
         </div>
 
-        <div class="card-body">
+        <div class="simplified-section-body p-3">
             {% if section.type == "problems" %}
                 {# PROBLEMS SECTION - Clean and customizable #}
                 <h6>Problems/Diagnoses ({{ section.entries|length }} entries)</h6>

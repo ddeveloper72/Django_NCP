@@ -2,9 +2,14 @@
 {# Django-compatible version - no {% set %} variables allowed #}
 {% load patient_filters %}
 
-<!-- Render individual clinical section (called within loop from main template) -->
+{# Render individual clinical section (called within loop from main template) #}
 {% if section and section.title %}
-    <!-- Route to specialized section templates based on section type -->
+    {# Clinical Section Router Component #}
+{% load patient_filters %}
+
+{# Render individual clinical section (called within loop from main template) #}
+
+    {# Route to specialized section templates based on section type #}
     {% if section.section_id == 'psAllergiesAndOtherAdverseReactions' or section.section_id == 'allergies' or section.section_id == 'allergies_and_intolerances' or 'allergies' in section.title|safe_title_text or 'adverse' in section.title|safe_title_text %}
         {% with section_index=forloop.counter0 %}
             {% if section.structured_entries or section.clinical_codes %}
@@ -50,7 +55,7 @@
             {% endif %}
         {% endwith %}
 
-    {% elif section.section_id == 'psListOfSurgeries' or section.section_id == 'list_of_surgeries' or section.section_id == 'surgeries' or section.section_id == 'surgical_procedures' or section.section_id == 'procedures' %}
+    {% elif section.section_id == 'psListOfSurgeries' or section.section_id == 'list_of_surgeries' or section.section_id == 'surgeries' or section.section_id == 'surgical_procedures' or section.section_id == 'procedures' or section.section_id == 'history_of_procedures' or 'procedures' in section.title|safe_title_text|lower or 'surgery' in section.title|safe_title_text|lower %}
         {% with section_index=forloop.counter0 %}
             {% if section.structured_entries or section.clinical_codes %}
                 {% include 'patient_data/sections/enhanced_clinical_section_optimized.html' %}
@@ -69,7 +74,7 @@
             {% include 'patient_data/sections/medical_devices_section.html' %}
         {% endwith %}
 
-    <!-- Generic sections with predefined configurations -->
+    {# Generic sections with predefined configurations #}
     {% elif section.section_id == 'psHistoryOfPastIllnesses' %}
         {% with section_index=forloop.counter0 %}
             {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='past_illnesses' section_icon='fa-solid fa-history' header_class='bg-warning text-dark' table_header_class='table-warning' text_class='text-warning' badge_class='bg-warning text-dark' border_class='border-warning' entries_label='past illnesses' empty_title='No Past Illness History' empty_message='No history of past illnesses reported for this patient' %}
@@ -95,19 +100,21 @@
             {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='pregnancies' section_icon='fa-solid fa-baby' header_class='bg-pink' table_header_class='table-pink' text_class='text-pink' badge_class='bg-pink' border_class='border-pink' entries_label='pregnancy records' empty_title='No Pregnancy History' empty_message='No pregnancy history available for this patient' %}
         {% endwith %}
 
-    <!-- Default fallback for unknown section types -->
-    {% else %}
+        {% else %}
+    {# Default fallback for unknown section types #}
         {% with section_index=forloop.counter0 %}
-            <!-- Use enhanced template for sections with rich clinical data -->
-            {% if section.structured_entries or section.clinical_codes or section.coding_density %}
-                {% include 'patient_data/sections/enhanced_clinical_section_optimized.html' %}
-            {% else %}
-                {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='unknown' section_icon='fa-solid fa-file-medical' header_class='bg-light text-dark' table_header_class='table-light' text_class='text-muted' badge_class='bg-light text-dark' border_class='border-light' entries_label='entries' empty_title='Clinical Information' empty_message='Clinical information available for this patient' %}
+            {% if section.has_entries %}
+                {# Use enhanced template for sections with rich clinical data #}
+                {% if section.structured_entries or section.clinical_codes or section.coding_density %}
+                    {% include 'patient_data/sections/enhanced_clinical_section_optimized.html' %}
+                {% else %}
+                    {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='unknown' section_icon='fa-solid fa-file-medical' header_class='bg-light text-dark' table_header_class='table-light' text_class='text-muted' badge_class='bg-light text-dark' border_class='border-light' entries_label='entries' empty_title='Clinical Information' empty_message='Clinical information available for this patient' %}
+                {% endif %}
             {% endif %}
         {% endwith %}
     {% endif %}
 {% else %}
-    <!-- No clinical section data -->
+    {# No clinical section data #}
     <div class="alert alert-info">
         <i class="fa-solid fa-info-circle me-2"></i>
         <strong>No Clinical Section Data</strong><br>
@@ -115,7 +122,7 @@
     </div>
 {% endif %}
 
-<!-- Debug information (development only) -->
+{# Debug information (development only) #}
 {% comment %}
 Django Template Syntax Notes:
 - Updated to work with individual section objects passed from main template loop

@@ -1,7 +1,7 @@
-<!-- Demographics Section Template Component -->
+{# Demographics Section Template Component #}
 {% if data %}
 <div class="demographics-grid">
-    <!-- Basic Information -->
+    {# Basic Information #}
     <div class="demo-card">
         <h5><i class="fa-solid fa-user"></i> Basic Information</h5>
         {% if data.name %}
@@ -43,7 +43,7 @@
         {% endif %}
     </div>
 
-    <!-- Contact Information -->
+    {# Contact Information #}
     <div class="demo-card">
         <h5><i class="fa-solid fa-address-book"></i> Contact Information</h5>
         {% if data.telecom %}
@@ -60,7 +60,7 @@
         {% endif %}
     </div>
 
-    <!-- Address Information -->
+    {# Address Information #}
     <div class="demo-card">
         <h5><i class="fa-solid fa-map-marker-alt"></i> Address</h5>
         {% if data.address %}
@@ -85,7 +85,7 @@
         {% endif %}
     </div>
 
-    <!-- Identifiers -->
+    {# Identifiers #}
     {% if data.identifier %}
     <div class="demo-card">
         <h5><i class="fa-solid fa-id-card"></i> Identifiers</h5>
@@ -113,7 +113,7 @@
     </div>
     {% endif %}
 
-    <!-- Communication -->
+    {# Communication #}
     {% if data.communication %}
     <div class="demo-card">
         <h5><i class="fa-solid fa-language"></i> Communication</h5>
@@ -129,7 +129,7 @@
     </div>
     {% endif %}
 
-    <!-- Additional Demographics -->
+    {# Additional Demographics #}
     {% if data.deceased_boolean is not None or data.deceased_datetime or data.multiple_birth_boolean is not None %}
     <div class="demo-card">
         <h5><i class="fa-solid fa-info"></i> Additional Information</h5>
