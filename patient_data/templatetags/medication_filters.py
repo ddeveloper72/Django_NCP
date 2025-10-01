@@ -4,9 +4,11 @@ Smart extraction and display of medication dose form and dose quantity data
 """
 
 import re
+import logging
 from django import template
 from django.utils.safestring import mark_safe
 
+logger = logging.getLogger(__name__)
 register = template.Library()
 
 
@@ -422,6 +424,120 @@ def format_medication_name(medication_name):
         return mark_safe(f'<strong class="brand-name">{brand}</strong>')
     else:
         return medication_name
+
+
+@register.filter
+def extract_dosage_schedule(medication):
+    """
+    Extract dosage schedule from medication data using comprehensive fallback logic
+    Handles all medication data structure variations consistently
+    """
+    if not medication:
+        return "Schedule not specified"
+    
+    # Strategy 1: Check for direct frequency display fields
+    if isinstance(medication, dict):
+        # Check data structure first
+        if medication.get('data', {}).get('frequency_display'):
+            return medication['data']['frequency_display']
+        
+        if medication.get('data', {}).get('period'):
+            return medication['data']['period']
+        
+        # Check direct fields
+        if medication.get('frequency_display'):
+            return medication['frequency_display']
+        
+        if medication.get('period'):
+            return medication['period']
+        
+        if medication.get('frequency'):
+            return medication['frequency']
+    
+    # Strategy 2: Check object attributes
+    if hasattr(medication, 'data'):
+        if hasattr(medication.data, 'frequency_display') and medication.data.frequency_display:
+            return medication.data.frequency_display
+        if hasattr(medication.data, 'period') and medication.data.period:
+            return medication.data.period
+    
+    if hasattr(medication, 'frequency_display') and medication.frequency_display:
+        return medication.frequency_display
+    
+    if hasattr(medication, 'frequency') and medication.frequency:
+        return medication.frequency
+    
+    # Strategy 3: Check effective_time for schedule codes using CTS translation
+    try:
+        from translation_services.terminology_translator import TerminologyTranslator
+        translator = TerminologyTranslator()
+        
+        effective_time = None
+        if isinstance(medication, dict):
+            effective_time = medication.get('effective_time', [])
+        elif hasattr(medication, 'effective_time'):
+            effective_time = medication.effective_time
+        
+        if effective_time and isinstance(effective_time, list):
+            for et in effective_time:
+                if isinstance(et, dict):
+                    # Check for period codes
+                    period = et.get('period')
+                    if period:
+                        translated = translator.translate_code(period, 'ACM')
+                        if translated and translated != period:
+                            return translated
+                    
+                    # Check for frequency codes
+                    frequency = et.get('frequency')
+                    if frequency:
+                        translated = translator.translate_code(frequency, 'ACM')
+                        if translated and translated != frequency:
+                            return translated
+    except Exception as e:
+        logger.debug(f"Error in CTS translation for dosage schedule: {e}")
+    
+    # Strategy 4: Fallback extraction from medication name patterns
+    medication_name = ""
+    if isinstance(medication, dict):
+        for key in ['medication_name', 'substance_name', 'substance_display_name', 'title', 'name']:
+            if medication.get(key):
+                medication_name = str(medication[key])
+                break
+        
+        # Check nested structures
+        if not medication_name and medication.get('medication', {}).get('name'):
+            medication_name = str(medication['medication']['name'])
+            
+    elif hasattr(medication, 'medication') and hasattr(medication.medication, 'name'):
+        medication_name = str(medication.medication.name)
+    elif hasattr(medication, 'name'):
+        medication_name = str(medication.name)
+    
+    if medication_name:
+        # Extract common schedule patterns from medication names
+        name_lower = medication_name.lower()
+        schedule_patterns = [
+            (r"once\s*daily", "Once daily"),
+            (r"twice\s*daily", "Twice daily"),
+            (r"(\d+)\s*times?\s*(per\s*)?day", lambda m: f"{m.group(1)} times per day"),
+            (r"every\s*(\d+)\s*hours?", lambda m: f"Every {m.group(1)} hours"),
+            (r"(\d+)\s*per\s*day", lambda m: f"{m.group(1)} per day"),
+            (r"before\s*breakfast", "Before breakfast"),
+            (r"after\s*meals?", "After meals"),
+            (r"at\s*bedtime", "At bedtime"),
+        ]
+        
+        for pattern, replacement in schedule_patterns:
+            if callable(replacement):
+                match = re.search(pattern, name_lower)
+                if match:
+                    return replacement(match)
+            else:
+                if re.search(pattern, name_lower):
+                    return replacement
+    
+    return "Schedule not specified"
 
 
 @register.filter

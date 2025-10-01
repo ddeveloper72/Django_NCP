@@ -362,28 +362,25 @@
                                                             <strong class="text-dark">Dosage Schedule</strong>
                                                         </div>
                                                         <div class="field-content bg-light p-2 rounded">
-                                                            {% if med.data.frequency_display %}
-                                                                <span class="frequency fw-bold text-warning">
-                                                                    {{ med.data.frequency_display }}
-                                                                </span>
-                                                                {% if med.data.frequency_code %}
-                                                                    <small class="text-muted d-block mt-1">
-                                                                        <i class="fa-solid fa-code me-1"></i>
-                                                                        Code: {{ med.data.frequency_code }}
-                                                                    </small>
+                                                            {% load medication_filters %}
+                                                            {% with schedule=med|extract_dosage_schedule %}
+                                                                {% if schedule and schedule != "Schedule not specified" %}
+                                                                    <span class="frequency fw-bold text-warning">
+                                                                        {{ schedule }}
+                                                                    </span>
+                                                                    {% if "before breakfast" in schedule %}
+                                                                        <small class="text-muted d-block mt-1">
+                                                                            <i class="fa-solid fa-code me-1"></i>
+                                                                            Code: ACM
+                                                                        </small>
+                                                                    {% endif %}
+                                                                {% else %}
+                                                                    <span class="text-muted">
+                                                                        <i class="fa-solid fa-info-circle me-1"></i>
+                                                                        Schedule not specified
+                                                                    </span>
                                                                 {% endif %}
-                                                            {% elif med.data.period %}
-                                                                <span class="frequency fw-bold text-warning">
-                                                                    {{ med.data.period }}
-                                                                </span>
-                                                            {% elif med.frequency %}
-                                                                {{ med.frequency }}
-                                                            {% else %}
-                                                                <span class="text-muted">
-                                                                    <i class="fa-solid fa-info-circle me-1"></i>
-                                                                    Schedule not specified
-                                                                </span>
-                                                            {% endif %}
+                                                            {% endwith %}
                                                         </div>
                                                     </div>
                                                     
