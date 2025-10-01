@@ -860,12 +860,7 @@ def patient_data(request, country_code, patient_id):
         "step": "PATIENT DATA",
     }
 
-    # Force Jinja2 template engine usage
-    from django.template.response import TemplateResponse
-
-    return TemplateResponse(
-        request, "ehealth_portal/patient_data.html", context, using="jinja2"
-    )
+    return render(request, "ehealth_portal/patient_data.html", context)
 
 
 @login_required

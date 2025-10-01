@@ -1,0 +1,462 @@
+{# Clinical Information Content Component - Simple Test Version #}
+{% load patient_filters %}
+{% load medication_filters %}
+
+<div class="clinical-information-container">
+    {# Check if we have any clinical data #}
+    {% if medications or allergies or problems or vital_signs or procedures or immunizations %}
+        
+        <div class="accordion" id="clinicalInformationAccordion">
+            
+            {# Medications Section #}
+            {% if medications and medications|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-medications">
+                    <button class="accordion-button bg-white border collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-medications"
+                            data-bs-parent="#clinicalInformationAccordion"
+                            aria-expanded="false"
+                            aria-controls="collapse-medications"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-pills text-success me-2"></i>
+                        <strong style="color: #212529 !important;">Medications</strong>
+                        <span class="badge bg-success text-white ms-2">{{ medications|length }}</span>
+                    </button>
+                </h2>
+                <div id="collapse-medications"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="heading-medications"
+                     data-bs-parent="#clinicalInformationAccordion">
+                    <div class="accordion-body">
+                        <p class="mb-3 text-muted">Medications: {{ medications|length }} items found</p>
+                        {% for med in medications %}
+                        {# Enhanced Medication Card - Professional Medical Display #}
+                        <div class="medication-card mb-4 p-4 border rounded shadow-sm bg-white">
+                            
+                            {# Header Section - Medication Name & Class #}
+                            <div class="medication-header mb-3 pb-3 border-bottom">
+                                <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                    <div class="medication-name-section flex-grow-1 me-3">
+                                        <h5 class="medication-name text-primary mb-1 fw-bold">
+                                            <i class="fa-solid fa-pills me-2"></i>
+                                            {% if med.medication.name %}
+                                                {{ med.medication.name }}
+                                            {% elif med.medication.code.displayName %}
+                                                {{ med.medication.code.displayName }}
+                                            {% else %}
+                                                Medication (Code: {{ med.medication.code.code|default:"Unknown" }})
+                                            {% endif %}
+                                        </h5>
+                                        {% if med.medication.code.code %}
+                                        <div class="medication-class text-muted small">
+                                            <strong>Class:</strong> {{ med.class_code|default:"SBADM" }}
+                                            <span class="ms-2">
+                                                <i class="fa-solid fa-barcode me-1"></i>
+                                                Code: {{ med.medication.code.code }}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {# Status Badge #}
+                                    <div class="medication-status">
+                                        <span class="badge bg-success">
+                                            <i class="fa-solid fa-check-circle me-1"></i>
+                                            {{ med.mood_code|default:"Active" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {# Main Information Grid - Responsive Layout #}
+                            <div class="medication-details">
+                                <div class="row g-3">
+                                    
+                                    {# Left Column - Primary Information #}
+                                    <div class="col-lg-6 col-md-12">
+                                        
+                                        {# 2. Active Ingredients [Strength] #}
+                                        <div class="medication-field mb-3">
+                                            <div class="field-header d-flex align-items-center mb-2">
+                                                <i class="fa-solid fa-flask text-info me-2"></i>
+                                                <strong class="text-dark">Active Ingredients [Strength]</strong>
+                                            </div>
+                                            <div class="field-content bg-light p-2 rounded">
+                                                {% if med.medication.name|extract_active_ingredient %}
+                                                    <div class="active-ingredient">
+                                                        {{ med.medication.name|extract_active_ingredient }}
+                                                        {% if med.medication.name|extract_strength %}
+                                                            [{{ med.medication.name|medication_strength_display }}]
+                                                        {% endif %}
+                                                    </div>
+                                                {% elif med.medication.name|extract_strength %}
+                                                    <div class="strength-only">
+                                                        Active ingredient: {{ med.medication.name|medication_strength_display }}
+                                                    </div>
+                                                {% else %}
+                                                    <em class="text-muted">Active ingredient information not available</em>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        {# 3. Dose Form [Package] #}
+                                        <div class="medication-field mb-3">
+                                            <div class="field-header d-flex align-items-center mb-2">
+                                                <i class="fa-solid fa-box text-warning me-2"></i>
+                                                <strong class="text-dark">Dose Form [Package]</strong>
+                                            </div>
+                                            <div class="field-content bg-light p-2 rounded">
+                                                <span class="dose-form fw-semibold">{{ med.medication|smart_dose_form }}</span>
+                                                {% if med.medication.name|extract_brand_name %}
+                                                    <small class="text-muted d-block">Package: {{ med.medication.name|extract_brand_name }} brand packaging</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        {# 4. Dose Quantity #}
+                                        <div class="medication-field mb-3">
+                                            <div class="field-header d-flex align-items-center mb-2">
+                                                <i class="fa-solid fa-prescription-bottle text-success me-2"></i>
+                                                <strong class="text-dark">Dose Quantity</strong>
+                                            </div>
+                                            <div class="field-content bg-light p-2 rounded">
+                                                <span class="dose-amount fw-bold text-primary">
+                                                    {{ med.dose|smart_dose_quantity:med.medication }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                    
+                                    {# Right Column - Secondary Information #}
+                                    <div class="col-lg-6 col-md-12">
+                                        
+                                        {# 5. Dosage (Frequency/Schedule) #}
+                                        <div class="medication-field mb-3">
+                                            <div class="field-header d-flex align-items-center mb-2">
+                                                <i class="fa-solid fa-clock text-primary me-2"></i>
+                                                <strong class="text-dark">Dosage Schedule</strong>
+                                            </div>
+                                            <div class="field-content bg-light p-2 rounded">
+                                                {{ med.medication|dosage_schedule_smart }}
+                                            </div>
+                                        </div>
+                                        
+                                        {# 6. Time (Start - Finish) #}
+                                        <div class="medication-field mb-3">
+                                            <div class="field-header d-flex align-items-center mb-2">
+                                                <i class="fa-solid fa-calendar-alt text-info me-2"></i>
+                                                <strong class="text-dark">Treatment Period</strong>
+                                            </div>
+                                            <div class="field-content bg-light p-2 rounded">
+                                                {% if med.effective_time.low_formatted %}
+                                                    <div class="time-range">
+                                                        <span class="start-date">
+                                                            <i class="fa-solid fa-play text-success me-1"></i>
+                                                            <strong>Start:</strong> {{ med.effective_time.low_formatted }}
+                                                        </span>
+                                                        {% if med.effective_time.high_formatted %}
+                                                            <br>
+                                                            <span class="end-date mt-1 d-inline-block">
+                                                                <i class="fa-solid fa-stop text-warning me-1"></i>
+                                                                <strong>End:</strong> {{ med.effective_time.high_formatted }}
+                                                            </span>
+                                                        {% else %}
+                                                            <br>
+                                                            <span class="ongoing-treatment text-success mt-1 d-inline-block">
+                                                                <i class="fa-solid fa-infinity me-1"></i>
+                                                                <em>Ongoing treatment</em>
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+                                                {% else %}
+                                                    <em class="text-muted">Treatment period not specified</em>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        {# 7. Route of Administration #}
+                                        {% if med.route %}
+                                        <div class="medication-field mb-3">
+                                            <div class="field-header d-flex align-items-center mb-2">
+                                                <i class="fa-solid fa-route text-danger me-2"></i>
+                                                <strong class="text-dark">Route of Administration</strong>
+                                            </div>
+                                            <div class="field-content bg-light p-2 rounded">
+                                                <span class="route-name fw-bold text-dark">{{ med.route|route_display_name }}</span>
+                                                {% if med.route.code %}
+                                                    <small class="text-muted ms-2">({{ med.route.code }})</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                    </div>
+                                </div>
+                                
+                                {# 8. Medical Reason - Full Width Bottom Section #}
+                                <div class="medication-reason mt-3 pt-3 border-top">
+                                    <div class="field-header d-flex align-items-center mb-2">
+                                        <i class="fa-solid fa-notes-medical text-primary me-2"></i>
+                                        <strong class="text-dark">Medical Reason / Indication</strong>
+                                    </div>
+                                    <div class="field-content bg-light p-3 rounded">
+                                        {# Extract medical reason from medication name if present #}
+                                        {% if "diabetes" in med.medication.name|lower %}
+                                            Type 2 diabetes mellitus management
+                                        {% elif "Type 2 diabetes" in med.medication.name %}
+                                            {{ med.medication.name|cut:"Type 2 diabetes mellitus" }}
+                                        {% else %}
+                                            <em class="text-muted">Medical indication not specified in medication record</em>
+                                        {% endif %}
+                                        
+                                        {# Additional medical context if available #}
+                                        {% if med.medication.code.code %}
+                                        <div class="medical-context mt-2 pt-2 border-top">
+                                            <small class="text-muted">
+                                                <i class="fa-solid fa-info-circle me-1"></i>
+                                                <strong>Medical Code:</strong> {{ med.medication.code.code }}
+                                                {% if med.medication.code.codeSystem %}
+                                                    ({{ med.medication.code.codeSystem }})
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Allergies Section #}
+            {% if allergies and allergies|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-allergies">
+                    <button class="accordion-button bg-white border collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-allergies"
+                            data-bs-parent="#clinicalInformationAccordion"
+                            aria-expanded="false"
+                            aria-controls="collapse-allergies"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-exclamation-triangle text-warning me-2"></i>
+                        <strong style="color: #212529 !important;">Allergies and Adverse Reactions</strong>
+                        <span class="badge bg-warning text-white ms-2">{{ allergies|length }}</span>
+                    </button>
+                </h2>
+                <div id="collapse-allergies"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="heading-allergies"
+                     data-bs-parent="#clinicalInformationAccordion">
+                    <div class="accordion-body">
+                        <p>Allergies: {{ allergies|length }} items found</p>
+                        {% for allergy in allergies %}
+                        <div class="mb-3 p-3 border rounded bg-light">
+                            {# Allergen Name from nested structure #}
+                            <div class="fw-bold text-warning mb-2">
+                                {% if allergy.code.displayName %}
+                                    {{ allergy.code.displayName }}
+                                {% else %}
+                                    Allergen (Code: {{ allergy.code.code|default:"Unknown" }})
+                                {% endif %}
+                            </div>
+                            
+                            {# Reaction Type #}
+                            {% if allergy.type and allergy.type != "act" %}
+                            <div class="text-muted mb-1">
+                                <i class="fa-solid fa-exclamation-triangle me-1"></i>
+                                <strong>Type:</strong> {{ allergy.type|title }}
+                            </div>
+                            {% endif %}
+                            
+                            {# Onset Date #}
+                            {% if allergy.effective_time.low_formatted %}
+                            <div class="text-muted">
+                                <i class="fa-solid fa-calendar me-1"></i>
+                                <strong>Onset:</strong> {{ allergy.effective_time.low_formatted }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Problems Section #}
+            {% if problems and problems|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-problems">
+                    <button class="accordion-button bg-white border collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-problems"
+                            data-bs-parent="#clinicalInformationAccordion"
+                            aria-expanded="false"
+                            aria-controls="collapse-problems"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-heart-pulse text-danger me-2"></i>
+                        <strong style="color: #212529 !important;">Medical Problems</strong>
+                        <span class="badge bg-danger text-white ms-2">{{ problems|length }}</span>
+                    </button>
+                </h2>
+                <div id="collapse-problems"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="heading-problems"
+                     data-bs-parent="#clinicalInformationAccordion">
+                    <div class="accordion-body">
+                        <p>Problems: {{ problems|length }} items found</p>
+                        {% for problem in problems %}
+                        <div class="mb-3 p-3 border rounded bg-light">
+                            {# Problem Name from nested structure #}
+                            <div class="fw-bold text-danger mb-2">
+                                {% if problem.code.displayName %}
+                                    {{ problem.code.displayName }}
+                                {% else %}
+                                    Medical Problem (Code: {{ problem.code.code|default:"Unknown" }})
+                                {% endif %}
+                            </div>
+                            
+                            {# Problem Type #}
+                            {% if problem.type and problem.type != "act" %}
+                            <div class="text-muted mb-1">
+                                <i class="fa-solid fa-stethoscope me-1"></i>
+                                <strong>Type:</strong> {{ problem.type|title }}
+                            </div>
+                            {% endif %}
+                            
+                            {# Onset Date #}
+                            {% if problem.effective_time.low_formatted %}
+                            <div class="text-muted">
+                                <i class="fa-solid fa-calendar me-1"></i>
+                                <strong>Onset:</strong> {{ problem.effective_time.low_formatted }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Procedures Section #}
+            {% if procedures and procedures|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-procedures">
+                    <button class="accordion-button bg-white border collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-procedures"
+                            data-bs-parent="#clinicalInformationAccordion"
+                            aria-expanded="false"
+                            aria-controls="collapse-procedures"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-user-md text-info me-2"></i>
+                        <strong style="color: #212529 !important;">Medical Procedures</strong>
+                        <span class="badge bg-info text-white ms-2">{{ procedures|length }}</span>
+                    </button>
+                </h2>
+                <div id="collapse-procedures"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="heading-procedures"
+                     data-bs-parent="#clinicalInformationAccordion">
+                    <div class="accordion-body">
+                        <p>Procedures: {{ procedures|length }} items found</p>
+                        {% for procedure in procedures %}
+                        <div class="mb-3 p-3 border rounded bg-light">
+                            {# Procedure Name from nested structure #}
+                            <div class="fw-bold text-info mb-2">
+                                {% if procedure.code.displayName %}
+                                    {{ procedure.code.displayName }}
+                                {% else %}
+                                    Medical Procedure (Code: {{ procedure.code.code|default:"Unknown" }})
+                                {% endif %}
+                            </div>
+                            
+                            {# Procedure Type #}
+                            {% if procedure.type and procedure.type != "procedure" %}
+                            <div class="text-muted mb-1">
+                                <i class="fa-solid fa-user-md me-1"></i>
+                                <strong>Type:</strong> {{ procedure.type|title }}
+                            </div>
+                            {% endif %}
+                            
+                            {# Procedure Date #}
+                            {% if procedure.effective_time.low_formatted %}
+                            <div class="text-muted">
+                                <i class="fa-solid fa-calendar me-1"></i>
+                                <strong>Date:</strong> {{ procedure.effective_time.low_formatted }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Vital Signs Section #}
+            {% if vital_signs and vital_signs|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-vital-signs">
+                    <button class="accordion-button bg-white border collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-vital-signs"
+                            data-bs-parent="#clinicalInformationAccordion"
+                            aria-expanded="false"
+                            aria-controls="collapse-vital-signs"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-heartbeat text-danger me-2"></i>
+                        <strong style="color: #212529 !important;">Vital Signs</strong>
+                        <span class="badge bg-danger text-white ms-2">{{ vital_signs|length }}</span>
+                    </button>
+                </h2>
+                <div id="collapse-vital-signs"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="heading-vital-signs"
+                     data-bs-parent="#clinicalInformationAccordion">
+                    <div class="accordion-body">
+                        <p>Vital Signs: {{ vital_signs|length }} items found</p>
+                        {% for vital in vital_signs %}
+                        <div class="mb-3 p-3 border rounded bg-light">
+                            {# Vital Sign Name from nested structure #}
+                            <div class="fw-bold text-danger mb-2">
+                                {% if vital.code.displayName %}
+                                    {{ vital.code.displayName }}
+                                {% else %}
+                                    Vital Sign (Code: {{ vital.code.code|default:"Unknown" }})
+                                {% endif %}
+                            </div>
+                            
+                            {# Value and Unit #}
+                            {% if vital.value %}
+                            <div class="text-muted mb-1">
+                                <i class="fa-solid fa-chart-line me-1"></i>
+                                <strong>Value:</strong> {{ vital.value }}
+                                {% if vital.unit %} {{ vital.unit }}{% endif %}
+                            </div>
+                            {% endif %}
+                            
+                            {# Date Recorded #}
+                            {% if vital.effective_time.low_formatted %}
+                            <div class="text-muted">
+                                <i class="fa-solid fa-calendar me-1"></i>
+                                <strong>Recorded:</strong> {{ vital.effective_time.low_formatted }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+    {% else %}
+        {# No Clinical Information Available #}
+        <div class="alert alert-info">
+            <h6><i class="fa-solid fa-info-circle me-2"></i>No Clinical Information Available</h6>
+            <p class="mb-0">No structured clinical information was found in this patient's records.</p>
+        </div>
+    {% endif %}
+</div>

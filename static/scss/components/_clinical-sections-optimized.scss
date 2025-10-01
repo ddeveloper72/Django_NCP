@@ -450,34 +450,146 @@
   }
 }
 
-// Print Styles for Medication Cards
-@media print {
-  .medication-card {
-    box-shadow: none;
-    border: 1px solid $text-dark;
-    margin-bottom: $space-lg;
-    page-break-inside: avoid;
+// Enhanced Medication Filters Styling
+.strength-badge {
+  padding: $space-xs $space-sm;
+  border-radius: $border-radius-sm;
+  font-size: 0.875rem;
+  font-weight: 600;
+  
+  &.insulin-strength {
+    background-color: $accent-blue;
+    color: $bg-white;
+  }
+  
+  &.standard-strength {
+    background-color: $success-green;
+    color: $bg-white;
+  }
+  
+  &:not(.insulin-strength):not(.standard-strength) {
+    background-color: $neutral-light;
+    color: $text-dark;
+  }
+}
 
-    .medication-header {
-      .medication-name {
-        color: $text-dark !important;
+.brand-name {
+  color: $primary-blue;
+  font-weight: 700;
+}
+
+.generic-name {
+  color: $neutral-dark;
+  font-weight: 400;
+}
+
+.active-ingredient {
+  line-height: 1.4;
+  
+  .strength-badge {
+    margin-left: $space-xs;
+  }
+}
+
+.dose-form {
+  color: $primary-green;
+  text-transform: capitalize;
+}
+
+.dose-amount {
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+}
+
+.route-name {
+  color: $error-red;
+  text-transform: capitalize;
+}
+
+// Medication Card Enhanced Layout
+.medication-card {
+  background: $bg-white;
+  border: 1px solid $border-light;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: $accent-blue;
+    box-shadow: 0 4px 12px rgba($primary-blue, 0.1);
+  }
+  
+  .medication-header {
+    background: linear-gradient(135deg, $neutral-lightest 0%, $bg-white 100%);
+    margin: (-$space-md) (-$space-md) $space-md (-$space-md);
+    padding: $space-md;
+    border-radius: $border-radius-md $border-radius-md 0 0;
+    
+    .medication-name {
+      margin: 0;
+      color: $primary-blue;
+    }
+    
+    .medication-class {
+      font-size: 0.8rem;
+      color: $neutral-dark;
+    }
+  }
+  
+  .medication-field {
+    .field-header {
+      margin-bottom: $space-sm;
+      
+      strong {
+        font-size: 0.9rem;
+        color: $text-dark;
       }
-
-      .medication-status .badge {
-        background: transparent !important;
-        color: $text-dark !important;
-        border: 1px solid $text-dark;
+      
+      i {
+        font-size: 1rem;
       }
     }
-
-    .medication-field {
-      .field-header i {
-        display: none; // Hide icons in print
+    
+    .field-content {
+      background: $neutral-lightest;
+      border: 1px solid $border-light;
+      border-radius: $border-radius-sm;
+      padding: $space-sm;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+      
+      em {
+        color: $neutral-light;
+        font-style: italic;
       }
+    }
+  }
+}
 
+// Responsive medication layout
+@media (max-width: 1199px) {
+  .medication-card {
+    .col-xl-6 {
+      margin-bottom: $space-md;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .medication-card {
+    .medication-field {
+      margin-bottom: $space-sm !important;
+      
+      .field-header {
+        margin-bottom: $space-xs;
+        
+        strong {
+          font-size: 0.85rem;
+        }
+      }
+      
       .field-content {
-        background: transparent !important;
-        border: 1px solid $text-dark;
+        padding: $space-xs $space-sm;
+        min-height: 2rem;
       }
     }
   }

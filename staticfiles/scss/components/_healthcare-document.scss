@@ -1,0 +1,387 @@
+// Healthcare Document Display Component
+// Follows Django NCP SCSS Architecture Standards
+// Dynamic, modular, reusable healthcare document styling
+
+@import "../base/variables";
+@import "../base/mixins";
+@import "../utilities/spacing";
+@import "../utilities/typography";
+@import "../components/cards";
+@import "../components/badges";
+
+// Healthcare document container
+.healthcare-document {
+  font-family: $font-family-base;
+  color: $text-color-primary;
+  line-height: $line-height-base;
+
+  // Mobile-first responsive approach
+  padding: $spacing-sm;
+
+  @include respond-to("tablet") {
+    padding: $spacing-md;
+  }
+
+  @include respond-to("desktop") {
+    padding: $spacing-lg;
+  }
+}
+
+// Document header with HSE healthcare branding
+.document-header {
+  @include healthcare-gradient-background();
+  color: $color-white;
+  padding: $spacing-lg;
+  border-radius: $border-radius-base;
+  margin-bottom: $spacing-lg;
+
+  @include card-shadow("elevated");
+
+  // Mobile optimization
+  @include respond-to("mobile-only") {
+    padding: $spacing-md;
+    margin-bottom: $spacing-md;
+  }
+
+  &__title {
+    @include heading-style("h2");
+    margin-bottom: $spacing-xs;
+
+    .icon {
+      @include smart-icon-color("light");
+      margin-right: $spacing-xs;
+    }
+  }
+
+  &__meta {
+    opacity: 0.9;
+    font-size: $font-size-sm;
+    margin-bottom: $spacing-xs;
+
+    &--secondary {
+      opacity: 0.75;
+    }
+  }
+
+  &__patient-info {
+    text-align: left;
+
+    @include respond-to("tablet") {
+      text-align: right;
+    }
+
+    .patient-id {
+      @include heading-style("h4");
+      margin: 0;
+    }
+  }
+}
+
+// Patient information card
+.patient-info-card {
+  @include card-base();
+  background: $background-color-secondary;
+  border-left: 4px solid $color-success;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  border-radius: 0 $border-radius-base $border-radius-base 0;
+
+  // Mobile responsive adjustments
+  @include respond-to("mobile-only") {
+    padding: $spacing-md;
+    margin-bottom: $spacing-md;
+  }
+
+  &__section-title {
+    color: $color-success;
+    @include heading-style("h5");
+    margin-bottom: $spacing-md;
+
+    .icon {
+      @include smart-icon-color("success");
+      margin-right: $spacing-xs;
+    }
+  }
+
+  &__field {
+    margin-bottom: $spacing-md;
+
+    strong {
+      color: $text-color-primary;
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  &__no-data {
+    color: $text-color-muted;
+    font-style: italic;
+  }
+}
+
+// Clinical sections accordion
+.clinical-sections {
+  margin-bottom: $spacing-lg;
+
+  &__title {
+    @include heading-style("h3");
+    margin-bottom: $spacing-md;
+
+    .icon {
+      @include smart-icon-color("primary");
+      margin-right: $spacing-xs;
+    }
+
+    .badge {
+      @include badge-style("primary");
+      margin-left: $spacing-xs;
+    }
+  }
+}
+
+.clinical-section {
+  @include card-base();
+  border: 1px solid $border-color-light;
+  border-radius: $border-radius-base;
+  margin-bottom: $spacing-lg;
+
+  &__header {
+    background: $background-color-tertiary;
+    padding: $spacing-md;
+    border-bottom: 1px solid $border-color-light;
+    border-radius: $border-radius-base $border-radius-base 0 0;
+
+    .btn-link {
+      text-decoration: none;
+      font-weight: $font-weight-semibold;
+      color: $text-color-primary;
+      width: 100%;
+      text-align: left;
+      padding: 0;
+
+      &:hover,
+      &:focus {
+        color: $color-primary;
+        text-decoration: none;
+      }
+
+      .icon {
+        @include smart-icon-color("neutral");
+        margin-right: $spacing-xs;
+        transition: transform $transition-base;
+      }
+
+      &[aria-expanded="true"] .icon {
+        transform: rotate(90deg);
+      }
+    }
+
+    .code-display {
+      @include code-style();
+      margin-left: $spacing-xs;
+    }
+
+    .badge {
+      @include badge-style("secondary");
+      margin-left: $spacing-xs;
+    }
+  }
+
+  &__body {
+    padding: $spacing-lg;
+
+    @include respond-to("mobile-only") {
+      padding: $spacing-md;
+    }
+  }
+
+  &__description {
+    margin-bottom: $spacing-md;
+
+    h6 {
+      color: $text-color-muted;
+      @include heading-style("h6");
+    }
+  }
+}
+
+// Clinical entries
+.clinical-entry {
+  @include card-base();
+  background: $background-color-secondary;
+  border: 1px solid $border-color-light;
+  border-radius: $border-radius-sm;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+
+  &__field {
+    margin-bottom: $spacing-sm;
+
+    strong {
+      color: $text-color-primary;
+      font-weight: $font-weight-semibold;
+    }
+
+    .code-display {
+      @include code-style();
+    }
+  }
+
+  &__participants {
+    margin-top: $spacing-sm;
+    padding-top: $spacing-sm;
+    border-top: 1px solid $border-color-light;
+
+    small {
+      color: $text-color-muted;
+    }
+
+    .badge {
+      @include badge-style("light");
+      margin-right: $spacing-xs;
+    }
+  }
+}
+
+// Code display styling
+.code-display {
+  @include code-style();
+  background: $background-color-tertiary;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-sm;
+}
+
+// Status badges with semantic colors
+.status-badge {
+  @include badge-base();
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius-pill;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+
+  &--cda {
+    background: rgba($color-success, 0.1);
+    color: $color-success;
+  }
+
+  &--fhir {
+    background: rgba($color-info, 0.1);
+    color: $color-info;
+  }
+}
+
+// Document metadata section
+.metadata-section {
+  @include card-base();
+  background: $background-color-secondary;
+  border-radius: $border-radius-base;
+  padding: $spacing-lg;
+  margin-top: $spacing-lg;
+
+  @include respond-to("mobile-only") {
+    padding: $spacing-md;
+  }
+
+  &__title {
+    @include heading-style("h4");
+    margin-bottom: $spacing-md;
+
+    .icon {
+      @include smart-icon-color("neutral");
+      margin-right: $spacing-xs;
+    }
+  }
+
+  &__field {
+    margin-bottom: $spacing-sm;
+
+    strong {
+      color: $text-color-primary;
+      font-weight: $font-weight-semibold;
+    }
+
+    .code-display {
+      @include code-style();
+      margin-right: $spacing-xs;
+    }
+  }
+}
+
+// Action buttons section
+.document-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1px solid $border-color-light;
+
+  // Mobile responsive stacking
+  @include respond-to("mobile-only") {
+    flex-direction: column;
+    gap: $spacing-md;
+    text-align: center;
+  }
+
+  &__buttons {
+    display: flex;
+    gap: $spacing-sm;
+
+    @include respond-to("mobile-only") {
+      flex-direction: column;
+      width: 100%;
+    }
+  }
+
+  &__info {
+    color: $text-color-muted;
+    font-size: $font-size-sm;
+  }
+}
+
+// Print-specific styles
+@media print {
+  .healthcare-document {
+    .document-actions {
+      display: none;
+    }
+
+    .clinical-section__body {
+      .collapse:not(.show) {
+        display: block !important;
+        height: auto !important;
+      }
+    }
+
+    .document-header {
+      background: $color-white !important;
+      color: $text-color-primary !important;
+      border: 2px solid $color-primary !important;
+    }
+  }
+}
+
+// No data state styling
+.no-data {
+  color: $text-color-muted;
+  font-style: italic;
+  padding: $spacing-md;
+  text-align: center;
+
+  .icon {
+    @include smart-icon-color("muted");
+    margin-right: $spacing-xs;
+  }
+}
+
+// Error states
+.error-message {
+  @include alert-style("danger");
+  margin: $spacing-md 0;
+}
+
+// Loading states
+.loading-spinner {
+  @include loading-spinner();
+  margin: $spacing-lg auto;
+}

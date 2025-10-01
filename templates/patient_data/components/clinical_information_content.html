@@ -158,19 +158,59 @@
                                                             <strong class="text-dark">Active Ingredients [Strength]</strong>
                                                         </div>
                                                         <div class="field-content bg-light p-2 rounded">
-                                                            {% if med.data.ingredient_display and med.data.strength %}
-                                                                <span class="active-ingredient fw-bold text-success">
-                                                                    {{ med.data.ingredient_display }} {{ med.data.strength }}
-                                                                </span>
-                                                                {% if med.data.ingredient_code %}
-                                                                    <small class="text-muted d-block mt-1">
-                                                                        <i class="fa-solid fa-code me-1"></i>
-                                                                        ATC Code: {{ med.data.ingredient_code }}
-                                                                    </small>
-                                                                {% endif %}
+                                                            {% if med.data.ingredient_display %}
+                                                                <div class="ingredient-container">
+                                                                    <span class="active-ingredient fw-bold text-success">
+                                                                        {{ med.data.ingredient_display }}{% if med.data.strength %} {{ med.data.strength }}{% endif %}
+                                                                    </span>
+                                                                    {% if med.data.ingredient_code %}
+                                                                        <br>
+                                                                        <small class="text-muted mt-1">
+                                                                            <i class="fa-solid fa-hashtag me-1"></i>
+                                                                            ATC Code: {{ med.data.ingredient_code }}
+                                                                        </small>
+                                                                    {% endif %}
+                                                                </div>
+                                                            {% elif med.active_ingredient %}
+                                                                <div class="ingredient-container">
+                                                                    <span class="active-ingredient fw-bold text-success">
+                                                                        {% if med.active_ingredient.display_name and med.active_ingredient.display_name != med.active_ingredient.code %}
+                                                                            {{ med.active_ingredient.display_name }}
+                                                                        {% else %}
+                                                                            {{ med.active_ingredient.code|title }}
+                                                                        {% endif %}
+                                                                        {% if med.strength %} {{ med.strength }}{% endif %}
+                                                                    </span>
+                                                                    {% if med.active_ingredient.display_name and med.active_ingredient.display_name != med.active_ingredient.code %}
+                                                                        <br>
+                                                                        <small class="text-muted mt-1">
+                                                                            <i class="fa-solid fa-hashtag me-1"></i>
+                                                                            ATC Code: {{ med.active_ingredient.code }}
+                                                                        </small>
+                                                                    {% endif %}
+                                                                </div>
+                                                            {% elif med.substance %}
+                                                                <div class="ingredient-container">
+                                                                    <span class="active-ingredient fw-bold text-success">
+                                                                        {% if med.substance.display_name and med.substance.display_name != med.substance.code %}
+                                                                            {{ med.substance.display_name }}
+                                                                        {% else %}
+                                                                            {{ med.substance.code|title }}
+                                                                        {% endif %}
+                                                                        {% if med.strength %} {{ med.strength }}{% endif %}
+                                                                    </span>
+                                                                    {% if med.substance.display_name and med.substance.display_name != med.substance.code %}
+                                                                        <br>
+                                                                        <small class="text-muted mt-1">
+                                                                            <i class="fa-solid fa-hashtag me-1"></i>
+                                                                            Substance Code: {{ med.substance.code }}
+                                                                        </small>
+                                                                    {% endif %}
+                                                                </div>
                                                             {% elif med.medication.name %}
-                                                                <span class="text-muted">
-                                                                    {{ med.medication.name }}
+                                                                <span class="text-warning">
+                                                                    <i class="fa-solid fa-exclamation-triangle me-1"></i>
+                                                                    {{ med.medication.name }} (Brand name - active ingredient not resolved)
                                                                 </span>
                                                             {% else %}
                                                                 <span class="text-muted">
@@ -193,11 +233,46 @@
                                                                     {{ med.data.pharmaceutical_form }}
                                                                 </span>
                                                                 {% if med.data.pharmaceutical_form_code %}
-                                                                    <small class="text-muted d-block mt-1">
-                                                                        <i class="fa-solid fa-barcode me-1"></i>
+                                                                    <br>
+                                                                    <small class="text-muted mt-1">
+                                                                        <i class="fa-solid fa-hashtag me-1"></i>
                                                                         Form Code: {{ med.data.pharmaceutical_form_code }}
                                                                     </small>
                                                                 {% endif %}
+                                                            {% elif med.pharmaceutical_form %}
+                                                                <div class="pharmaceutical-form-container">
+                                                                    <span class="pharmaceutical-form fw-bold text-info">
+                                                                        {% if med.pharmaceutical_form.displayName and med.pharmaceutical_form.displayName != med.pharmaceutical_form.code %}
+                                                                            {{ med.pharmaceutical_form.displayName }}
+                                                                        {% else %}
+                                                                            {{ med.pharmaceutical_form.code|title }}
+                                                                        {% endif %}
+                                                                    </span>
+                                                                    {% if med.pharmaceutical_form.displayName and med.pharmaceutical_form.displayName != med.pharmaceutical_form.code %}
+                                                                        <br>
+                                                                        <small class="text-muted mt-1">
+                                                                            <i class="fa-solid fa-hashtag me-1"></i>
+                                                                            Form Code: {{ med.pharmaceutical_form.code }}
+                                                                        </small>
+                                                                    {% endif %}
+                                                                </div>
+                                                            {% elif med.form %}
+                                                                <div class="pharmaceutical-form-container">
+                                                                    <span class="pharmaceutical-form fw-bold text-info">
+                                                                        {% if med.form.displayName and med.form.displayName != med.form.code %}
+                                                                            {{ med.form.displayName }}
+                                                                        {% else %}
+                                                                            {{ med.form.code|title }}
+                                                                        {% endif %}
+                                                                    </span>
+                                                                    {% if med.form.displayName and med.form.displayName != med.form.code %}
+                                                                        <br>
+                                                                        <small class="text-muted mt-1">
+                                                                            <i class="fa-solid fa-hashtag me-1"></i>
+                                                                            Form Code: {{ med.form.code }}
+                                                                        </small>
+                                                                    {% endif %}
+                                                                </div>
                                                             {% else %}
                                                                 <span class="text-muted">
                                                                     <i class="fa-solid fa-info-circle me-1"></i>
@@ -222,9 +297,20 @@
                                                                     Per administration
                                                                 </small>
                                                             {% elif med.dose %}
-                                                                <span class="dose-amount fw-bold text-primary">
-                                                                    {{ med.dose }}
-                                                                </span>
+                                                                {% if med.dose.value and med.dose.unit %}
+                                                                    <span class="dose-amount fw-bold text-primary">
+                                                                        {{ med.dose.value }} {{ med.dose.unit }}
+                                                                    </span>
+                                                                {% elif med.dose.value %}
+                                                                    <span class="dose-amount fw-bold text-primary">
+                                                                        {{ med.dose.value }}
+                                                                    </span>
+                                                                {% else %}
+                                                                    <span class="text-muted">
+                                                                        <i class="fa-solid fa-info-circle me-1"></i>
+                                                                        Dose quantity not specified
+                                                                    </span>
+                                                                {% endif %}
                                                             {% else %}
                                                                 <span class="text-muted">
                                                                     <i class="fa-solid fa-info-circle me-1"></i>

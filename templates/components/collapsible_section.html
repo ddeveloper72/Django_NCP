@@ -1,0 +1,29 @@
+<!-- 
+  Collapsible Section Component
+  Based on reference CDA implementation - Pure CSS toggle system
+  Usage: {% include 'components/collapsible_section.html' with section_id='medical-problems' section_title='Medical Problems' section_type='title' content_template='clinical/medical_problems_content.html' %}
+-->
+
+{% load static %}
+
+<div class="collapsible-wrapper">
+    <!-- Hidden checkbox that controls the toggle state -->
+    <input id="toggle-{{ section_id }}" class="toggle-input" type="checkbox" 
+           {% if default_open %}checked{% endif %}>
+    
+    <!-- Clickable label that triggers the toggle -->
+    <label for="toggle-{{ section_id }}" class="collapsible-label-{{ section_type|default:'main' }}">
+        {{ section_title }}
+    </label>
+    
+    <!-- Collapsible content area -->
+    <div class="collapsible-content-{{ section_type|default:'main' }}">
+        <div class="content-inner-{{ section_type|default:'main' }}">
+            {% if content_template %}
+                {% include content_template %}
+            {% else %}
+                {{ content|safe }}
+            {% endif %}
+        </div>
+    </div>
+</div>

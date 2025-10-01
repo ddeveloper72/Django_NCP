@@ -11,6 +11,8 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 import re
 
+from translation_services.terminology_translator import TerminologyTranslator
+
 logger = logging.getLogger(__name__)
 
 
@@ -938,10 +940,33 @@ class CDAParserService:
             # Route of administration
             route_elem = subst_elem.find(".//cda:routeCode", self.NAMESPACES)
             if route_elem is not None:
+                route_code = route_elem.get("code", "")
+                route_display = route_elem.get("displayName", "")
+                
+                # Try to resolve route code using CTS if displayName is empty
+                if route_code and not route_display:
+                    try:
+                        translator = TerminologyTranslator()
+                        resolved_display = translator.resolve_code(route_code)
+                        if resolved_display:
+                            route_display = resolved_display
+                    except Exception as e:
+                        logger.warning(f"Failed to resolve route code {route_code} via CTS: {e}")
+                
                 medication["route"] = {
-                    "code": route_elem.get("code", ""),
-                    "displayName": route_elem.get("displayName", ""),
+                    "code": route_code,
+                    "displayName": route_display,
                 }
+                
+                # Add resolved display for template compatibility (for both expected paths)
+                if route_display:
+                    medication["route_display"] = route_display
+                    # Also add to data structure for template
+                    if "data" not in medication:
+                        medication["data"] = {}
+                    medication["data"]["route_display"] = route_display
+                    if route_code:
+                        medication["data"]["route_code"] = route_code
 
             # Consumable (medication information)
             consumable_elem = subst_elem.find(".//cda:consumable", self.NAMESPACES)

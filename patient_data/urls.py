@@ -23,7 +23,6 @@ from .debug_views import debug_cda_index
 sys.path.append(os.path.dirname(__file__))
 from debug_session_view import debug_session_view
 
-from . import views as main_views
 from .clean_cda_views import clean_patient_cda_view
 from .clinical_data_debugger import clinical_data_api, clinical_data_debugger
 from .development_views import session_manager_view

@@ -1,0 +1,219 @@
+{# Clinical Information Content Component - Enhanced Modular Version #}
+{% load patient_filters %}
+{% load patient_date_filters %}
+
+<div class="clinical-information-container">
+    {# Check if we have any clinical data #}
+    {% if medications or allergies or problems or vital_signs or procedures or immunizations or enhanced_allergies %}
+        
+        <div class="accordion" id="clinicalInformationAccordion">
+            
+            {# Enhanced Allergies Section - Display if we have enhanced allergies data #}
+            {% if enhanced_allergies and enhanced_allergies|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-enhanced-allergies">
+                    <button class="accordion-button bg-white border" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-enhanced-allergies"
+                            aria-expanded="true"
+                            aria-controls="collapse-enhanced-allergies"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-exclamation-triangle text-warning me-2"></i>
+                        <strong style="color: #212529 !important;">Allergies and Adverse Reactions</strong>
+                        <span class="badge bg-primary text-white ms-2">{{ enhanced_allergies|length }} Enhanced</span>
+                        <span class="badge bg-success text-white ms-1">PS Guidelines</span>
+                    </button>
+                </h2>
+                <div id="collapse-enhanced-allergies"
+                     class="accordion-collapse collapse show"
+                     aria-labelledby="heading-enhanced-allergies">
+                    <div class="accordion-body">
+                        {% include "patient_data/sections/allergies_section.html" with section_entries=enhanced_allergies %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Allergies Section - Display if we have regular allergies data #}
+            {% if allergies and allergies|length > 0 and not enhanced_allergies %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-allergies">
+                    <button class="accordion-button bg-white border" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-allergies"
+                            aria-expanded="true"
+                            aria-controls="collapse-allergies"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-exclamation-triangle text-warning me-2"></i>
+                        <strong style="color: #212529 !important;">Allergies and Adverse Reactions</strong>
+                        <span class="badge bg-warning text-white ms-2">{{ allergies|length }}</span>
+                    </button>
+                </h2>
+                <div id="collapse-allergies"
+                     class="accordion-collapse collapse show"
+                     aria-labelledby="heading-allergies">
+                    <div class="accordion-body">
+                        {% include "patient_data/sections/allergies_section.html" with section_entries=allergies %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Medications Section #}
+            {% if medications and medications|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-medications">
+                    <button class="accordion-button bg-white border collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-medications"
+                            aria-expanded="false"
+                            aria-controls="collapse-medications"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-pills text-success me-2"></i>
+                        <strong style="color: #212529 !important;">Medications</strong>
+                        <span class="badge bg-success text-white ms-2">{{ medications|length }}</span>
+                    </button>
+                </h2>
+                <div id="collapse-medications"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="heading-medications">
+                    <div class="accordion-body">
+                        {% include "patient_data/sections/medication_section.html" with section_entries=medications %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Problems Section #}
+            {% if problems and problems|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-problems">
+                    <button class="accordion-button bg-white border collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-problems"
+                            aria-expanded="false"
+                            aria-controls="collapse-problems"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-heart-pulse text-danger me-2"></i>
+                        <strong style="color: #212529 !important;">Medical Problems</strong>
+                        <span class="badge bg-danger text-white ms-2">{{ problems|length }}</span>
+                    </button>
+                </h2>
+                <div id="collapse-problems"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="heading-problems">
+                    <div class="accordion-body">
+                        {% include "patient_data/sections/problems_section.html" with section_entries=problems %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Procedures Section #}
+            {% if procedures and procedures|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-procedures">
+                    <button class="accordion-button bg-white border collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-procedures"
+                            aria-expanded="false"
+                            aria-controls="collapse-procedures"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-user-md text-info me-2"></i>
+                        <strong style="color: #212529 !important;">Procedures</strong>
+                        <span class="badge bg-info text-white ms-2">{{ procedures|length }}</span>
+                    </button>
+                </h2>
+                <div id="collapse-procedures"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="heading-procedures">
+                    <div class="accordion-body">
+                        {% include "patient_data/sections/procedures_section.html" with section_entries=procedures %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Immunizations Section #}
+            {% if immunizations and immunizations|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-immunizations">
+                    <button class="accordion-button bg-white border collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-immunizations"
+                            aria-expanded="false"
+                            aria-controls="collapse-immunizations"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-syringe text-primary me-2"></i>
+                        <strong style="color: #212529 !important;">Immunizations</strong>
+                        <span class="badge bg-primary text-white ms-2">{{ immunizations|length }}</span>
+                    </button>
+                </h2>
+                <div id="collapse-immunizations"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="heading-immunizations">
+                    <div class="accordion-body">
+                        {% include "patient_data/sections/immunizations_section.html" with section_entries=immunizations %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Vital Signs Section #}
+            {% if vital_signs and vital_signs|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-vital-signs">
+                    <button class="accordion-button bg-white border collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-vital-signs"
+                            aria-expanded="false"
+                            aria-controls="collapse-vital-signs"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-heartbeat text-danger me-2"></i>
+                        <strong style="color: #212529 !important;">Vital Signs</strong>
+                        <span class="badge bg-danger text-white ms-2">{{ vital_signs|length }}</span>
+                    </button>
+                </h2>
+                <div id="collapse-vital-signs"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="heading-vital-signs">
+                    <div class="accordion-body">
+                        {% include "patient_data/sections/vital_signs_section.html" with section_entries=vital_signs %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+    {% elif processed_sections and processed_sections|length > 0 %}
+        {# Fallback to processed sections if no structured clinical arrays #}
+        <div class="accordion" id="clinicalInformationAccordion">
+            {% for section in processed_sections %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-{{ section.code|default:forloop.counter }}">
+                    <button class="accordion-button bg-white border" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-{{ section.code|default:forloop.counter }}"
+                            aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                            aria-controls="collapse-{{ section.code|default:forloop.counter }}"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-file-medical text-primary me-2"></i>
+                        <strong style="color: #212529 !important;">{{ section.title|extract_section_title|default:"Clinical Section" }}</strong>
+                        {% if section.code %}
+                        <span class="badge bg-dark text-white ms-2">{{ section.code }}</span>
+                        {% endif %}
+                    </button>
+                </h2>
+                <div id="collapse-{{ section.code|default:forloop.counter }}"
+                     class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                     aria-labelledby="heading-{{ section.code|default:forloop.counter }}">
+                    <div class="accordion-body">
+                        {# Display the section content as-is #}
+                        {{ section.content|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        {# No Clinical Information Available #}
+        <div class="alert alert-info">
+            <h6><i class="fa-solid fa-info-circle me-2"></i>No Clinical Information Available</h6>
+            <p class="mb-0">No structured clinical information was found in this patient's records. This may occur if the CDA document contains minimal clinical content or if clinical sections could not be parsed.</p>
+        </div>
+    {% endif %}
+</div>

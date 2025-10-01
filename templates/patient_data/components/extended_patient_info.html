@@ -45,9 +45,9 @@
                 data-action="show-extended-tab"
                 data-section-id="extended_patient"
                 data-tab-type="clinical"
-                {% if has_l1_cda and not has_l3_cda %}data-disabled="true" data-reason="Clinical data not available for L1 CDA documents"{% elif not processed_sections or processed_sections|length == 0 %}data-disabled="true" data-reason="No structured clinical data available"{% endif %}
+                {% if has_l1_cda and not has_l3_cda %}data-disabled="true" data-reason="Clinical data not available for L1 CDA documents"{% elif not processed_sections|length and not enhanced_allergies|length and not medications|length and not allergies|length and not problems|length and not procedures|length and not vital_signs|length %}data-disabled="true" data-reason="No structured clinical data available"{% endif %}
                 type="button"
-                {% if has_l1_cda and not has_l3_cda %}disabled title="Clinical data not available for L1 CDA documents"{% elif not processed_sections or processed_sections|length == 0 %}disabled title="No structured clinical data available"{% endif %}>
+                {% if has_l1_cda and not has_l3_cda %}disabled title="Clinical data not available for L1 CDA documents"{% elif not processed_sections|length and not enhanced_allergies|length and not medications|length and not allergies|length and not problems|length and not procedures|length and not vital_signs|length %}disabled title="No structured clinical data available"{% endif %}>
             <i class="fa-solid fa-notes-medical me-1"></i>Clinical Information
             <!-- DEBUG: med={{medications|length}} all={{allergies|length}} prob={{problems|length}} vs={{vital_signs|length}} proc={{procedures|length}} -->
             <!-- DEBUG: has_l1_cda={{has_l1_cda}} has_l3_cda={{has_l3_cda}} processed_sections={{processed_sections|length}} -->
@@ -57,6 +57,8 @@
                 {{ total_clinical }}
                 {% endwith %}
             </span>
+            {% elif enhanced_allergies and enhanced_allergies|length > 0 %}
+            <span class="badge bg-success ms-2">{{ enhanced_allergies|length }} Enhanced</span>
             {% elif processed_sections and processed_sections|length > 0 %}
             <span class="badge bg-info ms-2">{{ processed_sections|length }}</span>
             {% else %}

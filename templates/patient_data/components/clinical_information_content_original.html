@@ -1,0 +1,218 @@
+{# Clinical Information Content Component - Minimal Clean Version #}
+{% load patient_filters %}
+{% load patient_date_filters %}
+
+<div class="clinical-information-container">
+    {# Check if we have any clinical data or enhanced allergies #}
+    {% if processed_sections and processed_sections|length > 0 or enhanced_allergies and enhanced_allergies|length > 0 %}            {# Simple Clinical Information Accordion - Clean Structure #}
+        <div class="accordion" id="clinicalInformationAccordion">
+
+            {# Enhanced Allergies Section - Display if we have enhanced allergies data #}
+            {% if enhanced_allergies and enhanced_allergies|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-enhanced-allergies">
+                    <button class="accordion-button bg-white border" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-enhanced-allergies"
+                            aria-expanded="true"
+                            aria-controls="collapse-enhanced-allergies"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-exclamation-triangle text-warning me-2"></i>
+                        <strong style="color: #212529 !important;">Allergies and Adverse Reactions</strong>
+                        <span class="badge bg-primary text-white ms-2">{{ enhanced_allergies|length }} Enhanced</span>
+                        <span class="badge bg-success text-white ms-1">PS Guidelines</span>
+                    </button>
+                </h2>
+                <div id="collapse-enhanced-allergies"
+                     class="accordion-collapse collapse show"
+                     aria-labelledby="heading-enhanced-allergies">
+                    <div class="accordion-body">
+                        {# Include the comprehensive allergies section template #}
+                        {% include "patient_data/sections/allergies_section.html" with section_entries=enhanced_allergies %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Regular processed sections #}
+            {% for section in processed_sections %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-{{ section.code|default:forloop.counter }}">
+                    <button class="accordion-button bg-white border" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-{{ section.code|default:forloop.counter }}"
+                            aria-expanded="true"
+                            aria-controls="collapse-{{ section.code|default:forloop.counter }}"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-file-medical text-primary me-2"></i>
+                        <strong style="color: #212529 !important;">{{ section.title|extract_section_title|default:"Clinical Section" }}</strong>
+                        {% if section.code %}
+                        <span class="badge bg-dark text-white ms-2">{{ section.code }}</span>
+                        {% endif %}
+                    </button>
+                </h2>
+                <div id="collapse-{{ section.code|default:forloop.counter }}"
+                     class="accordion-collapse collapse show"
+                     aria-labelledby="heading-{{ section.code|default:forloop.counter }}">
+                    <div class="accordion-body">
+                        {# Display actual clinical content based on section type #}
+                        {% if section.title|extract_section_title == "Allergies and adverse reactions Document" %}
+                            {# Enhanced Allergies Section with PS Display Guidelines #}
+                            {% include "patient_data/sections/allergies_section.html" %}
+                        {% elif section.title|extract_section_title == "History of Medication use Narrative" %}
+                            {# Enhanced Medication Section with Comprehensive Display #}
+                            <div class="clinical-section-content">
+                                <div class="section-header d-flex justify-content-between align-items-center mb-3 p-3 bg-white border rounded shadow-sm">
+                                    <h6 class="text-dark mb-0" style="color: #212529 !important;">
+                                        <i class="fa-solid fa-pills text-primary me-2"></i><span style="color: #212529 !important;">Medication History</span>
+                                    </h6>
+                                    {% if section.structured_entries %}
+                                        <span class="badge bg-dark text-white">{{ section.structured_entries|length }} Medication{{ section.structured_entries|length|pluralize }}</span>
+                                    {% endif %}
+                                </div>
+
+                                {# Check for structured medication entries #}
+                                {% if section.structured_entries %}
+                                    <div class="medications-list">
+                                        {% for entry in section.structured_entries %}
+                                        <div class="medication-card border rounded p-3 mb-3 bg-white shadow-sm">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <div class="medication-info">
+                                                        <h6 class="medication-name text-dark mb-1">
+                                                            <i class="fa-solid fa-capsules text-success me-2"></i>
+                                                            {{ entry.medication_name|default:entry.display_name|default:"Medication" }}
+                                                        </h6>
+
+                                                        {% if entry.dosage or entry.strength %}
+                                                        <div class="dosage-info mb-2">
+                                                            <strong class="text-dark">Dosage:</strong>
+                                                            <span class="text-secondary">{{ entry.dosage|default:entry.strength|default:"Not specified" }}</span>
+                                                        </div>
+                                                        {% endif %}
+
+                                                        {% if entry.frequency or entry.route %}
+                                                        <div class="administration-info mb-2">
+                                                            {% if entry.frequency %}
+                                                                <span class="me-3">
+                                                                    <i class="fa-solid fa-clock text-warning me-1"></i>
+                                                                    <strong class="text-dark">Frequency:</strong> <span class="text-secondary">{{ entry.frequency }}</span>
+                                                                </span>
+                                                            {% endif %}
+                                                            {% if entry.route %}
+                                                                <span>
+                                                                    <i class="fa-solid fa-route text-info me-1"></i>
+                                                                    <strong class="text-dark">Route:</strong> <span class="text-secondary">{{ entry.route }}</span>
+                                                                </span>
+                                                            {% endif %}
+                                                        </div>
+                                                        {% endif %}
+
+                                                        {% if entry.instructions or entry.notes %}
+                                                        <div class="instructions">
+                                                            <i class="fa-solid fa-file-medical-alt text-primary me-1"></i>
+                                                            <small class="text-dark">{{ entry.instructions|default:entry.notes }}</small>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4 text-md-end">
+                                                    <div class="medication-status mb-2">
+                                                        {% if entry.status %}
+                                                            {% if entry.status == "active" or entry.status == "Active" %}
+                                                                <span class="badge bg-success">
+                                                                    <i class="fa-solid fa-check me-1"></i>{{ entry.status }}
+                                                                </span>
+                                                            {% elif entry.status == "discontinued" or entry.status == "Discontinued" %}
+                                                                <span class="badge bg-danger">
+                                                                    <i class="fa-solid fa-times me-1"></i>{{ entry.status }}
+                                                                </span>
+                                                            {% elif entry.status == "suspended" or entry.status == "Suspended" %}
+                                                                <span class="badge bg-warning">
+                                                                    <i class="fa-solid fa-pause me-1"></i>{{ entry.status }}
+                                                                </span>
+                                                            {% else %}
+                                                                <span class="badge bg-secondary">{{ entry.status }}</span>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </div>
+
+                                                    {% if entry.start_date or entry.end_date %}
+                                                    <div class="medication-dates">
+                                                        {% if entry.start_date %}
+                                                            <small class="text-muted d-block">
+                                                                <i class="fa-solid fa-play me-1"></i>Started: {{ entry.start_date }}
+                                                            </small>
+                                                        {% endif %}
+                                                        {% if entry.end_date %}
+                                                            <small class="text-muted d-block">
+                                                                <i class="fa-solid fa-stop me-1"></i>Ended: {{ entry.end_date }}
+                                                            </small>
+                                                        {% endif %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+
+                                {# Check for raw section content/text if no structured entries #}
+                                {% elif section.content or section.text %}
+                                    <div class="alert alert-warning">
+                                        <h6><i class="fa-solid fa-file-text me-2"></i>Medication Information (Text Format)</h6>
+                                        <div class="medication-text">
+                                            {{ section.content|default:section.text|safe }}
+                                        </div>
+                                        <small class="text-muted mt-2 d-block">
+                                            <i class="fa-solid fa-info-circle me-1"></i>
+                                            This medication information is available in text format only. Structured data parsing may not be available.
+                                        </small>
+                                    </div>
+
+                                {# No medication data available #}
+                                {% else %}
+                                    <div class="alert alert-info border bg-light">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fa-solid fa-info-circle fa-2x me-3 text-primary"></i>
+                                            <div>
+                                                <h6 class="mb-1 text-dark">No Medication History Available</h6>
+                                                <p class="mb-0 text-secondary">This clinical document does not contain medication history information, or the medication data could not be processed.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            {# Generic section display for other sections #}
+                            <div class="alert alert-info">
+                                <i class="fa-solid fa-info-circle me-2"></i>
+                                <strong>Testing Clinical Section: {{ section.title|extract_section_title|default:"Unknown" }}</strong><br>
+                                Section Code: {{ section.code|default:"No code" }}<br>
+                                This is a test to ensure this section stays properly contained.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            {# Fallback if no processed_sections #}
+            <div class="alert alert-warning">
+                <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                No processed_sections available for testing.
+            </div>
+            {% endfor %}
+
+        </div>
+        </div>
+
+    {% else %}
+        {# No Clinical Data Available #}
+        <div class="no-clinical-data text-center py-5">
+            <div class="text-muted">
+                <i class="fa-solid fa-notes-medical fa-3x mb-3 opacity-50"></i>
+                <h5 class="text-muted">No Clinical Information Available</h5>
+                <p class="mb-0">No clinical sections were found in the patient's medical record.</p>
+            </div>
+        </div>
+    {% endif %}
+</div> {# Close clinical-information-container #}

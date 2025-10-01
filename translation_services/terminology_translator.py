@@ -356,6 +356,72 @@ class TerminologyTranslator:
             "source_language": translation_result.get("source_language", "en"),
         }
 
+    def resolve_code(self, code: str, code_system: str = None) -> Optional[str]:
+        """
+        Resolve a single coded value to its display text using CTS Master Value Catalogue
+        
+        Args:
+            code: The coded value (e.g., "20066000")
+            code_system: Optional code system OID (e.g., "0.4.0.127.0.16.1.1.2.1")
+            
+        Returns:
+            Display text for the code or None if not found
+        """
+        if not code:
+            return None
+            
+        # Check cache first
+        cache_key = f"code_resolution_{code_system or 'any'}_{code}_{self.target_language}"
+        cached_result = cache.get(cache_key)
+        if cached_result:
+            return cached_result
+            
+        try:
+            # Find the concept in our MVC data
+            query_filters = {
+                'code': code,
+                'status': 'active'
+            }
+            
+            if code_system:
+                # Try exact code system match first
+                query_filters['code_system'] = code_system
+                concept = ValueSetConcept.objects.filter(**query_filters).first()
+                
+                if not concept:
+                    # Try OID match if code_system looks like OID
+                    if re.match(r"^[\d\.]+$", code_system):
+                        concept = ValueSetConcept.objects.filter(
+                            code=code,
+                            value_set__oid=code_system,
+                            status='active'
+                        ).first()
+            else:
+                # No code system specified - try to find any match
+                concept = ValueSetConcept.objects.filter(**query_filters).first()
+                
+            if concept:
+                # Look for translation to target language
+                translation_obj = ConceptTranslation.objects.filter(
+                    concept=concept, 
+                    language_code=self.target_language
+                ).first()
+                
+                if translation_obj:
+                    result = translation_obj.translated_display
+                else:
+                    # Use default display if no translation
+                    result = concept.display
+                    
+                # Cache the result
+                cache.set(cache_key, result, self.cache_timeout)
+                return result
+                
+        except Exception as e:
+            logger.warning(f"Error resolving code {code} from system {code_system}: {e}")
+            
+        return None
+
 
 def get_available_translation_languages() -> List[Tuple[str, str]]:
     """

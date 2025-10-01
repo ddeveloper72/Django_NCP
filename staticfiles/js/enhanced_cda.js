@@ -308,6 +308,20 @@ function initializeExtendedPatientEventDelegation() {
     console.log('🎯 CLICK DETECTED! Target:', event.target.tagName, event.target.className);
     console.log('🎯 Click event target text:', event.target.textContent.trim());
 
+    // Check if this is a Bootstrap accordion button - let Bootstrap handle it completely
+    const clickedElement = event.target;
+    const hasCollapseToggle = clickedElement.hasAttribute('data-bs-toggle') && 
+                             clickedElement.getAttribute('data-bs-toggle') === 'collapse';
+    const hasCollapseTarget = clickedElement.hasAttribute('data-bs-target');
+    const isAccordionButton = hasCollapseToggle || hasCollapseTarget ||
+                             clickedElement.closest('[data-bs-toggle="collapse"]') ||
+                             clickedElement.classList.contains('accordion-button');
+    
+    if (isAccordionButton) {
+      console.log('🔧 Bootstrap accordion button detected - COMPLETELY bypassing our handler');
+      return; // Do absolutely nothing - let Bootstrap handle it 100%
+    }
+
     // Find the closest button with data-action (in case user clicks on icon or text inside button)
     const target = event.target.closest('[data-action]') || event.target;
     const action = target.dataset.action;

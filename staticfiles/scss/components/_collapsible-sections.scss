@@ -1,0 +1,243 @@
+// =================================================================
+// Collapsible Sections Component
+// Based on reference CDA implementation - Pure CSS toggle system
+// Provides perfect individual section toggle behavior
+// =================================================================
+
+@import '../utils/variables';
+
+// =================================================================
+// Hidden Checkbox Controls
+// =================================================================
+.toggle-input {
+    display: none;
+}
+
+// =================================================================
+// Main Level Collapsible (Clinical Sections container)
+// =================================================================
+.collapsible-wrapper {
+    margin-bottom: 1.2rem;
+    width: 100%;
+}
+
+.collapsible-label-main {
+    display: block;
+    font-weight: bold;
+    color: $hco-primary-teal-dark;
+    font-size: 15px;
+    text-align: left;
+    padding: 0.5rem;
+    border: 2px solid $hco-primary-teal-dark;
+    border-radius: 3px;
+    background: $white;
+    cursor: pointer;
+    transition: all 0.25s ease-out;
+
+    &:hover {
+        color: $hco-primary-teal;
+        border-color: $hco-primary-teal;
+    }
+
+    // Chevron indicator
+    &::before {
+        content: '';
+        display: inline-block;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 5px solid currentColor;
+        vertical-align: middle;
+        margin-right: 0.7rem;
+        transform: translateY(-2px);
+        transition: transform 0.2s ease-out;
+    }
+}
+
+// Expanded state for main sections
+.toggle-input:checked + .collapsible-label-main {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+
+    &::before {
+        transform: rotate(90deg) translateX(-3px);
+    }
+}
+
+.collapsible-content-main {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease-in-out;
+}
+
+.toggle-input:checked + .collapsible-label-main + .collapsible-content-main {
+    max-height: none;
+}
+
+.collapsible-content-main .content-inner-main {
+    border-bottom: 2px solid $hco-primary-teal-dark;
+    border-left: 2px solid $hco-primary-teal-dark;
+    border-right: 2px solid $hco-primary-teal-dark;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
+    padding: 0.5rem 1rem;
+    background: $white;
+}
+
+// =================================================================
+// Title Level Collapsible (Clinical section categories)
+// =================================================================
+.collapsible-label-title {
+    display: block;
+    font-weight: bold;
+    color: $white;
+    font-size: 15px;
+    text-align: left;
+    padding: 0.5rem;
+    border: 2px solid $hco-primary-teal-dark;
+    background: $hco-primary-teal-dark;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.25s ease-out;
+
+    &:hover {
+        color: $hco-primary-teal;
+    }
+
+    // Chevron indicator
+    &::before {
+        content: '';
+        display: inline-block;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 5px solid currentColor;
+        vertical-align: middle;
+        margin-right: 0.7rem;
+        transform: translateY(-2px);
+        transition: transform 0.2s ease-out;
+    }
+}
+
+// Expanded state for title sections
+.toggle-input:checked + .collapsible-label-title {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+
+    &::before {
+        transform: rotate(90deg) translateX(-3px);
+    }
+}
+
+.collapsible-content-title {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease-in-out;
+}
+
+.toggle-input:checked + .collapsible-label-title + .collapsible-content-title {
+    max-height: none;
+    overflow: visible;
+}
+
+.collapsible-content-title .content-inner-title {
+    background: $white;
+    border-bottom: 2px solid $hco-primary-teal-dark;
+    border-left: 2px solid $hco-primary-teal-dark;
+    border-right: 2px solid $hco-primary-teal-dark;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
+    padding: 0.5rem 1rem;
+}
+
+// =================================================================
+// Sub Level Collapsible (Content type toggles)
+// =================================================================
+.collapsible-label-sub {
+    display: block;
+    color: $hco-primary-teal;
+    font-weight: bold;
+    font-size: 13px;
+    text-align: left;
+    padding: 0.5rem;
+    border: 2px solid $hco-primary-teal;
+    border-radius: 3px;
+    background: $white;
+    cursor: pointer;
+    transition: all 0.25s ease-out;
+
+    &:hover {
+        background: $hco-primary-teal-lighter;
+    }
+
+    // Chevron indicator
+    &::before {
+        content: '';
+        display: inline-block;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 5px solid currentColor;
+        vertical-align: middle;
+        margin-right: 0.7rem;
+        transform: translateY(-2px);
+        transition: transform 0.2s ease-out;
+    }
+}
+
+// Expanded state for sub sections
+.toggle-input:checked + .collapsible-label-sub {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+
+    &::before {
+        transform: rotate(90deg) translateX(-3px);
+    }
+}
+
+.collapsible-content-sub {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease-in-out;
+}
+
+.toggle-input:checked + .collapsible-label-sub + .collapsible-content-sub {
+    max-height: none;
+    overflow: visible;
+}
+
+.collapsible-content-sub .content-inner-sub {
+    background: $white;
+    border-bottom: 2px solid $hco-primary-teal;
+    border-left: 2px solid $hco-primary-teal;
+    border-right: 2px solid $hco-primary-teal;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
+    padding: 0.5rem 1rem;
+}
+
+// =================================================================
+// Clinical Section Spacing
+// =================================================================
+.clinical-section {
+    margin-bottom: 1rem;
+}
+
+.clinical-subsection {
+    margin-bottom: 0.5rem;
+}
+
+// =================================================================
+// Responsive Behavior
+// =================================================================
+@media (max-width: 768px) {
+    .collapsible-label-main,
+    .collapsible-label-title,
+    .collapsible-label-sub {
+        font-size: 14px;
+        padding: 0.4rem;
+    }
+
+    .content-inner-main,
+    .content-inner-title,
+    .content-inner-sub {
+        padding: 0.4rem 0.8rem;
+    }
+}

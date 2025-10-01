@@ -1469,7 +1469,7 @@ class EnhancedCDAProcessor:
             return None
 
     def _extract_medication_data(self, sub_admin, namespaces) -> Dict[str, Any]:
-        """Extract medication data from substanceAdministration element"""
+        """Extract comprehensive medication data from substanceAdministration element"""
         data = {}
 
         try:
@@ -1479,52 +1479,194 @@ class EnhancedCDAProcessor:
                 namespaces,
             )
             if consumable is not None:
-                code_elem = consumable.find("hl7:code", namespaces)
-                if code_elem is not None:
-                    data["medication_code"] = code_elem.get("code", "")
-                    data["medication_display"] = code_elem.get(
-                        "displayName", "Unknown Medication"
-                    )
-                    data["code_system"] = self._get_code_system_name(
-                        code_elem.get("codeSystem", "")
-                    )
+                # Extract medication name from <name> element
+                name_elem = consumable.find("hl7:name", namespaces)
+                if name_elem is not None and name_elem.text:
+                    data["medication_name"] = name_elem.text.strip()
+                else:
+                    # Fallback to code displayName
+                    code_elem = consumable.find("hl7:code", namespaces)
+                    if code_elem is not None:
+                        data["medication_name"] = code_elem.get("displayName", "Unknown Medication")
 
-                # Extract ingredient information
+                # Extract pharmaceutical form (tablet, injection, etc.)
+                pharm_form = consumable.find(".//pharm:formCode", namespaces)
+                if pharm_form is not None:
+                    data["pharmaceutical_form_code"] = pharm_form.get("code", "")
+                    # Use lookup for form display name
+                    data["pharmaceutical_form"] = self._lookup_form_code(
+                        pharm_form.get("code", "")
+                    ) or pharm_form.get("displayName", "")
+
+                # Extract ingredient information with strength
                 ingredient = consumable.find(
-                    ".//hl7:ingredient/hl7:ingredientSubstance", namespaces
+                    ".//pharm:ingredient/pharm:ingredientSubstance", namespaces
                 )
                 if ingredient is not None:
-                    ing_code = ingredient.find("hl7:code", namespaces)
+                    ing_code = ingredient.find("pharm:code", namespaces)
                     if ing_code is not None:
                         data["ingredient_code"] = ing_code.get("code", "")
-                        data["ingredient_display"] = ing_code.get(
-                            "displayName", "Unknown Ingredient"
-                        )
+                        # ATC codes need lookup - H03AA01 = levothyroxine sodium
+                        data["ingredient_display"] = self._lookup_atc_code(
+                            ing_code.get("code", "")
+                        ) or ing_code.get("displayName", "Unknown Ingredient")
 
-            # Extract dosage information
+                    # Extract strength information (numerator/denominator)
+                    quantity_elem = consumable.find(".//pharm:ingredient/pharm:quantity", namespaces)
+                    if quantity_elem is not None:
+                        numerator = quantity_elem.find("hl7:numerator", namespaces)
+                        denominator = quantity_elem.find("hl7:denominator", namespaces)
+                        
+                        if numerator is not None:
+                            strength_value = numerator.get("value", "")
+                            strength_unit = numerator.get("unit", "")
+                            denom_value = denominator.get("value", "1") if denominator is not None else "1"
+                            
+                            if strength_value and strength_unit:
+                                data["strength"] = f"{strength_value} {strength_unit}"
+                                if denom_value != "1":
+                                    denom_unit = denominator.get("unit", "") if denominator is not None else ""
+                                    data["strength"] += f" / {denom_value} {denom_unit}".strip()
+
+            # Extract comprehensive dosage information - handle both HL7 and pharmaceutical namespaces
             dose_quantity = sub_admin.find(".//hl7:doseQuantity", namespaces)
-            if dose_quantity is not None:
-                value = dose_quantity.get("value", "")
-                unit = dose_quantity.get("unit", "")
-                data["dosage"] = f"{value} {unit}".strip() if value else "Not specified"
+            pharm_quantity = sub_admin.find(".//pharm:quantity", namespaces)
+            
+            if pharm_quantity is not None:
+                # Handle pharmaceutical quantity with numerator/denominator
+                numerator = pharm_quantity.find("numerator", namespaces)
+                denominator = pharm_quantity.find("denominator", namespaces)
+                
+                if numerator is not None:
+                    num_value = numerator.get("value", "")
+                    num_unit = numerator.get("unit", "")
+                    
+                    if denominator is not None:
+                        denom_value = denominator.get("value", "")
+                        denom_unit = denominator.get("unit", "")
+                        
+                        # Format as "5 mg/1" for strength display
+                        if num_value and denom_value:
+                            if denom_value == "1" and denom_unit in ["1", ""]:
+                                data["dose_quantity"] = f"{num_value} {num_unit}".strip()
+                                data["strength"] = f"{num_value} {num_unit}".strip()
+                            else:
+                                data["dose_quantity"] = f"{num_value} {num_unit}/{denom_value} {denom_unit}".strip()
+                                data["strength"] = f"{num_value} {num_unit}/{denom_value} {denom_unit}".strip()
+                        else:
+                            data["dose_quantity"] = f"{num_value} {num_unit}".strip()
+                            data["strength"] = f"{num_value} {num_unit}".strip()
+                            
+                        # Store raw values for template flexibility
+                        data["dose_value"] = num_value
+                        data["dose_unit"] = num_unit
+                        
+            elif dose_quantity is not None:
+                # Handle standard HL7 doseQuantity
+                # Check for range (low/high)
+                low_elem = dose_quantity.find("hl7:low", namespaces)
+                high_elem = dose_quantity.find("hl7:high", namespaces)
+                
+                if low_elem is not None and high_elem is not None:
+                    low_val = low_elem.get("value", "")
+                    high_val = high_elem.get("value", "")
+                    unit = low_elem.get("unit", "")
+                    
+                    if low_val == high_val:
+                        data["dose_quantity"] = f"{low_val} {unit}".strip()
+                        data["dose_value"] = low_val
+                        data["dose_unit"] = unit
+                    else:
+                        data["dose_quantity"] = f"{low_val}-{high_val} {unit}".strip()
+                        data["dose_value"] = f"{low_val}-{high_val}"
+                        data["dose_unit"] = unit
+                else:
+                    # Single value
+                    value = dose_quantity.get("value", "")
+                    unit = dose_quantity.get("unit", "")
+                    data["dose_quantity"] = f"{value} {unit}".strip() if value else "Not specified"
+                    data["dose_value"] = value
+                    data["dose_unit"] = unit
 
-            # Extract posology/frequency
-            effectiveTime = sub_admin.find(
-                ".//hl7:effectiveTime[@xsi:type='PIVL_TS']", namespaces
-            )
-            if effectiveTime is not None:
-                period = effectiveTime.find("hl7:period", namespaces)
-                if period is not None:
-                    value = period.get("value", "")
-                    unit = period.get("unit", "")
-                    data["posology"] = (
-                        f"Every {value} {unit}" if value else "As directed"
-                    )
+            # Extract route of administration
+            route_elem = sub_admin.find("hl7:routeCode", namespaces)
+            if route_elem is not None:
+                data["route_code"] = route_elem.get("code", "")
+                data["route_display"] = self._lookup_route_code(
+                    route_elem.get("code", "")
+                ) or route_elem.get("displayName", "Unknown route")
+
+            # Extract timing/frequency information
+            effective_times = sub_admin.findall(".//hl7:effectiveTime", namespaces)
+            
+            for et in effective_times:
+                et_type = et.get("{http://www.w3.org/2001/XMLSchema-instance}type", "")
+                
+                # Date range (IVL_TS)
+                if et_type == "IVL_TS":
+                    low_elem = et.find("hl7:low", namespaces)
+                    high_elem = et.find("hl7:high", namespaces)
+                    
+                    if low_elem is not None:
+                        start_date = low_elem.get("value", "")
+                        data["start_date"] = self._format_hl7_date(start_date)
+                        data["start_date_raw"] = start_date
+                    
+                    if high_elem is not None and high_elem.get("nullFlavor") != "UNK":
+                        end_date = high_elem.get("value", "")
+                        data["end_date"] = self._format_hl7_date(end_date)
+                        data["end_date_raw"] = end_date
+
+                # Event-based timing (EIVL_TS)
+                elif et_type == "EIVL_TS":
+                    event_elem = et.find("hl7:event", namespaces)
+                    if event_elem is not None:
+                        event_code = event_elem.get("code", "")
+                        data["frequency_code"] = event_code
+                        data["frequency_display"] = self._lookup_frequency_code(event_code)
+
+                # Periodic timing (PIVL_TS)
+                elif et_type == "PIVL_TS":
+                    period = et.find("hl7:period", namespaces)
+                    if period is not None:
+                        value = period.get("value", "")
+                        unit = period.get("unit", "")
+                        data["period"] = f"Every {value} {unit}" if value else "As directed"
 
             # Extract status
             status_code = sub_admin.find("hl7:statusCode", namespaces)
             if status_code is not None:
                 data["status"] = status_code.get("code", "active")
+
+            # Create comprehensive medication summary (like XML Notepad output)
+            summary_parts = []
+            if "medication_name" in data:
+                summary_parts.append(data["medication_name"])
+            
+            if "ingredient_display" in data and "strength" in data:
+                summary_parts.append(f"{data['ingredient_display']} {data['strength']}")
+            
+            if "pharmaceutical_form" in data:
+                summary_parts.append(data["pharmaceutical_form"])
+            
+            dose_info = []
+            if "dose_quantity" in data:
+                dose_info.append(data["dose_quantity"])
+            if "frequency_display" in data:
+                dose_info.append(data["frequency_display"])
+            if dose_info:
+                summary_parts.append(" ".join(dose_info))
+            
+            if "start_date" in data:
+                time_part = f"since {data['start_date']}"
+                if "end_date" in data:
+                    time_part = f"between {data['start_date']} and {data['end_date']}"
+                summary_parts.append(time_part)
+            
+            if "route_display" in data:
+                summary_parts.append(f"({data['route_display']})")
+            
+            data["medication_summary"] = " : ".join(summary_parts) if summary_parts else "Unknown medication"
 
         except Exception as e:
             logger.error(f"Error extracting medication data: {e}")
@@ -3512,3 +3654,149 @@ class EnhancedCDAProcessor:
         except Exception as e:
             logger.error(f"Error generating comprehensive patient summary: {e}")
             return {}
+
+    def _lookup_atc_code(self, atc_code: str) -> str:
+        """Lookup ATC code to get active ingredient name"""
+        # Common ATC codes for medication ingredients
+        atc_lookup = {
+            "H03AA01": "levothyroxine sodium",
+            "C09AA05": "ramipril", 
+            "C08CA02": "felodipine",
+            "A10AE05": "insulin degludec",
+            "J01CA04": "amoxicillin",
+            "J01CR02": "amoxicillin and clavulanic acid",
+            "R03AK04": "salbutamol and ipratropium bromide",
+            "R03AC02": "salbutamol",
+            "R03BB01": "ipratropium bromide",
+        }
+        
+        return atc_lookup.get(atc_code, "")
+
+    def _lookup_route_code(self, route_code: str) -> str:
+        """Lookup route code to get administration route using CTS Master Value Catalogue"""
+        if not route_code:
+            return ""
+            
+        try:
+            # Use CTS terminology service to resolve the code
+            resolved_display = self.terminology_service.resolve_code(
+                code=route_code,
+                code_system="0.4.0.127.0.16.1.1.2.1"  # EDQM Standard Terms
+            )
+            
+            if resolved_display:
+                logger.debug(f"CTS resolved route code {route_code} to: {resolved_display}")
+                return resolved_display
+                
+        except Exception as e:
+            logger.warning(f"Error resolving route code {route_code} via CTS: {e}")
+            
+        # Fallback to hardcoded lookup for critical values
+        route_lookup = {
+            "20053000": "Oral use",
+            "20066000": "Subcutaneous use", 
+            "20045000": "Intravenous use",
+            "20030000": "Intramuscular use",
+            "20054000": "Sublingual use",
+            "20057000": "Inhalation use",
+        }
+        
+        fallback = route_lookup.get(route_code, route_code)
+        if fallback != route_code:
+            logger.debug(f"Used fallback lookup for route code {route_code}: {fallback}")
+        else:
+            logger.warning(f"No translation found for route code {route_code}")
+            
+        return fallback
+
+    def _lookup_frequency_code(self, freq_code: str) -> str:
+        """Lookup frequency/timing code using CTS Master Value Catalogue"""
+        if not freq_code:
+            return ""
+            
+        try:
+            # Use CTS terminology service to resolve the code
+            resolved_display = self.terminology_service.resolve_code(
+                code=freq_code,
+                code_system=None  # Multiple systems possible for frequency codes
+            )
+            
+            if resolved_display:
+                logger.debug(f"CTS resolved frequency code {freq_code} to: {resolved_display}")
+                return resolved_display
+                
+        except Exception as e:
+            logger.warning(f"Error resolving frequency code {freq_code} via CTS: {e}")
+            
+        # Fallback to hardcoded lookup for critical values
+        frequency_lookup = {
+            "ACM": "ACM",  # ante cibum (before meals)
+            "PCM": "PCM",  # post cibum (after meals) 
+            "BID": "twice daily",
+            "TID": "three times daily",
+            "QID": "four times daily",
+            "QD": "once daily",
+            "PRN": "as needed",
+        }
+        
+        fallback = frequency_lookup.get(freq_code, freq_code)
+        if fallback != freq_code:
+            logger.debug(f"Used fallback lookup for frequency code {freq_code}: {fallback}")
+        else:
+            logger.warning(f"No translation found for frequency code {freq_code}")
+            
+        return fallback
+
+    def _lookup_form_code(self, form_code: str) -> str:
+        """Lookup pharmaceutical form code using CTS Master Value Catalogue"""
+        if not form_code:
+            return ""
+            
+        try:
+            # Use CTS terminology service to resolve the code
+            resolved_display = self.terminology_service.resolve_code(
+                code=form_code,
+                code_system="0.4.0.127.0.16.1.1.2.1"  # EDQM Standard Terms
+            )
+            
+            if resolved_display:
+                logger.debug(f"CTS resolved form code {form_code} to: {resolved_display}")
+                return resolved_display
+                
+        except Exception as e:
+            logger.warning(f"Error resolving form code {form_code} via CTS: {e}")
+            
+        # Fallback to hardcoded lookup for critical values
+        form_lookup = {
+            "10219000": "Tablet",
+            "10225000": "Film-coated tablet",
+            "10226000": "Prolonged-release tablet",
+            "10307000": "Solution for injection",
+            "10316000": "Solution for injection in pre-filled pen",
+            "30009000": "Box",
+            "30077000": "Nebuliser solution",
+            "30078000": "Single-dose container",
+        }
+        
+        fallback = form_lookup.get(form_code, form_code)
+        if fallback != form_code:
+            logger.debug(f"Used fallback lookup for form code {form_code}: {fallback}")
+        else:
+            logger.warning(f"No translation found for form code {form_code}")
+            
+        return fallback
+
+    def _format_hl7_date(self, hl7_date: str) -> str:
+        """Format HL7 date string (YYYYMMDD) to readable format"""
+        if not hl7_date or len(hl7_date) < 8:
+            return hl7_date
+        
+        try:
+            # Extract year, month, day
+            year = hl7_date[:4]
+            month = hl7_date[4:6]
+            day = hl7_date[6:8]
+            
+            return f"{year}-{month}-{day}"
+        except (ValueError, IndexError):
+            return hl7_date

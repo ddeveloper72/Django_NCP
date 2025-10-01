@@ -3243,6 +3243,9 @@ def patient_cda_view(request, session_id, cda_type=None):
                     "has_l1_cda": False,
                     "has_l3_cda": True,
                     "processed_sections": processed_sections,
+                    "enhanced_allergies": match_data.get(
+                        "enhanced_allergies", []
+                    ),  # Add enhanced allergies directly
                     "sections_count": len(clinical_data["sections"]),
                     "medical_terms_count": total_medical_terms,
                     "coded_sections_count": coded_sections_count,
@@ -3765,8 +3768,8 @@ def patient_cda_view(request, session_id, cda_type=None):
                     )
 
                     # Extract processed sections for Clinical Information tab
-                    raw_sections = processing_result.get("sections", [])
                     processed_sections = []
+                    raw_sections = processing_result.get("sections", [])
 
                     logger.info(
                         f"[DEBUG] Converting {len(raw_sections)} raw sections to processed_sections"
@@ -3792,39 +3795,169 @@ def patient_cda_view(request, session_id, cda_type=None):
                             "medical_terminology_count": 0,
                         }
 
-                        # Convert entries
-                        for entry in entries:
-                            if hasattr(entry, "primary_code"):
-                                # ClinicalEntry dataclass
-                                display_name = (
-                                    entry.primary_code.display
-                                    if entry.primary_code
-                                    else "Unknown Item"
-                                )
-                                has_terminology = bool(
-                                    entry.primary_code and entry.primary_code.code
-                                )
-                            else:
-                                # Dictionary format
-                                display_name = entry.get(
-                                    "display_name", entry.get("name", "Unknown Item")
-                                )
-                                has_terminology = bool(entry.get("code"))
+                        # Check if this is an allergies section and we have enhanced allergies data
+                        # DEBUG: Log enhanced allergies processing
+                        enhanced_allergies = match_data.get("enhanced_allergies", [])
+                        print(
+                            f"[DEBUG] Enhanced allergies in match_data: {len(enhanced_allergies)} items"
+                        )
 
-                            processed_entry = {
-                                "display_name": display_name,
-                                "has_medical_terminology": has_terminology,
-                                "status": getattr(
-                                    entry, "status", entry.get("status", "Active")
-                                ),
-                            }
+                        is_allergies_section = any(
+                            keyword in section_title.lower()
+                            for keyword in ["allerg", "adverse", "reaction"]
+                        )
+                        print(
+                            f"[DEBUG] Section '{section_title}' is_allergies_section: {is_allergies_section}"
+                        )
 
-                            processed_section["entries"].append(processed_entry)
+                        if is_allergies_section and enhanced_allergies:
+                            print(
+                                f"[DEBUG] TRIGGERING enhanced allergies logic for {section_title}"
+                            )
+                        is_allergies_section = any(
+                            keyword in section_title.lower()
+                            for keyword in ["allerg", "adverse", "reaction"]
+                        )
 
-                            if has_terminology:
+                        if is_allergies_section and enhanced_allergies:
+                            logger.info(
+                                f"[ENHANCED] Found {len(enhanced_allergies)} enhanced allergies for section: {section_title}"
+                            )
+
+                            # Create structured entries from enhanced allergies data
+                            for allergy in enhanced_allergies:
+                                enhanced_entry = {
+                                    "display_name": allergy.get(
+                                        "substance", "Unknown Allergen"
+                                    ),
+                                    "has_medical_terminology": True,
+                                    "status": allergy.get("status", "active").title(),
+                                    "severity": allergy.get(
+                                        "severity", "unknown"
+                                    ).title(),
+                                    "reaction": ", ".join(
+                                        allergy.get("manifestation", [])
+                                    ),
+                                    "onset_date": allergy.get("onset_date", "Unknown"),
+                                    "last_occurrence": allergy.get(
+                                        "last_occurrence", "Unknown"
+                                    ),
+                                    "coding_system": allergy.get("coding_system", ""),
+                                    "code": allergy.get("code", ""),
+                                    "ps_guidelines_compliant": allergy.get(
+                                        "ps_guidelines_compliant", False
+                                    ),
+                                    "enhanced_data": True,  # Flag to identify enhanced entries
+                                }
+                                processed_section["entries"].append(enhanced_entry)
                                 processed_section["medical_terminology_count"] += 1
 
+                            # Also create structured_entries for template compatibility
+                            processed_section["structured_entries"] = processed_section[
+                                "entries"
+                            ].copy()
+                            processed_section["has_entries"] = True
+
+                            logger.info(
+                                f"[ENHANCED] Added {len(enhanced_allergies)} enhanced allergy entries to {section_title}"
+                            )
+                        else:
+                            # Convert original CDA entries
+                            for entry in entries:
+                                if hasattr(entry, "primary_code"):
+                                    # ClinicalEntry dataclass
+                                    display_name = (
+                                        entry.primary_code.display
+                                        if entry.primary_code
+                                        else "Unknown Item"
+                                    )
+                                    has_terminology = bool(
+                                        entry.primary_code and entry.primary_code.code
+                                    )
+                                else:
+                                    # Dictionary format
+                                    display_name = entry.get(
+                                        "display_name",
+                                        entry.get("name", "Unknown Item"),
+                                    )
+                                    has_terminology = bool(entry.get("code"))
+
+                                processed_entry = {
+                                    "display_name": display_name,
+                                    "has_medical_terminology": has_terminology,
+                                    "status": getattr(
+                                        entry, "status", entry.get("status", "Active")
+                                    ),
+                                }
+
+                                processed_section["entries"].append(processed_entry)
+
+                                if has_terminology:
+                                    processed_section["medical_terminology_count"] += 1
+
                         processed_sections.append(processed_section)
+
+                    # Check if we have enhanced allergies data and add them to clinical sections
+                    enhanced_allergies = match_data.get("enhanced_allergies", [])
+                    print(
+                        f"[ENHANCED DEBUG] Enhanced allergies found: {len(enhanced_allergies)} entries"
+                    )
+                    print(
+                        f"[ENHANCED DEBUG] Processed sections count: {len(processed_sections)}"
+                    )
+
+                    if enhanced_allergies:
+                        print(
+                            f"[ENHANCED] Enhanced allergies available. Creating allergies section."
+                        )
+                        logger.info(
+                            f"[ENHANCED] Enhanced allergies available. Creating allergies section."
+                        )
+
+                        # Create a new allergies section from enhanced data
+                        allergies_section = {
+                            "title": "Allergies and Intolerances",
+                            "has_entries": True,
+                            "entries": [],
+                            "medical_terminology_count": 0,
+                        }
+
+                        # Add enhanced allergies as entries
+                        for allergy in enhanced_allergies:
+                            enhanced_entry = {
+                                "display_name": allergy.get(
+                                    "substance", "Unknown Allergen"
+                                ),
+                                "has_medical_terminology": True,
+                                "status": allergy.get("status", "active").title(),
+                                "severity": allergy.get("severity", "unknown").title(),
+                                "reaction": ", ".join(allergy.get("manifestation", [])),
+                                "onset_date": allergy.get("onset_date", "Unknown"),
+                                "last_occurrence": allergy.get(
+                                    "last_occurrence", "Unknown"
+                                ),
+                                "coding_system": allergy.get("coding_system", ""),
+                                "code": allergy.get("code", ""),
+                                "ps_guidelines_compliant": allergy.get(
+                                    "ps_guidelines_compliant", False
+                                ),
+                                "enhanced_data": True,
+                            }
+                            allergies_section["entries"].append(enhanced_entry)
+                            allergies_section["medical_terminology_count"] += 1
+
+                        # Add structured_entries for template compatibility
+                        allergies_section["structured_entries"] = allergies_section[
+                            "entries"
+                        ].copy()
+
+                        processed_sections.append(allergies_section)
+                        print(
+                            f"[ENHANCED] Created allergies section with {len(enhanced_allergies)} enhanced entries"
+                        )
+                        logger.info(
+                            f"[ENHANCED] Created allergies section with {len(enhanced_allergies)} enhanced entries"
+                        )
 
                     logger.info(
                         f"[DEBUG] Created {len(processed_sections)} processed sections for Clinical Information tab"
@@ -3973,6 +4106,9 @@ def patient_cda_view(request, session_id, cda_type=None):
                 "translation_quality": translation_quality,
                 "sections_count": sections_count,
                 "processed_sections": processed_sections,  # Add processed sections for Clinical Information tab
+                "enhanced_allergies": match_data.get(
+                    "enhanced_allergies", []
+                ),  # Add enhanced allergies directly
                 "medical_terms_count": medical_terms_count,
                 "coded_sections_count": coded_sections_count,
                 "coded_sections_percentage": coded_sections_percentage,
@@ -4004,6 +4140,93 @@ def patient_cda_view(request, session_id, cda_type=None):
                 and len(enhanced_processing_result.get("sections", [])) == 0,
             }
         )
+
+        # CLINICAL ARRAYS EXTRACTION: Add clinical arrays for Clinical Information tab (Session-based patient path)
+        # Only execute this fallback if medications weren't already extracted by comprehensive processing
+        try:
+            if cda_content and cda_content.strip() and not context.get("medications"):
+                logger.info(
+                    f"[CLINICAL ARRAYS SESSION] Extracting clinical arrays for session {session_id} using ComprehensiveClinicalDataService (fallback path)"
+                )
+                from .services.comprehensive_clinical_data_service import (
+                    ComprehensiveClinicalDataService,
+                )
+
+                comprehensive_service = ComprehensiveClinicalDataService()
+                clinical_arrays = comprehensive_service.get_clinical_arrays_for_display(
+                    cda_content, {}
+                )
+
+                if clinical_arrays:
+                    # Add clinical arrays to context for Clinical Information tab
+                    context.update(
+                        {
+                            "medications": clinical_arrays["medications"],
+                            "allergies": clinical_arrays["allergies"],
+                            "problems": clinical_arrays["problems"],
+                            "procedures": clinical_arrays["procedures"],
+                            "vital_signs": clinical_arrays["vital_signs"],
+                            "results": clinical_arrays["results"],
+                            "immunizations": clinical_arrays["immunizations"],
+                        }
+                    )
+                    total_clinical_items = sum(
+                        len(arr) for arr in clinical_arrays.values()
+                    )
+                    logger.info(
+                        f"[CLINICAL ARRAYS SESSION] Added {total_clinical_items} clinical array items to context: med={len(clinical_arrays['medications'])}, all={len(clinical_arrays['allergies'])}, prob={len(clinical_arrays['problems'])}, proc={len(clinical_arrays['procedures'])}, vs={len(clinical_arrays['vital_signs'])}"
+                    )
+                else:
+                    # Ensure clinical arrays exist even if empty
+                    context.update(
+                        {
+                            "medications": [],
+                            "allergies": [],
+                            "problems": [],
+                            "procedures": [],
+                            "vital_signs": [],
+                            "results": [],
+                            "immunizations": [],
+                        }
+                    )
+                    logger.info(
+                        f"[CLINICAL ARRAYS SESSION] No clinical arrays extracted for session {session_id}"
+                    )
+            elif context.get("medications"):
+                logger.info(
+                    f"[CLINICAL ARRAYS SESSION] Skipping fallback extraction for session {session_id} - medications already extracted by comprehensive processing with {len(context.get('medications', []))} items"
+                )
+            else:
+                # No CDA content available - set empty arrays
+                context.update(
+                    {
+                        "medications": [],
+                        "allergies": [],
+                        "problems": [],
+                        "procedures": [],
+                        "vital_signs": [],
+                        "results": [],
+                        "immunizations": [],
+                    }
+                )
+                logger.info(
+                    f"[CLINICAL ARRAYS SESSION] No CDA content available for session {session_id}"
+                )
+
+        except Exception as e:
+            logger.warning(f"[CLINICAL ARRAYS SESSION] Clinical arrays extraction failed: {e}")
+            # Ensure clinical arrays exist even if extraction fails
+            context.update(
+                {
+                    "medications": [],
+                    "allergies": [],
+                    "problems": [],
+                    "procedures": [],
+                    "vital_signs": [],
+                    "results": [],
+                    "immunizations": [],
+                }
+            )
 
         # Extract enhanced data from CDADisplayService result
         enhanced_processing_result = translation_result
@@ -4136,6 +4359,9 @@ def patient_cda_view(request, session_id, cda_type=None):
         logger.info(
             f"Added template translations for {detected_source_language} → en with {len(template_translations)} strings"
         )
+
+        # CLINICAL ARRAYS: Context already added by comprehensive clinical data service earlier in view
+        # (Duplicate extraction removed to prevent overriding working clinical arrays)
 
         # NEW: Use CDA Display Data Helper to extract comprehensive extended patient data
         try:

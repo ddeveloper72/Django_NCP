@@ -897,6 +897,34 @@ function toggleSection(sectionId) {
 }
 
 /**
+ * Show translated content and hide original content
+ * @param {string} sectionCode - Code of the section to show translated content
+ */
+function showTranslated(sectionCode) {
+  const translatedContent = document.getElementById(`translated-content-${sectionCode}`);
+  const originalContent = document.getElementById(`original-content-${sectionCode}`);
+
+  if (translatedContent && originalContent) {
+    translatedContent.classList.remove('d-none');
+    originalContent.classList.add('d-none');
+  }
+}
+
+/**
+ * Show original content and hide translated content
+ * @param {string} sectionCode - Code of the section to show original content
+ */
+function showOriginal(sectionCode) {
+  const translatedContent = document.getElementById(`translated-content-${sectionCode}`);
+  const originalContent = document.getElementById(`original-content-${sectionCode}`);
+
+  if (translatedContent && originalContent) {
+    translatedContent.classList.add('d-none');
+    originalContent.classList.remove('d-none');
+  }
+}
+
+/**
  * Initialize clinical accordion functionality
  * Sets up expand/collapse all buttons
  */

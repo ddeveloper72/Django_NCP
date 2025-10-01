@@ -10,7 +10,7 @@
             <div class="page-info">
                 {% if country_code %}
                 <span class="page-location">
-                    <img src="{{ static('flags/' + country_code + '.webp') }}" alt="{{ country.name }} flag"
+                    <img src="{% static 'flags/' %}{{ country_code }}.webp" alt="{{ country.name }} flag"
                         class="context-flag">
                     {{ country.name }} Patient Search
                 </span>
@@ -39,7 +39,7 @@
         <div class="d-flex justify-content-between align-items-center">
             <h1>
                 {% if country_code %}
-                <img src="{{ static('flags/' + country_code + '.webp') }}" alt="{{ country.name }} flag"
+                <img src="{% static 'flags/' %}{{ country_code }}.webp" alt="{{ country.name }} flag"
                     class="country-flag">
                 {% endif %}
                 {{ country.name }} Patient Search
@@ -71,8 +71,7 @@
                 {% for ism_value, ism_label in ism_type_choices %}
                 <div class="ism-type-option {% if current_ism_type == ism_value %}selected{% endif %}"
                     onclick="changeIsmType('{{ ism_value }}')">
-                    <input type="radio" name="ism_type" value="{{ ism_value }}" {% if current_ism_type==ism_value
-                        %}checked{% endif %} onchange="changeIsmType('{{ ism_value }}')" class="ism-type-radio">
+                    <input type="radio" name="ism_type" value="{{ ism_value }}" {% if current_ism_type == ism_value %}checked{% endif %} onchange="changeIsmType('{{ ism_value }}')" class="ism-type-radio">
                     <div class="ism-type-content">
                         <label class="ism-type-label">
                             {{ ism_label }}
@@ -95,7 +94,7 @@
         <form method="post" id="patientSearchForm" novalidate>
             {% csrf_token %}
 
-            {% for group_name, fields in grouped_fields.items() %}
+            {% for group_name, fields in grouped_fields.items %}
             <div class="field-group">
                 <h5 class="field-group-title">{{ group_name }}</h5>
 
@@ -110,19 +109,15 @@
 
                     {% if field.type == 'text' or field.type == 'ssn' %}
                     <input type="text" name="{{ field.code }}" id="{{ field.code }}" class="form-control"
-                        value="{{ field.default_value|default:"" }}" {% if field.required %}required{% endif %} {% if
-                        field.placeholder %}placeholder="{{ field.placeholder }}" {% endif %} {% if
-                        field.validation_pattern %}pattern="{{ field.validation_pattern }}" {% endif %}>
+                        value="{{ field.default_value|default:"" }}" {% if field.required %}required{% endif %}{% if field.placeholder %} placeholder="{{ field.placeholder }}"{% endif %}{% if field.validation_pattern %} pattern="{{ field.validation_pattern }}"{% endif %}>
                     {% elif field.type == 'date' %}
                     <input type="date" name="{{ field.code }}" id="{{ field.code }}" class="form-control"
                         value="{{ field.default_value|default:"" }}" {% if field.required %}required{% endif %}>
                     {% elif field.type == 'select' %}
-                    <select name="{{ field.code }}" id="{{ field.code }}" class="form-control" {% if field.required
-                        %}required{% endif %}>
+                    <select name="{{ field.code }}" id="{{ field.code }}" class="form-control" {% if field.required %}required{% endif %}>
                         <option value="">Select {{ field.label }}</option>
                         {% for option in field.options %}
-                        <option value="{{ option.value }}" {% if option.value==field.default_value %}selected{% endif
-                            %}>
+                        <option value="{{ option.value }}" {% if option.value == field.default_value %}selected{% endif %}>
                             {{ option.label }}
                         </option>
                         {% endfor %}
@@ -168,8 +163,7 @@
                     This action will be logged and audited.
                 </p>
 
-                <div class="break-glass-reason" id="breakGlassReason" {% if not break_glass %}style="display: none;" {%
-                    endif %}>
+                <div class="break-glass-reason" id="breakGlassReason" {% if not break_glass %}style="display: none;"{% endif %}>
                     <label for="break_glass_reason" class="form-label">
                         Emergency Reason <span class="required">*</span>
                     </label>
@@ -231,7 +225,7 @@
                     {% if patient.patient_identifiers %}
                     {% for identifier in patient.patient_identifiers %}
                     <p><strong>{% if identifier.assigningAuthorityName %}{{ identifier.assigningAuthorityName }}{% else
-                            %}Patient ID ({{ identifier.root|truncate(15, True) }}){% endif %}:</strong> {{
+                            %}Patient ID ({{ identifier.root|slice:":15" }}){% endif %}:</strong> {{
                         identifier.extension }}</p>
                     {% endfor %}
                     {% else %}
@@ -242,7 +236,7 @@
                     {% endif %}
                 </div>
                 <div class="patient-actions">
-                    <a href="{{ url('ehealth_portal:patient_documents', patient.id) }}" class="btn btn-primary">
+                    <a href="{% url 'ehealth_portal:patient_documents' patient.id %}" class="btn btn-primary">
                         📋 View Documents
                     </a>
                 </div>

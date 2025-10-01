@@ -1,0 +1,182 @@
+{% load patient_filters %}
+{# Procedures Section Template #}
+
+<div class="medical-section" id="procedures-section">
+    {# Check if we have procedures data passed directly #}
+    {% if section_entries and section_entries|length > 0 %}
+        {# Procedures Display - Direct Data #}
+        <div class="clinical-table">
+            {# Mobile Card Layout for Procedures #}
+            <div class="d-block d-md-none">
+                <div class="clinical-cards-container">
+                    {% for procedure in section_entries %}
+                    <div class="card clinical-card mb-3 border-info">
+                        <div class="card-body">
+                            <div class="clinical-field mb-2 primary-field-mobile">
+                                <div class="field-label d-flex align-items-center mb-1">
+                                    <strong class="text-muted small">Procedure</strong>
+                                    <i class="fa-solid fa-user-md ms-1 terminology-indicator text-muted" title="Procedure"></i>
+                                </div>
+                                <div class="field-value">
+                                    <strong class="text-info">{{ procedure.name|default:procedure.display_name|default:procedure.procedure_name|default:"Procedure" }}</strong>
+                                    {% if procedure.code %}
+                                    <div class="medical-terminology">
+                                        <span class="terminology-display">
+                                            <span class="terminology-code">{{ procedure.code }}</span>
+                                            <span class="terminology-system text-muted">{{ procedure.coding_system|default:"" }}</span>
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if procedure.status %}
+                            <div class="clinical-field mb-2">
+                                <div class="field-label">
+                                    <strong class="text-muted small">Status</strong>
+                                    <i class="fa-solid fa-check-circle ms-1 terminology-indicator text-muted" title="Status"></i>
+                                </div>
+                                <div class="field-value">
+                                    <span class="status-badge status-{{ procedure.status|lower }}">{{ procedure.status|title }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if procedure.date or procedure.effective_time %}
+                            <div class="clinical-field mb-2">
+                                <div class="field-label">
+                                    <strong class="text-muted small">Date</strong>
+                                    <i class="fa-solid fa-calendar ms-1 terminology-indicator text-muted" title="Procedure Date"></i>
+                                </div>
+                                <div class="field-value">
+                                    <span class="text-secondary">{{ procedure.date|default:procedure.effective_time|date:"M d, Y" }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if procedure.performer or procedure.provider %}
+                            <div class="clinical-field mb-2">
+                                <div class="field-label">
+                                    <strong class="text-muted small">Performer</strong>
+                                    <i class="fa-solid fa-user-doctor ms-1 terminology-indicator text-muted" title="Performing Provider"></i>
+                                </div>
+                                <div class="field-value">
+                                    <span class="text-secondary">{{ procedure.performer|default:procedure.provider }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if procedure.location %}
+                            <div class="clinical-field mb-2">
+                                <div class="field-label">
+                                    <strong class="text-muted small">Location</strong>
+                                    <i class="fa-solid fa-location-dot ms-1 terminology-indicator text-muted" title="Location"></i>
+                                </div>
+                                <div class="field-value">
+                                    <span class="text-secondary">{{ procedure.location }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if procedure.notes or procedure.description %}
+                            <div class="clinical-field">
+                                <div class="field-label">
+                                    <strong class="text-muted small">Notes</strong>
+                                    <i class="fa-solid fa-note-sticky ms-1 terminology-indicator text-muted" title="Notes"></i>
+                                </div>
+                                <div class="field-value">
+                                    <small class="text-muted">{{ procedure.notes|default:procedure.description }}</small>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# Desktop Table Layout for Procedures #}
+            <div class="d-none d-md-block">
+                <div class="table-responsive">
+                    <table class="table table-hover clinical-table-desktop">
+                        <thead class="table-info">
+                            <tr>
+                                <th scope="col">
+                                    <i class="fa-solid fa-user-md me-1"></i>Procedure
+                                </th>
+                                <th scope="col">
+                                    <i class="fa-solid fa-check-circle me-1"></i>Status
+                                </th>
+                                <th scope="col">
+                                    <i class="fa-solid fa-calendar me-1"></i>Date
+                                </th>
+                                <th scope="col">
+                                    <i class="fa-solid fa-user-doctor me-1"></i>Performer
+                                </th>
+                                <th scope="col">
+                                    <i class="fa-solid fa-location-dot me-1"></i>Location
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for procedure in section_entries %}
+                            <tr>
+                                <td>
+                                    <div class="procedure-info">
+                                        <strong>{{ procedure.name|default:procedure.display_name|default:procedure.procedure_name|default:"Procedure" }}</strong>
+                                        {% if procedure.code %}
+                                        <div class="medical-terminology">
+                                            <span class="terminology-display">
+                                                <span class="terminology-code">{{ procedure.code }}</span>
+                                                <span class="terminology-system text-muted">{{ procedure.coding_system|default:"" }}</span>
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                        {% if procedure.notes or procedure.description %}
+                                        <div class="text-muted small">{{ procedure.notes|default:procedure.description|truncatewords:15 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if procedure.status %}
+                                    <span class="status-badge status-{{ procedure.status|lower }}">{{ procedure.status|title }}</span>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if procedure.date or procedure.effective_time %}
+                                    <span class="text-secondary">{{ procedure.date|default:procedure.effective_time|date:"M d, Y" }}</span>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if procedure.performer or procedure.provider %}
+                                    <span class="text-secondary">{{ procedure.performer|default:procedure.provider }}</span>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if procedure.location %}
+                                    <span class="text-secondary">{{ procedure.location }}</span>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        {# No procedures data available #}
+        <div class="alert alert-info">
+            <h6><i class="fa-solid fa-info-circle me-2"></i>No Procedures Available</h6>
+            <p class="mb-0">No procedure information was found for this patient.</p>
+        </div>
+    {% endif %}
+</div>

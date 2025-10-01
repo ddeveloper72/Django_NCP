@@ -53,3 +53,20 @@
     transform: translateY(0);
   }
 }
+
+// Flag Icons - Professional country flag display
+.flag-icon {
+  height: 16px !important;
+  width: auto !important;
+  max-width: 20px !important;
+  max-height: 16px !important;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  vertical-align: middle;
+  display: inline-block;
+
+  // Ensure consistent spacing in badges
+  .badge & {
+    margin-right: 4px;
+  }
+}
