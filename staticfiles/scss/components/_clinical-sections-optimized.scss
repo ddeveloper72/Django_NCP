@@ -1,0 +1,484 @@
+// ========================================
+// Optimized Clinical Section Components
+// New layout: tabs in header, maximized content area
+// ========================================
+
+// Enhanced Accordion Header with integrated tab controls
+.clinical-section-header-optimized {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: $space-md;
+
+  // Left side: section title and icon (existing)
+  .section-title-area {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+
+    .section-icon {
+      margin-right: $space-sm;
+      font-size: 1.2rem;
+    }
+
+    .section-title {
+      font-weight: $font-weight-semibold;
+      color: $text-dark;
+    }
+
+    .section-badge {
+      margin-left: $space-sm;
+    }
+  }
+
+  // Center: inline tab controls (new)
+  .header-tab-controls {
+    display: flex;
+    gap: $space-xs;
+    margin: 0 $space-md;
+
+    .header-tab-button {
+      background: $bg-light;
+      border: 1px solid $border-light;
+      border-radius: $border-radius-sm;
+      padding: $space-xs $space-sm;
+      font-size: $font-size-sm;
+      color: $text-muted;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: $neutral-lighter;
+        color: $text-dark;
+      }
+
+      &.active {
+        background: $primary-color;
+        color: $white;
+        border-color: $primary-color;
+      }
+
+      .tab-icon {
+        margin-right: $space-xs;
+        font-size: 0.9em;
+      }
+    }
+  }
+
+  // Right side: metrics and controls (existing + enhanced)
+  .section-controls-area {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+
+    .clinical-metrics-compact {
+      display: flex;
+      gap: $space-xs;
+
+      .metric-badge {
+        background: $primary-lighter;
+        color: $primary-dark;
+        padding: $space-xs $space-sm;
+        border-radius: $border-radius-sm;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+
+        &.coded {
+          background: $success-lighter;
+          color: $success-dark;
+        }
+      }
+    }
+  }
+}
+
+// Optimized accordion body - maximized content area
+.clinical-accordion-content-optimized {
+  padding: 0;
+  background: $white;
+
+  // Direct content without card wrapper
+  .clinical-content-direct {
+    padding: $space-md;
+
+    // Tab content areas
+    .clinical-tab-content {
+      display: none;
+
+      &.active {
+        display: block;
+      }
+    }
+
+    // Clinical table within optimized layout
+    .clinical-table-optimized {
+      border: 1px solid $border-light;
+      border-radius: $border-radius-md;
+      overflow: hidden;
+
+      .table {
+        margin-bottom: 0;
+
+        th {
+          background: $primary-lighter;
+          color: $text-dark;
+          font-weight: $font-weight-semibold;
+          padding: $space-sm $space-md;
+          border-bottom: 2px solid $border-light;
+        }
+
+        td {
+          padding: $space-sm $space-md;
+          vertical-align: top;
+          border-bottom: 1px solid $border-light;
+        }
+
+        tbody tr:hover {
+          background: $bg-light;
+        }
+      }
+    }
+
+    // Mobile card layout optimization
+    .clinical-cards-container-optimized {
+      .clinical-card {
+        border: 1px solid $border-light;
+        border-radius: $border-radius-md;
+        margin-bottom: $space-sm;
+
+        .card-body {
+          padding: $space-md;
+        }
+
+        .clinical-field {
+          margin-bottom: $space-sm;
+
+          .field-label {
+            color: $text-muted;
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            margin-bottom: $space-xs;
+          }
+
+          .field-value {
+            color: $text-dark;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Medical terminology and badge styling
+.medical-terminology-optimized {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-xs;
+  margin-top: $space-xs;
+
+  .terminology-badge {
+    background: $warning-lighter;
+    color: $warning-dark;
+    padding: $space-xs $space-sm;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+  }
+}
+
+// Enhanced data volume indicator
+.data-volume-indicator-optimized {
+  background: $bg-light;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-sm;
+  padding: $space-sm $space-md;
+  margin-bottom: $space-md;
+
+  .data-metrics {
+    color: $text-muted;
+    font-size: $font-size-sm;
+
+    .metric-icon {
+      color: $primary-color;
+      margin-right: $space-xs;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .clinical-section-header-optimized {
+    flex-direction: column;
+    align-items: stretch;
+    gap: $space-sm;
+
+    .header-tab-controls {
+      margin: 0;
+      justify-content: center;
+    }
+
+    .section-controls-area {
+      justify-content: center;
+    }
+  }
+}
+
+// Dark mode support (if needed)
+@media (prefers-color-scheme: dark) {
+  .clinical-section-header-optimized {
+    .header-tab-button {
+      background: $neutral-dark;
+      color: $neutral-light;
+
+      &:hover {
+        background: $neutral-medium;
+      }
+
+      &.active {
+        background: $primary-color;
+        color: $white;
+      }
+    }
+  }
+}
+
+// ========================================
+// Enhanced Medication Cards - Professional Medical Display
+// ========================================
+
+.medication-card {
+  background: $bg-white;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-md;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-color: $primary-color;
+  }
+
+  // Medication Header Section
+  .medication-header {
+    .medication-name-section {
+      .medication-name {
+        color: $primary-color;
+        font-size: 1.25rem;
+        font-weight: $font-weight-bold;
+        margin-bottom: $space-xs;
+
+        i {
+          color: $success;
+        }
+      }
+
+      .medication-class {
+        font-size: $font-size-sm;
+        color: $text-muted;
+
+        .fa-barcode {
+          color: $accent-blue;
+        }
+      }
+    }
+
+    .medication-status {
+      .badge {
+        font-size: $font-size-sm;
+        padding: $space-xs $space-sm;
+
+        i {
+          margin-right: $space-xs;
+        }
+      }
+    }
+  }
+
+  // Medication Information Fields
+  .medication-field {
+    .field-header {
+      margin-bottom: $space-sm;
+
+      i {
+        font-size: 1.1rem;
+      }
+
+      strong {
+        color: $text-dark;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-semibold;
+      }
+    }
+
+    .field-content {
+      background: $neutral-lightest;
+      border: 1px solid $neutral-lighter;
+      border-radius: $border-radius-sm;
+      padding: $space-sm;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+
+      .dose-amount {
+        font-size: 1.1rem;
+        color: $primary-color;
+      }
+
+      .route-name {
+        color: $text-dark;
+        font-weight: $font-weight-medium;
+      }
+
+      .time-range {
+        .start-date, .end-date {
+          display: block;
+          margin-bottom: $space-xs;
+
+          i {
+            margin-right: $space-xs;
+          }
+        }
+
+        .ongoing-treatment {
+          color: $success;
+          font-style: italic;
+
+          i {
+            color: $success;
+          }
+        }
+      }
+
+      em {
+        color: $text-muted;
+        font-style: italic;
+      }
+    }
+  }
+
+  // Medical Reason Section
+  .medication-reason {
+    border-top: 1px solid $neutral-lighter;
+
+    .field-content {
+      background: $bg-light;
+      border-color: $neutral-lighter;
+
+      .medical-context {
+        border-top: 1px solid $neutral-lighter;
+        margin-top: $space-sm;
+        padding-top: $space-sm;
+
+        small {
+          color: $text-muted;
+
+          i {
+            color: $accent-blue;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design for Medication Cards
+@media (max-width: 992px) {
+  .medication-card {
+    .medication-details {
+      .row {
+        .col-lg-6 {
+          margin-bottom: $space-md;
+        }
+      }
+    }
+
+    .medication-header {
+      .d-flex {
+        flex-direction: column;
+        align-items: stretch;
+
+        .medication-name-section {
+          margin-right: 0;
+          margin-bottom: $space-sm;
+        }
+
+        .medication-status {
+          align-self: flex-start;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .medication-card {
+    padding: $space-md;
+
+    .medication-header {
+      margin-bottom: $space-sm;
+      padding-bottom: $space-sm;
+
+      .medication-name {
+        font-size: 1.1rem;
+      }
+    }
+
+    .medication-field {
+      margin-bottom: $space-sm;
+
+      .field-header {
+        margin-bottom: $space-xs;
+
+        strong {
+          font-size: $font-size-xs;
+        }
+      }
+
+      .field-content {
+        padding: $space-xs;
+        font-size: $font-size-sm;
+      }
+    }
+
+    .medication-reason {
+      margin-top: $space-sm;
+      padding-top: $space-sm;
+    }
+  }
+}
+
+// Print Styles for Medication Cards
+@media print {
+  .medication-card {
+    box-shadow: none;
+    border: 1px solid $text-dark;
+    margin-bottom: $space-lg;
+    page-break-inside: avoid;
+
+    .medication-header {
+      .medication-name {
+        color: $text-dark !important;
+      }
+
+      .medication-status .badge {
+        background: transparent !important;
+        color: $text-dark !important;
+        border: 1px solid $text-dark;
+      }
+    }
+
+    .medication-field {
+      .field-header i {
+        display: none; // Hide icons in print
+      }
+
+      .field-content {
+        background: transparent !important;
+        border: 1px solid $text-dark;
+      }
+    }
+  }
+}
