@@ -213,10 +213,25 @@
                                                                     {{ med.medication.name }} (Brand name - active ingredient not resolved)
                                                                 </span>
                                                             {% else %}
-                                                                <span class="text-muted">
-                                                                    <i class="fa-solid fa-info-circle me-1"></i>
-                                                                    Active ingredient information not specified
-                                                                </span>
+                                                                {% with fallback_ingredient=med|extract_active_ingredient %}
+                                                                    {% if fallback_ingredient and fallback_ingredient != "" %}
+                                                                        <div class="ingredient-container">
+                                                                            <span class="active-ingredient fw-bold text-success">
+                                                                                {{ fallback_ingredient }}
+                                                                            </span>
+                                                                            <br>
+                                                                            <small class="text-muted mt-1">
+                                                                                <i class="fa-solid fa-magic-wand-sparkles me-1"></i>
+                                                                                Inferred from medication name
+                                                                            </small>
+                                                                        </div>
+                                                                    {% else %}
+                                                                        <span class="text-muted">
+                                                                            <i class="fa-solid fa-info-circle me-1"></i>
+                                                                            Active ingredient information not specified
+                                                                        </span>
+                                                                    {% endif %}
+                                                                {% endwith %}
                                                             {% endif %}
                                                         </div>
                                                     </div>
@@ -274,10 +289,25 @@
                                                                     {% endif %}
                                                                 </div>
                                                             {% else %}
-                                                                <span class="text-muted">
-                                                                    <i class="fa-solid fa-info-circle me-1"></i>
-                                                                    Pharmaceutical form not specified
-                                                                </span>
+                                                                {% with fallback_form=med|smart_dose_form %}
+                                                                    {% if fallback_form and fallback_form != "Form not specified" %}
+                                                                        <div class="pharmaceutical-form-container">
+                                                                            <span class="pharmaceutical-form fw-bold text-info">
+                                                                                {{ fallback_form }}
+                                                                            </span>
+                                                                            <br>
+                                                                            <small class="text-muted mt-1">
+                                                                                <i class="fa-solid fa-magic-wand-sparkles me-1"></i>
+                                                                                Inferred from medication name
+                                                                            </small>
+                                                                        </div>
+                                                                    {% else %}
+                                                                        <span class="text-muted">
+                                                                            <i class="fa-solid fa-info-circle me-1"></i>
+                                                                            Pharmaceutical form not specified
+                                                                        </span>
+                                                                    {% endif %}
+                                                                {% endwith %}
                                                             {% endif %}
                                                         </div>
                                                     </div>
@@ -364,52 +394,20 @@
                                                             <strong class="text-dark">Treatment Period</strong>
                                                         </div>
                                                         <div class="field-content bg-light p-2 rounded">
-                                                            {% if med.data.start_date %}
-                                                                <div class="time-range">
-                                                                    <span class="start-date">
-                                                                        <i class="fa-solid fa-play text-success me-1"></i>
-                                                                        <strong>Start:</strong> {{ med.data.start_date }}
+                                                            {% load medication_filters %}
+                                                            {% with treatment_period=med|format_treatment_period %}
+                                                                {% if "not specified" not in treatment_period %}
+                                                                    <div class="time-range">
+                                                                        <i class="fa-solid fa-calendar-check text-success me-2"></i>
+                                                                        <strong>{{ treatment_period }}</strong>
+                                                                    </div>
+                                                                {% else %}
+                                                                    <span class="text-muted">
+                                                                        <i class="fa-solid fa-info-circle me-1"></i>
+                                                                        Treatment timing not specified
                                                                     </span>
-                                                                    {% if med.data.end_date %}
-                                                                        <br>
-                                                                        <span class="end-date mt-1 d-inline-block">
-                                                                            <i class="fa-solid fa-stop text-warning me-1"></i>
-                                                                            <strong>End:</strong> {{ med.data.end_date }}
-                                                                        </span>
-                                                                    {% else %}
-                                                                        <br>
-                                                                        <span class="ongoing-treatment text-success mt-1 d-inline-block">
-                                                                            <i class="fa-solid fa-arrow-right me-1"></i>
-                                                                            <strong>Status:</strong> Ongoing treatment
-                                                                        </span>
-                                                                    {% endif %}
-                                                                </div>
-                                                            {% elif med.effective_time.low_formatted %}
-                                                                <div class="time-range">
-                                                                    <span class="start-date">
-                                                                        <i class="fa-solid fa-play text-success me-1"></i>
-                                                                        <strong>Start:</strong> {{ med.effective_time.low_formatted }}
-                                                                    </span>
-                                                                    {% if med.effective_time.high_formatted %}
-                                                                        <br>
-                                                                        <span class="end-date mt-1 d-inline-block">
-                                                                            <i class="fa-solid fa-stop text-warning me-1"></i>
-                                                                            <strong>End:</strong> {{ med.effective_time.high_formatted }}
-                                                                        </span>
-                                                                    {% else %}
-                                                                        <br>
-                                                                        <span class="ongoing-treatment text-success mt-1 d-inline-block">
-                                                                            <i class="fa-solid fa-arrow-right me-1"></i>
-                                                                            <strong>Status:</strong> Ongoing treatment
-                                                                        </span>
-                                                                    {% endif %}
-                                                                </div>
-                                                            {% else %}
-                                                                <span class="text-muted">
-                                                                    <i class="fa-solid fa-info-circle me-1"></i>
-                                                                    Treatment timing not specified
-                                                                </span>
-                                                            {% endif %}
+                                                                {% endif %}
+                                                            {% endwith %}
                                                         </div>
                                                     </div>
                                                     

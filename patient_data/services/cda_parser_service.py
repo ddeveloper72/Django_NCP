@@ -34,6 +34,7 @@ class CDAParserService:
     NAMESPACES = {
         "cda": "urn:hl7-org:v3",
         "xsi": "http://www.w3.org/2001/XMLSchema-instance",
+        "pharm": "urn:ihe:pharm:medication",
     }
 
     # HL7 Patient Summary section codes
@@ -924,18 +925,89 @@ class CDAParserService:
             medication["class_code"] = subst_elem.get("classCode", "")
             medication["mood_code"] = subst_elem.get("moodCode", "")
 
-            # Effective time (dosing schedule)
-            time_elem = subst_elem.find(".//cda:effectiveTime", self.NAMESPACES)
-            if time_elem is not None:
-                medication["effective_time"] = self._extract_effective_time(time_elem)
+            # Effective time (dosing schedule) - capture ALL effectiveTime elements
+            time_elems = subst_elem.findall(".//cda:effectiveTime", self.NAMESPACES)
+            if time_elems:
+                effective_times = []
+                for time_elem in time_elems:
+                    time_info = self._extract_effective_time(time_elem)
+                    
+                    # Also check for event elements (like ACM) in EIVL_TS time types
+                    event_elem = time_elem.find(".//cda:event", self.NAMESPACES)
+                    if event_elem is not None:
+                        time_info["event"] = {
+                            "code": event_elem.get("code", ""),
+                            "code_system": event_elem.get("codeSystem", ""),
+                            "display_name": event_elem.get("displayName", "")
+                        }
+                    
+                    effective_times.append(time_info)
+                
+                medication["effective_time"] = effective_times[0] if len(effective_times) == 1 else effective_times
+                
+                # Extract event codes for frequency/schedule resolution
+                for time_info in effective_times:
+                    if "event" in time_info:
+                        event_data = time_info["event"]
+                        medication["event_code"] = event_data["code"]
+                        medication["event_code_system"] = event_data["code_system"]
+                        medication["event_display_name"] = event_data["display_name"]
+                        break  # Use first event found
 
-            # Dose quantity
+            # Dose quantity - Enhanced extraction for complex structures
             dose_elem = subst_elem.find(".//cda:doseQuantity", self.NAMESPACES)
             if dose_elem is not None:
-                medication["dose"] = {
-                    "value": dose_elem.get("value", ""),
-                    "unit": dose_elem.get("unit", ""),
-                }
+                # Check for simple value/unit structure first
+                simple_value = dose_elem.get("value", "")
+                simple_unit = dose_elem.get("unit", "")
+                
+                if simple_value or simple_unit:
+                    # Simple structure
+                    medication["dose"] = {
+                        "value": simple_value,
+                        "unit": simple_unit,
+                    }
+                    medication["doseQuantity"] = {
+                        "value": simple_value,
+                        "unit": simple_unit,
+                    }
+                else:
+                    # Check for complex low/high structure
+                    low_elem = dose_elem.find(".//cda:low", self.NAMESPACES)
+                    high_elem = dose_elem.find(".//cda:high", self.NAMESPACES)
+                    
+                    if low_elem is not None or high_elem is not None:
+                        dose_quantity = {}
+                        
+                        if low_elem is not None:
+                            dose_quantity["low"] = {
+                                "value": low_elem.get("value", ""),
+                                "unit": low_elem.get("unit", "")
+                            }
+                        
+                        if high_elem is not None:
+                            dose_quantity["high"] = {
+                                "value": high_elem.get("value", ""),
+                                "unit": high_elem.get("unit", "")
+                            }
+                        
+                        medication["doseQuantity"] = dose_quantity
+                        
+                        # Also set simple dose for backward compatibility
+                        if low_elem is not None:
+                            medication["dose"] = {
+                                "value": low_elem.get("value", ""),
+                                "unit": low_elem.get("unit", ""),
+                            }
+                        else:
+                            medication["dose"] = {"value": "", "unit": ""}
+                        
+                        logger.info(f"Extracted complex doseQuantity: {dose_quantity}")
+                    else:
+                        # No dose quantity found
+                        medication["dose"] = {"value": "", "unit": ""}
+            else:
+                medication["dose"] = {"value": "", "unit": ""}
 
             # Route of administration
             route_elem = subst_elem.find(".//cda:routeCode", self.NAMESPACES)
@@ -972,6 +1044,9 @@ class CDAParserService:
             consumable_elem = subst_elem.find(".//cda:consumable", self.NAMESPACES)
             if consumable_elem is not None:
                 medication["medication"] = self._parse_medication_info(consumable_elem)
+                
+                # Also store raw consumable structure for enhanced processing
+                medication["consumable"] = self._extract_consumable_structure(consumable_elem)
 
         except Exception as e:
             logger.warning(f"Error parsing substance administration: {e}")
@@ -1005,6 +1080,61 @@ class CDAParserService:
                     name_elem = material_elem.find(".//cda:name", self.NAMESPACES)
                     if name_elem is not None and name_elem.text:
                         med_info["name"] = name_elem.text
+                    
+                    # Pharmaceutical form (formCode) - ENHANCED EXTRACTION
+                    form_elem = material_elem.find(".//pharm:formCode", self.NAMESPACES)
+                    if form_elem is not None:
+                        form_code = form_elem.get("code", "")
+                        form_display = form_elem.get("displayName", "")
+                        
+                        # Try to resolve form code using CTS if displayName is empty
+                        if form_code and not form_display:
+                            try:
+                                translator = TerminologyTranslator()
+                                resolved_display = translator.resolve_code(form_code)
+                                if resolved_display:
+                                    form_display = resolved_display
+                                    logger.info(f"CTS resolved pharmaceutical form code {form_code} to '{form_display}'")
+                            except Exception as e:
+                                logger.warning(f"Failed to resolve pharmaceutical form code {form_code} via CTS: {e}")
+                        
+                        med_info["formCode"] = {
+                            "code": form_code,
+                            "codeSystem": form_elem.get("codeSystem", ""),
+                            "displayName": form_display,
+                        }
+                        
+                        # Also add for easy access
+                        med_info["pharmaceutical_form_code"] = form_code
+                        if form_display:
+                            med_info["pharmaceutical_form"] = form_display
+                        
+                        logger.info(f"Extracted pharmaceutical form: {form_code} - {form_display}")
+                    
+                    # Also check for alternative form code paths
+                    alt_form_elem = material_elem.find(".//cda:formCode", self.NAMESPACES)
+                    if alt_form_elem is not None and "formCode" not in med_info:
+                        form_code = alt_form_elem.get("code", "")
+                        form_display = alt_form_elem.get("displayName", "")
+                        
+                        if form_code and not form_display:
+                            try:
+                                translator = TerminologyTranslator()
+                                resolved_display = translator.resolve_code(form_code)
+                                if resolved_display:
+                                    form_display = resolved_display
+                                    logger.info(f"CTS resolved alt pharmaceutical form code {form_code} to '{form_display}'")
+                            except Exception as e:
+                                logger.warning(f"Failed to resolve alt pharmaceutical form code {form_code} via CTS: {e}")
+                        
+                        med_info["formCode"] = {
+                            "code": form_code,
+                            "codeSystem": alt_form_elem.get("codeSystem", ""),
+                            "displayName": form_display,
+                        }
+                        med_info["pharmaceutical_form_code"] = form_code
+                        if form_display:
+                            med_info["pharmaceutical_form"] = form_display
 
                 # Manufacturer
                 org_elem = product_elem.find(
@@ -1017,6 +1147,93 @@ class CDAParserService:
             logger.warning(f"Error parsing medication info: {e}")
 
         return med_info
+    
+    def _extract_consumable_structure(self, consumable_elem) -> Dict[str, Any]:
+        """Extract complete consumable structure for enhanced processing"""
+        consumable_data = {}
+        
+        try:
+            # Manufactured product
+            product_elem = consumable_elem.find(".//cda:manufacturedProduct", self.NAMESPACES)
+            if product_elem is not None:
+                manufactured_product = {}
+                
+                # Manufactured material
+                material_elem = product_elem.find(".//cda:manufacturedMaterial", self.NAMESPACES)
+                if material_elem is not None:
+                    manufactured_material = {}
+                    
+                    # Name
+                    name_elem = material_elem.find(".//cda:name", self.NAMESPACES)
+                    if name_elem is not None and name_elem.text:
+                        manufactured_material["name"] = name_elem.text
+                    
+                    # Form code
+                    form_elem = material_elem.find(".//pharm:formCode", self.NAMESPACES)
+                    if form_elem is not None:
+                        manufactured_material["form_code"] = form_elem.get("code", "")
+                        manufactured_material["form_display"] = form_elem.get("displayName", "")
+                        manufactured_material["form_system"] = form_elem.get("codeSystem", "")
+                    
+                    # Alternative form code path
+                    alt_form_elem = material_elem.find(".//cda:formCode", self.NAMESPACES)
+                    if alt_form_elem is not None and "form_code" not in manufactured_material:
+                        manufactured_material["form_code"] = alt_form_elem.get("code", "")
+                        manufactured_material["form_display"] = alt_form_elem.get("displayName", "")
+                        manufactured_material["form_system"] = alt_form_elem.get("codeSystem", "")
+                    
+                    # Ingredient information
+                    ingredient_elem = material_elem.find(".//pharm:ingredient", self.NAMESPACES)
+                    if ingredient_elem is not None:
+                        ingredient_data = {}
+                        
+                        # Ingredient substance
+                        substance_elem = ingredient_elem.find(".//pharm:ingredientSubstance", self.NAMESPACES)
+                        if substance_elem is not None:
+                            ingredient_substance = {}
+                            
+                            # Code
+                            code_elem = substance_elem.find(".//pharm:code", self.NAMESPACES)
+                            if code_elem is not None:
+                                ingredient_substance["code"] = code_elem.get("code", "")
+                                ingredient_substance["display"] = code_elem.get("displayName", "")
+                                ingredient_substance["system"] = code_elem.get("codeSystem", "")
+                            
+                            ingredient_data["ingredient_substance"] = ingredient_substance
+                        
+                        # Quantity (strength)
+                        quantity_elem = ingredient_elem.find(".//pharm:quantity", self.NAMESPACES)
+                        if quantity_elem is not None:
+                            quantity_data = {}
+                            
+                            # Numerator
+                            num_elem = quantity_elem.find(".//pharm:numerator", self.NAMESPACES)
+                            if num_elem is not None:
+                                quantity_data["numerator"] = {
+                                    "value": num_elem.get("value", ""),
+                                    "unit": num_elem.get("unit", "")
+                                }
+                            
+                            # Denominator
+                            denom_elem = quantity_elem.find(".//pharm:denominator", self.NAMESPACES)
+                            if denom_elem is not None:
+                                quantity_data["denominator"] = {
+                                    "value": denom_elem.get("value", ""),
+                                    "unit": denom_elem.get("unit", "")
+                                }
+                            
+                            ingredient_data["quantity"] = quantity_data
+                        
+                        manufactured_material["ingredient"] = ingredient_data
+                    
+                    manufactured_product["manufactured_material"] = manufactured_material
+                
+                consumable_data["manufactured_product"] = manufactured_product
+        
+        except Exception as e:
+            logger.warning(f"Error extracting consumable structure: {e}")
+        
+        return consumable_data
 
     def _parse_supply(self, supply_elem) -> Dict[str, Any]:
         """Parse supply entry"""
