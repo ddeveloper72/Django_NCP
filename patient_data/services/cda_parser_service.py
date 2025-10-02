@@ -1488,7 +1488,29 @@ class CDAParserService:
                     if severity_code_elem is not None:
                         severity_value_elem = severity_obs.find(".//cda:value", self.NAMESPACES)
                         if severity_value_elem is not None:
-                            problem["severity"] = severity_value_elem.get("displayName", severity_value_elem.get("code", ""))
+                            severity_code = severity_value_elem.get("code", "")
+                            severity_display = severity_value_elem.get("displayName", "")
+                            severity_system = severity_value_elem.get("codeSystem", "")
+                            
+                            # Try to resolve severity using CTS if displayName is missing or we want to prioritize CTS
+                            if not severity_display or severity_display.strip() == "" or severity_code:
+                                try:
+                                    translator = TerminologyTranslator()
+                                    resolved_display = translator.resolve_code(severity_code, severity_system)
+                                    if resolved_display and resolved_display.strip():
+                                        severity_display = resolved_display
+                                        logger.info(f"CTS resolved problem severity code {severity_code} to '{severity_display}'")
+                                    else:
+                                        # Try without code system
+                                        resolved_display = translator.resolve_code(severity_code)
+                                        if resolved_display and resolved_display.strip():
+                                            severity_display = resolved_display
+                                            logger.info(f"CTS resolved problem severity code {severity_code} (no system) to '{severity_display}'")
+                                except Exception as e:
+                                    logger.warning(f"Failed to resolve problem severity code {severity_code} via CTS: {e}")
+                            
+                            # Use CTS resolved display name, fallback to original displayName, then code
+                            problem["severity"] = severity_display or severity_code
 
         except Exception as e:
             logger.warning(f"Error extracting problem observation: {e}")
