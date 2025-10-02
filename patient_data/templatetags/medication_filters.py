@@ -437,12 +437,24 @@ def extract_dosage_schedule(medication):
         if medication.get('data', {}).get('frequency_display'):
             return medication['data']['frequency_display']
         
+        # Check for enhanced period information first
+        if medication.get('data', {}).get('period_info'):
+            period_info = medication['data']['period_info']
+            if isinstance(period_info, dict):
+                return period_info.get('period_display', '')
+        
         if medication.get('data', {}).get('period'):
             return medication['data']['period']
         
         # Check direct fields
         if medication.get('frequency_display'):
             return medication['frequency_display']
+        
+        # Check for enhanced period_info at top level
+        if medication.get('period_info'):
+            period_info = medication['period_info']
+            if isinstance(period_info, dict):
+                return period_info.get('period_display', '')
         
         if medication.get('period'):
             return medication['period']

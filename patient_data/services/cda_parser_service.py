@@ -34,7 +34,7 @@ class CDAParserService:
     NAMESPACES = {
         "cda": "urn:hl7-org:v3",
         "xsi": "http://www.w3.org/2001/XMLSchema-instance",
-        "pharm": "urn:ihe:pharm:medication",
+        "pharm": "urn:hl7-org:pharm",  # Fixed: was "urn:ihe:pharm:medication"
     }
 
     # HL7 Patient Summary section codes
@@ -1185,49 +1185,59 @@ class CDAParserService:
                         manufactured_material["form_display"] = alt_form_elem.get("displayName", "")
                         manufactured_material["form_system"] = alt_form_elem.get("codeSystem", "")
                     
-                    # Ingredient information
-                    ingredient_elem = material_elem.find(".//pharm:ingredient", self.NAMESPACES)
-                    if ingredient_elem is not None:
-                        ingredient_data = {}
+                    # Ingredient information - ENHANCED: Extract ALL ingredients
+                    ingredient_elems = material_elem.findall(".//pharm:ingredient", self.NAMESPACES)
+                    if ingredient_elems:
+                        # Store all ingredients for multi-ingredient medications like Triapin
+                        all_ingredients = []
                         
-                        # Ingredient substance
-                        substance_elem = ingredient_elem.find(".//pharm:ingredientSubstance", self.NAMESPACES)
-                        if substance_elem is not None:
-                            ingredient_substance = {}
+                        for ingredient_elem in ingredient_elems:
+                            ingredient_data = {}
                             
-                            # Code
-                            code_elem = substance_elem.find(".//pharm:code", self.NAMESPACES)
-                            if code_elem is not None:
-                                ingredient_substance["code"] = code_elem.get("code", "")
-                                ingredient_substance["display"] = code_elem.get("displayName", "")
-                                ingredient_substance["system"] = code_elem.get("codeSystem", "")
+                            # Ingredient substance
+                            substance_elem = ingredient_elem.find(".//pharm:ingredientSubstance", self.NAMESPACES)
+                            if substance_elem is not None:
+                                ingredient_substance = {}
+                                
+                                # Code
+                                code_elem = substance_elem.find(".//pharm:code", self.NAMESPACES)
+                                if code_elem is not None:
+                                    ingredient_substance["code"] = code_elem.get("code", "")
+                                    ingredient_substance["display"] = code_elem.get("displayName", "")
+                                    ingredient_substance["system"] = code_elem.get("codeSystem", "")
+                                
+                                ingredient_data["ingredient_substance"] = ingredient_substance
                             
-                            ingredient_data["ingredient_substance"] = ingredient_substance
+                            # Quantity (strength)
+                            quantity_elem = ingredient_elem.find(".//pharm:quantity", self.NAMESPACES)
+                            if quantity_elem is not None:
+                                quantity_data = {}
+                                
+                                # Numerator
+                                num_elem = quantity_elem.find(".//pharm:numerator", self.NAMESPACES)
+                                if num_elem is not None:
+                                    quantity_data["numerator"] = {
+                                        "value": num_elem.get("value", ""),
+                                        "unit": num_elem.get("unit", "")
+                                    }
+                                
+                                # Denominator
+                                denom_elem = quantity_elem.find(".//pharm:denominator", self.NAMESPACES)
+                                if denom_elem is not None:
+                                    quantity_data["denominator"] = {
+                                        "value": denom_elem.get("value", ""),
+                                        "unit": denom_elem.get("unit", "")
+                                    }
+                                
+                                ingredient_data["quantity"] = quantity_data
+                            
+                            all_ingredients.append(ingredient_data)
                         
-                        # Quantity (strength)
-                        quantity_elem = ingredient_elem.find(".//pharm:quantity", self.NAMESPACES)
-                        if quantity_elem is not None:
-                            quantity_data = {}
-                            
-                            # Numerator
-                            num_elem = quantity_elem.find(".//pharm:numerator", self.NAMESPACES)
-                            if num_elem is not None:
-                                quantity_data["numerator"] = {
-                                    "value": num_elem.get("value", ""),
-                                    "unit": num_elem.get("unit", "")
-                                }
-                            
-                            # Denominator
-                            denom_elem = quantity_elem.find(".//pharm:denominator", self.NAMESPACES)
-                            if denom_elem is not None:
-                                quantity_data["denominator"] = {
-                                    "value": denom_elem.get("value", ""),
-                                    "unit": denom_elem.get("unit", "")
-                                }
-                            
-                            ingredient_data["quantity"] = quantity_data
-                        
-                        manufactured_material["ingredient"] = ingredient_data
+                        # Store all ingredients (primary ingredient for compatibility, all ingredients for enhanced processing)
+                        if all_ingredients:
+                            manufactured_material["ingredient"] = all_ingredients[0]  # First ingredient for compatibility
+                            manufactured_material["all_ingredients"] = all_ingredients  # All ingredients for enhanced processing
+                            logger.info(f"Extracted {len(all_ingredients)} ingredients for medication")
                     
                     manufactured_product["manufactured_material"] = manufactured_material
                 
@@ -1320,10 +1330,20 @@ class CDAParserService:
         return encounter
 
     def _extract_effective_time(self, time_elem) -> Dict[str, Any]:
-        """Extract effective time information"""
+        """Extract effective time information including PIVL_TS period data"""
         time_info = {}
 
         try:
+            # Capture xsi:type for specialized processing
+            xsi_type = time_elem.get("{http://www.w3.org/2001/XMLSchema-instance}type", "")
+            if xsi_type:
+                time_info["xsi_type"] = xsi_type
+
+            # PIVL_TS specific attributes
+            if xsi_type == "PIVL_TS":
+                time_info["institution_specified"] = time_elem.get("institutionSpecified", "")
+                time_info["operator"] = time_elem.get("operator", "")
+
             # Single time value
             if time_elem.get("value"):
                 time_info["value"] = time_elem.get("value")
@@ -1347,13 +1367,20 @@ class CDAParserService:
                     high_elem.get("value", "")
                 )
 
-            # Periodic interval
+            # Periodic interval (enhanced for PIVL_TS)
             period_elem = time_elem.find(".//cda:period", self.NAMESPACES)
             if period_elem is not None:
+                period_value = period_elem.get("value", "")
+                period_unit = period_elem.get("unit", "")
+                
                 time_info["period"] = {
-                    "value": period_elem.get("value", ""),
-                    "unit": period_elem.get("unit", ""),
+                    "value": period_value,
+                    "unit": period_unit,
                 }
+                
+                # Create human-readable period display
+                if period_value and period_unit:
+                    time_info["period_display"] = f"Period: {period_value} {period_unit}"
 
         except Exception as e:
             logger.warning(f"Error extracting effective time: {e}")

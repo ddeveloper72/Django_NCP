@@ -249,7 +249,7 @@
                                                                 </span>
                                                                 {% if med.data.pharmaceutical_form_code %}
                                                                     <br>
-                                                                    <small class="text-muted mt-1">
+                                                                    <small class="text-muted mt-1 d-block">
                                                                         <i class="fa-solid fa-hashtag me-1"></i>
                                                                         Form Code: {{ med.data.pharmaceutical_form_code }}
                                                                     </small>
@@ -265,7 +265,7 @@
                                                                     </span>
                                                                     {% if med.pharmaceutical_form.displayName and med.pharmaceutical_form.displayName != med.pharmaceutical_form.code %}
                                                                         <br>
-                                                                        <small class="text-muted mt-1">
+                                                                        <small class="text-muted mt-1 d-block">
                                                                             <i class="fa-solid fa-hashtag me-1"></i>
                                                                             Form Code: {{ med.pharmaceutical_form.code }}
                                                                         </small>
@@ -282,7 +282,7 @@
                                                                     </span>
                                                                     {% if med.form.displayName and med.form.displayName != med.form.code %}
                                                                         <br>
-                                                                        <small class="text-muted mt-1">
+                                                                        <small class="text-muted mt-1 d-block">
                                                                             <i class="fa-solid fa-hashtag me-1"></i>
                                                                             Form Code: {{ med.form.code }}
                                                                         </small>
@@ -365,10 +365,13 @@
                                                             {% load medication_filters %}
                                                             {% with schedule=med|extract_dosage_schedule %}
                                                                 {% if schedule and schedule != "Schedule not specified" %}
+                                                                    {% with clean_schedule=schedule|cut:" Code: ACM"|cut:" Code:ACM"|cut:"Code: ACM"|cut:"Code:ACM" %}
                                                                     <span class="frequency fw-bold text-warning">
-                                                                        {{ schedule }}
+                                                                        {{ clean_schedule }}
                                                                     </span>
-                                                                    {% if "before breakfast" in schedule %}
+                                                                    {% endwith %}
+                                                                    {% if "before breakfast" in schedule or "ACM" in schedule %}
+                                                                        <br>
                                                                         <small class="text-muted d-block mt-1">
                                                                             <i class="fa-solid fa-code me-1"></i>
                                                                             Code: ACM

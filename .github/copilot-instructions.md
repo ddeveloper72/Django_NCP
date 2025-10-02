@@ -110,6 +110,38 @@ git commit -m "test: add patient data model unit tests"
 - ePrescription/eDispensation: Electronic prescription workflows across EU member states
 - Clinical Sections: Organized clinical data rendering with badges, filters, and interactive elements
 
+## Pharmaceutical Quantity Standards (UCUM)
+
+### UCUM Units in `<pharm:quantity>` Elements
+
+**Context**: CDA pharmaceutical quantities are expressed using UCUM (Unified Code for Units of Measure) in Physical Quantity (PQ) elements.
+
+**Standard Pattern**:
+```xml
+<pharm:quantity>
+  <numerator xsi:type="PQ" value="100" unit="ug" />
+  <denominator xsi:type="PQ" value="1" unit="1" />
+</pharm:quantity>
+```
+
+**Critical Requirements**:
+- **UCUM Compliance**: All unit attributes in PQ elements MUST use valid UCUM codes
+- **Numerator**: Represents active ingredient amount (e.g., "100 ug" = 100 micrograms)
+- **Denominator**: Represents basis unit (e.g., "1" = per unit, "mL" = per volume)
+- **Semantic Validation**: Numerator/denominator must express valid strength (mg/mL, ug/1)
+- **No Local Codes**: Reject non-UCUM abbreviations (e.g., "mcg" instead of "ug")
+
+**Common UCUM Codes**:
+- `ug` = microgram
+- `mg` = milligram  
+- `g` = gram
+- `mL` = milliliter
+- `1` = dimensionless unit (per unit)
+
+**Implementation**: Extract and validate UCUM units in CDA parser service, ensure CTS integration handles quantity display with proper units.
+
+**Detailed Guidelines**: See [UCUM Validation Checklist](.github/ucum-validation-checklist.md) for comprehensive implementation and testing requirements.
+
 ## European Healthcare Compliance
 
 - GDPR: Data protection, patient consent, audit logging, and data retention
@@ -130,6 +162,7 @@ git commit -m "test: add patient data model unit tests"
 3. Security First: Implement proper authentication, session management, and audit logging
 4. SCSS Compliance: Use SCSS Quick Reference checklists
 5. Test Coverage: Write unit tests for all new functionality
+6. UCUM Validation: Ensure pharmaceutical quantities use valid UCUM codes in CDA processing
 
 ### When Debugging Issues
 
