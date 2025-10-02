@@ -356,9 +356,9 @@ class TerminologyTranslator:
 
 **Integration with .specs Documentation:**
 
-- Follows [SCSS Architecture Standards](../.specs/scss-architecture-standards.md)
-- Implements [SCSS Component Patterns](../.specs/scss-component-patterns.md)
-- Uses [SCSS Quick Reference](../.specs/scss-quick-reference.md) guidelines
+- Follows [SCSS Architecture Standards](scss-architecture-standards.md)
+- Implements [SCSS Component Patterns](scss-component-patterns.md)
+- Uses [SCSS Quick Reference](scss-quick-reference.md) guidelines
 
 **Key Architectural Principles:**
 
@@ -752,7 +752,7 @@ class PatientCDAViewTests(TestCase):
 
 #### Priority Matrix (High to Low)
 
-1. **Testing Implementation** - [Testing and Modular Code Standards](../.specs/testing-and-modular-code-standards.md)
+1. **Testing Implementation** - [Testing and Modular Code Standards](testing-and-modular-code-standards.md)
 2. **Inline CSS/JS Removal** - Frontend structure compliance
 3. **Mock Data Replacement** - Real data integration
 4. **View Refactoring** - CBV conversion for reusability
@@ -760,9 +760,9 @@ class PatientCDAViewTests(TestCase):
 
 #### Integration with .specs Documentation
 
-- **Starter Prompt Integration**: All TODO items reference [Starter Prompt](../.specs/starter-prompt.md) workflow
-- **Feature Template Usage**: New features follow [Feature Template](../.specs/feature-template.md) requirements
-- **Quality Gates**: All items must pass quality gates in [Comprehensive Development Methodology](../.specs/comprehensive-development-methodology.md)
+- **Starter Prompt Integration**: All TODO items reference [Starter Prompt](starter-prompt.md) workflow
+- **Feature Template Usage**: New features follow [Feature Template](feature-template.md) requirements
+- **Quality Gates**: All items must pass quality gates in [Comprehensive Development Methodology](comprehensive-development-methodology.md)
 
 ## Architecture Evolution & Future Planning
 
@@ -814,8 +814,8 @@ By following this architectural guide, developers can understand the complete sy
 
 ## Integration References
 
-- **[Retro-Spec Current State](../.specs/retro-spec.md)** - Current implementation status
-- **[SCSS Architecture Standards](../.specs/scss-architecture-standards.md)** - Frontend styling requirements
-- **[Testing and Modular Code Standards](../.specs/testing-and-modular-code-standards.md)** - Backend quality requirements
-- **[Comprehensive Development Methodology](../.specs/comprehensive-development-methodology.md)** - Complete development workflow
-- **[Starter Prompt](../.specs/starter-prompt.md)** - Development session initialization
+- **[Retro-Spec Current State](retro-spec.md)** - Current implementation status
+- **[SCSS Architecture Standards](scss-architecture-standards.md)** - Frontend styling requirements
+- **[Testing and Modular Code Standards](testing-and-modular-code-standards.md)** - Backend quality requirements
+- **[Comprehensive Development Methodology](comprehensive-development-methodology.md)** - Complete development workflow
+- **[Starter Prompt](starter-prompt.md)** - Development session initialization

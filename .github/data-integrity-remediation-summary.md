@@ -124,12 +124,12 @@ Template Rendering
 
 ## Documentation Created
 
-1. **[Pharmaceutical Form Extraction Data Flow](../.specs/pharmaceutical-form-extraction-data-flow.md)**
+1. **[Pharmaceutical Form Extraction Data Flow](pharmaceutical-form-extraction-data-flow.md)**
    - Complete technical architecture documentation
    - Code examples and implementation details
    - Testing and validation procedures
 
-2. **[CDA → CTS → Template Patterns Index](../.specs/cda-cts-template-patterns-index.md)**
+2. **[CDA → CTS → Template Patterns Index](cda-cts-template-patterns-index.md)**
    - Central reference for CDA processing patterns
    - Anti-patterns documentation (what was removed)
    - Best practices for future development
@@ -170,9 +170,9 @@ Template Rendering
 - `patient_data/templatetags/medication_filters.py`
 
 ### Documentation (3 files)
-- `.specs/pharmaceutical-form-extraction-data-flow.md`
-- `.specs/cda-cts-template-patterns-index.md`
-- `.specs/data-integrity-remediation-summary.md` (this file)
+- `.github/pharmaceutical-form-extraction-data-flow.md`
+- `.github/cda-cts-template-patterns-index.md`
+- `.github/data-integrity-remediation-summary.md` (this file)
 
 ## Future Maintenance
 

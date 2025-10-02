@@ -250,7 +250,7 @@ def test_pharmaceutical_form_extraction():
 - [CTS Integration Guide](../docs/cts-integration-guide.md)
 - [European Healthcare Compliance](../docs/european-healthcare-compliance.md)
 - [FHIR R4 Medication Mapping](../docs/fhir-medication-mapping.md)
-- [Testing Standards](../.specs/testing-and-modular-code-standards.md)
+- [Testing Standards](testing-and-modular-code-standards.md)
 
 ---
 

@@ -125,7 +125,7 @@ git commit -m "test: add patient data model unit tests"
 
 ### When Implementing Features
 
-1. Check Specifications: Review existing .specs/ files for requirements and patterns
+1. Check Specifications: Review existing .github/ files for requirements and patterns
 2. Follow Architecture: Use established service layer patterns, model structures, and template organization
 3. Security First: Implement proper authentication, session management, and audit logging
 4. SCSS Compliance: Use SCSS Quick Reference checklists
@@ -151,7 +151,7 @@ git commit -m "test: add patient data model unit tests"
 django_ncp/
 ├── .github/
 │   ├── [copilot-instructions.md](http://_vscodecontentref_/2)      # This file
-│   └── .specs/                      # Comprehensive specification system
+│   └── [specifications]/           # Comprehensive specification system
 ├── eu_ncp_server/                   # Django configuration (14kB settings.py)
 ├── patient_data/                    # Healthcare data models (30kB models.py)
 ├── ncp_gateway/                     # European healthcare interoperability

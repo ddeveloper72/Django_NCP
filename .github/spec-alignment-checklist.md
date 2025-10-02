@@ -58,7 +58,7 @@ This checklist is based on the Retro‑Spec and is used to track progress in ali
 - [x] **Create `/docs/todo.md`** for ongoing tasks *(Completed 2025-09-20)*
 - [x] **Create `/docs/decisions/`** folder for architectural decisions *(Completed 2025-09-20)*
 - [ ] **Backfill decision log** with past major choices
-- [ ] **Ensure all new features start with a spec file** in `.specs/`
+- [ ] **Ensure all new features start with a spec file** in `.github/`
 - [ ] **Add PR checklist** to enforce spec compliance
 
 ---
