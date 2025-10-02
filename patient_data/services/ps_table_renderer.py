@@ -228,19 +228,12 @@ class PSTableRenderer:
             "milk": ("SNOMED", "425525006"),  # Milk allergy
         }
 
-        # Medical conditions/problems
-        condition_patterns = {
-            "diabetes": ("ICD-10", "E11.9"),  # Type 2 diabetes
-            "hypertension": ("ICD-10", "I10"),  # Essential hypertension
-            "asthma": ("ICD-10", "J45.9"),  # Asthma
-            "copd": ("ICD-10", "J44.1"),  # COPD
-            "depression": ("ICD-10", "F32.9"),  # Depression
-            "anxiety": ("ICD-10", "F41.9"),  # Anxiety
-            "migraine": ("ICD-10", "G43.9"),  # Migraine
-            "arthritis": ("ICD-10", "M13.9"),  # Arthritis
-        }
+        # Remove hardcoded medical condition mappings - these should come from actual CDA codes
+        # and be resolved through the CTS terminology service, not hardcoded patterns
+        # All medical conditions should be extracted from the CDA document with proper codes
 
-        # Frequency/timing patterns
+        # Frequency/timing patterns - these should also be extracted from CDA effectiveTime
+        # and resolved through CTS, not pattern matched from text
         frequency_patterns = {
             "daily": ("SNOMED", "229797004"),  # Once daily
             "quotidien": ("SNOMED", "229797004"),  # French daily
@@ -255,20 +248,17 @@ class PSTableRenderer:
             "as needed": ("SNOMED", "394707008"),
         }
 
+        # DISABLED: All hardcoded pattern matching removed for data integrity
+        # Clinical codes should be extracted from CDA and resolved via CTS service
+        
         # Check medication brand names and active ingredients
-        for pattern, (system, code) in medication_patterns.items():
-            if pattern in term_lower:
-                return (system, code)
-
-        # Check routes of administration
-        for pattern, (system, code) in route_patterns.items():
-            if pattern in term_lower:
-                return (system, code)
-
+        # DISABLED: medication_patterns removed - use CDA medicationCode
+        
+        # Check routes of administration  
+        # DISABLED: route_patterns removed - use CDA routeCode
+        
         # Check pharmaceutical forms
-        for pattern, (system, code) in dosage_form_patterns.items():
-            if pattern in term_lower:
-                return (system, code)
+        # DISABLED: dosage_form_patterns removed - use CDA formCode
 
         # Check dosage units (look for dosage patterns like "10mg", "5ml")
         import re
@@ -285,11 +275,9 @@ class PSTableRenderer:
             if pattern in term_lower:
                 return (system, code)
 
-        # Check medical conditions
-        for pattern, (system, code) in condition_patterns.items():
-            if pattern in term_lower:
-                return (system, code)
-
+        # Remove hardcoded pattern matching - medical conditions should be extracted
+        # from actual CDA codes and resolved through terminology services
+        
         # Check frequency patterns
         for pattern, (system, code) in frequency_patterns.items():
             if pattern in term_lower:

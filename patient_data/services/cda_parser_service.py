@@ -1085,27 +1085,30 @@ class CDAParserService:
                     form_elem = material_elem.find(".//pharm:formCode", self.NAMESPACES)
                     if form_elem is not None:
                         form_code = form_elem.get("code", "")
+                        form_code_system = form_elem.get("codeSystem", "")
                         form_display = form_elem.get("displayName", "")
                         
                         # Try to resolve form code using CTS if displayName is empty
                         if form_code and not form_display:
                             try:
                                 translator = TerminologyTranslator()
-                                resolved_display = translator.resolve_code(form_code)
+                                # Pass both code AND codeSystem to CTS for proper resolution
+                                resolved_display = translator.resolve_code(form_code, form_code_system)
                                 if resolved_display:
                                     form_display = resolved_display
-                                    logger.info(f"CTS resolved pharmaceutical form code {form_code} to '{form_display}'")
+                                    logger.info(f"CTS resolved pharmaceutical form code {form_code} (system: {form_code_system}) to '{form_display}'")
                             except Exception as e:
                                 logger.warning(f"Failed to resolve pharmaceutical form code {form_code} via CTS: {e}")
                         
                         med_info["formCode"] = {
                             "code": form_code,
-                            "codeSystem": form_elem.get("codeSystem", ""),
+                            "codeSystem": form_code_system,
                             "displayName": form_display,
                         }
                         
                         # Also add for easy access
                         med_info["pharmaceutical_form_code"] = form_code
+                        med_info["pharmaceutical_form_code_system"] = form_code_system
                         if form_display:
                             med_info["pharmaceutical_form"] = form_display
                         

@@ -3656,21 +3656,22 @@ class EnhancedCDAProcessor:
             return {}
 
     def _lookup_atc_code(self, atc_code: str) -> str:
-        """Lookup ATC code to get active ingredient name"""
-        # Common ATC codes for medication ingredients
-        atc_lookup = {
-            "H03AA01": "levothyroxine sodium",
-            "C09AA05": "ramipril", 
-            "C08CA02": "felodipine",
-            "A10AE05": "insulin degludec",
-            "J01CA04": "amoxicillin",
-            "J01CR02": "amoxicillin and clavulanic acid",
-            "R03AK04": "salbutamol and ipratropium bromide",
-            "R03AC02": "salbutamol",
-            "R03BB01": "ipratropium bromide",
-        }
-        
-        return atc_lookup.get(atc_code, "")
+        """Lookup ATC code to get active ingredient name using CTS terminology service"""
+        if not atc_code:
+            return ""
+            
+        try:
+            # Use CTS terminology service to resolve ATC codes
+            resolved_name = self.terminology_service.resolve_code(atc_code)
+            if resolved_name:
+                logger.info(f"CTS resolved ATC code {atc_code} to '{resolved_name}'")
+                return resolved_name
+            else:
+                logger.warning(f"CTS could not resolve ATC code: {atc_code}")
+                return ""
+        except Exception as e:
+            logger.error(f"Error resolving ATC code {atc_code}: {e}")
+            return ""
 
     def _lookup_route_code(self, route_code: str) -> str:
         """Lookup route code to get administration route using CTS Master Value Catalogue"""

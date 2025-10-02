@@ -49,22 +49,9 @@ def extract_brand_name(medication_name):
     # For simple medication names, return the name as the brand
     medication_name = medication_name.strip()
     
-    # Known brand medications - return as-is since they're already brand names
-    known_brands = {
-        'eutirox': 'Eutirox',
-        'triapin': 'Triapin',
-        'tresiba': 'Tresiba',
-        'augmentin': 'Augmentin',
-        'combivent': 'Combivent',
-        'lantus': 'Lantus',
-        'novolog': 'NovoLog',
-        'humalog': 'Humalog'
-    }
-    
+    # Extract brand name from medication name using patterns only
+    # No hardcoded brand mappings - use actual data from CDA
     name_lower = medication_name.lower()
-    for brand_key, brand_name in known_brands.items():
-        if brand_key in name_lower:
-            return brand_name
     
     # Pattern to extract brand name before colon or first word if all caps
     brand_patterns = [
@@ -138,28 +125,30 @@ def extract_active_ingredient(medication):
     if not medication_name:
         return ""
     
-    # Strategy 1: Known medication active ingredients (hardcoded mappings)
-    active_ingredients = {
-        'eutirox': 'Levothyroxine sodium',
-        'aspirin': 'Aspirin',
-        'clarithromycin': 'Clarithromycin',
-        'triapin': 'Ramipril + Felodipine', 
-        'tresiba': 'Insulin degludec',
-        'augmentin': 'Amoxicillin + Clavulanic acid',
-        'combivent': 'Ipratropium bromide + Salbutamol',
-        'lantus': 'Insulin glargine',
-        'novolog': 'Insulin aspart',
-        'humalog': 'Insulin lispro'
-    }
+    # Strategy 1: Try to get active ingredient from medication data structure first
+    if isinstance(medication, dict):
+        # Check for extracted active ingredient data
+        if medication.get('data', {}).get('ingredient_display'):
+            return medication['data']['ingredient_display']
+        
+        if medication.get('active_ingredient', {}).get('display_name'):
+            return medication['active_ingredient']['display_name']
+        
+        if medication.get('ingredient_display'):
+            return medication['ingredient_display']
+    
+    # Strategy 2: Check object attributes for extracted data
+    if hasattr(medication, 'active_ingredient'):
+        if hasattr(medication.active_ingredient, 'display_name'):
+            return medication.active_ingredient.display_name
+    
+    if hasattr(medication, 'ingredient_display'):
+        return medication.ingredient_display
     
     name_lower = medication_name.lower().strip()
     
-    # Check for exact matches first
-    for med_name, ingredient in active_ingredients.items():
-        if med_name in name_lower:
-            return ingredient
-    
-    # Strategy 2: Extract active ingredient from medication name using patterns
+    # Strategy 3: Extract active ingredient from medication name using patterns
+    # Note: This should only be used as a last resort when CDA parsing fails
     import re
     
     # Clean up the medication name to extract the active ingredient
@@ -259,25 +248,32 @@ def smart_dose_form(medication, route=None):
     # Check medication name for dose form clues
     name_lower = medication_name.lower()
     
-    # Map known medication names to likely dose forms
-    medication_dose_forms = {
-        'eutirox': 'Tablet',
-        'aspirin': 'Enteric-coated tablet',  # NEW: from CDA data
-        'clarithromycin': 'Tablet',  # NEW: from CDA data
-        'triapin': 'Tablet', 
-        'tresiba': 'Pre-filled pen',
-        'augmentin': 'Tablet',
-        'combivent': 'Nebuliser solution',
-        'insulin': 'Solution for injection',
-        'lantus': 'Pre-filled pen',
-        'novolog': 'Pre-filled pen',
-        'humalog': 'Pre-filled pen',
-    }
+    # First try to get dose form from extracted medication data
+    if isinstance(medication, dict):
+        # Check for extracted pharmaceutical form data
+        if medication.get('data', {}).get('pharmaceutical_form'):
+            return medication['data']['pharmaceutical_form']
+        
+        if medication.get('pharmaceutical_form', {}).get('displayName'):
+            return medication['pharmaceutical_form']['displayName']
+        
+        if medication.get('form', {}).get('displayName'):
+            return medication['form']['displayName']
+        
+        if medication.get('dose_form'):
+            return medication['dose_form']
     
-    # Check for exact matches first
-    for med_name, dose_form in medication_dose_forms.items():
-        if med_name in name_lower:
-            return dose_form
+    # Check object attributes for extracted data
+    if hasattr(medication, 'pharmaceutical_form'):
+        if hasattr(medication.pharmaceutical_form, 'displayName'):
+            return medication.pharmaceutical_form.displayName
+    
+    if hasattr(medication, 'form'):
+        if hasattr(medication.form, 'displayName'):
+            return medication.form.displayName
+    
+    # If no extracted data available, try to infer from medication name patterns
+    # Note: This should only be used as a last resort when CDA parsing fails
     
     # Check medication name for dose form clues
     if any(word in name_lower for word in ['pen', 'injection', 'injectable']):
