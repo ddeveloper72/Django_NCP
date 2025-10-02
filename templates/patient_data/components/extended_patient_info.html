@@ -50,15 +50,16 @@
                 {% if has_l1_cda and not has_l3_cda %}disabled title="Clinical data not available for L1 CDA documents"{% elif not processed_sections|length and not enhanced_allergies|length and not medications|length and not allergies|length and not problems|length and not procedures|length and not vital_signs|length %}disabled title="No structured clinical data available"{% endif %}>
             <i class="fa-solid fa-notes-medical me-1"></i>Clinical Information
             <!-- DEBUG: med={{medications|length}} all={{allergies|length}} prob={{problems|length}} vs={{vital_signs|length}} proc={{procedures|length}} -->
-            <!-- DEBUG: has_l1_cda={{has_l1_cda}} has_l3_cda={{has_l3_cda}} processed_sections={{processed_sections|length}} -->
-            {% if medications or allergies or problems or vital_signs or procedures %}
+            <!-- DEBUG: enhanced_all={{enhanced_allergies|length}} processed={{processed_sections|length}} -->
+            <!-- DEBUG: has_l1_cda={{has_l1_cda}} has_l3_cda={{has_l3_cda}} -->
+            {% if medications and medications|length > 0 or allergies and allergies|length > 0 or problems and problems|length > 0 or vital_signs and vital_signs|length > 0 or procedures and procedures|length > 0 %}
             <span class="badge bg-warning ms-2">
                 {% with total_clinical=medications|length|add:allergies|length|add:problems|length|add:vital_signs|length|add:procedures|length %}
                 {{ total_clinical }}
                 {% endwith %}
             </span>
             {% elif enhanced_allergies and enhanced_allergies|length > 0 %}
-            <span class="badge bg-success ms-2">{{ enhanced_allergies|length }} Enhanced</span>
+            <span class="badge bg-success ms-2">{{ enhanced_allergies|length }}</span>
             {% elif processed_sections and processed_sections|length > 0 %}
             <span class="badge bg-info ms-2">{{ processed_sections|length }}</span>
             {% else %}
