@@ -84,7 +84,7 @@
 }
 
 // =================================================================
-// Title Level Collapsible (Clinical section categories)
+// Title Level Collapsible (Clinical section categories) 
 // =================================================================
 .collapsible-label-title {
     display: block;
@@ -92,15 +92,36 @@
     color: $white;
     font-size: 15px;
     text-align: left;
-    padding: 0.5rem;
+    padding: 0.75rem 1rem;
     border: 2px solid $hco-primary-teal-dark;
-    background: $hco-primary-teal-dark;
+    background: linear-gradient(135deg, $hco-primary-teal-dark 0%, lighten($hco-primary-teal-dark, 5%) 100%);
     cursor: pointer;
-    border-radius: 3px;
+    border-radius: 6px;
     transition: all 0.25s ease-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
+    // Enhanced hover effect - improve UX without color change that hides icons
     &:hover {
-        color: $hco-primary-teal;
+        background: linear-gradient(135deg, lighten($hco-primary-teal-dark, 3%) 0%, lighten($hco-primary-teal-dark, 8%) 100%);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+    }
+
+    // CRITICAL: Ensure FontAwesome icons remain visible on hover - highest specificity
+    &:hover i,
+    &:hover .fa-solid,
+    &:hover .fa-regular,
+    &:hover .fa-light,
+    &:hover .fa-brands,
+    i:hover,
+    .fa-solid:hover,
+    .fa-regular:hover,
+    .fa-light:hover,
+    .fa-brands:hover {
+        color: $white !important;
+        fill: $white !important;
+        transform: none !important;
+        transition: none !important;
     }
 
     // Chevron indicator

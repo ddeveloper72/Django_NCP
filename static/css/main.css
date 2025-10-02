@@ -1104,30 +1104,16 @@ h6 {
   font-weight: var(--healthcare-heading-weight);
 }
 
-/* Healthcare Badge Styling */
+/* Healthcare Badge Styling - See _badges-and-animations.scss for complete badge system */
 .badge {
   border-radius: 4px;
   font-weight: 500;
   letter-spacing: 0.5px;
 }
 
-.badge.bg-primary {
-  background-color: var(--healthcare-blue) !important;
-}
-
-.badge.bg-success {
-  background-color: var(--healthcare-green) !important;
-}
-
-.badge.bg-warning {
-  background-color: var(--healthcare-orange) !important;
-}
-
-.badge.bg-danger {
-  background-color: var(--healthcare-red) !important;
-}
-
-/* Language Flag Badge Styling */
+/* Note: Badge colors are now centrally managed in _badges-and-animations.scss */
+/* The following styles override specific badge types for healthcare theming */
+/* Language Flag Badge Styling - Special case for enhanced visual appeal */
 .badge.bg-info {
   background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
   color: white !important;
@@ -3017,6 +3003,34 @@ body nav .badge:hover i.fa-user-injured,
 
 /* Unselected tab button styling removed - using Enhanced CDA approach */
 /* Badge styling is now handled by static/scss/pages/_enhanced_cda.scss */
+/* Stop ALL icon color changes on hover for clinical sections */
+.collapsible-label-title:hover i,
+.collapsible-label-title:hover .fa-solid,
+.collapsible-label-title:hover .fa-regular,
+.collapsible-label-title:hover .fa-light,
+.collapsible-label-title:hover .fa-brands,
+.collapsible-label-title i:hover,
+.collapsible-label-title .fa-solid:hover,
+.collapsible-label-title .fa-regular:hover,
+.collapsible-label-title .fa-light:hover,
+.collapsible-label-title .fa-brands:hover {
+  color: white !important;
+  fill: white !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Override any global hover effects specifically for clinical sections */
+.clinical-section .collapsible-label-title:hover i,
+.clinical-section .collapsible-label-title:hover .fa-solid,
+.clinical-section .collapsible-label-title:hover .fa-regular,
+.clinical-section .collapsible-label-title:hover .fa-light,
+.clinical-section .collapsible-label-title:hover .fa-brands {
+  color: white !important;
+  fill: white !important;
+  transform: none !important;
+}
+
 /* Performance & Accessibility Enhancements */
 /* Lazy loading image transitions */
 img[data-src] {
@@ -8445,30 +8459,167 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   background-color: #f59e0b;
 }
 
+.badge,
+.badge-primary,
+.badge-secondary,
+.badge-success,
+.badge-danger,
+.badge-warning,
+.badge-info,
+.badge-light,
+.badge-dark {
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  padding: 0.25em 0.6em !important;
+  font-size: 0.75em !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  vertical-align: baseline !important;
+  border-radius: 0.375rem !important;
+}
+
+.tab-button .badge {
+  align-self: center !important;
+  margin-top: 0 !important;
+  margin-left: 0.5rem !important;
+  vertical-align: middle !important;
+}
+
+.nav-tabs-healthcare .nav-link .badge {
+  align-self: center !important;
+  margin-left: 0.5rem !important;
+}
+
+.card .nav-tabs-healthcare .nav-link .badge {
+  align-self: center !important;
+  margin-left: 0.5rem !important;
+}
+
+.clinical-table .medical-codes-container .badge,
+.clinical-table .badge {
+  margin: 0.125rem !important;
+  font-size: 0.7rem !important;
+}
+
+.clinical-accordion-item .accordion-button .badge {
+  margin-left: auto !important;
+  align-self: center !important;
+}
+
 .badge.bg-primary {
-  background-color: #0d6efd !important;
+  background-color: var(--healthcare-blue, #0d6efd) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
 }
 .badge.bg-success {
-  background-color: #198754 !important;
+  background-color: var(--healthcare-success, #198754) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
 }
 .badge.bg-warning {
-  background-color: #fd7e14 !important;
+  background-color: var(--healthcare-warning, #fd7e14) !important;
+  color: var(--healthcare-text-dark, #000000) !important;
 }
 .badge.bg-danger {
-  background-color: #dc3545 !important;
+  background-color: var(--healthcare-danger, #dc3545) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
 }
 .badge.bg-info {
-  background-color: #0dcaf0 !important;
+  background-color: var(--healthcare-info, #0dcaf0) !important;
+  color: var(--healthcare-text-dark, #000000) !important;
 }
 .badge.bg-secondary {
-  background-color: #6c757d !important;
+  background-color: var(--healthcare-secondary, #6c757d) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
 }
 .badge.bg-dark {
-  background-color: #212529 !important;
+  background-color: var(--healthcare-dark, #212529) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
+}
+.badge.bg-light {
+  background-color: var(--healthcare-light, #f8f9fa) !important;
+  color: var(--healthcare-text-dark, #000000) !important;
+  border: 1px solid var(--healthcare-border, #dee2e6) !important;
 }
 .badge.bg-outline-secondary {
-  color: #6c757d !important;
-  border-color: #6c757d !important;
+  color: var(--healthcare-secondary, #6c757d) !important;
+  border: 1px solid var(--healthcare-secondary, #6c757d) !important;
+  background-color: transparent !important;
+}
+
+.badge:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.tab-button.active .badge {
+  background-color: var(--healthcare-blue, #0d6efd) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
+  border: 2px solid var(--healthcare-text-light, #ffffff) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.card-header.bg-primary .badge {
+  background-color: var(--healthcare-text-light, #ffffff) !important;
+  color: var(--healthcare-blue, #0d6efd) !important;
+  border: 1px solid var(--healthcare-blue, #0d6efd) !important;
+}
+
+@media (max-width: 576px) {
+  .badge {
+    font-size: 0.65em !important;
+    padding: 0.2em 0.4em !important;
+  }
+  .clinical-table .badge {
+    font-size: 0.6rem !important;
+    padding: 0.15em 0.3em !important;
+  }
+  .tab-button .badge {
+    font-size: 0.7em !important;
+    margin-left: 0.3rem !important;
+  }
+}
+@media (min-width: 1200px) {
+  .badge {
+    font-size: 0.8em !important;
+  }
+  .clinical-table .badge {
+    font-size: 0.75rem !important;
+  }
+}
+.badge-rounded {
+  border-radius: 50px !important;
+}
+
+.badge-square {
+  border-radius: 0.25rem !important;
+}
+
+.badge-large {
+  font-size: 0.9em !important;
+  padding: 0.375em 0.75em !important;
+}
+
+.badge-small {
+  font-size: 0.65em !important;
+  padding: 0.2em 0.4em !important;
+}
+
+.badge-xs {
+  font-size: 0.55em !important;
+  padding: 0.15em 0.3em !important;
+}
+
+.badge-icon .badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+}
+.badge-icon .badge i {
+  font-size: 0.9em !important;
+  line-height: 1 !important;
 }
 
 @keyframes fadeIn {
@@ -9008,7 +9159,6 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 }
 
 .hero-badge .badge {
-  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   position: relative !important;
@@ -9024,7 +9174,6 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   transform: none !important;
   text-align: center !important;
   vertical-align: middle !important;
-  flex-shrink: 0 !important;
 }
 .hero-badge .badge i {
   font-size: 1.2em !important;
@@ -9166,7 +9315,6 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .badge-info,
 .badge-light,
 .badge-dark {
-  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   position: relative !important;
@@ -9190,7 +9338,6 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   transform: none !important;
   text-align: center !important;
   vertical-align: middle !important;
-  flex-shrink: 0 !important;
 }
 .badge i.fa, .badge i.fas, .badge i.far, .badge i.fal, .badge i.fat, .badge i.fad, .badge i.fab, .badge i[class*=fa-],
 .badge-primary i.fa,
@@ -11749,15 +11896,29 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   color: #ffffff;
   font-size: 15px;
   text-align: left;
-  padding: 0.5rem;
+  padding: 0.75rem 1rem;
   border: 2px solid #005b5f;
-  background: #005b5f;
+  background: linear-gradient(135deg, #005b5f 0%, rgb(0, 115.4263157895, 120.5) 100%);
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 6px;
   transition: all 0.25s ease-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .collapsible-label-title:hover {
-  color: #007b7f;
+  background: linear-gradient(135deg, rgb(0, 105.6557894737, 110.3) 0%, rgb(0, 130.0821052632, 135.8) 100%);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+.collapsible-label-title:hover i, .collapsible-label-title:hover .fa-solid, .collapsible-label-title:hover .fa-regular, .collapsible-label-title:hover .fa-light, .collapsible-label-title:hover .fa-brands,
+.collapsible-label-title i:hover,
+.collapsible-label-title .fa-solid:hover,
+.collapsible-label-title .fa-regular:hover,
+.collapsible-label-title .fa-light:hover,
+.collapsible-label-title .fa-brands:hover {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  transform: none !important;
+  transition: none !important;
 }
 .collapsible-label-title::before {
   content: "";
@@ -17267,11 +17428,27 @@ main {
 .card-header.bg-dark:hover .far,
 .card-header.bg-dark:hover .fal,
 .card-header.bg-dark:hover .fab,
-.card-header.bg-dark:hover .fa {
+.card-header.bg-dark:hover .fa,
+.card-header.bg-teal:hover i,
+.card-header.bg-teal:hover .fa-solid,
+.card-header.bg-teal:hover .far,
+.card-header.bg-teal:hover .fal,
+.card-header.bg-teal:hover .fab,
+.card-header.bg-teal:hover .fa {
   color: var(--healthcare-text-light) !important;
   fill: var(--healthcare-text-light) !important;
   transform: none !important;
   transition: none !important;
+}
+
+.collapsible-label-title:hover i,
+.collapsible-label-title:hover .fa-solid,
+.collapsible-label-title:hover .fa-regular,
+.collapsible-label-title:hover .fa-light,
+.collapsible-label-title:hover .fa-brands {
+  color: white !important;
+  fill: white !important;
+  transform: none !important;
 }
 
 @media (max-width: 480px) {

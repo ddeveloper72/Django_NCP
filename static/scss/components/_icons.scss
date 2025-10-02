@@ -415,7 +415,7 @@
 // ========================================
 
 .hero-badge .badge {
-  @include perfect-icon-center; // Apply perfect centering mixin for cross-hair alignment
+  @include badge-icon-center; // Apply badge-specific centering (no display override)
 
   i {
     font-size: 1.2em !important;
@@ -614,7 +614,7 @@
 .badge-info,
 .badge-light,
 .badge-dark {
-  @include perfect-icon-center; // Apply cross-hair alignment to ALL badges
+  @include badge-icon-center; // Apply badge-specific alignment (no display override)
 
   i {
     @include fontawesome-center-override; // Override FontAwesome positioning

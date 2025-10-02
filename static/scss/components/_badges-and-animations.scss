@@ -1,47 +1,250 @@
-// Badge Colors - System badge colors consistent with backend mapping
+// ========================================
+// UNIVERSAL BADGE STYLING SYSTEM
+// Consolidates all badge styles from across the project
+// ========================================
+
+// ========================================
+// CORE BADGE ALIGNMENT & LAYOUT
+// Universal alignment properties for all badge types
+// ========================================
+.badge, 
+.badge-primary, 
+.badge-secondary, 
+.badge-success, 
+.badge-danger, 
+.badge-warning, 
+.badge-info, 
+.badge-light, 
+.badge-dark {
+    // Universal alignment properties
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    
+    // Consistent spacing and sizing
+    padding: 0.25em 0.6em !important;
+    font-size: 0.75em !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    vertical-align: baseline !important;
+    border-radius: 0.375rem !important;
+}
+
+// ========================================
+// TAB BUTTON BADGE STYLING
+// Specialized alignment for badges within tab buttons
+// ========================================
+.tab-button .badge {
+    align-self: center !important;
+    margin-top: 0 !important;
+    margin-left: 0.5rem !important;
+    vertical-align: middle !important;
+}
+
+// ========================================
+// NAVIGATION TAB BADGE STYLING  
+// Healthcare-specific tab navigation badges
+// ========================================
+.nav-tabs-healthcare .nav-link .badge {
+    align-self: center !important;
+    margin-left: 0.5rem !important;
+}
+
+.card .nav-tabs-healthcare .nav-link .badge {
+    align-self: center !important;
+    margin-left: 0.5rem !important;
+}
+
+// ========================================
+// CLINICAL TABLE BADGE STYLING
+// Medical codes and clinical data badges
+// ========================================
+.clinical-table .medical-codes-container .badge,
+.clinical-table .badge {
+    margin: 0.125rem !important;
+    font-size: 0.7rem !important;
+}
+
+// ========================================
+// ACCORDION BADGE STYLING
+// Clinical accordion header badges
+// ========================================
+.clinical-accordion-item .accordion-button .badge {
+    margin-left: auto !important;
+    align-self: center !important;
+}
+
+// ========================================
+// BADGE COLOR SYSTEM
+// Healthcare-themed badge colors with medical terminology mapping
+// ========================================
 .badge {
+  // Primary Healthcare Blue
   &.bg-primary {
-    background-color: #0d6efd !important;
+    background-color: var(--healthcare-blue, #0d6efd) !important;
+    color: var(--healthcare-text-light, #ffffff) !important;
   }
 
-  // SNOMED CT
+  // SNOMED CT - Success Green
   &.bg-success {
-    background-color: #198754 !important;
+    background-color: var(--healthcare-success, #198754) !important;
+    color: var(--healthcare-text-light, #ffffff) !important;
   }
 
-  // LOINC
+  // LOINC - Warning Orange
   &.bg-warning {
-    background-color: #fd7e14 !important;
+    background-color: var(--healthcare-warning, #fd7e14) !important;
+    color: var(--healthcare-text-dark, #000000) !important;
   }
 
-  // RxNorm
+  // RxNorm - Danger Red
   &.bg-danger {
-    background-color: #dc3545 !important;
+    background-color: var(--healthcare-danger, #dc3545) !important;
+    color: var(--healthcare-text-light, #ffffff) !important;
   }
 
-  // ICD
+  // ICD - Info Light Blue
   &.bg-info {
-    background-color: #0dcaf0 !important;
+    background-color: var(--healthcare-info, #0dcaf0) !important;
+    color: var(--healthcare-text-dark, #000000) !important;
   }
 
-  // UCUM
+  // UCUM - Secondary Gray
   &.bg-secondary {
-    background-color: #6c757d !important;
+    background-color: var(--healthcare-secondary, #6c757d) !important;
+    color: var(--healthcare-text-light, #ffffff) !important;
   }
 
-  // Legacy
+  // Legacy - Dark
   &.bg-dark {
-    background-color: #212529 !important;
+    background-color: var(--healthcare-dark, #212529) !important;
+    color: var(--healthcare-text-light, #ffffff) !important;
   }
 
-  // ATC
+  // Light - High contrast
+  &.bg-light {
+    background-color: var(--healthcare-light, #f8f9fa) !important;
+    color: var(--healthcare-text-dark, #000000) !important;
+    border: 1px solid var(--healthcare-border, #dee2e6) !important;
+  }
+
+  // ATC - Outline style
   &.bg-outline-secondary {
-    color: #6c757d !important;
-    border-color: #6c757d !important;
+    color: var(--healthcare-secondary, #6c757d) !important;
+    border: 1px solid var(--healthcare-secondary, #6c757d) !important;
+    background-color: transparent !important;
   }
 }
 
-// Animation keyframes
+// ========================================
+// BADGE HOVER EFFECTS
+// Subtle interactive feedback for clickable badges
+// ========================================
+.badge:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+// ========================================
+// TAB BUTTON BADGE INTERACTIONS
+// Special styling for active tab badges
+// ========================================
+.tab-button.active .badge {
+  background-color: var(--healthcare-blue, #0d6efd) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
+  border: 2px solid var(--healthcare-text-light, #ffffff) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+// ========================================
+// CARD HEADER BADGE STYLING
+// Badges within card headers for clinical data
+// ========================================
+.card-header.bg-primary .badge {
+  background-color: var(--healthcare-text-light, #ffffff) !important;
+  color: var(--healthcare-blue, #0d6efd) !important;
+  border: 1px solid var(--healthcare-blue, #0d6efd) !important;
+}
+
+// ========================================
+// RESPONSIVE BADGE SIZING
+// Adaptive badge sizes for different screen sizes and contexts
+// ========================================
+@media (max-width: 576px) {
+  .badge {
+    font-size: 0.65em !important;
+    padding: 0.2em 0.4em !important;
+  }
+
+  .clinical-table .badge {
+    font-size: 0.6rem !important;
+    padding: 0.15em 0.3em !important;
+  }
+
+  .tab-button .badge {
+    font-size: 0.7em !important;
+    margin-left: 0.3rem !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .badge {
+    font-size: 0.8em !important;
+  }
+
+  .clinical-table .badge {
+    font-size: 0.75rem !important;
+  }
+}
+
+// ========================================
+// BADGE UTILITY CLASSES
+// Additional badge modifiers for specific use cases
+// ========================================
+.badge-rounded {
+  border-radius: 50px !important;
+}
+
+.badge-square {
+  border-radius: 0.25rem !important;
+}
+
+.badge-large {
+  font-size: 0.9em !important;
+  padding: 0.375em 0.75em !important;
+}
+
+.badge-small {
+  font-size: 0.65em !important;
+  padding: 0.2em 0.4em !important;
+}
+
+.badge-xs {
+  font-size: 0.55em !important;
+  padding: 0.15em 0.3em !important;
+}
+
+// Badge with icon support
+.badge-icon {
+  .badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+
+    i {
+      font-size: 0.9em !important;
+      line-height: 1 !important;
+    }
+  }
+}
+
+// ========================================
+// ANIMATION SYSTEM
+// Badge entrance and interactive animations
+// ========================================
 @keyframes fadeIn {
   from {
     opacity: 0;

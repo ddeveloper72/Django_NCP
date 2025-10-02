@@ -852,30 +852,17 @@ h6 {
   font-weight: var(--healthcare-heading-weight);
 }
 
-/* Healthcare Badge Styling */
+/* Healthcare Badge Styling - See _badges-and-animations.scss for complete badge system */
 .badge {
   border-radius: 4px;
   font-weight: 500;
   letter-spacing: 0.5px;
 }
 
-.badge.bg-primary {
-  background-color: var(--healthcare-blue) !important;
-}
+/* Note: Badge colors are now centrally managed in _badges-and-animations.scss */
+/* The following styles override specific badge types for healthcare theming */
 
-.badge.bg-success {
-  background-color: var(--healthcare-green) !important;
-}
-
-.badge.bg-warning {
-  background-color: var(--healthcare-orange) !important;
-}
-
-.badge.bg-danger {
-  background-color: var(--healthcare-red) !important;
-}
-
-/* Language Flag Badge Styling */
+/* Language Flag Badge Styling - Special case for enhanced visual appeal */
 .badge.bg-info {
   background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
   color: white !important;
@@ -2609,3 +2596,35 @@ body nav .badge:hover i.fa-user-injured,
 
 /* Unselected tab button styling removed - using Enhanced CDA approach */
 /* Badge styling is now handled by static/scss/pages/_enhanced_cda.scss */
+
+// ========================================
+// CRITICAL: Clinical Section Icon Hover Fix
+// ========================================
+
+/* Stop ALL icon color changes on hover for clinical sections */
+.collapsible-label-title:hover i,
+.collapsible-label-title:hover .fa-solid,
+.collapsible-label-title:hover .fa-regular,
+.collapsible-label-title:hover .fa-light,
+.collapsible-label-title:hover .fa-brands,
+.collapsible-label-title i:hover,
+.collapsible-label-title .fa-solid:hover,
+.collapsible-label-title .fa-regular:hover,
+.collapsible-label-title .fa-light:hover,
+.collapsible-label-title .fa-brands:hover {
+  color: white !important;
+  fill: white !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Override any global hover effects specifically for clinical sections */
+.clinical-section .collapsible-label-title:hover i,
+.clinical-section .collapsible-label-title:hover .fa-solid,
+.clinical-section .collapsible-label-title:hover .fa-regular,
+.clinical-section .collapsible-label-title:hover .fa-light,
+.clinical-section .collapsible-label-title:hover .fa-brands {
+  color: white !important;
+  fill: white !important;
+  transform: none !important;
+}

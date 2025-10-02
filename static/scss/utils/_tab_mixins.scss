@@ -32,8 +32,10 @@
     }
   }
 
-  // Badge centered below
+  // Badge centered below - uses centralized badge styling from _badges-and-animations.scss
   .badge {
+    // Core badge styling is handled by the universal badge system
+    // Only add tab-specific positioning here
     align-self: center !important;
     margin-top: 0 !important;
   }
