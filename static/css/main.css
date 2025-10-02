@@ -11824,6 +11824,352 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
     min-height: 2rem;
   }
 }
+.medical-problems-table-container {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.medical-problems-table-container .medical-problems-table {
+  margin-bottom: 0;
+}
+.medical-problems-table-container .medical-problems-table thead {
+  background: linear-gradient(135deg, #085a9f, rgb(5.5568862275, 62.5149700599, 110.4431137725));
+}
+.medical-problems-table-container .medical-problems-table thead th {
+  border: none;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 1rem;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.medical-problems-table-container .medical-problems-table thead th i {
+  opacity: 0.9;
+  font-size: 0.85rem;
+}
+.medical-problems-table-container .medical-problems-table thead th:first-child {
+  border-top-left-radius: 0.375rem;
+}
+.medical-problems-table-container .medical-problems-table thead th:last-child {
+  border-top-right-radius: 0.375rem;
+}
+.medical-problems-table-container .medical-problems-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.2s ease;
+}
+.medical-problems-table-container .medical-problems-table tbody tr:hover {
+  background-color: #f7fafc;
+}
+.medical-problems-table-container .medical-problems-table tbody tr:last-child {
+  border-bottom: none;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td {
+  padding: 1rem;
+  vertical-align: top;
+  border: none;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-name-cell {
+  min-width: 200px;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-name-cell .problem-title {
+  font-size: 1rem;
+  line-height: 1.3;
+  margin-bottom: 0.25rem;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-name-cell .problem-code {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-name-cell .problem-code i {
+  opacity: 0.7;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-type-cell {
+  min-width: 140px;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-type-cell .badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-type-cell .small {
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-time-cell {
+  min-width: 120px;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-time-cell .time-info {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #085a9f;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-time-cell .end-time {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-status-cell {
+  min-width: 100px;
+  text-align: center;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-status-cell .status-badge {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-status-cell .status-badge i {
+  font-size: 0.75rem;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-severity-cell {
+  min-width: 100px;
+  text-align: center;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-severity-cell .severity-badge {
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 1199px) {
+  .medical-problems-table-container .medical-problems-table {
+    font-size: 0.9rem;
+  }
+  .medical-problems-table-container .medical-problems-table thead th {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td {
+    padding: 0.5rem 1rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-name-cell .problem-title {
+    font-size: 0.95rem;
+  }
+}
+@media (max-width: 767px) {
+  .medical-problems-table-container .table-responsive {
+    border-radius: 0.375rem;
+  }
+  .medical-problems-table-container .medical-problems-table {
+    font-size: 0.8rem;
+  }
+  .medical-problems-table-container .medical-problems-table thead th {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  .medical-problems-table-container .medical-problems-table thead th i {
+    display: none;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td {
+    padding: 0.5rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-name-cell {
+    min-width: 150px;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-name-cell .problem-title {
+    font-size: 0.9rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-name-cell .problem-code {
+    font-size: 0.75rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-type-cell {
+    min-width: 100px;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-type-cell .badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-status-cell .status-badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-severity-cell .severity-badge {
+    font-size: 0.8rem;
+  }
+}
+.medical-problems-table .badge.bg-success {
+  background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+}
+.medical-problems-table .badge.bg-info {
+  background: linear-gradient(135deg, #007b7f, #005b5f) !important;
+}
+.medical-problems-table .badge.bg-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+}
+.medical-problems-table .badge.bg-danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+}
+.medical-problems-table .badge.bg-secondary {
+  background: linear-gradient(135deg, #2d5a27, #4a7c59) !important;
+}
+.medical-problems-table .status-badge {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.medical-problems-table .severity-badge.text-danger {
+  color: #dc2626 !important;
+  text-shadow: 0 1px 2px rgba(220, 38, 38, 0.3);
+}
+.medical-problems-table .severity-badge.text-warning {
+  color: #d97706 !important;
+  text-shadow: 0 1px 2px rgba(245, 158, 11, 0.3);
+}
+.medical-problems-table .severity-badge.text-success {
+  color: #16a34a !important;
+  text-shadow: 0 1px 2px rgba(34, 197, 94, 0.3);
+}
+
+.problem-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+.problem-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: #dc2626;
+}
+.problem-card .problem-header .problem-name-section .problem-name {
+  color: #dc2626;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.problem-card .problem-header .problem-name-section .problem-name i {
+  color: #f59e0b;
+}
+.problem-card .problem-header .problem-name-section .problem-code {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+.problem-card .problem-header .problem-name-section .problem-code .fa-barcode {
+  color: #1e3a5f;
+}
+.problem-card .problem-header .problem-status-section .badge {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+}
+.problem-card .problem-header .problem-status-section .badge i {
+  margin-right: 0.25rem;
+}
+.problem-card .problem-field .field-header {
+  margin-bottom: 0.5rem;
+}
+.problem-card .problem-field .field-header i {
+  font-size: 1.1rem;
+}
+.problem-card .problem-field .field-header strong {
+  color: #2d3748;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.problem-card .problem-field .field-content {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+}
+.problem-card .problem-field .field-content .onset-date {
+  font-size: 1.1rem;
+  color: #085a9f;
+}
+.problem-card .problem-field .field-content .severity {
+  color: #2d3748;
+  font-weight: 500;
+}
+.problem-card .problem-field .field-content .provider {
+  color: #2d3748;
+  font-weight: 500;
+}
+.problem-card .problem-field .field-content .notes {
+  color: #2d3748;
+  font-style: italic;
+}
+.problem-card .problem-status-badge.bg-danger {
+  background-color: #dc2626 !important;
+  color: #ffffff;
+}
+.problem-card .problem-status-badge.bg-success {
+  background-color: #22c55e !important;
+  color: #ffffff;
+}
+.problem-card .problem-status-badge.bg-secondary {
+  background-color: #4a5568 !important;
+  color: #ffffff;
+}
+.problem-card .problem-status-badge.bg-warning {
+  background-color: #f59e0b !important;
+  color: #2d3748;
+}
+
+@media (max-width: 992px) {
+  .problem-card .problem-details .row .col-lg-6 {
+    margin-bottom: 1rem;
+  }
+  .problem-card .problem-header .d-flex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .problem-card .problem-header .d-flex .problem-name-section {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+  .problem-card .problem-header .d-flex .problem-status-section {
+    align-self: flex-start;
+  }
+}
+@media (max-width: 768px) {
+  .problem-card {
+    padding: 1rem;
+  }
+  .problem-card .problem-header {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .problem-card .problem-header .problem-name {
+    font-size: 1.1rem;
+  }
+  .problem-card .problem-field {
+    margin-bottom: 0.5rem;
+  }
+  .problem-card .problem-field .field-header {
+    margin-bottom: 0.25rem;
+  }
+  .problem-card .problem-field .field-header strong {
+    font-size: 0.75rem;
+  }
+  .problem-card .problem-field .field-content {
+    padding: 0.25rem;
+    font-size: 0.875rem;
+  }
+}
+@media (max-width: 576px) {
+  .problem-card .col-xl-6 {
+    margin-bottom: 1rem;
+  }
+}
+@media (max-width: 767px) {
+  .problem-card .problem-field {
+    margin-bottom: 0.5rem !important;
+  }
+  .problem-card .problem-field .field-header {
+    margin-bottom: 0.25rem;
+  }
+  .problem-card .problem-field .field-header strong {
+    font-size: 0.85rem;
+  }
+  .problem-card .problem-field .field-content {
+    padding: 0.25rem 0.5rem;
+    min-height: 2rem;
+  }
+}
 .toggle-input {
   display: none;
 }
