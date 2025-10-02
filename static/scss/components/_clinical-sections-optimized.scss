@@ -594,3 +594,482 @@
     }
   }
 }
+
+// ========================================
+// Medical Problems Table Styling
+// ========================================
+
+.medical-problems-table-container {
+  overflow: hidden;
+  border: 1px solid $border-light;
+  box-shadow: $shadow-sm;
+  
+  .medical-problems-table {
+    margin-bottom: 0;
+    
+    // Professional table header
+    thead {
+      background: linear-gradient(135deg, $primary-color, $primary-dark);
+      
+      th {
+        border: none;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: $space-md;
+        text-align: left;
+        vertical-align: middle;
+        white-space: nowrap;
+        
+        i {
+          opacity: 0.9;
+          font-size: 0.85rem;
+        }
+        
+        &:first-child {
+          border-top-left-radius: $border-radius-md;
+        }
+        
+        &:last-child {
+          border-top-right-radius: $border-radius-md;
+        }
+      }
+    }
+    
+    // Table body styling
+    tbody {
+      tr {
+        border-bottom: 1px solid $border-light;
+        transition: background-color 0.2s ease;
+        
+        &:hover {
+          background-color: $neutral-lightest;
+        }
+        
+        &:last-child {
+          border-bottom: none;
+        }
+        
+        td {
+          padding: $space-md;
+          vertical-align: top;
+          border: none;
+          
+          // Problem name cell
+          &.problem-name-cell {
+            min-width: 200px;
+            
+            .problem-title {
+              font-size: 1rem;
+              line-height: 1.3;
+              margin-bottom: $space-xs;
+            }
+            
+            .problem-code {
+              font-size: 0.8rem;
+              color: $text-muted;
+              
+              i {
+                opacity: 0.7;
+              }
+            }
+          }
+          
+          // Problem type cell  
+          &.problem-type-cell {
+            min-width: 140px;
+            
+            .badge {
+              font-size: 0.75rem;
+              font-weight: 500;
+              white-space: nowrap;
+            }
+            
+            .small {
+              font-size: 0.8rem;
+              margin-top: 2px;
+            }
+          }
+          
+          // Time cell
+          &.problem-time-cell {
+            min-width: 120px;
+            
+            .time-info {
+              font-size: 0.9rem;
+              font-weight: 600;
+              color: $primary-color;
+            }
+            
+            .end-time {
+              font-size: 0.8rem;
+              color: $text-muted;
+            }
+          }
+          
+          // Status cell
+          &.problem-status-cell {
+            min-width: 100px;
+            text-align: center;
+            
+              .status-badge {
+                font-size: 0.8rem;
+                font-weight: 500;
+                padding: 0.4rem 0.8rem;
+                border-radius: $border-radius-full;
+                white-space: nowrap;              i {
+                font-size: 0.75rem;
+              }
+            }
+          }
+          
+          // Severity cell
+          &.problem-severity-cell {
+            min-width: 100px;
+            text-align: center;
+            
+            .severity-badge {
+              font-size: 0.9rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive medical problems table
+@media (max-width: 1199px) {
+  .medical-problems-table-container {
+    .medical-problems-table {
+      font-size: 0.9rem;
+      
+      thead th {
+        padding: $space-sm $space-md;
+        font-size: 0.85rem;
+      }
+      
+      tbody td {
+        padding: $space-sm $space-md;
+        
+        &.problem-name-cell .problem-title {
+          font-size: 0.95rem;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .medical-problems-table-container {
+    .table-responsive {
+      border-radius: $border-radius-md;
+    }
+    
+    .medical-problems-table {
+      font-size: 0.8rem;
+      
+      thead th {
+        padding: $space-sm;
+        font-size: 0.8rem;
+        
+        i {
+          display: none; // Hide icons on mobile for space
+        }
+      }
+      
+      tbody td {
+        padding: $space-sm;
+        
+        &.problem-name-cell {
+          min-width: 150px;
+          
+          .problem-title {
+            font-size: 0.9rem;
+          }
+          
+          .problem-code {
+            font-size: 0.75rem;
+          }
+        }
+        
+        &.problem-type-cell {
+          min-width: 100px;
+          
+          .badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+          }
+        }
+        
+        &.problem-status-cell .status-badge {
+          font-size: 0.7rem;
+          padding: 0.3rem 0.6rem;
+        }
+        
+        &.problem-severity-cell .severity-badge {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+}
+
+// Healthcare theming for medical problems
+.medical-problems-table {
+  .badge {
+    &.bg-success {
+      background: linear-gradient(135deg, $success, $success-dark) !important;
+    }
+    
+    &.bg-info {
+      background: linear-gradient(135deg, $info, $info-dark) !important;
+    }
+    
+    &.bg-warning {
+      background: linear-gradient(135deg, $warning, $warning-dark) !important;
+    }
+    
+    &.bg-danger {
+      background: linear-gradient(135deg, $error, $error-dark) !important;
+    }
+    
+    &.bg-secondary {
+      background: linear-gradient(135deg, $secondary-color, $secondary-light) !important;
+    }
+  }
+  
+  .status-badge {
+    box-shadow: $shadow-xs;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .severity-badge {
+    &.text-danger {
+      color: $error !important;
+      text-shadow: 0 1px 2px rgba($error, 0.3);
+    }
+    
+    &.text-warning {
+      color: $warning-dark !important;
+      text-shadow: 0 1px 2px rgba($warning, 0.3);
+    }
+    
+    &.text-success {
+      color: $success-dark !important;
+      text-shadow: 0 1px 2px rgba($success, 0.3);
+    }
+  }
+}
+
+.problem-card {
+  background: $bg-white;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-md;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-color: $error-red;
+  }
+
+  // Problem Header Section
+  .problem-header {
+    .problem-name-section {
+      .problem-name {
+        color: $error-red;
+        font-size: 1.25rem;
+        font-weight: $font-weight-bold;
+        margin-bottom: $space-xs;
+
+        i {
+          color: $warning;
+        }
+      }
+
+      .problem-code {
+        font-size: $font-size-sm;
+        color: $text-muted;
+
+        .fa-barcode {
+          color: $accent-blue;
+        }
+      }
+    }
+
+    .problem-status-section {
+      .badge {
+        font-size: $font-size-sm;
+        padding: $space-xs $space-sm;
+
+        i {
+          margin-right: $space-xs;
+        }
+      }
+    }
+  }
+
+  // Problem Information Fields
+  .problem-field {
+    .field-header {
+      margin-bottom: $space-sm;
+
+      i {
+        font-size: 1.1rem;
+      }
+
+      strong {
+        color: $text-dark;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-semibold;
+      }
+    }
+
+    .field-content {
+      background: $neutral-lightest;
+      border: 1px solid $neutral-lighter;
+      border-radius: $border-radius-sm;
+      padding: $space-sm;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+
+      .onset-date {
+        font-size: 1.1rem;
+        color: $primary-color;
+      }
+
+      .severity {
+        color: $text-dark;
+        font-weight: $font-weight-medium;
+      }
+
+      .provider {
+        color: $text-dark;
+        font-weight: $font-weight-medium;
+      }
+
+      .notes {
+        color: $text-dark;
+        font-style: italic;
+      }
+    }
+  }
+
+  // Problem Status Badge Styling
+  .problem-status-badge {
+    &.bg-danger {
+      background-color: $error-red !important;
+      color: $bg-white;
+    }
+
+    &.bg-success {
+      background-color: $success-green !important;
+      color: $bg-white;
+    }
+
+    &.bg-secondary {
+      background-color: $neutral-medium !important;
+      color: $bg-white;
+    }
+
+    &.bg-warning {
+      background-color: $warning !important;
+      color: $text-dark;
+    }
+  }
+}
+
+// Responsive Design for Problem Cards
+@media (max-width: 992px) {
+  .problem-card {
+    .problem-details {
+      .row {
+        .col-lg-6 {
+          margin-bottom: $space-md;
+        }
+      }
+    }
+
+    .problem-header {
+      .d-flex {
+        flex-direction: column;
+        align-items: stretch;
+
+        .problem-name-section {
+          margin-right: 0;
+          margin-bottom: $space-sm;
+        }
+
+        .problem-status-section {
+          align-self: flex-start;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .problem-card {
+    padding: $space-md;
+
+    .problem-header {
+      margin-bottom: $space-sm;
+      padding-bottom: $space-sm;
+
+      .problem-name {
+        font-size: 1.1rem;
+      }
+    }
+
+    .problem-field {
+      margin-bottom: $space-sm;
+
+      .field-header {
+        margin-bottom: $space-xs;
+
+        strong {
+          font-size: $font-size-xs;
+        }
+      }
+
+      .field-content {
+        padding: $space-xs;
+        font-size: $font-size-sm;
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .problem-card {
+    .col-xl-6 {
+      margin-bottom: $space-md;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .problem-card {
+    .problem-field {
+      margin-bottom: $space-sm !important;
+      
+      .field-header {
+        margin-bottom: $space-xs;
+        
+        strong {
+          font-size: 0.85rem;
+        }
+      }
+      
+      .field-content {
+        padding: $space-xs $space-sm;
+        min-height: 2rem;
+      }
+    }
+  }
+}

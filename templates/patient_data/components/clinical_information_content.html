@@ -27,39 +27,191 @@
                             <div class="collapsible-content-title">
                                 <div class="content-inner-title">
                                     <p class="mb-3 text-muted">Medical Problems: {{ problems|length }} items found</p>
-                                    {% for problem in problems %}
-                                    <div class="problem-card mb-3 p-3 border rounded bg-white">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <h6 class="problem-name text-danger mb-1">
-                                                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
-                                                    {% if problem.problem.name %}
-                                                        {{ problem.problem.name }}
-                                                    {% elif problem.problem.code.displayName %}
-                                                        {{ problem.problem.code.displayName }}
-                                                    {% else %}
-                                                        Medical Problem
-                                                    {% endif %}
-                                                </h6>
-                                                {% if problem.problem.code.code %}
-                                                    <p class="text-muted mb-1">
-                                                        <small><strong>Code:</strong> {{ problem.problem.code.code }}</small>
-                                                    </p>
-                                                {% endif %}
-                                                {% if problem.effective_time.low_formatted %}
-                                                    <p class="text-muted mb-0">
-                                                        <small><strong>Onset:</strong> {{ problem.effective_time.low_formatted }}</small>
-                                                    </p>
-                                                {% endif %}
-                                            </div>
-                                            {% if problem.statusCode.code %}
-                                                <span class="badge {% if problem.statusCode.code == 'active' %}bg-danger{% else %}bg-secondary{% endif %}">
-                                                    {{ problem.statusCode.code|title }}
-                                                </span>
-                                            {% endif %}
+                                    
+                                    {# Professional Medical Problems Table #}
+                                    <div class="medical-problems-table-container bg-white border rounded-3 shadow-sm overflow-hidden">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover mb-0 medical-problems-table">
+                                                <thead class="table-primary">
+                                                    <tr>
+                                                        <th scope="col" class="fw-bold">
+                                                            <i class="fa-solid fa-triangle-exclamation me-2"></i>Active Problem
+                                                        </th>
+                                                        <th scope="col" class="fw-bold">
+                                                            <i class="fa-solid fa-tags me-2"></i>Problem Type
+                                                        </th>
+                                                        <th scope="col" class="fw-bold">
+                                                            <i class="fa-solid fa-clock me-2"></i>Time
+                                                        </th>
+                                                        <th scope="col" class="fw-bold">
+                                                            <i class="fa-solid fa-info-circle me-2"></i>Problem Status
+                                                        </th>
+                                                        <th scope="col" class="fw-bold">
+                                                            <i class="fa-solid fa-thermometer-half me-2"></i>Severity
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for problem in problems %}
+                                                    <tr class="problem-row">
+                                                        {# Active Problem Column #}
+                                                        <td class="problem-name-cell">
+                                                            <div class="problem-name-container">
+                                                                <div class="problem-title fw-bold text-danger mb-1">
+                                                                    {% if problem.name %}
+                                                                        {{ problem.name }}
+                                                                    {% elif problem.problem.name %}
+                                                                        {{ problem.problem.name }}
+                                                                    {% elif problem.problem.code.displayName %}
+                                                                        {{ problem.problem.code.displayName }}
+                                                                    {% else %}
+                                                                        Medical Problem
+                                                                    {% endif %}
+                                                                </div>
+                                                                {% if problem.code %}
+                                                                    <div class="problem-code text-muted small">
+                                                                        <i class="fa-solid fa-barcode me-1"></i>
+                                                                        {{ problem.code }}
+                                                                        {% if problem.code_system %} ({{ problem.code_system }}){% endif %}
+                                                                    </div>
+                                                                {% elif problem.problem.code.code %}
+                                                                    <div class="problem-code text-muted small">
+                                                                        <i class="fa-solid fa-barcode me-1"></i>
+                                                                        {{ problem.problem.code.code }}
+                                                                    </div>
+                                                                {% endif %}
+                                                            </div>
+                                                        </td>
+                                                        
+                                                        {# Problem Type Column #}
+                                                        <td class="problem-type-cell">
+                                                            {% if problem.type %}
+                                                                {% if problem.type == "Active Problem" %}
+                                                                    <span class="badge bg-danger me-1">{{ problem.type }}</span>
+                                                                {% elif problem.type == "Resolved Problem" %}
+                                                                    <span class="badge bg-success me-1">{{ problem.type }}</span>
+                                                                {% else %}
+                                                                    <span class="badge bg-info me-1">{{ problem.type }}</span>
+                                                                {% endif %}
+                                                                {% if problem.code_system %}
+                                                                    <div class="small text-muted mt-1">{{ problem.code_system }}</div>
+                                                                {% endif %}
+                                                            {% elif problem.problem.code.codeSystem %}
+                                                                {% if problem.problem.code.codeSystem == "2.16.840.1.113883.6.96" %}
+                                                                    <span class="badge bg-success me-1">Clinical finding</span>
+                                                                    <div class="small text-muted mt-1">SNOMED CT</div>
+                                                                {% elif problem.problem.code.codeSystem == "2.16.840.1.113883.6.90" %}
+                                                                    <span class="badge bg-info me-1">Clinical finding</span>
+                                                                    <div class="small text-muted mt-1">ICD-10</div>
+                                                                {% elif problem.problem.code.codeSystem == "2.16.840.1.113883.6.103" %}
+                                                                    <span class="badge bg-warning me-1">Clinical finding</span>
+                                                                    <div class="small text-muted mt-1">ICD-9</div>
+                                                                {% else %}
+                                                                    <span class="badge bg-secondary me-1">Problem</span>
+                                                                    <div class="small text-muted mt-1">Other</div>
+                                                                {% endif %}
+                                                            {% else %}
+                                                                <span class="text-muted">Clinical finding</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        
+                                                        {# Time Column #}
+                                                        <td class="problem-time-cell">
+                                                            {% if problem.time_display %}
+                                                                <div class="time-info text-primary fw-bold">
+                                                                    {{ problem.time_display }}
+                                                                </div>
+                                                            {% elif problem.onset %}
+                                                                <div class="time-info text-primary fw-bold">
+                                                                    since {{ problem.onset }}
+                                                                </div>
+                                                                {% if problem.resolution %}
+                                                                    <div class="end-time text-muted small mt-1">
+                                                                        until {{ problem.resolution }}
+                                                                    </div>
+                                                                {% endif %}
+                                                            {% elif problem.effective_time.low_formatted %}
+                                                                <div class="time-info text-primary fw-bold">
+                                                                    since {{ problem.effective_time.low_formatted }}
+                                                                </div>
+                                                                {% if problem.effective_time.high_formatted %}
+                                                                    <div class="end-time text-muted small mt-1">
+                                                                        until {{ problem.effective_time.high_formatted }}
+                                                                    </div>
+                                                                {% endif %}
+                                                            {% else %}
+                                                                <span class="text-muted">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        
+                                                        {# Problem Status Column #}
+                                                        <td class="problem-status-cell text-center">
+                                                            {% if problem.status %}
+                                                                {% if problem.status|lower == "active" %}
+                                                                    <span class="badge bg-danger status-badge">
+                                                                        <i class="fa-solid fa-exclamation-circle me-1"></i>{{ problem.status|capfirst }}
+                                                                    </span>
+                                                                {% elif problem.status|lower == "resolved" or problem.status|lower == "completed" %}
+                                                                    <span class="badge bg-success status-badge">
+                                                                        <i class="fa-solid fa-check-circle me-1"></i>{{ problem.status|capfirst }}
+                                                                    </span>
+                                                                {% elif problem.status|lower == "inactive" %}
+                                                                    <span class="badge bg-secondary status-badge">
+                                                                        <i class="fa-solid fa-pause-circle me-1"></i>{{ problem.status|capfirst }}
+                                                                    </span>
+                                                                {% else %}
+                                                                    <span class="badge bg-info status-badge">
+                                                                        <i class="fa-solid fa-info-circle me-1"></i>{{ problem.status|capfirst }}
+                                                                    </span>
+                                                                {% endif %}
+                                                            {% elif problem.statusCode.code %}
+                                                                {% if problem.statusCode.code == "active" %}
+                                                                    <span class="badge bg-danger status-badge">
+                                                                        <i class="fa-solid fa-exclamation-circle me-1"></i>active
+                                                                    </span>
+                                                                {% elif problem.statusCode.code == "completed" or problem.statusCode.code == "resolved" %}
+                                                                    <span class="badge bg-success status-badge">
+                                                                        <i class="fa-solid fa-check-circle me-1"></i>resolved
+                                                                    </span>
+                                                                {% elif problem.statusCode.code == "inactive" %}
+                                                                    <span class="badge bg-secondary status-badge">
+                                                                        <i class="fa-solid fa-pause-circle me-1"></i>inactive
+                                                                    </span>
+                                                                {% else %}
+                                                                    <span class="badge bg-warning status-badge">
+                                                                        <i class="fa-solid fa-question-circle me-1"></i>{{ problem.statusCode.code }}
+                                                                    </span>
+                                                                {% endif %}
+                                                            {% else %}
+                                                                <span class="text-muted">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        
+                                                        {# Severity Column #}
+                                                        <td class="problem-severity-cell text-center">
+                                                            {% if problem.severity %}
+                                                                <span class="severity-badge fw-bold 
+                                                                    {% if problem.severity|lower == 'severe' %}text-danger
+                                                                    {% elif problem.severity|lower == 'moderate' %}text-warning  
+                                                                    {% else %}text-success
+                                                                    {% endif %}">
+                                                                    {{ problem.severity|title }}
+                                                                </span>
+                                                            {% else %}
+                                                                <span class="text-muted">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
-                                    {% endfor %}
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

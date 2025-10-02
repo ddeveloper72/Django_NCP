@@ -1278,7 +1278,7 @@ class CDAParserService:
         return supply
 
     def _parse_act(self, act_elem) -> Dict[str, Any]:
-        """Parse act entry"""
+        """Parse act entry - enhanced for problem extraction"""
         act = {"type": "act"}
 
         try:
@@ -1291,6 +1291,8 @@ class CDAParserService:
                 act["code"] = {
                     "code": code_elem.get("code", ""),
                     "displayName": code_elem.get("displayName", ""),
+                    "codeSystem": code_elem.get("codeSystem", ""),
+                    "codeSystemName": code_elem.get("codeSystemName", ""),
                 }
 
             # Effective time
@@ -1298,10 +1300,159 @@ class CDAParserService:
             if time_elem is not None:
                 act["effective_time"] = self._extract_effective_time(time_elem)
 
+            # Status code
+            status_elem = act_elem.find(".//cda:statusCode", self.NAMESPACES)
+            if status_elem is not None:
+                act["status"] = status_elem.get("code", "")
+
+            # Enhanced problem extraction from nested observations
+            act["problems"] = []
+            for entry_rel in act_elem.findall(".//cda:entryRelationship", self.NAMESPACES):
+                problem_obs = entry_rel.find(".//cda:observation", self.NAMESPACES)
+                if problem_obs is not None:
+                    problem_data = self._extract_problem_observation(problem_obs)
+                    if problem_data:
+                        act["problems"].append(problem_data)
+
+            # If this act has problem data, mark it as a problem type
+            if act["problems"]:
+                act["type"] = "problem_act"
+
         except Exception as e:
             logger.warning(f"Error parsing act: {e}")
 
         return act
+
+    def _extract_problem_observation(self, obs_elem) -> Dict[str, Any]:
+        """Extract detailed problem information from observation element"""
+        problem = {}
+
+        try:
+            # Problem code and description from value element
+            value_elem = obs_elem.find(".//cda:value", self.NAMESPACES)
+            if value_elem is not None:
+                # Extract basic code information
+                problem_code = value_elem.get("code", "")
+                problem_display = value_elem.get("displayName", "")
+                code_system = value_elem.get("codeSystem", "")
+                code_system_name = value_elem.get("codeSystemName", "")
+                
+                # Try to resolve problem code using CTS if displayName is missing or empty
+                if not problem_display or problem_display.strip() == "":
+                    try:
+                        translator = TerminologyTranslator()
+                        # Try without code system first (often works better for diagnostic codes)
+                        resolved_display = translator.resolve_code(problem_code)
+                        if resolved_display and resolved_display.strip():
+                            problem_display = resolved_display
+                            logger.info(f"CTS resolved problem code {problem_code} to '{problem_display}'")
+                        else:
+                            # If that fails, try with code system
+                            resolved_display = translator.resolve_code(problem_code, code_system)
+                            if resolved_display and resolved_display.strip():
+                                problem_display = resolved_display
+                                logger.info(f"CTS resolved problem code {problem_code} (system: {code_system}) to '{problem_display}'")
+                            else:
+                                problem_display = "Medical Problem"
+                                logger.warning(f"CTS could not resolve problem code {problem_code} (system: {code_system})")
+                    except Exception as e:
+                        logger.warning(f"Failed to resolve problem code {problem_code} via CTS: {e}")
+                        problem_display = "Medical Problem"
+                
+                # Extract problem description and medical code
+                problem["problem"] = {
+                    "code": {
+                        "code": problem_code,
+                        "displayName": problem_display,
+                        "codeSystem": code_system,
+                        "codeSystemName": code_system_name
+                    },
+                    "name": problem_display
+                }
+
+            # Status code for the problem itself
+            status_elem = obs_elem.find(".//cda:statusCode", self.NAMESPACES)
+            if status_elem is not None:
+                problem["statusCode"] = {
+                    "code": status_elem.get("code", "")
+                }
+
+            # Effective time with proper low/high extraction
+            time_elem = obs_elem.find(".//cda:effectiveTime", self.NAMESPACES)
+            if time_elem is not None:
+                effective_time = {}
+                
+                # Extract low time (onset)
+                low_elem = time_elem.find(".//cda:low", self.NAMESPACES)
+                if low_elem is not None:
+                    low_value = low_elem.get("value", "")
+                    if low_value:
+                        effective_time["low"] = low_value
+                        effective_time["low_formatted"] = self._format_hl7_date(low_value)
+                
+                # Extract high time (resolution)
+                high_elem = time_elem.find(".//cda:high", self.NAMESPACES)
+                if high_elem is not None:
+                    high_value = high_elem.get("value", "")
+                    if high_value:
+                        effective_time["high"] = high_value
+                        effective_time["high_formatted"] = self._format_hl7_date(high_value)
+                
+                # Single time value
+                single_value = time_elem.get("value", "")
+                if single_value:
+                    effective_time["value"] = single_value
+                    effective_time["formatted"] = self._format_hl7_date(single_value)
+                
+                problem["effective_time"] = effective_time
+
+            # Extract problem status from entryRelationship with typeCode="REFR"
+            for entry_rel in obs_elem.findall(".//cda:entryRelationship[@typeCode='REFR']", self.NAMESPACES):
+                status_obs = entry_rel.find(".//cda:observation", self.NAMESPACES)
+                if status_obs is not None:
+                    # Check if this is a problem status observation
+                    status_code_elem = status_obs.find(".//cda:code[@code='33999-4']", self.NAMESPACES)
+                    if status_code_elem is not None:
+                        # Extract status value
+                        status_value_elem = status_obs.find(".//cda:value", self.NAMESPACES)
+                        if status_value_elem is not None:
+                            problem["status_detail"] = {
+                                "code": status_value_elem.get("code", ""),
+                                "displayName": status_value_elem.get("displayName", ""),
+                                "codeSystem": status_value_elem.get("codeSystem", "")
+                            }
+
+            # Extract severity if present
+            for entry_rel in obs_elem.findall(".//cda:entryRelationship[@typeCode='SUBJ']", self.NAMESPACES):
+                severity_obs = entry_rel.find(".//cda:observation", self.NAMESPACES)
+                if severity_obs is not None:
+                    severity_code_elem = severity_obs.find(".//cda:code[@code='SEV']", self.NAMESPACES)
+                    if severity_code_elem is not None:
+                        severity_value_elem = severity_obs.find(".//cda:value", self.NAMESPACES)
+                        if severity_value_elem is not None:
+                            problem["severity"] = severity_value_elem.get("displayName", severity_value_elem.get("code", ""))
+
+        except Exception as e:
+            logger.warning(f"Error extracting problem observation: {e}")
+
+        return problem
+
+    def _format_hl7_date(self, hl7_date: str) -> str:
+        """Format HL7 date string to human readable format"""
+        try:
+            if not hl7_date:
+                return ""
+            
+            # Handle YYYYMMDD format
+            if len(hl7_date) >= 8:
+                year = hl7_date[0:4]
+                month = hl7_date[4:6]
+                day = hl7_date[6:8]
+                return f"{year}-{month}-{day}"
+            else:
+                return hl7_date
+        except Exception:
+            return hl7_date
 
     def _parse_encounter(self, enc_elem) -> Dict[str, Any]:
         """Parse encounter entry"""

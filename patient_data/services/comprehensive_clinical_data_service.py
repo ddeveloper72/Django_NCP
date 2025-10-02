@@ -180,9 +180,19 @@ class ComprehensiveClinicalDataService:
             # Check if input is already comprehensive data or raw CDA content
             if (
                 isinstance(cda_content_or_comprehensive_data, dict)
-                and "clinical_sections" in cda_content_or_comprehensive_data
+                and (
+                    "clinical_sections" in cda_content_or_comprehensive_data
+                    or len(cda_content_or_comprehensive_data) == 0  # Empty dict case
+                )
             ):
                 comprehensive_data = cda_content_or_comprehensive_data
+                # If it's an empty dict, ensure it has the expected structure
+                if len(comprehensive_data) == 0:
+                    comprehensive_data = {
+                        "clinical_sections": {},
+                        "extraction_statistics": {},
+                        "sections": []
+                    }
             else:
                 # Extract comprehensive data from CDA content
                 comprehensive_data = self.extract_comprehensive_clinical_data(
@@ -259,7 +269,12 @@ class ComprehensiveClinicalDataService:
                 
                 # Use CDA parser for other data types where enhanced parser might not have coverage
                 clinical_arrays["allergies"].extend(structured.get("allergies", []))
-                clinical_arrays["problems"].extend(structured.get("problems", []))
+                
+                # Enhanced problem processing with rich clinical data
+                raw_problems = structured.get("problems", [])
+                enhanced_problems = self._extract_enhanced_problems(raw_problems)
+                clinical_arrays["problems"].extend(enhanced_problems)
+                
                 clinical_arrays["procedures"].extend(structured.get("procedures", []))
                 clinical_arrays["vital_signs"].extend(structured.get("vital_signs", []))
                 clinical_arrays["results"].extend(structured.get("results", []))
@@ -1299,3 +1314,139 @@ class ComprehensiveClinicalDataService:
             medication_data['data'] = self._convert_valueset_fields_to_medication_data(fields_for_conversion)
         
         return medication_data
+
+    def _extract_enhanced_problems(self, raw_problems: List[Dict]) -> List[Dict]:
+        """Extract rich clinical problem data from CDA parser results"""
+        enhanced_problems = []
+        
+        try:
+            for problem_entry in raw_problems:
+                # Check if this is a problem act with detailed problems
+                if problem_entry.get("type") == "problem_act" and "problems" in problem_entry:
+                    # Get the nested problems for this act
+                    nested_problems = problem_entry["problems"]
+                    
+                    if nested_problems:
+                        # Take the first nested problem as the primary problem
+                        # (all observations in this act represent the same clinical problem)
+                        primary_problem = nested_problems[0]
+                        enhanced_problem = self._format_problem_for_display(primary_problem, problem_entry)
+                        
+                        # Merge any additional clinical details from other observations
+                        for additional_problem in nested_problems[1:]:
+                            self._merge_additional_problem_details(enhanced_problem, additional_problem)
+                        
+                        if enhanced_problem:
+                            enhanced_problems.append(enhanced_problem)
+                else:
+                    # Handle legacy problem format
+                    enhanced_problem = self._format_legacy_problem_for_display(problem_entry)
+                    if enhanced_problem:
+                        enhanced_problems.append(enhanced_problem)
+                        
+        except Exception as e:
+            logger.warning(f"Error extracting enhanced problems: {e}")
+            # Return original problems on error
+            return raw_problems
+            
+        return enhanced_problems if enhanced_problems else raw_problems
+
+    def _merge_additional_problem_details(self, enhanced_problem: Dict, additional_problem: Dict) -> None:
+        """Merge additional clinical details from secondary observations into the primary problem"""
+        try:
+            # Merge status details if not already present
+            if not enhanced_problem.get("status") and "status_detail" in additional_problem:
+                status_detail = additional_problem["status_detail"]
+                enhanced_problem["status"] = status_detail.get("displayName", status_detail.get("code", ""))
+            
+            # Merge severity if not already present
+            if not enhanced_problem.get("severity") and "severity" in additional_problem:
+                enhanced_problem["severity"] = additional_problem["severity"]
+            
+            # Merge additional effective time information if needed
+            if "effective_time" in additional_problem and not enhanced_problem.get("resolution"):
+                additional_time = additional_problem["effective_time"]
+                if "high_formatted" in additional_time:
+                    enhanced_problem["resolution"] = additional_time["high_formatted"]
+                    
+        except Exception as e:
+            logger.warning(f"Error merging additional problem details: {e}")
+
+    def _format_problem_for_display(self, problem_detail: Dict, problem_act: Dict) -> Dict:
+        """Format detailed problem data for clinical display"""
+        try:
+            formatted_problem = {}
+            
+            # Extract problem name and code
+            problem_info = problem_detail.get("problem", {})
+            code_info = problem_info.get("code", {})
+            
+            formatted_problem["name"] = code_info.get("displayName", "Medical Problem")
+            formatted_problem["code"] = code_info.get("code", "")
+            formatted_problem["code_system"] = code_info.get("codeSystemName", "")
+            
+            # Extract effective time for display
+            effective_time = problem_detail.get("effective_time", {})
+            if effective_time:
+                if "low_formatted" in effective_time:
+                    formatted_problem["onset"] = effective_time["low_formatted"]
+                elif "formatted" in effective_time:
+                    formatted_problem["onset"] = effective_time["formatted"]
+                    
+                if "high_formatted" in effective_time:
+                    formatted_problem["resolution"] = effective_time["high_formatted"]
+            
+            # Extract status information
+            status_detail = problem_detail.get("status_detail", {})
+            if status_detail:
+                formatted_problem["status"] = status_detail.get("displayName", status_detail.get("code", ""))
+            else:
+                # Fallback to main act status
+                formatted_problem["status"] = problem_act.get("status", "active")
+            
+            # Extract severity
+            severity = problem_detail.get("severity", "")
+            if severity:
+                formatted_problem["severity"] = severity
+            
+            # Set problem type based on clinical context
+            formatted_problem["type"] = "Active Problem"
+            if formatted_problem.get("resolution"):
+                formatted_problem["type"] = "Resolved Problem"
+            
+            # Format time for display
+            if formatted_problem.get("onset"):
+                formatted_problem["time_display"] = formatted_problem["onset"]
+                if formatted_problem.get("resolution"):
+                    formatted_problem["time_display"] += f" - {formatted_problem['resolution']}"
+            
+            return formatted_problem
+            
+        except Exception as e:
+            logger.warning(f"Error formatting problem for display: {e}")
+            return {}
+
+    def _format_legacy_problem_for_display(self, problem_entry: Dict) -> Dict:
+        """Format legacy problem entry for display"""
+        try:
+            formatted_problem = {
+                "name": problem_entry.get("display_name", "Medical Problem"),
+                "type": "Medical Problem",
+                "status": "active",
+                "code": problem_entry.get("code", ""),
+                "source": problem_entry.get("source", "cda_parser")
+            }
+            
+            # Extract time if available
+            if "effective_time" in problem_entry:
+                time_info = problem_entry["effective_time"]
+                if isinstance(time_info, dict) and "formatted" in time_info:
+                    formatted_problem["time_display"] = time_info["formatted"]
+                elif isinstance(time_info, str):
+                    formatted_problem["time_display"] = time_info
+            
+            return formatted_problem
+            
+        except Exception as e:
+            logger.warning(f"Error formatting legacy problem: {e}")
+            return {}
