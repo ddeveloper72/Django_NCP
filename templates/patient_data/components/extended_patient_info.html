@@ -49,22 +49,37 @@
                 type="button"
                 {% if has_l1_cda and not has_l3_cda %}disabled title="Clinical data not available for L1 CDA documents"{% elif not processed_sections|length and not enhanced_allergies|length and not medications|length and not allergies|length and not problems|length and not procedures|length and not vital_signs|length %}disabled title="No structured clinical data available"{% endif %}>
             <i class="fa-solid fa-notes-medical me-1"></i>Clinical Information
-            <!-- DEBUG: med={{medications|length}} all={{allergies|length}} prob={{problems|length}} vs={{vital_signs|length}} proc={{procedures|length}} -->
-            <!-- DEBUG: enhanced_all={{enhanced_allergies|length}} processed={{processed_sections|length}} -->
-            <!-- DEBUG: has_l1_cda={{has_l1_cda}} has_l3_cda={{has_l3_cda}} -->
-            {% if medications and medications|length > 0 or allergies and allergies|length > 0 or problems and problems|length > 0 or vital_signs and vital_signs|length > 0 or procedures and procedures|length > 0 %}
-            <span class="badge bg-warning ms-2">
-                {% with total_clinical=medications|length|add:allergies|length|add:problems|length|add:vital_signs|length|add:procedures|length %}
-                {{ total_clinical }}
-                {% endwith %}
-            </span>
-            {% elif enhanced_allergies and enhanced_allergies|length > 0 %}
+            
+            {# Calculate total clinical items using add filter - more reliable approach #}
+            {% with med_count=medications|length %}
+            {% with all_count=allergies|length %}
+            {% with prob_count=problems|length %}
+            {% with vs_count=vital_signs|length %}
+            {% with proc_count=procedures|length %}
+            {% with total_clinical=med_count|add:all_count|add:prob_count|add:vs_count|add:proc_count %}
+            
+            {# Temporary debug output - remove after testing #}
+            <div style="font-size:10px;color:red;">
+                M:{{med_count}} A:{{all_count}} P:{{prob_count}} VS:{{vs_count}} PR:{{proc_count}} TOT:{{total_clinical}}
+                <br>EA:{{enhanced_allergies|length|default:"0"}} PS:{{processed_sections|length|default:"0"}}
+            </div>
+            
+            {% if total_clinical > 0 %}
+            <span class="badge bg-warning ms-2">{{ total_clinical }}</span>
+            {% elif enhanced_allergies|length > 0 %}
             <span class="badge bg-success ms-2">{{ enhanced_allergies|length }}</span>
-            {% elif processed_sections and processed_sections|length > 0 %}
+            {% elif processed_sections|length > 0 %}
             <span class="badge bg-info ms-2">{{ processed_sections|length }}</span>
             {% else %}
             <span class="badge bg-secondary ms-2">0</span>
             {% endif %}
+            
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
         </button>
 
         <button id="pdf-tab-btn" class="tab-button{% if has_l3_cda and not has_embedded_pdfs %} text-muted{% endif %}"
