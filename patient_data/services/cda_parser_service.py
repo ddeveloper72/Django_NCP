@@ -1453,10 +1453,31 @@ class CDAParserService:
                         # Extract status value
                         status_value_elem = status_obs.find(".//cda:value", self.NAMESPACES)
                         if status_value_elem is not None:
+                            status_code = status_value_elem.get("code", "")
+                            status_display = status_value_elem.get("displayName", "")
+                            status_system = status_value_elem.get("codeSystem", "")
+                            
+                            # Try to resolve status using CTS if displayName is missing
+                            if not status_display or status_display.strip() == "":
+                                try:
+                                    translator = TerminologyTranslator()
+                                    resolved_display = translator.resolve_code(status_code, status_system)
+                                    if resolved_display and resolved_display.strip():
+                                        status_display = resolved_display
+                                        logger.info(f"CTS resolved problem status code {status_code} to '{status_display}'")
+                                    else:
+                                        # Try without code system
+                                        resolved_display = translator.resolve_code(status_code)
+                                        if resolved_display and resolved_display.strip():
+                                            status_display = resolved_display
+                                            logger.info(f"CTS resolved problem status code {status_code} (no system) to '{status_display}'")
+                                except Exception as e:
+                                    logger.warning(f"Failed to resolve problem status code {status_code} via CTS: {e}")
+                            
                             problem["status_detail"] = {
-                                "code": status_value_elem.get("code", ""),
-                                "displayName": status_value_elem.get("displayName", ""),
-                                "codeSystem": status_value_elem.get("codeSystem", "")
+                                "code": status_code,
+                                "displayName": status_display,
+                                "codeSystem": status_system
                             }
 
             # Extract severity if present
