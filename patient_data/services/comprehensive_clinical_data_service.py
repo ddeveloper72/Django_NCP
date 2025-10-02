@@ -1385,6 +1385,18 @@ class ComprehensiveClinicalDataService:
             formatted_problem["code"] = code_info.get("code", "")
             formatted_problem["code_system"] = code_info.get("codeSystemName", "")
             
+            # Extract problem type from the observation code element
+            problem_type_info = problem_detail.get("problem_type", {})
+            if problem_type_info and problem_type_info.get("displayName"):
+                formatted_problem["type"] = problem_type_info["displayName"]
+                formatted_problem["type_code"] = problem_type_info.get("code", "")
+                formatted_problem["type_code_system"] = problem_type_info.get("codeSystem", "")
+            else:
+                # Set problem type based on clinical context (fallback)
+                formatted_problem["type"] = "Active Problem"
+                if problem_detail.get("effective_time", {}).get("high_formatted"):
+                    formatted_problem["type"] = "Resolved Problem"
+            
             # Extract effective time for display
             effective_time = problem_detail.get("effective_time", {})
             if effective_time:
@@ -1408,11 +1420,6 @@ class ComprehensiveClinicalDataService:
             severity = problem_detail.get("severity", "")
             if severity:
                 formatted_problem["severity"] = severity
-            
-            # Set problem type based on clinical context
-            formatted_problem["type"] = "Active Problem"
-            if formatted_problem.get("resolution"):
-                formatted_problem["type"] = "Resolved Problem"
             
             # Format time for display
             if formatted_problem.get("onset"):

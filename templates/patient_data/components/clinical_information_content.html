@@ -86,14 +86,24 @@
                                                         {# Problem Type Column #}
                                                         <td class="problem-type-cell">
                                                             {% if problem.type %}
-                                                                {% if problem.type == "Active Problem" %}
+                                                                {% if "Active Problem" in problem.type or "active" in problem.type|lower %}
                                                                     <span class="badge bg-danger me-1">{{ problem.type }}</span>
-                                                                {% elif problem.type == "Resolved Problem" %}
+                                                                {% elif "Resolved Problem" in problem.type or "resolved" in problem.type|lower or "completed" in problem.type|lower %}
                                                                     <span class="badge bg-success me-1">{{ problem.type }}</span>
-                                                                {% else %}
+                                                                {% elif "Clinical finding" in problem.type or "Finding" in problem.type %}
                                                                     <span class="badge bg-info me-1">{{ problem.type }}</span>
+                                                                {% else %}
+                                                                    <span class="badge bg-secondary me-1">{{ problem.type }}</span>
                                                                 {% endif %}
-                                                                {% if problem.code_system %}
+                                                                {% if problem.type_code_system %}
+                                                                    {% if "2.16.840.1.113883.6.96" in problem.type_code_system %}
+                                                                        <div class="small text-muted mt-1">SNOMED CT</div>
+                                                                    {% elif "2.16.840.1.113883.6.1" in problem.type_code_system %}
+                                                                        <div class="small text-muted mt-1">LOINC</div>
+                                                                    {% else %}
+                                                                        <div class="small text-muted mt-1">{{ problem.type_code_system|truncatechars:15 }}</div>
+                                                                    {% endif %}
+                                                                {% elif problem.code_system %}
                                                                     <div class="small text-muted mt-1">{{ problem.code_system }}</div>
                                                                 {% endif %}
                                                             {% elif problem.problem.code.codeSystem %}

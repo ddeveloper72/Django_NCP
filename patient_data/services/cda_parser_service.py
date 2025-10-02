@@ -1328,6 +1328,35 @@ class CDAParserService:
         problem = {}
 
         try:
+            # Extract problem type from the observation's direct code element
+            # This represents the category/type of the problem observation
+            obs_code_elem = obs_elem.find("./cda:code", self.NAMESPACES)
+            problem_type_code = ""
+            problem_type_display = ""
+            problem_type_system = ""
+            
+            if obs_code_elem is not None:
+                problem_type_code = obs_code_elem.get("code", "")
+                problem_type_display = obs_code_elem.get("displayName", "")
+                problem_type_system = obs_code_elem.get("codeSystem", "")
+                
+                # Try to resolve problem type using CTS if displayName is missing
+                if not problem_type_display or problem_type_display.strip() == "":
+                    try:
+                        translator = TerminologyTranslator()
+                        resolved_display = translator.resolve_code(problem_type_code, problem_type_system)
+                        if resolved_display and resolved_display.strip():
+                            problem_type_display = resolved_display
+                            logger.info(f"CTS resolved problem type code {problem_type_code} to '{problem_type_display}'")
+                        else:
+                            # Try without code system
+                            resolved_display = translator.resolve_code(problem_type_code)
+                            if resolved_display and resolved_display.strip():
+                                problem_type_display = resolved_display
+                                logger.info(f"CTS resolved problem type code {problem_type_code} (no system) to '{problem_type_display}'")
+                    except Exception as e:
+                        logger.warning(f"Failed to resolve problem type code {problem_type_code} via CTS: {e}")
+
             # Problem code and description from value element
             value_elem = obs_elem.find(".//cda:value", self.NAMESPACES)
             if value_elem is not None:
@@ -1368,6 +1397,14 @@ class CDAParserService:
                         "codeSystemName": code_system_name
                     },
                     "name": problem_display
+                }
+
+            # Add problem type information to the result
+            if problem_type_code:
+                problem["problem_type"] = {
+                    "code": problem_type_code,
+                    "displayName": problem_type_display or "Clinical Finding",
+                    "codeSystem": problem_type_system
                 }
 
             # Status code for the problem itself
