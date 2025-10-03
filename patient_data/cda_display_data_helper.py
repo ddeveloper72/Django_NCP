@@ -276,11 +276,12 @@ class CDADisplayDataHelper:
                                 # Convert enhanced allergies to clinical table rows
                                 for allergy in enhanced_allergies:
                                     # Map Enhanced CDA Processor field names to clinical table format
+                                    # Based on CDA structure: observation/code = reaction type, observation/value = manifestation
                                     row = {
                                         "data": {
                                             "code": {"value": allergy.get("code", "Unknown"), "display_value": allergy.get("display", "Unknown")},
-                                            "reaction_type": {"value": allergy.get("display", "Propensity to adverse reaction"), "display_value": allergy.get("display", "Propensity to adverse reaction")},
-                                            "manifestation": {"value": allergy.get("manifestation_display", "Unknown reaction"), "display_value": allergy.get("manifestation_display", "Unknown reaction")},
+                                            "reaction_type": {"value": allergy.get("reaction_type_display", "Propensity to adverse reaction"), "display_value": allergy.get("reaction_type_display", "Propensity to adverse reaction")},
+                                            "manifestation": {"value": allergy.get("manifestation_display", "Unknown manifestation"), "display_value": allergy.get("manifestation_display", "Unknown manifestation")},
                                             "agent": {"value": allergy.get("agent_display", "Unknown"), "display_value": allergy.get("agent_display", "Unknown")},
                                             "time": {"value": allergy.get("onset_date", "Unknown"), "display_value": allergy.get("onset_date", "Unknown")},
                                             "severity": {"value": allergy.get("severity", "unknown"), "display_value": allergy.get("severity", "unknown").title()},

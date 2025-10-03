@@ -1683,7 +1683,7 @@ class EnhancedCDAProcessor:
             if id_elem is not None:
                 data["id"] = id_elem.get("root", "")
 
-            # Get observation code (what is being measured)
+            # Get observation code (REACTION TYPE for allergies)
             code_elem = obs_elem.find("hl7:code", namespaces)
             if code_elem is not None:
                 data["code"] = code_elem.get("code", "")
@@ -1693,6 +1693,11 @@ class EnhancedCDAProcessor:
                 )
                 data["code_system_name"] = code_elem.get("codeSystemName", "")
 
+                # For allergies: The observation/code element contains the REACTION TYPE
+                # e.g., code="420134006" = "Propensity to adverse reactions"
+                data["reaction_type_code"] = code_elem.get("code", "")
+                data["reaction_type_display"] = code_elem.get("displayName", "Unknown Reaction Type")
+
                 # Extract translation if available (e.g., Italian translation)
                 translation_elem = code_elem.find("hl7:translation", namespaces)
                 if translation_elem is not None:
@@ -1701,7 +1706,7 @@ class EnhancedCDAProcessor:
                     )
                     data["translation_code"] = translation_elem.get("code", "")
 
-            # Extract value - this is the measured value
+            # Extract value - CLINICAL MANIFESTATION for allergies
             value_elem = obs_elem.find("hl7:value", namespaces)
             if value_elem is not None:
                 # Check the type of value (PQ = Physical Quantity, CD = Coded Display, etc.)
@@ -1730,6 +1735,11 @@ class EnhancedCDAProcessor:
                     data["value_type"] = "coded"
                     data["formatted_value"] = data["value"]
 
+                    # For allergies: The observation/value element contains the CLINICAL MANIFESTATION
+                    # e.g., code="43116000" = "Eczema"
+                    data["manifestation_code"] = value_elem.get("code", "")
+                    data["manifestation_display"] = value_elem.get("displayName", "Unknown Manifestation")
+
                     # For problem observations, map value fields to condition fields
                     data["condition_code"] = value_elem.get("code", "")
                     data["condition_display"] = value_elem.get(
@@ -1739,7 +1749,7 @@ class EnhancedCDAProcessor:
                         value_elem.get("codeSystem", "")
                     )
 
-                    # For allergies, also extract agent information
+                    # For legacy allergies support, also extract agent information
                     data["agent_code"] = value_elem.get("code", "")
                     data["agent_display"] = value_elem.get(
                         "displayName", "Unknown Agent"
@@ -1835,21 +1845,41 @@ class EnhancedCDAProcessor:
                         data["reference_range"]["high_unit"] = high_elem.get("unit", "")
 
             # Enhanced allergy-specific extraction
-            # Extract criticality information
-            criticality = obs_elem.find(
-                ".//hl7:entryRelationship[@typeCode='COMP']/hl7:observation[hl7:code[@code='CRIT']]/hl7:value",
-                namespaces,
-            )
-            if criticality is not None:
-                data["criticality"] = criticality.get("displayName", criticality.get("code", ""))
+            # Extract criticality information - use safer XPath approach
+            try:
+                # Find COMP entryRelationships first, then search within them
+                comp_entries = obs_elem.findall(".//hl7:entryRelationship[@typeCode='COMP']", namespaces)
+                for comp_entry in comp_entries:
+                    # Look for observation with CRIT code
+                    crit_obs = comp_entry.find("hl7:observation", namespaces)
+                    if crit_obs is not None:
+                        crit_code = crit_obs.find("hl7:code", namespaces)
+                        if crit_code is not None and crit_code.get("code") == "CRIT":
+                            crit_value = crit_obs.find("hl7:value", namespaces)
+                            if crit_value is not None:
+                                data["criticality"] = crit_value.get("displayName", crit_value.get("code", ""))
+                                break
+            except Exception as e:
+                # Criticality extraction failed, but continue processing
+                pass
 
-            # Extract certainty/verification status
-            certainty = obs_elem.find(
-                ".//hl7:entryRelationship[@typeCode='COMP']/hl7:observation[hl7:code[@code='CERT']]/hl7:value",
-                namespaces,
-            )
-            if certainty is not None:
-                data["certainty"] = certainty.get("displayName", certainty.get("code", ""))
+            # Extract certainty/verification status - use safer XPath approach
+            try:
+                # Find COMP entryRelationships first, then search within them
+                comp_entries = obs_elem.findall(".//hl7:entryRelationship[@typeCode='COMP']", namespaces)
+                for comp_entry in comp_entries:
+                    # Look for observation with CERT code
+                    cert_obs = comp_entry.find("hl7:observation", namespaces)
+                    if cert_obs is not None:
+                        cert_code = cert_obs.find("hl7:code", namespaces)
+                        if cert_code is not None and cert_code.get("code") == "CERT":
+                            cert_value = cert_obs.find("hl7:value", namespaces)
+                            if cert_value is not None:
+                                data["certainty"] = cert_value.get("displayName", cert_value.get("code", ""))
+                                break
+            except Exception as e:
+                # Certainty extraction failed, but continue processing
+                pass
             
             # Alternative certainty extraction from verification status
             if not data.get("certainty"):
