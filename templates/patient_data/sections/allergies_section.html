@@ -171,6 +171,8 @@
                                             <i class="fa-solid fa-calendar ms-1 terminology-indicator text-muted" title="Date"></i>
                                             {% elif header.type == 'status' %}
                                             <i class="fa-solid fa-info-circle ms-1 terminology-indicator text-muted" title="Status"></i>
+                                            {% elif header.type == 'code' %}
+                                            <i class="fa-solid fa-hashtag ms-1 terminology-indicator text-muted" title="Medical Code"></i>
                                             {% endif %}
                                         </div>
                                         <div class="field-value">
@@ -240,6 +242,12 @@
                                                 <i class="fa-solid fa-fire ms-1 terminology-indicator" title="Reaction"></i>
                                                 {% elif header.type == 'severity' %}
                                                 <i class="fa-solid fa-thermometer-full ms-1 terminology-indicator" title="Severity"></i>
+                                                {% elif header.type == 'date' %}
+                                                <i class="fa-solid fa-calendar ms-1 terminology-indicator" title="Date"></i>
+                                                {% elif header.type == 'status' %}
+                                                <i class="fa-solid fa-info-circle ms-1 terminology-indicator" title="Status"></i>
+                                                {% elif header.type == 'code' %}
+                                                <i class="fa-solid fa-hashtag ms-1 terminology-indicator" title="Medical Code"></i>
                                                 {% endif %}
                                             </div>
                                         </th>

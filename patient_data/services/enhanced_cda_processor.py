@@ -1834,6 +1834,41 @@ class EnhancedCDAProcessor:
                         data["reference_range"]["high"] = high_elem.get("value", "")
                         data["reference_range"]["high_unit"] = high_elem.get("unit", "")
 
+            # Enhanced allergy-specific extraction
+            # Extract criticality information
+            criticality = obs_elem.find(
+                ".//hl7:entryRelationship[@typeCode='COMP']/hl7:observation[hl7:code[@code='CRIT']]/hl7:value",
+                namespaces,
+            )
+            if criticality is not None:
+                data["criticality"] = criticality.get("displayName", criticality.get("code", ""))
+
+            # Extract certainty/verification status
+            certainty = obs_elem.find(
+                ".//hl7:entryRelationship[@typeCode='COMP']/hl7:observation[hl7:code[@code='CERT']]/hl7:value",
+                namespaces,
+            )
+            if certainty is not None:
+                data["certainty"] = certainty.get("displayName", certainty.get("code", ""))
+            
+            # Alternative certainty extraction from verification status
+            if not data.get("certainty"):
+                verification = obs_elem.find(".//hl7:verificationStatus", namespaces)
+                if verification is not None:
+                    data["certainty"] = verification.get("displayName", verification.get("code", ""))
+
+            # Extract end date for allergy duration
+            effective_time_high = obs_elem.find("hl7:effectiveTime/hl7:high", namespaces)
+            if effective_time_high is not None:
+                end_value = effective_time_high.get("value", "")
+                if end_value:
+                    data["end_date"] = self._format_hl7_datetime(end_value)
+
+            # Extract reaction type (for allergies) - can be in code or separate observation
+            if data.get("code") and not data.get("type_code"):
+                data["type_code"] = data["code"]
+                data["type_display"] = data.get("display", "Propensity to adverse reaction")
+
         except Exception as e:
             logger.error(f"Error extracting observation data: {e}")
 
@@ -2219,11 +2254,15 @@ class EnhancedCDAProcessor:
                     "Status",
                 ],  # Medication History
                 "48765-2": [
-                    "Allergy Type",
-                    "Causative Agent",
-                    "Manifestation",
+                    "Code",
+                    "Reaction Type",
+                    "Clinical Manifestation",
+                    "Agent",
+                    "Time",
                     "Severity",
+                    "Criticality",
                     "Status",
+                    "Certainty",
                 ],  # Allergies
                 "11450-4": [
                     "Condition",
@@ -2271,11 +2310,15 @@ class EnhancedCDAProcessor:
                     "Statut",
                 ],
                 "48765-2": [
-                    "Type d'allergie",
-                    "Agent causant",
-                    "Manifestation",
+                    "Code",
+                    "Type de réaction",
+                    "Manifestation clinique",
+                    "Agent",
+                    "Durée",
                     "Sévérité",
+                    "Criticité",
                     "Statut",
+                    "Certitude",
                 ],
                 "11450-4": [
                     "Condition",
@@ -2305,11 +2348,15 @@ class EnhancedCDAProcessor:
                     "Status",
                 ],
                 "48765-2": [
-                    "Allergie-Typ",
+                    "Code",
+                    "Reaktionstyp",
+                    "Klinische Manifestation",
                     "Auslöser",
-                    "Manifestation",
+                    "Zeit",
                     "Schweregrad",
+                    "Kritikalität",
                     "Status",
+                    "Gewissheit",
                 ],
                 "11450-4": [
                     "Erkrankung",
@@ -2339,11 +2386,15 @@ class EnhancedCDAProcessor:
                     "Stato",
                 ],
                 "48765-2": [
-                    "Tipo allergia",
-                    "Agente causale",
-                    "Manifestazione",
+                    "Codice",
+                    "Tipo di reazione",
+                    "Manifestazione clinica",
+                    "Agente",
+                    "Tempo",
                     "Gravità",
+                    "Criticità",
                     "Stato",
+                    "Certezza",
                 ],
                 "11450-4": [
                     "Condizione",
@@ -2450,49 +2501,99 @@ class EnhancedCDAProcessor:
         """
 
     def _generate_allergy_row(self, item: Dict, target_language: str) -> str:
-        """Generate allergy table row with coded medical data"""
+        """Generate allergy table row with coded medical data for all 9 columns"""
 
         data = item.get("data", {})
 
-        allergy_type = self._translate_coded_value(
-            data.get("type_code", ""),
-            data.get("type_display", "Unknown Type"),
+        # 1. Code - Extract observation code (main allergy code)
+        observation_code = data.get("code", "")
+        code_badge = self._generate_code_badge(
+            observation_code, data.get("code_system", "")
+        )
+
+        # 2. Reaction Type - Extract allergy type from observation or value
+        reaction_type = self._translate_coded_value(
+            data.get("type_code", data.get("code", "")),
+            data.get("type_display", data.get("display", "Propensity to adverse reaction")),
             target_language,
         )
 
-        causative_agent = self._translate_coded_value(
-            data.get("agent_code", ""),
-            data.get("agent_display", "Unknown Agent"),
-            target_language,
-        )
-
+        # 3. Clinical Manifestation - Extract manifestation details
         manifestation = self._translate_coded_value(
             data.get("manifestation_code", ""),
             data.get("manifestation_display", "Unknown Reaction"),
             target_language,
         )
 
+        # 4. Agent - Extract causative agent
+        causative_agent = self._translate_coded_value(
+            data.get("agent_code", ""),
+            data.get("agent_display", "Unknown Agent"),
+            target_language,
+        )
+
+        # 5. Time - Extract timing information (onset date, effective time, duration)
+        time_info = ""
+        if data.get("onset_date"):
+            time_info = f"From {data['onset_date']}"
+        elif data.get("formatted_time"):
+            time_info = data["formatted_time"]
+        elif data.get("effective_time"):
+            time_info = self._format_hl7_datetime(data["effective_time"])
+        else:
+            time_info = "Unknown"
+        
+        # Check for end date or duration
+        if data.get("end_date"):
+            time_info += f" Until {data['end_date']}"
+        elif "From" in time_info:
+            time_info += " Until <span class='text-muted'>ongoing</span>"
+
+        # 6. Severity - Extract and translate severity
         severity = self._translate_severity(
             data.get("severity", "unknown"), target_language
         )
+
+        # 7. Criticality - Extract criticality information (usually found in nested observations)
+        criticality = data.get("criticality", "")
+        if not criticality:
+            # Infer criticality from severity for display purposes
+            severity_lower = data.get("severity", "").lower()
+            if "severe" in severity_lower or "life threatening" in severity_lower:
+                criticality = "High"
+            elif "moderate" in severity_lower:
+                criticality = "Medium"
+            elif "mild" in severity_lower:
+                criticality = "Low"
+            else:
+                criticality = "Unknown"
+
+        # 8. Status - Extract and translate status
         status = self._translate_status(data.get("status", "active"), target_language)
 
-        code_badge = self._generate_code_badge(
-            data.get("agent_code", ""), data.get("code_system", "")
-        )
+        # 9. Certainty - Extract certainty information
+        certainty = data.get("certainty", "")
+        if not certainty:
+            # Common certainty values in CDA: confirmed, probable, possible, suspected
+            certainty = data.get("certainty_display", "Unknown")
 
         return f"""
         <tr>
-            <td>{allergy_type}</td>
-            <td><strong>{causative_agent}</strong></td>
+            <td>{code_badge}</td>
+            <td>{reaction_type}</td>
             <td>{manifestation}</td>
+            <td><strong>{causative_agent}</strong></td>
+            <td>{time_info}</td>
             <td>
                 <span class="badge bg-{self._get_severity_color(data.get('severity', 'unknown'))}">{severity}</span>
             </td>
             <td>
+                <span class="badge bg-{self._get_criticality_color(criticality.lower())}">{criticality}</span>
+            </td>
+            <td>
                 <span class="badge bg-{self._get_status_color(data.get('status', 'active'))}">{status}</span>
             </td>
-            <td>{code_badge}</td>
+            <td>{certainty}</td>
         </tr>
         """
 
@@ -2665,6 +2766,16 @@ class EnhancedCDAProcessor:
             "unknown": "secondary",
         }
         return color_map.get(severity.lower(), "secondary")
+
+    def _get_criticality_color(self, criticality: str) -> str:
+        """Get Bootstrap color class for criticality"""
+        color_map = {
+            "low": "success",
+            "medium": "warning", 
+            "high": "danger",
+            "unknown": "secondary",
+        }
+        return color_map.get(criticality.lower(), "secondary")
 
     def _get_no_data_row(self, colspan: int, language: str) -> str:
         """Generate a 'no data' row in the appropriate language"""

@@ -320,11 +320,15 @@ def create_clinical_table(
         },
         "48765-2": {  # Allergies
             "headers": [
-                {"key": "allergen", "label": "Allergen", "primary": True},
-                {"key": "reaction", "label": "Reaction"},
+                {"key": "code", "label": "Code", "type": "code"},
+                {"key": "reaction_type", "label": "Reaction Type", "primary": True, "type": "reaction"},
+                {"key": "manifestation", "label": "Clinical Manifestation", "type": "reaction"},
+                {"key": "agent", "label": "Agent", "type": "allergen"},
+                {"key": "time", "label": "Time", "type": "date"},
                 {"key": "severity", "label": "Severity", "type": "severity"},
+                {"key": "criticality", "label": "Criticality", "type": "severity"},
                 {"key": "status", "label": "Status", "type": "status"},
-                {"key": "onset_date", "label": "First Noted", "type": "date"},
+                {"key": "certainty", "label": "Certainty", "type": "status"},
             ],
             "title": "Allergies & Adverse Reactions",
             "icon": "fas fa-exclamation-triangle",
