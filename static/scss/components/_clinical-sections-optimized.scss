@@ -644,6 +644,17 @@
         
         &:hover {
           background-color: $neutral-lightest;
+          
+          // Prevent status badge icons from changing color on row hover
+          .status-badge {
+            i,
+            .fa-solid,
+            .fa-regular,
+            .fa-light,
+            .fa-brands {
+              color: white !important;
+            }
+          }
         }
         
         &:last-child {
@@ -823,10 +834,12 @@
   .badge {
     &.bg-success {
       background: linear-gradient(135deg, $success, $success-dark) !important;
+      color: white !important; // Ensure white text for dark badge
     }
     
     &.bg-info {
       background: linear-gradient(135deg, $info, $info-dark) !important;
+      color: white !important; // Ensure white text for dark badge
     }
     
     &.bg-warning {
@@ -835,16 +848,44 @@
     
     &.bg-danger {
       background: linear-gradient(135deg, $error, $error-dark) !important;
+      color: white !important; // Ensure white text for dark badge
     }
     
     &.bg-secondary {
       background: linear-gradient(135deg, $secondary-color, $secondary-light) !important;
+      color: white !important; // Ensure white text for dark badge
     }
   }
   
   .status-badge {
     box-shadow: $shadow-xs;
     border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    // Keep status badge icons white on hover (override global hover effects)
+    i,
+    .fa-solid,
+    .fa-regular,
+    .fa-light,
+    .fa-brands {
+      color: white !important;
+      
+      &:hover {
+        color: white !important;
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+    
+    // Ensure icon color stays consistent when parent element is hovered
+    &:hover {
+      i,
+      .fa-solid,
+      .fa-regular,
+      .fa-light,
+      .fa-brands {
+        color: white !important;
+      }
+    }
   }
   
   .severity-badge {
