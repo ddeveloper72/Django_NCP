@@ -217,11 +217,6 @@
                                             </table>
                                         </div>
                                     </div>
-                                                    
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -677,9 +672,6 @@
                                     {# PRIORITY 1: Check if allergies data has clinical_table structure (NEW 9-COLUMN FORMAT) #}
                                     {% if allergies.0.clinical_table %}
                                         {# NEW 9-COLUMN CLINICAL TABLE STRUCTURE from Enhanced CDA Processor #}
-                                        <div class="alert alert-info">
-                                            <strong>DEBUG:</strong> Using Enhanced CDA Processor 9-column format
-                                        </div>
                                         <div class="clinical-table">
                                             {# Desktop Table Layout #}
                                             <div class="d-none d-md-block">
@@ -785,9 +777,6 @@
                                         </div>
                                     {% else %}
                                         {# FALLBACK: Original card format for backward compatibility #}
-                                        <div class="alert alert-warning">
-                                            <strong>DEBUG:</strong> Using fallback card format - no clinical_table detected
-                                        </div>
                                         {% for allergy in allergies %}
                                         <div class="allergy-card mb-3 p-3 border rounded bg-white">
                                             <div class="d-flex align-items-start">
