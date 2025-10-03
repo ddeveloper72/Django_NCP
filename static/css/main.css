@@ -11372,6 +11372,17 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
     display: none !important;
   }
 }
+:root {
+  --hover-overlay-light: rgba(0, 0, 0, 0.04);
+  --pressed-overlay-light: rgba(0, 0, 0, 0.08);
+  --focus-overlay-light: rgba(0, 95, 95, 0.12);
+  --hover-overlay-dark: rgba(255, 255, 255, 0.08);
+  --pressed-overlay-dark: rgba(255, 255, 255, 0.16);
+  --focus-overlay-dark: rgba(0, 95, 95, 0.20);
+  --ease-out-hover: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-focus: cubic-bezier(0.23, 1, 0.320, 1);
+}
+
 .clinical-section-header-optimized {
   display: flex;
   align-items: center;
@@ -11410,11 +11421,14 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   font-size: 0.875rem;
   color: #6c757d;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s var(--ease-out-hover);
 }
-.clinical-section-header-optimized .header-tab-controls .header-tab-button:hover {
-  background: #e2e8f0;
+.clinical-section-header-optimized .header-tab-controls .header-tab-button:hover:not(.active) {
+  background-image: linear-gradient(var(--hover-overlay-light), var(--hover-overlay-light));
   color: #2d3748;
+}
+.clinical-section-header-optimized .header-tab-controls .header-tab-button:active:not(.active) {
+  background-image: linear-gradient(var(--pressed-overlay-light), var(--pressed-overlay-light));
 }
 .clinical-section-header-optimized .header-tab-controls .header-tab-button.active {
   background: #085a9f;
@@ -11480,8 +11494,14 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   vertical-align: top;
   border-bottom: 1px solid #e2e8f0;
 }
+.clinical-accordion-content-optimized .clinical-content-direct .clinical-table-optimized .table tbody tr {
+  transition: background-color 0.1s var(--ease-out-hover);
+}
 .clinical-accordion-content-optimized .clinical-content-direct .clinical-table-optimized .table tbody tr:hover {
-  background: #f7fafc;
+  background: rgba(0, 95, 95, 0.02);
+}
+.clinical-accordion-content-optimized .clinical-content-direct .clinical-table-optimized .table.medical-data-table tbody tr:hover {
+  background: transparent;
 }
 .clinical-accordion-content-optimized .clinical-content-direct .clinical-cards-container-optimized .clinical-card {
   border: 1px solid #e2e8f0;

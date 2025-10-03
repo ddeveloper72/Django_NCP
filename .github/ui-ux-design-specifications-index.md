@@ -33,6 +33,18 @@
 
 **Status:** ✅ Production Implementation Guide
 
+### 3. [Hover States and Interaction Design Guidelines](./hover-states-interaction-design-guidelines.md)
+
+**Interaction design standards** for subtle, purposeful hover effects:
+
+- **Philosophy**: "Less is more" approach preventing "whack-a-mole" interface behavior
+- **Six-Token System**: Minimal design tokens for consistent hover and pressed states
+- **Healthcare Context**: Medical data protection and clinical workflow considerations
+- **Component Guidelines**: Specific hover patterns for navigation, buttons, forms, tables
+- **Anti-Patterns**: What to avoid to maintain professional healthcare interface
+
+**Status:** ✅ Healthcare UX Standards
+
 ---
 
 ## Design System Integration
@@ -157,6 +169,7 @@ Aligns with [Technical Architecture](./technical-architecture-and-information-fl
 
 ## Related Specifications
 
+- [Hover States and Interaction Design Guidelines](./hover-states-interaction-design-guidelines.md) - Subtle interaction patterns and healthcare-focused hover behavior
 - [Color Contrast and Accessibility Standards](./color-contrast-accessibility-standards.md) - WCAG 2.2 compliance and healthcare accessibility
 - [SCSS Standards Index](./scss-standards-index.md) - CSS implementation standards
 - [Django Template Commenting Standards](./django-template-commenting-standards.md) - Template structure

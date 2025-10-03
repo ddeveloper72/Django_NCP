@@ -48,6 +48,16 @@ All SCSS components must comply with [Color Contrast and Accessibility Standards
 - Focus state contrast requirements (3:1+ minimum)
 - Healthcare-specific accessibility considerations
 
+### Hover States and Interaction Design
+
+Follows [Hover States and Interaction Design Guidelines](./hover-states-interaction-design-guidelines.md):
+
+- Six-token hover system for consistent interaction patterns
+- Subtle, purposeful hover effects avoiding "whack-a-mole" behavior
+- Healthcare context considerations protecting medical data visibility
+- Performance-optimized transitions and animations
+- Clinical workflow protection for critical medical information
+
 ### Frontend Structure Compliance
 
 The SCSS standards integrate with existing [Frontend Structure Compliance](./frontend-structure-compliance.md) requirements:
@@ -237,6 +247,7 @@ By following these standards, the Django NCP application maintains a robust, fut
 
 ## Quick Links
 
+- [Hover States and Interaction Design Guidelines](./hover-states-interaction-design-guidelines.md) - Subtle interaction patterns and healthcare UX
 - [Color Contrast and Accessibility Standards](./color-contrast-accessibility-standards.md) - WCAG 2.2 compliance and healthcare accessibility
 - [SCSS Architecture Standards](./scss-architecture-standards.md) - Core principles
 - [SCSS Component Patterns](./scss-component-patterns.md) - Implementation guides

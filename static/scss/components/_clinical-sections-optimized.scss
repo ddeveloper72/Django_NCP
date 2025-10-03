@@ -1,7 +1,26 @@
 // ========================================
 // Optimized Clinical Section Components
 // New layout: tabs in header, maximized content area
+// Implements subtle hover guidelines for healthcare UX
 // ========================================
+
+// Six-token hover system for consistent interactions
+// Based on: https://uxdesign.cc/handling-hover-and-pressed-states-in-design-systems-9d1c2a29213d
+:root {
+  // Light overlay tokens
+  --hover-overlay-light: rgba(0, 0, 0, 0.04);        // Subtle darkening
+  --pressed-overlay-light: rgba(0, 0, 0, 0.08);      // Pressed feedback
+  --focus-overlay-light: rgba(0, 95, 95, 0.12);      // HSE teal focus
+  
+  // Dark overlay tokens  
+  --hover-overlay-dark: rgba(255, 255, 255, 0.08);   // Subtle lightening
+  --pressed-overlay-dark: rgba(255, 255, 255, 0.16); // Pressed feedback
+  --focus-overlay-dark: rgba(0, 95, 95, 0.20);       // HSE teal focus
+  
+  // Standard easing functions for healthcare interactions
+  --ease-out-hover: cubic-bezier(0.25, 0.46, 0.45, 0.94);   // Gentle entry
+  --ease-focus: cubic-bezier(0.23, 1, 0.320, 1);            // Smooth focus
+}
 
 // Enhanced Accordion Header with integrated tab controls
 .clinical-section-header-optimized {
@@ -48,11 +67,16 @@
       font-size: $font-size-sm;
       color: $text-muted;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s var(--ease-out-hover);
 
-      &:hover {
-        background: $neutral-lighter;
+      // ✅ SUBTLE: Six-token hover system for tab controls
+      &:hover:not(.active) {
+        background-image: linear-gradient(var(--hover-overlay-light), var(--hover-overlay-light));
         color: $text-dark;
+      }
+
+      &:active:not(.active) {
+        background-image: linear-gradient(var(--pressed-overlay-light), var(--pressed-overlay-light));
       }
 
       &.active {
@@ -136,8 +160,18 @@
           border-bottom: 1px solid $border-light;
         }
 
-        tbody tr:hover {
-          background: $bg-light;
+        tbody tr {
+          transition: background-color 0.1s var(--ease-out-hover);
+          
+          // ✅ MINIMAL: Very subtle row highlighting for data scanning
+          &:hover {
+            background: rgba(0, 95, 95, 0.02); // Extremely subtle HSE teal
+          }
+        }
+        
+        // Exception: Medical data tables should have minimal to no hover
+        &.medical-data-table tbody tr:hover {
+          background: transparent;
         }
       }
     }
@@ -1114,3 +1148,31 @@
     }
   }
 }
+
+
+// ========================================
+// Healthcare-Specific Hover Guidelines Implementation
+// ========================================
+
+// This file implements the "Less is More" hover philosophy to prevent
+// "whack-a-mole" interface behavior in healthcare environments.
+//
+// Key Principles Applied:
+// 1. Six-token system for consistent hover states
+// 2. Subtle overlays instead of color changes
+// 3. Medical data protection from distracting hover effects
+// 4. Performance-optimized transitions for clinical devices
+//
+// Reference: 
+// - Hover States and Interaction Design Guidelines
+// - https://uxdesign.cc/handling-hover-and-pressed-states-in-design-systems-9d1c2a29213d
+//
+// Token Usage Examples:
+// - var(--hover-overlay-light): rgba(0, 0, 0, 0.04) for light backgrounds
+// - var(--hover-overlay-dark): rgba(255, 255, 255, 0.08) for dark backgrounds
+// - var(--ease-out-hover): cubic-bezier(0.25, 0.46, 0.45, 0.94) for gentle transitions
+//
+// Medical Data Protection:
+// - Critical medical information tables use minimal or no hover effects
+// - Status badges maintain color consistency during interaction
+// - Emergency alerts remain stable regardless of mouse movement
