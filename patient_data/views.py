@@ -3885,6 +3885,96 @@ def patient_cda_view(request, session_id, cda_type=None):
                         f"{medical_terms_count} medical terms"
                     )
 
+                    # ENHANCED: Process allergies section with Enhanced CDA Processor for 9-column structure
+                    try:
+                        logger.info("[ENHANCED] Invoking Enhanced CDA Processor for allergies extraction")
+                        
+                        # Process with Enhanced CDA Processor to extract structured allergies data
+                        enhanced_processor = EnhancedCDAProcessor(
+                            target_language=source_language, 
+                            country_code=country_code
+                        )
+                        
+                        # Extract allergies section specifically (code 48765-2) using XML processing
+                        enhanced_allergies_data = []
+                        
+                        if cda_content and '48765-2' in cda_content:
+                            # Parse XML to extract allergies section
+                            try:
+                                import xml.etree.ElementTree as ET
+                                root = ET.fromstring(cda_content)
+                                
+                                # Define namespaces commonly used in CDA documents
+                                namespaces = {
+                                    'hl7': 'urn:hl7-org:v3',
+                                    'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
+                                }
+                                
+                                # Find allergies section (code 48765-2)
+                                allergies_sections = root.findall(".//hl7:section[hl7:code[@code='48765-2']]", namespaces)
+                                
+                                for section in allergies_sections:
+                                    # Extract entries from allergies section
+                                    entries = section.findall("hl7:entry", namespaces)
+                                    
+                                    for entry in entries:
+                                        # Extract observation data for each allergy
+                                        obs_data = enhanced_processor._extract_observation_data(entry, namespaces)
+                                        if obs_data:
+                                            enhanced_allergies_data.append(obs_data)
+                                
+                                logger.info(f"[ENHANCED] Extracted {len(enhanced_allergies_data)} allergies from XML processing")
+                                
+                            except ET.ParseError:
+                                logger.warning("[ENHANCED] CDA content is not valid XML, trying HTML processing")
+                                # Fall back to HTML processing if XML parsing fails
+                                from bs4 import BeautifulSoup
+                                soup = BeautifulSoup(cda_content, 'html.parser')
+                                
+                                # Look for allergies section in HTML
+                                allergies_divs = soup.find_all('div', string=re.compile(r'48765-2|Allergies|allergies'))
+                                for div in allergies_divs:
+                                    # Extract table data if present
+                                    table = div.find_next('table')
+                                    if table:
+                                        rows = table.find_all('tr')[1:]  # Skip header
+                                        for row in rows:
+                                            cells = row.find_all(['td', 'th'])
+                                            if len(cells) >= 2:
+                                                # Basic allergy extraction from HTML table
+                                                allergy_data = {
+                                                    'allergy_type': 'Drug Allergy',
+                                                    'causative_agent': cells[0].get_text(strip=True) if cells[0] else 'Unknown',
+                                                    'manifestation': cells[1].get_text(strip=True) if len(cells) > 1 else 'Unknown reaction',
+                                                    'severity': 'moderate',
+                                                    'status': 'active',
+                                                    'recorded_date': '',
+                                                    'onset_date': '',
+                                                    'allergy_code': '',
+                                                    'agent_code': '',
+                                                    'manifestation_code': '',
+                                                    'notes': ''
+                                                }
+                                                enhanced_allergies_data.append(allergy_data)
+                        
+                        if enhanced_allergies_data and len(enhanced_allergies_data) > 0:
+                            logger.info(f"[ENHANCED] Successfully extracted {len(enhanced_allergies_data)} enhanced allergies")
+                            
+                            # Store enhanced allergies data in session for template access
+                            request.session[f'enhanced_allergies_data_{session_id}'] = {
+                                'structured_entries': enhanced_allergies_data,
+                                'extraction_timestamp': str(timezone.now()),
+                                'source_language': source_language,
+                                'country_code': country_code
+                            }
+                            
+                            logger.info(f"[ENHANCED] Stored enhanced allergies data in session key: enhanced_allergies_data_{session_id}")
+                        else:
+                            logger.info("[ENHANCED] No enhanced allergies data extracted")
+                            
+                    except Exception as e:
+                        logger.error(f"[ERROR] Enhanced CDA Processor allergies extraction failed: {str(e)}")
+
                     # Extract processed sections for Clinical Information tab
                     processed_sections = []
                     raw_sections = processing_result.get("sections", [])
@@ -3922,30 +4012,58 @@ def patient_cda_view(request, session_id, cda_type=None):
                         
                         # ALSO check session for enhanced allergies data (session-based storage)
                         if not enhanced_allergies:
-                            for session_key, session_value in request.session.items():
-                                if 'enhanced_allergies_data' in session_key and isinstance(session_value, dict):
-                                    structured_entries = session_value.get('structured_entries', [])
-                                    if structured_entries:
-                                        # Convert structured_entries format to old format for compatibility
-                                        enhanced_allergies = []
-                                        for entry in structured_entries:
-                                            # Convert new format to old format expected by view
-                                            converted_entry = {
-                                                'substance': entry.get('causative_agent', 'Unknown'),
-                                                'code': entry.get('allergy_code', '').split(':')[-1] if ':' in entry.get('allergy_code', '') else entry.get('allergy_code', ''),
-                                                'coding_system': entry.get('allergy_code', '').split(':')[0] if ':' in entry.get('allergy_code', '') else 'SNOMED-CT',
-                                                'agent_code': entry.get('agent_code', '').split(':')[-1] if ':' in entry.get('agent_code', '') else entry.get('agent_code', ''),
-                                                'manifestation': [entry.get('manifestation', 'Unknown reaction')],
-                                                'manifestation_codes': [entry.get('manifestation_code', '').split(':')[-1] if ':' in entry.get('manifestation_code', '') else entry.get('manifestation_code', '')],
-                                                'severity': entry.get('severity', 'unknown'),
-                                                'status': entry.get('status', 'active'),
-                                                'onset_date': entry.get('onset_date', ''),
-                                                'end_date': entry.get('end_date', ''),
-                                                'certainty': 'confirmed',  # Default from enhanced data
-                                            }
-                                            enhanced_allergies.append(converted_entry)
-                                        print(f"[DEBUG] Converted {len(enhanced_allergies)} enhanced allergies from session key: {session_key}")
-                                        break
+                            # Check for session-specific enhanced allergies data first
+                            enhanced_key = f'enhanced_allergies_data_{session_id}'
+                            if enhanced_key in request.session:
+                                session_allergies = request.session[enhanced_key]
+                                structured_entries = session_allergies.get('structured_entries', [])
+                                if structured_entries:
+                                    # Convert structured_entries format to old format for compatibility
+                                    enhanced_allergies = []
+                                    for entry in structured_entries:
+                                        # Convert new format to old format expected by view
+                                        converted_entry = {
+                                            'substance': entry.get('causative_agent', 'Unknown'),
+                                            'code': entry.get('allergy_code', '').split(':')[-1] if ':' in entry.get('allergy_code', '') else entry.get('allergy_code', ''),
+                                            'coding_system': entry.get('allergy_code', '').split(':')[0] if ':' in entry.get('allergy_code', '') else 'SNOMED-CT',
+                                            'agent_code': entry.get('agent_code', '').split(':')[-1] if ':' in entry.get('agent_code', '') else entry.get('agent_code', ''),
+                                            'manifestation': [entry.get('manifestation', 'Unknown reaction')],
+                                            'manifestation_codes': [entry.get('manifestation_code', '').split(':')[-1] if ':' in entry.get('manifestation_code', '') else entry.get('manifestation_code', '')],
+                                            'severity': entry.get('severity', 'unknown'),
+                                            'status': entry.get('status', 'active'),
+                                            'onset_date': entry.get('onset_date', ''),
+                                            'end_date': entry.get('end_date', ''),
+                                            'certainty': 'confirmed',  # Default from enhanced data
+                                        }
+                                        enhanced_allergies.append(converted_entry)
+                                    print(f"[DEBUG] Converted {len(enhanced_allergies)} enhanced allergies from session key: {enhanced_key}")
+                            
+                            # Fallback: check general session keys for enhanced allergies data
+                            if not enhanced_allergies:
+                                for session_key, session_value in request.session.items():
+                                    if 'enhanced_allergies_data' in session_key and isinstance(session_value, dict):
+                                        structured_entries = session_value.get('structured_entries', [])
+                                        if structured_entries:
+                                            # Convert structured_entries format to old format for compatibility
+                                            enhanced_allergies = []
+                                            for entry in structured_entries:
+                                                # Convert new format to old format expected by view
+                                                converted_entry = {
+                                                    'substance': entry.get('causative_agent', 'Unknown'),
+                                                    'code': entry.get('allergy_code', '').split(':')[-1] if ':' in entry.get('allergy_code', '') else entry.get('allergy_code', ''),
+                                                    'coding_system': entry.get('allergy_code', '').split(':')[0] if ':' in entry.get('allergy_code', '') else 'SNOMED-CT',
+                                                    'agent_code': entry.get('agent_code', '').split(':')[-1] if ':' in entry.get('agent_code', '') else entry.get('agent_code', ''),
+                                                    'manifestation': [entry.get('manifestation', 'Unknown reaction')],
+                                                    'manifestation_codes': [entry.get('manifestation_code', '').split(':')[-1] if ':' in entry.get('manifestation_code', '') else entry.get('manifestation_code', '')],
+                                                    'severity': entry.get('severity', 'unknown'),
+                                                    'status': entry.get('status', 'active'),
+                                                    'onset_date': entry.get('onset_date', ''),
+                                                    'end_date': entry.get('end_date', ''),
+                                                    'certainty': 'confirmed',  # Default from enhanced data
+                                                }
+                                                enhanced_allergies.append(converted_entry)
+                                            print(f"[DEBUG] Converted {len(enhanced_allergies)} enhanced allergies from session key: {session_key}")
+                                            break
 
                         is_allergies_section = any(
                             keyword in section_title.lower()
