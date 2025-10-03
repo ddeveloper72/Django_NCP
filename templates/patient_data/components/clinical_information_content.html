@@ -665,10 +665,6 @@
                                 <div class="content-inner-title">
                                     <p class="mb-3 text-muted">Allergies: {{ allergies|length }} items found</p>
                                     
-                                    {# DEBUG: Show allergies data structure #}
-                                    <!-- DEBUG: allergies type: {{ allergies|safe }} -->
-                                    <!-- DEBUG: first allergy keys: {{ allergies.0|safe }} -->
-                                    
                                     {# PRIORITY 1: Check if allergies data has clinical_table structure (NEW 9-COLUMN FORMAT) #}
                                     {% if allergies.0.clinical_table %}
                                         {# NEW 9-COLUMN CLINICAL TABLE STRUCTURE from Enhanced CDA Processor #}

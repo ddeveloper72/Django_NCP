@@ -25,23 +25,23 @@ class CDADisplayDataHelper:
     def __init__(self):
         try:
             self.clinical_extractor = ClinicalDataExtractor()
-            logger.info("[SUCCESS] ClinicalDataExtractor initialized successfully")
+            logger.debug("ClinicalDataExtractor initialized successfully")
         except Exception as e:
-            logger.error(f"[ERROR] Failed to initialize ClinicalDataExtractor: {e}")
+            logger.error(f"Failed to initialize ClinicalDataExtractor: {e}")
             self.clinical_extractor = None
 
         try:
             self.enhanced_parser = EnhancedCDAXMLParser()
-            logger.info("[SUCCESS] EnhancedCDAXMLParser initialized successfully")
+            logger.debug("EnhancedCDAXMLParser initialized successfully")
         except Exception as e:
-            logger.error(f"[ERROR] Failed to initialize EnhancedCDAXMLParser: {e}")
+            logger.error(f"Failed to initialize EnhancedCDAXMLParser: {e}")
             self.enhanced_parser = None
 
         try:
             self.structured_extractor = StructuredCDAExtractor()
-            logger.info("[SUCCESS] StructuredCDAExtractor initialized successfully")
+            logger.debug("StructuredCDAExtractor initialized successfully")
         except Exception as e:
-            logger.error(f"[ERROR] Failed to initialize StructuredCDAExtractor: {e}")
+            logger.error(f"Failed to initialize StructuredCDAExtractor: {e}")
             self.structured_extractor = None
 
     def extract_display_data(
@@ -158,9 +158,9 @@ class CDADisplayDataHelper:
             try:
                 from .services.enhanced_cda_processor import EnhancedCDAProcessor
                 enhanced_processor = EnhancedCDAProcessor(target_language='en', country_code='PT')
-                logger.info("[ENHANCED CDA HELPER] Enhanced CDA Processor initialized for allergies")
+                logger.debug("Enhanced CDA Processor initialized for allergies")
             except Exception as e:
-                logger.warning(f"[ENHANCED CDA HELPER] Could not initialize Enhanced CDA Processor: {e}")
+                logger.warning(f"Could not initialize Enhanced CDA Processor: {e}")
                 enhanced_processor = None
 
             # Transform to display format
@@ -184,19 +184,14 @@ class CDADisplayDataHelper:
 
                 # ENHANCED: Check if this is an allergies section and apply Enhanced CDA Processor
                 section_title = display_section.get("display_name", "").lower()
-                logger.info(f"[ENHANCED CDA HELPER DEBUG] Section title: '{section_title}' (from {section_name})")
                 
                 is_allergies_section = (
                     section_name == "allergies" or 
                     any(keyword in section_title for keyword in ["allerg", "adverse", "reaction", "intolerance"])
                 )
-                
-                logger.info(f"[ENHANCED CDA HELPER DEBUG] Is allergies section: {is_allergies_section}")
-                logger.info(f"[ENHANCED CDA HELPER DEBUG] Enhanced processor available: {enhanced_processor is not None}")
-                logger.info(f"[ENHANCED CDA HELPER DEBUG] CDA content available: {cda_content is not None}")
 
                 if is_allergies_section and enhanced_processor and cda_content:
-                    logger.info(f"[ENHANCED CDA HELPER] Processing allergies section: {display_section.get('display_name')}")
+                    logger.debug(f"Processing allergies section: {display_section.get('display_name')}")
                     
                     try:
                         # Extract allergies using Enhanced CDA Processor
@@ -243,19 +238,19 @@ class CDADisplayDataHelper:
                                         observation = entry.find(".//{urn:hl7-org:v3}observation")
                                     
                                     if observation is not None:
-                                        logger.info(f"[ENHANCED CDA HELPER] Found observation in entry - extracting data")
+                                        logger.debug("Found observation in entry - extracting data")
                                         # Extract observation data for each allergy
                                         obs_data = enhanced_processor._extract_observation_data(observation, namespaces)
                                         if obs_data:
-                                            logger.info(f"[ENHANCED CDA HELPER] Successfully extracted observation data: {list(obs_data.keys())}")
+                                            logger.debug(f"Successfully extracted observation data with {len(obs_data)} fields")
                                             enhanced_allergies.append(obs_data)
                                         else:
-                                            logger.warning(f"[ENHANCED CDA HELPER] Observation data extraction returned empty")
+                                            logger.warning("Observation data extraction returned empty")
                                     else:
-                                        logger.warning(f"[ENHANCED CDA HELPER] No observation found in entry")
+                                        logger.warning("No observation found in entry")
 
                             if enhanced_allergies:
-                                logger.info(f"[ENHANCED CDA HELPER] Found {len(enhanced_allergies)} enhanced allergies")
+                                logger.debug(f"Found {len(enhanced_allergies)} enhanced allergies")
                                 
                                 # Create 9-column clinical table structure for allergies
                                 display_section["clinical_table"] = {
@@ -293,20 +288,18 @@ class CDADisplayDataHelper:
                                     }
                                     display_section["clinical_table"]["rows"].append(row)
 
-                                logger.info(f"[ENHANCED CDA HELPER] Created clinical_table with {len(display_section['clinical_table']['rows'])} allergy rows")
+                                logger.debug(f"Created clinical_table with {len(display_section['clinical_table']['rows'])} allergy rows")
                             
                     except Exception as e:
-                        logger.error(f"[ENHANCED CDA HELPER] Enhanced allergies processing failed: {e}")
+                        logger.error(f"Enhanced allergies processing failed: {e}")
 
                 clinical_sections.append(display_section)
 
-            logger.info(
-                f"[SUCCESS] Extracted {len(clinical_sections)} clinical sections"
-            )
+            logger.debug(f"Extracted {len(clinical_sections)} clinical sections")
             return clinical_sections
 
         except Exception as e:
-            logger.error(f"[ERROR] Clinical sections extraction failed: {e}")
+            logger.error(f"Clinical sections extraction failed: {e}")
             return []
 
     def _transform_to_display_format(
