@@ -23,6 +23,22 @@
 4. **Consistent Feedback:** Uniform interaction patterns across the application
 5. **Token-Based System:** Minimal design tokens for maximum consistency
 
+### Industry-Validated Methodology
+
+Our approach follows the proven six-token methodology outlined in "[Handling hover and pressed states in design systems](https://uxdesign.cc/handling-hover-and-pressed-states-in-design-systems-9d1c2a29213d)" which categorizes all interactive elements into three types:
+
+**Element Categories:**
+- **Prominent Elements:** Solid buttons, primary actions, call-to-actions (use strong overlays)
+- **Soft Elements:** Cards, secondary buttons, interactive icons (use gentle overlays)  
+- **Transparent Elements:** Naked buttons, links, minimal designs (use soft overlays + semantic highlights when needed)
+
+**State Management:**
+- **Neutral Elements:** Using grayscale or non-meaningful colors
+- **Semantic Elements:** Using colors with specific meanings (danger, success, action)
+- **Cross-Theme Compatibility:** Same tokens work across light and dark modes
+
+**This systematic approach ensures every interactive element receives appropriate feedback while maintaining visual hierarchy and preventing interface chaos.**
+
 ---
 
 ## Healthcare Context Considerations
@@ -70,12 +86,14 @@
 
 ## Six-Token Hover System
 
-### Design Token Strategy
+### Design Token Strategy - Validated Approach
 
-Based on design systems best practices, we use only six tokens to handle all hover and pressed states:
+Based on design systems best practices and validated by Felix's comprehensive guide "[Handling hover and pressed states in design systems](https://uxdesign.cc/handling-hover-and-pressed-states-in-design-systems-9d1c2a29213d)", we use only six tokens to handle all hover and pressed states across the entire healthcare interface.
+
+**This systematic approach prevents "whack-a-mole" interface behavior while maintaining professional healthcare standards.**
 
 ```scss
-// ✅ SYSTEM: Six-token hover system
+// ✅ SYSTEM: Six-token hover system - Industry validated methodology
 :root {
     // Light overlay tokens
     --hover-overlay-light: rgba(0, 0, 0, 0.04);        // Subtle darkening
@@ -86,6 +104,66 @@ Based on design systems best practices, we use only six tokens to handle all hov
     --hover-overlay-dark: rgba(255, 255, 255, 0.08);   // Subtle lightening
     --pressed-overlay-dark: rgba(255, 255, 255, 0.16); // Pressed feedback
     --focus-overlay-dark: rgba(0, 95, 95, 0.20);       // HSE teal focus
+}
+```
+
+---
+
+## Implementation Methodology
+
+### Industry-Validated Approach
+
+Following the comprehensive methodology outlined in Felix's design systems guide, our hover implementation uses **overlay-based state changes** rather than direct color modifications. This approach provides:
+
+- **Consistency:** Same overlay tokens work across all element types
+- **Scalability:** No need for component-specific hover tokens  
+- **Maintainability:** Single source of truth for interaction feedback
+- **Professional Feel:** 0.3s ease transitions for healthcare interfaces
+
+### Base Implementation Pattern
+
+```scss
+// ✅ STANDARD: Base interactive element pattern
+.interactive-element {
+    background-color: var(--base-color);
+    background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)); // No overlay initially
+    transition: background-image 0.3s ease, color 0.3s ease;
+    position: relative; // Required for proper stacking context
+    
+    &:hover {
+        background-image: linear-gradient(var(--hover-overlay-light), var(--hover-overlay-light));
+    }
+    
+    &:active {
+        background-image: linear-gradient(var(--pressed-overlay-light), var(--pressed-overlay-light));
+    }
+    
+    &:focus {
+        box-shadow: 0 0 0 3px var(--focus-overlay-light);
+        outline: none; // Remove browser default
+    }
+}
+```
+
+### Semantic Transparent Elements
+
+Special handling for transparent elements with semantic meaning (e.g., destructive action buttons):
+
+```scss
+// ✅ SEMANTIC: Transparent elements with meaning
+.btn-transparent-semantic {
+    background-color: transparent;
+    transition: background-color 0.3s ease, background-image 0.3s ease;
+    
+    &:hover {
+        background-color: var(--bg-action-soft-highlight); // Semantic highlight
+        background-image: linear-gradient(var(--hover-overlay-light), var(--hover-overlay-light));
+    }
+    
+    &:active {
+        background-color: var(--bg-action-soft-highlight); // Same semantic highlight
+        background-image: linear-gradient(var(--pressed-overlay-light), var(--pressed-overlay-light));
+    }
 }
 ```
 

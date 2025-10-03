@@ -61,15 +61,17 @@
 
     .header-tab-button {
       background: $bg-light;
+      background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)); // No overlay initially
       border: 1px solid $border-light;
       border-radius: $border-radius-sm;
       padding: $space-xs $space-sm;
       font-size: $font-size-sm;
       color: $text-muted;
       cursor: pointer;
-      transition: all 0.2s var(--ease-out-hover);
+      position: relative; // Required for proper stacking context
+      transition: background-image 0.3s ease, color 0.3s ease; // Article-validated timing
 
-      // ✅ SUBTLE: Six-token hover system for tab controls
+      // ✅ VALIDATED: Six-token hover system following Felix's methodology
       &:hover:not(.active) {
         background-image: linear-gradient(var(--hover-overlay-light), var(--hover-overlay-light));
         color: $text-dark;

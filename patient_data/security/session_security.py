@@ -335,7 +335,7 @@ class SessionSecurity:
             return False
 
         # Check session expiration
-        if session.is_expired():
+        if session.is_expired:  # Fixed: is_expired is a property, not a method
             logger.info(f"Session {session.session_id} has expired")
             return False
 

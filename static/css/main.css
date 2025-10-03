@@ -11415,13 +11415,15 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 }
 .clinical-section-header-optimized .header-tab-controls .header-tab-button {
   background: #f7fafc;
+  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0));
   border: 1px solid #e2e8f0;
   border-radius: 0.25rem;
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
   color: #6c757d;
   cursor: pointer;
-  transition: all 0.2s var(--ease-out-hover);
+  position: relative;
+  transition: background-image 0.3s ease, color 0.3s ease;
 }
 .clinical-section-header-optimized .header-tab-controls .header-tab-button:hover:not(.active) {
   background-image: linear-gradient(var(--hover-overlay-light), var(--hover-overlay-light));

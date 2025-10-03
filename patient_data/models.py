@@ -507,8 +507,8 @@ class PatientSession(models.Model):
             )
             self.expires_at = timezone.now() + session_duration
 
-        # Validate expiration is in the future
-        if self.expires_at <= timezone.now():
+        # Validate expiration is in the future (except when marking as expired)
+        if self.expires_at <= timezone.now() and self.status != "expired":
             from django.core.exceptions import ValidationError
 
             raise ValidationError("Session expiration must be in the future")
@@ -524,7 +524,7 @@ class PatientSession(models.Model):
         """Mark session as expired and inactive."""
         self.is_active = False
         self.status = "expired"
-        self.save()  # Save all fields to avoid any update_fields issues
+        self.save()
 
     def record_access(
         self, action: str = "", client_ip: str = "", user_agent: str = ""

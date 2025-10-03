@@ -2653,6 +2653,48 @@ def patient_details_view(request, patient_id):
             match_data["country_code"],
         )
 
+        # Extract clinical arrays for Clinical Information tab
+        clinical_arrays = {
+            "medications": [],
+            "allergies": [],
+            "problems": [],
+            "procedures": [],
+            "vital_signs": [],
+            "results": [],
+            "immunizations": [],
+        }
+        
+        try:
+            # Import and use the comprehensive clinical data service
+            from .services.comprehensive_clinical_data_service import ComprehensiveClinicalDataService
+            
+            comprehensive_service = ComprehensiveClinicalDataService()
+            cda_content = match_data.get("cda_content")
+            
+            if cda_content:
+                logger.info(f"[PATIENT_DETAILS] Extracting clinical arrays for patient {patient_id}")
+                
+                # Extract comprehensive data
+                comprehensive_data = comprehensive_service.extract_comprehensive_clinical_data(
+                    cda_content, match_data["country_code"]
+                )
+                
+                if comprehensive_data and isinstance(comprehensive_data, dict):
+                    clinical_arrays = comprehensive_service.get_clinical_arrays_for_display(
+                        comprehensive_data
+                    )
+                    logger.info(
+                        f"[PATIENT_DETAILS] Clinical arrays extracted: problems={len(clinical_arrays['problems'])}, allergies={len(clinical_arrays['allergies'])}, medications={len(clinical_arrays['medications'])}"
+                    )
+                else:
+                    logger.info(f"[PATIENT_DETAILS] No comprehensive data extracted for patient {patient_id}")
+            else:
+                logger.info(f"[PATIENT_DETAILS] No CDA content available for patient {patient_id}")
+                
+        except Exception as e:
+            logger.warning(f"[PATIENT_DETAILS] Failed to extract clinical arrays: {e}")
+            # Keep default empty arrays
+
         context.update(
             {
                 "patient_summary": patient_summary,
@@ -2675,6 +2717,40 @@ def patient_details_view(request, patient_id):
                 "selected_l3_index": match_data.get("selected_l3_index", 0),
             }
         )
+
+        # Add clinical arrays to context if available (unpack for template compatibility)
+        if clinical_arrays:
+            context.update(
+                {
+                    "medications": clinical_arrays["medications"],
+                    "allergies": clinical_arrays["allergies"],
+                    "problems": clinical_arrays["problems"],
+                    "procedures": clinical_arrays["procedures"],
+                    "vital_signs": clinical_arrays["vital_signs"],
+                    "results": clinical_arrays["results"],
+                    "immunizations": clinical_arrays["immunizations"],
+                }
+            )
+            total_clinical_items = sum(
+                len(arr) for arr in clinical_arrays.values()
+            )
+            logger.info(
+                f"[PATIENT_DETAILS] Added {total_clinical_items} clinical array items to context for patient {patient_id}"
+            )
+        else:
+            # Ensure clinical arrays exist even if empty for template compatibility
+            context.update(
+                {
+                    "medications": [],
+                    "allergies": [],
+                    "problems": [],
+                    "procedures": [],
+                    "vital_signs": [],
+                    "results": [],
+                    "immunizations": [],
+                }
+            )
+            logger.info(f"[PATIENT_DETAILS] Added empty clinical arrays to context for patient {patient_id}")
 
         return render(request, "patient_data/patient_details.html", context)
     else:
@@ -3008,6 +3084,7 @@ def patient_cda_view(request, session_id, cda_type=None):
             # Initialize administrative data and clinical arrays variables
             admin_data = None
             clinical_arrays = None
+            comprehensive_data = None
 
             # ALWAYS run Comprehensive Clinical Data Service for administrative data and clinical arrays
             logger.info(
@@ -3024,8 +3101,9 @@ def patient_cda_view(request, session_id, cda_type=None):
                     f"[DEBUG] Got CDA content length: {len(cda_content) if cda_content else 0}"
                 )
 
+                comprehensive_service = ComprehensiveClinicalDataService()
+
                 if cda_content:
-                    comprehensive_service = ComprehensiveClinicalDataService()
                     logger.info(
                         f"[DEBUG] Created comprehensive service, extracting data..."
                     )
@@ -3050,38 +3128,74 @@ def patient_cda_view(request, session_id, cda_type=None):
                     )
 
                     # Extract clinical arrays for Clinical Information tab
-                    clinical_arrays = (
-                        comprehensive_service.get_clinical_arrays_for_display(
-                            cda_content, {}
-                        )
-                    )
-                    logger.info(
-                        f"[CLINICAL SERVICE] Clinical arrays extracted: med={len(clinical_arrays['medications'])}, all={len(clinical_arrays['allergies'])}, prob={len(clinical_arrays['problems'])}, proc={len(clinical_arrays['procedures'])}, vs={len(clinical_arrays['vital_signs'])}"
-                    )
-
-                    # If main clinical data extraction failed, use comprehensive service sections
-                    if not clinical_data or not clinical_data.get("sections"):
-                        logger.info(
-                            f"Main clinical data extraction returned empty, using comprehensive service sections"
-                        )
-                        if comprehensive_data and comprehensive_data.get("sections"):
-                            logger.info(
-                                f"Comprehensive service found {len(comprehensive_data['sections'])} sections"
+                    if comprehensive_data and isinstance(comprehensive_data, dict):
+                        clinical_arrays = (
+                            comprehensive_service.get_clinical_arrays_for_display(
+                                comprehensive_data
                             )
-                            # Convert comprehensive service sections to expected format
-                            if not clinical_data:
-                                clinical_data = {"sections": []}
-                            clinical_data["sections"] = comprehensive_data["sections"]
+                        )
+                        logger.info(
+                            f"[CLINICAL SERVICE] Clinical arrays extracted: med={len(clinical_arrays['medications'])}, all={len(clinical_arrays['allergies'])}, prob={len(clinical_arrays['problems'])}, proc={len(clinical_arrays['procedures'])}, vs={len(clinical_arrays['vital_signs'])}"
+                        )
+                    else:
+                        logger.info(
+                            f"[CLINICAL SERVICE] No comprehensive data available, using empty clinical arrays"
+                        )
+                        clinical_arrays = {
+                            "medications": [],
+                            "allergies": [],
+                            "problems": [],
+                            "procedures": [],
+                            "vital_signs": [],
+                            "results": [],
+                            "immunizations": [],
+                        }
+
                 else:
                     logger.warning(
-                        f"[DEBUG] No CDA content available for session {session_id}"
+                        f"[DEBUG] No CDA content available for session {session_id}, using empty clinical arrays"
                     )
+                    # Initialize empty clinical arrays for sessions without CDA content
+                    clinical_arrays = {
+                        "medications": [],
+                        "allergies": [],
+                        "problems": [],
+                        "procedures": [],
+                        "vital_signs": [],
+                        "results": [],
+                        "immunizations": [],
+                    }
+
+                # If main clinical data extraction failed, use comprehensive service sections
+                if not clinical_data or not clinical_data.get("sections"):
+                    logger.info(
+                        f"Main clinical data extraction returned empty, checking comprehensive data"
+                    )
+                    if comprehensive_data and comprehensive_data.get("sections"):
+                        logger.info(
+                            f"Comprehensive service found {len(comprehensive_data['sections'])} sections"
+                        )
+                        # Convert comprehensive service sections to expected format
+                        if not clinical_data:
+                            clinical_data = {"sections": []}
+                        clinical_data["sections"] = comprehensive_data["sections"]
 
             except Exception as e:
                 logger.warning(f"Comprehensive service execution failed: {e}")
                 import traceback
 
                 logger.warning(f"Traceback: {traceback.format_exc()}")
+                # Initialize empty clinical arrays on error
+                if clinical_arrays is None:
+                    clinical_arrays = {
+                        "medications": [],
+                        "allergies": [],
+                        "problems": [],
+                        "procedures": [],
+                        "vital_signs": [],
+                        "results": [],
+                        "immunizations": [],
+                    }
 
             if clinical_data:
                 # Structured CDA found - create enhanced context with both new and existing data
@@ -4144,7 +4258,17 @@ def patient_cda_view(request, session_id, cda_type=None):
         # CLINICAL ARRAYS EXTRACTION: Add clinical arrays for Clinical Information tab (Session-based patient path)
         # Only execute this fallback if medications weren't already extracted by comprehensive processing
         try:
-            if cda_content and cda_content.strip() and not context.get("medications"):
+            # Get the raw CDA content from the search result based on the requested type
+            raw_cda_content = None
+            if actual_cda_type == "L3":
+                raw_cda_content = search_result.l3_cda_content
+            elif actual_cda_type == "L1":
+                raw_cda_content = search_result.l1_cda_content
+            else:
+                # Fallback to any available content
+                raw_cda_content = search_result.l3_cda_content or search_result.l1_cda_content or search_result.cda_content
+            
+            if raw_cda_content and raw_cda_content.strip() and not context.get("medications"):
                 logger.info(
                     f"[CLINICAL ARRAYS SESSION] Extracting clinical arrays for session {session_id} using ComprehensiveClinicalDataService (fallback path)"
                 )
@@ -4152,10 +4276,16 @@ def patient_cda_view(request, session_id, cda_type=None):
                     ComprehensiveClinicalDataService,
                 )
 
+                # Use the comprehensive service directly with raw CDA content
                 comprehensive_service = ComprehensiveClinicalDataService()
-                clinical_arrays = comprehensive_service.get_clinical_arrays_for_display(
-                    cda_content, {}
+                comprehensive_data = comprehensive_service.extract_comprehensive_clinical_data(
+                    raw_cda_content, country_code
                 )
+                
+                if comprehensive_data and isinstance(comprehensive_data, dict):
+                    clinical_arrays = comprehensive_service.get_clinical_arrays_for_display(
+                        comprehensive_data
+                    )
 
                 if clinical_arrays:
                     # Add clinical arrays to context for Clinical Information tab
@@ -4551,7 +4681,10 @@ def patient_cda_view(request, session_id, cda_type=None):
 
     except Exception as e:
         logger.error(f"Error in patient_cda_view: {e}")
-        return render(request, "patient_data/error.html", {"error": str(e)})
+        import traceback
+        logger.error(f"Full traceback: {traceback.format_exc()}")
+        # Re-raise the exception to see the full Django debug page
+        raise e
 
 
 @login_required

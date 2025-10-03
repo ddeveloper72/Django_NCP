@@ -235,7 +235,7 @@ class PatientSessionMiddleware(MiddlewareMixin):
         # Clean up expired session if it exists
         try:
             expired_session = PatientSession.objects.get(session_id=session_id)
-            if expired_session.is_expired():
+            if expired_session.is_expired:  # Fixed: is_expired is a property, not a method
                 expired_session.mark_expired()
                 SessionAuditLog.log_action(
                     session=expired_session,
