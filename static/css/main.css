@@ -17327,6 +17327,34 @@ input[type=checkbox] {
   width: 100%;
   min-height: 300px;
   position: relative;
+  overflow: hidden;
+  contain: layout;
+}
+
+.clinical-section {
+  width: 100%;
+  overflow: hidden;
+  contain: layout style;
+  position: relative;
+}
+.clinical-section .clinical-tab-content {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  contain: layout;
+}
+.clinical-section .clinical-tab-content:not(.active) {
+  display: none !important;
+  visibility: hidden;
+  position: absolute;
+  left: -9999px;
+}
+.clinical-section .clinical-tab-content.active {
+  display: block !important;
+  visibility: visible;
+  position: relative;
+  left: auto;
 }
 
 @media (max-width: 768px) {

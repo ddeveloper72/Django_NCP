@@ -70,6 +70,39 @@
   width: 100%;
   min-height: 300px; // Ensure container height
   position: relative;
+  overflow: hidden; // Ensure content doesn't escape
+  contain: layout; // CSS containment to prevent layout issues
+}
+
+// Force proper containment for clinical tab content
+.clinical-section {
+  width: 100%;
+  overflow: hidden; // Prevent content from escaping the section
+  contain: layout style; // CSS containment
+  position: relative;
+  
+  .clinical-tab-content {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden; // Prevent horizontal overflow
+    contain: layout; // Contain layout calculations
+    
+    // Ensure inactive tabs are completely hidden
+    &:not(.active) {
+      display: none !important;
+      visibility: hidden;
+      position: absolute;
+      left: -9999px; // Move off-screen as additional precaution
+    }
+    
+    &.active {
+      display: block !important;
+      visibility: visible;
+      position: relative;
+      left: auto;
+    }
+  }
 }
 
 // Responsive design for tabs
