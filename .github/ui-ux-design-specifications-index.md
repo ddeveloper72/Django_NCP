@@ -43,7 +43,17 @@
 2. **Color Consistency**: Bootstrap-based color scheme with medical/healthcare themes
 3. **Information Architecture**: Card-based layout with clear content separation
 4. **Responsive Design**: Mobile-first approach with progressive enhancement
-5. **Accessibility**: WCAG AA compliant with proper ARIA implementation
+5. **Accessibility**: WCAG 2.2 AA compliant with comprehensive color contrast standards
+
+### Accessibility Integration
+
+Integrates with [Color Contrast and Accessibility Standards](./color-contrast-accessibility-standards.md):
+
+- **Badge Components**: White text on dark backgrounds, proper contrast ratios (4.5:1+)
+- **Status Indicators**: Multi-modal design (color + text + icons), never color alone
+- **Interactive Elements**: Focus states with 3:1+ contrast, proper border visibility
+- **Healthcare Context**: Medical data accessibility in clinical environments
+- **Emergency Information**: High contrast critical alerts with multiple visual indicators
 
 ### Component Standards
 
@@ -147,6 +157,7 @@ Aligns with [Technical Architecture](./technical-architecture-and-information-fl
 
 ## Related Specifications
 
+- [Color Contrast and Accessibility Standards](./color-contrast-accessibility-standards.md) - WCAG 2.2 compliance and healthcare accessibility
 - [SCSS Standards Index](./scss-standards-index.md) - CSS implementation standards
 - [Django Template Commenting Standards](./django-template-commenting-standards.md) - Template structure
 - [Frontend Structure Compliance](./frontend-structure-compliance.md) - Overall frontend standards

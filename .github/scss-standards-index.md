@@ -38,6 +38,16 @@ This index provides access to all SCSS architecture standards and guidelines for
 
 ## Integration with Existing Specifications
 
+### Color Contrast and Accessibility Standards
+
+All SCSS components must comply with [Color Contrast and Accessibility Standards](./color-contrast-accessibility-standards.md):
+
+- WCAG 2.2 AA minimum contrast ratios (4.5:1 normal text, 3:1 large text)
+- Badge text color requirements for dark/light backgrounds
+- Status indicator multi-modal design (never color alone)
+- Focus state contrast requirements (3:1+ minimum)
+- Healthcare-specific accessibility considerations
+
 ### Frontend Structure Compliance
 
 The SCSS standards integrate with existing [Frontend Structure Compliance](./frontend-structure-compliance.md) requirements:
@@ -227,6 +237,7 @@ By following these standards, the Django NCP application maintains a robust, fut
 
 ## Quick Links
 
+- [Color Contrast and Accessibility Standards](./color-contrast-accessibility-standards.md) - WCAG 2.2 compliance and healthcare accessibility
 - [SCSS Architecture Standards](./scss-architecture-standards.md) - Core principles
 - [SCSS Component Patterns](./scss-component-patterns.md) - Implementation guides
 - [SCSS Quick Reference](./scss-quick-reference.md) - Developer checklists
