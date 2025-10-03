@@ -3919,6 +3919,33 @@ def patient_cda_view(request, session_id, cda_type=None):
                         print(
                             f"[DEBUG] Enhanced allergies in match_data: {len(enhanced_allergies)} items"
                         )
+                        
+                        # ALSO check session for enhanced allergies data (session-based storage)
+                        if not enhanced_allergies:
+                            for session_key, session_value in request.session.items():
+                                if 'enhanced_allergies_data' in session_key and isinstance(session_value, dict):
+                                    structured_entries = session_value.get('structured_entries', [])
+                                    if structured_entries:
+                                        # Convert structured_entries format to old format for compatibility
+                                        enhanced_allergies = []
+                                        for entry in structured_entries:
+                                            # Convert new format to old format expected by view
+                                            converted_entry = {
+                                                'substance': entry.get('causative_agent', 'Unknown'),
+                                                'code': entry.get('allergy_code', '').split(':')[-1] if ':' in entry.get('allergy_code', '') else entry.get('allergy_code', ''),
+                                                'coding_system': entry.get('allergy_code', '').split(':')[0] if ':' in entry.get('allergy_code', '') else 'SNOMED-CT',
+                                                'agent_code': entry.get('agent_code', '').split(':')[-1] if ':' in entry.get('agent_code', '') else entry.get('agent_code', ''),
+                                                'manifestation': [entry.get('manifestation', 'Unknown reaction')],
+                                                'manifestation_codes': [entry.get('manifestation_code', '').split(':')[-1] if ':' in entry.get('manifestation_code', '') else entry.get('manifestation_code', '')],
+                                                'severity': entry.get('severity', 'unknown'),
+                                                'status': entry.get('status', 'active'),
+                                                'onset_date': entry.get('onset_date', ''),
+                                                'end_date': entry.get('end_date', ''),
+                                                'certainty': 'confirmed',  # Default from enhanced data
+                                            }
+                                            enhanced_allergies.append(converted_entry)
+                                        print(f"[DEBUG] Converted {len(enhanced_allergies)} enhanced allergies from session key: {session_key}")
+                                        break
 
                         is_allergies_section = any(
                             keyword in section_title.lower()
@@ -4017,6 +4044,34 @@ def patient_cda_view(request, session_id, cda_type=None):
 
                     # Check if we have enhanced allergies data and add them to clinical sections
                     enhanced_allergies = match_data.get("enhanced_allergies", [])
+                    
+                    # ALSO check session for enhanced allergies data (session-based storage)
+                    if not enhanced_allergies:
+                        for session_key, session_value in request.session.items():
+                            if 'enhanced_allergies_data' in session_key and isinstance(session_value, dict):
+                                structured_entries = session_value.get('structured_entries', [])
+                                if structured_entries:
+                                    # Convert structured_entries format to old format for compatibility
+                                    enhanced_allergies = []
+                                    for entry in structured_entries:
+                                        # Convert new format to old format expected by view
+                                        converted_entry = {
+                                            'substance': entry.get('causative_agent', 'Unknown'),
+                                            'code': entry.get('allergy_code', '').split(':')[-1] if ':' in entry.get('allergy_code', '') else entry.get('allergy_code', ''),
+                                            'coding_system': entry.get('allergy_code', '').split(':')[0] if ':' in entry.get('allergy_code', '') else 'SNOMED-CT',
+                                            'agent_code': entry.get('agent_code', '').split(':')[-1] if ':' in entry.get('agent_code', '') else entry.get('agent_code', ''),
+                                            'manifestation': [entry.get('manifestation', 'Unknown reaction')],
+                                            'manifestation_codes': [entry.get('manifestation_code', '').split(':')[-1] if ':' in entry.get('manifestation_code', '') else entry.get('manifestation_code', '')],
+                                            'severity': entry.get('severity', 'unknown'),
+                                            'status': entry.get('status', 'active'),
+                                            'onset_date': entry.get('onset_date', ''),
+                                            'end_date': entry.get('end_date', ''),
+                                            'certainty': 'confirmed',  # Default from enhanced data
+                                        }
+                                        enhanced_allergies.append(converted_entry)
+                                    print(f"[ENHANCED DEBUG] Converted {len(enhanced_allergies)} enhanced allergies from session key: {session_key}")
+                                    break
+                    
                     print(
                         f"[ENHANCED DEBUG] Enhanced allergies found: {len(enhanced_allergies)} entries"
                     )
