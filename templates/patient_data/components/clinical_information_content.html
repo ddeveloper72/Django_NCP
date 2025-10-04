@@ -25,7 +25,6 @@
                                     <div class="clinical-section-title">
                                         <i class="fa-solid fa-triangle-exclamation me-2"></i>
                                         <span>Medical Problems</span>
-                                        <span class="badge bg-light text-dark ms-2">{{ problems|length }}</span>
                                     </div>
                                     <div class="clinical-badge-container">
                                         <span class="clinical-badge populated">{{ problems|length }} Found</span>
@@ -242,7 +241,6 @@
                                     <div class="clinical-section-title">
                                         <i class="fa-solid fa-pills me-2"></i>
                                         <span>Medications</span>
-                                        <span class="badge bg-light text-dark ms-2">{{ medications|length }}</span>
                                     </div>
                                     <div class="clinical-badge-container">
                                         <span class="clinical-badge populated">{{ medications|length }} Found</span>
@@ -679,10 +677,6 @@
                                     <div class="clinical-section-title">
                                         <i class="fa-solid fa-triangle-exclamation me-2"></i>
                                         <span>Allergies & Intolerances</span>
-                                        {% if allergies and allergies|length > 0 %}
-                                            {# Use custom filter to count allergies correctly based on data structure #}
-                                            <span class="badge bg-light text-dark ms-2">{{ allergies|count_allergy_observations }}</span>
-                                        {% endif %}
                                     </div>
                                     <div class="clinical-badge-container">
                                         {% if allergies and allergies|length > 0 %}
@@ -918,8 +912,6 @@
                                     <div class="clinical-section-title">
                                         <i class="fa-solid fa-user-md me-2"></i>
                                         <span>Medical Procedures</span>
-                                        {# Use custom filter to count procedures correctly based on data structure #}
-                                        <span class="badge bg-light text-dark ms-2">{{ procedures|count_procedure_observations }}</span>
                                     </div>
                                     <div class="clinical-badge-container">
                                         <span class="clinical-badge populated">{{ procedures|count_procedure_observations }} Found</span>
@@ -1133,8 +1125,6 @@
                                     <div class="clinical-section-title">
                                         <i class="fa-solid fa-heartbeat me-2"></i>
                                         <span>Medical Devices</span>
-                                        {# Use custom filter to count medical devices correctly based on data structure #}
-                                        <span class="badge bg-light text-dark ms-2">{{ medical_devices|count_medical_device_observations }}</span>
                                     </div>
                                     <div class="clinical-badge-container">
                                         <span class="clinical-badge populated">{{ medical_devices|count_medical_device_observations }} Found</span>
@@ -1339,7 +1329,6 @@
                                     <div class="clinical-section-title">
                                         <i class="fa-solid fa-chart-line me-2"></i>
                                         <span>Vital Signs</span>
-                                        <span class="badge bg-light text-dark ms-2">{{ vital_signs|length }}</span>
                                     </div>
                                     <div class="clinical-badge-container">
                                         <span class="clinical-badge populated">{{ vital_signs|length }} Found</span>
