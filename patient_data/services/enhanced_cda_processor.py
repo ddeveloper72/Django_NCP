@@ -1991,6 +1991,9 @@ class EnhancedCDAProcessor:
             if not hl7_datetime:
                 return ""
 
+            # Strip whitespace and validate input
+            hl7_datetime = hl7_datetime.strip()
+            
             # Handle different HL7 datetime formats
             if len(hl7_datetime) >= 14:
                 # YYYYMMDDHHMMSS format
@@ -2006,8 +2009,19 @@ class EnhancedCDAProcessor:
                 month = hl7_datetime[4:6]
                 day = hl7_datetime[6:8]
                 return f"{month}/{day}/{year}"
-            else:
+            elif len(hl7_datetime) == 6:
+                # YYYYMM format (year and month only)
+                year = hl7_datetime[0:4]
+                month = hl7_datetime[4:6]
+                return f"{month}/{year}"
+            elif len(hl7_datetime) == 4 and hl7_datetime.isdigit():
+                # YYYY format (year only) - common in allergy onset/end dates
                 return hl7_datetime
+            else:
+                # Fallback for unknown formats - return as-is
+                return hl7_datetime
+        except Exception:
+            return hl7_datetime
         except Exception:
             return hl7_datetime
 
@@ -2643,22 +2657,34 @@ class EnhancedCDAProcessor:
             target_language,
         )
 
-        # 5. Time - Extract timing information (onset date, effective time, duration)
+        # 5. Time - Extract timing information with enhanced date range handling
         time_info = ""
-        if data.get("onset_date"):
-            time_info = f"From {data['onset_date']}"
+        onset_date = data.get("onset_date", "")
+        end_date = data.get("end_date", "")
+        
+        # Handle date ranges intelligently
+        if onset_date and end_date:
+            # Both start and end dates available - create a date range
+            if onset_date == end_date:
+                # Same date
+                time_info = onset_date
+            else:
+                # Different dates - show as range
+                time_info = f"{onset_date} - {end_date}"
+        elif onset_date:
+            # Only start date available
+            time_info = f"From {onset_date}"
+        elif end_date:
+            # Only end date available (unusual but possible)
+            time_info = f"Until {end_date}"
         elif data.get("formatted_time"):
+            # Use formatted effective time
             time_info = data["formatted_time"]
         elif data.get("effective_time"):
+            # Use raw effective time, format it
             time_info = self._format_hl7_datetime(data["effective_time"])
         else:
             time_info = "Unknown"
-        
-        # Check for end date or duration
-        if data.get("end_date"):
-            time_info += f" Until {data['end_date']}"
-        elif "From" in time_info:
-            time_info += " Until <span class='text-muted'>ongoing</span>"
 
         # 6. Severity - Extract and translate severity
         severity = self._translate_severity(
