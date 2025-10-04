@@ -1839,17 +1839,21 @@ class EnhancedCDAProcessor:
 
             # ENHANCED: Extract agent from pharm:code elements (e.g., J01CA04)
             # This is where the actual allergen/causative agent is specified
-            pharm_codes = obs_elem.findall(".//pharm:code", namespaces)
-            for pharm_code in pharm_codes:
-                code_value = pharm_code.get("code", "")
-                display_name = pharm_code.get("displayName", "")
-                
-                # If we found a pharm:code with meaningful data, use it as the agent
-                if code_value and (display_name or code_value != "ASSERTION"):
-                    data["agent_code"] = code_value
-                    data["agent_display"] = display_name if display_name else f"Agent (Code: {code_value})"
-                    # Break after finding the first meaningful pharm:code
-                    break
+            try:
+                pharm_codes = obs_elem.findall(".//pharm:code", namespaces)
+                for pharm_code in pharm_codes:
+                    code_value = pharm_code.get("code", "")
+                    display_name = pharm_code.get("displayName", "")
+                    
+                    # If we found a pharm:code with meaningful data, use it as the agent
+                    if code_value and (display_name or code_value != "ASSERTION"):
+                        data["agent_code"] = code_value
+                        data["agent_display"] = display_name if display_name else f"Agent (Code: {code_value})"
+                        # Break after finding the first meaningful pharm:code
+                        break
+            except Exception as pharm_e:
+                # Pharmaceutical namespace not available or other error - continue without pharm:code extraction
+                pass
 
             # If no agent found yet, try looking in entry/act/code (alternative structure)
             if not data.get("agent_code"):
