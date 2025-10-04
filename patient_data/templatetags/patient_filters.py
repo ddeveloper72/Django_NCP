@@ -727,3 +727,26 @@ def safe_title_text(title_data):
 
     # Return lowercase for safe matching
     return clean_title.lower() if clean_title else ""
+
+
+@register.filter
+def count_allergy_observations(allergies):
+    """
+    Count total allergy observations for badge display.
+    For Enhanced CDA format: counts total rows across all clinical tables
+    For Legacy format: counts allergy entries
+    """
+    if not allergies:
+        return 0
+    
+    # Check if we have Enhanced CDA format (clinical_table structure)
+    if allergies and hasattr(allergies[0], 'get') and allergies[0].get('clinical_table'):
+        total_rows = 0
+        for allergy in allergies:
+            if hasattr(allergy, 'get') and allergy.get('clinical_table'):
+                rows = allergy['clinical_table'].get('rows', [])
+                total_rows += len(rows)
+        return total_rows
+    else:
+        # Legacy format: count allergy entries
+        return len(allergies)

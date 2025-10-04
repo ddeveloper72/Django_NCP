@@ -659,11 +659,12 @@
                             <input id="toggle-allergies" class="toggle-input" type="checkbox">
                             <label for="toggle-allergies" class="collapsible-label-title">
                                 <i class="fa-solid fa-triangle-exclamation me-2"></i>Allergies & Intolerances
-                                <span class="badge bg-light text-dark ms-2">{{ allergies|length }}</span>
+                                {# Use custom filter to count allergies correctly based on data structure #}
+                                <span class="badge bg-light text-dark ms-2">{{ allergies|count_allergy_observations }}</span>
                             </label>
                             <div class="collapsible-content-title">
                                 <div class="content-inner-title">
-                                    <p class="mb-3 text-muted">Allergies: {{ allergies|length }} items found</p>
+                                    <p class="mb-3 text-muted">Allergies: {{ allergies|count_allergy_observations }} items found</p>
                                     
                                     {# PRIORITY 1: Check if allergies data has clinical_table structure (NEW 9-COLUMN FORMAT) #}
                                     {% if allergies.0.clinical_table %}
