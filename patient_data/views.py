@@ -3313,6 +3313,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                             "vital_signs": [],
                             "results": [],
                             "immunizations": [],
+                            "medical_devices": [],
                         }
 
                 else:
@@ -3328,6 +3329,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                         "vital_signs": [],
                         "results": [],
                         "immunizations": [],
+                        "medical_devices": [],
                     }
 
                 # If main clinical data extraction failed, use comprehensive service sections
@@ -3359,6 +3361,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                         "vital_signs": [],
                         "results": [],
                         "immunizations": [],
+                        "medical_devices": [],
                     }
 
             if clinical_data:
