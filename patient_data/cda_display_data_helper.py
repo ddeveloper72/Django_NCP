@@ -442,12 +442,13 @@ class CDADisplayDataHelper:
                             if enhanced_devices:
                                 logger.debug(f"Found {len(enhanced_devices)} enhanced medical devices")
                                 
-                                # Create clinical table structure for medical devices
+                                # Create clinical table structure for medical devices  
+                                # 3-column format: Device Type, Device ID, Implant Date
                                 display_section["clinical_table"] = {
                                     "headers": [
-                                        {"key": "device", "label": "Medical Device", "type": "device"},
-                                        {"key": "usage_period", "label": "Usage Period", "type": "date"},  
-                                        {"key": "status", "label": "Status", "type": "status"},
+                                        {"key": "device_type", "label": "Device Type", "type": "device"},
+                                        {"key": "device_id", "label": "Device ID", "type": "identifier"},  
+                                        {"key": "implant_date", "label": "Implant Date", "type": "date"},
                                     ],
                                     "rows": [],
                                     "total_count": len(enhanced_devices),
@@ -458,9 +459,22 @@ class CDADisplayDataHelper:
                                 for device in enhanced_devices:
                                     row = {
                                         "data": {
-                                            "device": {"value": device.get("device_display", "Unknown"), "display_value": device.get("device_display", "Unknown"), "code": device.get("device_code"), "code_system": device.get("device_code_system", "SNOMED CT")},
-                                            "usage_period": {"value": device.get("usage_period", "Not specified"), "display_value": device.get("usage_period", "Not specified")},
-                                            "status": {"value": device.get("status_display", "Active"), "display_value": device.get("status_display", "Active")},
+                                            "device_type": {
+                                                "value": device.get("device_display", "Unknown Medical Device"), 
+                                                "display_value": device.get("device_display", "Unknown Medical Device"), 
+                                                "code": device.get("device_code"), 
+                                                "code_system": device.get("device_code_system", "SNOMED CT")
+                                            },
+                                            "device_id": {
+                                                "value": device.get("device_id", "Not specified"), 
+                                                "display_value": device.get("device_id", "Not specified")
+                                            },
+                                            "implant_date": {
+                                                "value": device.get("implant_date_display", "Not specified"), 
+                                                "display_value": device.get("implant_date_display", "Not specified"),
+                                                "raw_date": device.get("implant_date"),
+                                                "removal_date": device.get("removal_date")
+                                            },
                                         },
                                         "has_medical_codes": bool(device.get("device_code")),
                                         # Add the device object for template access to codes

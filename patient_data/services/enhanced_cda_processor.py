@@ -2247,72 +2247,126 @@ class EnhancedCDAProcessor:
         data = {}
 
         try:
-            # Get device code with CTS integration
-            code_elem = device_elem.find("hl7:code", namespaces)
-            if code_elem is not None:
-                device_code = code_elem.get("code", "")
-                code_system = code_elem.get("codeSystem", "")
-                display_name = code_elem.get("displayName", "")
-                
-                data["device_code"] = device_code
-                data["device_code_system"] = self._get_code_system_name(code_system)
-                
-                # Use CTS for device translation if display name is missing
-                if display_name and display_name.strip():
-                    data["device_display"] = display_name
-                elif device_code and code_system:
-                    # Use CTS to get device description
-                    cts_device = self._lookup_valueset_term(device_code, "device")
-                    data["device_display"] = cts_device or f"Medical Device: {device_code}"
-                else:
-                    data["device_display"] = "Unknown Medical Device"
-
-            # Extract participantRole for device-specific information
+            # Extract participant role for device-specific information (primary path)
             participant_role = device_elem.find("hl7:participant/hl7:participantRole", namespaces)
             if participant_role is not None:
-                # Get device name from participantRole
-                device_name = participant_role.find("hl7:playingDevice/hl7:code", namespaces)
-                if device_name is not None:
-                    device_display = device_name.get("displayName", "")
-                    if device_display and not data.get("device_display", "").startswith("Unknown"):
-                        data["device_display"] = device_display
+                
+                # Extract Device ID from participantRole/id
+                device_id_elem = participant_role.find("hl7:id", namespaces)
+                if device_id_elem is not None:
+                    device_root = device_id_elem.get("root", "")
+                    device_extension = device_id_elem.get("extension", "")
+                    
+                    if device_extension:
+                        data["device_id"] = device_extension
+                    elif device_root:
+                        data["device_id"] = f"Root: {device_root}"
+                    else:
+                        data["device_id"] = "Not specified"
+                else:
+                    data["device_id"] = "Not specified"
+                
+                # Get device code from playingDevice/code (main device type)
+                playing_device = participant_role.find("hl7:playingDevice", namespaces)
+                if playing_device is not None:
+                    device_code_elem = playing_device.find("hl7:code", namespaces)
+                    if device_code_elem is not None:
+                        device_code = device_code_elem.get("code", "")
+                        code_system = device_code_elem.get("codeSystem", "")
+                        display_name = device_code_elem.get("displayName", "")
+                        
+                        data["device_code"] = device_code
+                        data["device_code_system"] = self._get_code_system_name(code_system)
+                        
+                        # Enhanced CTS integration for device codes
+                        if display_name and display_name.strip():
+                            data["device_display"] = display_name
+                        elif device_code and code_system:
+                            # Use CTS to translate SNOMED CT device codes (like 68183006)
+                            if code_system == "2.16.840.1.113883.6.96":  # SNOMED CT OID
+                                cts_device = self._lookup_valueset_term(device_code, "medical_device")
+                                data["device_display"] = cts_device or f"Medical Device (SNOMED: {device_code})"
+                            else:
+                                cts_device = self._lookup_valueset_term(device_code, "device")
+                                data["device_display"] = cts_device or f"Medical Device: {device_code}"
+                        else:
+                            data["device_display"] = "Unknown Medical Device"
+            
+            # Fallback: Try to get device code from direct code element if participant not found
+            if not data.get("device_display"):
+                code_elem = device_elem.find("hl7:code", namespaces)
+                if code_elem is not None:
+                    device_code = code_elem.get("code", "")
+                    code_system = code_elem.get("codeSystem", "")
+                    display_name = code_elem.get("displayName", "")
+                    
+                    data["device_code"] = device_code
+                    data["device_code_system"] = self._get_code_system_name(code_system)
+                    
+                    if display_name and display_name.strip():
+                        data["device_display"] = display_name
+                    elif device_code and code_system:
+                        cts_device = self._lookup_valueset_term(device_code, "device")
+                        data["device_display"] = cts_device or f"Medical Device: {device_code}"
+                    else:
+                        data["device_display"] = "Unknown Medical Device"
+            
+            # Set defaults if still not found
+            if not data.get("device_display"):
+                data["device_display"] = "Unknown Medical Device"
+            if not data.get("device_id"):
+                data["device_id"] = "Not specified"
 
-            # Extract effective time (usage period) with formatting
+            # Extract effective time (usage period) with enhanced IVL_TS handling
             effectiveTime = device_elem.find("hl7:effectiveTime", namespaces)
             if effectiveTime is not None:
-                # Check for low/high time range (usage period)
-                low_elem = effectiveTime.find("hl7:low", namespaces)
-                high_elem = effectiveTime.find("hl7:high", namespaces)
+                # Check for IVL_TS type with low/high time range (implant/removal dates)
+                ivl_type = effectiveTime.get("{http://www.w3.org/2001/XMLSchema-instance}type", "")
                 
-                if low_elem is not None:
-                    low_value = low_elem.get("value", "")
-                    if low_value:
-                        data["start_date"] = low_value
-                        data["formatted_start_date"] = self._format_hl7_datetime(low_value)
-                
-                if high_elem is not None:
-                    high_value = high_elem.get("value", "")
-                    if high_value:
-                        data["end_date"] = high_value
-                        data["formatted_end_date"] = self._format_hl7_datetime(high_value)
-                
-                # Format usage period for display
-                if data.get("formatted_start_date") and data.get("formatted_end_date"):
-                    data["usage_period"] = f"{data['formatted_start_date']} - {data['formatted_end_date']}"
-                elif data.get("formatted_start_date"):
-                    data["usage_period"] = f"Since {data['formatted_start_date']}"
+                if ivl_type == "IVL_TS" or effectiveTime.find("hl7:low", namespaces) is not None:
+                    # Handle interval time with low (implant) and high (removal) dates
+                    low_elem = effectiveTime.find("hl7:low", namespaces)
+                    high_elem = effectiveTime.find("hl7:high", namespaces)
+                    
+                    if low_elem is not None:
+                        low_value = low_elem.get("value", "")
+                        if low_value:
+                            data["implant_date"] = low_value
+                            data["formatted_implant_date"] = self._format_hl7_datetime(low_value)
+                    
+                    if high_elem is not None:
+                        high_value = high_elem.get("value", "")
+                        if high_value:
+                            data["removal_date"] = high_value  
+                            data["formatted_removal_date"] = self._format_hl7_datetime(high_value)
+                    
+                    # Format date range for display (Implant Date column)
+                    if data.get("formatted_implant_date") and data.get("formatted_removal_date"):
+                        # Device was implanted and later removed
+                        data["implant_date_display"] = f"{data['formatted_implant_date']} - {data['formatted_removal_date']}"
+                        data["usage_period"] = f"Implanted: {data['formatted_implant_date']}, Removed: {data['formatted_removal_date']}"
+                    elif data.get("formatted_implant_date"):
+                        # Device was implanted (still active)
+                        data["implant_date_display"] = data["formatted_implant_date"]
+                        data["usage_period"] = f"Implanted: {data['formatted_implant_date']} (Active)"
+                    else:
+                        data["implant_date_display"] = "Not specified"
+                        data["usage_period"] = "Date not specified"
                 else:
-                    # Try single value for point in time
+                    # Handle single point in time (simple effectiveTime)
                     time_value = effectiveTime.get("value", "")
                     if time_value:
-                        data["start_date"] = time_value
-                        data["formatted_start_date"] = self._format_hl7_datetime(time_value)
-                        data["usage_period"] = data["formatted_start_date"]
-
-            # Set default if no time information
-            if not data.get("usage_period"):
-                data["usage_period"] = "Not specified"
-                data["formatted_start_date"] = "Not specified"
+                        data["implant_date"] = time_value
+                        data["formatted_implant_date"] = self._format_hl7_datetime(time_value)
+                        data["implant_date_display"] = data["formatted_implant_date"]
+                        data["usage_period"] = f"Date: {data['formatted_implant_date']}"
+                    else:
+                        data["implant_date_display"] = "Not specified"
+                        data["usage_period"] = "Date not specified"
+            else:
+                # No effective time found
+                data["implant_date_display"] = "Not specified"
+                data["usage_period"] = "Date not specified"
 
             # Extract status
             status_code = device_elem.find("hl7:statusCode", namespaces)
