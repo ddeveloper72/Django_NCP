@@ -4197,10 +4197,9 @@ def patient_cda_view(request, session_id, cda_type=None):
                                 f"[ENHANCED] Found {len(enhanced_allergies)} enhanced allergies for section: {section_title}"
                             )
 
-                            # Create 9-column clinical table structure for allergies
+                            # Create 8-column clinical table structure for allergies (removed generic code column)
                             processed_section["clinical_table"] = {
                                 "headers": [
-                                    {"key": "code", "label": "Code", "type": "code"},
                                     {"key": "reaction_type", "label": "Reaction Type", "primary": True, "type": "reaction"},
                                     {"key": "manifestation", "label": "Clinical Manifestation", "type": "reaction"},
                                     {"key": "agent", "label": "Agent", "type": "allergen"},
@@ -4217,7 +4216,6 @@ def patient_cda_view(request, session_id, cda_type=None):
                             for allergy in enhanced_allergies:
                                 row = {
                                     "data": {
-                                        "code": {"value": allergy.get("code", "Unknown"), "display_value": allergy.get("code", "Unknown")},
                                         "reaction_type": {"value": "Propensity to adverse reaction", "display_value": "Propensity to adverse reaction"},
                                         "manifestation": {"value": ", ".join(allergy.get("manifestation", ["Unknown"])), "display_value": ", ".join(allergy.get("manifestation", ["Unknown"]))},
                                         "agent": {"value": allergy.get("substance", "Unknown"), "display_value": allergy.get("substance", "Unknown")},
@@ -4227,7 +4225,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                                         "status": {"value": allergy.get("status", "active"), "display_value": allergy.get("status", "active").title()},
                                         "certainty": {"value": allergy.get("certainty", "confirmed"), "display_value": allergy.get("certainty", "confirmed").title()},
                                     },
-                                    "has_medical_codes": bool(allergy.get("code"))
+                                    "has_medical_codes": bool(allergy.get("manifestation_code") or allergy.get("agent_code"))
                                 }
                                 processed_section["clinical_table"]["rows"].append(row)
 
@@ -4255,6 +4253,14 @@ def patient_cda_view(request, session_id, cda_type=None):
                                         "ps_guidelines_compliant", False
                                     ),
                                     "enhanced_data": True,  # Flag to identify enhanced entries
+                                    # Add clinical codes for manifestation and agent
+                                    "manifestation_code": allergy.get("manifestation_code", ""),
+                                    "manifestation_display": allergy.get("manifestation_display", ""),
+                                    "agent_code": allergy.get("agent_code", ""),
+                                    "agent_display": allergy.get("agent_display", ""),
+                                    # Add code systems if available
+                                    "manifestation_code_system": allergy.get("manifestation_code_system", ""),
+                                    "agent_code_system": allergy.get("agent_code_system", ""),
                                 }
                                 processed_section["entries"].append(enhanced_entry)
                                 processed_section["medical_terminology_count"] += 1

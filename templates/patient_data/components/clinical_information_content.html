@@ -711,9 +711,26 @@
                                                                         {% firstof cell_data.display_value cell_data.value "N/A" %}
                                                                     </strong>
                                                                     {% else %}
-                                                                    <span class="text-muted">
-                                                                        {% firstof cell_data.display_value cell_data.value "N/A" %}
-                                                                    </span>
+                                                                    <div>
+                                                                        <span class="text-muted">
+                                                                            {% firstof cell_data.display_value cell_data.value "N/A" %}
+                                                                        </span>
+                                                                        
+                                                                        {# Add clinical codes for manifestation and agent fields #}
+                                                                        {% if header.type == 'reaction' and header.key == 'manifestation' and allergy.manifestation_code %}
+                                                                            <div class="problem-code text-muted small">
+                                                                                <i class="fa-solid fa-barcode me-1"></i>
+                                                                                {{ allergy.manifestation_code }}
+                                                                                {% if allergy.manifestation_code_system %} ({{ allergy.manifestation_code_system }}){% endif %}
+                                                                            </div>
+                                                                        {% elif header.type == 'allergen' and header.key == 'agent' and allergy.agent_code %}
+                                                                            <div class="problem-code text-muted small">
+                                                                                <i class="fa-solid fa-barcode me-1"></i>
+                                                                                {{ allergy.agent_code }}
+                                                                                {% if allergy.agent_code_system %} ({{ allergy.agent_code_system }}){% endif %}
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    </div>
                                                                     {% endif %}
                                                                 </td>
                                                                 {% endwith %}
@@ -758,7 +775,24 @@
                                                                     {% if header.primary %}
                                                                     <strong class="text-dark">{% firstof cell_data.display_value cell_data.value "N/A" %}</strong>
                                                                     {% else %}
-                                                                    <span class="text-muted">{% firstof cell_data.display_value cell_data.value "N/A" %}</span>
+                                                                    <div>
+                                                                        <span class="text-muted">{% firstof cell_data.display_value cell_data.value "N/A" %}</span>
+                                                                        
+                                                                        {# Add clinical codes for manifestation and agent fields in mobile layout #}
+                                                                        {% if header.type == 'reaction' and header.key == 'manifestation' and allergy.manifestation_code %}
+                                                                            <div class="problem-code text-muted small mt-1">
+                                                                                <i class="fa-solid fa-barcode me-1"></i>
+                                                                                {{ allergy.manifestation_code }}
+                                                                                {% if allergy.manifestation_code_system %} ({{ allergy.manifestation_code_system }}){% endif %}
+                                                                            </div>
+                                                                        {% elif header.type == 'allergen' and header.key == 'agent' and allergy.agent_code %}
+                                                                            <div class="problem-code text-muted small mt-1">
+                                                                                <i class="fa-solid fa-barcode me-1"></i>
+                                                                                {{ allergy.agent_code }}
+                                                                                {% if allergy.agent_code_system %} ({{ allergy.agent_code_system }}){% endif %}
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    </div>
                                                                     {% endif %}
                                                                 </div>
                                                             </div>
