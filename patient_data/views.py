@@ -42,6 +42,95 @@ from .services.terminology_service import CentralTerminologyService
 logger = logging.getLogger(__name__)
 
 
+# Mandatory Clinical Sections (always displayed even if empty)
+MANDATORY_CLINICAL_SECTIONS = {
+    "48765-2": {
+        "code": "48765-2",
+        "title": "Allergies and adverse reactions Document",
+        "display_name": "Allergies and adverse reactions",
+        "icon": "fa-solid fa-exclamation-triangle",
+        "empty_message": "No known allergies or adverse reactions documented."
+    },
+    "30954-2": {
+        "code": "30954-2", 
+        "title": "Relevant diagnostic tests/laboratory data Narrative",
+        "display_name": "Relevant diagnostic tests/laboratory data",
+        "icon": "fa-solid fa-flask",
+        "empty_message": "No diagnostic tests or laboratory data available."
+    },
+    "11450-4": {
+        "code": "11450-4",
+        "title": "Problem list - Reported", 
+        "display_name": "Problem list",
+        "icon": "fa-solid fa-list-ul",
+        "empty_message": "No active problems reported."
+    },
+    "10160-0": {
+        "code": "10160-0",
+        "title": "History of Medication use Narrative",
+        "display_name": "History of Medication use", 
+        "icon": "fa-solid fa-pills",
+        "empty_message": "No medication history documented."
+    },
+    "46264-8": {
+        "code": "46264-8",
+        "title": "History of medical device use",
+        "display_name": "History of medical device use",
+        "icon": "fa-solid fa-heartbeat", 
+        "empty_message": "No medical device usage documented."
+    },
+    "47519-4": {
+        "code": "47519-4",
+        "title": "History of Procedures Document",
+        "display_name": "History of Procedures",
+        "icon": "fa-solid fa-user-md",
+        "empty_message": "No procedures documented."
+    }
+}
+
+
+def ensure_mandatory_sections(clinical_arrays: dict) -> dict:
+    """
+    Ensure all mandatory clinical sections are present, adding empty sections with 
+    appropriate messaging when they don't exist in the CDA.
+    
+    Args:
+        clinical_arrays: Dictionary of clinical section arrays
+        
+    Returns:
+        Enhanced clinical_arrays with mandatory sections guaranteed to be present
+    """
+    # Mapping from our internal names to LOINC codes
+    section_mapping = {
+        "allergies": "48765-2",
+        "results": "30954-2", 
+        "problems": "11450-4",
+        "medications": "10160-0",
+        "medical_devices": "46264-8",  # This might need adjustment based on actual data structure
+        "procedures": "47519-4"
+    }
+    
+    for section_name, loinc_code in section_mapping.items():
+        if section_name not in clinical_arrays or not clinical_arrays[section_name]:
+            # Create empty section with mandatory messaging
+            mandatory_info = MANDATORY_CLINICAL_SECTIONS[loinc_code]
+            empty_section = {
+                "is_mandatory": True,
+                "is_empty": True,
+                "section_code": loinc_code,
+                "display_name": mandatory_info["display_name"], 
+                "title": mandatory_info["title"],
+                "icon": mandatory_info["icon"],
+                "empty_message": mandatory_info["empty_message"],
+                "entries": [],
+                "clinical_table": None
+            }
+            clinical_arrays[section_name] = [empty_section]
+            logger.info(f"Added mandatory empty section: {mandatory_info['display_name']}")
+    
+    return clinical_arrays
+
+
 def has_meaningful_administrative_data(admin_data):
     """
     Check if administrative data contains meaningful content.
@@ -4608,6 +4697,9 @@ def patient_cda_view(request, session_id, cda_type=None):
                         # Keep standard data on error
 
                 if clinical_arrays:
+                    # Ensure mandatory sections are present even if empty
+                    clinical_arrays = ensure_mandatory_sections(clinical_arrays)
+                    
                     # Add clinical arrays to context for Clinical Information tab
                     context.update(
                         {
@@ -4627,16 +4719,28 @@ def patient_cda_view(request, session_id, cda_type=None):
                         f"[CLINICAL ARRAYS SESSION] Added {total_clinical_items} clinical array items to context: med={len(clinical_arrays['medications'])}, all={len(clinical_arrays['allergies'])}, prob={len(clinical_arrays['problems'])}, proc={len(clinical_arrays['procedures'])}, vs={len(clinical_arrays['vital_signs'])}"
                     )
                 else:
-                    # Ensure clinical arrays exist even if empty
+                    # Create empty clinical arrays and ensure mandatory sections
+                    clinical_arrays = {
+                        "medications": [],
+                        "allergies": [],
+                        "problems": [],
+                        "procedures": [],
+                        "vital_signs": [],
+                        "results": [],
+                        "immunizations": [],
+                    }
+                    clinical_arrays = ensure_mandatory_sections(clinical_arrays)
+                    
+                    # Update context with mandatory sections
                     context.update(
                         {
-                            "medications": [],
-                            "allergies": [],
-                            "problems": [],
-                            "procedures": [],
-                            "vital_signs": [],
-                            "results": [],
-                            "immunizations": [],
+                            "medications": clinical_arrays["medications"],
+                            "allergies": clinical_arrays["allergies"],
+                            "problems": clinical_arrays["problems"],
+                            "procedures": clinical_arrays["procedures"],
+                            "vital_signs": clinical_arrays["vital_signs"],
+                            "results": clinical_arrays["results"],
+                            "immunizations": clinical_arrays["immunizations"],
                         }
                     )
                     logger.info(

@@ -652,22 +652,27 @@
                     </div>
                     {% endif %}
                     
-                    {# Allergies Section #}
-                    {% if allergies and allergies|length > 0 %}
+                    {# Allergies Section - MANDATORY (always displayed) #}
                     <div class="clinical-section">
                         <div class="collapsible-wrapper">
                             <input id="toggle-allergies" class="toggle-input" type="checkbox">
                             <label for="toggle-allergies" class="collapsible-label-title">
                                 <i class="fa-solid fa-triangle-exclamation me-2"></i>Allergies & Intolerances
-                                {# Use custom filter to count allergies correctly based on data structure #}
-                                <span class="badge bg-light text-dark ms-2">{{ allergies|count_allergy_observations }}</span>
+                                {% if allergies and allergies|length > 0 %}
+                                    {# Use custom filter to count allergies correctly based on data structure #}
+                                    <span class="badge bg-light text-dark ms-2">{{ allergies|count_allergy_observations }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary text-white ms-2">Mandatory</span>
+                                {% endif %}
                             </label>
                             <div class="collapsible-content-title">
                                 <div class="content-inner-title">
-                                    <p class="mb-3 text-muted">Allergies: {{ allergies|count_allergy_observations }} items found</p>
-                                    
-                                    {# PRIORITY 1: Check if allergies data has clinical_table structure (NEW 9-COLUMN FORMAT) #}
-                                    {% if allergies.0.clinical_table %}
+                                    {% if allergies and allergies|length > 0 %}
+                                        <p class="mb-3 text-muted">Allergies: {{ allergies|count_allergy_observations }} items found</p>
+                                        
+                                        {# PRIORITY 1: Check if allergies data has clinical_table structure (NEW 9-COLUMN FORMAT) #}
+                                        {% if allergies.0.clinical_table %}
+                                            {# Continue with existing clinical table structure... #}
                                         {# NEW 9-COLUMN CLINICAL TABLE STRUCTURE from Enhanced CDA Processor #}
                                         <div class="clinical-table">
                                             {# Desktop Table Layout #}
@@ -845,17 +850,53 @@
                             </div>
                         </div>
                     </div>
+                    {% else %}
+                    {# Empty state for mandatory allergies section #}
+                    <div class="clinical-section">
+                        <div class="collapsible-wrapper">
+                            <input id="toggle-allergies" class="toggle-input" type="checkbox">
+                            <label for="toggle-allergies" class="collapsible-label-title">
+                                <div class="clinical-section-title-row">
+                                    <div class="clinical-section-title">
+                                        <i class="fas fa-exclamation-triangle fa-lg me-2" aria-hidden="true"></i>
+                                        <span>Allergies and Intolerances</span>
+                                    </div>
+                                    <div class="clinical-badge-container">
+                                        <span class="clinical-badge mandatory">Mandatory</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                            </label>
+                            <div class="collapsible-content">
+                                <div class="clinical-content">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        No allergies or intolerances data available in the patient record.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     {% endif %}
                     
-                    {# Procedures Section #}
+                    {# Procedures Section - MANDATORY #}
                     {% if procedures and procedures|length > 0 %}
                     <div class="clinical-section">
                         <div class="collapsible-wrapper">
                             <input id="toggle-procedures" class="toggle-input" type="checkbox">
                             <label for="toggle-procedures" class="collapsible-label-title">
-                                <i class="fa-solid fa-user-md me-2"></i>Medical Procedures
-                                {# Use custom filter to count procedures correctly based on data structure #}
-                                <span class="badge bg-light text-dark ms-2">{{ procedures|count_procedure_observations }}</span>
+                                <div class="clinical-section-title-row">
+                                    <div class="clinical-section-title">
+                                        <i class="fa-solid fa-user-md me-2"></i>
+                                        <span>Medical Procedures</span>
+                                        {# Use custom filter to count procedures correctly based on data structure #}
+                                        <span class="badge bg-light text-dark ms-2">{{ procedures|count_procedure_observations }}</span>
+                                    </div>
+                                    <div class="clinical-badge-container">
+                                        <span class="clinical-badge populated">{{ procedures|count_procedure_observations }} Found</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
                             </label>
                             <div class="collapsible-content-title">
                                 <div class="content-inner-title">
@@ -1020,6 +1061,33 @@
                                         </div>
                                         {% endfor %}
                                     {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    {# Empty state for mandatory procedures section #}
+                    <div class="clinical-section">
+                        <div class="collapsible-wrapper">
+                            <input id="toggle-procedures" class="toggle-input" type="checkbox">
+                            <label for="toggle-procedures" class="collapsible-label-title">
+                                <div class="clinical-section-title-row">
+                                    <div class="clinical-section-title">
+                                        <i class="fa-solid fa-user-md me-2" aria-hidden="true"></i>
+                                        <span>Medical Procedures</span>
+                                    </div>
+                                    <div class="clinical-badge-container">
+                                        <span class="clinical-badge mandatory">Mandatory</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                            </label>
+                            <div class="collapsible-content">
+                                <div class="clinical-content">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        No medical procedures data available in the patient record.
+                                    </div>
                                 </div>
                             </div>
                         </div>

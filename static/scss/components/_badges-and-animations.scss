@@ -273,3 +273,61 @@
     margin-right: 4px;
   }
 }
+
+// ========================================
+// CLINICAL SECTION BADGES
+// Mandatory vs populated section indicator badges
+// ========================================
+.clinical-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.375rem;
+  border: 1px solid transparent;
+  
+  &.mandatory {
+    background-color: #fff3cd;
+    border-color: #f0ad4e;
+    color: #856404;
+    
+    &::before {
+      content: "⚠️ ";
+      margin-right: 0.25rem;
+    }
+  }
+  
+  &.populated {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+    
+    &::before {
+      content: "✓ ";
+      margin-right: 0.25rem;
+    }
+  }
+}
+
+// Clinical section title row layout
+.clinical-section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.clinical-section-title {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.clinical-badge-container {
+  margin-left: auto;
+  flex-shrink: 0;
+}
