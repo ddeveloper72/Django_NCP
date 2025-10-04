@@ -33,6 +33,32 @@
             </div>
             {% endif %}
 
+            {# Enhanced Procedures Section - Display if we have enhanced procedures data #}
+            {% if enhanced_procedures and enhanced_procedures|length > 0 %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-enhanced-procedures">
+                    <button class="accordion-button bg-white border collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-enhanced-procedures"
+                            aria-expanded="false"
+                            aria-controls="collapse-enhanced-procedures"
+                            style="color: #212529 !important; background-color: #ffffff !important;">
+                        <i class="fa-solid fa-user-md text-info me-2"></i>
+                        <strong style="color: #212529 !important;">Medical Procedures</strong>
+                        <span class="badge bg-primary text-white ms-2">{{ enhanced_procedures|length }} Enhanced</span>
+                        <span class="badge bg-success text-white ms-1">PS Guidelines</span>
+                    </button>
+                </h2>
+                <div id="collapse-enhanced-procedures"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="heading-enhanced-procedures">
+                    <div class="accordion-body">
+                        {# Include the comprehensive procedures section template #}
+                        {% include "patient_data/sections/procedures_section.html" with section_entries=enhanced_procedures %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             {# Regular processed sections #}
             {% for section in processed_sections %}
             <div class="accordion-item">
