@@ -1686,8 +1686,11 @@ class EnhancedCDAProcessor:
             # Get observation code (REACTION TYPE for allergies)
             code_elem = obs_elem.find("hl7:code", namespaces)
             if code_elem is not None:
-                data["code"] = code_elem.get("code", "")
-                data["display"] = code_elem.get("displayName", "Unknown Observation")
+                code_value = code_elem.get("code", "")
+                display_name = code_elem.get("displayName", "")
+                
+                data["code"] = code_value
+                data["display"] = display_name if display_name else f"Code: {code_value}" if code_value else "Unknown Observation"
                 data["code_system"] = self._get_code_system_name(
                     code_elem.get("codeSystem", "")
                 )
@@ -1695,8 +1698,20 @@ class EnhancedCDAProcessor:
 
                 # For allergies: The observation/code element contains the REACTION TYPE
                 # e.g., code="420134006" = "Propensity to adverse reactions"
-                data["reaction_type_code"] = code_elem.get("code", "")
-                data["reaction_type_display"] = code_elem.get("displayName", "Unknown Reaction Type")
+                data["reaction_type_code"] = code_value
+                
+                # Use CTS lookup for reaction type if displayName is missing
+                if display_name and display_name.strip():
+                    data["reaction_type_display"] = display_name
+                elif code_value:
+                    # Try CTS lookup for SNOMED CT reaction type codes
+                    cts_reaction_type = self._lookup_valueset_term(code_value, "reaction_type")
+                    if cts_reaction_type:
+                        data["reaction_type_display"] = cts_reaction_type
+                    else:
+                        data["reaction_type_display"] = f"Reaction Type: {code_value}"
+                else:
+                    data["reaction_type_display"] = "Unknown Reaction Type"
 
                 # Extract translation if available (e.g., Italian translation)
                 translation_elem = code_elem.find("hl7:translation", namespaces)
@@ -1728,17 +1743,30 @@ class EnhancedCDAProcessor:
 
                 elif xsi_type == "CD":
                     # Coded Display (e.g., conditions, problems)
-                    data["value"] = value_elem.get(
-                        "displayName", value_elem.get("value", "")
-                    )
-                    data["value_code"] = value_elem.get("code", "")
+                    value_code = value_elem.get("code", "")
+                    value_display = value_elem.get("displayName", value_elem.get("value", ""))
+                    
+                    data["value"] = value_display if value_display else f"Value: {value_code}" if value_code else ""
+                    data["value_code"] = value_code
                     data["value_type"] = "coded"
                     data["formatted_value"] = data["value"]
 
                     # For allergies: The observation/value element contains the CLINICAL MANIFESTATION
                     # e.g., code="43116000" = "Eczema"
-                    data["manifestation_code"] = value_elem.get("code", "")
-                    data["manifestation_display"] = value_elem.get("displayName", "Unknown Manifestation")
+                    data["manifestation_code"] = value_code
+                    
+                    # Use CTS lookup for manifestation if displayName is missing
+                    if value_display and value_display.strip():
+                        data["manifestation_display"] = value_display
+                    elif value_code:
+                        # Try CTS lookup for SNOMED CT manifestation codes
+                        cts_manifestation = self._lookup_valueset_term(value_code, "manifestation")
+                        if cts_manifestation:
+                            data["manifestation_display"] = cts_manifestation
+                        else:
+                            data["manifestation_display"] = f"Manifestation: {value_code}"
+                    else:
+                        data["manifestation_display"] = "Unknown Reaction"
 
                     # For problem observations, map value fields to condition fields
                     data["condition_code"] = value_elem.get("code", "")
@@ -1791,10 +1819,50 @@ class EnhancedCDAProcessor:
             if participant is not None:
                 agent_code = participant.find("hl7:code", namespaces)
                 if agent_code is not None:
-                    data["agent_code"] = agent_code.get("code", "")
-                    data["agent_display"] = agent_code.get(
-                        "displayName", "Unknown Agent"
-                    )
+                    code_value = agent_code.get("code", "")
+                    display_name = agent_code.get("displayName", "")
+                    
+                    data["agent_code"] = code_value
+                    
+                    # Use CTS lookup for agent if displayName is missing
+                    if display_name and display_name.strip():
+                        data["agent_display"] = display_name
+                    elif code_value:
+                        # Try CTS lookup for SNOMED CT agent codes
+                        cts_agent = self._lookup_valueset_term(code_value, "agent")
+                        if cts_agent:
+                            data["agent_display"] = cts_agent
+                        else:
+                            data["agent_display"] = f"Agent (Code: {code_value})"
+                    else:
+                        data["agent_display"] = "Unknown Agent"
+
+            # ENHANCED: Extract agent from pharm:code elements (e.g., J01CA04)
+            # This is where the actual allergen/causative agent is specified
+            pharm_codes = obs_elem.findall(".//pharm:code", namespaces)
+            for pharm_code in pharm_codes:
+                code_value = pharm_code.get("code", "")
+                display_name = pharm_code.get("displayName", "")
+                
+                # If we found a pharm:code with meaningful data, use it as the agent
+                if code_value and (display_name or code_value != "ASSERTION"):
+                    data["agent_code"] = code_value
+                    data["agent_display"] = display_name if display_name else f"Agent (Code: {code_value})"
+                    # Break after finding the first meaningful pharm:code
+                    break
+
+            # If no agent found yet, try looking in entry/act/code (alternative structure)
+            if not data.get("agent_code"):
+                # Look for act elements that might contain agent information
+                act_elem = obs_elem.find("../hl7:act", namespaces)
+                if act_elem is not None:
+                    act_code = act_elem.find("hl7:code", namespaces)
+                    if act_code is not None:
+                        code_value = act_code.get("code", "")
+                        display_name = act_code.get("displayName", "")
+                        if code_value and display_name:
+                            data["agent_code"] = code_value
+                            data["agent_display"] = display_name
 
             # Extract severity (for allergies and problems)
             entryRelationship = obs_elem.find(
@@ -1817,10 +1885,23 @@ class EnhancedCDAProcessor:
                 namespaces,
             )
             if manifestation is not None:
-                data["manifestation_code"] = manifestation.get("code", "")
-                data["manifestation_display"] = manifestation.get(
-                    "displayName", "Unknown Reaction"
-                )
+                manifestation_code = manifestation.get("code", "")
+                manifestation_display = manifestation.get("displayName", "")
+                
+                data["manifestation_code"] = manifestation_code
+                
+                # Use CTS lookup for manifestation if displayName is missing
+                if manifestation_display and manifestation_display.strip():
+                    data["manifestation_display"] = manifestation_display
+                elif manifestation_code:
+                    # Try CTS lookup for SNOMED CT manifestation codes
+                    cts_manifestation = self._lookup_valueset_term(manifestation_code, "manifestation")
+                    if cts_manifestation:
+                        data["manifestation_display"] = cts_manifestation
+                    else:
+                        data["manifestation_display"] = f"Manifestation: {manifestation_code}"
+                else:
+                    data["manifestation_display"] = "Unknown Reaction"
 
             # Extract interpretation codes (normal, high, low, etc.)
             interpretation = obs_elem.find("hl7:interpretationCode", namespaces)

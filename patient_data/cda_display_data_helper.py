@@ -208,10 +208,11 @@ class CDADisplayDataHelper:
                                 allergies_sections.append(section)
                         
                         if allergies_sections:
-                            # Define namespaces for entry processing
+                            # Define namespaces for entry processing (include pharm namespace for agent extraction)
                             namespaces = {
                                 'hl7': 'urn:hl7-org:v3',
-                                'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
+                                'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+                                'pharm': 'urn:hl7-org:pharm'
                             }
                             
                             enhanced_allergies = []
