@@ -854,43 +854,172 @@
                             <input id="toggle-procedures" class="toggle-input" type="checkbox">
                             <label for="toggle-procedures" class="collapsible-label-title">
                                 <i class="fa-solid fa-user-md me-2"></i>Medical Procedures
-                                <span class="badge bg-light text-dark ms-2">{{ procedures|length }}</span>
+                                {# Use custom filter to count procedures correctly based on data structure #}
+                                <span class="badge bg-light text-dark ms-2">{{ procedures|count_procedure_observations }}</span>
                             </label>
                             <div class="collapsible-content-title">
                                 <div class="content-inner-title">
-                                    <p class="mb-3 text-muted">Procedures: {{ procedures|length }} items found</p>
-                                    {% for procedure in procedures %}
-                                    <div class="procedure-card mb-3 p-3 border rounded bg-white">
-                                        <div class="d-flex align-items-start">
-                                            <div class="procedure-icon me-3">
-                                                <i class="fa-solid fa-user-md text-info fs-4"></i>
+                                    <p class="mb-3 text-muted">Procedures: {{ procedures|count_procedure_observations }} items found</p>
+                                    
+                                    {# PRIORITY 1: Check if procedures data has clinical_table structure (NEW 3-COLUMN FORMAT) #}
+                                    {% if procedures.0.clinical_table %}
+                                        {# NEW 3-COLUMN CLINICAL TABLE STRUCTURE from Enhanced CDA Processor #}
+                                        <div class="clinical-table">
+                                            {# Desktop Table Layout #}
+                                            <div class="d-none d-md-block">
+                                                <div class="table-responsive">
+                                                    <table class="table table-striped table-hover clinical-data-table">
+                                                        <thead class="table-info">
+                                                            <tr>
+                                                                {% for header in procedures.0.clinical_table.headers %}
+                                                                <th scope="col" class="clinical-header fw-bold">
+                                                                    {% if header.type == 'procedure' %}
+                                                                    <i class="fa-solid fa-user-md me-2"></i>
+                                                                    {% elif header.type == 'target_site' %}
+                                                                    <i class="fa-solid fa-location-dot me-2"></i>
+                                                                    {% elif header.type == 'date' %}
+                                                                    <i class="fa-solid fa-calendar me-2"></i>
+                                                                    {% else %}
+                                                                    <i class="fa-solid fa-stethoscope me-2"></i>
+                                                                    {% endif %}
+                                                                    {{ header.label }}
+                                                                </th>
+                                                                {% endfor %}
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for procedure in procedures %}
+                                                            {% if procedure.clinical_table %}
+                                                            {% for row in procedure.clinical_table.rows %}
+                                                            <tr class="clinical-row">
+                                                                {% for header in procedure.clinical_table.headers %}
+                                                                {% with row.data|get_item:header.key as cell_data %}
+                                                                <td class="clinical-cell">
+                                                                    {% if header.primary or header.type == 'procedure' %}
+                                                                    <strong class="text-dark">
+                                                                        {% firstof cell_data.display_value cell_data.value "N/A" %}
+                                                                    </strong>
+                                                                    {% else %}
+                                                                    <div>
+                                                                        <span class="text-muted">
+                                                                            {% firstof cell_data.display_value cell_data.value "N/A" %}
+                                                                        </span>
+                                                                        
+                                                                        {# Add clinical codes for procedure fields #}
+                                                                        {% if header.type == 'procedure' and cell_data.code %}
+                                                                        <div class="mt-1">
+                                                                            <span class="badge bg-secondary text-white small">
+                                                                                <i class="fa-solid fa-code me-1"></i>{{ cell_data.code }}
+                                                                                {% if cell_data.code_system %} ({{ cell_data.code_system }}){% endif %}
+                                                                            </span>
+                                                                        </div>
+                                                                        {% endif %}
+                                                                        
+                                                                        {% if header.type == 'target_site' and cell_data.code %}
+                                                                        <div class="mt-1">
+                                                                            <span class="badge bg-info text-white small">
+                                                                                <i class="fa-solid fa-location-dot me-1"></i>{{ cell_data.code }}
+                                                                                {% if cell_data.code_system %} ({{ cell_data.code_system }}){% endif %}
+                                                                            </span>
+                                                                        </div>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                    {% endif %}
+                                                                </td>
+                                                                {% endwith %}
+                                                                {% endfor %}
+                                                            </tr>
+                                                            {% endfor %}
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
-                                            <div class="procedure-details flex-grow-1">
-                                                <h6 class="procedure-name text-dark mb-1">
-                                                    {% if procedure.procedure.name %}
-                                                        {{ procedure.procedure.name }}
-                                                    {% elif procedure.procedure.code.displayName %}
-                                                        {{ procedure.procedure.code.displayName }}
-                                                    {% else %}
-                                                        Procedure (Code: {{ procedure.procedure.code.code|default:"Unknown" }})
+                                            
+                                            {# Mobile Card Layout #}
+                                            <div class="d-block d-md-none">
+                                                <div class="clinical-cards-container">
+                                                    {% for procedure in procedures %}
+                                                    {% if procedure.clinical_table %}
+                                                    {% for row in procedure.clinical_table.rows %}
+                                                    <div class="card clinical-card mb-3 border-info">
+                                                        <div class="card-body">
+                                                            {% for header in procedure.clinical_table.headers %}
+                                                            {% with row.data|get_item:header.key as cell_data %}
+                                                            <div class="clinical-field mb-2 {% if header.primary or header.type == 'procedure' %}primary-field-mobile{% endif %}">
+                                                                <div class="field-label d-flex align-items-center mb-1">
+                                                                    <strong class="text-muted small">{{ header.label }}</strong>
+                                                                    {% if header.type == 'procedure' %}
+                                                                    <i class="fa-solid fa-user-md ms-1 terminology-indicator text-muted" title="Medical Procedure"></i>
+                                                                    {% elif header.type == 'target_site' %}
+                                                                    <i class="fa-solid fa-location-dot ms-1 terminology-indicator text-muted" title="Target Site"></i>
+                                                                    {% elif header.type == 'date' %}
+                                                                    <i class="fa-solid fa-calendar ms-1 terminology-indicator text-muted" title="Date"></i>
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="field-value">
+                                                                    <span class="{% if header.primary or header.type == 'procedure' %}fw-bold text-dark{% else %}text-muted{% endif %}">
+                                                                        {% firstof cell_data.display_value cell_data.value "N/A" %}
+                                                                    </span>
+                                                                    
+                                                                    {# Mobile clinical codes #}
+                                                                    {% if cell_data.code %}
+                                                                    <div class="clinical-codes-mobile mt-1">
+                                                                        <span class="badge {% if header.type == 'procedure' %}bg-secondary{% elif header.type == 'target_site' %}bg-info{% else %}bg-light text-dark{% endif %} small">
+                                                                            <i class="fa-solid fa-code me-1"></i>{{ cell_data.code }}
+                                                                            {% if cell_data.code_system %} ({{ cell_data.code_system }}){% endif %}
+                                                                        </span>
+                                                                    </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                            {% endwith %}
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                    {% endfor %}
                                                     {% endif %}
-                                                </h6>
-                                                {% if procedure.statusCode.code %}
-                                                <div class="text-muted mb-1">
-                                                    <i class="fa-solid fa-info-circle me-1"></i>
-                                                    <strong>Status:</strong> {{ procedure.statusCode.code|title }}
+                                                    {% endfor %}
                                                 </div>
-                                                {% endif %}
-                                                {% if procedure.effective_time.low_formatted %}
-                                                <div class="text-muted">
-                                                    <i class="fa-solid fa-calendar me-1"></i>
-                                                    <strong>Date:</strong> {{ procedure.effective_time.low_formatted }}
-                                                </div>
-                                                {% endif %}
                                             </div>
                                         </div>
-                                    </div>
-                                    {% endfor %}
+                                    
+                                    {# FALLBACK: Display procedures in original card format if no clinical_table #}
+                                    {% else %}
+                                        {% for procedure in procedures %}
+                                        <div class="procedure-card mb-3 p-3 border rounded bg-white">
+                                            <div class="d-flex align-items-start">
+                                                <div class="procedure-icon me-3">
+                                                    <i class="fa-solid fa-user-md text-info fs-4"></i>
+                                                </div>
+                                                <div class="procedure-details flex-grow-1">
+                                                    <h6 class="procedure-name text-dark mb-1">
+                                                        {% if procedure.procedure.name %}
+                                                            {{ procedure.procedure.name }}
+                                                        {% elif procedure.procedure.code.displayName %}
+                                                            {{ procedure.procedure.code.displayName }}
+                                                        {% else %}
+                                                            Procedure (Code: {{ procedure.procedure.code.code|default:"Unknown" }})
+                                                        {% endif %}
+                                                    </h6>
+                                                    {% if procedure.statusCode.code %}
+                                                    <div class="text-muted mb-1">
+                                                        <i class="fa-solid fa-info-circle me-1"></i>
+                                                        <strong>Status:</strong> {{ procedure.statusCode.code|title }}
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if procedure.effective_time.low_formatted %}
+                                                    <div class="text-muted">
+                                                        <i class="fa-solid fa-calendar me-1"></i>
+                                                        <strong>Date:</strong> {{ procedure.effective_time.low_formatted }}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
