@@ -4565,12 +4565,47 @@ def patient_cda_view(request, session_id, cda_type=None):
                             clinical_arrays["allergies"] = allergies_with_clinical_table
                         else:
                             logger.info("[ENHANCED ALLERGIES CDA_VIEW] No enhanced allergies found, keeping standard format")
+
+                        # ENHANCED: Process procedures using the same clinical_sections data
+                        logger.info("[ENHANCED PROCEDURES CDA_VIEW] Starting Enhanced CDA Helper integration for procedures")
+                        
+                        # Find procedures section with clinical_table structure from existing clinical_sections
+                        procedures_with_clinical_table = []
+                        for section in clinical_sections:
+                            section_name = section.get("display_name", "").lower()
+                            logger.info(f"[ENHANCED PROCEDURES CDA_VIEW] Processing section: {section.get('display_name', 'Unknown')}")
+                            if any(keyword in section_name for keyword in ["procedure", "surgery", "surgical", "intervention"]):
+                                logger.info(f"[ENHANCED PROCEDURES CDA_VIEW] Found procedures section: {section.get('display_name')}")
+                                if section.get("clinical_table"):
+                                    logger.info(f"[ENHANCED PROCEDURES CDA_VIEW] Found enhanced procedures section: {section.get('display_name')}")
+                                    # Convert clinical_table structure to procedure objects with clinical_table
+                                    enhanced_procedure = {
+                                        "clinical_table": section["clinical_table"],
+                                        "procedure": {"name": "Enhanced Procedures", "code": {"code": "Enhanced"}},
+                                        "section_name": section.get("display_name", ""),
+                                        "is_enhanced": True
+                                    }
+                                    procedures_with_clinical_table.append(enhanced_procedure)
+                                    logger.info(f"[ENHANCED PROCEDURES CDA_VIEW] Clinical table has {len(section['clinical_table'].get('headers', []))} headers and {len(section['clinical_table'].get('rows', []))} rows")
+                                else:
+                                    logger.info(f"[ENHANCED PROCEDURES CDA_VIEW] Section {section.get('display_name')} has no clinical_table")
+                        
+                        # Replace procedures with enhanced version if available
+                        if procedures_with_clinical_table:
+                            logger.info(f"[ENHANCED PROCEDURES CDA_VIEW] Replacing {len(clinical_arrays['procedures'])} standard procedures with {len(procedures_with_clinical_table)} enhanced procedures")
+                            clinical_arrays["procedures"] = procedures_with_clinical_table
+                            # Also store enhanced procedures for template access
+                            context["enhanced_procedures"] = procedures_with_clinical_table
+                            logger.info(f"[ENHANCED PROCEDURES CDA_VIEW] Added {len(procedures_with_clinical_table)} enhanced procedures to context")
+                        else:
+                            logger.info("[ENHANCED PROCEDURES CDA_VIEW] No enhanced procedures found, keeping standard format")
+                            context["enhanced_procedures"] = []
                             
                     except Exception as e:
-                        logger.warning(f"[ENHANCED ALLERGIES CDA_VIEW] Enhanced CDA Helper integration failed: {e}")
+                        logger.warning(f"[ENHANCED CDA_VIEW] Enhanced CDA Helper integration failed: {e}")
                         import traceback
-                        logger.warning(f"[ENHANCED ALLERGIES CDA_VIEW] Full traceback: {traceback.format_exc()}")
-                        # Keep standard allergies on error
+                        logger.warning(f"[ENHANCED CDA_VIEW] Full traceback: {traceback.format_exc()}")
+                        # Keep standard data on error
 
                 if clinical_arrays:
                     # Add clinical arrays to context for Clinical Information tab
