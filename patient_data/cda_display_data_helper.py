@@ -253,10 +253,9 @@ class CDADisplayDataHelper:
                             if enhanced_allergies:
                                 logger.debug(f"Found {len(enhanced_allergies)} enhanced allergies")
                                 
-                                # Create 9-column clinical table structure for allergies
+                                # Create 8-column clinical table structure for allergies (Code column removed)
                                 display_section["clinical_table"] = {
                                     "headers": [
-                                        {"key": "code", "label": "Code", "type": "code"},
                                         {"key": "reaction_type", "label": "Reaction Type", "primary": True, "type": "reaction"},
                                         {"key": "manifestation", "label": "Clinical Manifestation", "type": "reaction"},
                                         {"key": "agent", "label": "Agent", "type": "allergen"},
@@ -273,19 +272,21 @@ class CDADisplayDataHelper:
                                 for allergy in enhanced_allergies:
                                     # Map Enhanced CDA Processor field names to clinical table format
                                     # Based on CDA structure: observation/code = reaction type, observation/value = manifestation
+                                    # Code column removed - clinical codes will be displayed under manifestation and agent fields
                                     row = {
                                         "data": {
-                                            "code": {"value": allergy.get("code", "Unknown"), "display_value": allergy.get("display", "Unknown")},
-                                            "reaction_type": {"value": allergy.get("reaction_type_display", "Propensity to adverse reaction"), "display_value": allergy.get("reaction_type_display", "Propensity to adverse reaction")},
-                                            "manifestation": {"value": allergy.get("manifestation_display", "Unknown manifestation"), "display_value": allergy.get("manifestation_display", "Unknown manifestation")},
-                                            "agent": {"value": allergy.get("agent_display", "Unknown"), "display_value": allergy.get("agent_display", "Unknown")},
+                                            "reaction_type": {"value": allergy.get("reaction_type", "Allergic disposition"), "display_value": allergy.get("reaction_type", "Allergic disposition")},
+                                            "manifestation": {"value": allergy.get("manifestation_display", "Unknown"), "display_value": allergy.get("manifestation_display", "Unknown"), "code": allergy.get("manifestation_code"), "code_system": allergy.get("manifestation_code_system", "SNOMED CT")},
+                                            "agent": {"value": allergy.get("agent_display", "Unknown"), "display_value": allergy.get("agent_display", "Unknown"), "code": allergy.get("agent_code"), "code_system": allergy.get("agent_code_system", "SNOMED CT")},
                                             "time": {"value": allergy.get("onset_date", "Unknown"), "display_value": allergy.get("onset_date", "Unknown")},
                                             "severity": {"value": allergy.get("severity", "unknown"), "display_value": allergy.get("severity", "unknown").title()},
                                             "criticality": {"value": "High" if allergy.get("severity", "").lower() == "severe" else "Medium" if allergy.get("severity", "").lower() == "moderate" else "Low", "display_value": "High" if allergy.get("severity", "").lower() == "severe" else "Medium" if allergy.get("severity", "").lower() == "moderate" else "Low"},
                                             "status": {"value": allergy.get("status", "active"), "display_value": allergy.get("status", "active").title()},
                                             "certainty": {"value": "confirmed", "display_value": "Confirmed"},
                                         },
-                                        "has_medical_codes": bool(allergy.get("code"))
+                                        "has_medical_codes": bool(allergy.get("code")),
+                                        # Add the allergy object for template access to codes
+                                        "allergy_data": allergy
                                     }
                                     display_section["clinical_table"]["rows"].append(row)
 

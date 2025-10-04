@@ -1755,6 +1755,14 @@ class EnhancedCDAProcessor:
                     # e.g., code="43116000" = "Eczema"
                     data["manifestation_code"] = value_code
                     
+                    # Extract code system for manifestation - if not available, assume SNOMED CT from CTS
+                    manifestation_code_system = value_elem.get("codeSystem", "")
+                    if manifestation_code_system:
+                        data["manifestation_code_system"] = self._get_code_system_name(manifestation_code_system)
+                    else:
+                        # CTS provides SNOMED CT codes for manifestations
+                        data["manifestation_code_system"] = "SNOMED CT"
+                    
                     # Use CTS lookup for manifestation if displayName is missing
                     if value_display and value_display.strip():
                         data["manifestation_display"] = value_display
@@ -1821,8 +1829,16 @@ class EnhancedCDAProcessor:
                 if agent_code is not None:
                     code_value = agent_code.get("code", "")
                     display_name = agent_code.get("displayName", "")
+                    code_system = agent_code.get("codeSystem", "")
                     
                     data["agent_code"] = code_value
+                    
+                    # Extract code system for agent - if not available, assume SNOMED CT from CTS
+                    if code_system:
+                        data["agent_code_system"] = self._get_code_system_name(code_system)
+                    else:
+                        # CTS provides SNOMED CT codes for agents
+                        data["agent_code_system"] = "SNOMED CT"
                     
                     # Use CTS lookup for agent if displayName is missing
                     if display_name and display_name.strip():
@@ -1844,11 +1860,20 @@ class EnhancedCDAProcessor:
                 for pharm_code in pharm_codes:
                     code_value = pharm_code.get("code", "")
                     display_name = pharm_code.get("displayName", "")
+                    code_system = pharm_code.get("codeSystem", "")
                     
                     # If we found a pharm:code with meaningful data, use it as the agent
                     if code_value and (display_name or code_value != "ASSERTION"):
                         data["agent_code"] = code_value
                         data["agent_display"] = display_name if display_name else f"Agent (Code: {code_value})"
+                        
+                        # Extract code system for pharm agent - if not available, assume SNOMED CT from CTS
+                        if code_system:
+                            data["agent_code_system"] = self._get_code_system_name(code_system)
+                        else:
+                            # CTS provides SNOMED CT codes for pharmaceutical agents
+                            data["agent_code_system"] = "SNOMED CT"
+                        
                         # Break after finding the first meaningful pharm:code
                         break
             except Exception as pharm_e:
@@ -1864,9 +1889,17 @@ class EnhancedCDAProcessor:
                     if act_code is not None:
                         code_value = act_code.get("code", "")
                         display_name = act_code.get("displayName", "")
+                        code_system = act_code.get("codeSystem", "")
                         if code_value and display_name:
                             data["agent_code"] = code_value
                             data["agent_display"] = display_name
+                            
+                            # Extract code system for act agent - if not available, assume SNOMED CT from CTS
+                            if code_system:
+                                data["agent_code_system"] = self._get_code_system_name(code_system)
+                            else:
+                                # CTS provides SNOMED CT codes for agents
+                                data["agent_code_system"] = "SNOMED CT"
 
             # Extract severity (for allergies and problems)
             entryRelationship = obs_elem.find(
@@ -1891,8 +1924,16 @@ class EnhancedCDAProcessor:
             if manifestation is not None:
                 manifestation_code = manifestation.get("code", "")
                 manifestation_display = manifestation.get("displayName", "")
+                manifestation_code_system = manifestation.get("codeSystem", "")
                 
                 data["manifestation_code"] = manifestation_code
+                
+                # Extract code system for manifestation - if not available, assume SNOMED CT from CTS
+                if manifestation_code_system:
+                    data["manifestation_code_system"] = self._get_code_system_name(manifestation_code_system)
+                else:
+                    # CTS provides SNOMED CT codes for manifestations
+                    data["manifestation_code_system"] = "SNOMED CT"
                 
                 # Use CTS lookup for manifestation if displayName is missing
                 if manifestation_display and manifestation_display.strip():

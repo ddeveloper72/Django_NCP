@@ -717,17 +717,17 @@
                                                                         </span>
                                                                         
                                                                         {# Add clinical codes for manifestation and agent fields #}
-                                                                        {% if header.type == 'reaction' and header.key == 'manifestation' and allergy.manifestation_code %}
+                                                                        {% if header.type == 'reaction' and header.key == 'manifestation' and cell_data.code %}
                                                                             <div class="problem-code text-muted small">
                                                                                 <i class="fa-solid fa-barcode me-1"></i>
-                                                                                {{ allergy.manifestation_code }}
-                                                                                {% if allergy.manifestation_code_system %} ({{ allergy.manifestation_code_system }}){% endif %}
+                                                                                {{ cell_data.code }}
+                                                                                {% if cell_data.code_system %} ({{ cell_data.code_system }}){% endif %}
                                                                             </div>
-                                                                        {% elif header.type == 'allergen' and header.key == 'agent' and allergy.agent_code %}
+                                                                        {% elif header.type == 'allergen' and header.key == 'agent' and cell_data.code %}
                                                                             <div class="problem-code text-muted small">
                                                                                 <i class="fa-solid fa-barcode me-1"></i>
-                                                                                {{ allergy.agent_code }}
-                                                                                {% if allergy.agent_code_system %} ({{ allergy.agent_code_system }}){% endif %}
+                                                                                {{ cell_data.code }}
+                                                                                {% if cell_data.code_system %} ({{ cell_data.code_system }}){% endif %}
                                                                             </div>
                                                                         {% endif %}
                                                                     </div>
@@ -779,17 +779,17 @@
                                                                         <span class="text-muted">{% firstof cell_data.display_value cell_data.value "N/A" %}</span>
                                                                         
                                                                         {# Add clinical codes for manifestation and agent fields in mobile layout #}
-                                                                        {% if header.type == 'reaction' and header.key == 'manifestation' and allergy.manifestation_code %}
+                                                                        {% if header.type == 'reaction' and header.key == 'manifestation' and cell_data.code %}
                                                                             <div class="problem-code text-muted small mt-1">
                                                                                 <i class="fa-solid fa-barcode me-1"></i>
-                                                                                {{ allergy.manifestation_code }}
-                                                                                {% if allergy.manifestation_code_system %} ({{ allergy.manifestation_code_system }}){% endif %}
+                                                                                {{ cell_data.code }}
+                                                                                {% if cell_data.code_system %} ({{ cell_data.code_system }}){% endif %}
                                                                             </div>
-                                                                        {% elif header.type == 'allergen' and header.key == 'agent' and allergy.agent_code %}
+                                                                        {% elif header.type == 'allergen' and header.key == 'agent' and cell_data.code %}
                                                                             <div class="problem-code text-muted small mt-1">
                                                                                 <i class="fa-solid fa-barcode me-1"></i>
-                                                                                {{ allergy.agent_code }}
-                                                                                {% if allergy.agent_code_system %} ({{ allergy.agent_code_system }}){% endif %}
+                                                                                {{ cell_data.code }}
+                                                                                {% if cell_data.code_system %} ({{ cell_data.code_system }}){% endif %}
                                                                             </div>
                                                                         {% endif %}
                                                                     </div>
