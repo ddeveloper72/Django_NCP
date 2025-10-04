@@ -750,3 +750,26 @@ def count_allergy_observations(allergies):
     else:
         # Legacy format: count allergy entries
         return len(allergies)
+
+
+@register.filter
+def count_procedure_observations(procedures):
+    """
+    Count total procedure observations for badge display.
+    For Enhanced CDA format: counts total rows across all clinical tables
+    For Legacy format: counts procedure entries
+    """
+    if not procedures:
+        return 0
+    
+    # Check if we have Enhanced CDA format (clinical_table structure)
+    if procedures and hasattr(procedures[0], 'get') and procedures[0].get('clinical_table'):
+        total_rows = 0
+        for procedure in procedures:
+            if hasattr(procedure, 'get') and procedure.get('clinical_table'):
+                rows = procedure['clinical_table'].get('rows', [])
+                total_rows += len(rows)
+        return total_rows
+    else:
+        # Legacy format: count procedure entries
+        return len(procedures)
