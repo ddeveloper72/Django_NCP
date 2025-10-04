@@ -301,6 +301,90 @@ class CDADisplayDataHelper:
                     except Exception as e:
                         logger.error(f"Enhanced allergies processing failed: {e}")
 
+                # ENHANCED: Check if this is a procedures section and apply Enhanced CDA Processor
+                is_procedures_section = (
+                    section_name == "procedures" or 
+                    section_name == "medical_procedures" or
+                    any(keyword in section_title for keyword in ["procedure", "surgery", "surgical", "intervention"])
+                )
+
+                if is_procedures_section and enhanced_processor and cda_content:
+                    logger.debug(f"Processing procedures section: {display_section.get('display_name')}")
+                    
+                    try:
+                        # Extract procedures using Enhanced CDA Processor
+                        import xml.etree.ElementTree as ET
+                        root = ET.fromstring(cda_content)
+                        
+                        # Find procedures section (code 47519-4) using manual filtering
+                        all_sections = root.findall(".//{urn:hl7-org:v3}section")
+                        procedures_sections = []
+                        
+                        for section in all_sections:
+                            code_elem = section.find('{urn:hl7-org:v3}code')
+                            if code_elem is not None and code_elem.get('code') == '47519-4':
+                                procedures_sections.append(section)
+                        
+                        if procedures_sections:
+                            # Define namespaces for procedure processing
+                            namespaces = {
+                                'hl7': 'urn:hl7-org:v3',
+                                'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
+                            }
+                            
+                            enhanced_procedures = []
+                            for section in procedures_sections:
+                                # Extract entries from procedures section
+                                entries = section.findall("{urn:hl7-org:v3}entry")
+                                
+                                for entry in entries:
+                                    # Find procedure within entry
+                                    procedure = entry.find("{urn:hl7-org:v3}procedure")
+                                    
+                                    if procedure is not None:
+                                        logger.debug("Found procedure in entry - extracting data")
+                                        # Extract procedure data
+                                        proc_data = enhanced_processor._extract_procedure_data(procedure, namespaces)
+                                        if proc_data:
+                                            logger.debug(f"Successfully extracted procedure data with {len(proc_data)} fields")
+                                            enhanced_procedures.append(proc_data)
+                                        else:
+                                            logger.warning("Procedure data extraction returned empty")
+                            
+                            if enhanced_procedures:
+                                logger.debug(f"Found {len(enhanced_procedures)} enhanced procedures")
+                                
+                                # Create clinical table structure for procedures
+                                display_section["clinical_table"] = {
+                                    "headers": [
+                                        {"key": "procedure", "label": "Procedure", "type": "procedure"},
+                                        {"key": "target_site", "label": "Target Site", "type": "target_site"},  
+                                        {"key": "procedure_date", "label": "Procedure Date", "type": "date"},
+                                    ],
+                                    "rows": [],
+                                    "total_count": len(enhanced_procedures),
+                                    "table_type": "procedures"
+                                }
+                                
+                                # Process each procedure into table row
+                                for procedure in enhanced_procedures:
+                                    row = {
+                                        "data": {
+                                            "procedure": {"value": procedure.get("procedure_display", "Unknown"), "display_value": procedure.get("procedure_display", "Unknown"), "code": procedure.get("procedure_code"), "code_system": procedure.get("procedure_code_system", "SNOMED CT")},
+                                            "target_site": {"value": procedure.get("target_site_display", "Not specified"), "display_value": procedure.get("target_site_display", "Not specified"), "code": procedure.get("target_site_code"), "code_system": procedure.get("target_site_code_system", "SNOMED CT")},
+                                            "procedure_date": {"value": procedure.get("formatted_date", "Not specified"), "display_value": procedure.get("formatted_date", "Not specified")},
+                                        },
+                                        "has_medical_codes": bool(procedure.get("procedure_code")),
+                                        # Add the procedure object for template access to codes
+                                        "procedure_data": procedure
+                                    }
+                                    display_section["clinical_table"]["rows"].append(row)
+
+                                logger.debug(f"Created clinical_table with {len(display_section['clinical_table']['rows'])} procedure rows")
+                            
+                    except Exception as e:
+                        logger.error(f"Enhanced procedures processing failed: {e}")
+
                 clinical_sections.append(display_section)
 
             logger.debug(f"Extracted {len(clinical_sections)} clinical sections")

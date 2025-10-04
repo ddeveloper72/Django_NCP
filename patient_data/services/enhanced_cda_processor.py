@@ -2165,25 +2165,64 @@ class EnhancedCDAProcessor:
         return fields
 
     def _extract_procedure_data(self, procedure, namespaces) -> Dict[str, Any]:
-        """Extract procedure data"""
+        """Extract procedure data with enhanced code support and target site"""
         data = {}
 
         try:
-            # Get procedure code
+            # Get procedure code with CTS integration
             code_elem = procedure.find("hl7:code", namespaces)
             if code_elem is not None:
-                data["procedure_code"] = code_elem.get("code", "")
-                data["procedure_display"] = code_elem.get(
-                    "displayName", "Unknown Procedure"
-                )
-                data["code_system"] = self._get_code_system_name(
-                    code_elem.get("codeSystem", "")
-                )
+                procedure_code = code_elem.get("code", "")
+                code_system = code_elem.get("codeSystem", "")
+                display_name = code_elem.get("displayName", "")
+                
+                data["procedure_code"] = procedure_code
+                data["procedure_code_system"] = self._get_code_system_name(code_system)
+                
+                # Use CTS for procedure translation if display name is missing
+                if display_name and display_name.strip():
+                    data["procedure_display"] = display_name
+                elif procedure_code and code_system:
+                    # Use CTS to get procedure description
+                    cts_procedure = self._lookup_valueset_term(procedure_code, "procedure")
+                    data["procedure_display"] = cts_procedure or f"Procedure: {procedure_code}"
+                else:
+                    data["procedure_display"] = "Unknown Procedure"
 
-            # Extract effective time (date)
+            # Extract target site code with CTS integration  
+            target_site_elem = procedure.find("hl7:targetSiteCode", namespaces)
+            if target_site_elem is not None:
+                target_site_code = target_site_elem.get("code", "")
+                target_site_system = target_site_elem.get("codeSystem", "")
+                target_site_display = target_site_elem.get("displayName", "")
+                
+                data["target_site_code"] = target_site_code
+                data["target_site_code_system"] = self._get_code_system_name(target_site_system) if target_site_system else "SNOMED CT"
+                
+                # Use CTS for target site translation if display name is missing
+                if target_site_display and target_site_display.strip():
+                    data["target_site_display"] = target_site_display
+                elif target_site_code and target_site_system:
+                    # Use CTS to get target site description
+                    cts_target_site = self._lookup_valueset_term(target_site_code, "anatomy") 
+                    data["target_site_display"] = cts_target_site or f"Body Site: {target_site_code}"
+                else:
+                    data["target_site_display"] = "Not specified"
+
+            # Extract effective time (date) with formatting
             effectiveTime = procedure.find("hl7:effectiveTime", namespaces)
             if effectiveTime is not None:
-                data["date"] = effectiveTime.get("value", "Not specified")
+                time_value = effectiveTime.get("value", "")
+                if time_value:
+                    data["date"] = time_value
+                    # Format the date for display
+                    data["formatted_date"] = self._format_hl7_datetime(time_value)
+                else:
+                    data["date"] = "Not specified"
+                    data["formatted_date"] = "Not specified"
+            else:
+                data["date"] = "Not specified"
+                data["formatted_date"] = "Not specified"
 
             # Extract performer
             performer = procedure.find(
