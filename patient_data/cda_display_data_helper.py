@@ -385,6 +385,94 @@ class CDADisplayDataHelper:
                     except Exception as e:
                         logger.error(f"Enhanced procedures processing failed: {e}")
 
+                # ENHANCED: Check if this is a medical devices section and apply Enhanced CDA Processor
+                is_medical_devices_section = (
+                    section_name == "medical_devices" or 
+                    section_name == "medical_device" or
+                    any(keyword in section_title for keyword in ["medical device", "device", "implant", "equipment"])
+                )
+
+                if is_medical_devices_section and enhanced_processor and cda_content:
+                    logger.debug(f"Processing medical devices section: {display_section.get('display_name')}")
+                    
+                    try:
+                        # Extract medical devices using Enhanced CDA Processor
+                        import xml.etree.ElementTree as ET
+                        root = ET.fromstring(cda_content)
+                        
+                        # Find medical devices section (code 46264-8) using manual filtering
+                        all_sections = root.findall(".//{urn:hl7-org:v3}section")
+                        devices_sections = []
+                        
+                        for section in all_sections:
+                            code_elem = section.find('{urn:hl7-org:v3}code')
+                            if code_elem is not None and code_elem.get('code') == '46264-8':
+                                devices_sections.append(section)
+                        
+                        if devices_sections:
+                            # Define namespaces for device processing
+                            namespaces = {
+                                'hl7': 'urn:hl7-org:v3',
+                                'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
+                            }
+                            
+                            enhanced_devices = []
+                            for section in devices_sections:
+                                # Extract entries from medical devices section
+                                entries = section.findall("{urn:hl7-org:v3}entry")
+                                
+                                for entry in entries:
+                                    # Find different device elements (supply, act, organizer)
+                                    device_elements = (
+                                        entry.findall("{urn:hl7-org:v3}supply") +
+                                        entry.findall("{urn:hl7-org:v3}act") +
+                                        entry.findall("{urn:hl7-org:v3}organizer")
+                                    )
+                                    
+                                    for device_elem in device_elements:
+                                        logger.debug("Found medical device element - extracting data")
+                                        # Extract medical device data
+                                        device_data = enhanced_processor._extract_medical_device_data(device_elem, namespaces)
+                                        if device_data:
+                                            logger.debug(f"Successfully extracted device data with {len(device_data)} fields")
+                                            enhanced_devices.append(device_data)
+                                        else:
+                                            logger.warning("Medical device data extraction returned empty")
+                            
+                            if enhanced_devices:
+                                logger.debug(f"Found {len(enhanced_devices)} enhanced medical devices")
+                                
+                                # Create clinical table structure for medical devices
+                                display_section["clinical_table"] = {
+                                    "headers": [
+                                        {"key": "device", "label": "Medical Device", "type": "device"},
+                                        {"key": "usage_period", "label": "Usage Period", "type": "date"},  
+                                        {"key": "status", "label": "Status", "type": "status"},
+                                    ],
+                                    "rows": [],
+                                    "total_count": len(enhanced_devices),
+                                    "table_type": "medical_devices"
+                                }
+                                
+                                # Process each device into table row
+                                for device in enhanced_devices:
+                                    row = {
+                                        "data": {
+                                            "device": {"value": device.get("device_display", "Unknown"), "display_value": device.get("device_display", "Unknown"), "code": device.get("device_code"), "code_system": device.get("device_code_system", "SNOMED CT")},
+                                            "usage_period": {"value": device.get("usage_period", "Not specified"), "display_value": device.get("usage_period", "Not specified")},
+                                            "status": {"value": device.get("status_display", "Active"), "display_value": device.get("status_display", "Active")},
+                                        },
+                                        "has_medical_codes": bool(device.get("device_code")),
+                                        # Add the device object for template access to codes
+                                        "device_data": device
+                                    }
+                                    display_section["clinical_table"]["rows"].append(row)
+
+                                logger.debug(f"Created clinical_table with {len(display_section['clinical_table']['rows'])} medical device rows")
+                            
+                    except Exception as e:
+                        logger.error(f"Enhanced medical devices processing failed: {e}")
+
                 clinical_sections.append(display_section)
 
             logger.debug(f"Extracted {len(clinical_sections)} clinical sections")

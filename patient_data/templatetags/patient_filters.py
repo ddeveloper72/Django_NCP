@@ -773,3 +773,26 @@ def count_procedure_observations(procedures):
     else:
         # Legacy format: count procedure entries
         return len(procedures)
+
+
+@register.filter
+def count_medical_device_observations(medical_devices):
+    """
+    Count total medical device observations for badge display.
+    For Enhanced CDA format: counts total rows across all clinical tables
+    For Legacy format: counts device entries
+    """
+    if not medical_devices:
+        return 0
+    
+    # Check if we have Enhanced CDA format (clinical_table structure)
+    if medical_devices and hasattr(medical_devices[0], 'get') and medical_devices[0].get('clinical_table'):
+        total_rows = 0
+        for device in medical_devices:
+            if hasattr(device, 'get') and device.get('clinical_table'):
+                rows = device['clinical_table'].get('rows', [])
+                total_rows += len(rows)
+        return total_rows
+    else:
+        # Legacy format: count device entries
+        return len(medical_devices)

@@ -4689,6 +4689,46 @@ def patient_cda_view(request, session_id, cda_type=None):
                         else:
                             logger.info("[ENHANCED PROCEDURES CDA_VIEW] No enhanced procedures found, keeping standard format")
                             context["enhanced_procedures"] = []
+
+                        # ENHANCED: Process medical devices sections with clinical_table structure
+                        medical_devices_with_clinical_table = []
+                        for section in clinical_sections:
+                            section_name = section.get("section_name", "").lower()
+                            display_name = section.get("display_name", "").lower()
+                            
+                            # Check if this is a medical devices section
+                            is_medical_devices_section = (
+                                section_name in ["medical_devices", "medical_device"] or
+                                "medical device" in display_name or
+                                "device" in display_name or
+                                section.get("section_code") == "46264-8"
+                            )
+                            
+                            if is_medical_devices_section and section.get("clinical_table"):
+                                logger.info(f"[ENHANCED MEDICAL DEVICES CDA_VIEW] Found medical devices section: {section.get('display_name')}")
+                                if section["clinical_table"].get("headers") and section["clinical_table"].get("rows"):
+                                    # Convert clinical_table structure to device objects with clinical_table
+                                    enhanced_device = {
+                                        "clinical_table": section["clinical_table"],
+                                        "device": {"name": "Enhanced Medical Devices", "code": {"code": "Enhanced"}},
+                                        "section_name": section.get("display_name", ""),
+                                        "is_enhanced": True
+                                    }
+                                    medical_devices_with_clinical_table.append(enhanced_device)
+                                    logger.info(f"[ENHANCED MEDICAL DEVICES CDA_VIEW] Clinical table has {len(section['clinical_table'].get('headers', []))} headers and {len(section['clinical_table'].get('rows', []))} rows")
+                                else:
+                                    logger.info(f"[ENHANCED MEDICAL DEVICES CDA_VIEW] Section {section.get('display_name')} has no clinical_table")
+                        
+                        # Replace medical devices with enhanced version if available
+                        if medical_devices_with_clinical_table:
+                            logger.info(f"[ENHANCED MEDICAL DEVICES CDA_VIEW] Replacing {len(clinical_arrays['medical_devices'])} standard devices with {len(medical_devices_with_clinical_table)} enhanced devices")
+                            clinical_arrays["medical_devices"] = medical_devices_with_clinical_table
+                            # Also store enhanced medical devices for template access
+                            context["enhanced_medical_devices"] = medical_devices_with_clinical_table
+                            logger.info(f"[ENHANCED MEDICAL DEVICES CDA_VIEW] Added {len(medical_devices_with_clinical_table)} enhanced medical devices to context")
+                        else:
+                            logger.info("[ENHANCED MEDICAL DEVICES CDA_VIEW] No enhanced medical devices found, keeping standard format")
+                            context["enhanced_medical_devices"] = []
                             
                     except Exception as e:
                         logger.warning(f"[ENHANCED CDA_VIEW] Enhanced CDA Helper integration failed: {e}")
@@ -4710,6 +4750,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                             "vital_signs": clinical_arrays["vital_signs"],
                             "results": clinical_arrays["results"],
                             "immunizations": clinical_arrays["immunizations"],
+                            "medical_devices": clinical_arrays["medical_devices"],
                         }
                     )
                     total_clinical_items = sum(
@@ -4728,6 +4769,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                         "vital_signs": [],
                         "results": [],
                         "immunizations": [],
+                        "medical_devices": [],
                     }
                     clinical_arrays = ensure_mandatory_sections(clinical_arrays)
                     
@@ -4741,6 +4783,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                             "vital_signs": clinical_arrays["vital_signs"],
                             "results": clinical_arrays["results"],
                             "immunizations": clinical_arrays["immunizations"],
+                            "medical_devices": clinical_arrays["medical_devices"],
                         }
                     )
                     logger.info(

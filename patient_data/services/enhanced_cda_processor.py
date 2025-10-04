@@ -2242,6 +2242,99 @@ class EnhancedCDAProcessor:
 
         return data
 
+    def _extract_medical_device_data(self, device_elem, namespaces) -> Dict[str, Any]:
+        """Extract medical device data with enhanced code support and usage details"""
+        data = {}
+
+        try:
+            # Get device code with CTS integration
+            code_elem = device_elem.find("hl7:code", namespaces)
+            if code_elem is not None:
+                device_code = code_elem.get("code", "")
+                code_system = code_elem.get("codeSystem", "")
+                display_name = code_elem.get("displayName", "")
+                
+                data["device_code"] = device_code
+                data["device_code_system"] = self._get_code_system_name(code_system)
+                
+                # Use CTS for device translation if display name is missing
+                if display_name and display_name.strip():
+                    data["device_display"] = display_name
+                elif device_code and code_system:
+                    # Use CTS to get device description
+                    cts_device = self._lookup_valueset_term(device_code, "device")
+                    data["device_display"] = cts_device or f"Medical Device: {device_code}"
+                else:
+                    data["device_display"] = "Unknown Medical Device"
+
+            # Extract participantRole for device-specific information
+            participant_role = device_elem.find("hl7:participant/hl7:participantRole", namespaces)
+            if participant_role is not None:
+                # Get device name from participantRole
+                device_name = participant_role.find("hl7:playingDevice/hl7:code", namespaces)
+                if device_name is not None:
+                    device_display = device_name.get("displayName", "")
+                    if device_display and not data.get("device_display", "").startswith("Unknown"):
+                        data["device_display"] = device_display
+
+            # Extract effective time (usage period) with formatting
+            effectiveTime = device_elem.find("hl7:effectiveTime", namespaces)
+            if effectiveTime is not None:
+                # Check for low/high time range (usage period)
+                low_elem = effectiveTime.find("hl7:low", namespaces)
+                high_elem = effectiveTime.find("hl7:high", namespaces)
+                
+                if low_elem is not None:
+                    low_value = low_elem.get("value", "")
+                    if low_value:
+                        data["start_date"] = low_value
+                        data["formatted_start_date"] = self._format_hl7_datetime(low_value)
+                
+                if high_elem is not None:
+                    high_value = high_elem.get("value", "")
+                    if high_value:
+                        data["end_date"] = high_value
+                        data["formatted_end_date"] = self._format_hl7_datetime(high_value)
+                
+                # Format usage period for display
+                if data.get("formatted_start_date") and data.get("formatted_end_date"):
+                    data["usage_period"] = f"{data['formatted_start_date']} - {data['formatted_end_date']}"
+                elif data.get("formatted_start_date"):
+                    data["usage_period"] = f"Since {data['formatted_start_date']}"
+                else:
+                    # Try single value for point in time
+                    time_value = effectiveTime.get("value", "")
+                    if time_value:
+                        data["start_date"] = time_value
+                        data["formatted_start_date"] = self._format_hl7_datetime(time_value)
+                        data["usage_period"] = data["formatted_start_date"]
+
+            # Set default if no time information
+            if not data.get("usage_period"):
+                data["usage_period"] = "Not specified"
+                data["formatted_start_date"] = "Not specified"
+
+            # Extract status
+            status_code = device_elem.find("hl7:statusCode", namespaces)
+            if status_code is not None:
+                data["status"] = status_code.get("code", "active")
+                # Map status codes to readable text
+                status_map = {
+                    "active": "Active",
+                    "completed": "Completed", 
+                    "cancelled": "Cancelled",
+                    "suspended": "Suspended"
+                }
+                data["status_display"] = status_map.get(data["status"], data["status"].title())
+            else:
+                data["status"] = "active"
+                data["status_display"] = "Active"
+
+        except Exception as e:
+            logger.error(f"Error extracting medical device data: {e}")
+
+        return data
+
     def _extract_act_data(self, act_elem, namespaces) -> Dict[str, Any]:
         """Extract general act data"""
         data = {}
