@@ -273,12 +273,18 @@ class CDADisplayDataHelper:
                                     # Map Enhanced CDA Processor field names to clinical table format
                                     # Based on CDA structure: observation/code = reaction type, observation/value = manifestation
                                     # Code column removed - clinical codes will be displayed under manifestation and agent fields
+                                    
+                                    # Format date range from onset and end dates
+                                    onset_date = allergy.get("onset_date", "")
+                                    end_date = allergy.get("end_date", "")
+                                    time_display = self._format_allergy_date_range(onset_date, end_date)
+                                    
                                     row = {
                                         "data": {
                                             "reaction_type": {"value": allergy.get("reaction_type", "Allergic disposition"), "display_value": allergy.get("reaction_type", "Allergic disposition")},
                                             "manifestation": {"value": allergy.get("manifestation_display", "Unknown"), "display_value": allergy.get("manifestation_display", "Unknown"), "code": allergy.get("manifestation_code"), "code_system": allergy.get("manifestation_code_system", "SNOMED CT")},
                                             "agent": {"value": allergy.get("agent_display", "Unknown"), "display_value": allergy.get("agent_display", "Unknown"), "code": allergy.get("agent_code"), "code_system": allergy.get("agent_code_system", "SNOMED CT")},
-                                            "time": {"value": allergy.get("onset_date", "Unknown"), "display_value": allergy.get("onset_date", "Unknown")},
+                                            "time": {"value": time_display, "display_value": time_display},
                                             "severity": {"value": allergy.get("severity", "unknown"), "display_value": allergy.get("severity", "unknown").title()},
                                             "criticality": {"value": "High" if allergy.get("severity", "").lower() == "severe" else "Medium" if allergy.get("severity", "").lower() == "moderate" else "Low", "display_value": "High" if allergy.get("severity", "").lower() == "severe" else "Medium" if allergy.get("severity", "").lower() == "moderate" else "Low"},
                                             "status": {"value": allergy.get("status", "active"), "display_value": allergy.get("status", "active").title()},
@@ -485,6 +491,24 @@ class CDADisplayDataHelper:
             "uses_coded_sections": False,
             "translation_quality": "Error",
         }
+
+    def _format_allergy_date_range(self, onset_date: str, end_date: str) -> str:
+        """Format allergy date range from onset and end dates"""
+        if onset_date and end_date:
+            if onset_date == end_date:
+                # Same date
+                return onset_date
+            else:
+                # Different dates - show as range
+                return f"{onset_date} - {end_date}"
+        elif onset_date:
+            # Only start date available
+            return f"From {onset_date}"
+        elif end_date:
+            # Only end date available (unusual but possible)
+            return f"Until {end_date}"
+        else:
+            return "Unknown"
 
     def get_service_status(self) -> Dict[str, str]:
         """Get service status information"""
