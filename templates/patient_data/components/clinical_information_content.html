@@ -21,8 +21,17 @@
                         <div class="collapsible-wrapper">
                             <input id="toggle-medical-problems" class="toggle-input" type="checkbox" checked>
                             <label for="toggle-medical-problems" class="collapsible-label-title">
-                                <i class="fa-solid fa-triangle-exclamation me-2"></i>Medical Problems
-                                <span class="badge bg-light text-dark ms-2">{{ problems|length }}</span>
+                                <div class="clinical-section-title-row">
+                                    <div class="clinical-section-title">
+                                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                        <span>Medical Problems</span>
+                                        <span class="badge bg-light text-dark ms-2">{{ problems|length }}</span>
+                                    </div>
+                                    <div class="clinical-badge-container">
+                                        <span class="clinical-badge populated">{{ problems|length }} Found</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
                             </label>
                             <div class="collapsible-content-title">
                                 <div class="content-inner-title">
@@ -229,8 +238,17 @@
                         <div class="collapsible-wrapper">
                             <input id="toggle-medications" class="toggle-input" type="checkbox">
                             <label for="toggle-medications" class="collapsible-label-title">
-                                <i class="fa-solid fa-pills me-2"></i>Medications
-                                <span class="badge bg-light text-dark ms-2">{{ medications|length }}</span>
+                                <div class="clinical-section-title-row">
+                                    <div class="clinical-section-title">
+                                        <i class="fa-solid fa-pills me-2"></i>
+                                        <span>Medications</span>
+                                        <span class="badge bg-light text-dark ms-2">{{ medications|length }}</span>
+                                    </div>
+                                    <div class="clinical-badge-container">
+                                        <span class="clinical-badge populated">{{ medications|length }} Found</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
                             </label>
                             <div class="collapsible-content-title">
                                 <div class="content-inner-title">
@@ -657,13 +675,24 @@
                         <div class="collapsible-wrapper">
                             <input id="toggle-allergies" class="toggle-input" type="checkbox">
                             <label for="toggle-allergies" class="collapsible-label-title">
-                                <i class="fa-solid fa-triangle-exclamation me-2"></i>Allergies & Intolerances
-                                {% if allergies and allergies|length > 0 %}
-                                    {# Use custom filter to count allergies correctly based on data structure #}
-                                    <span class="badge bg-light text-dark ms-2">{{ allergies|count_allergy_observations }}</span>
-                                {% else %}
-                                    <span class="badge bg-secondary text-white ms-2">Mandatory</span>
-                                {% endif %}
+                                <div class="clinical-section-title-row">
+                                    <div class="clinical-section-title">
+                                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                        <span>Allergies & Intolerances</span>
+                                        {% if allergies and allergies|length > 0 %}
+                                            {# Use custom filter to count allergies correctly based on data structure #}
+                                            <span class="badge bg-light text-dark ms-2">{{ allergies|count_allergy_observations }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="clinical-badge-container">
+                                        {% if allergies and allergies|length > 0 %}
+                                            <span class="clinical-badge populated">{{ allergies|count_allergy_observations }} Found</span>
+                                        {% else %}
+                                            <span class="clinical-badge mandatory">Mandatory</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
                             </label>
                             <div class="collapsible-content-title">
                                 <div class="content-inner-title">
@@ -1306,8 +1335,17 @@
                         <div class="collapsible-wrapper">
                             <input id="toggle-vital-signs" class="toggle-input" type="checkbox">
                             <label for="toggle-vital-signs" class="collapsible-label-title">
-                                <i class="fa-solid fa-chart-line me-2"></i>Vital Signs
-                                <span class="badge bg-light text-dark ms-2">{{ vital_signs|length }}</span>
+                                <div class="clinical-section-title-row">
+                                    <div class="clinical-section-title">
+                                        <i class="fa-solid fa-chart-line me-2"></i>
+                                        <span>Vital Signs</span>
+                                        <span class="badge bg-light text-dark ms-2">{{ vital_signs|length }}</span>
+                                    </div>
+                                    <div class="clinical-badge-container">
+                                        <span class="clinical-badge populated">{{ vital_signs|length }} Found</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
                             </label>
                             <div class="collapsible-content-title">
                                 <div class="content-inner-title">
