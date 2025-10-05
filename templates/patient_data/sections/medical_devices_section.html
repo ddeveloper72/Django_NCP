@@ -74,13 +74,22 @@
                                 <td>
                                     {% if header.primary %}
                                     <div class="primary-field">
-                                        <strong class="text-info">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" or
-                                            'N/A %}</strong>
+                                        <div>
+                                            <strong class="text-info">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" or 'N/A' %}</strong>
+                                        </div>
+                                        {% comment %} Add SNOMED CT device codes below device type descriptions {% endcomment %}
+                                        {% if header.key == "Device Type" and cell_data|safe_get:"device_code" %}
+                                        <div class="device-code-display mt-1">
+                                            <small class="text-muted">
+                                                <i class="fa-solid fa-hashtag me-1"></i>{{ cell_data|safe_get:"device_code" }}
+                                            </small>
+                                        </div>
+                                        {% endif %}
                                         {% if cell_data|safe_get:"has_terminology" %}
                                         <div class="medical-terminology mt-1">
                                             {% for term in cell_data|safe_get:"terminology" %}
                                             <span class="badge bg-info me-1" title="{% firstof term.system }}: {{ term.code }}">
-                                                {{ term.display_name term.code %}
+                                                {{ term.display_name term.code }}
                                             </span>
                                             {% endfor %}
                                         </div>

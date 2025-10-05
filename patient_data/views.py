@@ -433,6 +433,15 @@ def create_clinical_table(
             "title": "Current & Past Medications",
             "icon": "fas fa-pills",
         },
+        "46264-8": {  # Medical Devices
+            "headers": [
+                {"key": "Device Type", "label": "Device Type", "primary": True, "type": "device"},
+                {"key": "Device ID", "label": "Device ID", "type": "device"},
+                {"key": "Implant Date", "label": "Implant Date", "type": "date"},
+            ],
+            "title": "Medical Devices & Implants",
+            "icon": "fas fa-microchip",
+        },
         "default": {  # Generic clinical data
             "headers": [
                 {"key": "item", "label": "Clinical Item", "primary": True},
@@ -1211,6 +1220,15 @@ def extract_clinical_row_data(entry, headers, section_code):
                 "has_codes": len(original_codes) > 0,
             }
 
+        elif key == "Device Type" and section_code == "46264-8":
+            # Special handling for Device Type to preserve device_code
+            device_type_data = extract_field_value(fields, [key, "Device Type", "Type"])
+            row["data"][key] = {
+                "value": device_type_data.get("display_value", "Not specified"),
+                "has_terminology": device_type_data.get("has_terminology", False),
+                "device_code": device_type_data.get("device_code", ""),  # Preserve device code
+            }
+
         else:
             # Generic field extraction
             generic_data = extract_field_value(fields, [key.title(), key])
@@ -1243,6 +1261,8 @@ def extract_field_value(fields, field_patterns):
         "original_value": None,
         "has_terminology": False,
         "codes": [],
+        "device_code": "",  # Add device_code to result
+        "code_system": "",  # Add code_system to result
     }
 
     for pattern in field_patterns:
@@ -1261,6 +1281,10 @@ def extract_field_value(fields, field_patterns):
                     result["display_value"] = display_value
                     result["original_value"] = field_data.get("original_value")
                     result["has_terminology"] = field_data.get("has_valueset", False)
+                    
+                    # Preserve device_code and code_system for medical devices
+                    result["device_code"] = field_data.get("device_code", "")
+                    result["code_system"] = field_data.get("code_system", "")
 
                     # Extract codes if available
                     if field_data.get("code"):
@@ -4721,6 +4745,10 @@ def patient_cda_view(request, session_id, cda_type=None):
                                     logger.info(f"[ENHANCED MEDICAL DEVICES CDA_VIEW] Clinical table has {len(section['clinical_table'].get('headers', []))} headers and {len(section['clinical_table'].get('rows', []))} rows")
                                 else:
                                     logger.info(f"[ENHANCED MEDICAL DEVICES CDA_VIEW] Section {section.get('display_name')} has no clinical_table")
+                        
+                        # Ensure medical_devices key exists in clinical_arrays
+                        if "medical_devices" not in clinical_arrays:
+                            clinical_arrays["medical_devices"] = []
                         
                         # Replace medical devices with enhanced version if available
                         if medical_devices_with_clinical_table:

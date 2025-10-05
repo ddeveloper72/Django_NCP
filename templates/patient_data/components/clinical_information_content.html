@@ -1171,24 +1171,25 @@
                                                                 {% with row.data|get_item:header.key as cell_data %}
                                                                 <td class="clinical-cell">
                                                                     {% if header.primary or header.type == 'device' %}
-                                                                    <strong class="text-dark">
-                                                                        {% firstof cell_data.display_value cell_data.value "N/A" %}
-                                                                    </strong>
+                                                                    <div>
+                                                                        <strong class="text-dark">
+                                                                            {% firstof cell_data.display_value cell_data.value "N/A" %}
+                                                                        </strong>
+                                                                        
+                                                                        {# Add SNOMED CT device codes below device type using medical problems pattern #}
+                                                                        {% if header.type == 'device' and cell_data.device_code %}
+                                                                        <div class="device-code text-muted small">
+                                                                            <i class="fa-solid fa-barcode me-1"></i>
+                                                                            {{ cell_data.device_code }}
+                                                                            {% if cell_data.code_system %} ({{ cell_data.code_system }}){% endif %}
+                                                                        </div>
+                                                                        {% endif %}
+                                                                    </div>
                                                                     {% else %}
                                                                     <div>
                                                                         <span class="text-muted">
                                                                             {% firstof cell_data.display_value cell_data.value "N/A" %}
                                                                         </span>
-                                                                        
-                                                                        {# Add clinical codes for device fields #}
-                                                                        {% if header.type == 'device' and cell_data.code %}
-                                                                        <div class="mt-1">
-                                                                            <span class="badge bg-secondary text-white small">
-                                                                                <i class="fa-solid fa-code me-1"></i>{{ cell_data.code }}
-                                                                                {% if cell_data.code_system %} ({{ cell_data.code_system }}){% endif %}
-                                                                            </span>
-                                                                        </div>
-                                                                        {% endif %}
                                                                     </div>
                                                                     {% endif %}
                                                                 </td>
@@ -1229,13 +1230,12 @@
                                                                         {% firstof cell_data.display_value cell_data.value "N/A" %}
                                                                     </span>
                                                                     
-                                                                    {# Mobile clinical codes #}
-                                                                    {% if cell_data.code %}
-                                                                    <div class="clinical-codes-mobile mt-1">
-                                                                        <span class="badge {% if header.type == 'device' %}bg-secondary{% else %}bg-light text-dark{% endif %} small">
-                                                                            <i class="fa-solid fa-code me-1"></i>{{ cell_data.code }}
-                                                                            {% if cell_data.code_system %} ({{ cell_data.code_system }}){% endif %}
-                                                                        </span>
+                                                                    {# Mobile device codes using medical problems pattern #}
+                                                                    {% if header.type == 'device' and cell_data.device_code %}
+                                                                    <div class="device-code text-muted small mt-1">
+                                                                        <i class="fa-solid fa-barcode me-1"></i>
+                                                                        {{ cell_data.device_code }}
+                                                                        {% if cell_data.code_system %} ({{ cell_data.code_system }}){% endif %}
                                                                     </div>
                                                                     {% endif %}
                                                                 </div>

@@ -235,9 +235,9 @@ class CDADisplayDataHelper:
                             # 3-column format: Device Type, Device ID, Implant Date
                             medical_devices_section["clinical_table"] = {
                                 "headers": [
-                                    {"key": "device_type", "label": "Device Type", "type": "device"},
-                                    {"key": "device_id", "label": "Device ID", "type": "identifier"},  
-                                    {"key": "implant_date", "label": "Implant Date", "type": "date"},
+                                    {"key": "Device Type", "label": "Device Type", "type": "device", "primary": True},
+                                    {"key": "Device ID", "label": "Device ID", "type": "device"},  
+                                    {"key": "Implant Date", "label": "Implant Date", "type": "date"},
                                 ],
                                 "rows": [],
                                 "total_count": len(enhanced_devices),
@@ -248,17 +248,17 @@ class CDADisplayDataHelper:
                             for device in enhanced_devices:
                                 row = {
                                     "data": {
-                                        "device_type": {
+                                        "Device Type": {
                                             "value": device.get("device_display", "Unknown Medical Device"), 
                                             "display_value": device.get("device_display", "Unknown Medical Device"), 
-                                            "code": device.get("device_code"), 
+                                            "device_code": device.get("device_code"),  # Add device_code here for template
                                             "code_system": device.get("device_code_system", "SNOMED CT")
                                         },
-                                        "device_id": {
+                                        "Device ID": {
                                             "value": device.get("device_id", "Not specified"), 
                                             "display_value": device.get("device_id", "Not specified")
                                         },
-                                        "implant_date": {
+                                        "Implant Date": {
                                             "value": device.get("implant_date_display", "Not specified"), 
                                             "display_value": device.get("implant_date_display", "Not specified"),
                                             "raw_date": device.get("implant_date"),

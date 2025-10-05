@@ -410,6 +410,51 @@ class EnhancedCDAProcessor:
                 entries, namespaces, clinical_fields, section_code
             )
 
+            # Special processing for medical devices section (46264-8)
+            if section_code == "46264-8":
+                # Use our custom medical device extraction for enhanced data structure
+                enhanced_medical_devices = []
+                for entry in entries:
+                    # Look for supply elements with participant/playingDevice structure
+                    supply_elems = entry.findall(".//hl7:supply", namespaces)
+                    for supply_elem in supply_elems:
+                        device_data = self._extract_medical_device_data(supply_elem, namespaces)
+                        if device_data:
+                            enhanced_medical_devices.append(device_data)
+                
+                # Replace the generic table_data with our enhanced medical device data
+                if enhanced_medical_devices:
+                    # Convert our enhanced device data to the expected format
+                    table_data = []
+                    for device in enhanced_medical_devices:
+                        entry_data = {
+                            "type": "medical_device_entry",
+                            "data": device,
+                            "fields": {
+                                "Device Type": {
+                                    "value": device.get("device_display", "Unknown Device"),
+                                    "device_code": device.get("device_code", ""),  # Add device code here
+                                    "code_system": device.get("device_code_system", ""),  # Add code system
+                                    "needs_translation": False,
+                                    "has_valueset": True,
+                                },
+                                "Device ID": {
+                                    "value": device.get("device_id", "Unknown ID"),
+                                    "needs_translation": False,
+                                    "has_valueset": False,
+                                },
+                                "Implant Date": {
+                                    "value": device.get("implant_date_display", "Unknown Date"),
+                                    "needs_translation": False,
+                                    "has_valueset": False,
+                                }
+                            },
+                            "section_type": "medical_device",
+                            "section_code": section_code,
+                            "device_code": device.get("device_code", ""),  # Also add at row level
+                        }
+                        table_data.append(entry_data)
+
             # Generate PS-compliant table if structured data exists
             ps_table_html = ""
             ps_table_html_original = ""
@@ -2282,13 +2327,16 @@ class EnhancedCDAProcessor:
                         if display_name and display_name.strip():
                             data["device_display"] = display_name
                         elif device_code and code_system:
-                            # Use CTS to translate SNOMED CT device codes (like 68183006)
-                            if code_system == "2.16.840.1.113883.6.96":  # SNOMED CT OID
+                            # Use CTS to translate device codes with proper eHDSI MVC lookup
+                            if code_system == "1.3.6.1.4.1.12559.11.10.1.3.1.44.6":  # eHDSI Medical Devices OID
+                                cts_device = self._lookup_valueset_term(device_code, "medical_device")
+                                data["device_display"] = cts_device or display_name or f"Medical Device: {device_code}"
+                            elif code_system == "2.16.840.1.113883.6.96":  # SNOMED CT OID (legacy)
                                 cts_device = self._lookup_valueset_term(device_code, "medical_device")
                                 data["device_display"] = cts_device or f"Medical Device (SNOMED: {device_code})"
                             else:
                                 cts_device = self._lookup_valueset_term(device_code, "device")
-                                data["device_display"] = cts_device or f"Medical Device: {device_code}"
+                                data["device_display"] = cts_device or display_name or f"Medical Device: {device_code}"
                         else:
                             data["device_display"] = "Unknown Medical Device"
             
@@ -2306,8 +2354,13 @@ class EnhancedCDAProcessor:
                     if display_name and display_name.strip():
                         data["device_display"] = display_name
                     elif device_code and code_system:
-                        cts_device = self._lookup_valueset_term(device_code, "device")
-                        data["device_display"] = cts_device or f"Medical Device: {device_code}"
+                        # Enhanced CTS lookup for eHDSI codes
+                        if code_system == "1.3.6.1.4.1.12559.11.10.1.3.1.44.6":  # eHDSI Medical Devices
+                            cts_device = self._lookup_valueset_term(device_code, "medical_device")
+                            data["device_display"] = cts_device or f"Medical Device: {device_code}"
+                        else:
+                            cts_device = self._lookup_valueset_term(device_code, "device")
+                            data["device_display"] = cts_device or f"Medical Device: {device_code}"
                     else:
                         data["device_display"] = "Unknown Medical Device"
             
@@ -2511,6 +2564,7 @@ class EnhancedCDAProcessor:
             "2.16.840.1.113883.6.3": "ICD-10",
             "2.16.840.1.113883.6.73": "ATC",
             "2.16.840.1.113883.6.88": "RxNorm",
+            "1.3.6.1.4.1.12559.11.10.1.3.1.44.6": "eHDSI Medical Devices",  # eHDSI Medical Device codes
         }
         return oid_mappings.get(oid, "Unknown")
 
