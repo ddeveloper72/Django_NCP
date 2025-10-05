@@ -2971,6 +2971,14 @@ body nav .badge:hover i.fa-user-injured,
   color: #4a5568 !important;
   font-weight: 500;
 }
+.card .d-flex .text-muted.fa-solid {
+  font-weight: 900 !important;
+}
+
+/* Fix missing Font Awesome chevron-right icon definition */
+.fa-chevron-right::before {
+  content: "\f054" !important;
+}
 
 /* Fix 3: Selected Tab Button Text Contrast and Icon Color Issues */
 /* Override washed out active tab styling with darker text */
