@@ -131,6 +131,100 @@ def ensure_mandatory_sections(clinical_arrays: dict) -> dict:
     return clinical_arrays
 
 
+def detect_extended_clinical_sections(comprehensive_data: dict) -> dict:
+    """
+    Detect extended clinical sections available in CDA document beyond mandatory 5 sections.
+    
+    Args:
+        comprehensive_data: Processed CDA data from comprehensive clinical service
+        
+    Returns:
+        Dictionary with extended section arrays for template rendering
+    """
+    extended_sections = {
+        "history_of_past_illness": [],
+        "immunizations": [],
+        "pregnancy_history": [],
+        "social_history": [],
+        "laboratory_results": [],
+        "advance_directives": [],
+        "additional_sections": []
+    }
+    
+    # LOINC code mappings for extended sections
+    extended_section_mapping = {
+        "11369-6": "immunizations",  # History of Immunizations
+        "29762-2": "social_history",  # Social History
+        "8716-3": "vital_signs",     # Vital Signs (could be extended)
+        "47420-5": "functional_status",  # Functional Status
+        "42348-3": "advance_directives",  # Advance Directives
+        "10164-2": "history_of_past_illness",  # History of Present Illness
+        "57060-6": "pregnancy_history",  # Estimated date of delivery
+        "30954-2": "laboratory_results",  # Relevant diagnostic tests
+    }
+    
+    if not comprehensive_data or not isinstance(comprehensive_data, dict):
+        return extended_sections
+    
+    # Check if we have sections data
+    sections = comprehensive_data.get("sections", [])
+    if not sections:
+        return extended_sections
+    
+    logger.info(f"[EXTENDED SECTIONS] Processing {len(sections)} sections for extended detection")
+    
+    # Process each section and categorize
+    for section in sections:
+        section_code = section.get("section_code", "")
+        section_title = section.get("display_name", section.get("title", "")).lower()
+        entries = section.get("entries", [])
+        
+        # Map by LOINC code first
+        mapped_category = extended_section_mapping.get(section_code)
+        if mapped_category and mapped_category in extended_sections:
+            if entries:  # Only add if has actual data
+                extended_sections[mapped_category].append(section)
+                logger.info(f"[EXTENDED SECTIONS] Mapped {section_code} to {mapped_category} with {len(entries)} entries")
+            continue
+        
+        # Map by title keywords for sections without standard LOINC codes
+        if any(keyword in section_title for keyword in ["immuniz", "vaccin", "immun"]):
+            if entries:
+                extended_sections["immunizations"].append(section)
+                logger.info(f"[EXTENDED SECTIONS] Mapped '{section_title}' to immunizations by keyword")
+        elif any(keyword in section_title for keyword in ["social", "tobacco", "alcohol", "smoking"]):
+            if entries:
+                extended_sections["social_history"].append(section)
+                logger.info(f"[EXTENDED SECTIONS] Mapped '{section_title}' to social_history by keyword")
+        elif any(keyword in section_title for keyword in ["pregnan", "pregnancy", "obstetric"]):
+            if entries:
+                extended_sections["pregnancy_history"].append(section)
+                logger.info(f"[EXTENDED SECTIONS] Mapped '{section_title}' to pregnancy_history by keyword")
+        elif any(keyword in section_title for keyword in ["past illness", "history of present", "medical history"]):
+            if entries:
+                extended_sections["history_of_past_illness"].append(section)
+                logger.info(f"[EXTENDED SECTIONS] Mapped '{section_title}' to history_of_past_illness by keyword")
+        elif any(keyword in section_title for keyword in ["laboratory", "lab result", "diagnostic test"]):
+            if entries:
+                extended_sections["laboratory_results"].append(section)
+                logger.info(f"[EXTENDED SECTIONS] Mapped '{section_title}' to laboratory_results by keyword")
+        elif any(keyword in section_title for keyword in ["advance directive", "living will", "healthcare proxy"]):
+            if entries:
+                extended_sections["advance_directives"].append(section)
+                logger.info(f"[EXTENDED SECTIONS] Mapped '{section_title}' to advance_directives by keyword")
+        else:
+            # Any other section with data goes to additional_sections
+            if entries:
+                extended_sections["additional_sections"].append(section)
+                logger.info(f"[EXTENDED SECTIONS] Added '{section_title}' to additional_sections")
+    
+    # Log summary
+    total_extended = sum(len(sections) for sections in extended_sections.values())
+    logger.info(f"[EXTENDED SECTIONS] Detected {total_extended} extended sections total")
+    
+    return extended_sections
+
+
 def has_meaningful_administrative_data(admin_data):
     """
     Check if administrative data contains meaningful content.
@@ -4790,6 +4884,29 @@ def patient_cda_view(request, session_id, cda_type=None):
                     logger.info(
                         f"[CLINICAL ARRAYS SESSION] Added {total_clinical_items} clinical array items to context: med={len(clinical_arrays['medications'])}, all={len(clinical_arrays['allergies'])}, prob={len(clinical_arrays['problems'])}, proc={len(clinical_arrays['procedures'])}, vs={len(clinical_arrays['vital_signs'])}"
                     )
+                    
+                    # EXTENDED CLINICAL SECTIONS DETECTION (when clinical arrays exist)
+                    try:
+                        if 'comprehensive_data' in locals() and comprehensive_data:
+                            extended_sections = detect_extended_clinical_sections(comprehensive_data)
+                            context.update(extended_sections)
+                            
+                            total_extended = sum(len(sections) for sections in extended_sections.values())
+                            logger.info(f"[EXTENDED SECTIONS] Added {total_extended} extended clinical sections to context")
+                        else:
+                            # Add empty extended sections for template compatibility
+                            context.update({
+                                "history_of_past_illness": [],
+                                "immunizations": context.get("immunizations", []),  # Don't override existing
+                                "pregnancy_history": [],
+                                "social_history": [],
+                                "laboratory_results": [],
+                                "advance_directives": [],
+                                "additional_sections": []
+                            })
+                    except Exception as e:
+                        logger.warning(f"[EXTENDED SECTIONS] Failed to detect extended sections: {e}")
+                        
                 else:
                     # Create empty clinical arrays and ensure mandatory sections
                     clinical_arrays = {
@@ -4824,6 +4941,47 @@ def patient_cda_view(request, session_id, cda_type=None):
                 logger.info(
                     f"[CLINICAL ARRAYS SESSION] Skipping fallback extraction for session {session_id} - medications already extracted by comprehensive processing with {len(context.get('medications', []))} items"
                 )
+
+            # EXTENDED CLINICAL SECTIONS DETECTION
+            # Detect and add extended clinical sections to context after mandatory sections are processed
+            try:
+                # Get comprehensive data from earlier processing (available in locals)
+                if 'comprehensive_data' in locals() and comprehensive_data:
+                    extended_sections = detect_extended_clinical_sections(comprehensive_data)
+                    context.update(extended_sections)
+                    
+                    total_extended = sum(len(sections) for sections in extended_sections.values())
+                    logger.info(f"[EXTENDED SECTIONS] Added {total_extended} extended clinical sections to context")
+                    
+                    # Log details of extended sections found
+                    for section_name, sections in extended_sections.items():
+                        if sections:
+                            logger.info(f"[EXTENDED SECTIONS] {section_name}: {len(sections)} sections")
+                else:
+                    # Add empty extended sections for template compatibility
+                    context.update({
+                        "history_of_past_illness": [],
+                        "immunizations": context.get("immunizations", []),  # Don't override if already exists
+                        "pregnancy_history": [],
+                        "social_history": [],
+                        "laboratory_results": [],
+                        "advance_directives": [],
+                        "additional_sections": []
+                    })
+                    logger.info("[EXTENDED SECTIONS] No comprehensive data available, added empty extended sections")
+                    
+            except Exception as e:
+                logger.warning(f"[EXTENDED SECTIONS] Failed to detect extended sections: {e}")
+                # Add empty extended sections on error
+                context.update({
+                    "history_of_past_illness": [],
+                    "immunizations": context.get("immunizations", []),
+                    "pregnancy_history": [],
+                    "social_history": [],
+                    "laboratory_results": [],
+                    "advance_directives": [],
+                    "additional_sections": []
+                })
             else:
                 # No CDA content available - set empty arrays
                 context.update(

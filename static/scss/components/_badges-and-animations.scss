@@ -311,6 +311,17 @@
       margin-right: 0.25rem;
     }
   }
+  
+  &.extended {
+    background-color: #e7f3ff;
+    border-color: #b8daff;
+    color: #004085;
+    
+    &::before {
+      content: "⊕ ";
+      margin-right: 0.25rem;
+    }
+  }
 }
 
 // Clinical section title row layout
@@ -325,6 +336,33 @@
   display: flex;
   align-items: center;
   flex-grow: 1;
+}
+
+// Clinical group headers for organizing sections
+.clinical-group-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 1rem 0;
+  
+  h5 {
+    color: #495057;
+    font-weight: 600;
+    margin: 0;
+    font-size: 1rem;
+    
+    &::before {
+      content: "📋 ";
+      margin-right: 0.5rem;
+    }
+  }
+  
+  &.extended-group {
+    h5::before {
+      content: "⊕ ";
+    }
+  }
 }
 
 .clinical-badge-container {

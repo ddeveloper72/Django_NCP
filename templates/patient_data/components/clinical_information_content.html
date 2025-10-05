@@ -1375,6 +1375,366 @@
                     </div>
                     {% endif %}
                     
+                    {# ========================================= #}
+                    {# EXTENDED CLINICAL SECTIONS GROUP HEADER #}
+                    {# ========================================= #}
+                    {% if history_of_past_illness or immunizations or pregnancy_history or social_history or laboratory_results or advance_directives or additional_sections %}
+                    <div class="extended-clinical-group mt-4">
+                        <div class="group-header mb-3">
+                            <h5 class="group-title">
+                                <i class="fa-solid fa-plus-circle me-2 text-info"></i>
+                                Extended Clinical Information
+                            </h5>
+                            <p class="group-subtitle text-muted mb-0">
+                                Additional clinical data available in this patient summary
+                            </p>
+                        </div>
+                    
+                        {# History of Past Illness Section #}
+                        {% if history_of_past_illness and history_of_past_illness|length > 0 %}
+                        <div class="clinical-section">
+                            <div class="collapsible-wrapper">
+                                <input id="toggle-past-illness" class="toggle-input" type="checkbox">
+                                <label for="toggle-past-illness" class="collapsible-label-title">
+                                    <div class="clinical-section-title-row">
+                                        <div class="clinical-section-title">
+                                            <i class="fa-solid fa-history me-2"></i>
+                                            <span>History of Past Illness</span>
+                                        </div>
+                                        <div class="clinical-badge-container">
+                                            <span class="clinical-badge extended">{{ history_of_past_illness|length }} Found</span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                                </label>
+                                <div class="collapsible-content-title">
+                                    <div class="content-inner-title">
+                                        <p class="mb-3 text-muted">Past Medical History: {{ history_of_past_illness|length }} items found</p>
+                                        {% for illness in history_of_past_illness %}
+                                        <div class="past-illness-card mb-3 p-3 border rounded bg-white">
+                                            <h6 class="illness-name text-dark mb-2">
+                                                {% if illness.name %}
+                                                    {{ illness.name }}
+                                                {% elif illness.code.displayName %}
+                                                    {{ illness.code.displayName }}
+                                                {% else %}
+                                                    Past Medical Condition
+                                                {% endif %}
+                                            </h6>
+                                            {% if illness.effective_time %}
+                                            <div class="text-muted mb-1">
+                                                <i class="fa-solid fa-calendar me-1"></i>
+                                                <strong>Date:</strong> {{ illness.effective_time }}
+                                            </div>
+                                            {% endif %}
+                                            {% if illness.status %}
+                                            <div class="text-muted">
+                                                <i class="fa-solid fa-info-circle me-1"></i>
+                                                <strong>Status:</strong> {{ illness.status }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    
+                        {# Immunizations Section #}
+                        {% if immunizations and immunizations|length > 0 %}
+                        <div class="clinical-section">
+                            <div class="collapsible-wrapper">
+                                <input id="toggle-immunizations" class="toggle-input" type="checkbox">
+                                <label for="toggle-immunizations" class="collapsible-label-title">
+                                    <div class="clinical-section-title-row">
+                                        <div class="clinical-section-title">
+                                            <i class="fa-solid fa-syringe me-2"></i>
+                                            <span>Immunizations</span>
+                                        </div>
+                                        <div class="clinical-badge-container">
+                                            <span class="clinical-badge extended">{{ immunizations|length }} Found</span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                                </label>
+                                <div class="collapsible-content-title">
+                                    <div class="content-inner-title">
+                                        <p class="mb-3 text-muted">Vaccination History: {{ immunizations|length }} items found</p>
+                                        {% for immunization in immunizations %}
+                                        <div class="immunization-card mb-3 p-3 border rounded bg-white">
+                                            <h6 class="vaccine-name text-dark mb-2">
+                                                {% if immunization.name %}
+                                                    {{ immunization.name }}
+                                                {% elif immunization.code.displayName %}
+                                                    {{ immunization.code.displayName }}
+                                                {% else %}
+                                                    Vaccination
+                                                {% endif %}
+                                            </h6>
+                                            {% if immunization.administration_date %}
+                                            <div class="text-muted mb-1">
+                                                <i class="fa-solid fa-calendar me-1"></i>
+                                                <strong>Administered:</strong> {{ immunization.administration_date }}
+                                            </div>
+                                            {% endif %}
+                                            {% if immunization.status %}
+                                            <div class="text-muted">
+                                                <i class="fa-solid fa-check-circle me-1"></i>
+                                                <strong>Status:</strong> {{ immunization.status }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    
+                        {# Pregnancy History Section #}
+                        {% if pregnancy_history and pregnancy_history|length > 0 %}
+                        <div class="clinical-section">
+                            <div class="collapsible-wrapper">
+                                <input id="toggle-pregnancy-history" class="toggle-input" type="checkbox">
+                                <label for="toggle-pregnancy-history" class="collapsible-label-title">
+                                    <div class="clinical-section-title-row">
+                                        <div class="clinical-section-title">
+                                            <i class="fa-solid fa-baby me-2"></i>
+                                            <span>Pregnancy History</span>
+                                        </div>
+                                        <div class="clinical-badge-container">
+                                            <span class="clinical-badge extended">{{ pregnancy_history|length }} Found</span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                                </label>
+                                <div class="collapsible-content-title">
+                                    <div class="content-inner-title">
+                                        <p class="mb-3 text-muted">Pregnancy Information: {{ pregnancy_history|length }} items found</p>
+                                        {% for pregnancy in pregnancy_history %}
+                                        <div class="pregnancy-card mb-3 p-3 border rounded bg-white">
+                                            <h6 class="pregnancy-title text-dark mb-2">
+                                                {% if pregnancy.name %}
+                                                    {{ pregnancy.name }}
+                                                {% else %}
+                                                    Pregnancy Record
+                                                {% endif %}
+                                            </h6>
+                                            {% if pregnancy.estimated_delivery_date %}
+                                            <div class="text-muted mb-1">
+                                                <i class="fa-solid fa-calendar me-1"></i>
+                                                <strong>Expected Delivery:</strong> {{ pregnancy.estimated_delivery_date }}
+                                            </div>
+                                            {% endif %}
+                                            {% if pregnancy.status %}
+                                            <div class="text-muted">
+                                                <i class="fa-solid fa-info-circle me-1"></i>
+                                                <strong>Status:</strong> {{ pregnancy.status }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    
+                        {# Social History Section #}
+                        {% if social_history and social_history|length > 0 %}
+                        <div class="clinical-section">
+                            <div class="collapsible-wrapper">
+                                <input id="toggle-social-history" class="toggle-input" type="checkbox">
+                                <label for="toggle-social-history" class="collapsible-label-title">
+                                    <div class="clinical-section-title-row">
+                                        <div class="clinical-section-title">
+                                            <i class="fa-solid fa-users me-2"></i>
+                                            <span>Social History</span>
+                                        </div>
+                                        <div class="clinical-badge-container">
+                                            <span class="clinical-badge extended">{{ social_history|length }} Found</span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                                </label>
+                                <div class="collapsible-content-title">
+                                    <div class="content-inner-title">
+                                        <p class="mb-3 text-muted">Social History: {{ social_history|length }} items found</p>
+                                        {% for social in social_history %}
+                                        <div class="social-history-card mb-3 p-3 border rounded bg-white">
+                                            <h6 class="social-item-title text-dark mb-2">
+                                                {% if social.name %}
+                                                    {{ social.name }}
+                                                {% elif social.code.displayName %}
+                                                    {{ social.code.displayName }}
+                                                {% else %}
+                                                    Social History Item
+                                                {% endif %}
+                                            </h6>
+                                            {% if social.value %}
+                                            <div class="text-muted mb-1">
+                                                <i class="fa-solid fa-info-circle me-1"></i>
+                                                <strong>Details:</strong> {{ social.value }}
+                                            </div>
+                                            {% endif %}
+                                            {% if social.effective_time %}
+                                            <div class="text-muted">
+                                                <i class="fa-solid fa-calendar me-1"></i>
+                                                <strong>Date:</strong> {{ social.effective_time }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    
+                        {# Laboratory Results Section #}
+                        {% if laboratory_results and laboratory_results|length > 0 %}
+                        <div class="clinical-section">
+                            <div class="collapsible-wrapper">
+                                <input id="toggle-laboratory-results" class="toggle-input" type="checkbox">
+                                <label for="toggle-laboratory-results" class="collapsible-label-title">
+                                    <div class="clinical-section-title-row">
+                                        <div class="clinical-section-title">
+                                            <i class="fa-solid fa-flask me-2"></i>
+                                            <span>Laboratory Results</span>
+                                        </div>
+                                        <div class="clinical-badge-container">
+                                            <span class="clinical-badge extended">{{ laboratory_results|length }} Found</span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                                </label>
+                                <div class="collapsible-content-title">
+                                    <div class="content-inner-title">
+                                        <p class="mb-3 text-muted">Lab Results: {{ laboratory_results|length }} items found</p>
+                                        {% for result in laboratory_results %}
+                                        <div class="lab-result-card mb-3 p-3 border rounded bg-white">
+                                            <h6 class="lab-test-name text-dark mb-2">
+                                                {% if result.name %}
+                                                    {{ result.name }}
+                                                {% elif result.code.displayName %}
+                                                    {{ result.code.displayName }}
+                                                {% else %}
+                                                    Laboratory Test
+                                                {% endif %}
+                                            </h6>
+                                            {% if result.value %}
+                                            <div class="text-muted mb-1">
+                                                <i class="fa-solid fa-chart-bar me-1"></i>
+                                                <strong>Result:</strong> {{ result.value }}
+                                                {% if result.unit %} {{ result.unit }}{% endif %}
+                                            </div>
+                                            {% endif %}
+                                            {% if result.reference_range %}
+                                            <div class="text-muted mb-1">
+                                                <i class="fa-solid fa-ruler me-1"></i>
+                                                <strong>Reference Range:</strong> {{ result.reference_range }}
+                                            </div>
+                                            {% endif %}
+                                            {% if result.effective_time %}
+                                            <div class="text-muted">
+                                                <i class="fa-solid fa-calendar me-1"></i>
+                                                <strong>Date:</strong> {{ result.effective_time }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    
+                        {# Advance Directives Section #}
+                        {% if advance_directives and advance_directives|length > 0 %}
+                        <div class="clinical-section">
+                            <div class="collapsible-wrapper">
+                                <input id="toggle-advance-directives" class="toggle-input" type="checkbox">
+                                <label for="toggle-advance-directives" class="collapsible-label-title">
+                                    <div class="clinical-section-title-row">
+                                        <div class="clinical-section-title">
+                                            <i class="fa-solid fa-file-contract me-2"></i>
+                                            <span>Advance Directives</span>
+                                        </div>
+                                        <div class="clinical-badge-container">
+                                            <span class="clinical-badge extended">{{ advance_directives|length }} Found</span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                                </label>
+                                <div class="collapsible-content-title">
+                                    <div class="content-inner-title">
+                                        <p class="mb-3 text-muted">Advance Directives: {{ advance_directives|length }} items found</p>
+                                        {% for directive in advance_directives %}
+                                        <div class="directive-card mb-3 p-3 border rounded bg-white">
+                                            <h6 class="directive-title text-dark mb-2">
+                                                {% if directive.name %}
+                                                    {{ directive.name }}
+                                                {% elif directive.code.displayName %}
+                                                    {{ directive.code.displayName }}
+                                                {% else %}
+                                                    Advance Directive
+                                                {% endif %}
+                                            </h6>
+                                            {% if directive.description %}
+                                            <div class="text-muted mb-1">
+                                                <i class="fa-solid fa-file-alt me-1"></i>
+                                                <strong>Description:</strong> {{ directive.description }}
+                                            </div>
+                                            {% endif %}
+                                            {% if directive.effective_time %}
+                                            <div class="text-muted">
+                                                <i class="fa-solid fa-calendar me-1"></i>
+                                                <strong>Effective Date:</strong> {{ directive.effective_time }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    
+                        {# Additional Sections (Dynamic) #}
+                        {% if additional_sections and additional_sections|length > 0 %}
+                        {% for section in additional_sections %}
+                        <div class="clinical-section">
+                            <div class="collapsible-wrapper">
+                                <input id="toggle-additional-{{ forloop.counter }}" class="toggle-input" type="checkbox">
+                                <label for="toggle-additional-{{ forloop.counter }}" class="collapsible-label-title">
+                                    <div class="clinical-section-title-row">
+                                        <div class="clinical-section-title">
+                                            <i class="fa-solid fa-file-medical me-2"></i>
+                                            <span>{{ section.title|default:"Additional Clinical Section" }}</span>
+                                        </div>
+                                        <div class="clinical-badge-container">
+                                            <span class="clinical-badge extended">Available</span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                                </label>
+                                <div class="collapsible-content-title">
+                                    <div class="content-inner-title">
+                                        <p class="mb-3 text-muted">{{ section.description|default:"Additional clinical information" }}</p>
+                                        <div class="additional-section-content">
+                                            {{ section.content|safe }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                    
+                    </div>
+                    {% endif %}
+                    
                 </div>
             </div>
         </div>
