@@ -38,6 +38,7 @@ from .services import EUPatientSearchService, PatientCredentials
 from .services.clinical_pdf_service import ClinicalDocumentPDFService
 from .services.section_processors import PatientSectionProcessor
 from .services.terminology_service import CentralTerminologyService
+from .services.history_of_past_illness_extractor import HistoryOfPastIllnessExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -158,7 +159,7 @@ def detect_extended_clinical_sections(comprehensive_data: dict) -> dict:
         "8716-3": "vital_signs",     # Vital Signs (could be extended)
         "47420-5": "functional_status",  # Functional Status
         "42348-3": "advance_directives",  # Advance Directives
-        "10164-2": "history_of_past_illness",  # History of Present Illness
+        "11348-0": "history_of_past_illness",  # History of Past Illness (corrected LOINC code)
         "57060-6": "pregnancy_history",  # Estimated date of delivery
         "30954-2": "laboratory_results",  # Relevant diagnostic tests
     }
@@ -4889,21 +4890,44 @@ def patient_cda_view(request, session_id, cda_type=None):
                     try:
                         if 'comprehensive_data' in locals() and comprehensive_data:
                             extended_sections = detect_extended_clinical_sections(comprehensive_data)
-                            context.update(extended_sections)
-                            
-                            total_extended = sum(len(sections) for sections in extended_sections.values())
-                            logger.info(f"[EXTENDED SECTIONS] Added {total_extended} extended clinical sections to context")
                         else:
-                            # Add empty extended sections for template compatibility
-                            context.update({
+                            # Initialize empty extended sections if no comprehensive_data
+                            extended_sections = {
                                 "history_of_past_illness": [],
-                                "immunizations": context.get("immunizations", []),  # Don't override existing
+                                "immunizations": [],
                                 "pregnancy_history": [],
                                 "social_history": [],
                                 "laboratory_results": [],
                                 "advance_directives": [],
                                 "additional_sections": []
-                            })
+                            }
+                            
+                        # HISTORY OF PAST ILLNESS SPECIALIZED EXTRACTION
+                        # This runs regardless of comprehensive_data status if we have raw CDA content
+                        try:
+                            if raw_cda_content:
+                                logger.info("[HISTORY OF PAST ILLNESS] Starting specialized extraction from raw CDA content")
+                                history_extractor = HistoryOfPastIllnessExtractor()
+                                history_entries = history_extractor.extract_history_of_past_illness(raw_cda_content)
+                                
+                                if history_entries:
+                                    # Override the history_of_past_illness with structured data
+                                    extended_sections["history_of_past_illness"] = history_entries
+                                    logger.info(f"[HISTORY OF PAST ILLNESS] Successfully extracted {len(history_entries)} structured entries")
+                                else:
+                                    logger.info("[HISTORY OF PAST ILLNESS] No history entries found in CDA document")
+                            else:
+                                logger.warning("[HISTORY OF PAST ILLNESS] No raw CDA content available for extraction")
+                                        
+                        except Exception as e:
+                            logger.warning(f"[HISTORY OF PAST ILLNESS] Extraction failed: {e}")
+                            # Keep existing detection if specialized extraction fails
+                        
+                        # UPDATE CONTEXT WITH EXTENDED SECTIONS (including History of Past Illness)
+                        context.update(extended_sections)
+                        
+                        total_extended = sum(len(sections) for sections in extended_sections.values())
+                        logger.info(f"[EXTENDED SECTIONS] Added {total_extended} extended clinical sections to context")
                     except Exception as e:
                         logger.warning(f"[EXTENDED SECTIONS] Failed to detect extended sections: {e}")
                         
@@ -4948,6 +4972,13 @@ def patient_cda_view(request, session_id, cda_type=None):
                 # Get comprehensive data from earlier processing (available in locals)
                 if 'comprehensive_data' in locals() and comprehensive_data:
                     extended_sections = detect_extended_clinical_sections(comprehensive_data)
+                    
+                    # PRESERVE SPECIALIZED EXTRACTIONS: Don't override if already populated by specialized extractors
+                    existing_history = context.get("history_of_past_illness", [])
+                    if existing_history:
+                        logger.info(f"[EXTENDED SECTIONS] Preserving existing History of Past Illness data ({len(existing_history)} entries)")
+                        extended_sections["history_of_past_illness"] = existing_history
+                    
                     context.update(extended_sections)
                     
                     total_extended = sum(len(sections) for sections in extended_sections.values())
@@ -4959,22 +4990,30 @@ def patient_cda_view(request, session_id, cda_type=None):
                             logger.info(f"[EXTENDED SECTIONS] {section_name}: {len(sections)} sections")
                 else:
                     # Add empty extended sections for template compatibility
-                    context.update({
-                        "history_of_past_illness": [],
+                    # PRESERVE SPECIALIZED EXTRACTIONS: Don't override if already populated
+                    empty_sections = {
+                        "history_of_past_illness": context.get("history_of_past_illness", []),  # Preserve existing
                         "immunizations": context.get("immunizations", []),  # Don't override if already exists
                         "pregnancy_history": [],
                         "social_history": [],
                         "laboratory_results": [],
                         "advance_directives": [],
                         "additional_sections": []
-                    })
-                    logger.info("[EXTENDED SECTIONS] No comprehensive data available, added empty extended sections")
+                    }
+                    context.update(empty_sections)
+                    
+                    # Log what we preserved
+                    preserved_history = len(context.get("history_of_past_illness", []))
+                    if preserved_history > 0:
+                        logger.info(f"[EXTENDED SECTIONS] No comprehensive data available, but preserved {preserved_history} History of Past Illness entries from specialized extraction")
+                    else:
+                        logger.info("[EXTENDED SECTIONS] No comprehensive data available, added empty extended sections")
                     
             except Exception as e:
                 logger.warning(f"[EXTENDED SECTIONS] Failed to detect extended sections: {e}")
-                # Add empty extended sections on error
+                # Add empty extended sections on error but preserve specialized extractions
                 context.update({
-                    "history_of_past_illness": [],
+                    "history_of_past_illness": context.get("history_of_past_illness", []),  # Preserve existing
                     "immunizations": context.get("immunizations", []),
                     "pregnancy_history": [],
                     "social_history": [],
@@ -4982,22 +5021,6 @@ def patient_cda_view(request, session_id, cda_type=None):
                     "advance_directives": [],
                     "additional_sections": []
                 })
-            else:
-                # No CDA content available - set empty arrays
-                context.update(
-                    {
-                        "medications": [],
-                        "allergies": [],
-                        "problems": [],
-                        "procedures": [],
-                        "vital_signs": [],
-                        "results": [],
-                        "immunizations": [],
-                    }
-                )
-                logger.info(
-                    f"[CLINICAL ARRAYS SESSION] No CDA content available for session {session_id}"
-                )
 
         except Exception as e:
             logger.warning(f"[CLINICAL ARRAYS SESSION] Clinical arrays extraction failed: {e}")
