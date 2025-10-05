@@ -5001,6 +5001,36 @@ def patient_cda_view(request, session_id, cda_type=None):
                         logger.info(f"[EXTENDED SECTIONS] Preserving existing History of Past Illness data ({len(existing_history)} entries)")
                         extended_sections["history_of_past_illness"] = existing_history
                     
+                    # IMMUNIZATIONS SPECIALIZED EXTRACTION (Path 2 - when medications already exist)
+                    # This runs when the clinical arrays block was skipped due to existing medications
+                    try:
+                        # Get the raw CDA content for immunizations extraction
+                        raw_cda_content = None
+                        if actual_cda_type == "L3":
+                            raw_cda_content = search_result.l3_cda_content
+                        elif actual_cda_type == "L1":
+                            raw_cda_content = search_result.l1_cda_content
+                        else:
+                            raw_cda_content = search_result.l3_cda_content or search_result.l1_cda_content or search_result.cda_content
+                            
+                        if raw_cda_content:
+                            logger.info("[IMMUNIZATIONS PATH2] Starting specialized extraction from raw CDA content")
+                            from .services.immunizations_extractor import ImmunizationsExtractor
+                            immunizations_extractor = ImmunizationsExtractor()
+                            immunization_entries = immunizations_extractor.extract_immunizations(raw_cda_content)
+                            
+                            if immunization_entries:
+                                # Override the immunizations with structured data
+                                extended_sections["immunizations"] = immunization_entries
+                                logger.info(f"[IMMUNIZATIONS PATH2] Successfully extracted {len(immunization_entries)} structured entries")
+                            else:
+                                logger.info("[IMMUNIZATIONS PATH2] No immunization entries found in CDA document")
+                        else:
+                            logger.warning("[IMMUNIZATIONS PATH2] No raw CDA content available for extraction")
+                    except Exception as e:
+                        logger.warning(f"[IMMUNIZATIONS PATH2] Extraction failed: {e}")
+                        # Keep existing detection if specialized extraction fails
+                    
                     context.update(extended_sections)
                     
                     total_extended = sum(len(sections) for sections in extended_sections.values())

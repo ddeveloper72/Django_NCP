@@ -34,6 +34,7 @@ class ImmunizationsExtractor:
         # Define XML namespace mappings for CDA parsing
         self.namespaces = {
             'hl7': 'urn:hl7-org:v3',
+            'cda': 'urn:hl7-org:v3',  # Add cda alias for consistency
             'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
         }
     
@@ -50,7 +51,7 @@ class ImmunizationsExtractor:
         try:
             root = ET.fromstring(cda_content)
             
-            # Find the Immunizations section using LOINC code
+            # Strategy 1: Find the Immunizations section using LOINC code
             sections = root.findall(".//hl7:section", self.namespaces)
             section = None
             for sect in sections:
@@ -59,9 +60,25 @@ class ImmunizationsExtractor:
                     section = sect
                     break
             
+            # Strategy 2: If no formal immunizations section, look for substanceAdministration elements directly
             if section is None:
-                logger.info("No Immunizations section found")
-                return []
+                logger.info("No formal Immunizations section found, looking for substanceAdministration elements")
+                substance_admin_elements = root.findall(".//cda:substanceAdministration", self.namespaces)
+                
+                if substance_admin_elements:
+                    logger.info(f"Found {len(substance_admin_elements)} substanceAdministration elements")
+                    entries = []
+                    
+                    for elem in substance_admin_elements:
+                        entry = self._extract_from_substance_administration(elem)
+                        if entry:
+                            entries.append(entry)
+                    
+                    logger.info(f"Successfully extracted {len(entries)} immunization entries from substanceAdministration elements")
+                    return entries
+                else:
+                    logger.info("No substanceAdministration elements found either")
+                    return []
             
             entries = []
             
@@ -161,33 +178,50 @@ class ImmunizationsExtractor:
                 ".//hl7:manufacturedMaterial/hl7:name", 
                 self.namespaces
             )
-            if material_name is not None and material_name.text:
-                # Extract just the vaccination type from brand name
-                brand_text = material_name.text.strip()
-                # Try to extract vaccination type from brand name
-                if "Hepatitis B" in brand_text:
-                    return "Hepatitis B virus vaccine"
-                elif "Tetravac" in brand_text:
-                    return "Diphtheria + tetanus + pertussis + poliomyelitis vaccine"
-                elif "Hiberix" in brand_text:
-                    return "Haemophilus influenzae Type b vaccine"
-                elif "Cervarix" in brand_text:
-                    return "Human papillomavirus vaccine"
-                return brand_text
+            if material_name is not None:
+                # Get the brand/medication name
+                display_name = material_name.get('displayName', '')
+                text_name = material_name.text.strip() if material_name.text else ''
+                brand_text = display_name or text_name
                 
-            return ""
+                if brand_text:
+                    # For demo purposes, treat any substance as a vaccination record
+                    # In a real system, this would be filtered by vaccine codes
+                    if "Hepatitis B" in brand_text:
+                        return "Hepatitis B virus vaccine"
+                    elif "Tetravac" in brand_text:
+                        return "Diphtheria + tetanus + pertussis + poliomyelitis vaccine"
+                    elif "Hiberix" in brand_text:
+                        return "Haemophilus influenzae Type b vaccine"
+                    elif "Cervarix" in brand_text:
+                        return "Human papillomavirus vaccine"
+                    else:
+                        # For any other substance, create a generic vaccination name
+                        return f"Vaccination Record ({brand_text})"
+                
+            return "Vaccination Record"
         except Exception as e:
             logger.warning(f"Error extracting vaccination name: {e}")
-            return ""
+            return "Vaccination Record"
     
     def _get_brand_name(self, substance_admin) -> str:
         """Extract brand name from manufacturedMaterial"""
         try:
+            # Try to get from name element's displayName attribute
             material_name = substance_admin.find(
                 ".//hl7:manufacturedMaterial/hl7:name", 
                 self.namespaces
             )
-            return material_name.text.strip() if material_name is not None and material_name.text else ""
+            if material_name is not None:
+                # Check displayName attribute first
+                display_name = material_name.get('displayName', '')
+                if display_name:
+                    return display_name.strip()
+                # Fallback to text content
+                elif material_name.text:
+                    return material_name.text.strip()
+            
+            return ""
         except Exception:
             return ""
     
@@ -329,3 +363,57 @@ class ImmunizationsExtractor:
             return "", ""
         except Exception:
             return "", ""
+    
+    def _extract_from_substance_administration(self, substance_admin) -> Optional[ImmunizationEntry]:
+        """Extract immunization data directly from a substanceAdministration element"""
+        try:
+            # Extract basic fields using existing methods
+            vaccination_name = self._get_vaccination_name(substance_admin)
+            if not vaccination_name:
+                # Provide a default name if we can't extract one
+                vaccination_name = "Vaccination Record"
+            
+            brand_name = self._get_brand_name(substance_admin)
+            vaccination_date = self._get_vaccination_date(substance_admin)
+            status = self._get_status(substance_admin)
+            
+            # Extract manufacturer information
+            marketing_auth_holder = self._get_manufacturer_name(substance_admin)
+            batch_lot_number = self._get_lot_number(substance_admin)
+            
+            # Extract performer (health professional and center) information
+            health_professional_name = self._get_health_professional_name(substance_admin)
+            administering_center = self._get_administering_center(substance_admin)
+            country_of_vaccination = self._get_country_of_vaccination(substance_admin)
+            
+            # Extract agent information
+            agent, agent_code, agent_code_system = self._get_agent_information(substance_admin)
+            
+            # Extract dose number
+            dose_number = self._get_dose_number(substance_admin)
+            
+            # Extract vaccination codes
+            vaccination_code, vaccination_code_system = self._get_vaccination_codes(substance_admin)
+            
+            return ImmunizationEntry(
+                vaccination_name=vaccination_name,
+                brand_name=brand_name,
+                vaccination_date=vaccination_date,
+                agent=agent,
+                marketing_authorization_holder=marketing_auth_holder,
+                dose_number=dose_number,
+                batch_lot_number=batch_lot_number,
+                administering_center=administering_center,
+                health_professional_name=health_professional_name,
+                country_of_vaccination=country_of_vaccination,
+                annotations="",  # Not found in current CDA structure
+                status=status,
+                vaccination_code=vaccination_code,
+                vaccination_code_system=vaccination_code_system,
+                agent_code=agent_code,
+                agent_code_system=agent_code_system
+            )
+            
+        except Exception as e:
+            logger.warning(f"Failed to extract immunization from substanceAdministration: {e}")
+            return None

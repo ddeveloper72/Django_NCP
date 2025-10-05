@@ -1555,14 +1555,14 @@
                                         <div class="d-lg-none">
                                             <div class="immunization-cards">
                                                 {% for immunization in immunizations %}
-                                                <div class="card mb-3 border-{{ immunization.status|default:'secondary' == 'completed'|yesno:'success,warning' }}">
-                                                    <div class="card-header bg-{{ immunization.status|default:'secondary' == 'completed'|yesno:'success,warning' }} bg-opacity-10">
+                                                <div class="card mb-3 border-{% if immunization.status == 'completed' %}success{% else %}warning{% endif %}">
+                                                    <div class="card-header bg-{% if immunization.status == 'completed' %}success{% else %}warning{% endif %} bg-opacity-10">
                                                         <div class="d-flex justify-content-between align-items-start">
                                                             <h6 class="card-title mb-1 fw-bold text-dark">
                                                                 <i class="fa-solid fa-syringe me-2 text-primary"></i>
                                                                 {{ immunization.vaccination_name }}
                                                             </h6>
-                                                            <span class="badge bg-{{ immunization.status|default:'secondary' == 'completed'|yesno:'success,warning' }}">
+                                                            <span class="badge bg-{% if immunization.status == 'completed' %}success{% else %}warning{% endif %}">
                                                                 {{ immunization.status|default:'Unknown'|title }}
                                                             </span>
                                                         </div>
@@ -1761,7 +1761,7 @@
                                                                 {% endif %}
                                                             </td>
                                                             <td>
-                                                                <span class="badge bg-{{ immunization.status|default:'secondary' == 'completed'|yesno:'success,warning' }}">
+                                                                <span class="badge bg-{% if immunization.status == 'completed' %}success{% else %}warning{% endif %}">
                                                                     {{ immunization.status|default:'Unknown'|title }}
                                                                 </span>
                                                             </td>
@@ -1831,52 +1831,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                            <div class="collapsible-wrapper">
-                                <input id="toggle-immunizations" class="toggle-input" type="checkbox">
-                                <label for="toggle-immunizations" class="collapsible-label-title">
-                                    <div class="clinical-section-title-row">
-                                        <div class="clinical-section-title">
-                                            <i class="fa-solid fa-syringe me-2"></i>
-                                            <span>Immunizations</span>
-                                        </div>
-                                        <div class="clinical-badge-container">
-                                            <span class="clinical-badge extended">{{ immunizations|length }} Found</span>
-                                        </div>
-                                    </div>
-                                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
-                                </label>
-                                <div class="collapsible-content-title">
-                                    <div class="content-inner-title">
-                                        <p class="mb-3 text-muted">Vaccination History: {{ immunizations|length }} items found</p>
-                                        {% for immunization in immunizations %}
-                                        <div class="immunization-card mb-3 p-3 border rounded bg-white">
-                                            <h6 class="vaccine-name text-dark mb-2">
-                                                {% if immunization.name %}
-                                                    {{ immunization.name }}
-                                                {% elif immunization.code.displayName %}
-                                                    {{ immunization.code.displayName }}
-                                                {% else %}
-                                                    Vaccination
-                                                {% endif %}
-                                            </h6>
-                                            {% if immunization.administration_date %}
-                                            <div class="text-muted mb-1">
-                                                <i class="fa-solid fa-calendar me-1"></i>
-                                                <strong>Administered:</strong> {{ immunization.administration_date }}
-                                            </div>
-                                            {% endif %}
-                                            {% if immunization.status %}
-                                            <div class="text-muted">
-                                                <i class="fa-solid fa-check-circle me-1"></i>
-                                                <strong>Status:</strong> {{ immunization.status }}
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                        {% endfor %}
                                     </div>
                                 </div>
                             </div>
