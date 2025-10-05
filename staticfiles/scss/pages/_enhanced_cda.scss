@@ -70,6 +70,39 @@
   width: 100%;
   min-height: 300px; // Ensure container height
   position: relative;
+  overflow: hidden; // Ensure content doesn't escape
+  contain: layout; // CSS containment to prevent layout issues
+}
+
+// Force proper containment for clinical tab content
+.clinical-section {
+  width: 100%;
+  overflow: hidden; // Prevent content from escaping the section
+  contain: layout style; // CSS containment
+  position: relative;
+  
+  .clinical-tab-content {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden; // Prevent horizontal overflow
+    contain: layout; // Contain layout calculations
+    
+    // Ensure inactive tabs are completely hidden
+    &:not(.active) {
+      display: none !important;
+      visibility: hidden;
+      position: absolute;
+      left: -9999px; // Move off-screen as additional precaution
+    }
+    
+    &.active {
+      display: block !important;
+      visibility: visible;
+      position: relative;
+      left: auto;
+    }
+  }
 }
 
 // Responsive design for tabs
@@ -641,11 +674,28 @@ main {
 .card-header.bg-dark:hover .far,
 .card-header.bg-dark:hover .fal,
 .card-header.bg-dark:hover .fab,
-.card-header.bg-dark:hover .fa {
+.card-header.bg-dark:hover .fa,
+.card-header.bg-teal:hover i,
+.card-header.bg-teal:hover .fa-solid,
+.card-header.bg-teal:hover .far,
+.card-header.bg-teal:hover .fal,
+.card-header.bg-teal:hover .fab,
+.card-header.bg-teal:hover .fa {
   color: var(--healthcare-text-light) !important;
   fill: var(--healthcare-text-light) !important;
   transform: none !important;
   transition: none !important;
+}
+
+// Specific override for clinical section collapsible labels
+.collapsible-label-title:hover i,
+.collapsible-label-title:hover .fa-solid,
+.collapsible-label-title:hover .fa-regular,
+.collapsible-label-title:hover .fa-light,
+.collapsible-label-title:hover .fa-brands {
+  color: white !important;
+  fill: white !important;
+  transform: none !important;
 }
 
 // Mobile-first responsive design for card headers

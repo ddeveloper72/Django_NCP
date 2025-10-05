@@ -119,3 +119,117 @@ window.addEventListener('hashchange', handleHashChange);
 if (window.location.hash) {
     setTimeout(handleHashChange, 100);
 }
+
+/**
+ * Pregnancy History Tab Navigation
+ * Handles mobile-first tab switching for pregnancy history section
+ */
+function initializePregnancyHistoryTabs() {
+    const pregnancyTabBtns = document.querySelectorAll('.pregnancy-tab-btn');
+    const pregnancyTabPanes = document.querySelectorAll('.pregnancy-tab-pane');
+
+    if (pregnancyTabBtns.length === 0) return;
+
+    pregnancyTabBtns.forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetTab = this.getAttribute('data-tab');
+
+            // Remove active class from all buttons and panes
+            pregnancyTabBtns.forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+            });
+            pregnancyTabPanes.forEach(p => p.classList.remove('active'));
+
+            // Add active class to clicked button and corresponding pane
+            this.classList.add('active');
+            this.setAttribute('aria-selected', 'true');
+            const targetPane = document.getElementById(targetTab);
+            if (targetPane) {
+                targetPane.classList.add('active');
+            }
+
+            // Announce change to screen readers
+            const announcement = `Switched to ${this.textContent.trim()} tab`;
+            announceToScreenReader(announcement);
+        });
+
+        // Handle keyboard navigation
+        btn.addEventListener('keydown', function (e) {
+            let nextBtn = null;
+
+            switch (e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                    e.preventDefault();
+                    nextBtn = this.nextElementSibling || pregnancyTabBtns[0];
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    e.preventDefault();
+                    nextBtn = this.previousElementSibling || pregnancyTabBtns[pregnancyTabBtns.length - 1];
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    nextBtn = pregnancyTabBtns[0];
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    nextBtn = pregnancyTabBtns[pregnancyTabBtns.length - 1];
+                    break;
+            }
+
+            if (nextBtn) {
+                nextBtn.focus();
+                nextBtn.click();
+            }
+        });
+    });
+}
+
+/**
+ * Announce changes to screen readers
+ */
+function announceToScreenReader(message) {
+    const announcement = document.createElement('div');
+    announcement.setAttribute('aria-live', 'polite');
+    announcement.setAttribute('aria-atomic', 'true');
+    announcement.className = 'sr-only';
+    announcement.textContent = message;
+
+    document.body.appendChild(announcement);
+
+    // Remove after announcement
+    setTimeout(() => {
+        document.body.removeChild(announcement);
+    }, 1000);
+}
+
+// Initialize pregnancy history tabs when DOM is ready
+document.addEventListener('DOMContentLoaded', function () {
+    initializePregnancyHistoryTabs();
+});
+
+// Re-initialize if content is dynamically loaded
+const observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+        if (mutation.type === 'childList') {
+            const addedNodes = Array.from(mutation.addedNodes);
+            const hasPregnancyTabs = addedNodes.some(node =>
+                node.nodeType === 1 &&
+                (node.classList?.contains('pregnancy-tabs-container') ||
+                    node.querySelector?.('.pregnancy-tabs-container'))
+            );
+
+            if (hasPregnancyTabs) {
+                setTimeout(initializePregnancyHistoryTabs, 100);
+            }
+        }
+    });
+});
+
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
+});

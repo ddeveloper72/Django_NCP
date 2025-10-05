@@ -1104,30 +1104,16 @@ h6 {
   font-weight: var(--healthcare-heading-weight);
 }
 
-/* Healthcare Badge Styling */
+/* Healthcare Badge Styling - See _badges-and-animations.scss for complete badge system */
 .badge {
   border-radius: 4px;
   font-weight: 500;
   letter-spacing: 0.5px;
 }
 
-.badge.bg-primary {
-  background-color: var(--healthcare-blue) !important;
-}
-
-.badge.bg-success {
-  background-color: var(--healthcare-green) !important;
-}
-
-.badge.bg-warning {
-  background-color: var(--healthcare-orange) !important;
-}
-
-.badge.bg-danger {
-  background-color: var(--healthcare-red) !important;
-}
-
-/* Language Flag Badge Styling */
+/* Note: Badge colors are now centrally managed in _badges-and-animations.scss */
+/* The following styles override specific badge types for healthcare theming */
+/* Language Flag Badge Styling - Special case for enhanced visual appeal */
 .badge.bg-info {
   background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
   color: white !important;
@@ -2985,6 +2971,14 @@ body nav .badge:hover i.fa-user-injured,
   color: #4a5568 !important;
   font-weight: 500;
 }
+.card .d-flex .text-muted.fa-solid {
+  font-weight: 900 !important;
+}
+
+/* Fix missing Font Awesome chevron-right icon definition */
+.fa-chevron-right::before {
+  content: "\f054" !important;
+}
 
 /* Fix 3: Selected Tab Button Text Contrast and Icon Color Issues */
 /* Override washed out active tab styling with darker text */
@@ -3017,6 +3011,34 @@ body nav .badge:hover i.fa-user-injured,
 
 /* Unselected tab button styling removed - using Enhanced CDA approach */
 /* Badge styling is now handled by static/scss/pages/_enhanced_cda.scss */
+/* Stop ALL icon color changes on hover for clinical sections */
+.collapsible-label-title:hover i,
+.collapsible-label-title:hover .fa-solid,
+.collapsible-label-title:hover .fa-regular,
+.collapsible-label-title:hover .fa-light,
+.collapsible-label-title:hover .fa-brands,
+.collapsible-label-title i:hover,
+.collapsible-label-title .fa-solid:hover,
+.collapsible-label-title .fa-regular:hover,
+.collapsible-label-title .fa-light:hover,
+.collapsible-label-title .fa-brands:hover {
+  color: white !important;
+  fill: white !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Override any global hover effects specifically for clinical sections */
+.clinical-section .collapsible-label-title:hover i,
+.clinical-section .collapsible-label-title:hover .fa-solid,
+.clinical-section .collapsible-label-title:hover .fa-regular,
+.clinical-section .collapsible-label-title:hover .fa-light,
+.clinical-section .collapsible-label-title:hover .fa-brands {
+  color: white !important;
+  fill: white !important;
+  transform: none !important;
+}
+
 /* Performance & Accessibility Enhancements */
 /* Lazy loading image transitions */
 img[data-src] {
@@ -8445,30 +8467,167 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   background-color: #f59e0b;
 }
 
+.badge,
+.badge-primary,
+.badge-secondary,
+.badge-success,
+.badge-danger,
+.badge-warning,
+.badge-info,
+.badge-light,
+.badge-dark {
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  padding: 0.25em 0.6em !important;
+  font-size: 0.75em !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  vertical-align: baseline !important;
+  border-radius: 0.375rem !important;
+}
+
+.tab-button .badge {
+  align-self: center !important;
+  margin-top: 0 !important;
+  margin-left: 0.5rem !important;
+  vertical-align: middle !important;
+}
+
+.nav-tabs-healthcare .nav-link .badge {
+  align-self: center !important;
+  margin-left: 0.5rem !important;
+}
+
+.card .nav-tabs-healthcare .nav-link .badge {
+  align-self: center !important;
+  margin-left: 0.5rem !important;
+}
+
+.clinical-table .medical-codes-container .badge,
+.clinical-table .badge {
+  margin: 0.125rem !important;
+  font-size: 0.7rem !important;
+}
+
+.clinical-accordion-item .accordion-button .badge {
+  margin-left: auto !important;
+  align-self: center !important;
+}
+
 .badge.bg-primary {
-  background-color: #0d6efd !important;
+  background-color: var(--healthcare-blue, #0d6efd) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
 }
 .badge.bg-success {
-  background-color: #198754 !important;
+  background-color: var(--healthcare-success, #198754) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
 }
 .badge.bg-warning {
-  background-color: #fd7e14 !important;
+  background-color: var(--healthcare-warning, #fd7e14) !important;
+  color: var(--healthcare-text-dark, #000000) !important;
 }
 .badge.bg-danger {
-  background-color: #dc3545 !important;
+  background-color: var(--healthcare-danger, #dc3545) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
 }
 .badge.bg-info {
-  background-color: #0dcaf0 !important;
+  background-color: var(--healthcare-info, #0dcaf0) !important;
+  color: var(--healthcare-text-dark, #000000) !important;
 }
 .badge.bg-secondary {
-  background-color: #6c757d !important;
+  background-color: var(--healthcare-secondary, #6c757d) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
 }
 .badge.bg-dark {
-  background-color: #212529 !important;
+  background-color: var(--healthcare-dark, #212529) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
+}
+.badge.bg-light {
+  background-color: var(--healthcare-light, #f8f9fa) !important;
+  color: var(--healthcare-text-dark, #000000) !important;
+  border: 1px solid var(--healthcare-border, #dee2e6) !important;
 }
 .badge.bg-outline-secondary {
-  color: #6c757d !important;
-  border-color: #6c757d !important;
+  color: var(--healthcare-secondary, #6c757d) !important;
+  border: 1px solid var(--healthcare-secondary, #6c757d) !important;
+  background-color: transparent !important;
+}
+
+.badge:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.tab-button.active .badge {
+  background-color: var(--healthcare-blue, #0d6efd) !important;
+  color: var(--healthcare-text-light, #ffffff) !important;
+  border: 2px solid var(--healthcare-text-light, #ffffff) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.card-header.bg-primary .badge {
+  background-color: var(--healthcare-text-light, #ffffff) !important;
+  color: var(--healthcare-blue, #0d6efd) !important;
+  border: 1px solid var(--healthcare-blue, #0d6efd) !important;
+}
+
+@media (max-width: 576px) {
+  .badge {
+    font-size: 0.65em !important;
+    padding: 0.2em 0.4em !important;
+  }
+  .clinical-table .badge {
+    font-size: 0.6rem !important;
+    padding: 0.15em 0.3em !important;
+  }
+  .tab-button .badge {
+    font-size: 0.7em !important;
+    margin-left: 0.3rem !important;
+  }
+}
+@media (min-width: 1200px) {
+  .badge {
+    font-size: 0.8em !important;
+  }
+  .clinical-table .badge {
+    font-size: 0.75rem !important;
+  }
+}
+.badge-rounded {
+  border-radius: 50px !important;
+}
+
+.badge-square {
+  border-radius: 0.25rem !important;
+}
+
+.badge-large {
+  font-size: 0.9em !important;
+  padding: 0.375em 0.75em !important;
+}
+
+.badge-small {
+  font-size: 0.65em !important;
+  padding: 0.2em 0.4em !important;
+}
+
+.badge-xs {
+  font-size: 0.55em !important;
+  padding: 0.15em 0.3em !important;
+}
+
+.badge-icon .badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+}
+.badge-icon .badge i {
+  font-size: 0.9em !important;
+  line-height: 1 !important;
 }
 
 @keyframes fadeIn {
@@ -8493,6 +8652,85 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 }
 .badge .flag-icon {
   margin-right: 4px;
+}
+
+.clinical-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.375rem;
+  border: 1px solid transparent;
+}
+.clinical-badge.mandatory {
+  background-color: #fff3cd;
+  border-color: #f0ad4e;
+  color: #856404;
+}
+.clinical-badge.mandatory::before {
+  content: "⚠️ ";
+  margin-right: 0.25rem;
+}
+.clinical-badge.populated {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+.clinical-badge.populated::before {
+  content: "✓ ";
+  margin-right: 0.25rem;
+}
+.clinical-badge.extended {
+  background-color: #e7f3ff;
+  border-color: #b8daff;
+  color: #004085;
+}
+.clinical-badge.extended::before {
+  content: "⊕ ";
+  margin-right: 0.25rem;
+}
+
+.clinical-section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.clinical-section-title {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.clinical-group-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 1rem 0;
+}
+.clinical-group-header h5 {
+  color: #495057;
+  font-weight: 600;
+  margin: 0;
+  font-size: 1rem;
+}
+.clinical-group-header h5::before {
+  content: "📋 ";
+  margin-right: 0.5rem;
+}
+.clinical-group-header.extended-group h5::before {
+  content: "⊕ ";
+}
+
+.clinical-badge-container {
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .fa.fa-xs,
@@ -9008,7 +9246,6 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 }
 
 .hero-badge .badge {
-  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   position: relative !important;
@@ -9024,7 +9261,6 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   transform: none !important;
   text-align: center !important;
   vertical-align: middle !important;
-  flex-shrink: 0 !important;
 }
 .hero-badge .badge i {
   font-size: 1.2em !important;
@@ -9166,7 +9402,6 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .badge-info,
 .badge-light,
 .badge-dark {
-  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   position: relative !important;
@@ -9190,7 +9425,6 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   transform: none !important;
   text-align: center !important;
   vertical-align: middle !important;
-  flex-shrink: 0 !important;
 }
 .badge i.fa, .badge i.fas, .badge i.far, .badge i.fal, .badge i.fat, .badge i.fad, .badge i.fab, .badge i[class*=fa-],
 .badge-primary i.fa,
@@ -11225,6 +11459,17 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
     display: none !important;
   }
 }
+:root {
+  --hover-overlay-light: rgba(0, 0, 0, 0.04);
+  --pressed-overlay-light: rgba(0, 0, 0, 0.08);
+  --focus-overlay-light: rgba(0, 95, 95, 0.12);
+  --hover-overlay-dark: rgba(255, 255, 255, 0.08);
+  --pressed-overlay-dark: rgba(255, 255, 255, 0.16);
+  --focus-overlay-dark: rgba(0, 95, 95, 0.20);
+  --ease-out-hover: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-focus: cubic-bezier(0.23, 1, 0.320, 1);
+}
+
 .clinical-section-header-optimized {
   display: flex;
   align-items: center;
@@ -11257,17 +11502,22 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 }
 .clinical-section-header-optimized .header-tab-controls .header-tab-button {
   background: #f7fafc;
+  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0));
   border: 1px solid #e2e8f0;
   border-radius: 0.25rem;
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
   color: #6c757d;
   cursor: pointer;
-  transition: all 0.2s ease;
+  position: relative;
+  transition: background-image 0.3s ease, color 0.3s ease;
 }
-.clinical-section-header-optimized .header-tab-controls .header-tab-button:hover {
-  background: #e2e8f0;
+.clinical-section-header-optimized .header-tab-controls .header-tab-button:hover:not(.active) {
+  background-image: linear-gradient(var(--hover-overlay-light), var(--hover-overlay-light));
   color: #2d3748;
+}
+.clinical-section-header-optimized .header-tab-controls .header-tab-button:active:not(.active) {
+  background-image: linear-gradient(var(--pressed-overlay-light), var(--pressed-overlay-light));
 }
 .clinical-section-header-optimized .header-tab-controls .header-tab-button.active {
   background: #085a9f;
@@ -11333,8 +11583,14 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   vertical-align: top;
   border-bottom: 1px solid #e2e8f0;
 }
+.clinical-accordion-content-optimized .clinical-content-direct .clinical-table-optimized .table tbody tr {
+  transition: background-color 0.1s var(--ease-out-hover);
+}
 .clinical-accordion-content-optimized .clinical-content-direct .clinical-table-optimized .table tbody tr:hover {
-  background: #f7fafc;
+  background: rgba(0, 95, 95, 0.02);
+}
+.clinical-accordion-content-optimized .clinical-content-direct .clinical-table-optimized .table.medical-data-table tbody tr:hover {
+  background: transparent;
 }
 .clinical-accordion-content-optimized .clinical-content-direct .clinical-cards-container-optimized .clinical-card {
   border: 1px solid #e2e8f0;
@@ -11677,6 +11933,784 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
     min-height: 2rem;
   }
 }
+.medical-problems-table-container {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.medical-problems-table-container .medical-problems-table {
+  margin-bottom: 0;
+}
+.medical-problems-table-container .medical-problems-table thead {
+  background: linear-gradient(135deg, #085a9f, rgb(5.5568862275, 62.5149700599, 110.4431137725));
+}
+.medical-problems-table-container .medical-problems-table thead th {
+  border: none;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 1rem;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.medical-problems-table-container .medical-problems-table thead th i {
+  opacity: 0.9;
+  font-size: 0.85rem;
+}
+.medical-problems-table-container .medical-problems-table thead th:first-child {
+  border-top-left-radius: 0.375rem;
+}
+.medical-problems-table-container .medical-problems-table thead th:last-child {
+  border-top-right-radius: 0.375rem;
+}
+.medical-problems-table-container .medical-problems-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.2s ease;
+}
+.medical-problems-table-container .medical-problems-table tbody tr:hover {
+  background-color: #f7fafc;
+}
+.medical-problems-table-container .medical-problems-table tbody tr:hover .status-badge i,
+.medical-problems-table-container .medical-problems-table tbody tr:hover .status-badge .fa-solid,
+.medical-problems-table-container .medical-problems-table tbody tr:hover .status-badge .fa-regular,
+.medical-problems-table-container .medical-problems-table tbody tr:hover .status-badge .fa-light,
+.medical-problems-table-container .medical-problems-table tbody tr:hover .status-badge .fa-brands {
+  color: white !important;
+}
+.medical-problems-table-container .medical-problems-table tbody tr:last-child {
+  border-bottom: none;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td {
+  padding: 1rem;
+  vertical-align: top;
+  border: none;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-name-cell {
+  min-width: 200px;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-name-cell .problem-title {
+  font-size: 1rem;
+  line-height: 1.3;
+  margin-bottom: 0.25rem;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-name-cell .problem-code {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-name-cell .problem-code i {
+  opacity: 0.7;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-type-cell {
+  min-width: 140px;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-type-cell .badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-type-cell .small {
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-time-cell {
+  min-width: 120px;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-time-cell .time-info {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #085a9f;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-time-cell .end-time {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-status-cell {
+  min-width: 100px;
+  text-align: center;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-status-cell .status-badge {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-status-cell .status-badge i {
+  font-size: 0.75rem;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-severity-cell {
+  min-width: 100px;
+  text-align: center;
+}
+.medical-problems-table-container .medical-problems-table tbody tr td.problem-severity-cell .severity-badge {
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 1199px) {
+  .medical-problems-table-container .medical-problems-table {
+    font-size: 0.9rem;
+  }
+  .medical-problems-table-container .medical-problems-table thead th {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td {
+    padding: 0.5rem 1rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-name-cell .problem-title {
+    font-size: 0.95rem;
+  }
+}
+@media (max-width: 767px) {
+  .medical-problems-table-container .table-responsive {
+    border-radius: 0.375rem;
+  }
+  .medical-problems-table-container .medical-problems-table {
+    font-size: 0.8rem;
+  }
+  .medical-problems-table-container .medical-problems-table thead th {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  .medical-problems-table-container .medical-problems-table thead th i {
+    display: none;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td {
+    padding: 0.5rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-name-cell {
+    min-width: 150px;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-name-cell .problem-title {
+    font-size: 0.9rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-name-cell .problem-code {
+    font-size: 0.75rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-type-cell {
+    min-width: 100px;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-type-cell .badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-status-cell .status-badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+  }
+  .medical-problems-table-container .medical-problems-table tbody td.problem-severity-cell .severity-badge {
+    font-size: 0.8rem;
+  }
+}
+.medical-problems-table .badge.bg-success {
+  background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+  color: white !important;
+}
+.medical-problems-table .badge.bg-info {
+  background: linear-gradient(135deg, #007b7f, #005b5f) !important;
+  color: white !important;
+}
+.medical-problems-table .badge.bg-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+}
+.medical-problems-table .badge.bg-danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  color: white !important;
+}
+.medical-problems-table .badge.bg-secondary {
+  background: linear-gradient(135deg, #2d5a27, #4a7c59) !important;
+  color: white !important;
+}
+.medical-problems-table .status-badge {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.medical-problems-table .status-badge i,
+.medical-problems-table .status-badge .fa-solid,
+.medical-problems-table .status-badge .fa-regular,
+.medical-problems-table .status-badge .fa-light,
+.medical-problems-table .status-badge .fa-brands {
+  color: white !important;
+}
+.medical-problems-table .status-badge i:hover,
+.medical-problems-table .status-badge .fa-solid:hover,
+.medical-problems-table .status-badge .fa-regular:hover,
+.medical-problems-table .status-badge .fa-light:hover,
+.medical-problems-table .status-badge .fa-brands:hover {
+  color: white !important;
+  transform: none !important;
+  transition: none !important;
+}
+.medical-problems-table .status-badge:hover i,
+.medical-problems-table .status-badge:hover .fa-solid,
+.medical-problems-table .status-badge:hover .fa-regular,
+.medical-problems-table .status-badge:hover .fa-light,
+.medical-problems-table .status-badge:hover .fa-brands {
+  color: white !important;
+}
+.medical-problems-table .severity-badge.text-danger {
+  color: #dc2626 !important;
+  text-shadow: 0 1px 2px rgba(220, 38, 38, 0.3);
+}
+.medical-problems-table .severity-badge.text-warning {
+  color: #d97706 !important;
+  text-shadow: 0 1px 2px rgba(245, 158, 11, 0.3);
+}
+.medical-problems-table .severity-badge.text-success {
+  color: #16a34a !important;
+  text-shadow: 0 1px 2px rgba(34, 197, 94, 0.3);
+}
+
+.problem-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+.problem-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: #dc2626;
+}
+.problem-card .problem-header .problem-name-section .problem-name {
+  color: #dc2626;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.problem-card .problem-header .problem-name-section .problem-name i {
+  color: #f59e0b;
+}
+.problem-card .problem-header .problem-name-section .problem-code {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+.problem-card .problem-header .problem-name-section .problem-code .fa-barcode {
+  color: #1e3a5f;
+}
+.problem-card .problem-header .problem-status-section .badge {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+}
+.problem-card .problem-header .problem-status-section .badge i {
+  margin-right: 0.25rem;
+}
+.problem-card .problem-field .field-header {
+  margin-bottom: 0.5rem;
+}
+.problem-card .problem-field .field-header i {
+  font-size: 1.1rem;
+}
+.problem-card .problem-field .field-header strong {
+  color: #2d3748;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.problem-card .problem-field .field-content {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+}
+.problem-card .problem-field .field-content .onset-date {
+  font-size: 1.1rem;
+  color: #085a9f;
+}
+.problem-card .problem-field .field-content .severity {
+  color: #2d3748;
+  font-weight: 500;
+}
+.problem-card .problem-field .field-content .provider {
+  color: #2d3748;
+  font-weight: 500;
+}
+.problem-card .problem-field .field-content .notes {
+  color: #2d3748;
+  font-style: italic;
+}
+.problem-card .problem-status-badge.bg-danger {
+  background-color: #dc2626 !important;
+  color: #ffffff;
+}
+.problem-card .problem-status-badge.bg-success {
+  background-color: #22c55e !important;
+  color: #ffffff;
+}
+.problem-card .problem-status-badge.bg-secondary {
+  background-color: #4a5568 !important;
+  color: #ffffff;
+}
+.problem-card .problem-status-badge.bg-warning {
+  background-color: #f59e0b !important;
+  color: #2d3748;
+}
+
+@media (max-width: 992px) {
+  .problem-card .problem-details .row .col-lg-6 {
+    margin-bottom: 1rem;
+  }
+  .problem-card .problem-header .d-flex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .problem-card .problem-header .d-flex .problem-name-section {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+  .problem-card .problem-header .d-flex .problem-status-section {
+    align-self: flex-start;
+  }
+}
+@media (max-width: 768px) {
+  .problem-card {
+    padding: 1rem;
+  }
+  .problem-card .problem-header {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .problem-card .problem-header .problem-name {
+    font-size: 1.1rem;
+  }
+  .problem-card .problem-field {
+    margin-bottom: 0.5rem;
+  }
+  .problem-card .problem-field .field-header {
+    margin-bottom: 0.25rem;
+  }
+  .problem-card .problem-field .field-header strong {
+    font-size: 0.75rem;
+  }
+  .problem-card .problem-field .field-content {
+    padding: 0.25rem;
+    font-size: 0.875rem;
+  }
+}
+@media (max-width: 576px) {
+  .problem-card .col-xl-6 {
+    margin-bottom: 1rem;
+  }
+}
+@media (max-width: 767px) {
+  .problem-card .problem-field {
+    margin-bottom: 0.5rem !important;
+  }
+  .problem-card .problem-field .field-header {
+    margin-bottom: 0.25rem;
+  }
+  .problem-card .problem-field .field-header strong {
+    font-size: 0.85rem;
+  }
+  .problem-card .problem-field .field-content {
+    padding: 0.25rem 0.5rem;
+    min-height: 2rem;
+  }
+}
+.pregnancy-tabs-container {
+  margin-top: 1rem;
+  --current-pregnancy-color: #10b981;
+  --current-pregnancy-light: #d1fae5;
+  --previous-history-color: #3b82f6;
+  --previous-history-light: #dbeafe;
+  --overview-summary-color: #8b5cf6;
+  --overview-summary-light: #ede9fe;
+}
+.pregnancy-tabs-container .pregnancy-tab-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0;
+}
+@media (min-width: 768px) {
+  .pregnancy-tabs-container .pregnancy-tab-nav {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+}
+.pregnancy-tabs-container .pregnancy-tab-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 6px 6px 0 0;
+  color: #718096;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) ease-out;
+  min-height: 48px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+@media (min-width: 768px) {
+  .pregnancy-tabs-container .pregnancy-tab-btn {
+    flex: 0 0 auto;
+    font-size: 1rem;
+    padding: 1rem 1.5rem;
+  }
+}
+.pregnancy-tabs-container .pregnancy-tab-btn .tab-text {
+  display: none;
+}
+@media (min-width: 576px) {
+  .pregnancy-tabs-container .pregnancy-tab-btn .tab-text {
+    display: inline;
+  }
+}
+.pregnancy-tabs-container .pregnancy-tab-btn .tab-badge {
+  border-radius: 20px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
+  background: #33969a;
+  color: #007b7f;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn .tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  border-radius: 2px;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1) ease-out;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=current-pregnancy] .tab-badge {
+  background: var(--current-pregnancy-light);
+  color: var(--current-pregnancy-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=current-pregnancy] .tab-indicator {
+  background: var(--current-pregnancy-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=current-pregnancy]:hover {
+  background: var(--current-pregnancy-light);
+  color: var(--current-pregnancy-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=current-pregnancy]:hover .tab-indicator {
+  width: 80%;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=current-pregnancy].active {
+  background: #ffffff;
+  color: var(--current-pregnancy-color);
+  border-bottom: 3px solid var(--current-pregnancy-color);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=current-pregnancy].active .tab-indicator {
+  width: 100%;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=previous-pregnancies] .tab-badge {
+  background: var(--previous-history-light);
+  color: var(--previous-history-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=previous-pregnancies] .tab-indicator {
+  background: var(--previous-history-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=previous-pregnancies]:hover {
+  background: var(--previous-history-light);
+  color: var(--previous-history-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=previous-pregnancies]:hover .tab-indicator {
+  width: 80%;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=previous-pregnancies].active {
+  background: #ffffff;
+  color: var(--previous-history-color);
+  border-bottom: 3px solid var(--previous-history-color);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=previous-pregnancies].active .tab-indicator {
+  width: 100%;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=pregnancy-overview] .tab-badge {
+  background: var(--overview-summary-light);
+  color: var(--overview-summary-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=pregnancy-overview] .tab-indicator {
+  background: var(--overview-summary-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=pregnancy-overview]:hover {
+  background: var(--overview-summary-light);
+  color: var(--overview-summary-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=pregnancy-overview]:hover .tab-indicator {
+  width: 80%;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=pregnancy-overview].active {
+  background: #ffffff;
+  color: var(--overview-summary-color);
+  border-bottom: 3px solid var(--overview-summary-color);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=pregnancy-overview].active .tab-indicator {
+  width: 100%;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn:not([data-tab]):hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #2d3748;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn:not([data-tab]):hover .tab-indicator {
+  width: 80%;
+  background: #085a9f;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn:not([data-tab]).active {
+  background: #ffffff;
+  color: #085a9f;
+  border-bottom: 3px solid #085a9f;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn:focus {
+  outline: 2px solid #085a9f;
+  outline-offset: 2px;
+}
+.pregnancy-tabs-container .pregnancy-tab-content .pregnancy-tab-pane {
+  display: none;
+  animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) ease-out;
+}
+.pregnancy-tabs-container .pregnancy-tab-content .pregnancy-tab-pane.active {
+  display: block;
+}
+
+.current-pregnancy-card {
+  background: linear-gradient(135deg, #dcfce7, #ffffff);
+  border: 2px solid #4ade80;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+.current-pregnancy-card .pregnancy-status-header {
+  margin-bottom: 1rem;
+}
+.current-pregnancy-card .pregnancy-status-header .pregnancy-card-title {
+  color: #16a34a;
+  font-weight: 700;
+  margin: 0;
+}
+.current-pregnancy-card .pregnancy-info-card {
+  background: #ffffff;
+  border: 1px solid #4ade80;
+  border-radius: 8px;
+  padding: 1rem;
+  height: 100%;
+}
+.current-pregnancy-card .pregnancy-info-card .info-label {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+.current-pregnancy-card .pregnancy-info-card .info-value {
+  font-size: 1rem;
+  color: #2d3748;
+  font-weight: 600;
+}
+.current-pregnancy-card .pregnancy-info-card .info-value .status-badge.pregnant {
+  background: #22c55e;
+  color: #ffffff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+.current-pregnancy-card .pregnancy-info-card .info-value .code-reference {
+  display: block;
+  margin-top: 0.25rem;
+  color: #718096;
+  font-weight: 400;
+}
+.current-pregnancy-card .pregnancy-info-card .info-value .delivery-date {
+  color: #007b7f;
+  font-weight: 700;
+}
+
+.previous-pregnancies-container .pregnancy-status-header {
+  margin-bottom: 1rem;
+}
+.previous-pregnancies-container .pregnancy-status-header .pregnancy-card-title {
+  color: #007b7f;
+  font-weight: 700;
+  margin: 0;
+}
+.previous-pregnancies-container .pregnancy-status-header .pregnancy-subtitle {
+  color: #718096;
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0 0;
+}
+.previous-pregnancies-container .pregnancy-history-table {
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.previous-pregnancies-container .pregnancy-history-table th {
+  background: #f7fafc;
+  color: #2d3748;
+  font-weight: 700;
+  border: none;
+  font-size: 0.875rem;
+}
+.previous-pregnancies-container .pregnancy-history-table td {
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-badge.livebirth {
+  background: #4ade80;
+  color: #16a34a;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-badge.termination {
+  background: #fcd34d;
+  color: #d97706;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-badge.stillbirth {
+  background: #f87171;
+  color: #b91c1c;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-badge.miscarriage {
+  background: #fef3c7;
+  color: #d97706;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-badge.other {
+  background: #33969a;
+  color: #007b7f;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-code {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+}
+.previous-pregnancies-container .pregnancy-history-table .pregnancy-number {
+  background: rgba(8, 90, 159, 0.1);
+  color: rgb(5.5568862275, 62.5149700599, 110.4431137725);
+  padding: 0.25rem 0.5rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  min-width: 30px;
+  text-align: center;
+  display: inline-block;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-dates .outcome-date {
+  background: #e2e8f0;
+  color: #2d3748;
+  padding: 2px 0.25rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  margin-right: 0.25rem;
+}
+
+.pregnancy-overview-container .pregnancy-status-header {
+  margin-bottom: 1.5rem;
+}
+.pregnancy-overview-container .pregnancy-status-header .pregnancy-card-title {
+  color: rgb(5.5568862275, 62.5149700599, 110.4431137725);
+  font-weight: 700;
+  margin: 0;
+}
+.pregnancy-overview-container .pregnancy-status-header .pregnancy-subtitle {
+  color: #718096;
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0 0;
+}
+.pregnancy-overview-container .overview-cards-grid {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .pregnancy-overview-container .overview-cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+.pregnancy-overview-container .overview-card {
+  background: #ffffff;
+  border: 2px solid rgba(8, 90, 159, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) ease-out;
+}
+.pregnancy-overview-container .overview-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  border-color: #085a9f;
+}
+.pregnancy-overview-container .overview-card .overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+.pregnancy-overview-container .overview-card .overview-header .overview-title {
+  color: rgb(5.5568862275, 62.5149700599, 110.4431137725);
+  font-weight: 700;
+  margin: 0;
+  font-size: 1rem;
+}
+.pregnancy-overview-container .overview-card .overview-header .overview-code {
+  background: #80bebf;
+  color: rgb(5.5568862275, 62.5149700599, 110.4431137725);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+.pregnancy-overview-container .overview-card .overview-content .overview-dates .dates-list {
+  margin-top: 0.25rem;
+}
+.pregnancy-overview-container .overview-card .overview-content .overview-dates .dates-list .overview-date {
+  display: inline-block;
+  background: #e2e8f0;
+  color: #2d3748;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  margin-right: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.pregnancy-terminology .code-group {
+  margin-bottom: 1rem;
+}
+.pregnancy-terminology .code-group .code-badge.pregnancy-code {
+  background: #4ade80;
+  color: #16a34a;
+}
+.pregnancy-terminology .code-group .code-badge.outcome-code {
+  background: #33969a;
+  color: #007b7f;
+}
+.pregnancy-terminology .code-group .code-badge.overview-code {
+  background: rgba(8, 90, 159, 0.1);
+  color: rgb(5.5568862275, 62.5149700599, 110.4431137725);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 .toggle-input {
   display: none;
 }
@@ -11749,15 +12783,29 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   color: #ffffff;
   font-size: 15px;
   text-align: left;
-  padding: 0.5rem;
+  padding: 0.75rem 1rem;
   border: 2px solid #005b5f;
-  background: #005b5f;
+  background: linear-gradient(135deg, #005b5f 0%, rgb(0, 115.4263157895, 120.5) 100%);
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 6px;
   transition: all 0.25s ease-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .collapsible-label-title:hover {
-  color: #007b7f;
+  background: linear-gradient(135deg, rgb(0, 105.6557894737, 110.3) 0%, rgb(0, 130.0821052632, 135.8) 100%);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+.collapsible-label-title:hover i, .collapsible-label-title:hover .fa-solid, .collapsible-label-title:hover .fa-regular, .collapsible-label-title:hover .fa-light, .collapsible-label-title:hover .fa-brands,
+.collapsible-label-title i:hover,
+.collapsible-label-title .fa-solid:hover,
+.collapsible-label-title .fa-regular:hover,
+.collapsible-label-title .fa-light:hover,
+.collapsible-label-title .fa-brands:hover {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  transform: none !important;
+  transition: none !important;
 }
 .collapsible-label-title::before {
   content: "";
@@ -16764,6 +17812,34 @@ input[type=checkbox] {
   width: 100%;
   min-height: 300px;
   position: relative;
+  overflow: hidden;
+  contain: layout;
+}
+
+.clinical-section {
+  width: 100%;
+  overflow: hidden;
+  contain: layout style;
+  position: relative;
+}
+.clinical-section .clinical-tab-content {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  contain: layout;
+}
+.clinical-section .clinical-tab-content:not(.active) {
+  display: none !important;
+  visibility: hidden;
+  position: absolute;
+  left: -9999px;
+}
+.clinical-section .clinical-tab-content.active {
+  display: block !important;
+  visibility: visible;
+  position: relative;
+  left: auto;
 }
 
 @media (max-width: 768px) {
@@ -17267,11 +18343,27 @@ main {
 .card-header.bg-dark:hover .far,
 .card-header.bg-dark:hover .fal,
 .card-header.bg-dark:hover .fab,
-.card-header.bg-dark:hover .fa {
+.card-header.bg-dark:hover .fa,
+.card-header.bg-teal:hover i,
+.card-header.bg-teal:hover .fa-solid,
+.card-header.bg-teal:hover .far,
+.card-header.bg-teal:hover .fal,
+.card-header.bg-teal:hover .fab,
+.card-header.bg-teal:hover .fa {
   color: var(--healthcare-text-light) !important;
   fill: var(--healthcare-text-light) !important;
   transform: none !important;
   transition: none !important;
+}
+
+.collapsible-label-title:hover i,
+.collapsible-label-title:hover .fa-solid,
+.collapsible-label-title:hover .fa-regular,
+.collapsible-label-title:hover .fa-light,
+.collapsible-label-title:hover .fa-brands {
+  color: white !important;
+  fill: white !important;
+  transform: none !important;
 }
 
 @media (max-width: 480px) {

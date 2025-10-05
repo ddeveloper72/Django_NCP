@@ -1956,23 +1956,24 @@ Although being real choices for the different diseases and conditions, the selec
                             </tbody>
                         </table>
                         <paragraph ID="obs-22">History of previous pregnancies</paragraph>
-                        <table><colgroup><col width="20%"/><col width="20%"/><col width="20%"/></colgroup>
+                        <table><colgroup><col width="40%"/><col width="30%"/><col width="30%"/></colgroup>
                             <thead>
-                                <tr><th>Outcome</th><th>Number</th><th>Outcome date(s)</th></tr>
+                                <tr><th>Outcome</th><th>Date</th><th>SNOMED Code</th></tr>
                             </thead>
                             <tbody>
-                                <tr ID="obs-22a"><td><content ID="pregnancy-1" language="en-GB">20200205</content></td></tr>
-                                <tr ID="obs-22b"><td><content ID="pregnancy-2" language="en-GB">20210908</content></td></tr>
+                                <tr ID="obs-22a"><td><content ID="pregnancy-outcome-1" language="en-GB">Livebirth</content></td><td>2020-02-05</td><td>281050002</td></tr>
+                                <tr ID="obs-22b"><td><content ID="pregnancy-outcome-2" language="en-GB">Livebirth</content></td><td>2021-09-08</td><td>281050002</td></tr>
+                                <tr ID="obs-22c"><td><content ID="pregnancy-outcome-3" language="en-GB">Termination of pregnancy</content></td><td>2010-07-03</td><td>57797005</td></tr>
                             </tbody>
                         </table>
                         <paragraph ID="obs-23">Previous pregnancies overview</paragraph>
-                        <table><colgroup><col width="60%"/></colgroup>
+                        <table><colgroup><col width="40%"/><col width="20%"/><col width="40%"/></colgroup>
                             <thead>
-                                <tr><th>Outcome date(s)</th></tr>
+                                <tr><th>Outcome Type</th><th>Count</th><th>Outcome date(s)</th></tr>
                             </thead>
                             <tbody>
-                                <tr ID="obs-23a"><td><content ID="code-60" language="en-GB">Livebirth</content><br/></td><td>2</td><td>2020-02-05, 2021-09-08</td></tr>
-                                <tr ID="obs-23b"><td><content ID="code-61" language="en-GB">Termination of pregnancy</content><br/></td><td>1</td><td>2010-07-03</td></tr>
+                                <tr ID="obs-23a"><td><content ID="code-60" language="en-GB">Livebirth</content></td><td>2</td><td>2020-02-05, 2021-09-08</td></tr>
+                                <tr ID="obs-23b"><td><content ID="code-61" language="en-GB">Termination of pregnancy</content></td><td>1</td><td>2010-07-03</td></tr>
                             </tbody>
                         </table>
                     </text>
@@ -1981,7 +1982,7 @@ Although being real choices for the different diseases and conditions, the selec
                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.45"/>
                             <code code="82810-3" codeSystem="2.16.840.1.113883.6.1"/>
                             <text>
-                                <reference value="#pregnancy-1"/>
+                                <reference value="#obs-21a"/>
                             </text>
                             <statusCode code="completed"/>
                             <effectiveTime value="20220615"/>
@@ -2024,6 +2025,42 @@ Although being real choices for the different diseases and conditions, the selec
                             </text>
                             <statusCode code="completed"/>
                             <value xsi:type="INT" value="1"/>
+                        </observation>
+                    </entry>
+                    <entry typeCode="COMP">
+                        <observation classCode="OBS" moodCode="EVN">
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.47"/>
+                            <code code="93857-1" codeSystem="2.16.840.1.113883.6.1" displayName="Pregnancy outcome"/>
+                            <text>
+                                <reference value="#pregnancy-outcome-1"/>
+                            </text>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20200205"/>
+                            <value xsi:type="CD" code="281050002" displayName="Livebirth" codeSystemVersion="2022-07-31" codeSystem="2.16.840.1.113883.6.96"/>
+                        </observation>
+                    </entry>
+                    <entry typeCode="COMP">
+                        <observation classCode="OBS" moodCode="EVN">
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.47"/>
+                            <code code="93857-1" codeSystem="2.16.840.1.113883.6.1" displayName="Pregnancy outcome"/>
+                            <text>
+                                <reference value="#pregnancy-outcome-2"/>
+                            </text>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20210908"/>
+                            <value xsi:type="CD" code="281050002" displayName="Livebirth" codeSystemVersion="2022-07-31" codeSystem="2.16.840.1.113883.6.96"/>
+                        </observation>
+                    </entry>
+                    <entry typeCode="COMP">
+                        <observation classCode="OBS" moodCode="EVN">
+                            <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.47"/>
+                            <code code="93857-1" codeSystem="2.16.840.1.113883.6.1" displayName="Pregnancy outcome"/>
+                            <text>
+                                <reference value="#pregnancy-outcome-3"/>
+                            </text>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20100703"/>
+                            <value xsi:type="CD" code="57797005" displayName="Termination of pregnancy" codeSystemVersion="2022-07-31" codeSystem="2.16.840.1.113883.6.96"/>
                         </observation>
                     </entry>
                     <entry typeCode="COMP">

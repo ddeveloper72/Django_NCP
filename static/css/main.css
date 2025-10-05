@@ -12313,6 +12313,404 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
     min-height: 2rem;
   }
 }
+.pregnancy-tabs-container {
+  margin-top: 1rem;
+  --current-pregnancy-color: #10b981;
+  --current-pregnancy-light: #d1fae5;
+  --previous-history-color: #3b82f6;
+  --previous-history-light: #dbeafe;
+  --overview-summary-color: #8b5cf6;
+  --overview-summary-light: #ede9fe;
+}
+.pregnancy-tabs-container .pregnancy-tab-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0;
+}
+@media (min-width: 768px) {
+  .pregnancy-tabs-container .pregnancy-tab-nav {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+}
+.pregnancy-tabs-container .pregnancy-tab-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 6px 6px 0 0;
+  color: #718096;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) ease-out;
+  min-height: 48px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+@media (min-width: 768px) {
+  .pregnancy-tabs-container .pregnancy-tab-btn {
+    flex: 0 0 auto;
+    font-size: 1rem;
+    padding: 1rem 1.5rem;
+  }
+}
+.pregnancy-tabs-container .pregnancy-tab-btn .tab-text {
+  display: none;
+}
+@media (min-width: 576px) {
+  .pregnancy-tabs-container .pregnancy-tab-btn .tab-text {
+    display: inline;
+  }
+}
+.pregnancy-tabs-container .pregnancy-tab-btn .tab-badge {
+  border-radius: 20px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
+  background: #33969a;
+  color: #007b7f;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn .tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  border-radius: 2px;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1) ease-out;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=current-pregnancy] .tab-badge {
+  background: var(--current-pregnancy-light);
+  color: var(--current-pregnancy-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=current-pregnancy] .tab-indicator {
+  background: var(--current-pregnancy-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=current-pregnancy]:hover {
+  background: var(--current-pregnancy-light);
+  color: var(--current-pregnancy-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=current-pregnancy]:hover .tab-indicator {
+  width: 80%;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=current-pregnancy].active {
+  background: #ffffff;
+  color: var(--current-pregnancy-color);
+  border-bottom: 3px solid var(--current-pregnancy-color);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=current-pregnancy].active .tab-indicator {
+  width: 100%;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=previous-pregnancies] .tab-badge {
+  background: var(--previous-history-light);
+  color: var(--previous-history-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=previous-pregnancies] .tab-indicator {
+  background: var(--previous-history-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=previous-pregnancies]:hover {
+  background: var(--previous-history-light);
+  color: var(--previous-history-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=previous-pregnancies]:hover .tab-indicator {
+  width: 80%;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=previous-pregnancies].active {
+  background: #ffffff;
+  color: var(--previous-history-color);
+  border-bottom: 3px solid var(--previous-history-color);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=previous-pregnancies].active .tab-indicator {
+  width: 100%;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=pregnancy-overview] .tab-badge {
+  background: var(--overview-summary-light);
+  color: var(--overview-summary-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=pregnancy-overview] .tab-indicator {
+  background: var(--overview-summary-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=pregnancy-overview]:hover {
+  background: var(--overview-summary-light);
+  color: var(--overview-summary-color);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=pregnancy-overview]:hover .tab-indicator {
+  width: 80%;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=pregnancy-overview].active {
+  background: #ffffff;
+  color: var(--overview-summary-color);
+  border-bottom: 3px solid var(--overview-summary-color);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+}
+.pregnancy-tabs-container .pregnancy-tab-btn[data-tab=pregnancy-overview].active .tab-indicator {
+  width: 100%;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn:not([data-tab]):hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #2d3748;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn:not([data-tab]):hover .tab-indicator {
+  width: 80%;
+  background: #085a9f;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn:not([data-tab]).active {
+  background: #ffffff;
+  color: #085a9f;
+  border-bottom: 3px solid #085a9f;
+}
+.pregnancy-tabs-container .pregnancy-tab-btn:focus {
+  outline: 2px solid #085a9f;
+  outline-offset: 2px;
+}
+.pregnancy-tabs-container .pregnancy-tab-content .pregnancy-tab-pane {
+  display: none;
+  animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) ease-out;
+}
+.pregnancy-tabs-container .pregnancy-tab-content .pregnancy-tab-pane.active {
+  display: block;
+}
+
+.current-pregnancy-card {
+  background: linear-gradient(135deg, #dcfce7, #ffffff);
+  border: 2px solid #4ade80;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+.current-pregnancy-card .pregnancy-status-header {
+  margin-bottom: 1rem;
+}
+.current-pregnancy-card .pregnancy-status-header .pregnancy-card-title {
+  color: #16a34a;
+  font-weight: 700;
+  margin: 0;
+}
+.current-pregnancy-card .pregnancy-info-card {
+  background: #ffffff;
+  border: 1px solid #4ade80;
+  border-radius: 8px;
+  padding: 1rem;
+  height: 100%;
+}
+.current-pregnancy-card .pregnancy-info-card .info-label {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+.current-pregnancy-card .pregnancy-info-card .info-value {
+  font-size: 1rem;
+  color: #2d3748;
+  font-weight: 600;
+}
+.current-pregnancy-card .pregnancy-info-card .info-value .status-badge.pregnant {
+  background: #22c55e;
+  color: #ffffff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+.current-pregnancy-card .pregnancy-info-card .info-value .code-reference {
+  display: block;
+  margin-top: 0.25rem;
+  color: #718096;
+  font-weight: 400;
+}
+.current-pregnancy-card .pregnancy-info-card .info-value .delivery-date {
+  color: #007b7f;
+  font-weight: 700;
+}
+
+.previous-pregnancies-container .pregnancy-status-header {
+  margin-bottom: 1rem;
+}
+.previous-pregnancies-container .pregnancy-status-header .pregnancy-card-title {
+  color: #007b7f;
+  font-weight: 700;
+  margin: 0;
+}
+.previous-pregnancies-container .pregnancy-status-header .pregnancy-subtitle {
+  color: #718096;
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0 0;
+}
+.previous-pregnancies-container .pregnancy-history-table {
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.previous-pregnancies-container .pregnancy-history-table th {
+  background: #f7fafc;
+  color: #2d3748;
+  font-weight: 700;
+  border: none;
+  font-size: 0.875rem;
+}
+.previous-pregnancies-container .pregnancy-history-table td {
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-badge.livebirth {
+  background: #4ade80;
+  color: #16a34a;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-badge.termination {
+  background: #fcd34d;
+  color: #d97706;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-badge.stillbirth {
+  background: #f87171;
+  color: #b91c1c;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-badge.miscarriage {
+  background: #fef3c7;
+  color: #d97706;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-badge.other {
+  background: #33969a;
+  color: #007b7f;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-cell .outcome-code {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+}
+.previous-pregnancies-container .pregnancy-history-table .pregnancy-number {
+  background: rgba(8, 90, 159, 0.1);
+  color: rgb(5.5568862275, 62.5149700599, 110.4431137725);
+  padding: 0.25rem 0.5rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  min-width: 30px;
+  text-align: center;
+  display: inline-block;
+}
+.previous-pregnancies-container .pregnancy-history-table .outcome-dates .outcome-date {
+  background: #e2e8f0;
+  color: #2d3748;
+  padding: 2px 0.25rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  margin-right: 0.25rem;
+}
+
+.pregnancy-overview-container .pregnancy-status-header {
+  margin-bottom: 1.5rem;
+}
+.pregnancy-overview-container .pregnancy-status-header .pregnancy-card-title {
+  color: rgb(5.5568862275, 62.5149700599, 110.4431137725);
+  font-weight: 700;
+  margin: 0;
+}
+.pregnancy-overview-container .pregnancy-status-header .pregnancy-subtitle {
+  color: #718096;
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0 0;
+}
+.pregnancy-overview-container .overview-cards-grid {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .pregnancy-overview-container .overview-cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+.pregnancy-overview-container .overview-card {
+  background: #ffffff;
+  border: 2px solid rgba(8, 90, 159, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) ease-out;
+}
+.pregnancy-overview-container .overview-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  border-color: #085a9f;
+}
+.pregnancy-overview-container .overview-card .overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+.pregnancy-overview-container .overview-card .overview-header .overview-title {
+  color: rgb(5.5568862275, 62.5149700599, 110.4431137725);
+  font-weight: 700;
+  margin: 0;
+  font-size: 1rem;
+}
+.pregnancy-overview-container .overview-card .overview-header .overview-code {
+  background: #80bebf;
+  color: rgb(5.5568862275, 62.5149700599, 110.4431137725);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+.pregnancy-overview-container .overview-card .overview-content .overview-dates .dates-list {
+  margin-top: 0.25rem;
+}
+.pregnancy-overview-container .overview-card .overview-content .overview-dates .dates-list .overview-date {
+  display: inline-block;
+  background: #e2e8f0;
+  color: #2d3748;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  margin-right: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.pregnancy-terminology .code-group {
+  margin-bottom: 1rem;
+}
+.pregnancy-terminology .code-group .code-badge.pregnancy-code {
+  background: #4ade80;
+  color: #16a34a;
+}
+.pregnancy-terminology .code-group .code-badge.outcome-code {
+  background: #33969a;
+  color: #007b7f;
+}
+.pregnancy-terminology .code-group .code-badge.overview-code {
+  background: rgba(8, 90, 159, 0.1);
+  color: rgb(5.5568862275, 62.5149700599, 110.4431137725);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 .toggle-input {
   display: none;
 }

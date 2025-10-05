@@ -48,6 +48,9 @@ function initializeEnhancedCDA() {
     new bootstrap.Tab(tab);
   });
 
+  // Initialize pregnancy history tabs
+  initializePregnancyHistoryTabs();
+
   // Enhanced hover effects for interactive elements
   const cards = document.querySelectorAll('.card');
   cards.forEach(card => {
@@ -74,6 +77,9 @@ function initializeEnhancedCDA() {
       showExtendedTab('extended_patient', 'personal');
     }
   }, 100); // Small delay to ensure DOM is ready
+
+  // Initialize pregnancy history tabs
+  initializePregnancyHistoryTabs();
 
   console.log('Bootstrap functionality initialized');
 }
@@ -310,13 +316,13 @@ function initializeExtendedPatientEventDelegation() {
 
     // Check if this is a Bootstrap accordion button - let Bootstrap handle it completely
     const clickedElement = event.target;
-    const hasCollapseToggle = clickedElement.hasAttribute('data-bs-toggle') && 
-                             clickedElement.getAttribute('data-bs-toggle') === 'collapse';
+    const hasCollapseToggle = clickedElement.hasAttribute('data-bs-toggle') &&
+      clickedElement.getAttribute('data-bs-toggle') === 'collapse';
     const hasCollapseTarget = clickedElement.hasAttribute('data-bs-target');
     const isAccordionButton = hasCollapseToggle || hasCollapseTarget ||
-                             clickedElement.closest('[data-bs-toggle="collapse"]') ||
-                             clickedElement.classList.contains('accordion-button');
-    
+      clickedElement.closest('[data-bs-toggle="collapse"]') ||
+      clickedElement.classList.contains('accordion-button');
+
     if (isAccordionButton) {
       console.log('🔧 Bootstrap accordion button detected - COMPLETELY bypassing our handler');
       return; // Do absolutely nothing - let Bootstrap handle it 100%
@@ -346,6 +352,7 @@ function initializeExtendedPatientEventDelegation() {
       return;
     }
 
+    console.log('🎯 SWITCH STATEMENT - Action value:', JSON.stringify(action), 'Type:', typeof action);
     switch (action) {
       case 'show-extended-tab':
         const sectionId = target.dataset.sectionId;
@@ -359,6 +366,50 @@ function initializeExtendedPatientEventDelegation() {
         } else {
           console.error('❌ Missing sectionId or tabType', { sectionId, tabType });
         }
+        break;
+
+      case 'pregnancy-tab':
+        console.log('✅ ENTERED PREGNANCY-TAB CASE!');
+        const targetTab = target.dataset.tab;
+        console.log('🎯 Pregnancy tab clicked via event delegation:', targetTab);
+        console.log('🔧 Target button classes:', target.classList.toString());
+        
+        if (targetTab) {
+          // Remove active class from all pregnancy tab buttons and panes
+          const pregnancyTabBtns = document.querySelectorAll('.pregnancy-tab-btn');
+          const pregnancyTabPanes = document.querySelectorAll('.pregnancy-tab-pane');
+          
+          console.log('🔧 Found', pregnancyTabBtns.length, 'pregnancy tab buttons');
+          console.log('🔧 Found', pregnancyTabPanes.length, 'pregnancy tab panes');
+          
+          pregnancyTabBtns.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+            console.log('🔧 Removed active from button:', b.id);
+          });
+          pregnancyTabPanes.forEach(p => {
+            p.classList.remove('active');
+            console.log('🔧 Removed active from pane:', p.id);
+          });
+
+          // Add active class to clicked button and corresponding pane
+          target.classList.add('active');
+          target.setAttribute('aria-selected', 'true');
+          console.log('🔧 Added active to button:', target.id);
+          
+          const targetPane = document.getElementById(targetTab);
+          if (targetPane) {
+            targetPane.classList.add('active');
+            console.log('✅ Activated pregnancy tab pane:', targetTab);
+          } else {
+            console.warn('❌ Could not find pregnancy tab pane:', targetTab);
+            console.log('🔧 Available pregnancy panes:', Array.from(pregnancyTabPanes).map(p => p.id));
+          }
+        } else {
+          console.error('❌ Missing target tab for pregnancy tab action');
+          console.log('🔧 Button dataset:', target.dataset);
+        }
+        console.log('✅ LEAVING PREGNANCY-TAB CASE!');
         break;
 
       case 'show-pdf-viewer':
@@ -484,6 +535,96 @@ window.debugTabs = function () {
     });
   });
 };
+
+/**
+ * Pregnancy History Tab Navigation
+ * Handles mobile-first tab switching for pregnancy history section
+ */
+function initializePregnancyHistoryTabs() {
+  console.log('🔧 Initializing pregnancy history tabs...');
+  
+  const pregnancyTabBtns = document.querySelectorAll('.pregnancy-tab-btn');
+  const pregnancyTabPanes = document.querySelectorAll('.pregnancy-tab-pane');
+
+  console.log('🔍 Found pregnancy tab buttons:', pregnancyTabBtns.length);
+  console.log('🔍 Found pregnancy tab panes:', pregnancyTabPanes.length);
+
+  if (pregnancyTabBtns.length === 0) {
+    console.log('⚠️ No pregnancy tab buttons found, skipping initialization');
+    return;
+  }
+
+  pregnancyTabBtns.forEach((btn, index) => {
+    console.log(`🔍 Tab button ${index}:`, btn.getAttribute('data-tab'), btn.textContent.trim());
+    
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      const targetTab = this.getAttribute('data-tab');
+      
+      console.log('🎯 Pregnancy tab clicked:', targetTab);
+
+      // Remove active class from all buttons and panes
+      pregnancyTabBtns.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      pregnancyTabPanes.forEach(p => {
+        p.classList.remove('active');
+        console.log('🔧 Removing active from pane:', p.id);
+      });
+
+      // Add active class to clicked button and corresponding pane
+      this.classList.add('active');
+      this.setAttribute('aria-selected', 'true');
+      const targetPane = document.getElementById(targetTab);
+      if (targetPane) {
+        targetPane.classList.add('active');
+        console.log('✅ Activated pregnancy tab pane:', targetTab);
+      } else {
+        console.warn('❌ Could not find pregnancy tab pane:', targetTab);
+      }
+
+      // Announce change to screen readers
+      const announcement = `Switched to ${this.textContent.trim()} tab`;
+      if (typeof announceToScreenReader === 'function') {
+        announceToScreenReader(announcement);
+      }
+    });
+
+    // Handle keyboard navigation
+    btn.addEventListener('keydown', function (e) {
+      let nextBtn = null;
+
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'ArrowDown':
+          e.preventDefault();
+          nextBtn = this.nextElementSibling || pregnancyTabBtns[0];
+          break;
+        case 'ArrowLeft':
+        case 'ArrowUp':
+          e.preventDefault();
+          nextBtn = this.previousElementSibling || pregnancyTabBtns[pregnancyTabBtns.length - 1];
+          break;
+        case 'Home':
+          e.preventDefault();
+          nextBtn = pregnancyTabBtns[0];
+          break;
+        case 'End':
+          e.preventDefault();
+          nextBtn = pregnancyTabBtns[pregnancyTabBtns.length - 1];
+          break;
+      }
+
+      if (nextBtn) {
+        nextBtn.focus();
+        nextBtn.click();
+      }
+    });
+  });
+
+  console.log('✅ Pregnancy history tabs initialized');
+}
 
 // Global function to manually activate any tab - you can call this from browser console
 window.forceActivateTab = function (tabId) {

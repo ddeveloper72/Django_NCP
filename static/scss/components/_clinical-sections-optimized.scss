@@ -1178,3 +1178,520 @@
 // - Critical medical information tables use minimal or no hover effects
 // - Status badges maintain color consistency during interaction
 // - Emergency alerts remain stable regardless of mouse movement
+
+// ========================================
+// Pregnancy History - Mobile-First Multi-Tab Design
+// Clinical Code-Based Color Scheme:
+// - Current Pregnancy (77386006): Active green for ongoing care
+// - Previous History (281050002/57797005): Historical blue for completed outcomes
+// - Overview (Summary): Analytics purple for data insights
+// ========================================
+
+.pregnancy-tabs-container {
+  margin-top: $space-md;
+  
+  // Clinical color variables for pregnancy codes
+  --current-pregnancy-color: #10b981;     // Green for active pregnancy (77386006)
+  --current-pregnancy-light: #d1fae5;    // Light green background
+  --previous-history-color: #3b82f6;     // Blue for historical data (281050002/57797005)
+  --previous-history-light: #dbeafe;     // Light blue background
+  --overview-summary-color: #8b5cf6;     // Purple for analytics/overview
+  --overview-summary-light: #ede9fe;     // Light purple background
+  
+  // Mobile-first tab navigation
+  .pregnancy-tab-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-xs;
+    margin-bottom: $space-md;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0;
+    
+    @media (min-width: 768px) {
+      flex-wrap: nowrap;
+      gap: $space-sm;
+    }
+  }
+  
+  .pregnancy-tab-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: $space-xs;
+    padding: $space-sm $space-md;
+    background: transparent;
+    border: none;
+    border-radius: 6px 6px 0 0;
+    color: #718096;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all $transition-fast ease-out;
+    min-height: 48px; // Accessibility touch target
+    
+    // Mobile optimization
+    flex: 1 1 auto;
+    min-width: 0;
+    
+    @media (min-width: 768px) {
+      flex: 0 0 auto;
+      font-size: 1rem;
+      padding: $space-md $space-lg;
+    }
+    
+    .tab-text {
+      display: none;
+      
+      @media (min-width: 576px) {
+        display: inline;
+      }
+    }
+    
+    .tab-badge {
+      border-radius: 20px;
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      min-width: 20px;
+      text-align: center;
+      
+      // Default badge styling
+      background: $info-light;
+      color: $info;
+    }
+    
+    .tab-indicator {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 3px;
+      border-radius: 2px;
+      transition: width $transition-normal ease-out;
+    }
+    
+    // Clinical Code-Based Tab Styling
+    
+    // Current Pregnancy Tab (Code: 77386006 - Active pregnancy)
+    &[data-tab="current-pregnancy"] {
+      .tab-badge {
+        background: var(--current-pregnancy-light);
+        color: var(--current-pregnancy-color);
+      }
+      
+      .tab-indicator {
+        background: var(--current-pregnancy-color);
+      }
+      
+      &:hover {
+        background: var(--current-pregnancy-light);
+        color: var(--current-pregnancy-color);
+        
+        .tab-indicator {
+          width: 80%;
+        }
+      }
+      
+      &.active {
+        background: #ffffff;
+        color: var(--current-pregnancy-color);
+        border-bottom: 3px solid var(--current-pregnancy-color);
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+        
+        .tab-indicator {
+          width: 100%;
+        }
+      }
+    }
+    
+    // Previous Pregnancies Tab (Codes: 281050002, 57797005 - Historical outcomes)
+    &[data-tab="previous-pregnancies"] {
+      .tab-badge {
+        background: var(--previous-history-light);
+        color: var(--previous-history-color);
+      }
+      
+      .tab-indicator {
+        background: var(--previous-history-color);
+      }
+      
+      &:hover {
+        background: var(--previous-history-light);
+        color: var(--previous-history-color);
+        
+        .tab-indicator {
+          width: 80%;
+        }
+      }
+      
+      &.active {
+        background: #ffffff;
+        color: var(--previous-history-color);
+        border-bottom: 3px solid var(--previous-history-color);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+        
+        .tab-indicator {
+          width: 100%;
+        }
+      }
+    }
+    
+    // Pregnancy Overview Tab (Summary analytics)
+    &[data-tab="pregnancy-overview"] {
+      .tab-badge {
+        background: var(--overview-summary-light);
+        color: var(--overview-summary-color);
+      }
+      
+      .tab-indicator {
+        background: var(--overview-summary-color);
+      }
+      
+      &:hover {
+        background: var(--overview-summary-light);
+        color: var(--overview-summary-color);
+        
+        .tab-indicator {
+          width: 80%;
+        }
+      }
+      
+      &.active {
+        background: #ffffff;
+        color: var(--overview-summary-color);
+        border-bottom: 3px solid var(--overview-summary-color);
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+        
+        .tab-indicator {
+          width: 100%;
+        }
+      }
+    }
+    
+    // Default hover state for tabs without specific styling
+    &:not([data-tab]):hover {
+      background: rgba(0, 0, 0, 0.04);
+      color: #2d3748;
+      
+      .tab-indicator {
+        width: 80%;
+        background: $primary-color;
+      }
+    }
+    
+    // Default active state
+    &:not([data-tab]).active {
+      background: #ffffff;
+      color: $primary-color;
+      border-bottom: 3px solid $primary-color;
+      
+      .tab-indicator {
+      }
+    }
+      
+    // Focus state for accessibility
+    &:focus {
+      outline: 2px solid $primary-color;
+      outline-offset: 2px;
+    }
+  }
+  
+  // Tab content area
+  .pregnancy-tab-content {
+    .pregnancy-tab-pane {
+      display: none;
+      animation: fadeIn $transition-normal ease-out;
+      
+      &.active {
+        display: block;
+      }
+    }
+  }
+}
+
+// Current Pregnancy Status Card
+.current-pregnancy-card {
+  background: linear-gradient(135deg, $success-lighter, #ffffff);
+  border: 2px solid $success-light;
+  border-radius: 12px;
+  padding: $space-lg;
+  
+  .pregnancy-status-header {
+    margin-bottom: $space-md;
+    
+    .pregnancy-card-title {
+      color: $success-dark;
+      font-weight: 700;
+      margin: 0;
+    }
+  }
+  
+  .pregnancy-info-card {
+    background: #ffffff;
+    border: 1px solid $success-light;
+    border-radius: 8px;
+    padding: $space-md;
+    height: 100%;
+    
+    .info-label {
+      font-size: 0.875rem;
+      color: #718096;
+      font-weight: 500;
+      margin-bottom: $space-xs;
+    }
+    
+    .info-value {
+      font-size: 1rem;
+      color: #2d3748;
+      font-weight: 600;
+      
+      .status-badge {
+        &.pregnant {
+          background: $success;
+          color: #ffffff;
+          padding: $space-xs $space-sm;
+          border-radius: 4px;
+          font-size: 0.875rem;
+        }
+      }
+      
+      .code-reference {
+        display: block;
+        margin-top: $space-xs;
+        color: #718096;
+        font-weight: 400;
+      }
+      
+      .delivery-date {
+        color: $info;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+// Previous Pregnancies History Table
+.previous-pregnancies-container {
+  .pregnancy-status-header {
+    margin-bottom: $space-md;
+    
+    .pregnancy-card-title {
+      color: $info;
+      font-weight: 700;
+      margin: 0;
+    }
+    
+    .pregnancy-subtitle {
+      color: #718096;
+      font-size: 0.875rem;
+      margin: $space-xs 0 0 0;
+    }
+  }
+  
+  .pregnancy-history-table {
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    
+    th {
+      background: #f7fafc;
+      color: #2d3748;
+      font-weight: 700;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    td {
+      border: none;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+    }
+    
+    .outcome-cell {
+      .outcome-badge {
+        padding: $space-xs $space-sm;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        
+        &.livebirth {
+          background: $success-light;
+          color: $success-dark;
+        }
+        
+        &.termination {
+          background: $warning-light;
+          color: $warning-dark;
+        }
+        
+        &.stillbirth {
+          background: $error-light;
+          color: $error-dark;
+        }
+        
+        &.miscarriage {
+          background: $warning-lighter;
+          color: $warning-dark;
+        }
+        
+        &.other {
+          background: $info-light;
+          color: $info;
+        }
+      }
+      
+      .outcome-code {
+        margin-top: $space-xs;
+        font-size: 0.75rem;
+      }
+    }
+    
+    .pregnancy-number {
+      background: $primary-light;
+      color: $primary-dark;
+      padding: $space-xs $space-sm;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      min-width: 30px;
+      text-align: center;
+      display: inline-block;
+    }
+    
+    .outcome-dates {
+      .outcome-date {
+        background: #e2e8f0;
+        color: #2d3748;
+        padding: 2px $space-xs;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        margin-right: $space-xs;
+      }
+    }
+  }
+}
+
+// Pregnancy Overview Cards
+.pregnancy-overview-container {
+  .pregnancy-status-header {
+    margin-bottom: $space-lg;
+    
+    .pregnancy-card-title {
+      color: $primary-dark;
+      font-weight: 700;
+      margin: 0;
+    }
+    
+    .pregnancy-subtitle {
+      color: #718096;
+      font-size: 0.875rem;
+      margin: $space-xs 0 0 0;
+    }
+  }
+  
+  .overview-cards-grid {
+    display: grid;
+    gap: $space-md;
+    
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+  }
+  
+  .overview-card {
+    background: #ffffff;
+    border: 2px solid $primary-light;
+    border-radius: 12px;
+    padding: $space-lg;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all $transition-normal ease-out;
+    
+    &:hover {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+      border-color: $primary-color;
+    }
+    
+    .overview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $space-md;
+      padding-bottom: $space-sm;
+      border-bottom: 1px solid #e2e8f0;
+      
+      .overview-title {
+        color: $primary-dark;
+        font-weight: 700;
+        margin: 0;
+        font-size: 1rem;
+      }
+      
+      .overview-code {
+        background: $primary-lighter;
+        color: $primary-dark;
+        padding: $space-xs $space-sm;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-family: monospace;
+      }
+    }
+    
+    .overview-content {
+      .overview-dates {
+        .dates-list {
+          margin-top: $space-xs;
+          
+          .overview-date {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #2d3748;
+            padding: $space-xs $space-sm;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            margin-right: $space-xs;
+            margin-bottom: $space-xs;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Pregnancy Clinical Terminology Integration
+.pregnancy-terminology {
+  .code-group {
+    margin-bottom: $space-md;
+    
+    .code-badge {
+      &.pregnancy-code {
+        background: $success-light;
+        color: $success-dark;
+      }
+      
+      &.outcome-code {
+        background: $info-light;
+        color: $info;
+      }
+      
+      &.overview-code {
+        background: $primary-light;
+        color: $primary-dark;
+      }
+    }
+  }
+}
+
+// Animation keyframes
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

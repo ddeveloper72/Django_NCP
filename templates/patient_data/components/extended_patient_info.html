@@ -50,16 +50,25 @@
                 {% if has_l1_cda and not has_l3_cda %}disabled title="Clinical data not available for L1 CDA documents"{% elif not processed_sections|length and not enhanced_allergies|length and not medications|length and not allergies|length and not problems|length and not procedures|length and not vital_signs|length %}disabled title="No structured clinical data available"{% endif %}>
             <i class="fa-solid fa-notes-medical me-1"></i>Clinical Information
             
-            {# Count clinical sections that have content - not individual items #}
+            {# Count all clinical sections that have content - including extended sections #}
             {% with has_medications=medications|length|yesno:"1,0" %}
             {% with has_allergies=allergies|length|yesno:"1,0" %}
             {% with has_problems=problems|length|yesno:"1,0" %}
             {% with has_procedures=procedures|length|yesno:"1,0" %}
             {% with has_vital_signs=vital_signs|length|yesno:"1,0" %}
-            {% with section_count=has_medications|add:has_allergies|add:has_problems|add:has_procedures|add:has_vital_signs %}
+            {% with has_immunizations=immunizations|length|yesno:"1,0" %}
+            {% with has_history_of_past_illness=history_of_past_illness|length|yesno:"1,0" %}
+            {% with has_medical_devices=medical_devices|length|yesno:"1,0" %}
+            {% with has_social_history=social_history|length|yesno:"1,0" %}
+            {% with has_lab_results=lab_results|length|yesno:"1,0" %}
+            {% with has_pregnancy_history=pregnancy_history|yesno:"1,0" %}
+            {% with has_functional_status=functional_status|length|yesno:"1,0" %}
+            {% with base_count=has_medications|add:has_allergies|add:has_problems|add:has_procedures|add:has_vital_signs %}
+            {% with extended_count=has_immunizations|add:has_history_of_past_illness|add:has_medical_devices|add:has_social_history|add:has_lab_results|add:has_pregnancy_history|add:has_functional_status %}
+            {% with total_section_count=base_count|add:extended_count %}
             
-            {% if section_count > 0 %}
-            <span class="badge bg-warning ms-2">{{ section_count }}</span>
+            {% if total_section_count > 0 %}
+            <span class="badge bg-warning ms-2">{{ total_section_count }}</span>
             {% elif enhanced_allergies|length > 0 %}
             <span class="badge bg-success ms-2">1</span>
             {% elif processed_sections|length > 0 %}
@@ -68,12 +77,21 @@
             <span class="badge bg-secondary ms-2">0</span>
             {% endif %}
             
-            {% endwith %}
-            {% endwith %}
-            {% endwith %}
-            {% endwith %}
-            {% endwith %}
-            {% endwith %}
+            {% endwith %} {# total_section_count #}
+            {% endwith %} {# extended_count #}
+            {% endwith %} {# base_count #}
+            {% endwith %} {# has_functional_status #}
+            {% endwith %} {# has_pregnancy_history #}
+            {% endwith %} {# has_lab_results #}
+            {% endwith %} {# has_social_history #}
+            {% endwith %} {# has_medical_devices #}
+            {% endwith %} {# has_history_of_past_illness #}
+            {% endwith %} {# has_immunizations #}
+            {% endwith %} {# has_vital_signs #}
+            {% endwith %} {# has_procedures #}
+            {% endwith %} {# has_problems #}
+            {% endwith %} {# has_allergies #}
+            {% endwith %} {# has_medications #}
         </button>
 
         <button id="pdf-tab-btn" class="tab-button{% if has_l3_cda and not has_embedded_pdfs %} text-muted{% endif %}"

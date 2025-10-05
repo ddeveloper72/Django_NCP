@@ -1525,6 +1525,359 @@
                         </div>
                         {% endif %}
                     
+                        {# Pregnancy History Section - Mobile-First Multi-Tab Design #}
+                        {% if pregnancy_history %}
+                        <div class="clinical-section">
+                            <div class="collapsible-wrapper">
+                                <input id="toggle-pregnancy-history" class="toggle-input" type="checkbox">
+                                <label for="toggle-pregnancy-history" class="collapsible-label-title">
+                                    <div class="clinical-section-title-row">
+                                        <div class="clinical-section-title">
+                                            <i class="fa-solid fa-baby me-2"></i>
+                                            <span>History of Pregnancies</span>
+                                        </div>
+                                        <div class="clinical-badge-container">
+                                            {% with total_count=0 %}
+                                                {% if pregnancy_history.current_pregnancy %}
+                                                    {% with total_count=total_count|add:1 %}{% endwith %}
+                                                {% endif %}
+                                                {% if pregnancy_history.previous_pregnancies %}
+                                                    {% with total_count=total_count|add:pregnancy_history.previous_pregnancies|length %}{% endwith %}
+                                                {% endif %}
+                                                {% if pregnancy_history.pregnancy_overview %}
+                                                    {% with total_count=total_count|add:pregnancy_history.pregnancy_overview|length %}{% endwith %}
+                                                {% endif %}
+                                                <span class="clinical-badge extended">
+                                                    {% if pregnancy_history.current_pregnancy and pregnancy_history.previous_pregnancies and pregnancy_history.pregnancy_overview %}
+                                                        Complete History Available
+                                                    {% elif pregnancy_history.current_pregnancy %}
+                                                        Current Pregnancy
+                                                    {% elif pregnancy_history.previous_pregnancies %}
+                                                        {{ pregnancy_history.previous_pregnancies|length }} Previous
+                                                    {% elif pregnancy_history.pregnancy_overview %}
+                                                        {{ pregnancy_history.pregnancy_overview|length }} Overview
+                                                    {% else %}
+                                                        Data Available
+                                                    {% endif %}
+                                                </span>
+                                            {% endwith %}
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                                </label>
+                                <div class="collapsible-content-title">
+                                    <div class="content-inner-title">
+                                        <p class="mb-3 text-muted">Comprehensive pregnancy history with current status and previous outcomes</p>
+                                        
+                                        {# Mobile-First Tab Navigation #}
+                                        <div class="pregnancy-tabs-container">
+                                            {# Tab Navigation Buttons - Mobile-First Design #}
+                                            <div class="pregnancy-tab-nav" role="tablist">
+                                                {% if pregnancy_history.current_pregnancy %}
+                                                <button class="pregnancy-tab-btn active" 
+                                                        id="current-tab-btn" 
+                                                        data-tab="current-pregnancy" 
+                                                        data-action="pregnancy-tab"
+                                                        type="button" 
+                                                        role="tab" 
+                                                        aria-controls="current-pregnancy" 
+                                                        aria-selected="true">
+                                                    <i class="fa-solid fa-heartbeat me-2"></i>
+                                                    <span class="tab-text">Current Status</span>
+                                                    <span class="tab-indicator"></span>
+                                                </button>
+                                                {% endif %}
+                                                
+                                                {% if pregnancy_history.previous_pregnancies %}
+                                                <button class="pregnancy-tab-btn {% if not pregnancy_history.current_pregnancy %}active{% endif %}" 
+                                                        id="previous-tab-btn" 
+                                                        data-tab="previous-pregnancies" 
+                                                        data-action="pregnancy-tab"
+                                                        type="button" 
+                                                        role="tab" 
+                                                        aria-controls="previous-pregnancies" 
+                                                        {% if not pregnancy_history.current_pregnancy %}aria-selected="true"{% else %}aria-selected="false"{% endif %}>
+                                                    <i class="fa-solid fa-history me-2"></i>
+                                                    <span class="tab-text">Previous History</span>
+                                                    <span class="tab-badge">{{ pregnancy_history.previous_pregnancies|length }}</span>
+                                                    <span class="tab-indicator"></span>
+                                                </button>
+                                                {% endif %}
+                                                
+                                                {% if pregnancy_history.pregnancy_overview %}
+                                                <button class="pregnancy-tab-btn {% if not pregnancy_history.current_pregnancy and not pregnancy_history.previous_pregnancies %}active{% endif %}" 
+                                                        id="overview-tab-btn" 
+                                                        data-tab="pregnancy-overview" 
+                                                        data-action="pregnancy-tab"
+                                                        type="button" 
+                                                        role="tab" 
+                                                        aria-controls="pregnancy-overview" 
+                                                        {% if not pregnancy_history.current_pregnancy and not pregnancy_history.previous_pregnancies %}aria-selected="true"{% else %}aria-selected="false"{% endif %}>
+                                                    <i class="fa-solid fa-chart-line me-2"></i>
+                                                    <span class="tab-text">Overview</span>
+                                                    <span class="tab-badge">{{ pregnancy_history.pregnancy_overview|length }}</span>
+                                                    <span class="tab-indicator"></span>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            {# Tab Content Panels #}
+                                            <div class="pregnancy-tab-content">
+                                                {# Current Pregnancy Status Tab #}
+                                                {% if pregnancy_history.current_pregnancy %}
+                                                <div class="pregnancy-tab-pane active" 
+                                                     id="current-pregnancy" 
+                                                     role="tabpanel" 
+                                                     aria-labelledby="current-tab-btn">
+                                                    <div class="current-pregnancy-card">
+                                                        <div class="pregnancy-status-header">
+                                                            <h6 class="pregnancy-card-title">
+                                                                <i class="fa-solid fa-baby-carriage me-2 text-primary"></i>
+                                                                Current Pregnancy Status
+                                                            </h6>
+                                                        </div>
+                                                        
+                                                        <div class="row g-3 mt-2">
+                                                            <div class="col-md-6">
+                                                                <div class="pregnancy-info-card">
+                                                                    <div class="info-label">
+                                                                        <i class="fa-solid fa-calendar-check me-2"></i>
+                                                                        Observation Date
+                                                                    </div>
+                                                                    <div class="info-value">
+                                                                        {{ pregnancy_history.current_pregnancy.observation_date|default:"Not specified" }}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="col-md-6">
+                                                                <div class="pregnancy-info-card">
+                                                                    <div class="info-label">
+                                                                        <i class="fa-solid fa-heartbeat me-2"></i>
+                                                                        Pregnancy Status
+                                                                    </div>
+                                                                    <div class="info-value">
+                                                                        <span class="status-badge pregnant">
+                                                                            {{ pregnancy_history.current_pregnancy.pregnancy_status|default:"Active" }}
+                                                                        </span>
+                                                                        {% if pregnancy_history.current_pregnancy.pregnancy_status_code %}
+                                                                        <small class="code-reference">
+                                                                            <i class="fa-solid fa-code me-1"></i>
+                                                                            {{ pregnancy_history.current_pregnancy.pregnancy_status_code }}
+                                                                        </small>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="col-md-6">
+                                                                <div class="pregnancy-info-card">
+                                                                    <div class="info-label">
+                                                                        <i class="fa-solid fa-calendar-days me-2"></i>
+                                                                        Delivery Date Estimated
+                                                                    </div>
+                                                                    <div class="info-value">
+                                                                        {% if pregnancy_history.current_pregnancy.delivery_date_estimated %}
+                                                                            <span class="delivery-date">
+                                                                                {{ pregnancy_history.current_pregnancy.delivery_date_estimated }}
+                                                                            </span>
+                                                                        {% else %}
+                                                                            <span class="text-muted">Not specified</span>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {# History of Previous Pregnancies Tab #}
+                                                {% if pregnancy_history.previous_pregnancies %}
+                                                <div class="pregnancy-tab-pane {% if not pregnancy_history.current_pregnancy %}active{% endif %}" 
+                                                     id="previous-pregnancies" 
+                                                     role="tabpanel" 
+                                                     aria-labelledby="previous-tab-btn">
+                                                    <div class="previous-pregnancies-container">
+                                                        <div class="pregnancy-status-header">
+                                                            <h6 class="pregnancy-card-title">
+                                                                <i class="fa-solid fa-clock-rotate-left me-2 text-info"></i>
+                                                                History of Previous Pregnancies
+                                                            </h6>
+                                                            <p class="pregnancy-subtitle">
+                                                                {{ pregnancy_history.previous_pregnancies|length }} previous pregnancy outcome(s) recorded
+                                                            </p>
+                                                        </div>
+                                                        
+                                                        <div class="table-responsive">
+                                                            <table class="table table-hover pregnancy-history-table">
+                                                                <thead class="table-light">
+                                                                    <tr>
+                                                                        <th scope="col">
+                                                                            <i class="fa-solid fa-flag me-2"></i>Outcome
+                                                                        </th>
+                                                                        <th scope="col">
+                                                                            <i class="fa-solid fa-hashtag me-2"></i>Number
+                                                                        </th>
+                                                                        <th scope="col">
+                                                                            <i class="fa-solid fa-calendar me-2"></i>Outcome Date(s)
+                                                                        </th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for pregnancy in pregnancy_history.previous_pregnancies %}
+                                                                    <tr>
+                                                                        <td>
+                                                                            <div class="outcome-cell">
+                                                                                {% if pregnancy.outcome == "Livebirth" %}
+                                                                                    <i class="fa-solid fa-baby text-success me-2"></i>
+                                                                                    <span class="outcome-badge livebirth">{{ pregnancy.outcome }}</span>
+                                                                                {% elif pregnancy.outcome == "Termination of pregnancy" %}
+                                                                                    <i class="fa-solid fa-times-circle text-warning me-2"></i>
+                                                                                    <span class="outcome-badge termination">{{ pregnancy.outcome }}</span>
+                                                                                {% elif pregnancy.outcome == "Stillbirth" %}
+                                                                                    <i class="fa-solid fa-heart-crack text-danger me-2"></i>
+                                                                                    <span class="outcome-badge stillbirth">{{ pregnancy.outcome }}</span>
+                                                                                {% elif pregnancy.outcome == "Miscarriage" %}
+                                                                                    <i class="fa-solid fa-exclamation-triangle text-warning me-2"></i>
+                                                                                    <span class="outcome-badge miscarriage">{{ pregnancy.outcome }}</span>
+                                                                                {% else %}
+                                                                                    <i class="fa-solid fa-info-circle text-info me-2"></i>
+                                                                                    <span class="outcome-badge other">{{ pregnancy.outcome }}</span>
+                                                                                {% endif %}
+                                                                                
+                                                                                {% if pregnancy.outcome_code %}
+                                                                                <div class="outcome-code">
+                                                                                    <small class="text-muted">
+                                                                                        <i class="fa-solid fa-code me-1"></i>
+                                                                                        {{ pregnancy.outcome_code }}
+                                                                                    </small>
+                                                                                </div>
+                                                                                {% endif %}
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span class="pregnancy-number">{{ pregnancy.number }}</span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="outcome-dates">
+                                                                                {% if pregnancy.outcome_dates %}
+                                                                                    {% for date in pregnancy.outcome_dates %}
+                                                                                        <span class="outcome-date">{{ date }}</span>{% if not forloop.last %}, {% endif %}
+                                                                                    {% endfor %}
+                                                                                {% else %}
+                                                                                    <span class="text-muted">Not specified</span>
+                                                                                {% endif %}
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {# Previous Pregnancies Overview Tab #}
+                                                {% if pregnancy_history.pregnancy_overview %}
+                                                <div class="pregnancy-tab-pane {% if not pregnancy_history.current_pregnancy and not pregnancy_history.previous_pregnancies %}active{% endif %}" 
+                                                     id="pregnancy-overview" 
+                                                     role="tabpanel" 
+                                                     aria-labelledby="overview-tab-btn">
+                                                    <div class="pregnancy-overview-container">
+                                                        <div class="pregnancy-status-header">
+                                                            <h6 class="pregnancy-card-title">
+                                                                <i class="fa-solid fa-chart-pie me-2 text-primary"></i>
+                                                                Previous Pregnancies Overview
+                                                            </h6>
+                                                            <p class="pregnancy-subtitle">
+                                                                Comprehensive summary of all pregnancy outcomes
+                                                            </p>
+                                                        </div>
+                                                        
+                                                        <div class="overview-cards-grid">
+                                                            {% for overview in pregnancy_history.pregnancy_overview %}
+                                                            <div class="overview-card">
+                                                                <div class="overview-header">
+                                                                    <h7 class="overview-title">
+                                                                        <i class="fa-solid fa-calendar-alt me-2"></i>
+                                                                        {{ overview.outcome }}
+                                                                    </h7>
+                                                                    {% if overview.outcome_code %}
+                                                                    <span class="overview-code">
+                                                                        <i class="fa-solid fa-code me-1"></i>
+                                                                        {{ overview.outcome_code }}
+                                                                    </span>
+                                                                    {% endif %}
+                                                                </div>
+                                                                
+                                                                <div class="overview-content">
+                                                                    <div class="overview-dates">
+                                                                        <strong>Outcome Date(s):</strong>
+                                                                        {% if overview.outcome_dates %}
+                                                                            <div class="dates-list">
+                                                                                {% for date in overview.outcome_dates %}
+                                                                                    <span class="overview-date">{{ date }}</span>{% if not forloop.last %}<br>{% endif %}
+                                                                                {% endfor %}
+                                                                            </div>
+                                                                        {% else %}
+                                                                            <span class="text-muted">Not specified</span>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        {# Clinical Terminology Integration #}
+                                        <div class="clinical-terminology-summary mt-4">
+                                            <h6 class="clinical-terminology-title">
+                                                <i class="fa-solid fa-code-branch me-2"></i>
+                                                Clinical Terminology Integration
+                                            </h6>
+                                            <div class="terminology-codes pregnancy-terminology">
+                                                {% if pregnancy_history.current_pregnancy and pregnancy_history.current_pregnancy.pregnancy_status_code %}
+                                                <div class="code-group">
+                                                    <strong>Current Pregnancy Codes:</strong>
+                                                    <span class="code-badge pregnancy-code">{{ pregnancy_history.current_pregnancy.pregnancy_status_code }}</span>
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {% if pregnancy_history.previous_pregnancies %}
+                                                <div class="code-group">
+                                                    <strong>Previous Pregnancy Outcome Codes:</strong>
+                                                    {% for pregnancy in pregnancy_history.previous_pregnancies %}
+                                                        {% if pregnancy.outcome_code %}
+                                                            <span class="code-badge outcome-code">{{ pregnancy.outcome_code }}</span>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {% if pregnancy_history.pregnancy_overview %}
+                                                <div class="code-group">
+                                                    <strong>Overview Reference Codes:</strong>
+                                                    {% for overview in pregnancy_history.pregnancy_overview %}
+                                                        {% if overview.outcome_code %}
+                                                            <span class="code-badge overview-code">{{ overview.outcome_code }}</span>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    
                         {# Immunizations/Vaccinations Section #}
                         {% if immunizations and immunizations|length > 0 %}
                         <div class="clinical-section">

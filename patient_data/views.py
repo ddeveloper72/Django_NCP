@@ -40,6 +40,7 @@ from .services.section_processors import PatientSectionProcessor
 from .services.terminology_service import CentralTerminologyService
 from .services.history_of_past_illness_extractor import HistoryOfPastIllnessExtractor
 from .services.immunizations_extractor import ImmunizationsExtractor
+from .services.pregnancy_history_extractor import PregnancyHistoryExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -161,7 +162,7 @@ def detect_extended_clinical_sections(comprehensive_data: dict) -> dict:
         "47420-5": "functional_status",  # Functional Status
         "42348-3": "advance_directives",  # Advance Directives
         "11348-0": "history_of_past_illness",  # History of Past Illness (corrected LOINC code)
-        "57060-6": "pregnancy_history",  # Estimated date of delivery
+        "10162-6": "pregnancy_history",  # History of pregnancies
         "30954-2": "laboratory_results",  # Relevant diagnostic tests
     }
     
@@ -4945,6 +4946,33 @@ def patient_cda_view(request, session_id, cda_type=None):
                             logger.warning(f"[IMMUNIZATIONS] Extraction failed: {e}")
                             # Keep existing detection if specialized extraction fails
                         
+                        # PREGNANCY HISTORY SPECIALIZED EXTRACTION (PATH 1)
+                        # This runs regardless of comprehensive_data status if we have raw CDA content
+                        try:
+                            if raw_cda_content:
+                                logger.info("[PREGNANCY HISTORY PATH1] Starting specialized extraction from raw CDA content")
+                                pregnancy_extractor = PregnancyHistoryExtractor()
+                                pregnancy_data = pregnancy_extractor.extract_pregnancy_history(raw_cda_content)
+                                
+                                logger.info(f"[PREGNANCY HISTORY PATH1] Extraction result: {pregnancy_data}")
+                                if pregnancy_data:
+                                    logger.info(f"[PREGNANCY HISTORY PATH1] Current pregnancy: {pregnancy_data.current_pregnancy}")
+                                    logger.info(f"[PREGNANCY HISTORY PATH1] Previous pregnancies: {len(pregnancy_data.previous_pregnancies) if pregnancy_data.previous_pregnancies else 0}")
+                                    logger.info(f"[PREGNANCY HISTORY PATH1] Pregnancy overview: {len(pregnancy_data.pregnancy_overview) if pregnancy_data.pregnancy_overview else 0}")
+                                
+                                if pregnancy_data and (pregnancy_data.current_pregnancy or pregnancy_data.previous_pregnancies or pregnancy_data.pregnancy_overview):
+                                    # Add structured pregnancy data to extended sections
+                                    extended_sections["pregnancy_history"] = pregnancy_data
+                                    logger.info(f"[PREGNANCY HISTORY PATH1] Successfully extracted comprehensive pregnancy data - ADDED TO CONTEXT")
+                                else:
+                                    logger.info("[PREGNANCY HISTORY PATH1] No pregnancy history found in CDA document")
+                            else:
+                                logger.warning("[PREGNANCY HISTORY PATH1] No raw CDA content available for extraction")
+                                        
+                        except Exception as e:
+                            logger.warning(f"[PREGNANCY HISTORY PATH1] Extraction failed: {e}")
+                            # Keep existing detection if specialized extraction fails
+                        
                         # UPDATE CONTEXT WITH EXTENDED SECTIONS (including History of Past Illness)
                         context.update(extended_sections)
                         
@@ -5031,6 +5059,26 @@ def patient_cda_view(request, session_id, cda_type=None):
                         logger.warning(f"[IMMUNIZATIONS PATH2] Extraction failed: {e}")
                         # Keep existing detection if specialized extraction fails
                     
+                    # PREGNANCY HISTORY SPECIALIZED EXTRACTION (Path 2 - when medications already exist)
+                    # This runs when the clinical arrays block was skipped due to existing medications
+                    try:
+                        if raw_cda_content:
+                            logger.info("[PREGNANCY HISTORY PATH2] Starting specialized extraction from raw CDA content")
+                            pregnancy_extractor = PregnancyHistoryExtractor()
+                            pregnancy_data = pregnancy_extractor.extract_pregnancy_history(raw_cda_content)
+                            
+                            if pregnancy_data and (pregnancy_data.current_pregnancy or pregnancy_data.previous_pregnancies or pregnancy_data.pregnancy_overview):
+                                # Add structured pregnancy data to extended sections
+                                extended_sections["pregnancy_history"] = pregnancy_data
+                                logger.info(f"[PREGNANCY HISTORY PATH2] Successfully extracted comprehensive pregnancy data")
+                            else:
+                                logger.info("[PREGNANCY HISTORY PATH2] No pregnancy history found in CDA document")
+                        else:
+                            logger.warning("[PREGNANCY HISTORY PATH2] No raw CDA content available for extraction")
+                    except Exception as e:
+                        logger.warning(f"[PREGNANCY HISTORY PATH2] Extraction failed: {e}")
+                        # Keep existing detection if specialized extraction fails
+                    
                     context.update(extended_sections)
                     
                     total_extended = sum(len(sections) for sections in extended_sections.values())
@@ -5046,7 +5094,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                     empty_sections = {
                         "history_of_past_illness": context.get("history_of_past_illness", []),  # Preserve existing
                         "immunizations": context.get("immunizations", []),  # Don't override if already exists
-                        "pregnancy_history": [],
+                        "pregnancy_history": context.get("pregnancy_history", []),  # Preserve existing
                         "social_history": [],
                         "laboratory_results": [],
                         "advance_directives": [],
@@ -5067,7 +5115,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                 context.update({
                     "history_of_past_illness": context.get("history_of_past_illness", []),  # Preserve existing
                     "immunizations": context.get("immunizations", []),
-                    "pregnancy_history": [],
+                    "pregnancy_history": context.get("pregnancy_history", []),  # Preserve existing
                     "social_history": [],
                     "laboratory_results": [],
                     "advance_directives": [],
