@@ -1375,14 +1375,17 @@
                     </div>
                     {% endif %}
                     
-                    {# ========================================= #}
-                    {# EXTENDED CLINICAL SECTIONS GROUP HEADER #}
-                    {# ========================================= #}
-                    {% if history_of_past_illness or immunizations or pregnancy_history or social_history or laboratory_results or advance_directives or additional_sections %}
-                    <div class="extended-clinical-group mt-4">
-                        <div class="group-header mb-3">
-                            <h5 class="group-title">
-                                <i class="fa-solid fa-plus-circle me-2 text-info"></i>
+                </div>
+            </div>
+            
+            {# ========================================= #}
+            {# EXTENDED CLINICAL SECTIONS GROUP HEADER #}
+            {# ========================================= #}
+            {% if history_of_past_illness or immunizations or pregnancy_history or social_history or laboratory_results or advance_directives or additional_sections %}
+            <div class="extended-clinical-group mt-4">
+                <div class="group-header mb-3">
+                    <h5 class="group-title">
+                        <i class="fa-solid fa-plus-circle me-2 text-info"></i>
                                 Extended Clinical Information
                             </h5>
                             <p class="group-subtitle text-muted mb-0">
@@ -1734,9 +1737,6 @@
                     
                     </div>
                     {% endif %}
-                    
-                </div>
-            </div>
         </div>
         
     {% else %}
@@ -1745,4 +1745,5 @@
             No clinical information available for this patient.
         </div>
     {% endif %}
+</div>
 </div>
