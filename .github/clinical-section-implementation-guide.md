@@ -156,29 +156,76 @@ patient_data/views.py
 from .services.history_of_past_illness_extractor import HistoryOfPastIllnessExtractor
 ```
 
-#### Step 2: Add Specialized Extraction Logic
+#### Step 2: Understand the Dual Code Path Architecture
+
+**CRITICAL DISCOVERY**: The `patient_cda_view` has **TWO SEPARATE EXECUTION PATHS** for clinical data extraction:
+
+- **Path 1** (Clinical Arrays Block): Executes when `not context.get("medications")` 
+- **Path 2** (Medications Pre-exist): Executes when medications already exist from comprehensive processing
+
+**This means clinical section extraction MUST be implemented in BOTH paths or sections will be missing from the UI!**
+
+#### Step 3: Add Specialized Extraction Logic to BOTH Paths
+
+**Path 1 Implementation** (inside clinical arrays block):
 ```python
-# Inside patient_cda_view function, after clinical arrays processing
-# HISTORY OF PAST ILLNESS SPECIALIZED EXTRACTION
-# This runs regardless of comprehensive_data status if we have raw CDA content
+# CLINICAL ARRAYS EXTRACTION: Add clinical arrays for Clinical Information tab (Session-based patient path)
+# Only execute this fallback if medications weren't already extracted by comprehensive processing
 try:
-    if raw_cda_content:
-        logger.info("[HISTORY OF PAST ILLNESS] Starting specialized extraction from raw CDA content")
-        history_extractor = HistoryOfPastIllnessExtractor()
-        history_entries = history_extractor.extract_history_of_past_illness(raw_cda_content)
+    # Get the raw CDA content from the search result based on the requested type
+    raw_cda_content = None
+    if actual_cda_type == "L3":
+        raw_cda_content = search_result.l3_cda_content
+    elif actual_cda_type == "L1":
+        raw_cda_content = search_result.l1_cda_content
         
-        if history_entries:
-            # Override the history_of_past_illness with structured data
-            extended_sections["history_of_past_illness"] = history_entries
-            logger.info(f"[HISTORY OF PAST ILLNESS] Successfully extracted {len(history_entries)} structured entries")
-        else:
-            logger.info("[HISTORY OF PAST ILLNESS] No history entries found in CDA document")
-    else:
-        logger.warning("[HISTORY OF PAST ILLNESS] No raw CDA content available for extraction")
+    if raw_cda_content and raw_cda_content.strip() and not context.get("medications"):
+        logger.info("[CLINICAL ARRAYS PATH1] Starting clinical arrays extraction from raw CDA content")
+        
+        # YOUR SECTION EXTRACTION HERE (Path 1)
+        try:
+            logger.info("[HISTORY OF PAST ILLNESS PATH1] Starting specialized extraction from raw CDA content")
+            history_extractor = HistoryOfPastIllnessExtractor()
+            history_entries = history_extractor.extract_history_of_past_illness(raw_cda_content)
+            
+            if history_entries:
+                extended_sections["history_of_past_illness"] = history_entries
+                logger.info(f"[HISTORY OF PAST ILLNESS PATH1] Successfully extracted {len(history_entries)} structured entries")
+            else:
+                logger.info("[HISTORY OF PAST ILLNESS PATH1] No history entries found in CDA document")
                         
+        except Exception as e:
+            logger.warning(f"[HISTORY OF PAST ILLNESS PATH1] Extraction failed: {e}")
+        
+        # ... other clinical arrays extractions ...
+```
+
+**Path 2 Implementation** (after comprehensive processing):
+```python
+# SPECIALIZED EXTRACTION FOR PATH 2: When medications already exist from comprehensive processing
+# Extract clinical sections that may not be handled by comprehensive service
+try:
+    if raw_cda_content and raw_cda_content.strip():
+        logger.info("[CLINICAL SECTIONS PATH2] Starting specialized extraction for missing sections")
+        
+        # YOUR SECTION EXTRACTION HERE (Path 2)
+        try:
+            logger.info("[HISTORY OF PAST ILLNESS PATH2] Starting specialized extraction from raw CDA content")
+            history_extractor = HistoryOfPastIllnessExtractor()
+            history_entries = history_extractor.extract_history_of_past_illness(raw_cda_content)
+            
+            if history_entries:
+                # Override or add to extended_sections
+                extended_sections["history_of_past_illness"] = history_entries
+                logger.info(f"[HISTORY OF PAST ILLNESS PATH2] Successfully extracted {len(history_entries)} structured entries")
+            else:
+                logger.info("[HISTORY OF PAST ILLNESS PATH2] No history entries found in CDA document")
+                        
+        except Exception as e:
+            logger.warning(f"[HISTORY OF PAST ILLNESS PATH2] Extraction failed: {e}")
+            
 except Exception as e:
-    logger.warning(f"[HISTORY OF PAST ILLNESS] Extraction failed: {e}")
-    # Keep existing detection if specialized extraction fails
+    logger.warning(f"[CLINICAL SECTIONS PATH2] Overall extraction failed: {e}")
 
 # UPDATE CONTEXT WITH EXTENDED SECTIONS (including History of Past Illness)
 context.update(extended_sections)
@@ -187,7 +234,7 @@ total_extended = sum(len(sections) for sections in extended_sections.values())
 logger.info(f"[EXTENDED SECTIONS] Added {total_extended} extended clinical sections to context")
 ```
 
-#### Step 3: Add to Extended Sections Detection
+#### Step 4: Add to Extended Sections Detection
 ```python
 # In detect_extended_clinical_sections function
 extended_section_mapping = {
@@ -199,10 +246,23 @@ extended_section_mapping = {
 
 ### Critical Implementation Notes
 
-1. **Context Assignment**: Always call `context.update(extended_sections)` after extraction
-2. **Independent Processing**: Make extraction independent of comprehensive_data status
-3. **Error Handling**: Graceful degradation if extraction fails
-4. **Logging**: Comprehensive logging for debugging and monitoring
+1. **Dual Path Architecture**: ALWAYS implement extraction in BOTH Path 1 and Path 2
+2. **Context Assignment**: Always call `context.update(extended_sections)` after extraction
+3. **Independent Processing**: Make extraction independent of comprehensive_data status
+4. **Error Handling**: Graceful degradation if extraction fails
+5. **Logging**: Use path-specific logging (`[SECTION_NAME PATH1]` and `[SECTION_NAME PATH2]`) for debugging
+6. **Testing Strategy**: Test with patients like Diana Ferreira who have complete clinical data to verify both paths work
+
+### Path Selection Logic
+```python
+# Path 1 executes when:
+if raw_cda_content and raw_cda_content.strip() and not context.get("medications"):
+    # Clinical arrays block - comprehensive service hasn't run
+
+# Path 2 executes when:  
+if raw_cda_content and raw_cda_content.strip():
+    # After comprehensive service - medications may already exist
+```
 
 ---
 
@@ -460,6 +520,29 @@ expect(entryCount).toContain('2 Found');
 **Problem**: Code fields are empty
 **Solution**: Implement specific code extraction methods with proper attribute handling
 
+### Issue 5: ⚠️ **CRITICAL** - Missing Clinical Sections Due to Dual Path Architecture
+**Problem**: Clinical section extraction works in isolation but doesn't appear in live UI
+**Root Cause**: Django view has **TWO SEPARATE EXECUTION PATHS**:
+- **Path 1**: Clinical arrays block (when `not context.get("medications")`)
+- **Path 2**: When medications pre-exist from comprehensive processing
+
+**Solution**: 
+1. **Always implement extraction in BOTH paths**
+2. **Test with complete CDA data** (like Diana Ferreira) that triggers comprehensive processing
+3. **Use path-specific logging** to identify which path is executing
+4. **Verify context.update() is called in both paths**
+
+### Issue 6: Testing with Incomplete CDA Data
+**Problem**: Using test patients without complete clinical sections 
+**Solution**: Use Diana Ferreira CDA (`2-1234-W7.xml`) as gold standard - contains ALL clinical sections needed for comprehensive testing
+
+### Debugging Workflow for Missing Sections
+1. **Check Server Logs**: Look for path-specific extraction logs (`[SECTION_NAME PATH1]` vs `[SECTION_NAME PATH2]`)
+2. **Verify Path Execution**: Check if medications exist in context to determine which path runs
+3. **Test Extraction Isolation**: Run extractor directly with CDA content to verify it works
+4. **Validate Template Logic**: Ensure conditional rendering logic is correct
+5. **Use Complete Test Data**: Always test with Diana Ferreira's complete CDA for real-world scenarios
+
 ---
 
 ## 7. Next Section Implementation Template
@@ -482,25 +565,87 @@ class {NextSection}Extractor:
         # Follow the established pattern
         pass
 
-# 4. Add to views.py
+# 4. Add to views.py - BOTH PATHS!
 from .services.{next_section}_extractor import {NextSection}Extractor
 
-# 5. Add extraction logic in patient_cda_view
+# PATH 1 (Clinical Arrays Block):
+if raw_cda_content and raw_cda_content.strip() and not context.get("medications"):
+    try:
+        logger.info("[{NEXT_SECTION} PATH1] Starting extraction")
+        extractor = {NextSection}Extractor()
+        entries = extractor.extract_{next_section}(raw_cda_content)
+        if entries:
+            extended_sections["{next_section}"] = entries
+            logger.info(f"[{NEXT_SECTION} PATH1] Extracted {len(entries)} entries")
+    except Exception as e:
+        logger.warning(f"[{NEXT_SECTION} PATH1] Failed: {e}")
 
-# 6. Add template section in clinical_information_content.html
+# PATH 2 (Medications Pre-exist):
+if raw_cda_content and raw_cda_content.strip():
+    try:
+        logger.info("[{NEXT_SECTION} PATH2] Starting extraction")
+        extractor = {NextSection}Extractor()
+        entries = extractor.extract_{next_section}(raw_cda_content)
+        if entries:
+            extended_sections["{next_section}"] = entries
+            logger.info(f"[{NEXT_SECTION} PATH2] Extracted {len(entries)} entries")
+    except Exception as e:
+        logger.warning(f"[{NEXT_SECTION} PATH2] Failed: {e}")
 
-# 7. Test with Playwright
+# 5. Add template section in clinical_information_content.html
+
+# 6. Test with Diana Ferreira CDA (2-1234-W7.xml)
 ```
+
+## 8. Diana Ferreira CDA - Gold Standard Test Data
+
+**Diana Ferreira (`2-1234-W7.xml`) is our comprehensive test patient** with ALL clinical sections:
+
+✅ **Complete Clinical Sections Available:**
+- **Immunizations** (LOINC 11369-6) - 4 substanceAdministration entries
+- **Medications** (History of medication use) - 5 medication entries  
+- **Allergies** (4 allergy/intolerance entries)
+- **Problem List** (7 active conditions)
+- **Procedures** (3 surgical procedures)
+- **Medical Devices** (2 implanted devices)
+- **History of Past Illness** (2 resolved conditions)
+- **Social History** (smoking/alcohol data)
+- **Vital Signs** (blood pressure measurements)
+- **Lab Results** (diagnostic test data)
+- **Pregnancy History** (comprehensive pregnancy data)
+- **Functional Status** (mobility assessments)
+
+**Why Diana Ferreira is Essential for Testing:**
+1. **Triggers Comprehensive Processing**: Has medications that activate Path 2 logic
+2. **Real-world CDA Structure**: Portuguese healthcare system standard
+3. **Complete Clinical Picture**: All section types for thorough testing
+4. **Proper LOINC Coding**: Standards-compliant clinical terminology
+5. **substanceAdministration Elements**: Tests enhanced parsing capabilities
+
+**Testing Strategy:**
+- **Primary Development**: Always use Diana Ferreira CDA
+- **Edge Case Testing**: Use other patients for specific scenarios only after core functionality works
+- **Dual Path Validation**: Diana's complete data ensures both execution paths are tested
 
 ---
 
 ## Conclusion
 
-This guide provides a complete blueprint for implementing clinical sections in Django_NCP. The modular approach ensures:
+This guide provides a complete blueprint for implementing clinical sections in Django_NCP. The **CRITICAL DISCOVERY** of the dual code path architecture fundamentally changes the implementation approach:
 
+### Key Architectural Insights:
+- **Dual Path Reality**: Always implement extraction in BOTH execution paths
+- **Diana Ferreira Standard**: Use complete CDA test data for realistic development
+- **Path-Specific Debugging**: Log with path identifiers for effective troubleshooting
+- **Comprehensive Testing**: Validate both scenarios (with/without existing medications)
+
+### Development Principles:
 - **Consistency** across different clinical sections
-- **Maintainability** through clear separation of concerns
-- **Testability** with comprehensive validation
+- **Maintainability** through clear separation of concerns  
+- **Testability** with comprehensive validation using complete CDA data
 - **Healthcare Standards Compliance** with proper clinical terminology integration
+- **Dual Path Coverage** ensuring sections appear in all user scenarios
 
-Follow this pattern for each new clinical section to maintain architectural consistency and ensure reliable functionality.
+Follow this updated pattern for each new clinical section to maintain architectural consistency, avoid the dual path pitfall, and ensure reliable functionality across all user workflows.
+
+**Time Savings**: This discovery and updated guide will save significant development time by immediately addressing the most common cause of "missing clinical sections" in the UI - a problem that previously required extensive debugging to identify.
