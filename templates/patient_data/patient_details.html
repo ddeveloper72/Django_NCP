@@ -198,6 +198,12 @@
                                 <i class="fa-solid fa-download me-2"></i>
                                 <div>
                                     <div class="fw-bold">CDA Download</div>
+                                    <small class="d-block">
+                                        {% if l1_available %}L1 Document (PDF Structure){% else %}{{ preferred_cda_type|default:"L3" }} Document{% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </a>
 
                         <!-- Clinical Data Debugger -->
                         {% if patient_id %}
@@ -209,15 +215,8 @@
                                     <small class="d-block">Analyze extraction data</small>
                                 </div>
                             </div>
-                            <i class="fa-solid fa-chevron-right text-muted"></i>
                         </a>
                         {% endif %}
-                                    <small class="d-block">
-                                        {% if l1_available %}L1 Document (PDF Structure){% else %}{{ preferred_cda_type|default:"L3" }} Document{% endif %}
-                                    </small>
-                                </div>
-                            </div>
-                        </a>
 
                         <!-- Patient Summary PDF Download -->
                         <a href="{% url 'patient_data:download_patient_summary_pdf' patient_id %}"
