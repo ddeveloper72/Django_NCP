@@ -39,6 +39,7 @@ from .services.clinical_pdf_service import ClinicalDocumentPDFService
 from .services.section_processors import PatientSectionProcessor
 from .services.terminology_service import CentralTerminologyService
 from .services.history_of_past_illness_extractor import HistoryOfPastIllnessExtractor
+from .services.immunizations_extractor import ImmunizationsExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -4921,6 +4922,27 @@ def patient_cda_view(request, session_id, cda_type=None):
                                         
                         except Exception as e:
                             logger.warning(f"[HISTORY OF PAST ILLNESS] Extraction failed: {e}")
+                            # Keep existing detection if specialized extraction fails
+                        
+                        # IMMUNIZATIONS SPECIALIZED EXTRACTION
+                        # This runs regardless of comprehensive_data status if we have raw CDA content
+                        try:
+                            if raw_cda_content:
+                                logger.info("[IMMUNIZATIONS] Starting specialized extraction from raw CDA content")
+                                immunizations_extractor = ImmunizationsExtractor()
+                                immunization_entries = immunizations_extractor.extract_immunizations(raw_cda_content)
+                                
+                                if immunization_entries:
+                                    # Override the immunizations with structured data
+                                    extended_sections["immunizations"] = immunization_entries
+                                    logger.info(f"[IMMUNIZATIONS] Successfully extracted {len(immunization_entries)} structured entries")
+                                else:
+                                    logger.info("[IMMUNIZATIONS] No immunization entries found in CDA document")
+                            else:
+                                logger.warning("[IMMUNIZATIONS] No raw CDA content available for extraction")
+                                        
+                        except Exception as e:
+                            logger.warning(f"[IMMUNIZATIONS] Extraction failed: {e}")
                             # Keep existing detection if specialized extraction fails
                         
                         # UPDATE CONTEXT WITH EXTENDED SECTIONS (including History of Past Illness)
