@@ -42,6 +42,7 @@ from .services.history_of_past_illness_extractor import HistoryOfPastIllnessExtr
 from .services.immunizations_extractor import ImmunizationsExtractor
 from .services.pregnancy_history_extractor import PregnancyHistoryExtractor
 from .services.social_history_extractor import SocialHistoryExtractor
+from .services.physical_findings_extractor import PhysicalFindingsExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -4994,6 +4995,26 @@ def patient_cda_view(request, session_id, cda_type=None):
                             logger.warning(f"[SOCIAL HISTORY PATH1] Extraction failed: {e}")
                             # Keep existing detection if specialized extraction fails
                         
+                        # PHYSICAL FINDINGS SPECIALIZED EXTRACTION (PATH 1)
+                        # This runs regardless of comprehensive_data status if we have raw CDA content
+                        try:
+                            if raw_cda_content:
+                                logger.info("[PHYSICAL FINDINGS PATH1] Starting specialized extraction from raw CDA content")
+                                physical_findings_extractor = PhysicalFindingsExtractor()
+                                physical_findings_entries = physical_findings_extractor.extract_physical_findings(raw_cda_content)
+                                
+                                if physical_findings_entries:
+                                    extended_sections["physical_findings"] = physical_findings_entries
+                                    logger.info(f"[PHYSICAL FINDINGS PATH1] Successfully extracted {len(physical_findings_entries)} entries - ADDED TO CONTEXT")
+                                else:
+                                    logger.info("[PHYSICAL FINDINGS PATH1] No physical findings entries found in CDA document")
+                            else:
+                                logger.warning("[PHYSICAL FINDINGS PATH1] No raw CDA content available for extraction")
+                                        
+                        except Exception as e:
+                            logger.warning(f"[PHYSICAL FINDINGS PATH1] Extraction failed: {e}")
+                            # Keep existing detection if specialized extraction fails
+                        
                         # UPDATE CONTEXT WITH EXTENDED SECTIONS (including History of Past Illness)
                         context.update(extended_sections)
                         
@@ -5137,6 +5158,23 @@ def patient_cda_view(request, session_id, cda_type=None):
                             logger.warning("[SOCIAL HISTORY PATH2] No raw CDA content available for extraction")
                     except Exception as e:
                         logger.warning(f"[SOCIAL HISTORY PATH2] Extraction failed: {e}")
+                    
+                    # PHYSICAL FINDINGS SPECIALIZED EXTRACTION (PATH 2)
+                    try:
+                        if raw_cda_content:
+                            logger.info("[PHYSICAL FINDINGS PATH2] Starting specialized extraction from raw CDA content")
+                            physical_findings_extractor = PhysicalFindingsExtractor()
+                            physical_findings_entries = physical_findings_extractor.extract_physical_findings(raw_cda_content)
+                            
+                            if physical_findings_entries:
+                                extended_sections["physical_findings"] = physical_findings_entries
+                                logger.info(f"[PHYSICAL FINDINGS PATH2] Successfully extracted {len(physical_findings_entries)} entries")
+                            else:
+                                logger.info("[PHYSICAL FINDINGS PATH2] No physical findings entries found in CDA document")
+                        else:
+                            logger.warning("[PHYSICAL FINDINGS PATH2] No raw CDA content available for extraction")
+                    except Exception as e:
+                        logger.warning(f"[PHYSICAL FINDINGS PATH2] Extraction failed: {e}")
                         # Keep existing detection if specialized extraction fails
                 
                     context["extended_sections"] = extended_sections

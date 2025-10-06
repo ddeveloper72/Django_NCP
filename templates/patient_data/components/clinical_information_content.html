@@ -4,7 +4,7 @@
 
 <div class="clinical-information-container">
     {# Check if we have any clinical data - including extended sections #}
-    {% if medications or allergies or problems or vital_signs or procedures or immunizations or history_of_past_illness or pregnancy_history or social_history or laboratory_results or advance_directives or additional_sections %}
+    {% if medications or allergies or problems or vital_signs or procedures or immunizations or history_of_past_illness or pregnancy_history or social_history or physical_findings or laboratory_results or advance_directives or additional_sections %}
         
         {# Main Clinical Sections Container #}
         <div class="collapsible-wrapper">
@@ -1381,7 +1381,7 @@
             {# ========================================= #}
             {# EXTENDED CLINICAL SECTIONS GROUP HEADER #}
             {# ========================================= #}
-            {% if history_of_past_illness or immunizations or pregnancy_history or social_history or laboratory_results or advance_directives or additional_sections %}
+            {% if history_of_past_illness or immunizations or pregnancy_history or social_history or physical_findings or laboratory_results or advance_directives or additional_sections %}
             <div class="extended-clinical-group mt-4">
                 <div class="group-header mb-3">
                     <h5 class="group-title">
@@ -2258,32 +2258,239 @@
                                 </label>
                                 <div class="collapsible-content-title">
                                     <div class="content-inner-title">
-                                        <p class="mb-3 text-muted">Social History: {{ social_history|length }} items found</p>
-                                        {% for social in social_history %}
-                                        <div class="social-history-card mb-3 p-3 border rounded bg-white">
-                                            <h6 class="social-item-title text-dark mb-2">
-                                                {% if social.name %}
-                                                    {{ social.name }}
-                                                {% elif social.code.displayName %}
-                                                    {{ social.code.displayName }}
-                                                {% else %}
-                                                    Social History Item
-                                                {% endif %}
-                                            </h6>
-                                            {% if social.value %}
-                                            <div class="text-muted mb-1">
-                                                <i class="fa-solid fa-info-circle me-1"></i>
-                                                <strong>Details:</strong> {{ social.value }}
+                                        <p class="mb-3 text-muted">Social History: {{ social_history|length }} observations found</p>
+                                        
+                                        {# Professional Social History Table #}
+                                        <div class="social-history-table-container bg-white border rounded-3 shadow-sm overflow-hidden">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-hover mb-0 social-history-table">
+                                                    <thead class="table-primary">
+                                                        <tr>
+                                                            <th scope="col" class="fw-bold">
+                                                                <i class="fa-solid fa-eye me-2"></i>Observation Type
+                                                            </th>
+                                                            <th scope="col" class="fw-bold">
+                                                                <i class="fa-solid fa-chart-line me-2"></i>Observation Value
+                                                            </th>
+                                                            <th scope="col" class="fw-bold">
+                                                                <i class="fa-solid fa-calendar me-2"></i>Observation Time
+                                                            </th>
+                                                            <th scope="col" class="fw-bold">
+                                                                <i class="fa-solid fa-code me-2"></i>Clinical Code
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for social_item in social_history %}
+                                                        <tr>
+                                                            <td class="social-observation-type">
+                                                                <div class="clinical-field-content">
+                                                                    <strong>{{ social_item.observation_type|default:"Social History Observation" }}</strong>
+                                                                    {% if social_item.status %}
+                                                                        <small class="text-muted d-block">Status: {{ social_item.status }}</small>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </td>
+                                                            <td class="social-observation-value">
+                                                                <div class="clinical-field-content">
+                                                                    {% if social_item.observation_value %}
+                                                                        <span class="clinical-value">{{ social_item.observation_value }}</span>
+                                                                    {% else %}
+                                                                        <span class="text-muted">No value recorded</span>
+                                                                    {% endif %}
+                                                                    {% if social_item.value_numeric and social_item.value_unit %}
+                                                                        <small class="text-muted d-block">
+                                                                            Numeric: {{ social_item.value_numeric }} {{ social_item.value_unit }}
+                                                                        </small>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </td>
+                                                            <td class="social-observation-time">
+                                                                <div class="clinical-field-content">
+                                                                    {% if social_item.observation_time %}
+                                                                        <span class="clinical-time">{{ social_item.observation_time }}</span>
+                                                                    {% else %}
+                                                                        <span class="text-muted">Time not specified</span>
+                                                                    {% endif %}
+                                                                    {% if social_item.effective_time_low or social_item.effective_time_high %}
+                                                                        <small class="text-muted d-block">
+                                                                            {% if social_item.effective_time_low %}From: {{ social_item.effective_time_low }}{% endif %}
+                                                                            {% if social_item.effective_time_high %} To: {{ social_item.effective_time_high }}{% endif %}
+                                                                        </small>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </td>
+                                                            <td class="social-clinical-codes">
+                                                                <div class="clinical-field-content">
+                                                                    {% if social_item.observation_code %}
+                                                                        <div class="clinical-terminology-summary">
+                                                                            <span class="medical-code-badge">
+                                                                                <i class="fa-solid fa-tag me-1"></i>
+                                                                                <code>{{ social_item.observation_code }}</code>
+                                                                            </span>
+                                                                            {% if social_item.observation_code_system %}
+                                                                                <small class="text-muted d-block">
+                                                                                    System: {{ social_item.observation_code_system }}
+                                                                                </small>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    {% else %}
+                                                                        <span class="text-muted">No coding available</span>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                            {% endif %}
-                                            {% if social.effective_time %}
-                                            <div class="text-muted">
-                                                <i class="fa-solid fa-calendar me-1"></i>
-                                                <strong>Date:</strong> {{ social.effective_time }}
-                                            </div>
-                                            {% endif %}
                                         </div>
-                                        {% endfor %}
+                                        
+                                        {# Clinical Terminology Summary for Social History #}
+                                        <div class="clinical-terminology-summary mt-3 p-3 bg-light border rounded">
+                                            <h6 class="terminology-title mb-2">
+                                                <i class="fa-solid fa-code-branch me-2"></i>Clinical Terminology Summary
+                                            </h6>
+                                            <div class="terminology-stats">
+                                                {% with coded_observations=social_history|length %}
+                                                <span class="terminology-badge coded">
+                                                    <i class="fa-solid fa-check-circle me-1"></i>
+                                                    {{ coded_observations }} Coded Observation{{ coded_observations|pluralize }}
+                                                </span>
+                                                {% endwith %}
+                                                <small class="terminology-note text-muted d-block mt-1">
+                                                    Social history observations with standardized clinical terminology for CTS integration
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    
+                        {# Physical Findings Section #}
+                        {% if physical_findings and physical_findings|length > 0 %}
+                        <div class="clinical-section">
+                            <div class="collapsible-wrapper">
+                                <input id="toggle-physical-findings" class="toggle-input" type="checkbox">
+                                <label for="toggle-physical-findings" class="collapsible-label-title">
+                                    <div class="clinical-section-title-row">
+                                        <div class="clinical-section-title">
+                                            <i class="fa-solid fa-stethoscope me-2"></i>
+                                            <span>Physical Findings</span>
+                                        </div>
+                                        <div class="clinical-badge-container">
+                                            <span class="clinical-badge extended">✓ {{ physical_findings|length }} Found</span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                                </label>
+                                <div class="collapsible-content-title">
+                                    <div class="content-inner-title">
+                                        <p class="mb-3 text-muted">Physical Findings: {{ physical_findings|length }} observations found</p>
+                                        
+                                        {# Professional Physical Findings Table #}
+                                        <div class="table-responsive mb-4">
+                                            <table class="table table-striped table-hover clinical-data-table">
+                                                <caption class="visually-hidden">Data table</caption>
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th scope="col" class="clinical-table-header">
+                                                            <i class="fa-solid fa-eye me-1" aria-hidden="true"></i>
+                                                            Observation Type
+                                                        </th>
+                                                        <th scope="col" class="clinical-table-header">
+                                                            <i class="fa-solid fa-chart-line me-1" aria-hidden="true"></i>
+                                                            Observation Value
+                                                        </th>
+                                                        <th scope="col" class="clinical-table-header">
+                                                            <i class="fa-solid fa-clock me-1" aria-hidden="true"></i>
+                                                            Observation Time
+                                                        </th>
+                                                        <th scope="col" class="clinical-table-header">
+                                                            <i class="fa-solid fa-code me-1" aria-hidden="true"></i>
+                                                            Clinical Code
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for physical_item in physical_findings %}
+                                                    <tr>
+                                                        <td class="physical-observation-type">
+                                                            <div class="clinical-field-content">
+                                                                <strong>{{ physical_item.observation_type|default:"Physical Finding" }}</strong>
+                                                                {% if physical_item.status %}
+                                                                    <small class="text-muted d-block">Status: {{ physical_item.status }}</small>
+                                                                {% endif %}
+                                                                {% if physical_item.organizer_type and physical_item.organizer_type != physical_item.observation_type %}
+                                                                    <small class="text-info d-block">Group: {{ physical_item.organizer_type }}</small>
+                                                                {% endif %}
+                                                            </div>
+                                                        </td>
+                                                        <td class="physical-observation-value">
+                                                            <div class="clinical-field-content">
+                                                                {% if physical_item.observation_value %}
+                                                                    <span class="clinical-value">{{ physical_item.observation_value }}</span>
+                                                                    {% if physical_item.value_numeric and physical_item.value_unit %}
+                                                                        <small class="text-muted d-block">Numeric: {{ physical_item.value_numeric }} {{ physical_item.value_unit }}</small>
+                                                                    {% endif %}
+                                                                {% else %}
+                                                                    <span class="text-muted">No value recorded</span>
+                                                                {% endif %}
+                                                            </div>
+                                                        </td>
+                                                        <td class="physical-observation-time">
+                                                            <div class="clinical-field-content">
+                                                                {% if physical_item.observation_time %}
+                                                                    <span class="clinical-time">{{ physical_item.observation_time }}</span>
+                                                                    {% if physical_item.effective_time and physical_item.effective_time != physical_item.observation_time %}
+                                                                        <small class="text-muted d-block">From: {{ physical_item.effective_time }}</small>
+                                                                    {% endif %}
+                                                                {% else %}
+                                                                    <span class="text-muted">Time not specified</span>
+                                                                {% endif %}
+                                                            </div>
+                                                        </td>
+                                                        <td class="physical-clinical-code">
+                                                            <div class="clinical-field-content">
+                                                                {% if physical_item.observation_code %}
+                                                                    <div class="clinical-code-badge">
+                                                                        <i class="fa-solid fa-hashtag me-1" aria-hidden="true"></i>
+                                                                        <code>{{ physical_item.observation_code }}</code>
+                                                                    </div>
+                                                                    {% if physical_item.observation_code_system %}
+                                                                        <small class="text-muted d-block">System: {{ physical_item.observation_code_system }}</small>
+                                                                    {% endif %}
+                                                                {% else %}
+                                                                    <span class="text-muted">No code available</span>
+                                                                {% endif %}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        
+                                        {# Clinical Terminology Summary for Physical Findings #}
+                                        <div class="clinical-terminology-summary mt-4">
+                                            <h6 class="clinical-summary-title">
+                                                <i class="fa-solid fa-code-branch me-2" aria-hidden="true"></i>
+                                                Clinical Terminology Summary
+                                            </h6>
+                                            <div class="terminology-summary-content">
+                                                {% with coded_observations=physical_findings|length %}
+                                                <div class="summary-stat">
+                                                    <i class="fa-solid fa-chart-bar me-1" aria-hidden="true"></i>
+                                                    <strong>{{ coded_observations }} Coded Observations</strong>
+                                                </div>
+                                                {% endwith %}
+                                                <small class="terminology-note text-muted d-block mt-1">
+                                                    Physical findings with standardized clinical terminology for CTS integration
+                                                </small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

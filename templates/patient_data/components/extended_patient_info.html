@@ -60,11 +60,12 @@
             {% with has_history_of_past_illness=history_of_past_illness|length|yesno:"1,0" %}
             {% with has_medical_devices=medical_devices|length|yesno:"1,0" %}
             {% with has_social_history=social_history|length|yesno:"1,0" %}
+            {% with has_physical_findings=physical_findings|length|yesno:"1,0" %}
             {% with has_lab_results=lab_results|length|yesno:"1,0" %}
             {% with has_pregnancy_history=pregnancy_history|yesno:"1,0" %}
             {% with has_functional_status=functional_status|length|yesno:"1,0" %}
             {% with base_count=has_medications|add:has_allergies|add:has_problems|add:has_procedures|add:has_vital_signs %}
-            {% with extended_count=has_immunizations|add:has_history_of_past_illness|add:has_medical_devices|add:has_social_history|add:has_lab_results|add:has_pregnancy_history|add:has_functional_status %}
+            {% with extended_count=has_immunizations|add:has_history_of_past_illness|add:has_medical_devices|add:has_social_history|add:has_physical_findings|add:has_lab_results|add:has_pregnancy_history|add:has_functional_status %}
             {% with total_section_count=base_count|add:extended_count %}
             
             {% if total_section_count > 0 %}
@@ -83,6 +84,7 @@
             {% endwith %} {# has_functional_status #}
             {% endwith %} {# has_pregnancy_history #}
             {% endwith %} {# has_lab_results #}
+            {% endwith %} {# has_physical_findings #}
             {% endwith %} {# has_social_history #}
             {% endwith %} {# has_medical_devices #}
             {% endwith %} {# has_history_of_past_illness #}
