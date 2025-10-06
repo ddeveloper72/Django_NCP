@@ -373,15 +373,15 @@ function initializeExtendedPatientEventDelegation() {
         const targetTab = target.dataset.tab;
         console.log('🎯 Pregnancy tab clicked via event delegation:', targetTab);
         console.log('🔧 Target button classes:', target.classList.toString());
-        
+
         if (targetTab) {
           // Remove active class from all pregnancy tab buttons and panes
           const pregnancyTabBtns = document.querySelectorAll('.pregnancy-tab-btn');
           const pregnancyTabPanes = document.querySelectorAll('.pregnancy-tab-pane');
-          
+
           console.log('🔧 Found', pregnancyTabBtns.length, 'pregnancy tab buttons');
           console.log('🔧 Found', pregnancyTabPanes.length, 'pregnancy tab panes');
-          
+
           pregnancyTabBtns.forEach(b => {
             b.classList.remove('active');
             b.setAttribute('aria-selected', 'false');
@@ -396,7 +396,7 @@ function initializeExtendedPatientEventDelegation() {
           target.classList.add('active');
           target.setAttribute('aria-selected', 'true');
           console.log('🔧 Added active to button:', target.id);
-          
+
           const targetPane = document.getElementById(targetTab);
           if (targetPane) {
             targetPane.classList.add('active');
@@ -542,7 +542,7 @@ window.debugTabs = function () {
  */
 function initializePregnancyHistoryTabs() {
   console.log('🔧 Initializing pregnancy history tabs...');
-  
+
   const pregnancyTabBtns = document.querySelectorAll('.pregnancy-tab-btn');
   const pregnancyTabPanes = document.querySelectorAll('.pregnancy-tab-pane');
 
@@ -556,11 +556,11 @@ function initializePregnancyHistoryTabs() {
 
   pregnancyTabBtns.forEach((btn, index) => {
     console.log(`🔍 Tab button ${index}:`, btn.getAttribute('data-tab'), btn.textContent.trim());
-    
+
     btn.addEventListener('click', function (e) {
       e.preventDefault();
       const targetTab = this.getAttribute('data-tab');
-      
+
       console.log('🎯 Pregnancy tab clicked:', targetTab);
 
       // Remove active class from all buttons and panes

@@ -43,6 +43,7 @@ from .services.immunizations_extractor import ImmunizationsExtractor
 from .services.pregnancy_history_extractor import PregnancyHistoryExtractor
 from .services.social_history_extractor import SocialHistoryExtractor
 from .services.physical_findings_extractor import PhysicalFindingsExtractor
+from .services.coded_results_extractor import CodedResultsExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -151,6 +152,8 @@ def detect_extended_clinical_sections(comprehensive_data: dict) -> dict:
         "immunizations": [],
         "pregnancy_history": [],
         "social_history": [],
+        "physical_findings": [],
+        "coded_results": {"blood_group": [], "diagnostic_results": []},
         "laboratory_results": [],
         "advance_directives": [],
         "additional_sections": []
@@ -166,6 +169,12 @@ def detect_extended_clinical_sections(comprehensive_data: dict) -> dict:
         "11348-0": "history_of_past_illness",  # History of Past Illness (corrected LOINC code)
         "10162-6": "pregnancy_history",  # History of pregnancies
         "30954-2": "laboratory_results",  # Relevant diagnostic tests
+        "18748-4": "coded_results",  # Diagnostic imaging report
+        "34530-6": "coded_results",  # ABO/Rh blood group panel
+        "883-9": "coded_results",    # ABO blood group
+        "882-1": "coded_results",    # Rh blood group
+        "18725-2": "coded_results",  # Microbiology studies
+        "11502-2": "coded_results",  # Laboratory report
     }
     
     if not comprehensive_data or not isinstance(comprehensive_data, dict):
@@ -2989,6 +2998,7 @@ def patient_details_view(request, patient_id):
                     "vital_signs": clinical_arrays["vital_signs"],
                     "results": clinical_arrays["results"],
                     "immunizations": clinical_arrays["immunizations"],
+                    "coded_results": {"blood_group": [], "diagnostic_results": []},  # Initialize for template compatibility
                 }
             )
             total_clinical_items = sum(
@@ -3008,6 +3018,7 @@ def patient_details_view(request, patient_id):
                     "vital_signs": [],
                     "results": [],
                     "immunizations": [],
+                    "coded_results": {"blood_group": [], "diagnostic_results": []},  # Initialize for template compatibility
                 }
             )
             logger.info(f"[PATIENT_DETAILS] Added empty clinical arrays to context for patient {patient_id}")
@@ -3032,6 +3043,7 @@ def patient_details_view(request, patient_id):
                 "session_expired": True,
                 "show_search_again_message": True,
                 "session_error": "Patient search data has expired. Please search again to view CDA documents and detailed information.",
+                "coded_results": {"blood_group": [], "diagnostic_results": []},  # Initialize for template compatibility
             }
         )
 
@@ -3759,6 +3771,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                             "vital_signs": clinical_arrays["vital_signs"],
                             "results": clinical_arrays["results"],
                             "immunizations": clinical_arrays["immunizations"],
+                            "coded_results": {"blood_group": [], "diagnostic_results": []},
                         }
                     )
                     total_clinical_items = sum(
@@ -3778,6 +3791,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                             "vital_signs": [],
                             "results": [],
                             "immunizations": [],
+                            "coded_results": {"blood_group": [], "diagnostic_results": []},
                         }
                     )
                     logger.info(
@@ -4901,6 +4915,8 @@ def patient_cda_view(request, session_id, cda_type=None):
                                 "immunizations": [],
                                 "pregnancy_history": [],
                                 "social_history": [],
+                                "physical_findings": [],
+                                "coded_results": {"blood_group": [], "diagnostic_results": []},
                                 "laboratory_results": [],
                                 "advance_directives": [],
                                 "additional_sections": []
@@ -5015,6 +5031,28 @@ def patient_cda_view(request, session_id, cda_type=None):
                             logger.warning(f"[PHYSICAL FINDINGS PATH1] Extraction failed: {e}")
                             # Keep existing detection if specialized extraction fails
                         
+                        # CODED RESULTS SPECIALIZED EXTRACTION (PATH 1)
+                        # This extracts both blood group and diagnostic results
+                        try:
+                            if raw_cda_content:
+                                logger.info("[CODED RESULTS PATH1] Starting specialized extraction from raw CDA content")
+                                coded_results_extractor = CodedResultsExtractor()
+                                coded_results_data = coded_results_extractor.extract_coded_results(raw_cda_content)
+                                
+                                if coded_results_data and (coded_results_data.get('blood_group') or coded_results_data.get('diagnostic_results')):
+                                    extended_sections["coded_results"] = coded_results_data
+                                    blood_group_count = len(coded_results_data.get('blood_group', []))
+                                    diagnostic_count = len(coded_results_data.get('diagnostic_results', []))
+                                    logger.info(f"[CODED RESULTS PATH1] Successfully extracted {blood_group_count} blood group + {diagnostic_count} diagnostic results - ADDED TO CONTEXT")
+                                else:
+                                    logger.info("[CODED RESULTS PATH1] No coded results found in CDA document")
+                            else:
+                                logger.warning("[CODED RESULTS PATH1] No raw CDA content available for extraction")
+                                        
+                        except Exception as e:
+                            logger.warning(f"[CODED RESULTS PATH1] Extraction failed: {e}")
+                            # Keep existing detection if specialized extraction fails
+                        
                         # UPDATE CONTEXT WITH EXTENDED SECTIONS (including History of Past Illness)
                         context.update(extended_sections)
                         
@@ -5061,8 +5099,10 @@ def patient_cda_view(request, session_id, cda_type=None):
             # EXTENDED CLINICAL SECTIONS DETECTION
             # Detect and add extended clinical sections to context after mandatory sections are processed
             try:
-                # Initialize extended_sections for both paths
-                extended_sections = {}
+                # Initialize extended_sections for both paths with all required keys
+                extended_sections = {
+                    "coded_results": {"blood_group": [], "diagnostic_results": []}
+                }
                 
                 # PATH 1: Get comprehensive data from earlier processing (available in locals)
                 has_comprehensive_data = 'comprehensive_data' in locals() and comprehensive_data
@@ -5176,6 +5216,26 @@ def patient_cda_view(request, session_id, cda_type=None):
                     except Exception as e:
                         logger.warning(f"[PHYSICAL FINDINGS PATH2] Extraction failed: {e}")
                         # Keep existing detection if specialized extraction fails
+                    
+                    # CODED RESULTS SPECIALIZED EXTRACTION (PATH 2)
+                    try:
+                        if raw_cda_content:
+                            logger.info("[CODED RESULTS PATH2] Starting specialized extraction from raw CDA content")
+                            coded_results_extractor = CodedResultsExtractor()
+                            coded_results_data = coded_results_extractor.extract_coded_results(raw_cda_content)
+                            
+                            if coded_results_data and (coded_results_data.get('blood_group') or coded_results_data.get('diagnostic_results')):
+                                extended_sections["coded_results"] = coded_results_data
+                                blood_group_count = len(coded_results_data.get('blood_group', []))
+                                diagnostic_count = len(coded_results_data.get('diagnostic_results', []))
+                                logger.info(f"[CODED RESULTS PATH2] Successfully extracted {blood_group_count} blood group + {diagnostic_count} diagnostic results")
+                            else:
+                                logger.info("[CODED RESULTS PATH2] No coded results found in CDA document")
+                        else:
+                            logger.warning("[CODED RESULTS PATH2] No raw CDA content available for extraction")
+                    except Exception as e:
+                        logger.warning(f"[CODED RESULTS PATH2] Extraction failed: {e}")
+                        # Keep existing detection if specialized extraction fails
                 
                     context["extended_sections"] = extended_sections
                     
@@ -5184,6 +5244,8 @@ def patient_cda_view(request, session_id, cda_type=None):
                     context["immunizations"] = extended_sections.get("immunizations", [])
                     context["pregnancy_history"] = extended_sections.get("pregnancy_history")
                     context["social_history"] = extended_sections.get("social_history", [])
+                    context["physical_findings"] = extended_sections.get("physical_findings", [])
+                    context["coded_results"] = extended_sections.get("coded_results", {"blood_group": [], "diagnostic_results": []})
                     context["laboratory_results"] = extended_sections.get("laboratory_results", [])
                     context["advance_directives"] = extended_sections.get("advance_directives", [])
                     context["additional_sections"] = extended_sections.get("additional_sections", [])
@@ -5218,6 +5280,8 @@ def patient_cda_view(request, session_id, cda_type=None):
                         "immunizations": context.get("immunizations", []),  # Don't override if already exists
                         "pregnancy_history": context.get("pregnancy_history", []),  # Preserve existing
                         "social_history": existing_social_history,  # Preserve from extended_sections or context
+                        "physical_findings": context.get("physical_findings", []),  # Preserve existing
+                        "coded_results": context.get("coded_results", {"blood_group": [], "diagnostic_results": []}),  # Preserve existing
                         "laboratory_results": [],
                         "advance_directives": [],
                         "additional_sections": []
@@ -5239,6 +5303,8 @@ def patient_cda_view(request, session_id, cda_type=None):
                     "immunizations": context.get("immunizations", []),
                     "pregnancy_history": context.get("pregnancy_history", []),  # Preserve existing
                     "social_history": [],
+                    "physical_findings": context.get("physical_findings", []),  # Preserve existing
+                    "coded_results": context.get("coded_results", {}),  # Preserve existing
                     "laboratory_results": [],
                     "advance_directives": [],
                     "additional_sections": []
@@ -5256,6 +5322,14 @@ def patient_cda_view(request, session_id, cda_type=None):
                     "vital_signs": [],
                     "results": [],
                     "immunizations": [],
+                    "history_of_past_illness": [],
+                    "pregnancy_history": [],
+                    "social_history": [],
+                    "physical_findings": [],
+                    "coded_results": {},
+                    "laboratory_results": [],
+                    "advance_directives": [],
+                    "additional_sections": []
                 }
             )
 
@@ -5538,6 +5612,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                     context["contact_data"] = {}  # Empty for template compatibility
                     context["contact_info"] = {}  # Template compatibility
                     context["healthcare_data"] = {}  # Empty for template compatibility
+                    context["coded_results"] = {"blood_group": [], "diagnostic_results": []}  # Empty for template compatibility
                     request.session[f"patient_extended_data_{session_id}"] = (
                         extended_header_data
                     )
@@ -5550,6 +5625,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                     context["contact_data"] = {}  # Empty for template compatibility
                     context["contact_info"] = {}  # Template compatibility
                     context["healthcare_data"] = {}  # Empty for template compatibility
+                    context["coded_results"] = {"blood_group": [], "diagnostic_results": []}  # Empty for template compatibility
                     logger.warning(
                         "[ERROR] No extended patient data available from any extraction method"
                     )
@@ -5566,6 +5642,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                 context["contact_data"] = {}  # Empty for template compatibility
                 context["contact_info"] = {}  # Template compatibility
                 context["healthcare_data"] = {}  # Empty for template compatibility
+                context["coded_results"] = {"blood_group": [], "diagnostic_results": []}  # Empty for template compatibility
                 request.session[f"patient_extended_data_{session_id}"] = (
                     extended_header_data
                 )
@@ -5575,6 +5652,7 @@ def patient_cda_view(request, session_id, cda_type=None):
                 context["administrative_data"] = {}  # Empty dict for template
                 context["contact_data"] = {}  # Empty for template compatibility
                 context["healthcare_data"] = {}  # Empty for template compatibility
+                context["coded_results"] = {"blood_group": [], "diagnostic_results": []}  # Empty for template compatibility
                 logger.warning("[ERROR] No extended header data available for fallback")
 
         # [DEBUG] Social History Template Context Debug

@@ -58,6 +58,7 @@
       justify-content: center;
       font-weight: bold;
       font-size: 12px;
+      object-fit: cover;
 
       &.country-flag-de {
         background: #000;
@@ -907,5 +908,52 @@
         box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
       }
     }
+  }
+}
+
+// ========================================
+// Fix for oversized flag images on country search pages  
+// HIGH SPECIFICITY RULES to override default image behavior
+// ========================================
+
+// Main country flags (e.g., in page headers)
+img.country-flag,
+h1 img.country-flag,
+.country-flag {
+  width: 48px !important;
+  height: 32px !important;
+  max-width: 48px !important;
+  max-height: 32px !important;
+  border-radius: 4px;
+  vertical-align: middle;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    width: 40px !important;
+    height: 27px !important;
+    max-width: 40px !important;
+    max-height: 27px !important;
+  }
+}
+
+// Context flags (e.g., in breadcrumbs, small indicators)
+.context-flag,
+img.context-flag {
+  width: 24px !important;
+  height: 16px !important;
+  max-width: 24px !important;
+  max-height: 16px !important;
+  border-radius: 2px;
+  object-fit: cover;
+  vertical-align: middle;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    width: 20px !important;
+    height: 13px !important;
+    max-width: 20px !important;
+    max-height: 13px !important;
   }
 }

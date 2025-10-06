@@ -4,7 +4,7 @@
 
 <div class="clinical-information-container">
     {# Check if we have any clinical data - including extended sections #}
-    {% if medications or allergies or problems or vital_signs or procedures or immunizations or history_of_past_illness or pregnancy_history or social_history or physical_findings or laboratory_results or advance_directives or additional_sections %}
+    {% if medications or allergies or problems or vital_signs or procedures or immunizations or history_of_past_illness or pregnancy_history or social_history or physical_findings or coded_results or laboratory_results or advance_directives or additional_sections %}
         
         {# Main Clinical Sections Container #}
         <div class="collapsible-wrapper">
@@ -2489,6 +2489,255 @@
                                                 <small class="terminology-note text-muted d-block mt-1">
                                                     Physical findings with standardized clinical terminology for CTS integration
                                                 </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    
+                        {# Coded Results Section #}
+                        {% if coded_results.blood_group or coded_results.diagnostic_results %}
+                        <div class="clinical-section">
+                            <div class="collapsible-wrapper">
+                                <input id="toggle-coded-results" class="toggle-input" type="checkbox">
+                                <label for="toggle-coded-results" class="collapsible-label-title">
+                                    <div class="clinical-section-title-row">
+                                        <div class="clinical-section-title">
+                                            <i class="fa-solid fa-vial me-2"></i>
+                                            <span>Coded Results</span>
+                                        </div>
+                                        <div class="clinical-badge-container">
+                                            <span class="clinical-badge extended">
+                                                {% with total_blood_group=coded_results.blood_group|length total_diagnostic=coded_results.diagnostic_results|length %}
+                                                    {% if total_blood_group > 0 and total_diagnostic > 0 %}
+                                                        ✓ {{ total_blood_group|add:total_diagnostic }} Found
+                                                    {% elif total_blood_group > 0 %}
+                                                        ✓ {{ total_blood_group }} Blood Group
+                                                    {% elif total_diagnostic > 0 %}
+                                                        ✓ {{ total_diagnostic }} Diagnostic
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                                </label>
+                                <div class="collapsible-content-title">
+                                    <div class="content-inner-title">
+                                        <p class="mb-3 text-muted">
+                                            Coded Results: 
+                                            {% with total_blood_group=coded_results.blood_group|length total_diagnostic=coded_results.diagnostic_results|length %}
+                                                {% if total_blood_group > 0 %}{{ total_blood_group }} blood group{% endif %}
+                                                {% if total_blood_group > 0 and total_diagnostic > 0 %} + {% endif %}
+                                                {% if total_diagnostic > 0 %}{{ total_diagnostic }} diagnostic result{{ total_diagnostic|pluralize }}{% endif %} found
+                                            {% endwith %}
+                                        </p>
+                                        
+                                        {# Tabbed Interface for Blood Group and Diagnostic Results #}
+                                        <div class="clinical-tabs-container">
+                                            <!-- Tab Navigation -->
+                                            <ul class="nav nav-tabs clinical-tabs" id="codedResultsTabs" role="tablist">
+                                                {% if coded_results.blood_group and coded_results.blood_group|length > 0 %}
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link clinical-tab-link active" id="blood-group-tab" data-bs-toggle="tab" data-bs-target="#blood-group-content" type="button" role="tab" aria-controls="blood-group-content" aria-selected="true">
+                                                        <i class="fa-solid fa-droplet me-2"></i>
+                                                        <span class="tab-label">Blood Group</span>
+                                                        <span class="badge bg-primary ms-2">{{ coded_results.blood_group|length }}</span>
+                                                    </button>
+                                                </li>
+                                                {% endif %}
+                                                {% if coded_results.diagnostic_results and coded_results.diagnostic_results|length > 0 %}
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link clinical-tab-link{% if not coded_results.blood_group or coded_results.blood_group|length == 0 %} active{% endif %}" 
+                                                            id="diagnostic-results-tab" data-bs-toggle="tab" data-bs-target="#diagnostic-results-content" type="button" role="tab" aria-controls="diagnostic-results-content" 
+                                                            aria-selected="{% if not coded_results.blood_group or coded_results.blood_group|length == 0 %}true{% else %}false{% endif %}">
+                                                        <i class="fa-solid fa-chart-line me-2"></i>
+                                                        <span class="tab-label">Diagnostic Results</span>
+                                                        <span class="badge bg-primary ms-2">{{ coded_results.diagnostic_results|length }}</span>
+                                                    </button>
+                                                </li>
+                                                {% endif %}
+                                            </ul>
+                                            
+                                            <!-- Tab Content -->
+                                            <div class="tab-content clinical-tab-content" id="codedResultsTabContent">
+                                                
+                                                {# Blood Group Tab #}
+                                                {% if coded_results.blood_group and coded_results.blood_group|length > 0 %}
+                                                <div class="tab-pane fade show active" id="blood-group-content" role="tabpanel" aria-labelledby="blood-group-tab">
+                                                    <div class="tab-inner-content">
+                                                        <h6 class="clinical-subsection-title">
+                                                            <i class="fa-solid fa-droplet me-2"></i>Blood Group Results
+                                                        </h6>
+                                                        
+                                                        {# Blood Group Table #}
+                                                        <div class="clinical-data-table-container bg-white border rounded-3 shadow-sm overflow-hidden">
+                                                            <div class="table-responsive">
+                                                                <table class="table table-striped table-hover mb-0 clinical-data-table">
+                                                                    <thead class="table-primary">
+                                                                        <tr>
+                                                                            <th scope="col" class="fw-bold">Diagnostic Date</th>
+                                                                            <th scope="col" class="fw-bold">Blood Group</th>
+                                                                            <th scope="col" class="fw-bold">Test Type</th>
+                                                                            <th scope="col" class="fw-bold">Clinical Code</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {% for blood_group in coded_results.blood_group %}
+                                                                        <tr>
+                                                                            <td>
+                                                                                <span class="clinical-date">{{ blood_group.diagnostic_date|default:"Not specified" }}</span>
+                                                                            </td>
+                                                                            <td>
+                                                                                <strong class="blood-group-value">{{ blood_group.blood_group|default:"Not determined" }}</strong>
+                                                                                {% if blood_group.status %}
+                                                                                <span class="status-badge badge bg-success ms-2">{{ blood_group.status|title }}</span>
+                                                                                {% endif %}
+                                                                            </td>
+                                                                            <td>
+                                                                                <span class="test-type">{{ blood_group.test_display|default:blood_group.test_code|default:"Blood typing" }}</span>
+                                                                            </td>
+                                                                            <td>
+                                                                                {% if blood_group.blood_group_code %}
+                                                                                <div class="code-info">
+                                                                                    <span class="clinical-code">
+                                                                                        <i class="fa-solid fa-hashtag me-1"></i>
+                                                                                        <code>{{ blood_group.blood_group_code }}</code>
+                                                                                    </span>
+                                                                                    {% if blood_group.blood_group_system %}
+                                                                                    <small class="code-system text-muted d-block">System: {{ blood_group.blood_group_system }}</small>
+                                                                                    {% endif %}
+                                                                                </div>
+                                                                                {% else %}
+                                                                                <span class="text-muted">No code available</span>
+                                                                                {% endif %}
+                                                                            </td>
+                                                                        </tr>
+                                                                        {% endfor %}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {# Diagnostic Results Tab #}
+                                                {% if coded_results.diagnostic_results and coded_results.diagnostic_results|length > 0 %}
+                                                <div class="tab-pane fade{% if not coded_results.blood_group or coded_results.blood_group|length == 0 %} show active{% endif %}" 
+                                                     id="diagnostic-results-content" role="tabpanel" aria-labelledby="diagnostic-results-tab">
+                                                    <div class="tab-inner-content">
+                                                        <h6 class="clinical-subsection-title">
+                                                            <i class="fa-solid fa-chart-line me-2"></i>Diagnostic Results
+                                                        </h6>
+                                                        
+                                                        {# Diagnostic Results Table #}
+                                                        <div class="clinical-data-table-container bg-white border rounded-3 shadow-sm overflow-hidden">
+                                                            <div class="table-responsive">
+                                                                <table class="table table-striped table-hover mb-0 clinical-data-table">
+                                                                    <thead class="table-primary">
+                                                                        <tr>
+                                                                            <th scope="col" class="fw-bold">Diagnostic Date</th>
+                                                                            <th scope="col" class="fw-bold">Result Type</th>
+                                                                            <th scope="col" class="fw-bold">Result Value</th>
+                                                                            <th scope="col" class="fw-bold">Performer Reporter</th>
+                                                                            <th scope="col" class="fw-bold">Comment</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {% for result in coded_results.diagnostic_results %}
+                                                                        <tr>
+                                                                            <td>
+                                                                                <span class="clinical-date">{{ result.diagnostic_date|default:"Not specified" }}</span>
+                                                                            </td>
+                                                                            <td>
+                                                                                <strong class="result-type">{{ result.result_type|default:"Diagnostic test" }}</strong>
+                                                                                {% if result.status %}
+                                                                                <span class="status-badge badge bg-success ms-2">{{ result.status|title }}</span>
+                                                                                {% endif %}
+                                                                                {% if result.result_code %}
+                                                                                <div class="code-info mt-1">
+                                                                                    <small class="clinical-code">
+                                                                                        <i class="fa-solid fa-hashtag me-1"></i>
+                                                                                        <code>{{ result.result_code }}</code>
+                                                                                    </small>
+                                                                                </div>
+                                                                                {% endif %}
+                                                                            </td>
+                                                                            <td>
+                                                                                {% if result.result_value %}
+                                                                                <span class="result-value">{{ result.result_value }}</span>
+                                                                                {% if result.interpretation %}
+                                                                                <span class="interpretation-badge badge bg-info ms-2">{{ result.interpretation }}</span>
+                                                                                {% endif %}
+                                                                                {% if result.reference_range %}
+                                                                                <small class="reference-range text-muted d-block">Range: {{ result.reference_range }}</small>
+                                                                                {% endif %}
+                                                                                {% else %}
+                                                                                <span class="text-muted">No value recorded</span>
+                                                                                {% endif %}
+                                                                            </td>
+                                                                            <td>
+                                                                                {% if result.performer_reporter %}
+                                                                                <div class="performer-info">
+                                                                                    <strong>{{ result.performer_reporter }}</strong>
+                                                                                    {% if result.performer_organization %}
+                                                                                    <small class="organization text-muted d-block">{{ result.performer_organization }}</small>
+                                                                                    {% endif %}
+                                                                                </div>
+                                                                                {% elif result.author_name %}
+                                                                                <div class="author-info">
+                                                                                    <strong>{{ result.author_name }}</strong>
+                                                                                    {% if result.author_organization %}
+                                                                                    <small class="organization text-muted d-block">{{ result.author_organization }}</small>
+                                                                                    {% endif %}
+                                                                                    {% if result.author_time %}
+                                                                                    <small class="author-time text-muted d-block">{{ result.author_time }}</small>
+                                                                                    {% endif %}
+                                                                                </div>
+                                                                                {% else %}
+                                                                                <span class="text-muted">Not specified</span>
+                                                                                {% endif %}
+                                                                            </td>
+                                                                            <td>
+                                                                                {% if result.comment %}
+                                                                                <span class="comment">{{ result.comment }}</span>
+                                                                                {% else %}
+                                                                                <span class="text-muted">No comment</span>
+                                                                                {% endif %}
+                                                                            </td>
+                                                                        </tr>
+                                                                        {% endfor %}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            {# Clinical Terminology Summary for Coded Results #}
+                                            <div class="clinical-terminology-summary mt-4">
+                                                <h6 class="terminology-title">
+                                                    <i class="fa-solid fa-code me-2"></i>Clinical Terminology Summary
+                                                </h6>
+                                                <div class="terminology-content bg-light p-3 rounded">
+                                                    {% with total_blood_group=coded_results.blood_group|length total_diagnostic=coded_results.diagnostic_results|length %}
+                                                    <div class="terminology-stats">
+                                                        <i class="fa-solid fa-chart-bar me-1" aria-hidden="true"></i>
+                                                        <strong>{{ total_blood_group|add:total_diagnostic }} Coded Results</strong>
+                                                        {% if total_blood_group > 0 %} ({{ total_blood_group }} Blood Group{% endif %}
+                                                        {% if total_blood_group > 0 and total_diagnostic > 0 %}, {% endif %}
+                                                        {% if total_diagnostic > 0 %}{{ total_diagnostic }} Diagnostic){% endif %}
+                                                    </div>
+                                                    {% endwith %}
+                                                    <small class="terminology-note text-muted d-block mt-1">
+                                                        Laboratory and diagnostic results with standardized clinical terminology for CTS integration
+                                                    </small>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
