@@ -321,31 +321,49 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5" role="contentinfo" aria-label="Site footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <h5 class="text-primary">EU eHealth NCP Portal</h5>
-                    <p class="small">Cross-border healthcare document exchange system built with Django and powered by secure medical data standards.</p>
+    <footer class="healthcare-footer" role="contentinfo" aria-label="Site footer">
+        <div class="footer-background">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="footer-section">
+                            <h5 class="footer-title">EU eHealth NCP Portal</h5>
+                            <p class="footer-description">
+                                Cross-border healthcare document exchange system built with Django and powered by secure medical data standards.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="footer-section">
+                            <h6 class="footer-subtitle">Quick Links</h6>
+                            <ul class="footer-links list-unstyled">
+                                <li><a href="/" class="footer-link">Home</a></li>
+                                <li><a href="/patients/search/" class="footer-link">Patient Search</a></li>
+                                <li><a href="/portal/" class="footer-link">Portal</a></li>
+                                <li><a href="/admin/" class="footer-link">Administration</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="footer-section">
+                            <h6 class="footer-subtitle">Technical Info</h6>
+                            <div class="footer-tech-info">
+                                <p class="tech-detail">Django {{ django_version }} | Python {{ python_version }}</p>
+                                <p class="tech-detail">Built for DMZ deployment</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <h6 class="text-light">Quick Links</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="/" class="text-light text-decoration-none">Home</a></li>
-                        <li><a href="/patients/search/" class="text-light text-decoration-none">Patient Search</a></li>
-                        <li><a href="/portal/" class="text-light text-decoration-none">Portal</a></li>
-                        <li><a href="/admin/" class="text-light text-decoration-none">Administration</a></li>
-                    </ul>
+                <div class="footer-separator"></div>
+                <div class="footer-bottom">
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="footer-copyright text-center">
+                                &copy; 2024 EU eHealth NCP Portal. Compliant with European Cross-Border Healthcare Standards.
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <h6 class="text-light">Technical Info</h6>
-                    <p class="small mb-1">Django {{ django_version }} | Python {{ python_version }}</p>
-                    <p class="small">Built for DMZ deployment</p>
-                </div>
-            </div>
-            <hr class="text-secondary">
-            <div class="text-center">
-                <p class="small mb-0">&copy; 2024 EU eHealth NCP Portal. Compliant with European Cross-Border Healthcare Standards.</p>
             </div>
         </div>
     </footer>

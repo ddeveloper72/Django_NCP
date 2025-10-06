@@ -4278,96 +4278,207 @@ img[data-src]::before {
     transform: translateY(-20px) rotate(10deg);
   }
 }
-.site-footer {
-  background-color: #2d3748;
+.healthcare-footer {
+  background: linear-gradient(135deg, #007b7f 0%, rgb(0, 104.55, 107.95) 100%);
   color: #ffffff;
-  padding: 3rem 0 1.5rem 0;
-  margin-top: auto;
+  margin-top: 4rem;
+  position: relative;
+  overflow: hidden;
 }
-.site-footer .footer-container {
-  width: 100%;
-  max-width: 1024px;
-  margin: 0 auto;
-  padding: 0 1rem;
+.healthcare-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.03) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.03) 75%);
+  background-size: 60px 60px;
+  opacity: 0.4;
+  pointer-events: none;
 }
-@media (min-width: 640px) {
-  .site-footer .footer-container {
-    padding: 0 1.5rem;
-  }
-}
-.site-footer .footer-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
+.healthcare-footer .footer-background {
+  position: relative;
+  z-index: 1;
+  padding: 3rem 0 2rem 0;
 }
 @media (min-width: 480px) {
-  .site-footer .footer-content {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+  .healthcare-footer .footer-background {
+    padding: 2.5rem 0 1.5rem 0;
   }
 }
-.site-footer .footer-section h4 {
-  color: #ffffff;
-  margin-bottom: 1rem;
-  font-size: 1.25rem;
+.healthcare-footer .footer-section {
+  padding: 1.5rem;
+  height: 100%;
 }
-.site-footer .footer-section ul {
-  list-style: none;
+@media (min-width: 480px) {
+  .healthcare-footer .footer-section {
+    padding: 1rem 0;
+    text-align: center;
+  }
+}
+.healthcare-footer .footer-title {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  line-height: 1.3;
+}
+@media (min-width: 480px) {
+  .healthcare-footer .footer-title {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+}
+.healthcare-footer .footer-subtitle {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+@media (min-width: 480px) {
+  .healthcare-footer .footer-subtitle {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+}
+.healthcare-footer .footer-description {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+@media (min-width: 480px) {
+  .healthcare-footer .footer-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+}
+.healthcare-footer .footer-links {
   padding: 0;
   margin: 0;
 }
-.site-footer .footer-section ul li {
+.healthcare-footer .footer-links li {
+  margin-bottom: 0.75rem;
+}
+.healthcare-footer .footer-links li:last-child {
+  margin-bottom: 0;
+}
+@media (min-width: 480px) {
+  .healthcare-footer .footer-links li {
+    margin-bottom: 0.5rem;
+  }
+}
+.healthcare-footer .footer-link {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  display: inline-block;
+  position: relative;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.healthcare-footer .footer-link:hover {
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transform: translateX(4px);
+}
+.healthcare-footer .footer-link::before {
+  content: "▶";
+  position: absolute;
+  left: -20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+.healthcare-footer .footer-link:hover::before {
+  opacity: 1;
+}
+@media (min-width: 480px) {
+  .healthcare-footer .footer-link {
+    font-size: 0.9rem;
+  }
+  .healthcare-footer .footer-link:hover {
+    transform: none;
+  }
+  .healthcare-footer .footer-link::before {
+    display: none;
+  }
+}
+.healthcare-footer .footer-tech-info .tech-detail {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
   margin-bottom: 0.5rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
-.site-footer .footer-section ul li a {
-  color: #718096;
-  text-decoration: none;
-  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+.healthcare-footer .footer-tech-info .tech-detail:last-child {
+  margin-bottom: 0;
 }
-.site-footer .footer-section ul li a:hover {
-  color: #ffffff;
-}
-.site-footer .footer-section p {
-  color: #718096;
-  line-height: 1.6;
-}
-.site-footer .footer-bottom {
-  border-top: 1px solid #4a5568;
-  padding-top: 1.5rem;
-  text-align: center;
-  color: #718096;
-  font-size: 0.875rem;
-}
-@media (min-width: 640px) {
-  .site-footer .footer-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    text-align: left;
+@media (min-width: 480px) {
+  .healthcare-footer .footer-tech-info .tech-detail {
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
   }
 }
-.site-footer .footer-links {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  margin-top: 1rem;
+.healthcare-footer .footer-separator {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 20%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.3) 80%, transparent 100%);
+  margin: 2rem 0 1.5rem 0;
 }
-@media (min-width: 640px) {
-  .site-footer .footer-links {
-    margin-top: 0;
+@media (min-width: 480px) {
+  .healthcare-footer .footer-separator {
+    margin: 1.5rem 0 1rem 0;
   }
 }
-.site-footer .footer-links a {
-  color: #718096;
-  text-decoration: none;
-  font-size: 0.875rem;
+.healthcare-footer .footer-bottom {
+  padding: 0 1.5rem;
 }
-.site-footer .footer-links a:hover {
-  color: #ffffff;
+@media (min-width: 480px) {
+  .healthcare-footer .footer-bottom {
+    padding: 0 1rem;
+  }
+}
+.healthcare-footer .footer-copyright {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+@media (min-width: 480px) {
+  .healthcare-footer .footer-copyright {
+    font-size: 0.8rem;
+  }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .healthcare-footer .footer-link {
+    transition: none;
+  }
+  .healthcare-footer .footer-link:hover {
+    transform: none;
+  }
+}
+@media (prefers-contrast: high) {
+  .healthcare-footer {
+    background: #007b7f;
+  }
+  .healthcare-footer::before {
+    display: none;
+  }
+  .healthcare-footer .footer-title,
+  .healthcare-footer .footer-subtitle,
+  .healthcare-footer .footer-description,
+  .healthcare-footer .footer-link,
+  .healthcare-footer .tech-detail,
+  .healthcare-footer .footer-copyright {
+    color: #ffffff;
+    text-shadow: none;
+  }
+}
 .sidebar {
   background-color: #ffffff;
   border-right: 1px solid #e2e8f0;
@@ -8736,330 +8847,145 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
 .fas, .far, .fal, .fat, .fad, .fab,
 [class*=fa-],
 i[class*=fa-] {
-  color: inherit !important;
   text-decoration: none !important;
+  font-family: "FontAwesome" !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  transition: color 0.2s ease;
 }
 
-.bg-primary .fas, .bg-primary .far, .bg-primary .fal, .bg-primary .fat, .bg-primary .fad, .bg-primary .fab,
-.bg-primary i[class*=fa-], .bg-primary [class*=fa-], .bg-secondary .fas, .bg-secondary .far, .bg-secondary .fal, .bg-secondary .fat, .bg-secondary .fad, .bg-secondary .fab,
-.bg-secondary i[class*=fa-], .bg-secondary [class*=fa-], .bg-success .fas, .bg-success .far, .bg-success .fal, .bg-success .fat, .bg-success .fad, .bg-success .fab,
-.bg-success i[class*=fa-], .bg-success [class*=fa-], .bg-danger .fas, .bg-danger .far, .bg-danger .fal, .bg-danger .fat, .bg-danger .fad, .bg-danger .fab,
-.bg-danger i[class*=fa-], .bg-danger [class*=fa-],
-.bg-info .fas,
-.bg-info .far,
-.bg-info .fal,
-.bg-info .fat,
-.bg-info .fad,
-.bg-info .fab,
-.bg-info i[class*=fa-],
-.bg-info [class*=fa-], .bg-dark .fas, .bg-dark .far, .bg-dark .fal, .bg-dark .fat, .bg-dark .fad, .bg-dark .fab,
-.bg-dark i[class*=fa-], .bg-dark [class*=fa-], .bg-teal .fas, .bg-teal .far, .bg-teal .fal, .bg-teal .fat, .bg-teal .fad, .bg-teal .fab,
-.bg-teal i[class*=fa-], .bg-teal [class*=fa-],
-.card-header.bg-primary .fas,
-.card-header.bg-primary .far,
-.card-header.bg-primary .fal,
-.card-header.bg-primary .fat,
-.card-header.bg-primary .fad,
-.card-header.bg-primary .fab,
-.card-header.bg-primary i[class*=fa-],
-.card-header.bg-primary [class*=fa-], .card-header.bg-secondary .fas, .card-header.bg-secondary .far, .card-header.bg-secondary .fal, .card-header.bg-secondary .fat, .card-header.bg-secondary .fad, .card-header.bg-secondary .fab,
-.card-header.bg-secondary i[class*=fa-], .card-header.bg-secondary [class*=fa-],
-.card-header.bg-success .fas,
-.card-header.bg-success .far,
-.card-header.bg-success .fal,
-.card-header.bg-success .fat,
-.card-header.bg-success .fad,
-.card-header.bg-success .fab,
-.card-header.bg-success i[class*=fa-],
-.card-header.bg-success [class*=fa-], .card-header.bg-danger .fas, .card-header.bg-danger .far, .card-header.bg-danger .fal, .card-header.bg-danger .fat, .card-header.bg-danger .fad, .card-header.bg-danger .fab,
-.card-header.bg-danger i[class*=fa-], .card-header.bg-danger [class*=fa-],
-.card-header.bg-info .fas,
-.card-header.bg-info .far,
-.card-header.bg-info .fal,
-.card-header.bg-info .fat,
-.card-header.bg-info .fad,
-.card-header.bg-info .fab,
-.card-header.bg-info i[class*=fa-],
-.card-header.bg-info [class*=fa-], .card-header.bg-dark .fas, .card-header.bg-dark .far, .card-header.bg-dark .fal, .card-header.bg-dark .fat, .card-header.bg-dark .fad, .card-header.bg-dark .fab,
-.card-header.bg-dark i[class*=fa-], .card-header.bg-dark [class*=fa-], .card-header.bg-teal .fas, .card-header.bg-teal .far, .card-header.bg-teal .fal, .card-header.bg-teal .fat, .card-header.bg-teal .fad, .card-header.bg-teal .fab,
-.card-header.bg-teal i[class*=fa-], .card-header.bg-teal [class*=fa-] {
-  color: var(--healthcare-text-light, #ffffff) !important;
-  fill: var(--healthcare-text-light, #ffffff) !important;
-}
-.bg-primary .fas:hover, .bg-primary .far:hover, .bg-primary .fal:hover, .bg-primary .fat:hover, .bg-primary .fad:hover, .bg-primary .fab:hover,
-.bg-primary i[class*=fa-]:hover, .bg-primary [class*=fa-]:hover, .bg-secondary .fas:hover, .bg-secondary .far:hover, .bg-secondary .fal:hover, .bg-secondary .fat:hover, .bg-secondary .fad:hover, .bg-secondary .fab:hover,
-.bg-secondary i[class*=fa-]:hover, .bg-secondary [class*=fa-]:hover, .bg-success .fas:hover, .bg-success .far:hover, .bg-success .fal:hover, .bg-success .fat:hover, .bg-success .fad:hover, .bg-success .fab:hover,
-.bg-success i[class*=fa-]:hover, .bg-success [class*=fa-]:hover, .bg-danger .fas:hover, .bg-danger .far:hover, .bg-danger .fal:hover, .bg-danger .fat:hover, .bg-danger .fad:hover, .bg-danger .fab:hover,
-.bg-danger i[class*=fa-]:hover, .bg-danger [class*=fa-]:hover,
-.bg-info .fas:hover,
-.bg-info .far:hover,
-.bg-info .fal:hover,
-.bg-info .fat:hover,
-.bg-info .fad:hover,
-.bg-info .fab:hover,
-.bg-info i[class*=fa-]:hover,
-.bg-info [class*=fa-]:hover, .bg-dark .fas:hover, .bg-dark .far:hover, .bg-dark .fal:hover, .bg-dark .fat:hover, .bg-dark .fad:hover, .bg-dark .fab:hover,
-.bg-dark i[class*=fa-]:hover, .bg-dark [class*=fa-]:hover, .bg-teal .fas:hover, .bg-teal .far:hover, .bg-teal .fal:hover, .bg-teal .fat:hover, .bg-teal .fad:hover, .bg-teal .fab:hover,
-.bg-teal i[class*=fa-]:hover, .bg-teal [class*=fa-]:hover,
-.card-header.bg-primary .fas:hover,
-.card-header.bg-primary .far:hover,
-.card-header.bg-primary .fal:hover,
-.card-header.bg-primary .fat:hover,
-.card-header.bg-primary .fad:hover,
-.card-header.bg-primary .fab:hover,
-.card-header.bg-primary i[class*=fa-]:hover,
-.card-header.bg-primary [class*=fa-]:hover, .card-header.bg-secondary .fas:hover, .card-header.bg-secondary .far:hover, .card-header.bg-secondary .fal:hover, .card-header.bg-secondary .fat:hover, .card-header.bg-secondary .fad:hover, .card-header.bg-secondary .fab:hover,
-.card-header.bg-secondary i[class*=fa-]:hover, .card-header.bg-secondary [class*=fa-]:hover,
-.card-header.bg-success .fas:hover,
-.card-header.bg-success .far:hover,
-.card-header.bg-success .fal:hover,
-.card-header.bg-success .fat:hover,
-.card-header.bg-success .fad:hover,
-.card-header.bg-success .fab:hover,
-.card-header.bg-success i[class*=fa-]:hover,
-.card-header.bg-success [class*=fa-]:hover, .card-header.bg-danger .fas:hover, .card-header.bg-danger .far:hover, .card-header.bg-danger .fal:hover, .card-header.bg-danger .fat:hover, .card-header.bg-danger .fad:hover, .card-header.bg-danger .fab:hover,
-.card-header.bg-danger i[class*=fa-]:hover, .card-header.bg-danger [class*=fa-]:hover,
-.card-header.bg-info .fas:hover,
-.card-header.bg-info .far:hover,
-.card-header.bg-info .fal:hover,
-.card-header.bg-info .fat:hover,
-.card-header.bg-info .fad:hover,
-.card-header.bg-info .fab:hover,
-.card-header.bg-info i[class*=fa-]:hover,
-.card-header.bg-info [class*=fa-]:hover, .card-header.bg-dark .fas:hover, .card-header.bg-dark .far:hover, .card-header.bg-dark .fal:hover, .card-header.bg-dark .fat:hover, .card-header.bg-dark .fad:hover, .card-header.bg-dark .fab:hover,
-.card-header.bg-dark i[class*=fa-]:hover, .card-header.bg-dark [class*=fa-]:hover, .card-header.bg-teal .fas:hover, .card-header.bg-teal .far:hover, .card-header.bg-teal .fal:hover, .card-header.bg-teal .fat:hover, .card-header.bg-teal .fad:hover, .card-header.bg-teal .fab:hover,
-.card-header.bg-teal i[class*=fa-]:hover, .card-header.bg-teal [class*=fa-]:hover {
-  color: var(--healthcare-text-light, #ffffff) !important;
-  fill: var(--healthcare-text-light, #ffffff) !important;
+a:hover .fas, a:hover .far, a:hover .fal, a:hover .fat, a:hover .fad, a:hover .fab,
+a:hover i[class*=fa-], a:hover [class*=fa-] {
   transition: none !important;
-}
-.bg-primary a .fas, .bg-primary a .far, .bg-primary a .fal, .bg-primary a .fat, .bg-primary a .fad, .bg-primary a .fab,
-.bg-primary a i[class*=fa-], .bg-primary a [class*=fa-], .bg-secondary a .fas, .bg-secondary a .far, .bg-secondary a .fal, .bg-secondary a .fat, .bg-secondary a .fad, .bg-secondary a .fab,
-.bg-secondary a i[class*=fa-], .bg-secondary a [class*=fa-], .bg-success a .fas, .bg-success a .far, .bg-success a .fal, .bg-success a .fat, .bg-success a .fad, .bg-success a .fab,
-.bg-success a i[class*=fa-], .bg-success a [class*=fa-], .bg-danger a .fas, .bg-danger a .far, .bg-danger a .fal, .bg-danger a .fat, .bg-danger a .fad, .bg-danger a .fab,
-.bg-danger a i[class*=fa-], .bg-danger a [class*=fa-],
-.bg-info a .fas,
-.bg-info a .far,
-.bg-info a .fal,
-.bg-info a .fat,
-.bg-info a .fad,
-.bg-info a .fab,
-.bg-info a i[class*=fa-],
-.bg-info a [class*=fa-], .bg-dark a .fas, .bg-dark a .far, .bg-dark a .fal, .bg-dark a .fat, .bg-dark a .fad, .bg-dark a .fab,
-.bg-dark a i[class*=fa-], .bg-dark a [class*=fa-], .bg-teal a .fas, .bg-teal a .far, .bg-teal a .fal, .bg-teal a .fat, .bg-teal a .fad, .bg-teal a .fab,
-.bg-teal a i[class*=fa-], .bg-teal a [class*=fa-],
-.card-header.bg-primary a .fas,
-.card-header.bg-primary a .far,
-.card-header.bg-primary a .fal,
-.card-header.bg-primary a .fat,
-.card-header.bg-primary a .fad,
-.card-header.bg-primary a .fab,
-.card-header.bg-primary a i[class*=fa-],
-.card-header.bg-primary a [class*=fa-], .card-header.bg-secondary a .fas, .card-header.bg-secondary a .far, .card-header.bg-secondary a .fal, .card-header.bg-secondary a .fat, .card-header.bg-secondary a .fad, .card-header.bg-secondary a .fab,
-.card-header.bg-secondary a i[class*=fa-], .card-header.bg-secondary a [class*=fa-],
-.card-header.bg-success a .fas,
-.card-header.bg-success a .far,
-.card-header.bg-success a .fal,
-.card-header.bg-success a .fat,
-.card-header.bg-success a .fad,
-.card-header.bg-success a .fab,
-.card-header.bg-success a i[class*=fa-],
-.card-header.bg-success a [class*=fa-], .card-header.bg-danger a .fas, .card-header.bg-danger a .far, .card-header.bg-danger a .fal, .card-header.bg-danger a .fat, .card-header.bg-danger a .fad, .card-header.bg-danger a .fab,
-.card-header.bg-danger a i[class*=fa-], .card-header.bg-danger a [class*=fa-],
-.card-header.bg-info a .fas,
-.card-header.bg-info a .far,
-.card-header.bg-info a .fal,
-.card-header.bg-info a .fat,
-.card-header.bg-info a .fad,
-.card-header.bg-info a .fab,
-.card-header.bg-info a i[class*=fa-],
-.card-header.bg-info a [class*=fa-], .card-header.bg-dark a .fas, .card-header.bg-dark a .far, .card-header.bg-dark a .fal, .card-header.bg-dark a .fat, .card-header.bg-dark a .fad, .card-header.bg-dark a .fab,
-.card-header.bg-dark a i[class*=fa-], .card-header.bg-dark a [class*=fa-], .card-header.bg-teal a .fas, .card-header.bg-teal a .far, .card-header.bg-teal a .fal, .card-header.bg-teal a .fat, .card-header.bg-teal a .fad, .card-header.bg-teal a .fab,
-.card-header.bg-teal a i[class*=fa-], .card-header.bg-teal a [class*=fa-] {
-  color: var(--healthcare-text-light, #ffffff) !important;
-  fill: var(--healthcare-text-light, #ffffff) !important;
-}
-.bg-primary a .fas:hover, .bg-primary a .far:hover, .bg-primary a .fal:hover, .bg-primary a .fat:hover, .bg-primary a .fad:hover, .bg-primary a .fab:hover,
-.bg-primary a i[class*=fa-]:hover, .bg-primary a [class*=fa-]:hover, .bg-secondary a .fas:hover, .bg-secondary a .far:hover, .bg-secondary a .fal:hover, .bg-secondary a .fat:hover, .bg-secondary a .fad:hover, .bg-secondary a .fab:hover,
-.bg-secondary a i[class*=fa-]:hover, .bg-secondary a [class*=fa-]:hover, .bg-success a .fas:hover, .bg-success a .far:hover, .bg-success a .fal:hover, .bg-success a .fat:hover, .bg-success a .fad:hover, .bg-success a .fab:hover,
-.bg-success a i[class*=fa-]:hover, .bg-success a [class*=fa-]:hover, .bg-danger a .fas:hover, .bg-danger a .far:hover, .bg-danger a .fal:hover, .bg-danger a .fat:hover, .bg-danger a .fad:hover, .bg-danger a .fab:hover,
-.bg-danger a i[class*=fa-]:hover, .bg-danger a [class*=fa-]:hover,
-.bg-info a .fas:hover,
-.bg-info a .far:hover,
-.bg-info a .fal:hover,
-.bg-info a .fat:hover,
-.bg-info a .fad:hover,
-.bg-info a .fab:hover,
-.bg-info a i[class*=fa-]:hover,
-.bg-info a [class*=fa-]:hover, .bg-dark a .fas:hover, .bg-dark a .far:hover, .bg-dark a .fal:hover, .bg-dark a .fat:hover, .bg-dark a .fad:hover, .bg-dark a .fab:hover,
-.bg-dark a i[class*=fa-]:hover, .bg-dark a [class*=fa-]:hover, .bg-teal a .fas:hover, .bg-teal a .far:hover, .bg-teal a .fal:hover, .bg-teal a .fat:hover, .bg-teal a .fad:hover, .bg-teal a .fab:hover,
-.bg-teal a i[class*=fa-]:hover, .bg-teal a [class*=fa-]:hover,
-.card-header.bg-primary a .fas:hover,
-.card-header.bg-primary a .far:hover,
-.card-header.bg-primary a .fal:hover,
-.card-header.bg-primary a .fat:hover,
-.card-header.bg-primary a .fad:hover,
-.card-header.bg-primary a .fab:hover,
-.card-header.bg-primary a i[class*=fa-]:hover,
-.card-header.bg-primary a [class*=fa-]:hover, .card-header.bg-secondary a .fas:hover, .card-header.bg-secondary a .far:hover, .card-header.bg-secondary a .fal:hover, .card-header.bg-secondary a .fat:hover, .card-header.bg-secondary a .fad:hover, .card-header.bg-secondary a .fab:hover,
-.card-header.bg-secondary a i[class*=fa-]:hover, .card-header.bg-secondary a [class*=fa-]:hover,
-.card-header.bg-success a .fas:hover,
-.card-header.bg-success a .far:hover,
-.card-header.bg-success a .fal:hover,
-.card-header.bg-success a .fat:hover,
-.card-header.bg-success a .fad:hover,
-.card-header.bg-success a .fab:hover,
-.card-header.bg-success a i[class*=fa-]:hover,
-.card-header.bg-success a [class*=fa-]:hover, .card-header.bg-danger a .fas:hover, .card-header.bg-danger a .far:hover, .card-header.bg-danger a .fal:hover, .card-header.bg-danger a .fat:hover, .card-header.bg-danger a .fad:hover, .card-header.bg-danger a .fab:hover,
-.card-header.bg-danger a i[class*=fa-]:hover, .card-header.bg-danger a [class*=fa-]:hover,
-.card-header.bg-info a .fas:hover,
-.card-header.bg-info a .far:hover,
-.card-header.bg-info a .fal:hover,
-.card-header.bg-info a .fat:hover,
-.card-header.bg-info a .fad:hover,
-.card-header.bg-info a .fab:hover,
-.card-header.bg-info a i[class*=fa-]:hover,
-.card-header.bg-info a [class*=fa-]:hover, .card-header.bg-dark a .fas:hover, .card-header.bg-dark a .far:hover, .card-header.bg-dark a .fal:hover, .card-header.bg-dark a .fat:hover, .card-header.bg-dark a .fad:hover, .card-header.bg-dark a .fab:hover,
-.card-header.bg-dark a i[class*=fa-]:hover, .card-header.bg-dark a [class*=fa-]:hover, .card-header.bg-teal a .fas:hover, .card-header.bg-teal a .far:hover, .card-header.bg-teal a .fal:hover, .card-header.bg-teal a .fat:hover, .card-header.bg-teal a .fad:hover, .card-header.bg-teal a .fab:hover,
-.card-header.bg-teal a i[class*=fa-]:hover, .card-header.bg-teal a [class*=fa-]:hover {
-  color: var(--healthcare-text-light, #ffffff) !important;
-  fill: var(--healthcare-text-light, #ffffff) !important;
 }
 
 .status-badge .fas:hover, .status-badge .far:hover, .status-badge .fal:hover, .status-badge .fat:hover, .status-badge .fad:hover, .status-badge .fab:hover,
 .status-badge i[class*=fa-]:hover, .status-badge [class*=fa-]:hover, .badge .fas:hover, .badge .far:hover, .badge .fal:hover, .badge .fat:hover, .badge .fad:hover, .badge .fab:hover,
-.badge i[class*=fa-]:hover, .badge [class*=fa-]:hover {
-  color: inherit !important;
-  transition: none !important;
-}
-
-.clinical-badge .fas, .clinical-badge .far, .clinical-badge .fal, .clinical-badge .fat, .clinical-badge .fad, .clinical-badge .fab,
-.clinical-badge i[class*=fa-], .clinical-badge [class*=fa-] {
-  color: inherit !important;
-}
-.clinical-badge .fas:hover, .clinical-badge .far:hover, .clinical-badge .fal:hover, .clinical-badge .fat:hover, .clinical-badge .fad:hover, .clinical-badge .fab:hover,
+.badge i[class*=fa-]:hover, .badge [class*=fa-]:hover, .clinical-badge .fas:hover, .clinical-badge .far:hover, .clinical-badge .fal:hover, .clinical-badge .fat:hover, .clinical-badge .fad:hover, .clinical-badge .fab:hover,
 .clinical-badge i[class*=fa-]:hover, .clinical-badge [class*=fa-]:hover {
   color: inherit !important;
   transition: none !important;
 }
 
-a .fas, a .far, a .fal, a .fat, a .fad, a .fab,
-a i[class*=fa-], a [class*=fa-] {
-  color: inherit !important;
-  text-decoration: none !important;
+.hero-stats .stat-icon i {
+  color: #007b7f !important;
+  font-size: 2.5rem !important;
+  line-height: 1 !important;
+  display: block !important;
+  text-align: center !important;
 }
-a .fas:hover, a .far:hover, a .fal:hover, a .fat:hover, a .fad:hover, a .fab:hover,
-a i[class*=fa-]:hover, a [class*=fa-]:hover {
-  color: inherit !important;
-  text-decoration: none !important;
-}
-
-.btn .fas, .btn .far, .btn .fal, .btn .fat, .btn .fad, .btn .fab,
-.btn i[class*=fa-], .btn [class*=fa-] {
-  color: inherit !important;
-}
-.btn .fas:hover, .btn .far:hover, .btn .fal:hover, .btn .fat:hover, .btn .fad:hover, .btn .fab:hover,
-.btn i[class*=fa-]:hover, .btn [class*=fa-]:hover {
-  color: inherit !important;
+.hero-stats .stat-icon i.fa, .hero-stats .stat-icon i.fab, .hero-stats .stat-icon i.fa-solid, .hero-stats .stat-icon i.fa-regular, .hero-stats .stat-icon i.far, .hero-stats .stat-icon i.fal, .hero-stats .stat-icon i.fat, .hero-stats .stat-icon i.fad {
+  color: #007b7f !important;
+  font-family: "FontAwesome" !important;
+  font-weight: normal !important;
+  font-style: normal !important;
 }
 
-.btn-primary .fas, .btn-primary .far, .btn-primary .fal, .btn-primary .fat, .btn-primary .fad, .btn-primary .fab,
-.btn-primary i[class*=fa-], .btn-primary [class*=fa-], .btn-secondary .fas, .btn-secondary .far, .btn-secondary .fal, .btn-secondary .fat, .btn-secondary .fad, .btn-secondary .fab,
-.btn-secondary i[class*=fa-], .btn-secondary [class*=fa-], .btn-success .fas, .btn-success .far, .btn-success .fal, .btn-success .fat, .btn-success .fad, .btn-success .fab,
-.btn-success i[class*=fa-], .btn-success [class*=fa-],
-.btn-danger .fas,
-.btn-danger .far,
-.btn-danger .fal,
-.btn-danger .fat,
-.btn-danger .fad,
-.btn-danger .fab,
-.btn-danger i[class*=fa-],
-.btn-danger [class*=fa-], .btn-info .fas, .btn-info .far, .btn-info .fal, .btn-info .fat, .btn-info .fad, .btn-info .fab,
-.btn-info i[class*=fa-], .btn-info [class*=fa-], .btn-dark .fas, .btn-dark .far, .btn-dark .fal, .btn-dark .fat, .btn-dark .fad, .btn-dark .fab,
-.btn-dark i[class*=fa-], .btn-dark [class*=fa-] {
-  color: var(--healthcare-text-light, #ffffff) !important;
-}
-.btn-primary .fas:hover, .btn-primary .far:hover, .btn-primary .fal:hover, .btn-primary .fat:hover, .btn-primary .fad:hover, .btn-primary .fab:hover,
-.btn-primary i[class*=fa-]:hover, .btn-primary [class*=fa-]:hover, .btn-secondary .fas:hover, .btn-secondary .far:hover, .btn-secondary .fal:hover, .btn-secondary .fat:hover, .btn-secondary .fad:hover, .btn-secondary .fab:hover,
-.btn-secondary i[class*=fa-]:hover, .btn-secondary [class*=fa-]:hover, .btn-success .fas:hover, .btn-success .far:hover, .btn-success .fal:hover, .btn-success .fat:hover, .btn-success .fad:hover, .btn-success .fab:hover,
-.btn-success i[class*=fa-]:hover, .btn-success [class*=fa-]:hover,
-.btn-danger .fas:hover,
-.btn-danger .far:hover,
-.btn-danger .fal:hover,
-.btn-danger .fat:hover,
-.btn-danger .fad:hover,
-.btn-danger .fab:hover,
-.btn-danger i[class*=fa-]:hover,
-.btn-danger [class*=fa-]:hover, .btn-info .fas:hover, .btn-info .far:hover, .btn-info .fal:hover, .btn-info .fat:hover, .btn-info .fad:hover, .btn-info .fab:hover,
-.btn-info i[class*=fa-]:hover, .btn-info [class*=fa-]:hover, .btn-dark .fas:hover, .btn-dark .far:hover, .btn-dark .fal:hover, .btn-dark .fat:hover, .btn-dark .fad:hover, .btn-dark .fab:hover,
-.btn-dark i[class*=fa-]:hover, .btn-dark [class*=fa-]:hover {
-  color: var(--healthcare-text-light, #ffffff) !important;
-}
-
-.btn-light .fas, .btn-light .far, .btn-light .fal, .btn-light .fat, .btn-light .fad, .btn-light .fab,
-.btn-light i[class*=fa-], .btn-light [class*=fa-], .btn-warning .fas, .btn-warning .far, .btn-warning .fal, .btn-warning .fat, .btn-warning .fad, .btn-warning .fab,
-.btn-warning i[class*=fa-], .btn-warning [class*=fa-], .btn-outline-primary .fas, .btn-outline-primary .far, .btn-outline-primary .fal, .btn-outline-primary .fat, .btn-outline-primary .fad, .btn-outline-primary .fab,
-.btn-outline-primary i[class*=fa-], .btn-outline-primary [class*=fa-],
-.btn-outline-secondary .fas,
-.btn-outline-secondary .far,
-.btn-outline-secondary .fal,
-.btn-outline-secondary .fat,
-.btn-outline-secondary .fad,
-.btn-outline-secondary .fab,
-.btn-outline-secondary i[class*=fa-],
-.btn-outline-secondary [class*=fa-], .btn-outline-success .fas, .btn-outline-success .far, .btn-outline-success .fal, .btn-outline-success .fat, .btn-outline-success .fad, .btn-outline-success .fab,
-.btn-outline-success i[class*=fa-], .btn-outline-success [class*=fa-] {
-  color: var(--healthcare-text-dark, #2d3748) !important;
-}
-.btn-light .fas:hover, .btn-light .far:hover, .btn-light .fal:hover, .btn-light .fat:hover, .btn-light .fad:hover, .btn-light .fab:hover,
-.btn-light i[class*=fa-]:hover, .btn-light [class*=fa-]:hover, .btn-warning .fas:hover, .btn-warning .far:hover, .btn-warning .fal:hover, .btn-warning .fat:hover, .btn-warning .fad:hover, .btn-warning .fab:hover,
-.btn-warning i[class*=fa-]:hover, .btn-warning [class*=fa-]:hover, .btn-outline-primary .fas:hover, .btn-outline-primary .far:hover, .btn-outline-primary .fal:hover, .btn-outline-primary .fat:hover, .btn-outline-primary .fad:hover, .btn-outline-primary .fab:hover,
-.btn-outline-primary i[class*=fa-]:hover, .btn-outline-primary [class*=fa-]:hover,
-.btn-outline-secondary .fas:hover,
-.btn-outline-secondary .far:hover,
-.btn-outline-secondary .fal:hover,
-.btn-outline-secondary .fat:hover,
-.btn-outline-secondary .fad:hover,
-.btn-outline-secondary .fab:hover,
-.btn-outline-secondary i[class*=fa-]:hover,
-.btn-outline-secondary [class*=fa-]:hover, .btn-outline-success .fas:hover, .btn-outline-success .far:hover, .btn-outline-success .fal:hover, .btn-outline-success .fat:hover, .btn-outline-success .fad:hover, .btn-outline-success .fab:hover,
-.btn-outline-success i[class*=fa-]:hover, .btn-outline-success [class*=fa-]:hover {
-  color: var(--healthcare-text-dark, #2d3748) !important;
-}
-
-.nav-tabs .nav-link .fas, .nav-tabs .nav-link .far, .nav-tabs .nav-link .fal, .nav-tabs .nav-link .fat, .nav-tabs .nav-link .fad, .nav-tabs .nav-link .fab,
-.nav-tabs .nav-link i[class*=fa-], .nav-tabs .nav-link [class*=fa-], .nav-pills .nav-link .fas, .nav-pills .nav-link .far, .nav-pills .nav-link .fal, .nav-pills .nav-link .fat, .nav-pills .nav-link .fad, .nav-pills .nav-link .fab,
-.nav-pills .nav-link i[class*=fa-], .nav-pills .nav-link [class*=fa-] {
-  color: inherit !important;
-}
-.nav-tabs .nav-link .fas:hover, .nav-tabs .nav-link .far:hover, .nav-tabs .nav-link .fal:hover, .nav-tabs .nav-link .fat:hover, .nav-tabs .nav-link .fad:hover, .nav-tabs .nav-link .fab:hover,
-.nav-tabs .nav-link i[class*=fa-]:hover, .nav-tabs .nav-link [class*=fa-]:hover, .nav-pills .nav-link .fas:hover, .nav-pills .nav-link .far:hover, .nav-pills .nav-link .fal:hover, .nav-pills .nav-link .fat:hover, .nav-pills .nav-link .fad:hover, .nav-pills .nav-link .fab:hover,
-.nav-pills .nav-link i[class*=fa-]:hover, .nav-pills .nav-link [class*=fa-]:hover {
-  color: inherit !important;
-}
-
-.table .fas, .table .far, .table .fal, .table .fat, .table .fad, .table .fab,
-.table i[class*=fa-], .table [class*=fa-] {
-  color: inherit !important;
-}
-.table .fas:hover, .table .far:hover, .table .fal:hover, .table .fat:hover, .table .fad:hover, .table .fab:hover,
-.table i[class*=fa-]:hover, .table [class*=fa-]:hover {
-  color: inherit !important;
-}
-
-.emergency-alert .fas, .emergency-alert .far, .emergency-alert .fal, .emergency-alert .fat, .emergency-alert .fad, .emergency-alert .fab,
-.emergency-alert i[class*=fa-], .emergency-alert [class*=fa-], .allergy-warning .fas, .allergy-warning .far, .allergy-warning .fal, .allergy-warning .fat, .allergy-warning .fad, .allergy-warning .fab,
-.allergy-warning i[class*=fa-], .allergy-warning [class*=fa-], .critical-status .fas, .critical-status .far, .critical-status .fal, .critical-status .fat, .critical-status .fad, .critical-status .fab,
-.critical-status i[class*=fa-], .critical-status [class*=fa-] {
-  color: inherit !important;
-}
-.emergency-alert .fas:hover, .emergency-alert .far:hover, .emergency-alert .fal:hover, .emergency-alert .fat:hover, .emergency-alert .fad:hover, .emergency-alert .fab:hover,
-.emergency-alert i[class*=fa-]:hover, .emergency-alert [class*=fa-]:hover, .allergy-warning .fas:hover, .allergy-warning .far:hover, .allergy-warning .fal:hover, .allergy-warning .fat:hover, .allergy-warning .fad:hover, .allergy-warning .fab:hover,
-.allergy-warning i[class*=fa-]:hover, .allergy-warning [class*=fa-]:hover, .critical-status .fas:hover, .critical-status .far:hover, .critical-status .fal:hover, .critical-status .fat:hover, .critical-status .fad:hover, .critical-status .fab:hover,
-.critical-status i[class*=fa-]:hover, .critical-status [class*=fa-]:hover {
-  color: inherit !important;
-  transform: none !important;
+.section-header .section-title i {
+  color: #007b7f !important;
   transition: none !important;
+}
+.section-header .section-title i.fa, .section-header .section-title i.fab, .section-header .section-title i.fa-solid, .section-header .section-title i.fa-regular, .section-header .section-title i.far, .section-header .section-title i.fal, .section-header .section-title i.fat, .section-header .section-title i.fad {
+  color: #007b7f !important;
+  transition: none !important;
+  font-family: "FontAwesome" !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+}
+.section-header .section-title:hover i {
+  color: #007b7f !important;
+}
+.section-header .section-title:hover i.fa, .section-header .section-title:hover i.fab, .section-header .section-title:hover i.fa-solid, .section-header .section-title:hover i.fa-regular, .section-header .section-title:hover i.far, .section-header .section-title:hover i.fal, .section-header .section-title:hover i.fat, .section-header .section-title:hover i.fad {
+  color: #007b7f !important;
+}
+
+.capabilities-section .capability-icon i,
+.capability-card .capability-icon i {
+  color: #ffffff !important;
+  font-size: 2.5rem !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  display: inline-block !important;
+}
+.capabilities-section .capability-icon i.fa, .capabilities-section .capability-icon i.fab, .capabilities-section .capability-icon i.fa-solid, .capabilities-section .capability-icon i.fa-regular, .capabilities-section .capability-icon i.far, .capabilities-section .capability-icon i.fal, .capabilities-section .capability-icon i.fat, .capabilities-section .capability-icon i.fad,
+.capability-card .capability-icon i.fa,
+.capability-card .capability-icon i.fab,
+.capability-card .capability-icon i.fa-solid,
+.capability-card .capability-icon i.fa-regular,
+.capability-card .capability-icon i.far,
+.capability-card .capability-icon i.fal,
+.capability-card .capability-icon i.fat,
+.capability-card .capability-icon i.fad {
+  color: #ffffff !important;
+  font-family: "FontAwesome" !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  display: inline-block !important;
+}
+.capabilities-section .capability-icon i[class*=fa-]:before,
+.capability-card .capability-icon i[class*=fa-]:before {
+  font-family: "FontAwesome" !important;
+  color: #ffffff !important;
+}
+@media (min-width: 768px) {
+  .capabilities-section .capability-icon i,
+  .capability-card .capability-icon i {
+    font-size: 3rem !important;
+  }
+}
+
+.service-icon i {
+  color: #ffffff !important;
+  line-height: 1;
+  vertical-align: middle;
+}
+.service-icon i.fa, .service-icon i.fab, .service-icon i.fa-solid, .service-icon i.fa-regular, .service-icon i.far, .service-icon i.fal, .service-icon i.fat, .service-icon i.fad {
+  color: #ffffff !important;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.config-icon i {
+  color: #ffffff !important;
+  line-height: 1;
+  vertical-align: middle;
+}
+.config-icon i.fa, .config-icon i.fab, .config-icon i.fa-solid, .config-icon i.fa-regular, .config-icon i.far, .config-icon i.fal, .config-icon i.fat, .config-icon i.fad {
+  color: #ffffff !important;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.service-logo i {
+  color: #ffffff !important;
+  line-height: 1;
+  vertical-align: middle;
+}
+.service-logo i.fa, .service-logo i.fab, .service-logo i.fa-solid, .service-logo i.fa-regular, .service-logo i.far, .service-logo i.fal, .service-logo i.fat, .service-logo i.fad {
+  color: #ffffff !important;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.navbar i {
+  color: inherit;
+}
+.navbar i.fa, .navbar i.fab, .navbar i.fa-solid, .navbar i.fa-regular, .navbar i.far, .navbar i.fal, .navbar i.fat, .navbar i.fad {
+  color: inherit;
+}
+
+.btn i {
+  color: inherit;
+}
+.btn i.fa, .btn i.fab, .btn i.fa-solid, .btn i.fa-regular, .btn i.far, .btn i.fal, .btn i.fat, .btn i.fad {
+  color: inherit;
+}
+
+.collapsible-label-title i {
+  color: #ffffff !important;
+}
+.collapsible-label-title i.fa, .collapsible-label-title i.fab, .collapsible-label-title i.fa-solid, .collapsible-label-title i.fa-regular, .collapsible-label-title i.far, .collapsible-label-title i.fal, .collapsible-label-title i.fat, .collapsible-label-title i.fad {
+  color: #ffffff !important;
 }
 
 .fa.fa-xs,
@@ -14037,34 +13963,73 @@ a i[class*=fa-]:hover, a [class*=fa-]:hover {
 .section-header .section-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #2d3748;
+  color: #1a202c !important;
   margin-bottom: 1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, rgba(0, 123, 127, 0.06) 0%, rgba(0, 123, 127, 0.03) 50%, rgba(255, 255, 255, 0.95) 100%);
+  padding: 1.5rem 2rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(0, 123, 127, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 123, 127, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  transition: none;
+  cursor: default;
 }
 @media (min-width: 768px) {
   .section-header .section-title {
     font-size: 2rem;
+    font-weight: 800;
+    padding: 2rem 3rem;
+    gap: 1.5rem;
+  }
+}
+@media (min-width: 1200px) {
+  .section-header .section-title {
+    font-size: 2.2rem;
+    padding: 2.5rem 4rem;
   }
 }
 .section-header .section-title i {
-  color: #007b7f;
+  color: #007b7f !important;
+  text-shadow: none;
+  font-weight: normal;
+  font-size: 1em;
+  transition: none;
+}
+.section-header .section-title i.fa, .section-header .section-title i.fab, .section-header .section-title i.fa-solid, .section-header .section-title i.far, .section-header .section-title i.fal, .section-header .section-title i.fat, .section-header .section-title i.fad {
+  color: #007b7f !important;
+}
+.section-header .section-title:hover {
+  color: #1a202c !important;
+  background: linear-gradient(135deg, rgba(0, 123, 127, 0.06) 0%, rgba(0, 123, 127, 0.03) 50%, rgba(255, 255, 255, 0.95) 100%);
+}
+.section-header .section-title:hover i {
+  color: #007b7f !important;
+}
+.section-header .section-title:hover i.fa, .section-header .section-title:hover i.fab, .section-header .section-title:hover i.fa-solid, .section-header .section-title:hover i.far, .section-header .section-title:hover i.fal, .section-header .section-title:hover i.fat, .section-header .section-title:hover i.fad {
+  color: #007b7f !important;
 }
 .section-header .section-subtitle {
   font-size: 1rem;
-  color: #2d3748;
+  color: #2d3748 !important;
   line-height: 1.6;
   max-width: 700px;
   margin: 0 auto;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
 }
 @media (min-width: 768px) {
   .section-header .section-subtitle {
     font-size: 1.25rem;
+    font-weight: 600;
   }
 }
 
 .services-section {
   padding: 3rem 1rem;
-  background: linear-gradient(180deg, white 0%, rgba(0, 123, 127, 0.02) 100%);
+  background: #ffffff;
 }
 @media (min-width: 768px) {
   .services-section {
@@ -14141,7 +14106,7 @@ a i[class*=fa-]:hover, a [class*=fa-]:hover {
 
 .capabilities-section {
   padding: 3rem 1rem;
-  background: linear-gradient(180deg, rgba(45, 90, 39, 0.02) 0%, white 100%);
+  background: linear-gradient(180deg, rgba(45, 90, 39, 0.04) 0%, rgba(45, 90, 39, 0.02) 50%, white 100%);
 }
 @media (min-width: 768px) {
   .capabilities-section {
@@ -14149,38 +14114,36 @@ a i[class*=fa-]:hover, a [class*=fa-]:hover {
   }
 }
 .capabilities-section .capability-card {
-  background: #ffffff;
+  background: linear-gradient(135deg, rgba(45, 90, 39, 0.03) 0%, white 30%, white 100%);
   border-radius: 0.5rem;
   padding: 2rem;
   text-align: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(45, 90, 39, 0.1);
-  box-shadow: 0 6px 16px rgba(45, 90, 39, 0.08), 0 3px 8px rgba(45, 90, 39, 0.04);
+  border: 1px solid rgba(45, 90, 39, 0.15);
+  box-shadow: 0 6px 16px rgba(45, 90, 39, 0.12), 0 3px 8px rgba(45, 90, 39, 0.08);
 }
 @media (min-width: 768px) {
   .capabilities-section .capability-card {
-    box-shadow: 0 10px 30px rgba(45, 90, 39, 0.1), 0 6px 16px rgba(45, 90, 39, 0.06), 0 3px 8px rgba(45, 90, 39, 0.03);
+    box-shadow: 0 10px 30px rgba(45, 90, 39, 0.15), 0 6px 16px rgba(45, 90, 39, 0.1), 0 3px 8px rgba(45, 90, 39, 0.06);
   }
 }
 .capabilities-section .capability-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 25px 50px rgba(45, 90, 39, 0.15), 0 15px 30px rgba(45, 90, 39, 0.1), 0 8px 16px rgba(45, 90, 39, 0.08);
-  border-color: rgba(45, 90, 39, 0.2);
+  box-shadow: 0 25px 50px rgba(45, 90, 39, 0.2), 0 15px 30px rgba(45, 90, 39, 0.15), 0 8px 16px rgba(45, 90, 39, 0.12);
+  border-color: rgba(45, 90, 39, 0.3);
+  background: linear-gradient(135deg, rgba(45, 90, 39, 0.06) 0%, white 25%, white 100%);
 }
 .capabilities-section .capability-card .capability-icon {
   width: 80px;
   height: 80px;
   border-radius: 50%;
   margin: 0 auto 1.5rem;
-  background: linear-gradient(135deg, #2d5a27, #4a7c59);
+  background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
   color: #ffffff;
-  box-shadow: 0 8px 20px rgba(45, 90, 39, 0.3);
-}
-.capabilities-section .capability-card .capability-icon i {
-  color: #ffffff !important;
-}
-.capabilities-section .capability-card .capability-icon i.fa, .capabilities-section .capability-card .capability-icon i.fab, .capabilities-section .capability-card .capability-icon i.fa-solid, .capabilities-section .capability-card .capability-icon i.far, .capabilities-section .capability-card .capability-icon i.fal, .capabilities-section .capability-card .capability-icon i.fat, .capabilities-section .capability-card .capability-icon i.fad {
-  color: #ffffff !important;
+  box-shadow: 0 8px 20px rgba(45, 90, 39, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 @media (min-width: 768px) {
   .capabilities-section .capability-card .capability-icon {
@@ -14200,9 +14163,10 @@ a i[class*=fa-]:hover, a [class*=fa-]:hover {
   }
 }
 .capabilities-section .capability-card .capability-description {
-  color: #718096;
+  color: #4a5568;
   line-height: 1.6;
   font-size: 0.875rem;
+  font-weight: 450;
 }
 @media (min-width: 768px) {
   .capabilities-section .capability-card .capability-description {
@@ -14212,7 +14176,7 @@ a i[class*=fa-]:hover, a [class*=fa-]:hover {
 
 .configuration-section {
   padding: 3rem 1rem;
-  background: linear-gradient(180deg, white 0%, rgba(0, 123, 127, 0.02) 100%);
+  background: #ffffff;
 }
 @media (min-width: 768px) {
   .configuration-section {
@@ -14286,10 +14250,11 @@ a i[class*=fa-]:hover, a [class*=fa-]:hover {
   padding: 1.5rem;
 }
 .configuration-section .config-card .config-card-body .config-description {
-  color: #718096;
+  color: #4a5568;
   line-height: 1.6;
   margin-bottom: 1.5rem;
   font-size: 0.875rem;
+  font-weight: 450;
 }
 @media (min-width: 768px) {
   .configuration-section .config-card .config-card-body .config-description {
@@ -14338,7 +14303,7 @@ a i[class*=fa-]:hover, a [class*=fa-]:hover {
 
 .external-services-section {
   padding: 3rem 1rem 4.5rem;
-  background: linear-gradient(180deg, rgba(45, 90, 39, 0.02) 0%, white 100%);
+  background: #ffffff;
 }
 @media (min-width: 768px) {
   .external-services-section {
