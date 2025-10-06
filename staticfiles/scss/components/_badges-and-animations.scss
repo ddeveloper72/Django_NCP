@@ -318,7 +318,7 @@
     color: #004085;
     
     &::before {
-      content: "⊕ ";
+      content: "✓ ";
       margin-right: 0.25rem;
     }
   }
@@ -360,7 +360,7 @@
   
   &.extended-group {
     h5::before {
-      content: "⊕ ";
+      content: "✓ ";
     }
   }
 }

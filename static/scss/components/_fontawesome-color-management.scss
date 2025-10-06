@@ -1,0 +1,213 @@
+// ========================================
+// FONTAWESOME ICON COLOR MANAGEMENT
+// Global icon color fixes and overrides
+// ========================================
+// Following Healthcare Organisation UI/UX Design Standards
+// Reference: Hover States and Interaction Design Guidelines
+
+// ========================================
+// CORE ICON COLOR INHERITANCE FIX
+// ========================================
+// Prevent FontAwesome icons from inheriting link colors
+// This fixes the dark teal color issue on dark backgrounds
+
+// Global FontAwesome color reset - prevents inheritance from link styles
+.fas, .far, .fal, .fat, .fad, .fab,
+[class*="fa-"],
+i[class*="fa-"] {
+  // Override global link color inheritance
+  color: inherit !important;
+  
+  // Ensure icons don't inherit text-decoration from links
+  text-decoration: none !important;
+}
+
+// ========================================
+// DARK BACKGROUND ICON CORRECTIONS
+// ========================================
+// Following "Hover States and Interaction Design Guidelines":
+// "Status badge icons should prevent icon color changes on hover"
+
+// Dark backgrounds must have white icons
+.bg-primary, .bg-secondary, .bg-success, .bg-danger, 
+.bg-info, .bg-dark, .bg-teal,
+.card-header.bg-primary, .card-header.bg-secondary, 
+.card-header.bg-success, .card-header.bg-danger,
+.card-header.bg-info, .card-header.bg-dark, .card-header.bg-teal {
+  
+  // FontAwesome icons in dark backgrounds
+  .fas, .far, .fal, .fat, .fad, .fab,
+  i[class*="fa-"], [class*="fa-"] {
+    color: var(--healthcare-text-light, #ffffff) !important;
+    fill: var(--healthcare-text-light, #ffffff) !important;
+    
+    // Prevent hover color changes (per design guidelines)
+    &:hover {
+      color: var(--healthcare-text-light, #ffffff) !important;
+      fill: var(--healthcare-text-light, #ffffff) !important;
+      transition: none !important;
+    }
+  }
+  
+  // Ensure links don't override icon colors
+  a {
+    .fas, .far, .fal, .fat, .fad, .fab,
+    i[class*="fa-"], [class*="fa-"] {
+      color: var(--healthcare-text-light, #ffffff) !important;
+      fill: var(--healthcare-text-light, #ffffff) !important;
+      
+      &:hover {
+        color: var(--healthcare-text-light, #ffffff) !important;
+        fill: var(--healthcare-text-light, #ffffff) !important;
+      }
+    }
+  }
+}
+
+// ========================================
+// STATUS BADGE ICON PROTECTION
+// ========================================
+// Following Healthcare design guidelines: 
+// "Status badges maintain consistency without color changes"
+
+.status-badge, .badge {
+  .fas, .far, .fal, .fat, .fad, .fab,
+  i[class*="fa-"], [class*="fa-"] {
+    // Prevent any color changes on hover
+    &:hover {
+      color: inherit !important;
+      transition: none !important;
+    }
+  }
+}
+
+// Clinical badge specific protection
+.clinical-badge {
+  .fas, .far, .fal, .fat, .fad, .fab,
+  i[class*="fa-"], [class*="fa-"] {
+    color: inherit !important;
+    
+    &:hover {
+      color: inherit !important;
+      transition: none !important;
+    }
+  }
+}
+
+// ========================================
+// LINK CONTEXT ICON MANAGEMENT
+// ========================================
+// Prevent link color inheritance while maintaining functionality
+
+// Icons inside links should maintain their context color
+a {
+  .fas, .far, .fal, .fat, .fad, .fab,
+  i[class*="fa-"], [class*="fa-"] {
+    // Don't inherit link color
+    color: inherit !important;
+    text-decoration: none !important;
+    
+    // Hover states for interactive icons
+    &:hover {
+      // Only allow color change if parent explicitly defines it
+      color: inherit !important;
+      text-decoration: none !important;
+    }
+  }
+}
+
+// ========================================
+// BUTTON ICON COLOR CONSISTENCY
+// ========================================
+// Ensure button icons maintain proper contrast
+
+.btn {
+  .fas, .far, .fal, .fat, .fad, .fab,
+  i[class*="fa-"], [class*="fa-"] {
+    color: inherit !important;
+    
+    &:hover {
+      color: inherit !important;
+    }
+  }
+}
+
+// Dark button variants need white icons
+.btn-primary, .btn-secondary, .btn-success, 
+.btn-danger, .btn-info, .btn-dark {
+  .fas, .far, .fal, .fat, .fad, .fab,
+  i[class*="fa-"], [class*="fa-"] {
+    color: var(--healthcare-text-light, #ffffff) !important;
+    
+    &:hover {
+      color: var(--healthcare-text-light, #ffffff) !important;
+    }
+  }
+}
+
+// Light button variants need dark icons
+.btn-light, .btn-warning, .btn-outline-primary,
+.btn-outline-secondary, .btn-outline-success {
+  .fas, .far, .fal, .fat, .fad, .fab,
+  i[class*="fa-"], [class*="fa-"] {
+    color: var(--healthcare-text-dark, #2d3748) !important;
+    
+    &:hover {
+      color: var(--healthcare-text-dark, #2d3748) !important;
+    }
+  }
+}
+
+// ========================================
+// NAVIGATION ICON CONSISTENCY
+// ========================================
+// Navigation icons should follow tab/pill styling
+
+.nav-tabs, .nav-pills {
+  .nav-link {
+    .fas, .far, .fal, .fat, .fad, .fab,
+    i[class*="fa-"], [class*="fa-"] {
+      color: inherit !important;
+      
+      &:hover {
+        color: inherit !important;
+      }
+    }
+  }
+}
+
+// ========================================
+// TABLE ICON MANAGEMENT
+// ========================================
+// Table icons should maintain readability
+
+.table {
+  .fas, .far, .fal, .fat, .fad, .fab,
+  i[class*="fa-"], [class*="fa-"] {
+    color: inherit !important;
+    
+    &:hover {
+      color: inherit !important;
+    }
+  }
+}
+
+// ========================================
+// EMERGENCY/CRITICAL ICON PROTECTION
+// ========================================
+// Critical medical information icons must maintain visibility
+
+.emergency-alert, .allergy-warning, .critical-status {
+  .fas, .far, .fal, .fat, .fad, .fab,
+  i[class*="fa-"], [class*="fa-"] {
+    // Maintain high contrast and readability
+    color: inherit !important;
+    
+    &:hover {
+      // No color changes that could reduce visibility
+      color: inherit !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+}
