@@ -41,6 +41,7 @@ from .services.terminology_service import CentralTerminologyService
 from .services.history_of_past_illness_extractor import HistoryOfPastIllnessExtractor
 from .services.immunizations_extractor import ImmunizationsExtractor
 from .services.pregnancy_history_extractor import PregnancyHistoryExtractor
+from .services.social_history_extractor import SocialHistoryExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -4973,6 +4974,26 @@ def patient_cda_view(request, session_id, cda_type=None):
                             logger.warning(f"[PREGNANCY HISTORY PATH1] Extraction failed: {e}")
                             # Keep existing detection if specialized extraction fails
                         
+                        # SOCIAL HISTORY SPECIALIZED EXTRACTION (PATH 1)
+                        # This runs regardless of comprehensive_data status if we have raw CDA content
+                        try:
+                            if raw_cda_content:
+                                logger.info("[SOCIAL HISTORY PATH1] Starting specialized extraction from raw CDA content")
+                                social_history_extractor = SocialHistoryExtractor()
+                                social_history_entries = social_history_extractor.extract_social_history(raw_cda_content)
+                                
+                                if social_history_entries:
+                                    extended_sections["social_history"] = social_history_entries
+                                    logger.info(f"[SOCIAL HISTORY PATH1] Successfully extracted {len(social_history_entries)} entries - ADDED TO CONTEXT")
+                                else:
+                                    logger.info("[SOCIAL HISTORY PATH1] No social history entries found in CDA document")
+                            else:
+                                logger.warning("[SOCIAL HISTORY PATH1] No raw CDA content available for extraction")
+                                        
+                        except Exception as e:
+                            logger.warning(f"[SOCIAL HISTORY PATH1] Extraction failed: {e}")
+                            # Keep existing detection if specialized extraction fails
+                        
                         # UPDATE CONTEXT WITH EXTENDED SECTIONS (including History of Past Illness)
                         context.update(extended_sections)
                         
@@ -5019,9 +5040,30 @@ def patient_cda_view(request, session_id, cda_type=None):
             # EXTENDED CLINICAL SECTIONS DETECTION
             # Detect and add extended clinical sections to context after mandatory sections are processed
             try:
-                # Get comprehensive data from earlier processing (available in locals)
-                if 'comprehensive_data' in locals() and comprehensive_data:
+                # Initialize extended_sections for both paths
+                extended_sections = {}
+                
+                # PATH 1: Get comprehensive data from earlier processing (available in locals)
+                has_comprehensive_data = 'comprehensive_data' in locals() and comprehensive_data
+                # PATH 2: Check if we can do specialized extractions (when medications already exist)
+                can_do_specialized_extractions = context.get("medications")
+                
+                if has_comprehensive_data:
+                    # PATH 1: Use comprehensive data detection 
+                    logger.info("[EXTENDED SECTIONS] Using comprehensive data detection (PATH 1)")
                     extended_sections = detect_extended_clinical_sections(comprehensive_data)
+                    
+                    # PRESERVE SPECIALIZED EXTRACTIONS: Don't override if already populated by specialized extractors
+                    existing_history = context.get("history_of_past_illness", [])
+                    if existing_history:
+                        logger.info(f"[EXTENDED SECTIONS] Preserving existing History of Past Illness data ({len(existing_history)} entries)")
+                        extended_sections["history_of_past_illness"] = existing_history
+                    
+                    # PATH 1 completed - context will be set after all paths
+                
+                elif can_do_specialized_extractions:
+                    # PATH 2: Do specialized extractions when medications already exist
+                    logger.info("[EXTENDED SECTIONS] Running specialized extractions (PATH 2)")
                     
                     # PRESERVE SPECIALIZED EXTRACTIONS: Don't override if already populated by specialized extractors
                     existing_history = context.get("history_of_past_illness", [])
@@ -5079,23 +5121,65 @@ def patient_cda_view(request, session_id, cda_type=None):
                         logger.warning(f"[PREGNANCY HISTORY PATH2] Extraction failed: {e}")
                         # Keep existing detection if specialized extraction fails
                     
-                    context.update(extended_sections)
+                    # SOCIAL HISTORY SPECIALIZED EXTRACTION (PATH 2)
+                    try:
+                        if raw_cda_content:
+                            logger.info("[SOCIAL HISTORY PATH2] Starting specialized extraction from raw CDA content")
+                            social_history_extractor = SocialHistoryExtractor()
+                            social_history_entries = social_history_extractor.extract_social_history(raw_cda_content)
+                            
+                            if social_history_entries:
+                                extended_sections["social_history"] = social_history_entries
+                                logger.info(f"[SOCIAL HISTORY PATH2] Successfully extracted {len(social_history_entries)} entries")
+                            else:
+                                logger.info("[SOCIAL HISTORY PATH2] No social history entries found in CDA document")
+                        else:
+                            logger.warning("[SOCIAL HISTORY PATH2] No raw CDA content available for extraction")
+                    except Exception as e:
+                        logger.warning(f"[SOCIAL HISTORY PATH2] Extraction failed: {e}")
+                        # Keep existing detection if specialized extraction fails
+                
+                    context["extended_sections"] = extended_sections
                     
-                    total_extended = sum(len(sections) for sections in extended_sections.values())
+                    # Extract individual sections for template compatibility
+                    context["history_of_past_illness"] = extended_sections.get("history_of_past_illness", [])
+                    context["immunizations"] = extended_sections.get("immunizations", [])
+                    context["pregnancy_history"] = extended_sections.get("pregnancy_history")
+                    context["social_history"] = extended_sections.get("social_history", [])
+                    context["laboratory_results"] = extended_sections.get("laboratory_results", [])
+                    context["advance_directives"] = extended_sections.get("advance_directives", [])
+                    context["additional_sections"] = extended_sections.get("additional_sections", [])
+                    
+                    # Calculate total properly, handling both lists and single objects
+                    total_extended = 0
+                    for section_name, sections in extended_sections.items():
+                        if isinstance(sections, list):
+                            total_extended += len(sections)
+                        elif sections:  # Single object like PregnancyHistoryData
+                            total_extended += 1
                     logger.info(f"[EXTENDED SECTIONS] Added {total_extended} extended clinical sections to context")
                     
                     # Log details of extended sections found
                     for section_name, sections in extended_sections.items():
                         if sections:
                             logger.info(f"[EXTENDED SECTIONS] {section_name}: {len(sections)} sections")
+                
                 else:
                     # Add empty extended sections for template compatibility
                     # PRESERVE SPECIALIZED EXTRACTIONS: Don't override if already populated
+                    # Check both context and extended_sections for existing data
+                    existing_social_history = []
+                    if extended_sections.get("social_history"):
+                        existing_social_history = extended_sections["social_history"]
+                        logger.info(f"[EXTENDED SECTIONS] Preserving {len(existing_social_history)} social history entries from specialized extraction")
+                    elif context.get("social_history"):
+                        existing_social_history = context.get("social_history", [])
+                    
                     empty_sections = {
                         "history_of_past_illness": context.get("history_of_past_illness", []),  # Preserve existing
                         "immunizations": context.get("immunizations", []),  # Don't override if already exists
                         "pregnancy_history": context.get("pregnancy_history", []),  # Preserve existing
-                        "social_history": [],
+                        "social_history": existing_social_history,  # Preserve from extended_sections or context
                         "laboratory_results": [],
                         "advance_directives": [],
                         "additional_sections": []
@@ -5454,6 +5538,26 @@ def patient_cda_view(request, session_id, cda_type=None):
                 context["contact_data"] = {}  # Empty for template compatibility
                 context["healthcare_data"] = {}  # Empty for template compatibility
                 logger.warning("[ERROR] No extended header data available for fallback")
+
+        # [DEBUG] Social History Template Context Debug
+        logger.info(f"🔍 [TEMPLATE DEBUG] About to render template with context...")
+        logger.info(f"🔍 [TEMPLATE DEBUG] Context has 'social_history' key: {'social_history' in context}")
+        if 'social_history' in context:
+            social_hist = context['social_history']
+            logger.info(f"🔍 [TEMPLATE DEBUG] social_history type: {type(social_hist)}")
+            logger.info(f"🔍 [TEMPLATE DEBUG] social_history length: {len(social_hist) if hasattr(social_hist, '__len__') else 'N/A'}")
+            logger.info(f"🔍 [TEMPLATE DEBUG] social_history content: {social_hist}")
+            if social_hist and len(social_hist) > 0:
+                logger.info("✅ [TEMPLATE DEBUG] Template condition SHOULD evaluate to TRUE")
+            else:
+                logger.info("❌ [TEMPLATE DEBUG] Template condition will evaluate to FALSE")
+        
+        if 'extended_sections' in context:
+            ext_sections = context['extended_sections']
+            logger.info(f"🔍 [TEMPLATE DEBUG] extended_sections type: {type(ext_sections)}")
+            if hasattr(ext_sections, 'get'):
+                ext_social = ext_sections.get('social_history', [])
+                logger.info(f"🔍 [TEMPLATE DEBUG] extended_sections.social_history: {ext_social}")
 
         # Prepare template context - use enhanced template with proper content
         return render(request, "patient_data/enhanced_patient_cda.html", context)
