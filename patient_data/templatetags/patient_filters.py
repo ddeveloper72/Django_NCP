@@ -796,3 +796,59 @@ def count_medical_device_observations(medical_devices):
     else:
         # Legacy format: count device entries
         return len(medical_devices)
+
+
+@register.filter
+def total_documents(patients):
+    """Calculate total document count for a list of patients"""
+    if not patients:
+        return 0
+    
+    total = 0
+    for patient in patients:
+        if hasattr(patient, 'get'):
+            # Dictionary-style access
+            l1_count = patient.get('l1_count', 0) or 0
+            l3_count = patient.get('l3_count', 0) or 0
+        else:
+            # Object-style access
+            l1_count = getattr(patient, 'l1_count', 0) or 0
+            l3_count = getattr(patient, 'l3_count', 0) or 0
+        
+        total += l1_count + l3_count
+    
+    return total
+
+
+@register.filter  
+def total_l1_documents(patients):
+    """Calculate total L1 document count for a list of patients"""
+    if not patients:
+        return 0
+    
+    total = 0
+    for patient in patients:
+        if hasattr(patient, 'get'):
+            l1_count = patient.get('l1_count', 0) or 0
+        else:
+            l1_count = getattr(patient, 'l1_count', 0) or 0
+        total += l1_count
+    
+    return total
+
+
+@register.filter
+def total_l3_documents(patients):
+    """Calculate total L3 document count for a list of patients"""
+    if not patients:
+        return 0
+    
+    total = 0
+    for patient in patients:
+        if hasattr(patient, 'get'):
+            l3_count = patient.get('l3_count', 0) or 0
+        else:
+            l3_count = getattr(patient, 'l3_count', 0) or 0
+        total += l3_count
+    
+    return total

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load patient_filters %}
 
 {% block title %}Test Patients - CDA Document Index{% endblock %}
 
@@ -73,10 +74,107 @@
                         {% for country, patients in patients_by_country.items %}
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
-                                    <h5 class="mb-0">
-                                        <i class="fa-solid fa-flag"></i> {{ country }}
-                                        <span class="badge bg-primary ms-2">{{ patients|length }} patient{{ patients|length|pluralize }}</span>
-                                    </h5>
+                                    <!-- Simplified Country Badge with Flag -->
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                        <span class="badge country-name-badge" data-country="{{ country|lower }}">
+                                            {% if country == "BE" %}
+                                                <img src="https://flagcdn.com/20x15/be.png" alt="Belgium Flag" class="country-flag">
+                                                Belgium
+                                            {% elif country == "EU" %}
+                                                <img src="https://flagcdn.com/20x15/eu.png" alt="European Union Flag" class="country-flag">
+                                                European Union
+                                            {% elif country == "PT" %}
+                                                <img src="https://flagcdn.com/20x15/pt.png" alt="Portugal Flag" class="country-flag">
+                                                Portugal
+                                            {% elif country == "IE" %}
+                                                <img src="https://flagcdn.com/20x15/ie.png" alt="Ireland Flag" class="country-flag">
+                                                Ireland
+                                            {% elif country == "IT" %}
+                                                <img src="https://flagcdn.com/20x15/it.png" alt="Italy Flag" class="country-flag">
+                                                Italy
+                                            {% elif country == "FR" %}
+                                                <img src="https://flagcdn.com/20x15/fr.png" alt="France Flag" class="country-flag">
+                                                France
+                                            {% elif country == "DE" %}
+                                                <img src="https://flagcdn.com/20x15/de.png" alt="Germany Flag" class="country-flag">
+                                                Germany
+                                            {% elif country == "ES" %}
+                                                <img src="https://flagcdn.com/20x15/es.png" alt="Spain Flag" class="country-flag">
+                                                Spain
+                                            {% elif country == "NL" %}
+                                                <img src="https://flagcdn.com/20x15/nl.png" alt="Netherlands Flag" class="country-flag">
+                                                Netherlands
+                                            {% elif country == "AT" %}
+                                                <img src="https://flagcdn.com/20x15/at.png" alt="Austria Flag" class="country-flag">
+                                                Austria
+                                            {% elif country == "SE" %}
+                                                <img src="https://flagcdn.com/20x15/se.png" alt="Sweden Flag" class="country-flag">
+                                                Sweden
+                                            {% elif country == "DK" %}
+                                                <img src="https://flagcdn.com/20x15/dk.png" alt="Denmark Flag" class="country-flag">
+                                                Denmark
+                                            {% elif country == "FI" %}
+                                                <img src="https://flagcdn.com/20x15/fi.png" alt="Finland Flag" class="country-flag">
+                                                Finland
+                                            {% elif country == "NO" %}
+                                                <img src="https://flagcdn.com/20x15/no.png" alt="Norway Flag" class="country-flag">
+                                                Norway
+                                            {% elif country == "PL" %}
+                                                <img src="https://flagcdn.com/20x15/pl.png" alt="Poland Flag" class="country-flag">
+                                                Poland
+                                            {% elif country == "CZ" %}
+                                                <img src="https://flagcdn.com/20x15/cz.png" alt="Czech Republic Flag" class="country-flag">
+                                                Czech Republic
+                                            {% elif country == "HU" %}
+                                                <img src="https://flagcdn.com/20x15/hu.png" alt="Hungary Flag" class="country-flag">
+                                                Hungary
+                                            {% elif country == "SK" %}
+                                                <img src="https://flagcdn.com/20x15/sk.png" alt="Slovakia Flag" class="country-flag">
+                                                Slovakia
+                                            {% elif country == "SI" %}
+                                                <img src="https://flagcdn.com/20x15/si.png" alt="Slovenia Flag" class="country-flag">
+                                                Slovenia
+                                            {% elif country == "HR" %}
+                                                <img src="https://flagcdn.com/20x15/hr.png" alt="Croatia Flag" class="country-flag">
+                                                Croatia
+                                            {% elif country == "BG" %}
+                                                <img src="https://flagcdn.com/20x15/bg.png" alt="Bulgaria Flag" class="country-flag">
+                                                Bulgaria
+                                            {% elif country == "RO" %}
+                                                <img src="https://flagcdn.com/20x15/ro.png" alt="Romania Flag" class="country-flag">
+                                                Romania
+                                            {% elif country == "EE" %}
+                                                <img src="https://flagcdn.com/20x15/ee.png" alt="Estonia Flag" class="country-flag">
+                                                Estonia
+                                            {% elif country == "LV" %}
+                                                <img src="https://flagcdn.com/20x15/lv.png" alt="Latvia Flag" class="country-flag">
+                                                Latvia
+                                            {% elif country == "LT" %}
+                                                <img src="https://flagcdn.com/20x15/lt.png" alt="Lithuania Flag" class="country-flag">
+                                                Lithuania
+                                            {% elif country == "LU" %}
+                                                <img src="https://flagcdn.com/20x15/lu.png" alt="Luxembourg Flag" class="country-flag">
+                                                Luxembourg
+                                            {% elif country == "MT" %}
+                                                <img src="https://flagcdn.com/20x15/mt.png" alt="Malta Flag" class="country-flag">
+                                                Malta
+                                            {% elif country == "CY" %}
+                                                <img src="https://flagcdn.com/20x15/cy.png" alt="Cyprus Flag" class="country-flag">
+                                                Cyprus
+                                            {% elif country == "GR" %}
+                                                <img src="https://flagcdn.com/20x15/gr.png" alt="Greece Flag" class="country-flag">
+                                                Greece
+                                            {% else %}
+                                                <img src="https://flagcdn.com/20x15/eu.png" alt="{{ country }} Flag" class="country-flag">
+                                                {{ country }}
+                                            {% endif %}
+                                        </span>
+                                        
+                                        <div class="country-info-text">
+                                            {{ patients|length }} patient{{ patients|length|pluralize }} • 
+                                            {{ patients|total_documents }} document{{ patients|total_documents|pluralize }}
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
