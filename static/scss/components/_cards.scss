@@ -92,8 +92,8 @@
 
       // FontAwesome icon styling - defer to icon system for sizing and color
       i {
-        // Icon size and color managed by _icons.scss
-        // This ensures consistency across all service cards
+        font-size: inherit;
+        color: inherit;
       }
     }
 

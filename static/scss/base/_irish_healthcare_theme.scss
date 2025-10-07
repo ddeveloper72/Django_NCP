@@ -517,11 +517,13 @@ body {
 }
 
 .nav-tabs-healthcare .nav-link i {
-  // Icon styling handled by tab-icon-center mixin
+  color: inherit;
+  transition: color 0.2s ease;
 }
 
 .nav-tabs-healthcare .badge {
-  // Badge styling handled by healthcare-tab-layout mixin
+  background-color: $hco-secondary-green-light;
+  color: $hco-primary-teal;
 }
 
 /* Integrated Patient Header Tabs - Enhanced 3D Effects */
