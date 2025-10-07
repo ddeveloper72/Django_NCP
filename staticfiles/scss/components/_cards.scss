@@ -310,3 +310,55 @@
     margin-bottom: $space-md;
   }
 }
+
+// ========================================
+// PATIENT/SERVICE CARD BUTTON PROTECTION
+// Ensure Healthcare Organisation compliance
+// ========================================
+
+.service-card {
+  // Override any conflicting button styles within service cards
+  .btn-outline-primary {
+    color: $hco-primary-teal !important;
+    border-color: $hco-primary-teal !important;
+    background-color: transparent !important;
+
+    // Critical: Icon color management for Healthcare Organisation compliance
+    i, .fa, .fas, .far, .fab {
+      color: $hco-primary-teal !important;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: $hco-primary-teal !important;
+      border-color: $hco-primary-teal !important;
+      color: $white !important;
+      transform: translateY(-1px);
+
+      // Ensure icons maintain proper white color on hover - highest specificity
+      i, .fa, .fas, .far, .fab {
+        color: $white !important;
+        transform: scale(1.1) !important;
+      }
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba($hco-primary-teal, 0.25) !important;
+    }
+  }
+
+  // Size variants with consistent icon management
+  .btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+
+    i, .fa, .fas, .far, .fab {
+      font-size: 0.875rem;
+      margin-right: 0.25rem;
+    }
+
+    &:hover i, &:hover .fa, &:hover .fas, &:hover .far, &:hover .fab {
+      color: $white !important;
+      transform: scale(1.1) !important;
+    }
+  }
+}

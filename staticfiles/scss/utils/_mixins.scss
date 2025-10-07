@@ -152,8 +152,18 @@
   color: $primary-blue;
   border: $border-width solid $primary-blue;
 
+  // Ensure icons follow the same color scheme
+  i, .fa, .fas, .far, .fab {
+    color: $primary-blue !important;
+  }
+
   &:hover:not(:disabled) {
     background-color: $light-blue;
+    
+    // Maintain icon color consistency on hover
+    i, .fa, .fas, .far, .fab {
+      color: $primary-blue !important;
+    }
   }
 }
 

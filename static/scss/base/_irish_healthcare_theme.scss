@@ -39,7 +39,7 @@ Generated: September 16, 2025
   --healthcare-red-accent: #e74c3c; /* Vibrant red */
   --healthcare-orange-accent: #f39c12; /* Warm orange */
   --healthcare-purple: #8e44ad; /* Professional purple */
-  --healthcare-teal: #16a085; /* Modern teal */
+  --healthcare-teal: #005f5f; /* Healthcare Organisation teal - Professional dark teal for accessibility */
   --healthcare-bright-green: #00ff3a; /* Bright green for hover/active effects */
 
   /* Typography */
@@ -267,14 +267,25 @@ body {
 }
 
 .btn-outline-primary {
-  color: var(--healthcare-blue);
-  border-color: var(--healthcare-blue);
+  color: var(--healthcare-teal, #005f5f) !important;
+  border-color: var(--healthcare-teal, #005f5f) !important;
+  background-color: transparent !important;
+
+  // Ensure icons follow Healthcare Organisation colors
+  i, .fa, .fas, .far, .fab {
+    color: var(--healthcare-teal, #005f5f) !important;
+  }
 }
 
 .btn-outline-primary:hover {
-  background-color: var(--healthcare-blue);
-  border-color: var(--healthcare-blue);
-  color: var(--healthcare-white);
+  background-color: var(--healthcare-teal, #005f5f) !important;
+  border-color: var(--healthcare-teal, #005f5f) !important;
+  color: var(--healthcare-white, #ffffff) !important;
+
+  // Critical: Maintain icon color consistency on hover
+  i, .fa, .fas, .far, .fab {
+    color: var(--healthcare-white, #ffffff) !important;
+  }
 }
 
 /* Healthcare Table Styling */
@@ -1516,7 +1527,7 @@ i.fab {
 .btn:not(.navbar *):not(.tab-button):hover i.far,
 .btn:not(.navbar *):not(.tab-button):hover i.fab {
   transform: scale(1.1);
-  color: var(--healthcare-bright-green) !important;
+  color: var(--healthcare-white, #ffffff) !important;
 }
 
 /* Override for navigation elements - highest specificity */

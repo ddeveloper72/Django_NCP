@@ -90,6 +90,80 @@
     }
   }
 
+  // Outline button variants with Healthcare Organisation colors
+  &.btn-outline-primary {
+    background-color: transparent;
+    border: 2px solid $hco-primary-teal;
+    color: $hco-primary-teal;
+
+    &:hover:not(:disabled) {
+      background-color: $hco-primary-teal;
+      border-color: $hco-primary-teal;
+      color: $white;
+    }
+
+    // Ensure icons follow the same color scheme
+    i, .fa, .fas, .far, .fab {
+      color: $hco-primary-teal;
+    }
+
+    &:hover:not(:disabled) i,
+    &:hover:not(:disabled) .fa,
+    &:hover:not(:disabled) .fas,
+    &:hover:not(:disabled) .far,
+    &:hover:not(:disabled) .fab {
+      color: $white !important;
+    }
+  }
+
+  &.btn-outline-secondary {
+    background-color: transparent;
+    border: 2px solid $neutral-medium;
+    color: $neutral-medium;
+
+    &:hover:not(:disabled) {
+      background-color: $neutral-medium;
+      border-color: $neutral-medium;
+      color: $white;
+    }
+
+    i, .fa, .fas, .far, .fab {
+      color: $neutral-medium;
+    }
+
+    &:hover:not(:disabled) i,
+    &:hover:not(:disabled) .fa,
+    &:hover:not(:disabled) .fas,
+    &:hover:not(:disabled) .far,
+    &:hover:not(:disabled) .fab {
+      color: $white !important;
+    }
+  }
+
+  &.btn-outline-info {
+    background-color: transparent;
+    border: 2px solid $info;
+    color: $info;
+
+    &:hover:not(:disabled) {
+      background-color: $info;
+      border-color: $info;
+      color: $white;
+    }
+
+    i, .fa, .fas, .far, .fab {
+      color: $info;
+    }
+
+    &:hover:not(:disabled) i,
+    &:hover:not(:disabled) .fa,
+    &:hover:not(:disabled) .fas,
+    &:hover:not(:disabled) .far,
+    &:hover:not(:disabled) .fab {
+      color: $white !important;
+    }
+  }
+
   // Full width button
   &.btn-block {
     width: 100%;
