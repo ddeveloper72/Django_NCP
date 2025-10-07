@@ -99,7 +99,8 @@ This document establishes mandatory color contrast and accessibility standards f
 #### Color Palette Compliance
 ```scss
 // Healthcare Organisation Color System with Accessibility
-$hse-primary-teal: #005f5f;      // Contrast ratio: 7.2:1 with white
+$hse-primary-teal: #005f5f;      // Contrast ratio: 7.2:1 with white (WCAG AAA)
+$hse-primary-teal-original: #007b7f; // Original: 4.6:1 (accessibility issue resolved)
 $hse-secondary-green: #2d5930;   // Contrast ratio: 8.1:1 with white  
 $hse-accent-blue: #1e4a72;       // Contrast ratio: 9.2:1 with white
 $warning-orange: #d97706;        // Contrast ratio: 4.8:1 with white

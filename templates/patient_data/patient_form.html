@@ -3,6 +3,20 @@
 {% load static %}
 {% block title %}Patient Search - EU NCP Portal{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Enhanced Search Icon Styling - Override any global FontAwesome rules */
+.form-card .card-header .card-title i.fa-search,
+.form-card .card-header .card-title i.fa-solid.fa-search {
+    font-size: 1.6rem !important;
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+    margin-right: 0.8rem !important;
+    vertical-align: middle !important;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="patient-form-container">
     <!-- Enhanced Navigation Breadcrumb -->
@@ -44,7 +58,7 @@
         <div class="form-card">
             <div class="card-header">
                 <h2 class="card-title">
-                    <i class="icon-search"></i>
+                    <i class="fa-solid fa-search fa-lg me-2 text-white" style="font-size: 1.6rem !important; color: white !important; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important; margin-right: 0.8rem !important;"></i>
                     NCP Document Query
                 </h2>
                 <p class="card-description">

@@ -8,7 +8,7 @@
 
   // Country Header
   .country-header {
-    background: linear-gradient(135deg, $primary-blue 0%, $accent-blue 100%);
+    background: linear-gradient(135deg, #005f5f 0%, $accent-blue 100%); // Accessible teal
     color: $white;
     padding: $space-xl;
     border-radius: 20px;

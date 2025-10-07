@@ -87,7 +87,7 @@
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    border-color: #007b7f;
+    border-color: $hco-primary-teal; // Use accessible teal variable
   }
 
   // Contact type header
@@ -108,7 +108,7 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: linear-gradient(90deg, #007b7f, #4fd1c7);
+      background: linear-gradient(90deg, $hco-primary-teal, #4fd1c7); // Use accessible teal
       border-radius: 12px 12px 0 0;
     }
   }
