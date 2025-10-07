@@ -288,15 +288,6 @@
         {% endif %}
     </div>
 
-    {% if has_cda_match %}
-    <!-- Extended Patient Information Section -->
-    <div class="row mt-4">
-        <div class="col-12">
-            {% include 'patient_data/components/extended_patient_info.html' %}
-        </div>
-    </div>
-    {% endif %}
-
     {% if not has_cda_match %}
     <!-- No Match Found -->
     <div class="row">
