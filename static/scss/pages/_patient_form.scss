@@ -266,6 +266,31 @@
         font-size: 1.1rem;
         flex-shrink: 0; // Prevent icon shrinking
       }
+
+      // Specific styling for info button (View Test Patients) to use Healthcare Organisation colors
+      &.btn-info {
+        background-color: $hco-primary-teal !important;
+        border-color: $hco-primary-teal !important;
+        color: white !important;
+
+        &:hover:not(:disabled) {
+          background-color: $hco-primary-teal-dark !important;
+          border-color: $hco-primary-teal-dark !important;
+          color: white !important;
+        }
+
+        i, .fa, .fas, .far, .fab {
+          color: white !important;
+        }
+
+        &:hover:not(:disabled) i,
+        &:hover:not(:disabled) .fa,
+        &:hover:not(:disabled) .fas,
+        &:hover:not(:disabled) .far,
+        &:hover:not(:disabled) .fab {
+          color: white !important;
+        }
+      }
     }
   }
 }

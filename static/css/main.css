@@ -4830,6 +4830,19 @@ img[data-src]::before {
 .btn.btn-warning:hover:not(:disabled) {
   background-color: rgb(196.9291338583, 126.7125984252, 8.0708661417);
 }
+.btn.btn-info {
+  background-color: #005f5f;
+  color: #ffffff;
+}
+.btn.btn-info:hover:not(:disabled) {
+  background-color: #004a4a;
+}
+.btn.btn-info i, .btn.btn-info .fa, .btn.btn-info .fas, .btn.btn-info .far, .btn.btn-info .fab {
+  color: #ffffff !important;
+}
+.btn.btn-info:hover:not(:disabled) i, .btn.btn-info:hover:not(:disabled) .fa, .btn.btn-info:hover:not(:disabled) .fas, .btn.btn-info:hover:not(:disabled) .far, .btn.btn-info:hover:not(:disabled) .fab {
+  color: #ffffff !important;
+}
 .btn.btn-danger {
   background-color: #dc2626;
   color: #ffffff;
@@ -18213,6 +18226,22 @@ input[type=checkbox] {
 .patient-search-form .form-actions .btn i {
   font-size: 1.1rem;
   flex-shrink: 0;
+}
+.patient-search-form .form-actions .btn.btn-info {
+  background-color: #005f5f !important;
+  border-color: #005f5f !important;
+  color: white !important;
+}
+.patient-search-form .form-actions .btn.btn-info:hover:not(:disabled) {
+  background-color: #004a4a !important;
+  border-color: #004a4a !important;
+  color: white !important;
+}
+.patient-search-form .form-actions .btn.btn-info i, .patient-search-form .form-actions .btn.btn-info .fa, .patient-search-form .form-actions .btn.btn-info .fas, .patient-search-form .form-actions .btn.btn-info .far, .patient-search-form .form-actions .btn.btn-info .fab {
+  color: white !important;
+}
+.patient-search-form .form-actions .btn.btn-info:hover:not(:disabled) i, .patient-search-form .form-actions .btn.btn-info:hover:not(:disabled) .fa, .patient-search-form .form-actions .btn.btn-info:hover:not(:disabled) .fas, .patient-search-form .form-actions .btn.btn-info:hover:not(:disabled) .far, .patient-search-form .form-actions .btn.btn-info:hover:not(:disabled) .fab {
+  color: white !important;
 }
 
 .search-info-card {

@@ -49,6 +49,28 @@
     }
   }
 
+  &.btn-info {
+    background-color: $info;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background-color: $info-dark;
+    }
+
+    // Ensure icons stay white on hover
+    i, .fa, .fas, .far, .fab {
+      color: $white !important;
+    }
+
+    &:hover:not(:disabled) i,
+    &:hover:not(:disabled) .fa,
+    &:hover:not(:disabled) .fas,
+    &:hover:not(:disabled) .far,
+    &:hover:not(:disabled) .fab {
+      color: $white !important;
+    }
+  }
+
   &.btn-danger {
     background-color: $error-red;
     color: $white;
