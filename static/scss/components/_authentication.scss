@@ -21,12 +21,46 @@
   box-shadow: 0 8px 32px rgba($hco-primary-teal, 0.1);
   border: 1px solid rgba($hco-primary-teal, 0.1);
   overflow: hidden;
-  max-width: 420px;
+  width: 100%;
+  max-width: 380px; // Mobile base width
   margin: 0 auto;
+
+  // Responsive scaling for better desktop/tablet experience
+  @media (min-width: $breakpoint-sm) {
+    max-width: 420px; // Large phones/small tablets
+  }
+  
+  @media (min-width: $breakpoint-md) {
+    max-width: 480px; // Tablets - more comfortable width
+  }
+  
+  @media (min-width: $breakpoint-lg) {
+    max-width: 540px; // Small desktop - expanded for better proportions
+  }
+  
+  @media (min-width: $breakpoint-xl) {
+    max-width: 600px; // Large desktop - utilize available space
+  }
 
   // Larger card for registration
   &.auth-card-large {
-    max-width: 480px;
+    max-width: 420px; // Mobile base
+    
+    @media (min-width: $breakpoint-sm) {
+      max-width: 480px; // Large phones
+    }
+    
+    @media (min-width: $breakpoint-md) {
+      max-width: 540px; // Tablets
+    }
+    
+    @media (min-width: $breakpoint-lg) {
+      max-width: 600px; // Small desktop
+    }
+    
+    @media (min-width: $breakpoint-xl) {
+      max-width: 680px; // Large desktop
+    }
   }
 }
 
@@ -38,9 +72,26 @@
     $hco-primary-teal-dark 100%
   );
   color: $white;
-  padding: $space-xxl;
+  padding: $space-xl; // Base padding for mobile
   text-align: center;
   position: relative;
+  
+  // Responsive padding to match card scaling
+  @media (min-width: $breakpoint-sm) {
+    padding: $space-xxl; // Standard padding for larger phones
+  }
+  
+  @media (min-width: $breakpoint-md) {
+    padding: $space-xxl $space-xxxl; // Extra horizontal padding on tablets
+  }
+  
+  @media (min-width: $breakpoint-lg) {
+    padding: $space-xxxl; // Generous padding on desktop
+  }
+  
+  @media (min-width: $breakpoint-xl) {
+    padding: $space-xxxl 4rem; // More horizontal space on large screens
+  }
 
   // Subtle pattern overlay
   &::before {
@@ -69,6 +120,7 @@
     opacity: 0.9;
     position: relative;
     z-index: 2;
+    color: $white !important; // Force white color for accessibility
   }
 
   .auth-title {
@@ -77,6 +129,7 @@
     margin-bottom: $space-sm;
     position: relative;
     z-index: 2;
+    color: $white !important; // Force white color for accessibility
   }
 
   .auth-subtitle {
@@ -85,15 +138,32 @@
     position: relative;
     z-index: 2;
     line-height: $line-height-relaxed;
+    color: $white !important; // Force white color for accessibility
   }
 }
 
 // Authentication Body
 .auth-body {
-  padding: $space-xxl;
+  padding: $space-xl; // Base padding for mobile
+  
+  @media (min-width: $breakpoint-sm) {
+    padding: $space-xxl; // More padding on larger phones
+  }
+  
+  @media (min-width: $breakpoint-md) {
+    padding: $space-xxl $space-xxxl; // Extra horizontal padding on tablets
+  }
+  
+  @media (min-width: $breakpoint-lg) {
+    padding: $space-xxxl; // Generous padding on desktop
+  }
+  
+  @media (min-width: $breakpoint-xl) {
+    padding: $space-xxxl 4rem; // Even more horizontal space on large screens
+  }
 
   @media (max-width: $breakpoint-sm) {
-    padding: $space-xl;
+    padding: $space-lg; // Compact on small screens
   }
 }
 
@@ -188,7 +258,7 @@
   font-weight: $font-weight-semibold;
   cursor: pointer;
   transition: all $transition-hco;
-  margin-bottom: $space-lg;
+  margin-bottom: $space-xxl;
   text-decoration: none;
   display: inline-block;
   text-align: center;
@@ -223,14 +293,22 @@
       $neutral-medium 0%,
       darken($neutral-medium, 10%) 100%
     );
+    color: $white !important; // Force white text for accessibility on dark background
     box-shadow: 0 2px 4px rgba($neutral-medium, 0.2);
 
     &:hover {
+      color: $white !important; // Maintain white text on hover
       box-shadow: 0 6px 16px rgba($neutral-medium, 0.3);
     }
 
     &:active {
+      color: $white !important; // Maintain white text on active
       box-shadow: 0 2px 4px rgba($neutral-medium, 0.2);
+    }
+    
+    // Ensure icons are also white
+    i {
+      color: $white !important;
     }
   }
 
@@ -462,18 +540,24 @@
 // Authentication Links Container
 .auth-links {
   text-align: center;
-  margin-top: $space-xl;
+  margin: $space-xxl 0;
+  padding: $space-lg 0;
 }
 
 // Authentication Footer
 .auth-footer {
   text-align: center;
-  margin-top: $space-xxl;
+  margin-top: $space-xxxl;
   padding-top: $space-xxl;
   border-top: 1px solid $border-light;
   color: $text-muted;
   font-size: $font-size-sm;
   line-height: $line-height-relaxed;
+
+  .auth-register-prompt {
+    margin-bottom: $space-lg;
+    font-weight: $font-weight-medium;
+  }
 
   i {
     margin-right: $space-xs;
@@ -509,29 +593,6 @@
 
   .btn-auth {
     margin: $space-sm;
-  }
-}
-
-// Responsive Adjustments
-@media (max-width: $breakpoint-sm) {
-  .auth-container {
-    padding: $space-lg;
-  }
-
-  .auth-body {
-    padding: $space-xl;
-  }
-
-  .auth-header {
-    padding: $space-xl;
-
-    .auth-logo {
-      font-size: $font-size-xxl;
-    }
-
-    .auth-title {
-      font-size: $font-size-xl;
-    }
   }
 }
 

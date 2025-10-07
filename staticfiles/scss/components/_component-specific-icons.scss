@@ -1,0 +1,283 @@
+// =====================================================
+// COMPONENT-SPECIFIC FONTAWESOME ICON STYLING
+// =====================================================
+
+// Context-aware FontAwesome icon styling organized by component
+// This replaces the global white icon enforcement with contextual styling
+
+// =====================================================
+// HERO SECTION STATS ICONS - HEALTHCARE TEAL ON LIGHT BACKGROUND
+// =====================================================
+
+.hero-stats .stat-icon {
+  i {
+    color: $hco-primary-teal !important;
+    font-size: 2.5rem !important;
+    line-height: 1 !important;
+    display: block !important;
+    text-align: center !important;
+    
+    // Force color for all FontAwesome icon types in hero stats (4.x and 5+)
+    &.fa,
+    &.fab,
+    &.fa-solid,
+    &.fa-regular,
+    &.far,
+    &.fal,
+    &.fat,
+    &.fad {
+      color: $hco-primary-teal !important;
+      font-family: 'FontAwesome' !important;
+      font-weight: normal !important;
+      font-style: normal !important;
+    }
+  }
+}
+
+// =====================================================
+// SECTION HEADER ICONS - DARK ICONS ON LIGHT BACKGROUNDS (NO HOVER EFFECTS)
+// =====================================================
+
+.section-header {
+  .section-title {
+    i {
+      // Section header icons should be healthcare teal for visibility
+      color: $hco-primary-teal !important;
+      
+      // Remove any transitions or hover effects
+      transition: none !important;
+      
+      // Force color for all FontAwesome icon types in section headers (4.x and 5+)
+      &.fa,
+      &.fab,
+      &.fa-solid,
+      &.fa-regular,
+      &.far,
+      &.fal,
+      &.fat,
+      &.fad {
+        color: $hco-primary-teal !important;
+        transition: none !important;
+        font-family: 'FontAwesome' !important;
+        font-weight: normal !important;
+        font-style: normal !important;
+      }
+    }
+    
+    // Prevent hover effects on the entire section title
+    &:hover {
+      i {
+        color: $hco-primary-teal !important;
+        
+        &.fa,
+        &.fab,
+        &.fa-solid,
+        &.fa-regular,
+        &.far,
+        &.fal,
+        &.fat,
+        &.fad {
+          color: $hco-primary-teal !important;
+        }
+      }
+    }
+  }
+}
+
+// =====================================================
+// CAPABILITY CARD ICONS - WHITE ICONS ON DARK BACKGROUNDS (HIGH SPECIFICITY)
+// =====================================================
+
+.capabilities-section .capability-icon,
+.capability-card .capability-icon {
+  // Ensure all icons are white with highest specificity on dark backgrounds
+  i {
+    color: $white !important;
+    font-size: 2.5rem !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    display: inline-block !important;
+
+    // Force color and font for all FontAwesome icon types on dark backgrounds (4.x and 5+)
+    &.fa,
+    &.fab,
+    &.fa-solid,
+    &.fa-regular,
+    &.far,
+    &.fal,
+    &.fat,
+    &.fad {
+      color: $white !important;
+      font-family: 'FontAwesome' !important;
+      font-weight: normal !important;
+      font-style: normal !important;
+      display: inline-block !important;
+    }
+    
+    // FontAwesome 4.x specific classes
+    &[class*="fa-"]:before {
+      font-family: 'FontAwesome' !important;
+      color: $white !important;
+    }
+  }
+
+  @media (min-width: 768px) {
+    i {
+      font-size: 3rem !important; // Slightly larger on desktop
+    }
+  }
+}
+
+// =====================================================
+// SERVICE CARD ICONS - WHITE ICONS ON COLORED BACKGROUNDS
+// =====================================================
+
+.service-icon {
+  // Service card icons on colored backgrounds need white color
+  i {
+    color: $white !important;
+    line-height: 1;
+    vertical-align: middle;
+
+    // Force color for all FontAwesome icon types on colored backgrounds (4.x and 5+)
+    &.fa,
+    &.fab,
+    &.fa-solid,
+    &.fa-regular,
+    &.far,
+    &.fal,
+    &.fat,
+    &.fad {
+      color: $white !important;
+      line-height: 1;
+      vertical-align: middle;
+    }
+  }
+}
+
+// =====================================================
+// CONFIGURATION CARD ICONS - WHITE ICONS ON DARK HEADERS
+// =====================================================
+
+.config-icon {
+  // Configuration card icons on dark headers need white color
+  i {
+    color: $white !important;
+    line-height: 1;
+    vertical-align: middle;
+
+    // Force color for all FontAwesome icon types on dark headers (4.x and 5+)
+    &.fa,
+    &.fab,
+    &.fa-solid,
+    &.fa-regular,
+    &.far,
+    &.fal,
+    &.fat,
+    &.fad {
+      color: $white !important;
+      line-height: 1;
+      vertical-align: middle;
+    }
+  }
+}
+
+// =====================================================
+// EXTERNAL SERVICE ICONS - WHITE ICONS ON COLORED BACKGROUNDS
+// =====================================================
+
+.service-logo {
+  // External service icons on colored backgrounds need white color
+  i {
+    color: $white !important;
+    line-height: 1;
+    vertical-align: middle;
+
+    // Force color for all FontAwesome icon types on colored backgrounds (4.x and 5+)
+    &.fa,
+    &.fab,
+    &.fa-solid,
+    &.fa-regular,
+    &.far,
+    &.fal,
+    &.fat,
+    &.fad {
+      color: $white !important;
+      line-height: 1;
+      vertical-align: middle;
+    }
+  }
+}
+
+// =====================================================
+// NAVIGATION ICONS - CONTEXTUAL COLORS
+// =====================================================
+
+.navbar {
+  // Navigation icons should inherit text color for flexibility
+  i {
+    color: inherit;
+    
+    &.fa,
+    &.fab,
+    &.fa-solid,
+    &.fa-regular,
+    &.far,
+    &.fal,
+    &.fat,
+    &.fad {
+      color: inherit;
+    }
+  }
+}
+
+// =====================================================
+// BUTTON ICONS - INHERIT BUTTON TEXT COLOR
+// =====================================================
+
+.btn {
+  i {
+    // Button icons should inherit the button's text color
+    color: inherit;
+    
+    &.fa,
+    &.fab,
+    &.fa-solid,
+    &.fa-regular,
+    &.far,
+    &.fal,
+    &.fat,
+    &.fad {
+      color: inherit;
+    }
+  }
+}
+
+// =====================================================
+// COLLAPSIBLE SECTION ICONS - WHITE ICONS ON DARK BACKGROUNDS
+// =====================================================
+
+.collapsible-label-title {
+  i {
+    // Icons in collapsible headers should be white on dark backgrounds
+    color: $white !important;
+    
+    &.fa,
+    &.fab,
+    &.fa-solid,
+    &.fa-regular,
+    &.far,
+    &.fal,
+    &.fat,
+    &.fad {
+      color: $white !important;
+    }
+  }
+}
+
+// =====================================================
+// DEFAULT FALLBACK - REMOVE GLOBAL WHITE ENFORCEMENT
+// =====================================================
+
+// Remove any global FontAwesome color overrides
+// Each component now manages its own icon colors contextually
