@@ -170,7 +170,7 @@
 
   i {
     font-size: 1.25rem;
-    color: white;
+    color: white !important; // Force white icons on teal gradient backgrounds
   }
 }
 

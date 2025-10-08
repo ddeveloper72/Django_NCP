@@ -16681,7 +16681,7 @@ html {
 }
 .detail-icon i {
   font-size: 1.25rem;
-  color: white;
+  color: white !important;
 }
 
 .detail-title {
