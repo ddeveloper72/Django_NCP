@@ -28,10 +28,12 @@
 @import "components/authentication";
 @import "components/cards";
 @import "components/country_badges";
+@import "components/document_type_badges";
 @import "components/tables";
 @import "components/navigation";
 @import "components/modals";
 @import "components/alerts";
+@import "components/flash_messages";
 @import "components/badges-and-animations";
 @import "components/fontawesome-color-management";
 @import "components/component-specific-icons";
@@ -47,6 +49,7 @@
 // 5. Page-specific Styles
 @import "pages/home";
 @import "pages/dashboard";
+@import "pages/performance_metrics";
 @import "pages/forms";
 @import "pages/patient_data_view";
 @import "pages/admin";

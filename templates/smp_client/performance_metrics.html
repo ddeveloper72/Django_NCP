@@ -25,142 +25,121 @@
             </div>
 
             <!-- Performance Metrics Overview -->
-            <div class="row mb-4">
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card bg-primary text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-0">{{ metrics.total_queries }}</h4>
-                                    <p class="mb-0">Total Queries</p>
-                                    <small class="opacity-75">Last {{ time_period }}</small>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fa-solid fa-search fa-2x"></i>
-                                </div>
-                            </div>
+            <div class="performance-metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon">
+                            <i class="fa-solid fa-search" aria-hidden="true"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3 class="metric-title">Total Queries</h3>
+                            <div class="metric-value">{{ metrics.total_queries }}</div>
+                            <div class="metric-subtitle">Last {{ time_period }}</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card bg-success text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-0">{{ metrics.success_rate }}%</h4>
-                                    <p class="mb-0">Success Rate</p>
-                                    <small class="opacity-75">{{ metrics.successful_queries }} successful</small>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fa-solid fa-check-circle fa-2x"></i>
-                                </div>
-                            </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon metric-icon-success">
+                            <i class="fa-solid fa-check-circle" aria-hidden="true"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3 class="metric-title">Success Rate</h3>
+                            <div class="metric-value metric-value-success">{{ metrics.success_rate }}%</div>
+                            <div class="metric-subtitle">{{ metrics.successful_queries }} successful</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card bg-info text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-0">{{ metrics.total_documents }}</h4>
-                                    <p class="mb-0">Total Documents</p>
-                                    <small class="opacity-75">{{ metrics.signed_documents }} signed</small>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fa-solid fa-file-alt fa-2x"></i>
-                                </div>
-                            </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon metric-icon-info">
+                            <i class="fa-solid fa-file-alt" aria-hidden="true"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3 class="metric-title">Total Documents</h3>
+                            <div class="metric-value metric-value-info">{{ metrics.total_documents }}</div>
+                            <div class="metric-subtitle">{{ metrics.signed_documents }} signed</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card bg-warning text-dark">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-0">{{ metrics.active_participants }}</h4>
-                                    <p class="mb-0">Active Participants</p>
-                                    <small class="opacity-75">{{ metrics.total_participants }} total</small>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fa-solid fa-users fa-2x"></i>
-                                </div>
-                            </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon metric-icon-warning">
+                            <i class="fa-solid fa-users" aria-hidden="true"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3 class="metric-title">Active Participants</h3>
+                            <div class="metric-value metric-value-warning">{{ metrics.active_participants }}</div>
+                            <div class="metric-subtitle">{{ metrics.total_participants }} total</div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Detailed Metrics -->
-            <div class="row">
-                <div class="col-lg-6 mb-4">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">
-                                <i class="fa-solid fa-chart-bar me-2"></i>
-                                Query Performance
-                            </h5>
+            <div class="detailed-metrics-grid">
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="detail-icon">
+                            <i class="fa-solid fa-chart-bar" aria-hidden="true"></i>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <h6>Total Queries</h6>
-                                    <h3 class="text-primary">{{ metrics.total_queries }}</h3>
-                                </div>
-                                <div class="col-6">
-                                    <h6>Successful</h6>
-                                    <h3 class="text-success">{{ metrics.successful_queries }}</h3>
-                                </div>
+                        <h3 class="detail-title">Query Performance</h3>
+                    </div>
+                    <div class="detail-body">
+                        <div class="metric-row">
+                            <div class="metric-item">
+                                <div class="metric-label">Total Queries</div>
+                                <div class="metric-number">{{ metrics.total_queries }}</div>
                             </div>
-                            <div class="progress mt-3">
-                                <div class="progress-bar bg-success" role="progressbar" 
-                                     style="width: {{ metrics.success_rate }}%"
-                                     aria-valuenow="{{ metrics.success_rate }}" 
-                                     aria-valuemin="0" aria-valuemax="100">
-                                    {{ metrics.success_rate }}%
-                                </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Successful</div>
+                                <div class="metric-number metric-number-success">{{ metrics.successful_queries }}</div>
                             </div>
-                            <small class="text-muted">Success rate over the last {{ time_period }}</small>
+                        </div>
+                        <div class="performance-progress">
+                            <div class="progress-label">
+                                <span>Success Rate</span>
+                                <span class="progress-value">{{ metrics.success_rate }}%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: {{ metrics.success_rate }}%"></div>
+                            </div>
+                            <div class="progress-note">Success rate over the last {{ time_period }}</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-lg-6 mb-4">
-                    <div class="card">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="mb-0">
-                                <i class="fa-solid fa-file-alt me-2"></i>
-                                Document Status
-                            </h5>
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="detail-icon">
+                            <i class="fa-solid fa-file-alt" aria-hidden="true"></i>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-4">
-                                    <h6>Total</h6>
-                                    <h4 class="text-info">{{ metrics.total_documents }}</h4>
-                                </div>
-                                <div class="col-4">
-                                    <h6>Signed</h6>
-                                    <h4 class="text-success">{{ metrics.signed_documents }}</h4>
-                                </div>
-                                <div class="col-4">
-                                    <h6>Uploaded</h6>
-                                    <h4 class="text-primary">{{ metrics.uploaded_documents }}</h4>
-                                </div>
+                        <h3 class="detail-title">Document Status</h3>
+                    </div>
+                    <div class="detail-body">
+                        <div class="metric-row metric-row-triple">
+                            <div class="metric-item">
+                                <div class="metric-label">Total</div>
+                                <div class="metric-number">{{ metrics.total_documents }}</div>
                             </div>
-                            {% if metrics.total_documents > 0 %}
-                            <div class="mt-3">
-                                <small class="text-muted">
-                                    {{ metrics.signed_documents|floatformat:0 }} of {{ metrics.total_documents }} documents signed
-                                    ({% widthratio metrics.signed_documents metrics.total_documents 100 %}%)
-                                </small>
+                            <div class="metric-item">
+                                <div class="metric-label">Signed</div>
+                                <div class="metric-number metric-number-success">{{ metrics.signed_documents }}</div>
                             </div>
-                            {% endif %}
+                            <div class="metric-item">
+                                <div class="metric-label">Uploaded</div>
+                                <div class="metric-number metric-number-info">{{ metrics.uploaded_documents }}</div>
+                            </div>
                         </div>
+                        {% if metrics.total_documents > 0 %}
+                        <div class="document-summary">
+                            {{ metrics.signed_documents|floatformat:0 }} of {{ metrics.total_documents }} documents signed
+                            ({% widthratio metrics.signed_documents metrics.total_documents 100 %}%)
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

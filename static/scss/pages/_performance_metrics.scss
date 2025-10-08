@@ -1,0 +1,369 @@
+// ✅ PERFORMANCE METRICS PAGE STYLING
+// Professional Healthcare Organisation themed performance metrics
+// Following accessibility standards and modern design patterns
+
+// ✅ MAIN METRICS GRID
+.performance-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: $space-lg;
+  margin-bottom: $space-xl;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metric-card {
+  background: white;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-lg;
+  padding: $space-lg;
+  transition: 
+    transform $transition-normal ease-out,
+    box-shadow $transition-normal ease-out,
+    border-color $transition-normal ease-out;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 95, 95, 0.08);
+    border-color: $hco-primary-teal-light;
+  }
+}
+
+.metric-header {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-md;
+}
+
+.metric-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: $border-radius-lg;
+  background: linear-gradient(135deg, $hco-primary-teal 0%, $hco-primary-teal-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  i {
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  // ✅ THEMED ICON VARIANTS
+  &.metric-icon-success {
+    background: linear-gradient(135deg, $hco-secondary-green 0%, lighten($hco-secondary-green, 15%) 100%);
+  }
+
+  &.metric-icon-info {
+    background: linear-gradient(135deg, $hco-accent-blue 0%, lighten($hco-accent-blue, 15%) 100%);
+  }
+
+  &.metric-icon-warning {
+    background: linear-gradient(135deg, $warning-orange 0%, lighten($warning-orange, 15%) 100%);
+  }
+}
+
+.metric-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.metric-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-dark;
+  margin: 0 0 $space-xs 0;
+  line-height: 1.3;
+}
+
+.metric-value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: $hco-primary-teal;
+  line-height: 1.1;
+  margin-bottom: $space-xs;
+
+  // ✅ COLORED VALUE VARIANTS
+  &.metric-value-success {
+    color: $hco-secondary-green;
+  }
+
+  &.metric-value-info {
+    color: $hco-accent-blue;
+  }
+
+  &.metric-value-warning {
+    color: $warning-orange;
+  }
+}
+
+.metric-subtitle {
+  font-size: 0.875rem;
+  color: $text-muted;
+  line-height: 1.4;
+}
+
+// ✅ DETAILED METRICS SECTION
+.detailed-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: $space-lg;
+  margin-bottom: $space-xl;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-card {
+  background: white;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  transition: 
+    transform $transition-normal ease-out,
+    box-shadow $transition-normal ease-out;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 95, 95, 0.08);
+  }
+}
+
+.detail-header {
+  background: linear-gradient(135deg, $hco-primary-teal 0%, $hco-primary-teal-light 100%);
+  color: white;
+  padding: $space-lg;
+  display: flex;
+  align-items: center;
+  gap: $space-md;
+}
+
+.detail-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: $border-radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  i {
+    font-size: 1.25rem;
+    color: white;
+  }
+}
+
+.detail-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+.detail-body {
+  padding: $space-lg;
+}
+
+// ✅ METRIC ROWS
+.metric-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-lg;
+  margin-bottom: $space-lg;
+
+  &.metric-row-triple {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: $space-md;
+
+    &.metric-row-triple {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.metric-item {
+  text-align: center;
+  padding: $space-md;
+  background: $bg-light;
+  border-radius: $border-radius-md;
+  border: 1px solid $border-light;
+  transition: border-color $transition-normal ease-out;
+
+  &:hover {
+    border-color: $hco-primary-teal-light;
+  }
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: $text-muted;
+  font-weight: 500;
+  margin-bottom: $space-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: $hco-primary-teal;
+  line-height: 1.2;
+
+  // ✅ COLORED NUMBER VARIANTS
+  &.metric-number-success {
+    color: $hco-secondary-green;
+  }
+
+  &.metric-number-info {
+    color: $hco-accent-blue;
+  }
+
+  &.metric-number-warning {
+    color: $warning-orange;
+  }
+}
+
+// ✅ PROGRESS BAR COMPONENT
+.performance-progress {
+  margin-top: $space-md;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $space-xs;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $text-dark;
+}
+
+.progress-value {
+  color: $hco-secondary-green;
+  font-weight: 600;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: $bg-light;
+  border-radius: $border-radius-full;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, $hco-secondary-green 0%, lighten($hco-secondary-green, 10%) 100%);
+  border-radius: $border-radius-full;
+  transition: width $transition-slow ease-out;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+    animation: progress-shimmer 2s infinite;
+  }
+}
+
+@keyframes progress-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progress-note {
+  font-size: 0.75rem;
+  color: $text-muted;
+  margin-top: $space-xs;
+  text-align: center;
+}
+
+// ✅ DOCUMENT SUMMARY
+.document-summary {
+  background: rgba($hco-primary-teal, 0.05);
+  border: 1px solid rgba($hco-primary-teal, 0.1);
+  border-radius: $border-radius-md;
+  padding: $space-md;
+  font-size: 0.875rem;
+  color: $text-dark;
+  text-align: center;
+  margin-top: $space-md;
+}
+
+// ✅ RESPONSIVE ADJUSTMENTS
+@media (max-width: 1200px) {
+  .performance-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .metric-card,
+  .detail-card {
+    margin-bottom: $space-md;
+  }
+
+  .metric-value {
+    font-size: 1.875rem;
+  }
+
+  .metric-number {
+    font-size: 1.5rem;
+  }
+
+  .detail-header {
+    padding: $space-md;
+  }
+
+  .detail-body {
+    padding: $space-md;
+  }
+}
+
+@media (max-width: 480px) {
+  .performance-metrics-grid {
+    gap: $space-md;
+  }
+
+  .detailed-metrics-grid {
+    gap: $space-md;
+  }
+
+  .metric-header {
+    flex-direction: column;
+    text-align: center;
+    gap: $space-sm;
+  }
+
+  .metric-icon {
+    width: 48px;
+    height: 48px;
+    align-self: center;
+  }
+
+  .metric-value {
+    font-size: 1.75rem;
+  }
+}

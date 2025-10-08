@@ -16531,6 +16531,333 @@ html {
   margin-right: 10px;
 }
 
+.performance-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+@media (max-width: 768px) {
+  .performance-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 480px) {
+  .performance-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metric-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) ease-out, box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1) ease-out, border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1) ease-out;
+}
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 95, 95, 0.08);
+  border-color: #33969a;
+}
+
+.metric-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.metric-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, #005f5f 0%, #33969a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.metric-icon i {
+  font-size: 1.5rem;
+  color: white;
+}
+.metric-icon.metric-icon-success {
+  background: linear-gradient(135deg, #2d5a27 0%, rgb(71.6860465116, 143.3720930233, 62.1279069767) 100%);
+}
+.metric-icon.metric-icon-info {
+  background: linear-gradient(135deg, #1e3a5f 0%, rgb(48.36, 93.496, 153.14) 100%);
+}
+.metric-icon.metric-icon-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, rgb(248.0118110236, 187.2145669291, 84.4881889764) 100%);
+}
+
+.metric-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.metric-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+}
+
+.metric-value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #005f5f;
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+.metric-value.metric-value-success {
+  color: #2d5a27;
+}
+.metric-value.metric-value-info {
+  color: #1e3a5f;
+}
+.metric-value.metric-value-warning {
+  color: #f59e0b;
+}
+
+.metric-subtitle {
+  font-size: 0.875rem;
+  color: #718096;
+  line-height: 1.4;
+}
+
+.detailed-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+@media (max-width: 768px) {
+  .detailed-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) ease-out, box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1) ease-out;
+}
+.detail-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 95, 95, 0.08);
+}
+
+.detail-header {
+  background: linear-gradient(135deg, #005f5f 0%, #33969a 100%);
+  color: white;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.detail-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.detail-icon i {
+  font-size: 1.25rem;
+  color: white;
+}
+
+.detail-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+.detail-body {
+  padding: 1.5rem;
+}
+
+.metric-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.metric-row.metric-row-triple {
+  grid-template-columns: repeat(3, 1fr);
+}
+@media (max-width: 480px) {
+  .metric-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .metric-row.metric-row-triple {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metric-item {
+  text-align: center;
+  padding: 1rem;
+  background: #f7fafc;
+  border-radius: 0.375rem;
+  border: 1px solid #e2e8f0;
+  transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1) ease-out;
+}
+.metric-item:hover {
+  border-color: #33969a;
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #005f5f;
+  line-height: 1.2;
+}
+.metric-number.metric-number-success {
+  color: #2d5a27;
+}
+.metric-number.metric-number-info {
+  color: #1e3a5f;
+}
+.metric-number.metric-number-warning {
+  color: #f59e0b;
+}
+
+.performance-progress {
+  margin-top: 1rem;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.progress-value {
+  color: #2d5a27;
+  font-weight: 600;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #f7fafc;
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #2d5a27 0%, rgb(62.7906976744, 125.5813953488, 54.4186046512) 100%);
+  border-radius: 9999px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) ease-out;
+  position: relative;
+}
+.progress-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+  animation: progress-shimmer 2s infinite;
+}
+
+@keyframes progress-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+.progress-note {
+  font-size: 0.75rem;
+  color: #718096;
+  margin-top: 0.25rem;
+  text-align: center;
+}
+
+.document-summary {
+  background: rgba(0, 95, 95, 0.05);
+  border: 1px solid rgba(0, 95, 95, 0.1);
+  border-radius: 0.375rem;
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: #2d3748;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .performance-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .metric-card,
+  .detail-card {
+    margin-bottom: 1rem;
+  }
+  .metric-value {
+    font-size: 1.875rem;
+  }
+  .metric-number {
+    font-size: 1.5rem;
+  }
+  .detail-header {
+    padding: 1rem;
+  }
+  .detail-body {
+    padding: 1rem;
+  }
+}
+@media (max-width: 480px) {
+  .performance-metrics-grid {
+    gap: 1rem;
+  }
+  .detailed-metrics-grid {
+    gap: 1rem;
+  }
+  .metric-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  .metric-icon {
+    width: 48px;
+    height: 48px;
+    align-self: center;
+  }
+  .metric-value {
+    font-size: 1.75rem;
+  }
+}
 .forms-page .form-container {
   max-width: 800px;
   margin: 0 auto;
