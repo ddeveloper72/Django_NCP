@@ -6226,9 +6226,10 @@ img[data-src]::before {
   color: white !important;
   border: 1px solid #004a4a;
 }
-.badge.bg-primary .fa-eye {
-  opacity: 0.9;
-  margin-left: 0.5rem;
+.badge.bg-primary .fa-check {
+  opacity: 1;
+  color: white !important;
+  font-weight: 900;
 }
 .badge.bg-secondary {
   background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
@@ -6252,6 +6253,9 @@ img[data-src]::before {
   transform: none !important;
   box-shadow: none !important;
 }
+.badge:hover i, .badge:hover .fa, .badge:hover .fas, .badge:hover .far, .badge:hover .fab, .badge:hover .fal, .badge:hover .fat, .badge:hover .fad {
+  color: inherit !important;
+}
 .badge.fs-6 {
   font-size: 0.875rem !important;
   font-weight: 500;
@@ -6269,10 +6273,21 @@ img[data-src]::before {
 }
 .badge i.fa-file-medical, .badge i.fa-language {
   color: inherit !important;
+  margin-right: 0.5rem !important;
 }
-.badge i.fa-eye {
-  opacity: 0.9;
+.badge i.fa-check {
+  opacity: 1;
   font-size: 0.8em;
+  color: inherit !important;
+  margin-left: 0.5rem !important;
+  font-weight: 900;
+}
+.badge i.fa, .badge i.fab, .badge i.fa-solid, .badge i.far, .badge i.fal, .badge i.fat, .badge i.fad {
+  color: inherit !important;
+  transition: none !important;
+}
+.badge i.fa:hover, .badge i.fab:hover, .badge i.fa-solid:hover, .badge i.far:hover, .badge i.fal:hover, .badge i.fat:hover, .badge i.fad:hover {
+  color: inherit !important;
 }
 
 .d-flex.gap-2 {
@@ -6295,6 +6310,19 @@ img[data-src]::before {
 .text-muted strong {
   color: #005f5f;
   font-weight: 600;
+}
+
+.badge i:hover,
+.badge .fa:hover,
+.badge .fas:hover,
+.badge .far:hover,
+.badge .fab:hover,
+.badge .fal:hover,
+.badge .fat:hover,
+.badge .fad:hover {
+  color: inherit !important;
+  background: none !important;
+  transition: none !important;
 }
 
 .table {

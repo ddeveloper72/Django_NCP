@@ -196,26 +196,26 @@
                                         <!-- L1 Document Type Badge -->
                                         {% if has_l1_cda %}
                                         <span class="badge {% if cda_type == 'L1' %}bg-primary{% else %}bg-secondary{% endif %} fs-6 px-3 py-2">
-                                            <i class="fa-solid fa-file-medical me-1"></i>L1 Original Document
-                                            {% if cda_type == 'L1' %}<i class="fa-solid fa-eye ms-1" title="Currently viewing"></i>{% endif %}
+                                            <i class="fa-solid fa-file-medical me-2"></i>L1 Original Document
+                                            {% if cda_type == 'L1' %}<i class="fa-solid fa-check ms-2" title="Currently active"></i>{% endif %}
                                         </span>
                                         {% else %}
                                         <span class="badge bg-light text-dark fs-6 px-3 py-2">
-                                            <i class="fa-solid fa-file-medical me-1"></i>L1 Original Document
-                                            <small class="ms-1">(Not Available)</small>
+                                            <i class="fa-solid fa-file-medical me-2"></i>L1 Original Document
+                                            <small class="ms-2">(Not Available)</small>
                                         </span>
                                         {% endif %}
                                         
                                         <!-- L3 Document Type Badge -->
                                         {% if has_l3_cda %}
                                         <span class="badge {% if cda_type == 'L3' %}bg-primary{% else %}bg-secondary{% endif %} fs-6 px-3 py-2">
-                                            <i class="fa-solid fa-language me-1"></i>L3 Patient Summary
-                                            {% if cda_type == 'L3' %}<i class="fa-solid fa-eye ms-1" title="Currently viewing"></i>{% endif %}
+                                            <i class="fa-solid fa-language me-2"></i>L3 Patient Summary
+                                            {% if cda_type == 'L3' %}<i class="fa-solid fa-check ms-2" title="Currently active"></i>{% endif %}
                                         </span>
                                         {% else %}
                                         <span class="badge bg-light text-dark fs-6 px-3 py-2">
-                                            <i class="fa-solid fa-language me-1"></i>L3 Patient Summary
-                                            <small class="ms-1">(Not Available)</small>
+                                            <i class="fa-solid fa-language me-2"></i>L3 Patient Summary
+                                            <small class="ms-2">(Not Available)</small>
                                         </span>
                                         {% endif %}
                                         {% else %}

@@ -15,10 +15,11 @@
     color: white !important;
     border: 1px solid $hco-primary-teal-dark;
     
-    // Eye icon for "currently viewing" indicator
-    .fa-eye {
-      opacity: 0.9;
-      margin-left: 0.5rem;
+    // Checkmark icon for "currently active" indicator
+    .fa-check {
+      opacity: 1;
+      color: white !important;
+      font-weight: 900;
     }
   }
   
@@ -49,10 +50,15 @@
   cursor: default;
   user-select: none;
   
-  // Remove any button-like effects
+  // Remove any button-like effects and prevent hover color changes
   &:hover {
     transform: none !important;
     box-shadow: none !important;
+    
+    // Prevent ALL icon color changes on hover
+    i, .fa, .fas, .far, .fab, .fal, .fat, .fad {
+      color: inherit !important;
+    }
   }
   
   // Healthcare professional sizing
@@ -72,18 +78,41 @@
     }
   }
   
-  // Icon alignment within badges
+  // Icon alignment and spacing within badges
   i {
     vertical-align: baseline;
     
+    // Main document type icons with improved spacing
     &.fa-file-medical,
     &.fa-language {
       color: inherit !important;
+      margin-right: 0.5rem !important; // Increased from me-1 to me-2 equivalent
     }
     
-    &.fa-eye {
-      opacity: 0.9;
+    // Status indicator icons (checkmarks)
+    &.fa-check {
+      opacity: 1;
       font-size: 0.8em;
+      color: inherit !important;
+      margin-left: 0.5rem !important; // Increased from ms-1 to ms-2 equivalent
+      font-weight: 900;
+    }
+    
+    // Prevent FontAwesome icon color inheritance and hover effects
+    &.fa,
+    &.fab, 
+    &.fa-solid,
+    &.far,
+    &.fal,
+    &.fat,
+    &.fad {
+      color: inherit !important;
+      transition: none !important;
+      
+      // Force color inheritance on hover
+      &:hover {
+        color: inherit !important;
+      }
     }
   }
 }
@@ -113,5 +142,22 @@
   strong {
     color: $hco-primary-teal;
     font-weight: 600;
+  }
+}
+
+// Additional FontAwesome icon protection for badges specifically
+.badge {
+  // Override any global FontAwesome hover styles
+  i:hover,
+  .fa:hover,
+  .fas:hover,
+  .far:hover,
+  .fab:hover,
+  .fal:hover,
+  .fat:hover,
+  .fad:hover {
+    color: inherit !important;
+    background: none !important;
+    transition: none !important;
   }
 }
