@@ -317,15 +317,8 @@ body {
   margin-bottom: 1rem;
 }
 
-/* Alert with Icons */
-.alert::before {
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
-  position: absolute;
-  left: 1rem;
-  top: 1.2rem;
-  font-size: 1.1rem;
-}
+/* Icons are handled by template FontAwesome elements, not CSS pseudo-elements */
+/* This prevents duplicate icons in success/warning/error alerts */
 
 .alert.alert-primary {
   background-color: var(--healthcare-light-blue);
@@ -343,24 +336,12 @@ body {
   background-color: #e8f8f0;
   border-color: var(--healthcare-green);
   color: #155724;
-  padding-left: 3rem;
-}
-
-.alert.alert-success::before {
-  content: "\f058"; /* check-circle */
-  color: var(--healthcare-green);
 }
 
 .alert.alert-warning {
   background-color: #fff3e0;
   border-color: var(--healthcare-orange);
   color: #856404;
-  padding-left: 3rem;
-}
-
-.alert.alert-warning::before {
-  content: "\f071"; /* exclamation-triangle */
-  color: var(--healthcare-orange);
 }
 
 .alert.alert-danger,
@@ -368,25 +349,12 @@ body {
   background-color: #f8e8e9;
   border-color: var(--healthcare-red);
   color: #721c24;
-  padding-left: 3rem;
-}
-
-.alert.alert-danger::before,
-.alert.alert-error::before {
-  content: "\f06a"; /* exclamation-circle */
-  color: var(--healthcare-red);
 }
 
 .alert.alert-info {
   background-color: #e1f5fe;
   border-color: #0288d1;
   color: #01579b;
-  padding-left: 3rem;
-}
-
-.alert.alert-info::before {
-  content: "\f05a"; /* info-circle */
-  color: #0288d1;
 }
 
 /* Alternative: Use actual Font Awesome icons instead of pseudo-elements */
