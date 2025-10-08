@@ -670,6 +670,14 @@ class SigningCertificate(models.Model):
     issuer = models.CharField(max_length=500, blank=True)
     serial_number = models.CharField(max_length=100, blank=True)
     fingerprint = models.CharField(max_length=100, blank=True)
+    
+    # Extended certificate information
+    version = models.CharField(max_length=10, blank=True, default="3")
+    public_key_algorithm = models.CharField(max_length=50, blank=True, default="RSA")
+    public_key_size = models.CharField(max_length=20, blank=True, default="2,048")
+    signature_algorithm = models.CharField(max_length=100, blank=True, default="SHA256withRSA")
+    sha1_fingerprint = models.CharField(max_length=100, blank=True)
+    md5_fingerprint = models.CharField(max_length=100, blank=True)
 
     # Validity
     valid_from = models.DateTimeField(null=True, blank=True)
@@ -699,5 +707,57 @@ class SigningCertificate(models.Model):
             else False
         )
 
-    def __str__(self):
-        return "SMP Configuration"
+    @property
+    def is_expired(self):
+        """Check if certificate is expired"""
+        if not self.valid_to:
+            return False
+        return timezone.now() > self.valid_to
+
+    @property
+    def certificate_type_icon(self):
+        """Get appropriate icon for certificate type based on subject and issuer"""
+        if not self.subject or not self.issuer:
+            return "fa-solid fa-certificate"
+        
+        subject_lower = self.subject.lower()
+        issuer_lower = self.issuer.lower()
+        
+        # Self-signed certificate (subject == issuer)
+        if self.subject == self.issuer:
+            return "fa-solid fa-key"
+        
+        # Root CA certificates
+        if any(keyword in issuer_lower for keyword in ['root ca', 'root certification authority', 'globalsign root']):
+            return "fa-solid fa-shield-halved"
+        
+        # Intermediate CA certificates
+        if any(keyword in subject_lower for keyword in ['ca ', 'certification authority', 'intermediate']):
+            return "fa-solid fa-sitemap"
+        
+        # Client/Personal certificates
+        if any(keyword in subject_lower for keyword in ['client', 'personal', 'user']):
+            return "fa-solid fa-user-shield"
+        
+        # Server/SSL certificates
+        if any(keyword in subject_lower for keyword in ['server', 'ssl', 'tls', 'www', 'cn=']):
+            return "fa-solid fa-server"
+        
+        # Code signing certificates
+        if any(keyword in subject_lower for keyword in ['code signing', 'codesign']):
+            return "fa-solid fa-code"
+        
+        # Default certificate icon
+        return "fa-solid fa-certificate"
+
+    @property
+    def certificate_type_color(self):
+        """Get appropriate color class for certificate status"""
+        if not self.is_active:
+            return "text-secondary"
+        elif self.is_expired:
+            return "text-danger"
+        elif self.is_valid:
+            return "text-success"
+        else:
+            return "text-warning"

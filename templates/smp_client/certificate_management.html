@@ -129,7 +129,8 @@
                                     {% for cert in certificates %}
                                     <tr>
                                         <td>
-                                            <i class="fa-solid fa-certificate me-2"></i>
+                                            <i class="{{ cert.certificate_type_icon }} certificate-type-icon me-2{% if not cert.is_active %} cert-status-inactive{% elif cert.is_expired %} cert-status-expired{% else %} cert-status-active{% endif %}" 
+                                               title="{% if cert.subject == cert.issuer %}Self-signed certificate{% elif 'root ca' in cert.issuer|lower %}Root Certificate Authority{% elif 'ca ' in cert.subject|lower %}Intermediate Certificate Authority{% elif 'client' in cert.subject|lower %}Client Certificate{% elif 'server' in cert.subject|lower %}Server Certificate{% elif 'code signing' in cert.subject|lower %}Code Signing Certificate{% else %}Digital Certificate{% endif %}"></i>
                                             <strong>{{ cert.certificate_name }}</strong>
                                         </td>
                                         <td>{{ cert.subject|default:"N/A" }}</td>
@@ -151,22 +152,23 @@
                                             <div class="btn-group" role="group">
                                                 <button class="btn btn-sm btn-outline-primary" 
                                                         data-bs-toggle="modal" 
-                                                        data-bs-target="#viewCertificateModal{{ cert.id }}">
+                                                        data-bs-target="#viewCertificateModal{{ cert.id }}"
+                                                        onclick="testModal('{{ cert.id }}')">
                                                     <i class="fa-solid fa-eye"></i>
                                                 </button>
                                                 {% if cert.is_active %}
                                                 <button class="btn btn-sm btn-outline-warning" 
-                                                        onclick="toggleCertificate({{ cert.id }})">
+                                                        onclick="toggleCertificate('{{ cert.id }}')">
                                                     <i class="fa-solid fa-pause"></i>
                                                 </button>
                                                 {% else %}
                                                 <button class="btn btn-sm btn-outline-success" 
-                                                        onclick="toggleCertificate({{ cert.id }})">
+                                                        onclick="toggleCertificate('{{ cert.id }}')">
                                                     <i class="fa-solid fa-play"></i>
                                                 </button>
                                                 {% endif %}
                                                 <button class="btn btn-sm btn-outline-danger" 
-                                                        onclick="deleteCertificate({{ cert.id }})">
+                                                        onclick="deleteCertificate('{{ cert.id }}')">
                                                     <i class="fa-solid fa-trash"></i>
                                                 </button>
                                             </div>
@@ -202,7 +204,8 @@
                                     {% for cert in active_certificates %}
                                     <tr>
                                         <td>
-                                            <i class="fa-solid fa-certificate me-2 text-success"></i>
+                                            <i class="{{ cert.certificate_type_icon }} certificate-type-icon cert-status-active me-2" 
+                                               title="Active: {% if cert.subject == cert.issuer %}Self-signed certificate{% elif 'root ca' in cert.issuer|lower %}Root Certificate Authority{% elif 'ca ' in cert.subject|lower %}Intermediate Certificate Authority{% elif 'client' in cert.subject|lower %}Client Certificate{% elif 'server' in cert.subject|lower %}Server Certificate{% elif 'code signing' in cert.subject|lower %}Code Signing Certificate{% else %}Digital Certificate{% endif %}"></i>
                                             <strong>{{ cert.certificate_name }}</strong>
                                         </td>
                                         <td>{{ cert.subject|default:"N/A" }}</td>
@@ -213,7 +216,8 @@
                                         <td>
                                             <button class="btn btn-sm btn-outline-primary" 
                                                     data-bs-toggle="modal" 
-                                                    data-bs-target="#viewCertificateModal{{ cert.id }}">
+                                                    data-bs-target="#viewCertificateModal{{ cert.id }}"
+                                                    onclick="testModal('{{ cert.id }}')">
                                                 <i class="fa-solid fa-eye me-1"></i>
                                                 View Details
                                             </button>
@@ -248,14 +252,15 @@
                                 {% for cert in expired_certificates %}
                                 <tr class="table-danger">
                                     <td>
-                                        <i class="fa-solid fa-certificate me-2 text-danger"></i>
+                                        <i class="{{ cert.certificate_type_icon }} certificate-type-icon cert-status-expired me-2" 
+                                           title="Expired: {% if cert.subject == cert.issuer %}Self-signed certificate{% elif 'root ca' in cert.issuer|lower %}Root Certificate Authority{% elif 'ca ' in cert.subject|lower %}Intermediate Certificate Authority{% elif 'client' in cert.subject|lower %}Client Certificate{% elif 'server' in cert.subject|lower %}Server Certificate{% elif 'code signing' in cert.subject|lower %}Code Signing Certificate{% else %}Digital Certificate{% endif %}"></i>
                                         <strong>{{ cert.certificate_name }}</strong>
                                     </td>
                                     <td>{{ cert.subject|default:"N/A" }}</td>
                                     <td>{{ cert.valid_to|date:"M d, Y" }}</td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-danger" 
-                                                onclick="deleteCertificate({{ cert.id }})">
+                                                onclick="deleteCertificate('{{ cert.id }}')">
                                             <i class="fa-solid fa-trash me-1"></i>
                                             Remove
                                         </button>
@@ -315,69 +320,95 @@
 <!-- Certificate Detail Modals -->
 {% for cert in certificates %}
 <div class="modal fade" id="viewCertificateModal{{ cert.id }}" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fa-solid fa-certificate me-2"></i>
-                    Certificate Details: {{ cert.certificate_name }}
+                    <i class="{{ cert.certificate_type_icon }} certificate-type-icon me-2{% if not cert.is_active %} cert-status-inactive{% elif cert.is_expired %} cert-status-expired{% else %} cert-status-active{% endif %}"></i>
+                    Certificate Details for entry '{{ cert.certificate_name }}'
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Certificate Information</h6>
-                        <table class="table table-sm">
-                            <tr>
-                                <th>Name:</th>
-                                <td>{{ cert.certificate_name }}</td>
-                            </tr>
-                            <tr>
-                                <th>Subject:</th>
-                                <td><code class="small">{{ cert.subject|default:"N/A" }}</code></td>
-                            </tr>
-                            <tr>
-                                <th>Issuer:</th>
-                                <td><code class="small">{{ cert.issuer|default:"N/A" }}</code></td>
-                            </tr>
-                            <tr>
-                                <th>Serial Number:</th>
-                                <td><code class="small">{{ cert.serial_number|default:"N/A" }}</code></td>
-                            </tr>
-                        </table>
+            
+            <!-- Certificate Navigation -->
+            <div class="modal-body p-0">
+                <div class="cert-navigation border-bottom px-3 py-2 bg-light">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <button class="btn btn-sm btn-outline-secondary me-2 cert-prev-btn" id="prevCert{{ cert.id }}" disabled>
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <span class="mx-3">Certificate <strong>1</strong> of <strong>{{ certificates|length }}</strong></span>
+                        <button class="btn btn-sm btn-outline-secondary ms-2 cert-next-btn" id="nextCert{{ cert.id }}">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
                     </div>
-                    <div class="col-md-6">
-                        <h6>Validity Information</h6>
-                        <table class="table table-sm">
+                </div>
+                
+                <!-- Certificate Details Table -->
+                <div class="p-3">
+                    <table class="table table-borderless table-sm cert-details-table">
+                        <tbody>
                             <tr>
-                                <th>Valid From:</th>
-                                <td>{{ cert.valid_from|date:"M d, Y H:i" }}</td>
+                                <td class="text-end fw-bold" width="120">Version:</td>
+                                <td>{{ cert.version|default:"3" }}</td>
                             </tr>
                             <tr>
-                                <th>Valid To:</th>
-                                <td>{{ cert.valid_to|date:"M d, Y H:i" }}</td>
+                                <td class="text-end fw-bold">Subject:</td>
+                                <td><code class="text-break">{{ cert.subject|default:"N/A" }}</code></td>
                             </tr>
                             <tr>
-                                <th>Status:</th>
-                                <td>
-                                    {% if cert.is_active %}
-                                        <span class="badge bg-success">Active</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">Inactive</span>
-                                    {% endif %}
-                                </td>
+                                <td class="text-end fw-bold">Issuer:</td>
+                                <td><code class="text-break">{{ cert.issuer|default:"N/A" }}</code></td>
                             </tr>
                             <tr>
-                                <th>Fingerprint:</th>
-                                <td><code class="small">{{ cert.fingerprint|default:"N/A" }}</code></td>
+                                <td class="text-end fw-bold">Serial Number:</td>
+                                <td><code>{{ cert.serial_number|default:"N/A" }}</code></td>
                             </tr>
-                        </table>
+                            <tr>
+                                <td class="text-end fw-bold">Valid From:</td>
+                                <td>{{ cert.valid_from|date:"d M Y, H:i:s T" }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-end fw-bold">Valid Until:</td>
+                                <td>{{ cert.valid_to|date:"d M Y, H:i:s T" }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-end fw-bold">Public Key:</td>
+                                <td>{{ cert.public_key_algorithm|default:"RSA" }} ({{ cert.public_key_size|default:"2,048" }} bits)</td>
+                            </tr>
+                            <tr>
+                                <td class="text-end fw-bold">Signature Algorithm:</td>
+                                <td>{{ cert.signature_algorithm|default:"SHA256withRSA" }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-end fw-bold">SHA-1 Fingerprint:</td>
+                                <td><code class="text-break">{{ cert.sha1_fingerprint|default:cert.fingerprint|default:"N/A" }}</code></td>
+                            </tr>
+                            <tr>
+                                <td class="text-end fw-bold">MD5 Fingerprint:</td>
+                                <td><code class="text-break">{{ cert.md5_fingerprint|default:"N/A" }}</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Action Tabs -->
+                <div class="border-top px-3 py-2">
+                    <div class="d-flex justify-content-center gap-2">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="showCertExtensions('{{ cert.id }}')">
+                            <i class="fa-solid fa-list me-1"></i>
+                            Extensions
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="showPEMEncoding('{{ cert.id }}')">
+                            <i class="fa-solid fa-code me-1"></i>
+                            PEM Encoding
+                        </button>
                     </div>
                 </div>
             </div>
+            
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
             </div>
         </div>
     </div>
@@ -385,6 +416,131 @@
 {% endfor %}
 
 <script>
+// Simple modal function that works reliably
+function testModal(certId) {
+    console.log('=== MODAL DEBUG START ===');
+    console.log('Certificate ID:', certId);
+    
+    const modalId = 'viewCertificateModal' + certId;
+    console.log('Looking for modal with ID:', modalId);
+    
+    const modalElement = document.getElementById(modalId);
+    console.log('Modal element:', modalElement);
+    
+    if (!modalElement) {
+        console.error('Modal not found!');
+        // List all available modals for debugging
+        const allModals = document.querySelectorAll('.modal');
+        console.log('Available modals:', Array.from(allModals).map(m => m.id));
+        alert('Modal not found. Check console for details.');
+        return;
+    }
+    
+    console.log('Modal found, attempting to show...');
+    
+    try {
+        // Method 1: Try Bootstrap if available
+        if (typeof bootstrap !== 'undefined') {
+            console.log('Using Bootstrap to show modal');
+            const bsModal = new bootstrap.Modal(modalElement, {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+            bsModal.show();
+            
+            // Force visibility after Bootstrap show
+            setTimeout(() => {
+                modalElement.style.visibility = 'visible';
+                modalElement.style.opacity = '1';
+                modalElement.style.display = 'flex';
+                modalElement.style.zIndex = '1055';
+                console.log('Modal visibility forced');
+            }, 50);
+            
+            console.log('Bootstrap modal.show() called');
+        } else {
+            console.log('Bootstrap not available, showing manually');
+            showModalManually(modalElement);
+        }
+    } catch (error) {
+        console.error('Bootstrap method failed:', error);
+        console.log('Falling back to manual method');
+        showModalManually(modalElement);
+    }
+    
+    console.log('=== MODAL DEBUG END ===');
+}
+
+function showModalManually(modalElement) {
+    console.log('Showing modal manually');
+    
+    // Remove any existing backdrops
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+    
+    // Create backdrop
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop fade show';
+    backdrop.style.zIndex = '1040';
+    document.body.appendChild(backdrop);
+    
+    // Show modal
+    modalElement.classList.add('show');
+    modalElement.style.display = 'block';
+    modalElement.style.zIndex = '1050';
+    modalElement.setAttribute('aria-modal', 'true');
+    modalElement.removeAttribute('aria-hidden');
+    
+    // Add body class
+    document.body.classList.add('modal-open');
+    
+    // Setup close handlers
+    setupModalCloseHandlers(modalElement, backdrop);
+    
+    console.log('Manual modal setup complete');
+}
+
+function setupModalCloseHandlers(modalElement, backdrop) {
+    // Close button handlers
+    const closeButtons = modalElement.querySelectorAll('[data-bs-dismiss="modal"], .btn-close');
+    closeButtons.forEach(btn => {
+        btn.onclick = function(e) {
+            e.preventDefault();
+            closeModalManually(modalElement, backdrop);
+        };
+    });
+    
+    // Backdrop click to close
+    backdrop.onclick = function() {
+        closeModalManually(modalElement, backdrop);
+    };
+    
+    // Escape key to close
+    document.addEventListener('keydown', function escapeHandler(e) {
+        if (e.key === 'Escape') {
+            closeModalManually(modalElement, backdrop);
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    });
+}
+
+function closeModalManually(modalElement, backdrop) {
+    console.log('Closing modal manually');
+    
+    modalElement.classList.remove('show');
+    modalElement.style.display = 'none';
+    modalElement.setAttribute('aria-hidden', 'true');
+    modalElement.removeAttribute('aria-modal');
+    
+    if (backdrop && backdrop.parentNode) {
+        backdrop.parentNode.removeChild(backdrop);
+    }
+    
+    document.body.classList.remove('modal-open');
+    
+    console.log('Modal closed');
+}
+
 function uploadCertificate() {
     // TODO: Implement certificate upload functionality
     alert('Certificate upload functionality will be implemented in a future update.');
@@ -399,6 +555,229 @@ function deleteCertificate(certId) {
     if (confirm('Are you sure you want to delete this certificate? This action cannot be undone.')) {
         // TODO: Implement certificate deletion functionality
         alert('Certificate deletion functionality will be implemented in a future update.');
+    }
+}
+
+function showCertExtensions(certId) {
+    // TODO: Implement certificate extensions display
+    alert('Certificate Extensions:\n\nThis feature will display detailed certificate extensions including:\n• Key Usage\n• Extended Key Usage\n• Subject Alternative Names\n• Authority Information Access\n• Certificate Policies\n\nComing in a future update.');
+}
+
+function showPEMEncoding(certId) {
+    // TODO: Implement PEM encoding display
+    alert('PEM Encoding:\n\nThis feature will display the full PEM-encoded certificate in a formatted text area for copying and external use.\n\nComing in a future update.');
+}
+
+// Add click event listeners when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Certificate management page loaded');
+    console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
+    console.log('jQuery available:', typeof $ !== 'undefined');
+    
+    // Test that testModal function is available
+    console.log('testModal function available:', typeof testModal !== 'undefined');
+    
+    // Log available modals
+    const modals = document.querySelectorAll('[id^="viewCertificateModal"]');
+    console.log('Found modals:', modals.length);
+    modals.forEach(modal => {
+        console.log('Modal ID:', modal.id);
+    });
+    
+    // Add close button functionality for all modals
+    document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                closeModal(modal.id);
+            }
+        });
+    });
+    
+    // Add backdrop click to close functionality
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal(this.id);
+            }
+        });
+    });
+});
+
+function closeModal(modalId) {
+    const modalElement = document.getElementById(modalId);
+    if (modalElement) {
+        modalElement.style.display = 'none';
+        modalElement.classList.remove('show');
+        modalElement.setAttribute('aria-hidden', 'true');
+        modalElement.removeAttribute('aria-modal');
+        
+        // Remove backdrop
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+        
+        console.log('Modal closed:', modalId);
+    }
+}
+
+// Simple test function to verify modal responsiveness
+function testModalInteraction() {
+    console.log('Testing modal interaction...');
+    const modals = document.querySelectorAll('.modal');
+    console.log('Found modals:', modals.length);
+    
+    modals.forEach((modal, index) => {
+        console.log(`Modal ${index + 1}:`, {
+            id: modal.id,
+            display: window.getComputedStyle(modal).display,
+            visibility: window.getComputedStyle(modal).visibility,
+            zIndex: window.getComputedStyle(modal).zIndex,
+            pointerEvents: window.getComputedStyle(modal).pointerEvents
+        });
+    });
+    
+    const buttons = document.querySelectorAll('button[data-bs-toggle="modal"]');
+    console.log('Found modal trigger buttons:', buttons.length);
+    
+    return {
+        modalsFound: modals.length,
+        buttonsFound: buttons.length,
+        modalIds: Array.from(modals).map(m => m.id)
+    };
+}
+
+// Add click event listeners when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Certificate management page loaded');
+    console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
+    console.log('jQuery available:', typeof $ !== 'undefined');
+    
+    // Test that testModal function is available
+    console.log('testModal function available:', typeof testModal !== 'undefined');
+    
+    // Log available modals
+    const modals = document.querySelectorAll('[id^="viewCertificateModal"]');
+    console.log('Found modals:', modals.length);
+    modals.forEach(modal => {
+        console.log('Modal ID:', modal.id);
+    });
+    
+    // Initialize certificate navigation
+    initializeCertificateNavigation();
+});
+
+// Certificate Navigation System
+let currentCertificateIndex = 0;
+let certificateModals = [];
+
+function initializeCertificateNavigation() {
+    // Get all certificate modals
+    certificateModals = Array.from(document.querySelectorAll('[id^="viewCertificateModal"]'));
+    console.log('Certificate modals found:', certificateModals.length);
+    
+    // Set up navigation for each modal
+    certificateModals.forEach((modal, index) => {
+        const prevBtn = modal.querySelector('#prevCert, .cert-prev-btn');
+        const nextBtn = modal.querySelector('#nextCert, .cert-next-btn');
+        
+        if (prevBtn) {
+            prevBtn.onclick = () => navigateToPreviousCertificate(index);
+        }
+        if (nextBtn) {
+            nextBtn.onclick = () => navigateToNextCertificate(index);
+        }
+        
+        // Update counter and button states
+        updateNavigationControls(modal, index);
+    });
+}
+
+function navigateToPreviousCertificate(currentIndex) {
+    if (currentIndex > 0) {
+        const currentModal = certificateModals[currentIndex];
+        const previousModal = certificateModals[currentIndex - 1];
+        
+        // Close current modal
+        bootstrap.Modal.getInstance(currentModal)?.hide();
+        
+        // Open previous modal after a brief delay
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(previousModal);
+            modal.show();
+            currentCertificateIndex = currentIndex - 1;
+        }, 150);
+    }
+}
+
+function navigateToNextCertificate(currentIndex) {
+    if (currentIndex < certificateModals.length - 1) {
+        const currentModal = certificateModals[currentIndex];
+        const nextModal = certificateModals[currentIndex + 1];
+        
+        // Close current modal
+        bootstrap.Modal.getInstance(currentModal)?.hide();
+        
+        // Open next modal after a brief delay
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(nextModal);
+            modal.show();
+            currentCertificateIndex = currentIndex + 1;
+        }, 150);
+    }
+}
+
+function updateNavigationControls(modal, index) {
+    const prevBtn = modal.querySelector('#prevCert, .cert-prev-btn');
+    const nextBtn = modal.querySelector('#nextCert, .cert-next-btn');
+    const counterSpan = modal.querySelector('.cert-navigation span');
+    
+    // Update counter
+    if (counterSpan) {
+        counterSpan.innerHTML = `Certificate <strong>${index + 1}</strong> of <strong>${certificateModals.length}</strong>`;
+    }
+    
+    // Update button states
+    if (prevBtn) {
+        prevBtn.disabled = (index === 0);
+        prevBtn.classList.toggle('disabled', index === 0);
+    }
+    
+    if (nextBtn) {
+        nextBtn.disabled = (index === certificateModals.length - 1);
+        nextBtn.classList.toggle('disabled', index === certificateModals.length - 1);
+    }
+}
+
+// Enhanced testModal function with navigation support
+function testModal(certId) {
+    console.log('Opening certificate modal for ID:', certId);
+    
+    const modalId = `viewCertificateModal${certId}`;
+    const modalElement = document.getElementById(modalId);
+    
+    if (modalElement) {
+        // Find the index of this certificate in our modals array
+        const modalIndex = certificateModals.findIndex(modal => modal.id === modalId);
+        currentCertificateIndex = modalIndex >= 0 ? modalIndex : 0;
+        
+        console.log('Current certificate index:', currentCertificateIndex);
+        
+        // Use Bootstrap to show modal
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+        
+        // Update navigation controls after modal is shown
+        modalElement.addEventListener('shown.bs.modal', () => {
+            updateNavigationControls(modalElement, currentCertificateIndex);
+        });
+        
+        console.log('Modal should now be visible');
+        return true;
+    } else {
+        console.error('Modal not found:', modalId);
+        return false;
     }
 }
 </script>
