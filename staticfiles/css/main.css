@@ -16531,6 +16531,17 @@ html {
   margin-right: 10px;
 }
 
+.container-fluid h1 {
+  color: #2d3748;
+  font-weight: 600;
+}
+.container-fluid h1 .fa-tachometer-alt {
+  color: #005f5f;
+  font-size: 1.75rem;
+  margin-right: 0.75rem;
+  vertical-align: middle;
+}
+
 .performance-metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

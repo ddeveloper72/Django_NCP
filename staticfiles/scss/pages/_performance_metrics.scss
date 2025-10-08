@@ -2,6 +2,19 @@
 // Professional Healthcare Organisation themed performance metrics
 // Following accessibility standards and modern design patterns
 
+// ✅ PAGE HEADER STYLING
+.container-fluid h1 {
+  color: $text-dark;
+  font-weight: 600;
+  
+  .fa-tachometer-alt {
+    color: $hco-primary-teal;
+    font-size: 1.75rem; // Slightly larger than default for prominence
+    margin-right: 0.75rem;
+    vertical-align: middle;
+  }
+}
+
 // ✅ MAIN METRICS GRID
 .performance-metrics-grid {
   display: grid;
