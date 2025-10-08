@@ -155,6 +155,20 @@ optional_*.py
 test_output.*
 debug_output.*
 
+# Playwright test files
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+screenshots/
+*.png
+*.jpeg
+*.jpg
+page-*.png
+*-screenshot.png
+*-screenshot.jpg
+*-screenshot.jpeg
+
 # Temporary data files
 *.tmp
 *.temp
