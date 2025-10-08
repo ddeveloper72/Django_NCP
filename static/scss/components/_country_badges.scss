@@ -1,0 +1,77 @@
+// ========================================
+// Country Badge Components
+// Simplified badges with integrated flag icons and healthcare data
+// ========================================
+
+.country-info-text {
+  color: $text-muted;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+// ========================================
+// COUNTRY NAME BADGE
+// Professional single badge with flag and Healthcare Organisation compliance
+// ========================================
+
+.country-name-badge {
+  background: $hco-primary-teal !important;
+  color: $white !important;
+  border: 1px solid $hco-primary-teal !important;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+
+  .country-flag {
+    width: 20px;
+    height: 15px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    // Ensure flag images display properly
+    display: inline-block;
+    vertical-align: middle;
+    
+    // Fallback for failed image loads
+    background: rgba(255, 255, 255, 0.1);
+    position: relative;
+    
+    // Add loading state
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.1) 50%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    // Show subtle loading indicator while image loads
+    &[src]:not([src=""]):not([alt*="error"]) {
+      &::before {
+        opacity: 0;
+      }
+    }
+  }
+
+  // Hover effect maintaining accessibility
+  &:hover {
+    background: linear-gradient(135deg, $hco-primary-teal 0%, scale-color($hco-primary-teal, $lightness: -10%) 100%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 95, 95, 0.15);
+    
+    .country-flag {
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+  }
+}

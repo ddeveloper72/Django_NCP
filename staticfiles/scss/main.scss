@@ -25,13 +25,16 @@
 @import "components/bootstrap_overrides";
 @import "components/buttons";
 @import "components/forms";
+@import "components/authentication";
 @import "components/cards";
+@import "components/country_badges";
 @import "components/tables";
 @import "components/navigation";
 @import "components/modals";
 @import "components/alerts";
 @import "components/badges-and-animations";
 @import "components/fontawesome-color-management";
+@import "components/component-specific-icons";
 @import "components/icons";
 @import "components/contact";
 @import "components/extended_patient_info";
@@ -53,6 +56,7 @@
 @import "pages/patient-details";
 @import "pages/patient_cda";
 @import "pages/patient_form";
+@import "pages/test_patients";
 @import "pages/patient_search";
 @import "pages/patient_search_results";
 @import "pages/enhanced_cda";

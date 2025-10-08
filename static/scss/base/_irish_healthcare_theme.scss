@@ -9,7 +9,8 @@ Generated: September 16, 2025
   /* HSE Primary Healthcare Colors */
   --healthcare-blue: #005eb8; /* HSE Primary Blue */
   --healthcare-dark-blue: #003d7a; /* HSE Dark Blue */
-  --healthcare-light-blue: #e8f4fd; /* HSE Light Blue */
+  --healthcare-light-blue: #005f5f; /* Accessible darker teal for headers (7.2:1 contrast) */
+  --healthcare-light-blue-original: #e8f4fd; /* Original light blue (accessibility issue) */
   --healthcare-navy: #1c3d72; /* HSE Navy */
 
   /* HSE Secondary Colors */
@@ -38,7 +39,7 @@ Generated: September 16, 2025
   --healthcare-red-accent: #e74c3c; /* Vibrant red */
   --healthcare-orange-accent: #f39c12; /* Warm orange */
   --healthcare-purple: #8e44ad; /* Professional purple */
-  --healthcare-teal: #16a085; /* Modern teal */
+  --healthcare-teal: #005f5f; /* Healthcare Organisation teal - Professional dark teal for accessibility */
   --healthcare-bright-green: #00ff3a; /* Bright green for hover/active effects */
 
   /* Typography */
@@ -186,17 +187,38 @@ body {
 }
 
 .card-header {
-  background-color: var(--healthcare-light-blue);
-  border-bottom: 1px solid var(--healthcare-blue);
-  color: var(--healthcare-text-dark);
+  background-color: var(--healthcare-light-blue); // Now uses accessible darker teal
+  border-bottom: 1px solid #004a4a; // Darker border
+  color: var(--healthcare-text-light) !important; // White text for contrast
   font-weight: var(--healthcare-heading-weight);
+  
+  // Ensure ALL text elements in card headers are white
+  h1, h2, h3, h4, h5, h6,
+  p, span, div, .card-title, .card-description {
+    color: var(--healthcare-text-light) !important; // Force white text
+  }
+  
+  // Icons should also be white and prominent
+  i, .fa, .fas, .far, .fab {
+    color: var(--healthcare-text-light) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); // Subtle shadow for depth
+  }
+  
+  // Enhanced search icon in card titles - High specificity to override globals
+  .card-title i.fa-search,
+  .card-title i.fa-solid.fa-search {
+    color: var(--healthcare-text-light) !important;
+    font-size: 1.2em !important; // Larger than default
+    margin-right: 0.75rem !important; // Better spacing
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important; // More prominent shadow
+  }
 }
 
 /* HSE Card Header Color Updates */
 .card-header.bg-primary {
-  background-color: var(--healthcare-blue) !important;
+  background-color: #005f5f !important; // Darker teal for 7.2:1 contrast ratio
   color: var(--healthcare-text-light) !important;
-  border-bottom-color: var(--healthcare-dark-blue);
+  border-bottom-color: #004a4a; // Even darker for depth
 }
 
 .card-header.bg-success {
@@ -245,14 +267,33 @@ body {
 }
 
 .btn-outline-primary {
-  color: var(--healthcare-blue);
-  border-color: var(--healthcare-blue);
+  color: var(--healthcare-teal, #005f5f) !important;
+  border-color: var(--healthcare-teal, #005f5f) !important;
+  background-color: transparent !important;
+
+  // Ensure icons follow Healthcare Organisation colors
+  i, .fa, .fas, .far, .fab {
+    color: var(--healthcare-teal, #005f5f) !important;
+  }
 }
 
 .btn-outline-primary:hover {
-  background-color: var(--healthcare-blue);
-  border-color: var(--healthcare-blue);
-  color: var(--healthcare-white);
+  background-color: var(--healthcare-teal, #005f5f) !important;
+  border-color: var(--healthcare-teal, #005f5f) !important;
+  color: var(--healthcare-white, #ffffff) !important;
+
+  // Critical: Maintain icon color consistency on hover
+  i, .fa, .fas, .far, .fab {
+    color: var(--healthcare-white, #ffffff) !important;
+  }
+}
+
+// Critical Fix: Logout button icon accessibility - prevent white icon on hover
+.btn[href*="logout"]:hover,
+a.btn[href*="logout"]:hover {
+  i, .fa, .fas, .far, .fab {
+    color: var(--healthcare-teal, #005f5f) !important;
+  }
 }
 
 /* Healthcare Table Styling */
@@ -284,15 +325,8 @@ body {
   margin-bottom: 1rem;
 }
 
-/* Alert with Icons */
-.alert::before {
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
-  position: absolute;
-  left: 1rem;
-  top: 1.2rem;
-  font-size: 1.1rem;
-}
+/* Icons are handled by template FontAwesome elements, not CSS pseudo-elements */
+/* This prevents duplicate icons in success/warning/error alerts */
 
 .alert.alert-primary {
   background-color: var(--healthcare-light-blue);
@@ -310,50 +344,25 @@ body {
   background-color: #e8f8f0;
   border-color: var(--healthcare-green);
   color: #155724;
-  padding-left: 3rem;
-}
-
-.alert.alert-success::before {
-  content: "\f058"; /* check-circle */
-  color: var(--healthcare-green);
 }
 
 .alert.alert-warning {
   background-color: #fff3e0;
   border-color: var(--healthcare-orange);
   color: #856404;
-  padding-left: 3rem;
-}
-
-.alert.alert-warning::before {
-  content: "\f071"; /* exclamation-triangle */
-  color: var(--healthcare-orange);
 }
 
 .alert.alert-danger,
 .alert.alert-error {
   background-color: #f8e8e9;
   border-color: var(--healthcare-red);
-  color: #721c24;
-  padding-left: 3rem;
-}
-
-.alert.alert-danger::before,
-.alert.alert-error::before {
-  content: "\f06a"; /* exclamation-circle */
-  color: var(--healthcare-red);
+  color: #2d0e0f; /* Much darker for WCAG AAA compliance (8.5:1 contrast ratio) */
 }
 
 .alert.alert-info {
   background-color: #e1f5fe;
   border-color: #0288d1;
   color: #01579b;
-  padding-left: 3rem;
-}
-
-.alert.alert-info::before {
-  content: "\f05a"; /* info-circle */
-  color: #0288d1;
 }
 
 /* Alternative: Use actual Font Awesome icons instead of pseudo-elements */
@@ -484,11 +493,13 @@ body {
 }
 
 .nav-tabs-healthcare .nav-link i {
-  // Icon styling handled by tab-icon-center mixin
+  color: inherit;
+  transition: color 0.2s ease;
 }
 
 .nav-tabs-healthcare .badge {
-  // Badge styling handled by healthcare-tab-layout mixin
+  background-color: $hco-secondary-green-light;
+  color: $hco-primary-teal;
 }
 
 /* Integrated Patient Header Tabs - Enhanced 3D Effects */
@@ -899,11 +910,11 @@ h6 {
 .card-header.bg-primary {
   background: linear-gradient(
     135deg,
-    var(--healthcare-blue) 0%,
-    var(--healthcare-dark-blue) 100%
+    #005f5f 0%, // Darker teal for accessibility (7.2:1 contrast)
+    #004a4a 100% // Even darker for depth
   ) !important;
-  border-bottom: 3px solid var(--healthcare-light-blue);
-  box-shadow: 0 2px 8px rgba(0, 94, 184, 0.3);
+  border-bottom: 3px solid #80bebf; // Light teal border
+  box-shadow: 0 2px 8px rgba(0, 95, 95, 0.3); // Adjusted shadow color
 }
 
 .card-header.bg-primary h2 {
@@ -1489,12 +1500,12 @@ i.fab {
   color: var(--healthcare-dark-blue) !important;
 }
 
-/* Specific button hover effects - exclude navbar buttons and tab buttons */
-.btn:not(.navbar *):not(.tab-button):hover i.fa-solid,
-.btn:not(.navbar *):not(.tab-button):hover i.far,
-.btn:not(.navbar *):not(.tab-button):hover i.fab {
+/* Specific button hover effects - exclude navbar buttons, tab buttons, and logout buttons */
+.btn:not(.navbar *):not(.tab-button):not([href*="logout"]):not(.logout-btn):hover i.fa-solid,
+.btn:not(.navbar *):not(.tab-button):not([href*="logout"]):not(.logout-btn):hover i.far,
+.btn:not(.navbar *):not(.tab-button):not([href*="logout"]):not(.logout-btn):hover i.fab {
   transform: scale(1.1);
-  color: var(--healthcare-bright-green) !important;
+  color: var(--healthcare-white, #ffffff) !important;
 }
 
 /* Override for navigation elements - highest specificity */
@@ -1520,7 +1531,13 @@ body nav .badge:hover i.fa-user-injured,
 .badge.bg-success:hover i.fa-user-injured,
 .badge.bg-warning:hover i.fa-solid,
 .badge.bg-warning:hover i.far,
-.badge.bg-warning:hover i.fab {
+.badge.bg-warning:hover i.fab,
+.btn[href*="logout"]:hover i.fa-solid,
+.btn[href*="logout"]:hover i.far,
+.btn[href*="logout"]:hover i.fab,
+.logout-btn:hover i.fa-solid,
+.logout-btn:hover i.far,
+.logout-btn:hover i.fab {
   color: inherit !important;
   transform: none !important;
 }

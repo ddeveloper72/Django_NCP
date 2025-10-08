@@ -9,7 +9,8 @@ Generated: September 16, 2025
   /* HSE Primary Healthcare Colors */
   --healthcare-blue: #005eb8; /* HSE Primary Blue */
   --healthcare-dark-blue: #003d7a; /* HSE Dark Blue */
-  --healthcare-light-blue: #e8f4fd; /* HSE Light Blue */
+  --healthcare-light-blue: #005f5f; /* Accessible darker teal for headers (7.2:1 contrast) */
+  --healthcare-light-blue-original: #e8f4fd; /* Original light blue (accessibility issue) */
   --healthcare-navy: #1c3d72; /* HSE Navy */
 
   /* HSE Secondary Colors */
@@ -38,7 +39,7 @@ Generated: September 16, 2025
   --healthcare-red-accent: #e74c3c; /* Vibrant red */
   --healthcare-orange-accent: #f39c12; /* Warm orange */
   --healthcare-purple: #8e44ad; /* Professional purple */
-  --healthcare-teal: #16a085; /* Modern teal */
+  --healthcare-teal: #005f5f; /* Healthcare Organisation teal - Professional dark teal for accessibility */
   --healthcare-bright-green: #00ff3a; /* Bright green for hover/active effects */
 
   /* Typography */
@@ -186,17 +187,38 @@ body {
 }
 
 .card-header {
-  background-color: var(--healthcare-light-blue);
-  border-bottom: 1px solid var(--healthcare-blue);
-  color: var(--healthcare-text-dark);
+  background-color: var(--healthcare-light-blue); // Now uses accessible darker teal
+  border-bottom: 1px solid #004a4a; // Darker border
+  color: var(--healthcare-text-light) !important; // White text for contrast
   font-weight: var(--healthcare-heading-weight);
+  
+  // Ensure ALL text elements in card headers are white
+  h1, h2, h3, h4, h5, h6,
+  p, span, div, .card-title, .card-description {
+    color: var(--healthcare-text-light) !important; // Force white text
+  }
+  
+  // Icons should also be white and prominent
+  i, .fa, .fas, .far, .fab {
+    color: var(--healthcare-text-light) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); // Subtle shadow for depth
+  }
+  
+  // Enhanced search icon in card titles - High specificity to override globals
+  .card-title i.fa-search,
+  .card-title i.fa-solid.fa-search {
+    color: var(--healthcare-text-light) !important;
+    font-size: 1.2em !important; // Larger than default
+    margin-right: 0.75rem !important; // Better spacing
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important; // More prominent shadow
+  }
 }
 
 /* HSE Card Header Color Updates */
 .card-header.bg-primary {
-  background-color: var(--healthcare-blue) !important;
+  background-color: #005f5f !important; // Darker teal for 7.2:1 contrast ratio
   color: var(--healthcare-text-light) !important;
-  border-bottom-color: var(--healthcare-dark-blue);
+  border-bottom-color: #004a4a; // Even darker for depth
 }
 
 .card-header.bg-success {
@@ -245,14 +267,25 @@ body {
 }
 
 .btn-outline-primary {
-  color: var(--healthcare-blue);
-  border-color: var(--healthcare-blue);
+  color: var(--healthcare-teal, #005f5f) !important;
+  border-color: var(--healthcare-teal, #005f5f) !important;
+  background-color: transparent !important;
+
+  // Ensure icons follow Healthcare Organisation colors
+  i, .fa, .fas, .far, .fab {
+    color: var(--healthcare-teal, #005f5f) !important;
+  }
 }
 
 .btn-outline-primary:hover {
-  background-color: var(--healthcare-blue);
-  border-color: var(--healthcare-blue);
-  color: var(--healthcare-white);
+  background-color: var(--healthcare-teal, #005f5f) !important;
+  border-color: var(--healthcare-teal, #005f5f) !important;
+  color: var(--healthcare-white, #ffffff) !important;
+
+  // Critical: Maintain icon color consistency on hover
+  i, .fa, .fas, .far, .fab {
+    color: var(--healthcare-white, #ffffff) !important;
+  }
 }
 
 /* Healthcare Table Styling */
@@ -899,11 +932,11 @@ h6 {
 .card-header.bg-primary {
   background: linear-gradient(
     135deg,
-    var(--healthcare-blue) 0%,
-    var(--healthcare-dark-blue) 100%
+    #005f5f 0%, // Darker teal for accessibility (7.2:1 contrast)
+    #004a4a 100% // Even darker for depth
   ) !important;
-  border-bottom: 3px solid var(--healthcare-light-blue);
-  box-shadow: 0 2px 8px rgba(0, 94, 184, 0.3);
+  border-bottom: 3px solid #80bebf; // Light teal border
+  box-shadow: 0 2px 8px rgba(0, 95, 95, 0.3); // Adjusted shadow color
 }
 
 .card-header.bg-primary h2 {
@@ -1494,7 +1527,7 @@ i.fab {
 .btn:not(.navbar *):not(.tab-button):hover i.far,
 .btn:not(.navbar *):not(.tab-button):hover i.fab {
   transform: scale(1.1);
-  color: var(--healthcare-bright-green) !important;
+  color: var(--healthcare-white, #ffffff) !important;
 }
 
 /* Override for navigation elements - highest specificity */

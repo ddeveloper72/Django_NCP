@@ -18,7 +18,7 @@
 
   .page-subtitle {
     font-size: $font-size-lg;
-    color: $text-muted;
+    color: $neutral-medium !important; // Darker gray for accessibility
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.5;
@@ -92,17 +92,32 @@
       gap: $space-md;
       font-size: $font-size-xl;
       font-weight: $font-weight-semibold;
-      color: $text-dark;
+      color: white !important; // White text on dark background
       margin-bottom: $space-sm;
 
       i {
-        color: $primary-blue;
+        color: white !important; // White icons on dark background
         font-size: 1.5rem;
+      }
+
+      // Specific styling for search icon to override any global FontAwesome rules
+      i.fa-search,
+      i.fa-solid.fa-search {
+        color: white !important;
+        font-size: 1.6rem !important; // Even larger for prominence
+        margin-right: 0.8rem !important; // Extra spacing
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important; // Strong shadow
+        vertical-align: middle !important;
+      }
+
+      // Override FontAwesome fa-lg class if present
+      i.fa-lg {
+        font-size: 1.6rem !important;
       }
     }
 
     .card-description {
-      color: $text-muted;
+      color: white !important; // White description text on dark background
       font-size: $font-size-base;
       margin: 0;
       line-height: 1.5;
@@ -251,6 +266,31 @@
         font-size: 1.1rem;
         flex-shrink: 0; // Prevent icon shrinking
       }
+
+      // Specific styling for info button (View Test Patients) to use Healthcare Organisation colors
+      &.btn-info {
+        background-color: $hco-primary-teal !important;
+        border-color: $hco-primary-teal !important;
+        color: white !important;
+
+        &:hover:not(:disabled) {
+          background-color: $hco-primary-teal-dark !important;
+          border-color: $hco-primary-teal-dark !important;
+          color: white !important;
+        }
+
+        i, .fa, .fas, .far, .fab {
+          color: white !important;
+        }
+
+        &:hover:not(:disabled) i,
+        &:hover:not(:disabled) .fa,
+        &:hover:not(:disabled) .fas,
+        &:hover:not(:disabled) .far,
+        &:hover:not(:disabled) .fab {
+          color: white !important;
+        }
+      }
     }
   }
 }
@@ -298,7 +338,7 @@
 
       ol {
         padding-left: $space-lg;
-        color: $text-muted;
+        color: $neutral-medium !important; // Darker gray for accessibility
         line-height: 1.6;
 
         li {
@@ -307,7 +347,7 @@
       }
 
       p {
-        color: $text-muted;
+        color: $neutral-medium !important; // Darker gray for accessibility  
         line-height: 1.6;
         margin: 0;
       }

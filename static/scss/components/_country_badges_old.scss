@@ -1,0 +1,483 @@
+// ========================================
+// Country Badge Components
+// Simplified badges with integrated flag icons and healthcare data
+// ========================================
+
+.country-info-text {
+  color: $text-secondary;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+// ========================================
+// COUNTRY NAME BADGE
+// Professional single badge with flag and Healthcare Organisation compliance
+// ========================================
+
+.country-name-badge {
+  background: $hco-primary-teal !important;
+  color: $white !important;
+  border: 1px solid $hco-primary-teal !important;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+
+  i {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    color: $white !important;
+  }
+
+  // Professional country-specific flag colors with white text for accessibility
+  &[data-country="be"] {
+    .be-flag {
+      color: #FFD700; // Gold accent for Belgium
+    }
+  }
+
+  &[data-country="eu"] {
+    .eu-flag {
+      color: #FFD700; // EU gold
+    }
+  }
+
+  &[data-country="pt"] {
+    .pt-flag {
+      color: #FF0000; // Portugal red
+    }
+  }
+
+  &[data-country="ie"] {
+    .ie-flag {
+      color: #00FF00; // Ireland green
+    }
+  }
+
+  &[data-country="it"] {
+    .it-flag {
+      color: #00FF00; // Italy green
+    }
+  }
+
+  &[data-country="fr"] {
+    .fr-flag {
+      color: #0055A4; // France blue
+    }
+  }
+
+  &[data-country="de"] {
+    .de-flag {
+      color: #FFD700; // Germany gold
+    }
+  }
+
+  &[data-country="es"] {
+    .es-flag {
+      color: #FFD700; // Spain gold
+    }
+  }
+
+  &[data-country="nl"] {
+    .nl-flag {
+      color: #FF9B00; // Netherlands orange
+    }
+  }
+
+  &[data-country="at"] {
+    .at-flag {
+      color: #FF0000; // Austria red
+    }
+  }
+
+  &[data-country="se"] {
+    .se-flag {
+      color: #FFCD00; // Sweden yellow
+    }
+  }
+
+  &[data-country="dk"] {
+    .dk-flag {
+      color: #FF0000; // Denmark red
+    }
+  }
+
+  &[data-country="fi"] {
+    .fi-flag {
+      color: #003580; // Finland blue
+    }
+  }
+
+  &[data-country="no"] {
+    .no-flag {
+      color: #FF0000; // Norway red
+    }
+  }
+
+  &[data-country="pl"] {
+    .pl-flag {
+      color: #FF0000; // Poland red
+    }
+  }
+
+  &[data-country="cz"] {
+    .cz-flag {
+      color: #0052CC; // Czech blue
+    }
+  }
+
+  &[data-country="hu"] {
+    .hu-flag {
+      color: #FF0000; // Hungary red
+    }
+  }
+
+  &[data-country="sk"] {
+    .sk-flag {
+      color: #0052CC; // Slovakia blue
+    }
+  }
+
+  &[data-country="si"] {
+    .si-flag {
+      color: #FF0000; // Slovenia red
+    }
+  }
+
+  &[data-country="hr"] {
+    .hr-flag {
+      color: #FF0000; // Croatia red
+    }
+  }
+
+  &[data-country="bg"] {
+    .bg-flag {
+      color: #00FF00; // Bulgaria green
+    }
+  }
+
+  &[data-country="ro"] {
+    .ro-flag {
+      color: #002B7F; // Romania blue
+    }
+  }
+
+  &[data-country="ee"] {
+    .ee-flag {
+      color: #0052CC; // Estonia blue
+    }
+  }
+
+  &[data-country="lv"] {
+    .lv-flag {
+      color: #A4343A; // Latvia red
+    }
+  }
+
+  &[data-country="lt"] {
+    .lt-flag {
+      color: #FFD500; // Lithuania yellow
+    }
+  }
+
+  &[data-country="lu"] {
+    .lu-flag {
+      color: #FF0000; // Luxembourg red
+    }
+  }
+
+  &[data-country="mt"] {
+    .mt-flag {
+      color: #CF142B; // Malta red
+    }
+  }
+
+  &[data-country="cy"] {
+    .cy-flag {
+      color: #FF8C00; // Cyprus orange
+    }
+  }
+
+  &[data-country="gr"] {
+    .gr-flag {
+      color: #0052CC; // Greece blue
+    }
+  }
+
+  .default-flag {
+    color: $white !important;
+  }
+
+  // Hover effect maintaining accessibility
+  &:hover {
+    background: linear-gradient(135deg, $hco-primary-teal 0%, scale-color($hco-primary-teal, $lightness: -10%) 100%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 95, 95, 0.15);
+  }
+}
+  }
+
+  &[data-country="pt"] {
+    background: linear-gradient(135deg, $success-green 0%, darken($success-green, 10%) 100%) !important;
+    color: $white !important;
+    
+    .pt-flag {
+      color: $white;
+    }
+  }
+
+  &[data-country="eu"] {
+    background: linear-gradient(135deg, $hco-primary-teal 0%, $hco-primary-teal-dark 100%) !important;
+    color: $white !important;
+    
+    .eu-flag {
+      color: $white;
+    }
+  }
+
+  &[data-country="ie"] {
+    background: linear-gradient(135deg, $success-green 0%, $hco-primary-teal 100%) !important;
+    color: $white !important;
+    
+    .ie-flag {
+      color: $white;
+    }
+  }
+
+  &[data-country="it"] {
+    background: linear-gradient(135deg, $success-green 0%, darken($success-green, 15%) 100%) !important;
+    color: $white !important;
+    
+    .it-flag {
+      color: $white;
+    }
+  }
+
+  &[data-country="fr"] {
+    background: linear-gradient(135deg, $hco-primary-teal 0%, $neutral-dark 100%) !important;
+    color: $white !important;
+    
+    .fr-flag {
+      color: $white;
+    }
+  }
+
+  &[data-country="de"] {
+    background: linear-gradient(135deg, $neutral-dark 0%, $neutral-medium 100%) !important;
+    color: $white !important;
+    
+    .de-flag {
+      color: #FFD700; // Subtle gold accent
+    }
+  }
+
+  &[data-country="es"] {
+    background: linear-gradient(135deg, $warning-orange 0%, darken($warning-orange, 10%) 100%) !important;
+    color: $white !important;
+    
+    .es-flag {
+      color: $white;
+    }
+  }
+
+  &[data-country="nl"] {
+    background: linear-gradient(135deg, $hco-primary-teal 0%, $neutral-dark 100%) !important;
+    color: $white !important;
+    
+    .nl-flag {
+      color: $white;
+    }
+  }
+
+  // Nordic countries - clean, minimal styling
+  &[data-country="se"],
+  &[data-country="dk"],
+  &[data-country="fi"],
+  &[data-country="no"] {
+    background: linear-gradient(135deg, $hco-primary-teal-light 0%, $hco-primary-teal 100%) !important;
+    color: $white !important;
+    
+    .se-flag, .dk-flag, .fi-flag, .no-flag {
+      color: $white;
+    }
+  }
+
+  // Central European countries
+  &[data-country="at"],
+  &[data-country="ch"] {
+    background: linear-gradient(135deg, $error-red 0%, darken($error-red, 10%) 100%) !important;
+    color: $white !important;
+    
+    .at-flag, .ch-flag {
+      color: $white;
+    }
+  }
+
+  // Eastern European countries
+  &[data-country="pl"],
+  &[data-country="cz"],
+  &[data-country="hu"],
+  &[data-country="sk"],
+  &[data-country="si"],
+  &[data-country="hr"] {
+    background: linear-gradient(135deg, $neutral-medium 0%, $neutral-dark 100%) !important;
+    color: $white !important;
+    
+    .pl-flag, .cz-flag, .hu-flag, .sk-flag, .si-flag, .hr-flag {
+      color: $white;
+    }
+  }
+
+  // Balkan and Mediterranean
+  &[data-country="bg"],
+  &[data-country="ro"],
+  &[data-country="gr"] {
+    background: linear-gradient(135deg, $hco-primary-teal 0%, $neutral-medium 100%) !important;
+    color: $white !important;
+    
+    .bg-flag, .ro-flag, .gr-flag {
+      color: $white;
+    }
+  }
+
+  // Baltic states
+  &[data-country="ee"],
+  &[data-country="lv"],
+  &[data-country="lt"] {
+    background: linear-gradient(135deg, $hco-primary-teal-light 0%, $hco-primary-teal-dark 100%) !important;
+    color: $white !important;
+    
+    .ee-flag, .lv-flag, .lt-flag {
+      color: $white;
+    }
+  }
+
+  // Small EU states
+  &[data-country="lu"],
+  &[data-country="mt"],
+  &[data-country="cy"] {
+    background: linear-gradient(135deg, $neutral-medium 0%, $hco-primary-teal 100%) !important;
+    color: $white !important;
+    
+    .lu-flag, .mt-flag, .cy-flag {
+      color: $white;
+    }
+  }
+
+  // Default flag styling
+  .default-flag {
+    color: $hco-primary-teal;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// ========================================
+// PATIENT COUNT BADGE
+// Healthcare Organisation teal with accessibility compliance
+// ========================================
+
+.patient-count-badge {
+  background: $hco-primary-teal !important;
+  color: $white !important;
+  border: 1px solid $hco-primary-teal !important;
+
+  i {
+    color: $white !important;
+  }
+
+  &:hover {
+    background: $hco-primary-teal-dark !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba($hco-primary-teal, 0.3);
+  }
+}
+
+// ========================================
+// DOCUMENT COUNT BADGE
+// Professional success green with subtle depth
+// ========================================
+
+.document-count-badge {
+  background: $success-green !important;
+  color: $white !important;
+  border: 1px solid $success-green !important;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+
+  i {
+    color: $white !important;
+  }
+
+  .document-breakdown {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    font-weight: 400;
+  }
+
+  &:hover {
+    background: darken($success-green, 10%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba($success-green, 0.3);
+  }
+}
+
+// ========================================
+// RESPONSIVE DESIGN
+// ========================================
+
+@media (max-width: 768px) {
+  .country-badges-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+
+    .badge {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .document-count-badge {
+      flex-direction: row;
+      align-items: center;
+      
+      .document-breakdown {
+        margin-left: 0.5rem;
+      }
+    }
+  }
+}
+
+// ========================================
+// ACCESSIBILITY ENHANCEMENTS
+// ========================================
+
+.country-badges-container .badge {
+  &:focus {
+    outline: 2px solid $hco-primary-teal;
+    outline-offset: 2px;
+  }
+
+  // High contrast mode support
+  @media (prefers-contrast: high) {
+    border-width: 2px !important;
+    font-weight: 700 !important;
+  }
+
+  // Reduced motion support
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    
+    &:hover {
+      transform: none;
+    }
+  }
+}

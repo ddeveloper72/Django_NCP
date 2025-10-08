@@ -49,6 +49,28 @@
     }
   }
 
+  &.btn-info {
+    background-color: $info;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background-color: $info-dark;
+    }
+
+    // Ensure icons stay white on hover
+    i, .fa, .fas, .far, .fab {
+      color: $white !important;
+    }
+
+    &:hover:not(:disabled) i,
+    &:hover:not(:disabled) .fa,
+    &:hover:not(:disabled) .fas,
+    &:hover:not(:disabled) .far,
+    &:hover:not(:disabled) .fab {
+      color: $white !important;
+    }
+  }
+
   &.btn-danger {
     background-color: $error-red;
     color: $white;
@@ -65,6 +87,152 @@
     &:hover:not(:disabled) {
       background-color: currentColor;
       color: $white;
+    }
+  }
+
+  // Outline button variants with Healthcare Organisation colors
+  &.btn-outline-primary {
+    background-color: transparent;
+    border: 2px solid $hco-primary-teal;
+    color: $hco-primary-teal;
+
+    &:hover:not(:disabled) {
+      background-color: $hco-primary-teal;
+      border-color: $hco-primary-teal;
+      color: $white;
+    }
+
+    // Ensure icons follow the same color scheme
+    i, .fa, .fas, .far, .fab {
+      color: $hco-primary-teal;
+    }
+
+    &:hover:not(:disabled) i,
+    &:hover:not(:disabled) .fa,
+    &:hover:not(:disabled) .fas,
+    &:hover:not(:disabled) .far,
+    &:hover:not(:disabled) .fab {
+      color: $white !important;
+    }
+  }
+
+  &.btn-outline-secondary {
+    background-color: transparent;
+    border: 2px solid $neutral-medium;
+    color: $neutral-medium;
+
+    &:hover:not(:disabled) {
+      background-color: $neutral-medium;
+      border-color: $neutral-medium;
+      color: $white;
+    }
+
+    i, .fa, .fas, .far, .fab {
+      color: $neutral-medium;
+    }
+
+    &:hover:not(:disabled) i,
+    &:hover:not(:disabled) .fa,
+    &:hover:not(:disabled) .fas,
+    &:hover:not(:disabled) .far,
+    &:hover:not(:disabled) .fab {
+      color: $white !important;
+    }
+  }
+
+  &.btn-outline-info {
+    background-color: transparent;
+    border: 2px solid $info;
+    color: $info;
+
+    &:hover:not(:disabled) {
+      background-color: $info;
+      border-color: $info;
+      color: $white;
+    }
+
+    i, .fa, .fas, .far, .fab {
+      color: $info;
+    }
+
+    &:hover:not(:disabled) i,
+    &:hover:not(:disabled) .fa,
+    &:hover:not(:disabled) .fas,
+    &:hover:not(:disabled) .far,
+    &:hover:not(:disabled) .fab {
+      color: $white !important;
+    }
+  }
+
+  &.btn-outline-success {
+    background-color: transparent;
+    border: 2px solid $success-green;
+    color: $success-green;
+
+    &:hover:not(:disabled) {
+      background-color: $success-green;
+      border-color: $success-green;
+      color: $white;
+    }
+
+    i, .fa, .fas, .far, .fab {
+      color: $success-green;
+    }
+
+    &:hover:not(:disabled) i,
+    &:hover:not(:disabled) .fa,
+    &:hover:not(:disabled) .fas,
+    &:hover:not(:disabled) .far,
+    &:hover:not(:disabled) .fab {
+      color: $white !important;
+    }
+  }
+
+  &.btn-outline-warning {
+    background-color: transparent;
+    border: 2px solid $warning-orange;
+    color: $warning-orange;
+
+    &:hover:not(:disabled) {
+      background-color: $warning-orange;
+      border-color: $warning-orange;
+      color: $white;
+    }
+
+    i, .fa, .fas, .far, .fab {
+      color: $warning-orange;
+    }
+
+    &:hover:not(:disabled) i,
+    &:hover:not(:disabled) .fa,
+    &:hover:not(:disabled) .fas,
+    &:hover:not(:disabled) .far,
+    &:hover:not(:disabled) .fab {
+      color: $white !important;
+    }
+  }
+
+  &.btn-outline-danger {
+    background-color: transparent;
+    border: 2px solid $error-red;
+    color: $error-red;
+
+    &:hover:not(:disabled) {
+      background-color: $error-red;
+      border-color: $error-red;
+      color: $white;
+    }
+
+    i, .fa, .fas, .far, .fab {
+      color: $error-red;
+    }
+
+    &:hover:not(:disabled) i,
+    &:hover:not(:disabled) .fa,
+    &:hover:not(:disabled) .fas,
+    &:hover:not(:disabled) .far,
+    &:hover:not(:disabled) .fab {
+      color: $white !important;
     }
   }
 

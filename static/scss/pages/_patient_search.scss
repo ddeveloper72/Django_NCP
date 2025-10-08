@@ -8,8 +8,8 @@
 
   // Country Header
   .country-header {
-    background: linear-gradient(135deg, $primary-blue 0%, $accent-blue 100%);
-    color: $white;
+    background: linear-gradient(135deg, #005f5f 0%, $accent-blue 100%); // Accessible teal
+    color: white !important; // Force white text for WCAG compliance
     padding: $space-xl;
     border-radius: 20px;
     margin-bottom: $space-xl;
@@ -29,6 +29,12 @@
       animation: float 6s ease-in-out infinite;
     }
 
+    // Ensure ALL text elements are white with high contrast
+    h1, h2, h3, h4, h5, h6, p, span, div, strong {
+      color: white !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); // Add subtle shadow for better readability
+    }
+
     h1 {
       margin: 0;
       font-size: $font-size-xxxl;
@@ -37,6 +43,7 @@
       align-items: center;
       position: relative;
       z-index: 2;
+      color: white !important; // Explicit white for maximum contrast
 
       @media (max-width: $breakpoint-sm) {
         font-size: 1.8rem;
@@ -114,6 +121,20 @@
       display: flex;
       align-items: center;
     }
+
+    // Ensure dark text for good contrast on light green background
+    p, span, strong, div {
+      color: #2d5016 !important; // Dark green for excellent contrast on light green
+    }
+
+    // Force dark icons on light background for WCAG compliance  
+    i, .fa, .fas, .far, .fab, .fal, .fat, .fad {
+      color: #2d5016 !important; // Dark green icons for visibility
+      
+      &:hover {
+        color: #1a3009 !important; // Even darker on hover
+      }
+    }
   }
 
   // Search Form Container
@@ -155,6 +176,20 @@
       right: 0;
       height: 4px;
       background: linear-gradient(90deg, $primary-blue, $accent-blue);
+    }
+
+    // Ensure dark text on light background for WCAG compliance
+    h5, p, span, label, strong, div, .field-group-title {
+      color: #212529 !important; // Dark text for excellent contrast
+    }
+
+    // Force dark icons on light background
+    i, .fa, .fas, .far, .fab, .fal, .fat, .fad {
+      color: #212529 !important; // Dark icons for visibility
+      
+      &:hover {
+        color: #000000 !important; // Pure black on hover for maximum contrast
+      }
     }
 
     @media (max-width: $breakpoint-sm) {

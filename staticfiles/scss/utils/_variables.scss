@@ -3,8 +3,9 @@
 // ========================================
 
 // Healthcare Organisation Primary Colors - Professional Healthcare Brand
-$hco-primary-teal: #007b7f; // Main healthcare organisation teal color
-$hco-primary-teal-dark: #005b5f; // Darker teal for depth
+$hco-primary-teal: #005f5f; // Darker teal for accessibility (7.2:1 contrast with white)
+$hco-primary-teal-original: #007b7f; // Original teal kept for reference
+$hco-primary-teal-dark: #004a4a; // Even darker teal for depth
 $hco-primary-teal-light: #33969a; // Lighter teal for highlights
 $hco-primary-teal-lighter: #80bebf; // Very light teal for backgrounds
 

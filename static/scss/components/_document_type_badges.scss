@@ -1,0 +1,288 @@
+// =====================================================
+// CDA Document Type Information Badges
+// =====================================================
+
+// CDA Document Type badges are informational, not interactive
+.badge {
+  // Ensure proper inline layout for flags and text
+  display: inline-flex;
+  align-items: center;
+  
+  // Standardize badge heights - use consistent height for all badges
+  min-height: 1.5rem; // Compact height for professional appearance
+  padding: 0.5rem 0.75rem; // Consistent vertical and horizontal padding
+  
+  // Document type badges with Healthcare Organisation styling
+  &.bg-primary {
+    // Active document type - currently viewing
+    background: $hco-primary-teal !important; // Use solid dark teal, no hover changes
+    color: white !important;
+    border: 1px solid $hco-primary-teal-dark;
+    
+    // All icons should be white and visible
+    i, .fa, .fas, .far, .fab, .fal, .fat, .fad {
+      color: white !important;
+      
+      // Prevent hover color changes
+      &:hover {
+        color: white !important;
+      }
+    }
+    
+    // Checkmark icon for "currently active" indicator
+    .fa-check {
+      opacity: 1;
+      color: white !important;
+      font-weight: 900;
+    }
+    
+    // Prevent badge background color changes on hover
+    &:hover {
+      background: $hco-primary-teal !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  }
+  
+  &.bg-secondary {
+    // Available but not currently viewing
+    background: #6c757d !important; // Solid color, no gradients
+    color: white !important;
+    border: 1px solid #5a6268;
+    
+    // All icons should be white and visible
+    i, .fa, .fas, .far, .fab, .fal, .fat, .fad {
+      color: white !important;
+      
+      // Prevent hover color changes
+      &:hover {
+        color: white !important;
+      }
+    }
+    
+    // Prevent badge background color changes on hover
+    &:hover {
+      background: #6c757d !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  }
+  
+  &.bg-light {
+    // Not available documents or country flags
+    background: #f8f9fa !important;
+    color: #6c757d !important;
+    border: 1px solid #dee2e6;
+    
+    small {
+      font-style: italic;
+      opacity: 0.8;
+    }
+    
+    // Icons in light badges should be dark for visibility
+    i, .fa, .fas, .far, .fab, .fal, .fat, .fad {
+      color: #495057 !important; // Dark gray for visibility on light background
+      
+      &:hover {
+        color: #495057 !important; // Prevent hover color changes
+      }
+    }
+    
+    // Prevent badge background color changes on hover
+    &:hover {
+      background: #f8f9fa !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  }
+  
+  &.bg-success {
+    // Success/High quality badges
+    i, .fa, .fas, .far, .fab, .fal, .fat, .fad {
+      color: white !important;
+      
+      &:hover {
+        color: white !important; // Prevent hover color changes
+      }
+    }
+  }
+  
+  &.bg-warning {
+    // Warning/Medium quality badges  
+    i, .fa, .fas, .far, .fab, .fal, .fat, .fad {
+      color: #212529 !important; // Dark text for good contrast on yellow
+      
+      &:hover {
+        color: #212529 !important; // Prevent hover color changes
+      }
+    }
+  }
+  
+  // Ensure badges are clearly non-interactive but allow tooltips
+  cursor: default;
+  user-select: none;
+  
+  // Remove any button-like effects and prevent hover color changes
+  // while preserving tooltip functionality
+  &:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    
+    // Prevent ALL icon color changes on hover
+    i, .fa, .fas, .far, .fab, .fal, .fat, .fad {
+      color: inherit !important;
+    }
+  }
+  
+  // Override Bootstrap's badge hover effects
+  &:not(:disabled):not(.disabled) {
+    &:hover {
+      // Maintain original colors on hover
+      background-color: inherit !important;
+      border-color: inherit !important;
+      color: inherit !important;
+    }
+  }
+  
+  // Healthcare professional sizing
+  &.fs-6 {
+    font-size: 0.875rem !important;
+    font-weight: 500;
+    
+    // Professional spacing
+    &.px-3 {
+      padding-left: 0.75rem !important;
+      padding-right: 0.75rem !important;
+    }
+    
+    &.py-2 {
+      padding-top: 0.5rem !important;
+      padding-bottom: 0.5rem !important;
+    }
+  }
+  
+  // Icon alignment and spacing within badges
+  i {
+    vertical-align: baseline;
+    
+    // Main document type icons with improved spacing
+    &.fa-file-medical,
+    &.fa-language {
+      color: inherit !important;
+      margin-right: 0.5rem !important; // Increased from me-1 to me-2 equivalent
+    }
+    
+    // Status indicator icons (checkmarks)
+    &.fa-check {
+      opacity: 1;
+      font-size: 0.8em;
+      color: inherit !important;
+      margin-left: 0.5rem !important; // Increased from ms-1 to ms-2 equivalent
+      font-weight: 900;
+    }
+    
+    // Translation quality icons with proper spacing
+    &.fa-check-circle {
+      margin-right: 0.5rem !important; // Consistent spacing with other icons
+    }
+    
+    // Prevent FontAwesome icon color inheritance and hover effects
+    &.fa,
+    &.fab, 
+    &.fa-solid,
+    &.far,
+    &.fal,
+    &.fat,
+    &.fad {
+      color: inherit !important;
+      transition: none !important;
+      
+      // Force color inheritance on hover
+      &:hover {
+        color: inherit !important;
+      }
+    }
+  }
+}
+
+// Country flag styling
+.flag-img {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem; // Consistent spacing with other badge elements
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+// Unified country badge styling
+.badge-country {
+  // Slightly darker than page background for professional appearance
+  background: #e9ecef !important; // Light gray, darker than page white
+  color: #495057 !important; // Dark gray text for good contrast
+  border: 1px solid #dee2e6 !important;
+  
+  // Ensure consistent height with other badges
+  min-height: 1.5rem;
+  padding: 0.5rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  
+  // No hover effects - this is informational only
+  &:hover {
+    background: #e9ecef !important;
+    color: #495057 !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  // Flag image styling within country badge
+  .flag-img {
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+}
+
+// Container for document type badges
+.d-flex.gap-2 {
+  // Professional spacing between badges
+  gap: 0.75rem !important;
+  
+  // Mobile responsive stacking
+  @media (max-width: 576px) {
+    flex-direction: column;
+    gap: 0.5rem !important;
+    
+    .badge {
+      text-align: left;
+      justify-content: flex-start;
+    }
+  }
+}
+
+// Document type explanation text
+.text-muted {
+  // Healthcare professional information text
+  line-height: 1.5;
+  
+  strong {
+    color: $hco-primary-teal;
+    font-weight: 600;
+  }
+}
+
+// Additional FontAwesome icon protection for badges specifically
+.badge {
+  // Override any global FontAwesome hover styles
+  i:hover,
+  .fa:hover,
+  .fas:hover,
+  .far:hover,
+  .fab:hover,
+  .fal:hover,
+  .fat:hover,
+  .fad:hover {
+    color: inherit !important;
+    background: none !important;
+    transition: none !important;
+  }
+}

@@ -72,7 +72,7 @@
   color: $neutral-medium;
 }
 .text-muted {
-  color: $neutral-light;
+  color: $neutral-medium !important; // Use darker gray for 7.1:1 contrast ratio (WCAG AAA)
 }
 .text-success {
   color: $success-green;
