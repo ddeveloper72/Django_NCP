@@ -6221,6 +6221,82 @@ img[data-src]::before {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
+.badge.bg-primary {
+  background: linear-gradient(135deg, #005f5f 0%, #004a4a 100%) !important;
+  color: white !important;
+  border: 1px solid #004a4a;
+}
+.badge.bg-primary .fa-eye {
+  opacity: 0.9;
+  margin-left: 0.5rem;
+}
+.badge.bg-secondary {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+  color: white !important;
+  border: 1px solid #5a6268;
+}
+.badge.bg-light {
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+  border: 1px solid #dee2e6;
+}
+.badge.bg-light small {
+  font-style: italic;
+  opacity: 0.8;
+}
+.badge {
+  cursor: default;
+  user-select: none;
+}
+.badge:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+.badge.fs-6 {
+  font-size: 0.875rem !important;
+  font-weight: 500;
+}
+.badge.fs-6.px-3 {
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+}
+.badge.fs-6.py-2 {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+.badge i {
+  vertical-align: baseline;
+}
+.badge i.fa-file-medical, .badge i.fa-language {
+  color: inherit !important;
+}
+.badge i.fa-eye {
+  opacity: 0.9;
+  font-size: 0.8em;
+}
+
+.d-flex.gap-2 {
+  gap: 0.75rem !important;
+}
+@media (max-width: 576px) {
+  .d-flex.gap-2 {
+    flex-direction: column;
+    gap: 0.5rem !important;
+  }
+  .d-flex.gap-2 .badge {
+    text-align: left;
+    justify-content: flex-start;
+  }
+}
+
+.text-muted {
+  line-height: 1.5;
+}
+.text-muted strong {
+  color: #005f5f;
+  font-weight: 600;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
