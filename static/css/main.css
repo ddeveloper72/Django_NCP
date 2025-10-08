@@ -16956,6 +16956,126 @@ html {
     font-size: 1.75rem;
   }
 }
+.badge.bg-info, .badge.bg-danger, .badge.bg-secondary, .badge.bg-success, .badge.bg-primary {
+  color: white !important;
+  font-weight: 500;
+}
+.badge.bg-info:hover, .badge.bg-danger:hover, .badge.bg-secondary:hover, .badge.bg-success:hover, .badge.bg-primary:hover {
+  color: white !important;
+}
+.badge.bg-warning {
+  color: #2d3748 !important;
+  font-weight: 600;
+}
+.badge.bg-warning:hover {
+  color: #2d3748 !important;
+}
+.badge.bg-light {
+  color: #2d3748 !important;
+}
+.badge.bg-light:hover {
+  color: #2d3748 !important;
+}
+
+.audit-trail-table .table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+}
+.audit-trail-table .table tbody tr:hover {
+  background-color: rgba(0, 95, 95, 0.02);
+}
+.audit-trail-table .table .timestamp-col {
+  font-family: "Courier New", monospace;
+  font-size: 0.875rem;
+  color: #718096;
+}
+.audit-trail-table .table .user-col .badge {
+  font-size: 0.75rem;
+  padding: 0.375rem 0.75rem;
+}
+.audit-trail-table .table .action-col .badge {
+  font-size: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+.audit-trail-table .table .object-col {
+  font-weight: 500;
+  color: #2d3748;
+}
+.audit-trail-table .table .changes-col {
+  font-size: 0.875rem;
+  color: #718096;
+  font-style: italic;
+}
+
+.nav-tabs .nav-item .nav-link {
+  color: #2d3748;
+  border: 1px solid transparent;
+}
+.nav-tabs .nav-item .nav-link:hover {
+  color: #005f5f;
+  border-color: #e2e8f0;
+}
+.nav-tabs .nav-item .nav-link.active {
+  color: #005f5f;
+  background-color: white;
+  border-color: #e2e8f0 #e2e8f0 white;
+  font-weight: 600;
+}
+.nav-tabs .nav-item .nav-link i {
+  color: inherit;
+}
+
+.container-fluid h1 {
+  color: #2d3748;
+  font-weight: 600;
+}
+.container-fluid h1 .fa-search {
+  color: #005f5f;
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .audit-trail-table .table {
+    font-size: 0.875rem;
+  }
+  .audit-trail-table .table .timestamp-col {
+    font-size: 0.75rem;
+  }
+  .audit-trail-table .table .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+  }
+  .d-flex.justify-content-between.align-items-center {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 1rem;
+  }
+  .d-flex.justify-content-between.align-items-center > div:last-child {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .d-flex.justify-content-between.align-items-center > div:last-child .btn {
+    flex: 1;
+  }
+}
+@media (prefers-contrast: high) {
+  .badge {
+    border: 2px solid currentColor;
+    font-weight: 700;
+  }
+  .audit-trail-table .table tbody tr:hover {
+    background-color: rgba(0, 95, 95, 0.1);
+  }
+}
+@media print {
+  .audit-trail-table .badge {
+    border: 1px solid #000;
+    color: #000 !important;
+    background: transparent !important;
+  }
+}
 .forms-page .form-container {
   max-width: 800px;
   margin: 0 auto;

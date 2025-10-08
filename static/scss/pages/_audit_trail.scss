@@ -1,0 +1,188 @@
+// ================================================================
+// SMP AUDIT TRAIL PAGE STYLING
+// ================================================================
+// Healthcare Organisation themed audit trail with accessibility compliance
+// Ensures WCAG 2.2 AA compliance for all badge components
+// ================================================================
+
+// ✅ BADGE ACCESSIBILITY IMPROVEMENTS
+// Ensures proper contrast ratios for all badge variants used in audit trail
+
+.badge {
+  // ✅ MANDATORY: White text on dark badge backgrounds for accessibility
+  &.bg-info,           // Dark blue user badges (like "duncan")
+  &.bg-danger,         // Red badges (Deleted, Error)
+  &.bg-secondary,      // Gray badges (Unknown, document types)
+  &.bg-success,        // Green badges (Added, Success)
+  &.bg-primary {       // Primary blue badges
+    color: white !important;
+    
+    // Ensure sufficient contrast ratio
+    font-weight: 500;
+    
+    // Prevent any hover state color changes for consistency
+    &:hover {
+      color: white !important;
+    }
+  }
+  
+  // ✅ MANDATORY: Dark text on light badge backgrounds
+  &.bg-warning {       // Yellow/orange badges (Changed)
+    color: $text-dark !important;
+    font-weight: 600;   // Slightly bolder for readability on yellow
+    
+    &:hover {
+      color: $text-dark !important;
+    }
+  }
+  
+  &.bg-light {
+    color: $text-dark !important;
+    
+    &:hover {
+      color: $text-dark !important;
+    }
+  }
+}
+
+// ✅ AUDIT TRAIL SPECIFIC STYLING
+.audit-trail-table {
+  .table {
+    // Enhanced readability for audit data
+    tbody tr {
+      border-bottom: 1px solid $border-light;
+      
+      &:hover {
+        background-color: rgba(0, 95, 95, 0.02);
+      }
+    }
+    
+    // Timestamp column styling
+    .timestamp-col {
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      color: $text-muted;
+    }
+    
+    // User column badges
+    .user-col .badge {
+      font-size: 0.75rem;
+      padding: 0.375rem 0.75rem;
+    }
+    
+    // Action column badges  
+    .action-col .badge {
+      font-size: 0.75rem;
+      padding: 0.375rem 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+    
+    // Object column styling
+    .object-col {
+      font-weight: 500;
+      color: $text-dark;
+    }
+    
+    // Changes column
+    .changes-col {
+      font-size: 0.875rem;
+      color: $text-muted;
+      font-style: italic;
+    }
+  }
+}
+
+// ✅ AUDIT TABS STYLING
+.nav-tabs {
+  .nav-item .nav-link {
+    color: $text-dark;
+    border: 1px solid transparent;
+    
+    &:hover {
+      color: $hco-primary-teal;
+      border-color: $border-light;
+    }
+    
+    &.active {
+      color: $hco-primary-teal;
+      background-color: white;
+      border-color: $border-light $border-light white;
+      font-weight: 600;
+    }
+    
+    // Icon styling in tabs
+    i {
+      color: inherit;
+    }
+  }
+}
+
+// ✅ PAGE HEADER STYLING
+.container-fluid h1 {
+  color: $text-dark;
+  font-weight: 600;
+  
+  .fa-search {
+    color: $hco-primary-teal;
+    margin-right: 0.5rem;
+  }
+}
+
+// ✅ MOBILE RESPONSIVENESS
+@media (max-width: 768px) {
+  .audit-trail-table {
+    .table {
+      font-size: 0.875rem;
+      
+      .timestamp-col {
+        font-size: 0.75rem;
+      }
+      
+      .badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+      }
+    }
+  }
+  
+  // Stack header buttons on mobile
+  .d-flex.justify-content-between.align-items-center {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 1rem;
+    
+    > div:last-child {
+      display: flex;
+      gap: 0.5rem;
+      width: 100%;
+      
+      .btn {
+        flex: 1;
+      }
+    }
+  }
+}
+
+// ✅ HIGH CONTRAST MODE SUPPORT
+@media (prefers-contrast: high) {
+  .badge {
+    border: 2px solid currentColor;
+    font-weight: 700;
+  }
+  
+  .audit-trail-table .table tbody tr:hover {
+    background-color: rgba(0, 95, 95, 0.1);
+  }
+}
+
+// ✅ PRINT STYLES
+@media print {
+  .audit-trail-table {
+    .badge {
+      border: 1px solid #000;
+      color: #000 !important;
+      background: transparent !important;
+    }
+  }
+}
