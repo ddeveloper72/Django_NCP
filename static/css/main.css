@@ -6221,6 +6221,10 @@ img[data-src]::before {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
+.badge {
+  display: inline-flex;
+  align-items: center;
+}
 .badge.bg-primary {
   background: linear-gradient(135deg, #005f5f 0%, #004a4a 100%) !important;
   color: white !important;
@@ -6244,6 +6248,24 @@ img[data-src]::before {
 .badge.bg-light small {
   font-style: italic;
   opacity: 0.8;
+}
+.badge.bg-light i, .badge.bg-light .fa, .badge.bg-light .fas, .badge.bg-light .far, .badge.bg-light .fab, .badge.bg-light .fal, .badge.bg-light .fat, .badge.bg-light .fad {
+  color: #495057 !important;
+}
+.badge.bg-light i:hover, .badge.bg-light .fa:hover, .badge.bg-light .fas:hover, .badge.bg-light .far:hover, .badge.bg-light .fab:hover, .badge.bg-light .fal:hover, .badge.bg-light .fat:hover, .badge.bg-light .fad:hover {
+  color: #495057 !important;
+}
+.badge.bg-success i, .badge.bg-success .fa, .badge.bg-success .fas, .badge.bg-success .far, .badge.bg-success .fab, .badge.bg-success .fal, .badge.bg-success .fat, .badge.bg-success .fad {
+  color: white !important;
+}
+.badge.bg-success i:hover, .badge.bg-success .fa:hover, .badge.bg-success .fas:hover, .badge.bg-success .far:hover, .badge.bg-success .fab:hover, .badge.bg-success .fal:hover, .badge.bg-success .fat:hover, .badge.bg-success .fad:hover {
+  color: white !important;
+}
+.badge.bg-warning i, .badge.bg-warning .fa, .badge.bg-warning .fas, .badge.bg-warning .far, .badge.bg-warning .fab, .badge.bg-warning .fal, .badge.bg-warning .fat, .badge.bg-warning .fad {
+  color: #212529 !important;
+}
+.badge.bg-warning i:hover, .badge.bg-warning .fa:hover, .badge.bg-warning .fas:hover, .badge.bg-warning .far:hover, .badge.bg-warning .fab:hover, .badge.bg-warning .fal:hover, .badge.bg-warning .fat:hover, .badge.bg-warning .fad:hover {
+  color: #212529 !important;
 }
 .badge {
   cursor: default;
@@ -6282,12 +6304,23 @@ img[data-src]::before {
   margin-left: 0.5rem !important;
   font-weight: 900;
 }
+.badge i.fa-check-circle {
+  margin-right: 0.5rem !important;
+}
 .badge i.fa, .badge i.fab, .badge i.fa-solid, .badge i.far, .badge i.fal, .badge i.fat, .badge i.fad {
   color: inherit !important;
   transition: none !important;
 }
 .badge i.fa:hover, .badge i.fab:hover, .badge i.fa-solid:hover, .badge i.far:hover, .badge i.fal:hover, .badge i.fat:hover, .badge i.fad:hover {
   color: inherit !important;
+}
+
+.flag-img {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .d-flex.gap-2 {

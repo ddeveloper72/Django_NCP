@@ -442,9 +442,9 @@ def country_flag(country_code):
     # Get full country name for alt text
     country_name = country_names.get(country_code, country_code)
 
-    # Return proper HTML img tag
+    # Return proper HTML img tag with CSS class instead of inline styles
     static_path = static(flag_path)
-    html = f'<img src="{static_path}" alt="{country_name}" class="flag-img" width="20" height="15" style="margin-right: 5px;">'
+    html = f'<img src="{static_path}" alt="{country_name}" class="flag-img" width="20" height="15">'
     return mark_safe(html)
 
 

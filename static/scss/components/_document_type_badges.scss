@@ -4,6 +4,10 @@
 
 // CDA Document Type badges are informational, not interactive
 .badge {
+  // Ensure proper inline layout for flags and text
+  display: inline-flex;
+  align-items: center;
+  
   // Document type badges with Healthcare Organisation styling
   &.bg-primary {
     // Active document type - currently viewing
@@ -35,7 +39,7 @@
   }
   
   &.bg-light {
-    // Not available documents
+    // Not available documents or country flags
     background: #f8f9fa !important;
     color: #6c757d !important;
     border: 1px solid #dee2e6;
@@ -43,6 +47,37 @@
     small {
       font-style: italic;
       opacity: 0.8;
+    }
+    
+    // Icons in light badges should remain dark for visibility
+    i, .fa, .fas, .far, .fab, .fal, .fat, .fad {
+      color: #495057 !important; // Dark gray for visibility on light background
+      
+      &:hover {
+        color: #495057 !important; // Prevent hover color changes
+      }
+    }
+  }
+  
+  &.bg-success {
+    // Success/High quality badges
+    i, .fa, .fas, .far, .fab, .fal, .fat, .fad {
+      color: white !important;
+      
+      &:hover {
+        color: white !important; // Prevent hover color changes
+      }
+    }
+  }
+  
+  &.bg-warning {
+    // Warning/Medium quality badges  
+    i, .fa, .fas, .far, .fab, .fal, .fat, .fad {
+      color: #212529 !important; // Dark text for good contrast on yellow
+      
+      &:hover {
+        color: #212529 !important; // Prevent hover color changes
+      }
     }
   }
   
@@ -98,6 +133,11 @@
       font-weight: 900;
     }
     
+    // Translation quality icons with proper spacing
+    &.fa-check-circle {
+      margin-right: 0.5rem !important; // Consistent spacing with other icons
+    }
+    
     // Prevent FontAwesome icon color inheritance and hover effects
     &.fa,
     &.fab, 
@@ -115,6 +155,15 @@
       }
     }
   }
+}
+
+// Country flag styling
+.flag-img {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem; // Consistent spacing with other badge elements
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 // Container for document type badges
