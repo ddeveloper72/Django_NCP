@@ -53,20 +53,32 @@
   
   i {
     font-size: 1.5rem;
-    color: white;
+    color: white !important; // Force white icons on all dark backgrounds
   }
 
-  // ✅ THEMED ICON VARIANTS
+  // ✅ THEMED ICON VARIANTS - All with white icons
   &.metric-icon-success {
     background: linear-gradient(135deg, $hco-secondary-green 0%, lighten($hco-secondary-green, 15%) 100%);
+    
+    i {
+      color: white !important;
+    }
   }
 
   &.metric-icon-info {
     background: linear-gradient(135deg, $hco-accent-blue 0%, lighten($hco-accent-blue, 15%) 100%);
+    
+    i {
+      color: white !important;
+    }
   }
 
   &.metric-icon-warning {
-    background: linear-gradient(135deg, $warning-orange 0%, lighten($warning-orange, 15%) 100%);
+    background: linear-gradient(135deg, darken($warning-orange, 20%) 0%, $warning-orange 100%);
+    
+    i {
+      color: white !important;
+    }
   }
 }
 
@@ -100,7 +112,7 @@
   }
 
   &.metric-value-warning {
-    color: $warning-orange;
+    color: darken($warning-orange, 30%); // Much darker orange for better contrast
   }
 }
 
@@ -232,7 +244,7 @@
   }
 
   &.metric-number-warning {
-    color: $warning-orange;
+    color: darken($warning-orange, 30%); // Much darker orange for better contrast
   }
 }
 

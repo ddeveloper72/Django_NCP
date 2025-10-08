@@ -16579,16 +16579,25 @@ html {
 }
 .metric-icon i {
   font-size: 1.5rem;
-  color: white;
+  color: white !important;
 }
 .metric-icon.metric-icon-success {
   background: linear-gradient(135deg, #2d5a27 0%, rgb(71.6860465116, 143.3720930233, 62.1279069767) 100%);
 }
+.metric-icon.metric-icon-success i {
+  color: white !important;
+}
 .metric-icon.metric-icon-info {
   background: linear-gradient(135deg, #1e3a5f 0%, rgb(48.36, 93.496, 153.14) 100%);
 }
+.metric-icon.metric-icon-info i {
+  color: white !important;
+}
 .metric-icon.metric-icon-warning {
-  background: linear-gradient(135deg, #f59e0b 0%, rgb(248.0118110236, 187.2145669291, 84.4881889764) 100%);
+  background: linear-gradient(135deg, rgb(147.937007874, 95.188976378, 6.062992126) 0%, #f59e0b 100%);
+}
+.metric-icon.metric-icon-warning i {
+  color: white !important;
 }
 
 .metric-info {
@@ -16618,7 +16627,7 @@ html {
   color: #1e3a5f;
 }
 .metric-value.metric-value-warning {
-  color: #f59e0b;
+  color: rgb(98.9448818898, 63.6653543307, 4.0551181102);
 }
 
 .metric-subtitle {
@@ -16739,7 +16748,7 @@ html {
   color: #1e3a5f;
 }
 .metric-number.metric-number-warning {
-  color: #f59e0b;
+  color: rgb(98.9448818898, 63.6653543307, 4.0551181102);
 }
 
 .performance-progress {
