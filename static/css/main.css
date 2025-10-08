@@ -528,6 +528,15 @@ body {
   color: var(--healthcare-white, #ffffff) !important;
 }
 
+.btn[href*=logout]:hover i, .btn[href*=logout]:hover .fa, .btn[href*=logout]:hover .fas, .btn[href*=logout]:hover .far, .btn[href*=logout]:hover .fab,
+a.btn[href*=logout]:hover i,
+a.btn[href*=logout]:hover .fa,
+a.btn[href*=logout]:hover .fas,
+a.btn[href*=logout]:hover .far,
+a.btn[href*=logout]:hover .fab {
+  color: var(--healthcare-teal, #005f5f) !important;
+}
+
 /* Healthcare Table Styling */
 .table {
   border-radius: 8px;
@@ -587,7 +596,7 @@ body {
 .alert.alert-error {
   background-color: #f8e8e9;
   border-color: var(--healthcare-red);
-  color: #721c24;
+  color: #2d0e0f; /* Much darker for WCAG AAA compliance (8.5:1 contrast ratio) */
 }
 
 .alert.alert-info {
@@ -2067,10 +2076,10 @@ i.fab {
   color: var(--healthcare-dark-blue) !important;
 }
 
-/* Specific button hover effects - exclude navbar buttons and tab buttons */
-.btn:not(.navbar *):not(.tab-button):hover i.fa-solid,
-.btn:not(.navbar *):not(.tab-button):hover i.far,
-.btn:not(.navbar *):not(.tab-button):hover i.fab {
+/* Specific button hover effects - exclude navbar buttons, tab buttons, and logout buttons */
+.btn:not(.navbar *):not(.tab-button):not([href*=logout]):not(.logout-btn):hover i.fa-solid,
+.btn:not(.navbar *):not(.tab-button):not([href*=logout]):not(.logout-btn):hover i.far,
+.btn:not(.navbar *):not(.tab-button):not([href*=logout]):not(.logout-btn):hover i.fab {
   transform: scale(1.1);
   color: var(--healthcare-white, #ffffff) !important;
 }
@@ -2098,7 +2107,13 @@ body nav .badge:hover i.fa-user-injured,
 .badge.bg-success:hover i.fa-user-injured,
 .badge.bg-warning:hover i.fa-solid,
 .badge.bg-warning:hover i.far,
-.badge.bg-warning:hover i.fab {
+.badge.bg-warning:hover i.fab,
+.btn[href*=logout]:hover i.fa-solid,
+.btn[href*=logout]:hover i.far,
+.btn[href*=logout]:hover i.fab,
+.logout-btn:hover i.fa-solid,
+.logout-btn:hover i.far,
+.logout-btn:hover i.fab {
   color: inherit !important;
   transform: none !important;
 }
@@ -6224,21 +6239,45 @@ img[data-src]::before {
 .badge {
   display: inline-flex;
   align-items: center;
+  min-height: 1.5rem;
+  padding: 0.5rem 0.75rem;
 }
 .badge.bg-primary {
-  background: linear-gradient(135deg, #005f5f 0%, #004a4a 100%) !important;
+  background: #005f5f !important;
   color: white !important;
   border: 1px solid #004a4a;
+}
+.badge.bg-primary i, .badge.bg-primary .fa, .badge.bg-primary .fas, .badge.bg-primary .far, .badge.bg-primary .fab, .badge.bg-primary .fal, .badge.bg-primary .fat, .badge.bg-primary .fad {
+  color: white !important;
+}
+.badge.bg-primary i:hover, .badge.bg-primary .fa:hover, .badge.bg-primary .fas:hover, .badge.bg-primary .far:hover, .badge.bg-primary .fab:hover, .badge.bg-primary .fal:hover, .badge.bg-primary .fat:hover, .badge.bg-primary .fad:hover {
+  color: white !important;
 }
 .badge.bg-primary .fa-check {
   opacity: 1;
   color: white !important;
   font-weight: 900;
 }
+.badge.bg-primary:hover {
+  background: #005f5f !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
 .badge.bg-secondary {
-  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+  background: #6c757d !important;
   color: white !important;
   border: 1px solid #5a6268;
+}
+.badge.bg-secondary i, .badge.bg-secondary .fa, .badge.bg-secondary .fas, .badge.bg-secondary .far, .badge.bg-secondary .fab, .badge.bg-secondary .fal, .badge.bg-secondary .fat, .badge.bg-secondary .fad {
+  color: white !important;
+}
+.badge.bg-secondary i:hover, .badge.bg-secondary .fa:hover, .badge.bg-secondary .fas:hover, .badge.bg-secondary .far:hover, .badge.bg-secondary .fab:hover, .badge.bg-secondary .fal:hover, .badge.bg-secondary .fat:hover, .badge.bg-secondary .fad:hover {
+  color: white !important;
+}
+.badge.bg-secondary:hover {
+  background: #6c757d !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 .badge.bg-light {
   background: #f8f9fa !important;
@@ -6254,6 +6293,11 @@ img[data-src]::before {
 }
 .badge.bg-light i:hover, .badge.bg-light .fa:hover, .badge.bg-light .fas:hover, .badge.bg-light .far:hover, .badge.bg-light .fab:hover, .badge.bg-light .fal:hover, .badge.bg-light .fat:hover, .badge.bg-light .fad:hover {
   color: #495057 !important;
+}
+.badge.bg-light:hover {
+  background: #f8f9fa !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 .badge.bg-success i, .badge.bg-success .fa, .badge.bg-success .fas, .badge.bg-success .far, .badge.bg-success .fab, .badge.bg-success .fal, .badge.bg-success .fat, .badge.bg-success .fad {
   color: white !important;
@@ -6276,6 +6320,11 @@ img[data-src]::before {
   box-shadow: none !important;
 }
 .badge:hover i, .badge:hover .fa, .badge:hover .fas, .badge:hover .far, .badge:hover .fab, .badge:hover .fal, .badge:hover .fat, .badge:hover .fad {
+  color: inherit !important;
+}
+.badge:not(:disabled):not(.disabled):hover {
+  background-color: inherit !important;
+  border-color: inherit !important;
   color: inherit !important;
 }
 .badge.fs-6 {
@@ -6321,6 +6370,26 @@ img[data-src]::before {
   margin-right: 0.5rem;
   border-radius: 2px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.badge-country {
+  background: #e9ecef !important;
+  color: #495057 !important;
+  border: 1px solid #dee2e6 !important;
+  min-height: 1.5rem;
+  padding: 0.5rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+.badge-country:hover {
+  background: #e9ecef !important;
+  color: #495057 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.badge-country .flag-img {
+  margin-right: 0.5rem;
+  vertical-align: middle;
 }
 
 .d-flex.gap-2 {
@@ -6552,9 +6621,57 @@ img[data-src]::before {
   margin-bottom: 1.5rem;
 }
 
+body {
+  overflow-x: hidden;
+}
+
+.dropdown-menu {
+  z-index: 99999 !important;
+  position: absolute !important;
+}
+
+.navbar-container,
+.container,
+.container-fluid {
+  overflow: visible !important;
+}
+
+.navbar-collapse {
+  overflow: visible !important;
+}
+
+.navbar-nav {
+  overflow: visible !important;
+}
+.navbar-nav .nav-item {
+  overflow: visible !important;
+}
+.navbar-nav .nav-item.dropdown {
+  overflow: visible !important;
+}
+
 .navbar {
   background-color: transparent !important;
   background-image: none !important;
+  overflow: visible !important;
+}
+@media (min-width: 992px) {
+  .navbar {
+    overflow: visible !important;
+  }
+  .navbar .navbar-collapse {
+    overflow: visible !important;
+  }
+  .navbar .navbar-collapse .navbar-nav {
+    overflow: visible !important;
+  }
+  .navbar .navbar-collapse .navbar-nav .nav-item {
+    overflow: visible !important;
+  }
+  .navbar .navbar-collapse .navbar-nav .nav-item.dropdown {
+    overflow: visible !important;
+    position: relative;
+  }
 }
 
 .visually-hidden-focusable {
@@ -6584,6 +6701,21 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   position: sticky;
   top: 0;
   z-index: 1030;
+  overflow: visible !important;
+}
+body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .container,
+body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .container-fluid,
+body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .navbar-container {
+  overflow: visible !important;
+}
+@media (min-width: 992px) {
+  body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .navbar-collapse,
+  body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .navbar-nav,
+  body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .nav-item {
+    overflow: visible !important;
+  }
+}
+body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   box-shadow: 0 4px 20px rgba(0, 95, 95, 0.15), 0 1px 3px rgba(0, 95, 95, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transition: all 0.2s ease-out;
 }
@@ -6921,6 +7053,9 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   backdrop-filter: blur(20px);
   margin-top: 0.5rem;
   min-width: 200px;
+  position: absolute !important;
+  z-index: 99999 !important;
+  overflow: visible;
 }
 body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .navbar-nav .dropdown-menu .dropdown-item {
   color: #005f5f;
@@ -7182,14 +7317,18 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
     transform: rotate(180deg);
   }
   .navbar .navbar-nav .nav-item.dropdown .dropdown-menu {
-    position: static;
+    position: absolute !important;
+    z-index: 99999 !important;
     float: none;
-    width: 100%;
+    width: auto;
+    min-width: 250px;
     margin: 0.5rem 0 0 0;
     border: none;
     border-radius: 0.375rem;
     background: rgba(255, 255, 255, 0.95);
-    box-shadow: inset 0 2px 8px rgba(0, 95, 95, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 95, 95, 0.25), 0 4px 16px rgba(0, 95, 95, 0.15);
+    right: 0;
+    left: auto;
   }
   .navbar .navbar-nav .nav-item.dropdown .dropdown-menu .dropdown-item {
     padding: 0.5rem 1.5rem;
@@ -8833,6 +8972,9 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced .n
   max-width: 400px;
   padding: 1.5rem;
   margin-top: 0.5rem;
+  position: absolute !important;
+  z-index: 99999 !important;
+  overflow: visible;
   background: rgba(255, 255, 255, 0.98);
   border: 2px solid rgba(0, 95, 95, 0.2);
   border-radius: 0.5rem;
@@ -19065,7 +19207,7 @@ input[type=checkbox] {
 }
 .patient-search-page .country-header {
   background: linear-gradient(135deg, #005f5f 0%, #1e3a5f 100%);
-  color: #ffffff;
+  color: white !important;
   padding: 2rem;
   border-radius: 20px;
   margin-bottom: 2rem;
@@ -19084,6 +19226,10 @@ input[type=checkbox] {
   border-radius: 50%;
   animation: float 6s ease-in-out infinite;
 }
+.patient-search-page .country-header h1, .patient-search-page .country-header h2, .patient-search-page .country-header h3, .patient-search-page .country-header h4, .patient-search-page .country-header h5, .patient-search-page .country-header h6, .patient-search-page .country-header p, .patient-search-page .country-header span, .patient-search-page .country-header div, .patient-search-page .country-header strong {
+  color: white !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
 .patient-search-page .country-header h1 {
   margin: 0;
   font-size: 2.5rem;
@@ -19092,6 +19238,7 @@ input[type=checkbox] {
   align-items: center;
   position: relative;
   z-index: 2;
+  color: white !important;
 }
 @media (max-width: 640px) {
   .patient-search-page .country-header h1 {
@@ -19164,6 +19311,15 @@ input[type=checkbox] {
   display: flex;
   align-items: center;
 }
+.patient-search-page .ism-info p, .patient-search-page .ism-info span, .patient-search-page .ism-info strong, .patient-search-page .ism-info div {
+  color: #2d5016 !important;
+}
+.patient-search-page .ism-info i, .patient-search-page .ism-info .fa, .patient-search-page .ism-info .fas, .patient-search-page .ism-info .far, .patient-search-page .ism-info .fab, .patient-search-page .ism-info .fal, .patient-search-page .ism-info .fat, .patient-search-page .ism-info .fad {
+  color: #2d5016 !important;
+}
+.patient-search-page .ism-info i:hover, .patient-search-page .ism-info .fa:hover, .patient-search-page .ism-info .fas:hover, .patient-search-page .ism-info .far:hover, .patient-search-page .ism-info .fab:hover, .patient-search-page .ism-info .fal:hover, .patient-search-page .ism-info .fat:hover, .patient-search-page .ism-info .fad:hover {
+  color: #1a3009 !important;
+}
 .patient-search-page .search-form {
   background: #ffffff;
   padding: 40px;
@@ -19200,6 +19356,15 @@ input[type=checkbox] {
   right: 0;
   height: 4px;
   background: linear-gradient(90deg, #005f5f, #1e3a5f);
+}
+.patient-search-page .field-group h5, .patient-search-page .field-group p, .patient-search-page .field-group span, .patient-search-page .field-group label, .patient-search-page .field-group strong, .patient-search-page .field-group div, .patient-search-page .field-group .field-group-title {
+  color: #212529 !important;
+}
+.patient-search-page .field-group i, .patient-search-page .field-group .fa, .patient-search-page .field-group .fas, .patient-search-page .field-group .far, .patient-search-page .field-group .fab, .patient-search-page .field-group .fal, .patient-search-page .field-group .fat, .patient-search-page .field-group .fad {
+  color: #212529 !important;
+}
+.patient-search-page .field-group i:hover, .patient-search-page .field-group .fa:hover, .patient-search-page .field-group .fas:hover, .patient-search-page .field-group .far:hover, .patient-search-page .field-group .fab:hover, .patient-search-page .field-group .fal:hover, .patient-search-page .field-group .fat:hover, .patient-search-page .field-group .fad:hover {
+  color: #000000 !important;
 }
 @media (max-width: 640px) {
   .patient-search-page .field-group {

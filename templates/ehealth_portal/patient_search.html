@@ -10,9 +10,12 @@
             <div class="page-info">
                 {% if country_code %}
                 <span class="page-location">
-                    <img src="{% static 'flags/' %}{{ country_code }}.webp" alt="{{ country.name }} flag"
-                        class="context-flag">
-                    {{ country.name }} Patient Search
+                    <span class="badge badge-country">
+                        <img src="{% static 'flags/' %}{{ country_code }}.webp" alt="{{ country.name }} flag"
+                            class="context-flag">
+                        {{ country.name }}
+                    </span>
+                    Patient Search
                 </span>
                 {% else %}
                 <span class="page-location">Patient Search</span>

@@ -90,7 +90,7 @@
                         {% endif %}
                     </h2>
                     <div class="d-flex align-items-center">
-                        <span class="badge bg-light text-dark border me-2"
+                        <span class="badge badge-country me-2"
                               {% tooltip "source_country_flag" %}>
                             {{ source_country|country_flag|safe }}
                             {{ source_country|country_name }}
@@ -166,8 +166,10 @@
                                 </div>
                                 <div class="col-md-6">
                                     <p><strong>Source Country:</strong>
-                                        {{ source_country|country_flag|safe }}
-                                        {{ source_country|country_name }}
+                                        <span class="badge badge-country">
+                                            {{ source_country|country_flag|safe }}
+                                            {{ source_country|country_name }}
+                                        </span>
                                     </p>
                                     <p><strong>CDA Type:</strong> {{ cda_type }}</p>
                                     <p><strong>Translation Quality:</strong>

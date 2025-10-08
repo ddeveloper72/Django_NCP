@@ -2,10 +2,69 @@
 // Navigation Components - HSE-Inspired Styling
 // ========================================
 
+// Ensure body doesn't show overflow when dropdowns are open
+body {
+  overflow-x: hidden;
+}
+
+// Force all dropdown menus to appear above everything else
+.dropdown-menu {
+  z-index: 99999 !important;
+  position: absolute !important;
+}
+
+// Ensure navbar containers don't constrain dropdowns
+.navbar-container,
+.container,
+.container-fluid {
+  overflow: visible !important;
+}
+
+// Ensure navbar collapse doesn't constrain dropdowns on larger screens
+.navbar-collapse {
+  overflow: visible !important;
+}
+
+// Force navbar nav elements to allow overflow
+.navbar-nav {
+  overflow: visible !important;
+  
+  .nav-item {
+    overflow: visible !important;
+    
+    &.dropdown {
+      overflow: visible !important;
+    }
+  }
+}
+
 // Bootstrap navbar background override - ensure our HSE styling takes precedence
 .navbar {
   background-color: transparent !important;
   background-image: none !important;
+  overflow: visible !important;
+  
+  // Force overflow visible on larger screens for dropdowns
+  @media (min-width: 992px) {
+    overflow: visible !important;
+    
+    .navbar-collapse {
+      overflow: visible !important;
+      
+      .navbar-nav {
+        overflow: visible !important;
+        
+        .nav-item {
+          overflow: visible !important;
+          
+          &.dropdown {
+            overflow: visible !important;
+            position: relative;
+          }
+        }
+      }
+    }
+  }
 }
 
 // Skip to content link for accessibility
@@ -57,6 +116,23 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
   position: sticky;
   top: 0;
   z-index: 1030;
+  overflow: visible !important;
+
+  // Force all child containers to allow overflow for dropdowns
+  .container,
+  .container-fluid,
+  .navbar-container {
+    overflow: visible !important;
+  }
+
+  // Large screen specific dropdown overflow handling
+  @media (min-width: 992px) {
+    .navbar-collapse,
+    .navbar-nav,
+    .nav-item {
+      overflow: visible !important;
+    }
+  }
 
   // Professional HSE shadow with depth
   box-shadow: 0 4px 20px rgba($hco-primary-teal, 0.15),
@@ -552,6 +628,9 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
       backdrop-filter: blur(20px);
       margin-top: $space-sm;
       min-width: 200px;
+      position: absolute !important;
+      z-index: 99999 !important;
+      overflow: visible;
 
       .dropdown-item {
         color: $hco-primary-teal;
@@ -938,14 +1017,19 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
           }
 
           .dropdown-menu {
-            position: static;
+            position: absolute !important;
+            z-index: 99999 !important;
             float: none;
-            width: 100%;
+            width: auto;
+            min-width: 250px;
             margin: $space-sm 0 0 0;
             border: none;
             border-radius: $border-radius-md;
             background: rgba($white, 0.95);
-            box-shadow: inset 0 2px 8px rgba($hco-primary-teal, 0.1);
+            box-shadow: 0 8px 32px rgba($hco-primary-teal, 0.25),
+              0 4px 16px rgba($hco-primary-teal, 0.15);
+            right: 0;
+            left: auto;
 
             .dropdown-item {
               padding: $space-sm $space-lg;
@@ -2692,6 +2776,9 @@ body nav#main-navigation.navbar.navbar-expand-lg.navbar-light.navbar-enhanced {
     max-width: 400px;
     padding: $space-lg;
     margin-top: $space-sm;
+    position: absolute !important;
+    z-index: 99999 !important;
+    overflow: visible;
 
     // Professional HSE styling
     background: rgba($white, 0.98);
