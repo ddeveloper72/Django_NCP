@@ -136,12 +136,51 @@
     @include card-base;
     padding: $space-xl;
     text-align: center;
-    transition: all $transition-normal;
+    // ✅ SMOOTH TRANSITIONS: Separate transitions for graceful hover effects
+    transition: 
+      background-color $transition-slow ease-out,
+      border-color $transition-normal ease-out,
+      transform $transition-normal ease-out,
+      box-shadow $transition-normal ease-out;
+
+    // Nested element transitions for smoother text color changes
+    h3 {
+      transition: color $transition-slow ease-out;
+    }
+
+    p {
+      transition: color $transition-slow ease-out;
+    }
+
+    .action-icon {
+      transition: color $transition-slow ease-out;
+
+      .fa {
+        transition: color $transition-slow ease-out;
+      }
+    }
 
     &:hover {
       border-color: $primary-blue;
       background: $primary-blue-light;
       transform: translateY(-2px);
+
+      // ✅ ACCESSIBILITY: White text on teal background for WCAG compliance
+      h3 {
+        color: white !important;
+      }
+
+      p {
+        color: rgba(255, 255, 255, 0.9) !important;
+      }
+
+      .action-icon {
+        color: white !important;
+
+        .fa {
+          color: white !important;
+        }
+      }
     }
 
     .action-icon {

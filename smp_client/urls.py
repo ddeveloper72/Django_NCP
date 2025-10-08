@@ -41,6 +41,12 @@ urlpatterns = [
         name="upload_to_smp_server",
     ),
     path("sync/", views.synchronize_from_smp, name="synchronize_from_smp"),
+    
+    # SMP Monitoring and Administration
+    path("logs/", views.system_logs, name="system_logs"),
+    path("performance/", views.performance_metrics, name="performance_metrics"),
+    path("audit/", views.audit_trail, name="audit_trail"),
+    
     # SMP API Endpoints (OASIS BDXR SMP v1.0 compatible)
     path(
         "api/participants/", views.smp_participants_list, name="api_participants_list"

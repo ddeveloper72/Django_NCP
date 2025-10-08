@@ -5,7 +5,9 @@
 .page-breadcrumb {
   background-color: rgba($hco-primary-teal, 0.1);
   border-bottom: 1px solid rgba($hco-primary-teal, 0.2);
-  padding: $space-sm 0;
+  border-top: 2px solid rgba($hco-primary-teal, 0.3);
+  padding: $space-lg 0 $space-md 0;
+  margin-top: $space-md;
   margin-bottom: $space-md;
 
   .container {
@@ -14,14 +16,15 @@
 
   .breadcrumb-content {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
     gap: $space-md;
+    align-items: flex-start;
 
-    @media (max-width: $breakpoint-md) {
-      flex-direction: column;
-      gap: $space-sm;
-      align-items: flex-start;
+    @media (min-width: $breakpoint-lg) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      gap: $space-lg;
     }
   }
 

@@ -1,0 +1,358 @@
+// ========================================
+// Enhanced Flash Message Components
+// ========================================
+
+@import '../utils/variables';
+@import '../utils/mixins';
+
+// Flash message container
+.flash-messages {
+  margin-bottom: $space-lg;
+  
+  .alert {
+    position: relative;
+    border: none;
+    border-radius: $border-radius-lg;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+    margin-bottom: $space-md;
+    padding: $space-lg $space-xl;
+    font-size: $font-size-base;
+    line-height: 1.5;
+    
+    // Enhanced visual hierarchy
+    .alert-heading {
+      font-weight: $font-weight-semibold;
+      font-size: $font-size-lg;
+      margin-bottom: $space-sm;
+      display: flex;
+      align-items: center;
+      gap: $space-sm;
+      
+      i {
+        font-size: $font-size-xl;
+        flex-shrink: 0;
+      }
+    }
+    
+    // Message content styling
+    .alert-content {
+      margin-bottom: 0;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    
+    // Enhanced close button
+    .btn-close {
+      position: absolute;
+      top: $space-md;
+      right: $space-md;
+      padding: $space-sm;
+      background: transparent;
+      border: none;
+      opacity: 0.6;
+      transition: opacity $transition-normal, transform $transition-fast;
+      cursor: pointer;
+      border-radius: $border-radius-sm;
+      
+      &:hover {
+        opacity: 1;
+        transform: scale(1.1);
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      
+      &:focus {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+      }
+    }
+  }
+}
+
+// Enhanced error alert with Healthcare Organisation styling
+.alert-error,
+.alert-danger {
+  background: linear-gradient(135deg, #fef7f7 0%, #fdf2f2 100%);
+  border-left: 4px solid $error-red;
+  color: #7f1d1d;
+  
+  .alert-heading {
+    color: #991b1b;
+    
+    i {
+      color: $error-red;
+    }
+  }
+  
+  // Session ID badge
+  .session-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-xs;
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #991b1b;
+    padding: $space-xs $space-sm;
+    border-radius: $border-radius-full;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    font-family: $font-family-mono;
+    margin-top: $space-sm;
+    
+    i {
+      font-size: $font-size-xs;
+    }
+  }
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12), 0 3px 6px rgba(0, 0, 0, 0.08);
+  }
+}
+
+// Enhanced warning alert
+.alert-warning {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-left: 4px solid $warning-orange;
+  color: #92400e;
+  
+  .alert-heading {
+    color: #b45309;
+    
+    i {
+      color: $warning-orange;
+    }
+  }
+}
+
+// Enhanced success alert
+.alert-success {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-left: 4px solid $success-green;
+  color: #14532d;
+  
+  .alert-heading {
+    color: #15803d;
+    
+    i {
+      color: $success-green;
+    }
+  }
+}
+
+// Enhanced info alert
+.alert-info {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-left: 4px solid $hco-primary-teal;
+  color: #0c4a6e;
+  
+  .alert-heading {
+    color: #0369a1;
+    
+    i {
+      color: $hco-primary-teal;
+    }
+  }
+}
+
+// Medical-themed error page layout
+.error-page-container {
+  .error-card {
+    background: $white;
+    border-radius: $border-radius-xl;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: $space-xxl;
+    margin: $space-xl auto;
+    max-width: 800px;
+    
+    .error-header {
+      text-align: center;
+      margin-bottom: $space-xl;
+      
+      .error-icon {
+        font-size: 4rem;
+        color: $error-red;
+        margin-bottom: $space-md;
+      }
+      
+      .error-title {
+        font-size: $font-size-xxl;
+        font-weight: $font-weight-bold;
+        color: $hco-primary-teal;
+        margin-bottom: $space-sm;
+      }
+      
+      .error-message {
+        font-size: $font-size-lg;
+        color: $text-muted;
+        line-height: 1.6;
+      }
+    }
+    
+    .error-details-section {
+      margin: $space-xl 0;
+      
+      .details-card {
+        background-color: $neutral-lightest;
+        border-radius: $border-radius-md;
+        padding: $space-lg;
+        border-left: 4px solid $hco-primary-teal;
+        
+        .details-title {
+          font-weight: $font-weight-semibold;
+          color: $hco-primary-teal;
+          margin-bottom: $space-md;
+          display: flex;
+          align-items: center;
+          gap: $space-sm;
+          
+          i {
+            color: $hco-primary-teal;
+          }
+        }
+        
+        .details-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          
+          li {
+            padding: $space-sm 0;
+            border-bottom: 1px solid rgba($hco-primary-teal, 0.1);
+            
+            &:last-child {
+              border-bottom: none;
+            }
+            
+            &::before {
+              content: "→";
+              color: $hco-primary-teal;
+              font-weight: bold;
+              margin-right: $space-sm;
+            }
+          }
+        }
+      }
+    }
+    
+    .error-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $space-md;
+      justify-content: center;
+      margin-top: $space-xl;
+      
+      .btn {
+        min-width: 160px;
+      }
+    }
+  }
+  
+  // Technical details expandable section
+  .technical-details {
+    margin-top: $space-xl;
+    
+    .details-toggle {
+      background: none;
+      border: none;
+      color: $hco-primary-teal;
+      font-weight: $font-weight-medium;
+      cursor: pointer;
+      padding: $space-sm 0;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+      
+      i {
+        margin-left: $space-xs;
+        transition: transform $transition-normal;
+      }
+      
+      &[aria-expanded="true"] i {
+        transform: rotate(180deg);
+      }
+    }
+    
+    .details-content {
+      background-color: $neutral-dark;
+      border-radius: $border-radius-md;
+      padding: $space-lg;
+      margin-top: $space-md;
+      font-family: $font-family-mono;
+      font-size: $font-size-sm;
+      color: $neutral-light;
+      max-height: 300px;
+      overflow-y: auto;
+      
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+    }
+  }
+}
+
+// Mobile optimizations
+@media (max-width: 768px) {
+  .flash-messages .alert {
+    margin-left: -$space-md;
+    margin-right: -$space-md;
+    border-radius: 0;
+    padding: $space-md;
+  }
+  
+  .error-page-container .error-card {
+    margin: $space-md;
+    padding: $space-lg;
+    
+    .error-actions {
+      flex-direction: column;
+      
+      .btn {
+        min-width: unset;
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Animation for flash messages
+@keyframes slideInDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.flash-messages .alert {
+  animation: slideInDown 0.3s ease-out;
+}
+
+// Accessibility improvements
+.alert {
+  &:focus-within {
+    outline: 2px solid $hco-primary-teal;
+    outline-offset: 2px;
+  }
+}
+
+// Print styles
+@media print {
+  .flash-messages,
+  .btn-close {
+    display: none !important;
+  }
+  
+  .alert {
+    border: 2px solid #000 !important;
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+}

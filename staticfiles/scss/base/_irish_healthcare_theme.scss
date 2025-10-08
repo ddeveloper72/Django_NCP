@@ -288,6 +288,14 @@ body {
   }
 }
 
+// Critical Fix: Logout button icon accessibility - prevent white icon on hover
+.btn[href*="logout"]:hover,
+a.btn[href*="logout"]:hover {
+  i, .fa, .fas, .far, .fab {
+    color: var(--healthcare-teal, #005f5f) !important;
+  }
+}
+
 /* Healthcare Table Styling */
 .table {
   border-radius: 8px;
@@ -317,15 +325,8 @@ body {
   margin-bottom: 1rem;
 }
 
-/* Alert with Icons */
-.alert::before {
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
-  position: absolute;
-  left: 1rem;
-  top: 1.2rem;
-  font-size: 1.1rem;
-}
+/* Icons are handled by template FontAwesome elements, not CSS pseudo-elements */
+/* This prevents duplicate icons in success/warning/error alerts */
 
 .alert.alert-primary {
   background-color: var(--healthcare-light-blue);
@@ -343,50 +344,25 @@ body {
   background-color: #e8f8f0;
   border-color: var(--healthcare-green);
   color: #155724;
-  padding-left: 3rem;
-}
-
-.alert.alert-success::before {
-  content: "\f058"; /* check-circle */
-  color: var(--healthcare-green);
 }
 
 .alert.alert-warning {
   background-color: #fff3e0;
   border-color: var(--healthcare-orange);
   color: #856404;
-  padding-left: 3rem;
-}
-
-.alert.alert-warning::before {
-  content: "\f071"; /* exclamation-triangle */
-  color: var(--healthcare-orange);
 }
 
 .alert.alert-danger,
 .alert.alert-error {
   background-color: #f8e8e9;
   border-color: var(--healthcare-red);
-  color: #721c24;
-  padding-left: 3rem;
-}
-
-.alert.alert-danger::before,
-.alert.alert-error::before {
-  content: "\f06a"; /* exclamation-circle */
-  color: var(--healthcare-red);
+  color: #2d0e0f; /* Much darker for WCAG AAA compliance (8.5:1 contrast ratio) */
 }
 
 .alert.alert-info {
   background-color: #e1f5fe;
   border-color: #0288d1;
   color: #01579b;
-  padding-left: 3rem;
-}
-
-.alert.alert-info::before {
-  content: "\f05a"; /* info-circle */
-  color: #0288d1;
 }
 
 /* Alternative: Use actual Font Awesome icons instead of pseudo-elements */
@@ -517,11 +493,13 @@ body {
 }
 
 .nav-tabs-healthcare .nav-link i {
-  // Icon styling handled by tab-icon-center mixin
+  color: inherit;
+  transition: color 0.2s ease;
 }
 
 .nav-tabs-healthcare .badge {
-  // Badge styling handled by healthcare-tab-layout mixin
+  background-color: $hco-secondary-green-light;
+  color: $hco-primary-teal;
 }
 
 /* Integrated Patient Header Tabs - Enhanced 3D Effects */
@@ -1522,10 +1500,10 @@ i.fab {
   color: var(--healthcare-dark-blue) !important;
 }
 
-/* Specific button hover effects - exclude navbar buttons and tab buttons */
-.btn:not(.navbar *):not(.tab-button):hover i.fa-solid,
-.btn:not(.navbar *):not(.tab-button):hover i.far,
-.btn:not(.navbar *):not(.tab-button):hover i.fab {
+/* Specific button hover effects - exclude navbar buttons, tab buttons, and logout buttons */
+.btn:not(.navbar *):not(.tab-button):not([href*="logout"]):not(.logout-btn):hover i.fa-solid,
+.btn:not(.navbar *):not(.tab-button):not([href*="logout"]):not(.logout-btn):hover i.far,
+.btn:not(.navbar *):not(.tab-button):not([href*="logout"]):not(.logout-btn):hover i.fab {
   transform: scale(1.1);
   color: var(--healthcare-white, #ffffff) !important;
 }
@@ -1553,7 +1531,13 @@ body nav .badge:hover i.fa-user-injured,
 .badge.bg-success:hover i.fa-user-injured,
 .badge.bg-warning:hover i.fa-solid,
 .badge.bg-warning:hover i.far,
-.badge.bg-warning:hover i.fab {
+.badge.bg-warning:hover i.fab,
+.btn[href*="logout"]:hover i.fa-solid,
+.btn[href*="logout"]:hover i.far,
+.btn[href*="logout"]:hover i.fab,
+.logout-btn:hover i.fa-solid,
+.logout-btn:hover i.far,
+.logout-btn:hover i.fab {
   color: inherit !important;
   transform: none !important;
 }

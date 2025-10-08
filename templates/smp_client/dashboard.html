@@ -7,7 +7,7 @@
 <div class="dashboard-page">
     <!-- Dashboard Header -->
     <div class="page-header">
-        <h1>🔗 SMP Dashboard</h1>
+        <h1><i class="fa fa-link" aria-hidden="true"></i> SMP Dashboard</h1>
         <p class="page-subtitle">Service Metadata Publisher Management Console</p>
     </div>
 
@@ -20,7 +20,7 @@
                     <div class="stat-value">{{ total_participants|default:"0" }}</div>
                     <div class="stat-change positive">+12% from last month</div>
                 </div>
-                <div class="stat-icon">👥</div>
+                <div class="stat-icon"><i class="fa fa-users" aria-hidden="true"></i></div>
             </div>
 
             <div class="stat-card stat-card-success">
@@ -29,7 +29,7 @@
                     <div class="stat-value">{{ active_services|default:"0" }}</div>
                     <div class="stat-change positive">+5% from last month</div>
                 </div>
-                <div class="stat-icon">🔧</div>
+                <div class="stat-icon"><i class="fa fa-cog" aria-hidden="true"></i></div>
             </div>
 
             <div class="stat-card stat-card-warning">
@@ -38,7 +38,7 @@
                     <div class="stat-value">{{ total_documents|default:"0" }}</div>
                     <div class="stat-change positive">+8% from last month</div>
                 </div>
-                <div class="stat-icon">📄</div>
+                <div class="stat-icon"><i class="fa fa-file-text-o" aria-hidden="true"></i></div>
             </div>
 
             <div class="stat-card stat-card-info">
@@ -46,7 +46,7 @@
                     <div class="stat-label">Countries</div>
                     <div class="stat-value">{{ country_count|default:"0" }}</div>
                 </div>
-                <div class="stat-icon">🌍</div>
+                <div class="stat-icon"><i class="fa fa-globe" aria-hidden="true"></i></div>
             </div>
         </div>
 
@@ -56,7 +56,7 @@
 
             <div class="actions-grid">
                 <div class="action-card">
-                    <div class="action-icon">👥</div>
+                    <div class="action-icon"><i class="fa fa-users" aria-hidden="true"></i></div>
                     <h3>Manage Participants</h3>
                     <p>Add, edit, or remove SMP participants and their metadata.</p>
                     <a href="{% url 'smp_client:participant_search' %}" class="btn btn-primary">
@@ -65,7 +65,7 @@
                 </div>
 
                 <div class="action-card">
-                    <div class="action-icon">📄</div>
+                    <div class="action-icon"><i class="fa fa-file-text-o" aria-hidden="true"></i></div>
                     <h3>Document Services</h3>
                     <p>Configure and manage document service endpoints.</p>
                     <a href="{% url 'smp_client:list_documents' %}" class="btn btn-primary">
@@ -74,17 +74,17 @@
                 </div>
 
                 <div class="action-card">
-                    <div class="action-icon">🔄</div>
+                    <div class="action-icon"><i class="fa fa-refresh" aria-hidden="true"></i></div>
                     <h3>European SMP Sync</h3>
                     <p>Synchronize with the European SMP registry for cross-border services.</p>
                     <button id="sync-european-smp" class="btn btn-primary" data-sync-url="{% url 'smp_client:european_smp_sync' %}">
-                        🔄 Sync with European SMP
+                        <i class="fa fa-refresh" aria-hidden="true"></i> Sync with European SMP
                     </button>
                     <div id="sync-result" class="sync-result"></div>
                 </div>
 
                 <div class="action-card">
-                    <div class="action-icon">⚙️</div>
+                    <div class="action-icon"><i class="fa fa-cogs" aria-hidden="true"></i></div>
                     <h3>System Configuration</h3>
                     <p>Configure SMP server settings and preferences.</p>
                     <a href="/admin/" class="btn btn-primary">
@@ -104,13 +104,13 @@
                 <div class="activity-item">
                     <div class="activity-icon">
                         {% if activity.type == 'participant_added' %}
-                        👥
+                        <i class="fa fa-user-plus" aria-hidden="true"></i>
                         {% elif activity.type == 'document_updated' %}
-                        📄
+                        <i class="fa fa-file-text" aria-hidden="true"></i>
                         {% elif activity.type == 'sync_completed' %}
-                        🔄
+                        <i class="fa fa-check-circle" aria-hidden="true"></i>
                         {% else %}
-                        📝
+                        <i class="fa fa-info-circle" aria-hidden="true"></i>
                         {% endif %}
                     </div>
                     <div class="activity-content">
@@ -127,7 +127,7 @@
             </div>
             {% else %}
             <div class="empty-state">
-                <div class="empty-icon">📝</div>
+                <div class="empty-icon"><i class="fa fa-clipboard" aria-hidden="true"></i></div>
                 <h3>No Recent Activity</h3>
                 <p>There has been no recent activity on this SMP server.</p>
             </div>
@@ -138,35 +138,63 @@
         <div class="content-section">
             <h2 class="section-title">System Status</h2>
 
-            <div class="status-grid">
-                <div class="status-item">
-                    <div class="status-label">SMP Server</div>
-                    <div class="status-value status-online">
-                        <span class="status-indicator"></span>
-                        Online
+            <div class="system-status-grid">
+                <div class="status-card">
+                    <div class="status-header">
+                        <div class="status-icon">
+                            <i class="fa fa-server" aria-hidden="true"></i>
+                        </div>
+                        <div class="status-info">
+                            <h3 class="status-title">SMP Server</h3>
+                            <div class="status-badge status-online">
+                                <span class="status-dot"></span>
+                                <span class="status-text">Online</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="status-item">
-                    <div class="status-label">Database</div>
-                    <div class="status-value status-online">
-                        <span class="status-indicator"></span>
-                        Connected
+                <div class="status-card">
+                    <div class="status-header">
+                        <div class="status-icon">
+                            <i class="fa fa-database" aria-hidden="true"></i>
+                        </div>
+                        <div class="status-info">
+                            <h3 class="status-title">Database</h3>
+                            <div class="status-badge status-online">
+                                <span class="status-dot"></span>
+                                <span class="status-text">Connected</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="status-item">
-                    <div class="status-label">European SMP</div>
-                    <div class="status-value {{ european_smp_status|lower }}">
-                        <span class="status-indicator"></span>
-                        {{ european_smp_status|default:"Unknown" }}
+                <div class="status-card">
+                    <div class="status-header">
+                        <div class="status-icon">
+                            <i class="fa fa-globe" aria-hidden="true"></i>
+                        </div>
+                        <div class="status-info">
+                            <h3 class="status-title">European SMP</h3>
+                            <div class="status-badge status-{{ european_smp_status|lower|default:'unknown' }}">
+                                <span class="status-dot"></span>
+                                <span class="status-text">{{ european_smp_status|default:"Unknown" }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="status-item">
-                    <div class="status-label">Last Sync</div>
-                    <div class="status-value">
-                        {{ last_sync_time|default:"Never" }}
+                <div class="status-card">
+                    <div class="status-header">
+                        <div class="status-icon">
+                            <i class="fa fa-clock-o" aria-hidden="true"></i>
+                        </div>
+                        <div class="status-info">
+                            <h3 class="status-title">Last Sync</h3>
+                            <div class="status-badge status-neutral">
+                                <span class="status-text">{{ last_sync_time|default:"Never" }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

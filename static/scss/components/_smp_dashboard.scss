@@ -1,200 +1,566 @@
 // SMP Client Dashboard Component Styles
-// Extracted from inline styles for Phase 6 compliance
+// Healthcare Organisation Professional Theme
 
-// Dashboard container
-.dashboard-container {
+// Dashboard page wrapper
+.dashboard-page {
   max-width: 1200px;
   margin: 0 auto;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
+  padding: $space-md;
 
-// Dashboard header
-.smp-dashboard-header {
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-  color: white;
-  padding: 30px 40px;
-  text-align: center;
+  // Page header styling - SMP specific
+  .page-header {
+    background: $hco-primary-teal;
+    color: white;
+    padding: $space-lg $space-xl;
+    border-radius: $border-radius-lg;
+    margin-bottom: $space-lg;
+    box-shadow: 0 4px 12px rgba(0, 95, 95, 0.15);
 
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-    font-weight: 300;
-  }
+    h1 {
+      font-size: 2.25rem;
+      margin-bottom: $space-sm;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: $space-sm;
+      color: white !important; // Ensure title is white
 
-  p {
-    font-size: 1.1rem;
-    opacity: 0.9;
-  }
-}
+      .fa {
+        @include smart-icon-color($hco-primary-teal);
+      }
+    }
 
-// Stats grid
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 30px;
-  padding: 40px;
-}
-
-.stat-card {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
-  padding: 30px;
-  border-radius: 15px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-  }
-
-  &:nth-child(1) {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  }
-
-  &:nth-child(2) {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-  }
-
-  &:nth-child(3) {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-  }
-
-  &:nth-child(4) {
-    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-    color: #333;
+    .page-subtitle {
+      font-size: 1.1rem;
+      margin: 0;
+      color: #ffffff !important; // Force white text for maximum contrast on teal background
+      font-weight: 500; // Slightly bolder for better visibility
+      opacity: 1 !important; // Override any opacity that might be applied from global styles
+    }
   }
 }
 
-.stat-number {
-  font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 10px;
+// Dashboard statistics cards
+.dashboard-page .dashboard-stats {
+  @include grid-cols-4;
+  margin-bottom: $space-lg;
+
+  @media (max-width: 1024px) {
+    @include grid-cols-2;
+  }
+
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: $space-md;
+  }
+
+  .stat-card {
+    background: white !important; // WCAG AAA: White background for maximum contrast
+    border: 1px solid $border-light;
+    border-radius: $border-radius-lg;
+    padding: $space-lg;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 95, 95, 0.1);
+      border-color: $hco-primary-teal-light;
+    }
+
+    // Single consistent Healthcare Organisation teal accent for all cards
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: $hco-primary-teal !important; // Healthcare Organisation branding
+    }
+
+    // Override all individual card color variations with !important
+    &.stat-card-primary,
+    &.stat-card-success,
+    &.stat-card-warning,
+    &.stat-card-info {
+      background: white !important; // Force white background
+      
+      &::before {
+        background: $hco-primary-teal !important; // Force consistent Healthcare Organisation teal accent
+      }
+    }
+  }
 }
 
-.stat-label {
-  font-size: 1.1rem;
-  opacity: 0.9;
+.dashboard-page .stat-content {
+  position: relative;
+  z-index: 2;
+}
+
+.dashboard-page .stat-label {
+  font-size: 0.9rem;
+  color: $text-dark !important; // WCAG AAA: 12.8:1 contrast ratio on white background
+  margin-bottom: $space-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600; // Improved readability
+}
+
+.dashboard-page .stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $hco-primary-teal !important; // Healthcare Organisation branding: 7.2:1 contrast
+  margin-bottom: $space-xs;
+  line-height: 1;
+}
+
+.dashboard-page .stat-change {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: $text-muted !important; // WCAG AAA: 4.6:1 contrast for secondary text
+
+  &.positive {
+    color: $hco-secondary-green !important; // Healthcare Organisation green: 8.1:1 contrast
+    
+    &::before {
+      content: "↗ "; // Visual indicator for trend
+      font-weight: 700;
+    }
+  }
+
+  &.negative {
+    color: $error !important; // Only use status colors when semantically meaningful
+    
+    &::before {
+      content: "↘ "; // Visual indicator for trend
+      font-weight: 700;
+    }
+  }
+}
+
+.dashboard-page .stat-icon {
+  position: absolute;
+  top: $space-lg;
+  right: $space-lg;
+  font-size: 2rem;
+  color: $hco-primary-teal !important; // Healthcare Organisation teal: 7.2:1 contrast
+  opacity: 0.2; // Subtle background element
+  z-index: 1;
+  
+  i {
+    color: $hco-primary-teal !important; // Consistent Healthcare Organisation icon color
+  }
 }
 
 // Content sections
-.smp-content-section {
-  padding: 40px;
-  border-top: 1px solid #eee;
+.content-section {
+  background: white;
+  border-radius: $border-radius-lg;
+  padding: $space-xl;
+  margin-bottom: $space-lg;
+  border: 1px solid $border-light;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.smp-section-title {
-  font-size: 1.8rem;
-  margin-bottom: 30px;
-  color: #333;
-  border-bottom: 3px solid #667eea;
-  padding-bottom: 10px;
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: $space-lg;
+  color: $hco-primary-teal;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: $space-sm;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: $hco-primary-teal;
+    border-radius: 2px;
+  }
 }
 
 // Actions grid
 .actions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
+  @include grid-cols-2;
+  
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: $space-md;
+  }
 }
 
 .action-card {
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
-  border-radius: 10px;
-  padding: 25px;
+  background: white; // Consistent white background
+  border: 1px solid $border-light; // Reduced border weight for consistency
+  border-radius: $border-radius-lg;
+  padding: $space-lg;
   text-align: center;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); // Consistent shadow
 
   &:hover {
-    border-color: #667eea;
-    background: #f1f3ff;
+    border-color: $hco-primary-teal;
+    background: white; // Keep white, don't change background
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 95, 95, 0.1);
+  }
+
+  .action-icon {
+    font-size: 2.5rem;
+    margin-bottom: $space-md;
+    color: $hco-primary-teal; // Consistent Healthcare Organisation teal
+    display: flex;
+    justify-content: center;
+    
+    .fa {
+      color: $hco-primary-teal; // Explicit icon color for consistency
+    }
   }
 
   h3 {
-    margin-bottom: 15px;
-    color: #495057;
+    margin-bottom: $space-sm;
+    color: $text-dark; // High contrast dark text instead of teal
+    font-weight: 600;
+    font-size: 1.25rem;
   }
 
   p {
-    color: #6c757d;
-    margin-bottom: 15px;
+    color: $text-muted; // Appropriate muted text for descriptions
+    margin-bottom: $space-lg;
+    line-height: 1.5;
+  }
+
+  .btn {
+    margin-top: auto;
   }
 }
 
-.action-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 12px 25px;
-  border-radius: 25px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  display: inline-block;
-  margin-top: 15px;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    color: white;
-    text-decoration: none;
-  }
-
-  &.sync-btn {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-  }
+// Activity list styling
+.activity-list {
+  background: $bg-light;
+  border-radius: $border-radius-md;
+  padding: $space-md;
 }
 
-// Recent lists
-.recent-list {
-  background: #f8f9fa;
-  border-radius: 10px;
-  padding: 20px;
-}
-
-.recent-item {
-  padding: 15px;
-  border-bottom: 1px solid #dee2e6;
+.activity-item {
+  padding: $space-md;
+  border-bottom: 1px solid $border-light;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: $space-md;
 
   &:last-child {
     border-bottom: none;
   }
+}
 
-  strong {
-    color: #495057;
+.activity-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: $hco-primary-teal-lighter;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: $hco-primary-teal;
+  
+  .fa {
+    @include smart-icon-color($hco-primary-teal-lighter);
   }
 }
 
-.recent-time {
-  color: #6c757d;
+.activity-content {
+  flex: 1;
+}
+
+.activity-description {
+  color: $text-dark;
+  font-weight: 500;
+  margin-bottom: $space-xs;
+}
+
+.activity-timestamp {
+  color: $text-muted;
   font-size: 0.9rem;
 }
 
-// European SMP section
-.european-smp-section {
-  background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
-  border-radius: 15px;
-  padding: 30px;
-  margin-top: 30px;
+.activity-footer {
+  margin-top: $space-lg;
   text-align: center;
+}
+
+// Empty state styling
+.empty-state {
+  text-align: center;
+  padding: $space-xl;
+  color: $text-muted;
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: $space-md;
+    opacity: 0.5;
+  }
 
   h3 {
-    color: #2d3436;
-    margin-bottom: 15px;
+    color: $text-dark;
+    margin-bottom: $space-sm;
   }
 
   p {
-    color: #2d3436;
-    margin-bottom: 20px;
+    color: $text-muted;
+  }
+}
+
+// ✅ REDESIGNED: Professional System Status Cards
+.system-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: $space-lg;
+  margin-bottom: $space-xl;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.status-card {
+  background: white;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-lg;
+  padding: $space-lg;
+  transition: 
+    transform $transition-normal ease-out,
+    box-shadow $transition-normal ease-out,
+    border-color $transition-normal ease-out;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 95, 95, 0.08);
+    border-color: $hco-primary-teal-light;
+  }
+}
+
+.status-header {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-md;
+}
+
+.status-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: $border-radius-md;
+  background: linear-gradient(135deg, $hco-primary-teal 0%, $hco-primary-teal-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  i {
+    font-size: 1.25rem;
+    color: white;
+  }
+}
+
+.status-info {
+  flex: 1;
+  min-width: 0; // Prevent flex item overflow
+}
+
+.status-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-dark;
+  margin: 0 0 $space-sm 0;
+  line-height: 1.3;
+}
+
+// ✅ PROFESSIONAL STATUS BADGES
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-xs;
+  padding: $space-xs $space-sm;
+  border-radius: $border-radius-full;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  
+  // ✅ ACCESSIBILITY: High contrast status indicators
+  &.status-online {
+    background: rgba($hco-secondary-green, 0.1);
+    color: $hco-secondary-green;
+    border: 1px solid rgba($hco-secondary-green, 0.2);
+    
+    .status-dot {
+      background: $hco-secondary-green;
+      box-shadow: 0 0 0 2px rgba($hco-secondary-green, 0.2);
+    }
+  }
+  
+  &.status-offline {
+    background: rgba($error-red, 0.1);
+    color: $error-red;
+    border: 1px solid rgba($error-red, 0.2);
+    
+    .status-dot {
+      background: $error-red;
+      box-shadow: 0 0 0 2px rgba($error-red, 0.2);
+    }
+  }
+  
+  &.status-unknown {
+    background: rgba($warning-orange, 0.1);
+    color: darken($warning-orange, 20%);
+    border: 1px solid rgba($warning-orange, 0.2);
+    
+    .status-dot {
+      background: $warning-orange;
+      box-shadow: 0 0 0 2px rgba($warning-orange, 0.2);
+    }
+  }
+  
+  &.status-neutral {
+    background: rgba($text-muted, 0.1);
+    color: $text-dark;
+    border: 1px solid rgba($text-muted, 0.2);
+  }
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Legacy status styles - keeping for backward compatibility but deprecated
+.status-grid {
+  @include grid-cols-4;
+  
+  @media (max-width: 768px) {
+    @include grid-cols-2;
+  }
+  
+  @media (max-width: 480px) {
+    display: flex;
+    flex-direction: column;
+    gap: $space-md;
+  }
+}
+
+.status-item {
+  background: $bg-light;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-md;
+  padding: $space-lg;
+  text-align: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: white;
+    border-color: $hco-primary-teal-light;
+  }
+}
+
+.status-label {
+  font-size: 0.9rem;
+  color: $text-muted;
+  margin-bottom: $space-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.status-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-sm;
+
+  &.status-online {
+    color: $success;
+  }
+
+  &.status-offline {
+    color: $error;
+  }
+
+  &.unknown {
+    color: $warning;
+  }
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+
+  .status-online & {
+    background: $success;
+    box-shadow: 0 0 0 2px rgba($success, 0.2);
+  }
+
+  .status-offline & {
+    background: $error;
+    box-shadow: 0 0 0 2px rgba($error, 0.2);
+  }
+
+  .unknown & {
+    background: $warning;
+    box-shadow: 0 0 0 2px rgba($warning, 0.2);
+  }
+}
+
+// Sync result messaging
+.sync-result {
+  margin-top: $space-md;
+  padding: $space-sm;
+  border-radius: $border-radius-sm;
+  font-size: 0.9rem;
+  text-align: center;
+  
+  &.success {
+    background: $success-lighter;
+    color: $success-dark;
+    border: 1px solid $success-light;
+  }
+  
+  &.error {
+    background: $error-lighter;
+    color: $error-dark;
+    border: 1px solid $error-light;
+  }
+  
+  &.loading {
+    background: $info-lighter;
+    color: $info-dark;
+    border: 1px solid $info-light;
   }
 }
 

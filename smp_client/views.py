@@ -862,3 +862,113 @@ def synchronize_from_smp(request):
     return JsonResponse(
         {"success": False, "error": "Invalid request method"}, status=405
     )
+
+
+# ==============================================================================
+# SMP Monitoring and Administration Views
+# ==============================================================================
+
+@login_required
+def system_logs(request):
+    """SMP System Logs Dashboard"""
+    # Only accessible to staff/admin users
+    if not (request.user.is_staff or request.user.is_superuser):
+        messages.error(request, "Access denied. Administrator privileges required.")
+        return redirect('smp_client:dashboard')
+    
+    # Get recent log entries (for demonstration, using SMP queries as system logs)
+    recent_logs = SMPQuery.objects.all().order_by('-timestamp')[:100]
+    
+    context = {
+        'title': 'System Logs',
+        'recent_logs': recent_logs,
+        'log_count': SMPQuery.objects.count(),
+    }
+    return render(request, 'smp_client/system_logs.html', context)
+
+
+@login_required 
+def performance_metrics(request):
+    """SMP Performance Metrics Dashboard"""
+    # Only accessible to staff/admin users
+    if not (request.user.is_staff or request.user.is_superuser):
+        messages.error(request, "Access denied. Administrator privileges required.")
+        return redirect('smp_client:dashboard')
+    
+    # Calculate basic performance metrics
+    from django.db.models import Count, Avg
+    from datetime import datetime, timedelta
+    
+    # Get metrics from the last 30 days
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    
+    # SMP Query metrics
+    total_queries = SMPQuery.objects.filter(timestamp__gte=thirty_days_ago).count()
+    successful_queries = SMPQuery.objects.filter(
+        timestamp__gte=thirty_days_ago,
+        response_status=200
+    ).count()
+    
+    # Document metrics
+    total_documents = SMPDocument.objects.count()
+    signed_documents = SMPDocument.objects.filter(status='signed').count()
+    uploaded_documents = SMPDocument.objects.filter(status='uploaded').count()
+    
+    # Participant metrics
+    active_participants = Participant.objects.filter(is_active=True).count()
+    total_participants = Participant.objects.count()
+    
+    success_rate = (successful_queries / total_queries * 100) if total_queries > 0 else 0
+    
+    context = {
+        'title': 'Performance Metrics',
+        'metrics': {
+            'total_queries': total_queries,
+            'successful_queries': successful_queries,
+            'success_rate': round(success_rate, 2),
+            'total_documents': total_documents,
+            'signed_documents': signed_documents,
+            'uploaded_documents': uploaded_documents,
+            'active_participants': active_participants,
+            'total_participants': total_participants,
+        },
+        'time_period': '30 days',
+    }
+    return render(request, 'smp_client/performance_metrics.html', context)
+
+
+@login_required
+def audit_trail(request):
+    """SMP Audit Trail Dashboard"""
+    # Only accessible to staff/admin users  
+    if not (request.user.is_staff or request.user.is_superuser):
+        messages.error(request, "Access denied. Administrator privileges required.")
+        return redirect('smp_client:dashboard')
+    
+    # Get audit trail data from various models
+    from django.contrib.admin.models import LogEntry
+    from django.contrib.contenttypes.models import ContentType
+    
+    # Get recent admin actions related to SMP models
+    smp_content_types = ContentType.objects.filter(
+        app_label='smp_client'
+    )
+    
+    recent_actions = LogEntry.objects.filter(
+        content_type__in=smp_content_types
+    ).select_related('user', 'content_type').order_by('-action_time')[:100]
+    
+    # Get recent SMP documents activity
+    recent_documents = SMPDocument.objects.all().order_by('-created_at')[:50]
+    
+    # Get recent queries
+    recent_queries = SMPQuery.objects.all().order_by('-timestamp')[:50]
+    
+    context = {
+        'title': 'Audit Trail',
+        'recent_actions': recent_actions,
+        'recent_documents': recent_documents,
+        'recent_queries': recent_queries,
+        'action_count': recent_actions.count(),
+    }
+    return render(request, 'smp_client/audit_trail.html', context)
