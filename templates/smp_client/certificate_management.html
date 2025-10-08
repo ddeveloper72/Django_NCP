@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - EU NCP Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fa-solid fa-certificate me-2"></i>
+                    {{ title }}
+                </h1>
+                <div>
+                    <a href="{% url 'smp_client:dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-arrow-left me-1"></i>
+                        Back to Dashboard
+                    </a>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadCertificateModal">
+                        <i class="fa-solid fa-plus me-1"></i>
+                        Upload Certificate
+                    </button>
+                </div>
+            </div>
+
+            <!-- Certificate Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon bg-success">
+                                <i class="fa-solid fa-certificate text-white"></i>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-label">Total Certificates</div>
+                                <div class="metric-number">{{ total_count }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon bg-primary">
+                                <i class="fa-solid fa-check-circle text-white"></i>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-label">Active</div>
+                                <div class="metric-number">{{ active_count }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon bg-warning">
+                                <i class="fa-solid fa-exclamation-triangle text-white"></i>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-label">Expiring Soon</div>
+                                <div class="metric-number">{{ expiring_soon }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon bg-danger">
+                                <i class="fa-solid fa-times-circle text-white"></i>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-label">Expired</div>
+                                <div class="metric-number">{{ expired_count }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificate Management Tabs -->
+            <ul class="nav nav-tabs" id="certificateTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="all-certificates-tab" data-bs-toggle="tab" 
+                            data-bs-target="#all-certificates" type="button" role="tab">
+                        <i class="fa-solid fa-list me-1"></i>
+                        All Certificates ({{ total_count }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="active-certificates-tab" data-bs-toggle="tab" 
+                            data-bs-target="#active-certificates" type="button" role="tab">
+                        <i class="fa-solid fa-check-circle me-1"></i>
+                        Active ({{ active_count }})
+                    </button>
+                </li>
+                {% if expired_count > 0 %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="expired-certificates-tab" data-bs-toggle="tab" 
+                            data-bs-target="#expired-certificates" type="button" role="tab">
+                        <i class="fa-solid fa-times-circle me-1"></i>
+                        Expired ({{ expired_count }})
+                    </button>
+                </li>
+                {% endif %}
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content mt-4">
+                <!-- All Certificates Tab -->
+                <div class="tab-pane fade show active" id="all-certificates" role="tabpanel">
+                    {% if certificates %}
+                        <div class="certificate-table-container">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Certificate Name</th>
+                                        <th>Subject</th>
+                                        <th>Issuer</th>
+                                        <th>Valid From</th>
+                                        <th>Valid To</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cert in certificates %}
+                                    <tr>
+                                        <td>
+                                            <i class="fa-solid fa-certificate me-2"></i>
+                                            <strong>{{ cert.certificate_name }}</strong>
+                                        </td>
+                                        <td>{{ cert.subject|default:"N/A" }}</td>
+                                        <td>{{ cert.issuer|default:"N/A" }}</td>
+                                        <td>{{ cert.valid_from|date:"M d, Y" }}</td>
+                                        <td>{{ cert.valid_to|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if cert.is_active %}
+                                                {% if cert.valid_to > now %}
+                                                    <span class="badge bg-success">Active</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Expired</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-sm btn-outline-primary" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#viewCertificateModal{{ cert.id }}">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </button>
+                                                {% if cert.is_active %}
+                                                <button class="btn btn-sm btn-outline-warning" 
+                                                        onclick="toggleCertificate({{ cert.id }})">
+                                                    <i class="fa-solid fa-pause"></i>
+                                                </button>
+                                                {% else %}
+                                                <button class="btn btn-sm btn-outline-success" 
+                                                        onclick="toggleCertificate({{ cert.id }})">
+                                                    <i class="fa-solid fa-play"></i>
+                                                </button>
+                                                {% endif %}
+                                                <button class="btn btn-sm btn-outline-danger" 
+                                                        onclick="deleteCertificate({{ cert.id }})">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fa-solid fa-info-circle me-2"></i>
+                            No certificates found. Upload a certificate to get started.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Active Certificates Tab -->
+                <div class="tab-pane fade" id="active-certificates" role="tabpanel">
+                    {% if active_certificates %}
+                        <div class="certificate-table-container">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Certificate Name</th>
+                                        <th>Subject</th>
+                                        <th>Valid To</th>
+                                        <th>Fingerprint</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cert in active_certificates %}
+                                    <tr>
+                                        <td>
+                                            <i class="fa-solid fa-certificate me-2 text-success"></i>
+                                            <strong>{{ cert.certificate_name }}</strong>
+                                        </td>
+                                        <td>{{ cert.subject|default:"N/A" }}</td>
+                                        <td>{{ cert.valid_to|date:"M d, Y" }}</td>
+                                        <td>
+                                            <code class="small">{{ cert.fingerprint|default:"N/A"|truncatechars:20 }}</code>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#viewCertificateModal{{ cert.id }}">
+                                                <i class="fa-solid fa-eye me-1"></i>
+                                                View Details
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                            No active certificates found.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Expired Certificates Tab -->
+                {% if expired_count > 0 %}
+                <div class="tab-pane fade" id="expired-certificates" role="tabpanel">
+                    <div class="certificate-table-container">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Certificate Name</th>
+                                    <th>Subject</th>
+                                    <th>Expired On</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cert in expired_certificates %}
+                                <tr class="table-danger">
+                                    <td>
+                                        <i class="fa-solid fa-certificate me-2 text-danger"></i>
+                                        <strong>{{ cert.certificate_name }}</strong>
+                                    </td>
+                                    <td>{{ cert.subject|default:"N/A" }}</td>
+                                    <td>{{ cert.valid_to|date:"M d, Y" }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                onclick="deleteCertificate({{ cert.id }})">
+                                            <i class="fa-solid fa-trash me-1"></i>
+                                            Remove
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Certificate Modal -->
+<div class="modal fade" id="uploadCertificateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-upload me-2"></i>
+                    Upload Certificate
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadCertificateForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="certificateName" class="form-label">Certificate Name</label>
+                        <input type="text" class="form-control" id="certificateName" name="certificate_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="certificateFile" class="form-label">Certificate File (.p12, .pfx)</label>
+                        <input type="file" class="form-control" id="certificateFile" name="certificate_file" 
+                               accept=".p12,.pfx" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="certificatePassword" class="form-label">Certificate Password</label>
+                        <input type="password" class="form-control" id="certificatePassword" name="password">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="uploadCertificate()">
+                    <i class="fa-solid fa-upload me-1"></i>
+                    Upload Certificate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Certificate Detail Modals -->
+{% for cert in certificates %}
+<div class="modal fade" id="viewCertificateModal{{ cert.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-certificate me-2"></i>
+                    Certificate Details: {{ cert.certificate_name }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Certificate Information</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Name:</th>
+                                <td>{{ cert.certificate_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Subject:</th>
+                                <td><code class="small">{{ cert.subject|default:"N/A" }}</code></td>
+                            </tr>
+                            <tr>
+                                <th>Issuer:</th>
+                                <td><code class="small">{{ cert.issuer|default:"N/A" }}</code></td>
+                            </tr>
+                            <tr>
+                                <th>Serial Number:</th>
+                                <td><code class="small">{{ cert.serial_number|default:"N/A" }}</code></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Validity Information</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Valid From:</th>
+                                <td>{{ cert.valid_from|date:"M d, Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Valid To:</th>
+                                <td>{{ cert.valid_to|date:"M d, Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td>
+                                    {% if cert.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Fingerprint:</th>
+                                <td><code class="small">{{ cert.fingerprint|default:"N/A" }}</code></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+function uploadCertificate() {
+    // TODO: Implement certificate upload functionality
+    alert('Certificate upload functionality will be implemented in a future update.');
+}
+
+function toggleCertificate(certId) {
+    // TODO: Implement certificate toggle functionality  
+    alert('Certificate toggle functionality will be implemented in a future update.');
+}
+
+function deleteCertificate(certId) {
+    if (confirm('Are you sure you want to delete this certificate? This action cannot be undone.')) {
+        // TODO: Implement certificate deletion functionality
+        alert('Certificate deletion functionality will be implemented in a future update.');
+    }
+}
+</script>
+{% endblock %}

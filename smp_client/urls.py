@@ -46,6 +46,7 @@ urlpatterns = [
     path("logs/", views.system_logs, name="system_logs"),
     path("performance/", views.performance_metrics, name="performance_metrics"),
     path("audit/", views.audit_trail, name="audit_trail"),
+    path("certificates/", views.certificate_management, name="certificate_management"),
     
     # SMP API Endpoints (OASIS BDXR SMP v1.0 compatible)
     path(

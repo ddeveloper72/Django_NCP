@@ -972,3 +972,39 @@ def audit_trail(request):
         'action_count': recent_actions.count(),
     }
     return render(request, 'smp_client/audit_trail.html', context)
+
+
+@login_required
+def certificate_management(request):
+    """Certificate Management interface for SMP digital signing"""
+    
+    # Get all signing certificates
+    certificates = SigningCertificate.objects.all().order_by('-created_at')
+    active_certificates = certificates.filter(is_active=True)
+    expired_certificates = certificates.filter(
+        valid_to__lt=timezone.now(),
+        is_active=True
+    )
+    
+    # Certificate statistics
+    total_count = certificates.count()
+    active_count = active_certificates.count()
+    expired_count = expired_certificates.count()
+    expiring_soon = certificates.filter(
+        valid_to__gt=timezone.now(),
+        valid_to__lt=timezone.now() + timedelta(days=30),
+        is_active=True
+    ).count()
+    
+    context = {
+        'title': 'Certificate Management',
+        'certificates': certificates,
+        'active_certificates': active_certificates,
+        'expired_certificates': expired_certificates,
+        'total_count': total_count,
+        'active_count': active_count,
+        'expired_count': expired_count,
+        'expiring_soon': expiring_soon,
+        'now': timezone.now(),
+    }
+    return render(request, 'smp_client/certificate_management.html', context)
