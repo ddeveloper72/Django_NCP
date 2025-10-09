@@ -101,24 +101,17 @@
         </button>
         {% endif %} {# End conditional for Clinical Information tab - only show for L3 CDA #}
 
-        {# Original Clinical Document tab - enabled for L1 CDA, disabled for L3 CDA without embedded PDFs #}
-        <button id="pdf-tab-btn" class="tab-button{% if cda_type == "L3" and not has_embedded_pdfs %} text-muted{% endif %}"
+        {# Original Clinical Document tab - only show for L1 CDA documents #}
+        {% if has_l1_cda and cda_type == "L1" %}
+        <button id="pdf-tab-btn" class="tab-button"
                 data-action="show-extended-tab"
                 data-section-id="extended_patient"
                 data-tab-type="pdfs"
-                {% if cda_type == "L3" and not has_embedded_pdfs %}data-disabled="true" data-reason="No Original Clinical Documents available for this L3 CDA"{% endif %}
-                type="button"
-                {% if cda_type == "L3" and not has_embedded_pdfs %}disabled title="No Original Clinical Documents available for this L3 CDA"{% endif %}>
+                type="button">
             <i class="fa-solid fa-file-pdf me-1"></i>Original Clinical Document
-            {# For L1 CDA documents, show count as 1 (the original document), for L3 show embedded PDFs count #}
-            {% if cda_type == "L1" %}
             <span class="badge bg-healthcare-grey ms-2">1</span>
-            {% elif has_embedded_pdfs %}
-            <span class="badge bg-healthcare-teal ms-2">{{ embedded_pdfs|length }}</span>
-            {% else %}
-            <span class="badge bg-secondary ms-2">0</span>
-            {% endif %}
         </button>
+        {% endif %}
     </div>
 
     {# Tab Content Containers #}
@@ -176,7 +169,8 @@
     </div>
     {% endif %}
 
-    {# Original Clinical Documents Tab Content #}
+    {# Original Clinical Documents Tab Content - only show for L1 CDA documents #}
+    {% if has_l1_cda and cda_type == "L1" %}
     <div class="clinical-tab-content" id="extended_patient_pdfs">
         <div class="row g-3">
             {# Original Clinical Documents Card #}
@@ -339,14 +333,19 @@
 
                         {% else %}
                         <div class="alert alert-info">
-                            <h6><i class="fa-solid fa-info-circle me-2"></i>No Original Clinical Documents Available</h6>
-                            {% if has_l1_cda %}
-                            <p class="mb-0">This L1 CDA document does not contain any Original Clinical Documents (OrCD).</p>
-                            {% elif has_l3_cda %}
-                            <p class="mb-0">This L3 CDA document contains structured clinical data only. Original Clinical Documents (OrCD) are typically found in L1 CDA documents.</p>
-                            {% else %}
-                            <p class="mb-0">No Original Clinical Documents (OrCD) were found in this CDA document.</p>
-                            {% endif %}
+                            <div class="alert-heading">
+                                <i class="fa-solid fa-info-circle"></i>
+                                No Original Clinical Documents Available
+                            </div>
+                            <div class="alert-content">
+                                {% if has_l1_cda %}
+                                <p class="mb-0">This L1 CDA document does not contain any Original Clinical Documents (OrCD).</p>
+                                {% elif has_l3_cda %}
+                                <p class="mb-0">This L3 CDA document contains structured clinical data only. Original Clinical Documents (OrCD) are typically found in L1 CDA documents.</p>
+                                {% else %}
+                                <p class="mb-0">No Original Clinical Documents (OrCD) were found in this CDA document.</p>
+                                {% endif %}
+                            </div>
                         </div>
                         {% endif %}
                     </div> {# End card-body #}
@@ -354,6 +353,7 @@
             </div> {# End col-12 #}
         </div> {# End row g-3 #}
     </div> {# End clinical-tab-content extended_patient_pdfs #}
+    {% endif %} {# End conditional for Original Clinical Documents tab - only show for L1 CDA #}
 
     </div> {# End extended-tab-content-container #}
 </div> {# End Clinical Section #}
