@@ -14,30 +14,29 @@
 {% endblock %}
 
 
-{% block breadcrumb %}
-<nav aria-label="breadcrumb" class="breadcrumb-nav">
-    <ol class="breadcrumb breadcrumb-enhanced mb-0">
+{% block page_context %}
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
         <li class="breadcrumb-item">
-            <a href="{% url 'home' %}" class="text-decoration-none">
-                <i class="fa-solid fa-home me-1"></i>Home
+            <a href="{% url 'home' %}" class="breadcrumb-link">
+                <i class="fa fa-home" aria-hidden="true"></i> Home
             </a>
         </li>
         <li class="breadcrumb-item">
-            <a href="{% url 'patient_data:patient_data_form' %}" class="text-decoration-none">
-                <i class="fa-solid fa-search me-1"></i>Patient Search
+            <a href="{% url 'patient_data:patient_data_form' %}" class="breadcrumb-link">
+                <i class="fa fa-search" aria-hidden="true"></i> Patient Search
             </a>
         </li>
         {% if session_id %}
         <li class="breadcrumb-item">
-            <a href="{% url 'patient_data:smart_patient_search' session_id %}"
-                class="text-decoration-none">
-                <i class="fa-solid fa-user me-1"></i>{{ patient_identity.given_name }} {{
-                patient_identity.family_name }}
+            <a href="{% url 'patient_data:smart_patient_search' session_id %}" class="breadcrumb-link">
+                <i class="fa fa-user" aria-hidden="true"></i> {{ patient_identity.given_name }} {{ patient_identity.family_name }}
             </a>
         </li>
         {% endif %}
         <li class="breadcrumb-item active" aria-current="page">
-            <i class="fa-solid fa-file-medical me-1"></i>CDA Document
+            <i class="fa fa-file-medical" aria-hidden="true"></i> CDA Document
         </li>
     </ol>
 </nav>

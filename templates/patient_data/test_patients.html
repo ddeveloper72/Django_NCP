@@ -4,21 +4,22 @@
 
 {% block title %}Test Patients - CDA Document Index{% endblock %}
 
-{% block breadcrumb %}
+{% block page_context %}
+<!-- Breadcrumb Navigation -->
 <nav aria-label="breadcrumb">
-    <ol class="breadcrumb breadcrumb-enhanced">
+    <ol class="breadcrumb">
         <li class="breadcrumb-item">
-            <a href="/" class="breadcrumb-link">
-                <i class="fa-solid fa-home"></i> Home
+            <a href="{% url 'home' %}" class="breadcrumb-link">
+                <i class="fa fa-home" aria-hidden="true"></i> Home
             </a>
         </li>
         <li class="breadcrumb-item">
             <a href="{% url 'patient_data:patient_data_form' %}" class="breadcrumb-link">
-                <i class="fa-solid fa-users"></i> Patient Data
+                <i class="fa fa-users" aria-hidden="true"></i> Patient Data
             </a>
         </li>
         <li class="breadcrumb-item active" aria-current="page">
-            <i class="fa-solid fa-vial"></i> Test Patients
+            <i class="fa fa-vial" aria-hidden="true"></i> Test Patients
         </li>
     </ol>
 </nav>

@@ -4,36 +4,31 @@
 {% block title %}Patient Search - {{ country.name }}{% endblock %}
 
 {% block page_context %}
-<div class="page-breadcrumb">
-    <div class="container">
-        <div class="breadcrumb-content">
-            <div class="page-info">
-                {% if country_code %}
-                <span class="page-location">
-                    <span class="badge badge-country">
-                        <img src="{% static 'flags/' %}{{ country_code }}.webp" alt="{{ country.name }} flag"
-                            class="context-flag">
-                        {{ country.name }}
-                    </span>
-                    Patient Search
-                </span>
-                {% else %}
-                <span class="page-location">Patient Search</span>
-                {% endif %}
-            </div>
-            <div class="page-actions">
-                <a href="/portal/" class="btn btn-outline-secondary btn-sm">
-                    <i class="fa fa-arrow-left"></i> Back to Countries
-                </a>
-                {% if country_code %}
-                <a href="/portal/country/{{ country_code }}/refresh-ism/" class="btn btn-outline-primary btn-sm">
-                    <i class="fa fa-refresh"></i> Refresh ISM
-                </a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'home' %}" class="breadcrumb-link">
+                <i class="fa fa-home" aria-hidden="true"></i> Home
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/portal/" class="breadcrumb-link">
+                <i class="fa fa-globe" aria-hidden="true"></i> Portal
+            </a>
+        </li>
+        {% if country_code %}
+        <li class="breadcrumb-item active" aria-current="page">
+            <img src="{% static 'flags/' %}{{ country_code }}.webp" alt="{{ country.name }} flag" class="flag-sm me-1">
+            {{ country.name }} Patient Search
+        </li>
+        {% else %}
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fa fa-search" aria-hidden="true"></i> Patient Search
+        </li>
+        {% endif %}
+    </ol>
+</nav>
 {% endblock %}
 
 {% block content %}

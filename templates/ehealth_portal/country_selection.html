@@ -3,16 +3,17 @@
 {% load static %}
 {% block title %}{{ page_title }}{% endblock %}
 
-{% block breadcrumb %}
+{% block page_context %}
+<!-- Breadcrumb Navigation -->
 <nav aria-label="breadcrumb">
-    <ol class="breadcrumb breadcrumb-enhanced">
+    <ol class="breadcrumb">
         <li class="breadcrumb-item">
-            <a href="/" class="breadcrumb-link">
-                <i class="fa-solid fa-home"></i> Home
+            <a href="{% url 'home' %}" class="breadcrumb-link">
+                <i class="fa fa-home" aria-hidden="true"></i> Home
             </a>
         </li>
         <li class="breadcrumb-item active" aria-current="page">
-            <i class="fa-solid fa-globe"></i> Country Selection
+            <i class="fa fa-globe" aria-hidden="true"></i> Portal
         </li>
     </ol>
 </nav>

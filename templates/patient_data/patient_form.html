@@ -3,6 +3,22 @@
 {% load static %}
 {% block title %}Patient Search - EU NCP Portal{% endblock %}
 
+{% block page_context %}
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'home' %}" class="breadcrumb-link">
+                <i class="fa fa-home" aria-hidden="true"></i> Home
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fa fa-search" aria-hidden="true"></i> Patient Search
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
 {% block extra_css %}
 <style>
 /* Enhanced Search Icon Styling - Override any global FontAwesome rules */
@@ -19,24 +35,6 @@
 
 {% block content %}
 <div class="patient-form-container">
-    <!-- Enhanced Navigation Breadcrumb -->
-    <!-- <div class="cda-navigation">
-        <div class="breadcrumb-nav">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a href="/" class="breadcrumb-link">
-                            <i class="fa-solid fa-home"></i> Home
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">
-                        <i class="fa-solid fa-search"></i> Patient Search
-                    </li>
-                </ol>
-            </nav> -->
-
-    <!-- Quick Actions -->
-    <!-- <div class="quick-actions">
                 <a href="/" class="btn btn-outline-primary btn-sm">
                     <i class="fa-solid fa-home"></i> Home
                 </a>
