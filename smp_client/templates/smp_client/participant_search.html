@@ -83,11 +83,17 @@
             {% for participant in participants %}
             <div class="participant-card" role="article" aria-labelledby="participant-{{ participant.id }}">
                 <h3 id="participant-{{ participant.id }}" class="participant-name">
-                    {% if participant.country_code == 'IE' %}<i class="fa fa-flag" aria-hidden="true" style="color: #009639;"></i>
-                    {% elif participant.country_code == 'BE' %}<i class="fa fa-flag" aria-hidden="true" style="color: #ed2939;"></i>
-                    {% elif participant.country_code == 'AT' %}<i class="fa fa-flag" aria-hidden="true" style="color: #ed2939;"></i>
-                    {% elif participant.country_code == 'HU' %}<i class="fa fa-flag" aria-hidden="true" style="color: #477050;"></i>
-                    {% else %}<i class="fa fa-globe" aria-hidden="true" style="color: #005f5f;"></i>{% endif %}
+                    <span class="country-flag-compact">
+                        {% if participant.country_code %}
+                            <img src="{% load static %}{% static 'flags/' %}{{ participant.country_code }}.webp" 
+                                 alt="{{ participant.country_code }} flag" 
+                                 class="flag-image"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                            <i class="fa fa-flag flag-fallback" style="display: none;" aria-hidden="true"></i>
+                        {% else %}
+                            <i class="fa fa-globe flag-fallback" aria-hidden="true"></i>
+                        {% endif %}
+                    </span>
                     {{ participant.participant_name|default:participant.participant_identifier }}
                 </h3>
 

@@ -594,7 +594,68 @@
   }
 }
 
-// Flag emojis
+// Country Flag Badges
+.country-flag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: $text-dark;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $hco-primary-teal;
+    box-shadow: 0 2px 6px rgba(0, 95, 95, 0.15);
+  }
+
+  .flag-image {
+    width: 20px;
+    height: 15px;
+    border-radius: 2px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    flex-shrink: 0;
+  }
+
+  .flag-fallback {
+    font-size: 1rem;
+    color: $hco-primary-teal;
+    flex-shrink: 0;
+  }
+
+  .country-name {
+    font-weight: 500;
+    white-space: nowrap;
+  }
+}
+
+// Compact flag badge (for search results)
+.country-flag-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+
+  .flag-image {
+    width: 18px;
+    height: 13px;
+    border-radius: 2px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+  }
+
+  .flag-fallback {
+    font-size: 0.9rem;
+    color: $hco-primary-teal;
+  }
+}
+
+// Legacy flag emoji/icon support (deprecated)
 .flag-emoji,
 .flag-icon {
   font-size: 1.5rem;
