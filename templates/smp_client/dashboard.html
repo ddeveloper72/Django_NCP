@@ -3,6 +3,22 @@
 
 {% block title %}SMP Dashboard - EU eHealth NCP{% endblock %}
 
+{% block page_context %}
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'index' %}" class="breadcrumb-link">
+                <i class="fa fa-home" aria-hidden="true"></i> Home
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fa fa-link" aria-hidden="true"></i> SMP Management
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
 <div class="dashboard-page">
     <!-- Dashboard Header -->

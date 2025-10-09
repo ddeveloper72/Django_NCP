@@ -3,6 +3,27 @@
 
 {% block title %}SMP Documents{% endblock %}
 
+{% block page_context %}
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'index' %}" class="breadcrumb-link">
+                <i class="fa fa-home" aria-hidden="true"></i> Home
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'smp_client:dashboard' %}" class="breadcrumb-link">
+                <i class="fa fa-link" aria-hidden="true"></i> SMP Management
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fa fa-file-text" aria-hidden="true"></i> Documents
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
 <div class="dashboard-page">
     <!-- Page Header -->
