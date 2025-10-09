@@ -141,6 +141,9 @@ class EnhancedCDADisplayView(View):
                 },
             )()
 
+            # Get session metadata for CDA type flags
+            session_metadata = self._get_session_metadata(patient_id)
+            
             # Prepare context for template
             context = {
                 "patient_id": patient_id,
@@ -150,6 +153,13 @@ class EnhancedCDADisplayView(View):
                 "template_translations": template_translations,
                 "source_language": source_language,
                 "target_language": target_language,
+                # Add CDA type information for L1/L3 logic from session metadata
+                "cda_type": session_metadata.get("preferred_cda_type", "L1"),  
+                "has_l1_cda": session_metadata.get("has_l1", False),  
+                "has_l3_cda": session_metadata.get("has_l3", False),  
+                "source_country": session_metadata.get("country_code", "Unknown"),
+                "translation_quality": "Medium",  # Default value
+                "session_id": patient_id,  # Use patient_id as session identifier
                 "document_metadata": {
                     "success": enhanced_sections.get("success", False),
                     "content_type": enhanced_sections.get("content_type", "unknown"),
@@ -232,6 +242,33 @@ class EnhancedCDADisplayView(View):
         except Exception as e:
             logger.error(f"Error retrieving CDA content for patient {patient_id}: {e}")
             return None
+
+    def _get_session_metadata(self, patient_id: str) -> Dict[str, Any]:
+        """Get session metadata including CDA type flags"""
+        if not patient_id:
+            return {}
+
+        try:
+            session_key = f"patient_match_{patient_id}"
+            
+            # Search across all Django sessions for the patient data
+            all_sessions = Session.objects.all()
+            for db_session in all_sessions:
+                try:
+                    db_session_data = db_session.get_decoded()
+                    if session_key in db_session_data:
+                        match_data = db_session_data[session_key]
+                        logger.info(f"Found session metadata for patient {patient_id}")
+                        return match_data
+                except Exception:
+                    continue  # Skip corrupted sessions
+
+            logger.warning(f"No session metadata found for patient {patient_id}")
+            return {}
+
+        except Exception as e:
+            logger.error(f"Error fetching session metadata for patient {patient_id}: {e}")
+            return {}
 
 
 @method_decorator(csrf_exempt, name="dispatch")

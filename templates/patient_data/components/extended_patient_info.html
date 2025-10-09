@@ -41,13 +41,15 @@
             <span class="badge bg-warning ms-2">3</span>
         </button>
 
-        <button id="clinical-tab-btn" class="tab-button{% if has_l1_cda and not has_l3_cda or not processed_sections or processed_sections|length == 0 %} text-muted{% endif %}"
+        {# Only show Clinical Information tab for L3 CDA documents - hide for L1 #}
+        {% if has_l3_cda and cda_type != "L1" %}
+        <button id="clinical-tab-btn" class="tab-button{% if not processed_sections or processed_sections|length == 0 %} text-muted{% endif %}"
                 data-action="show-extended-tab"
                 data-section-id="extended_patient"
                 data-tab-type="clinical"
-                {% if has_l1_cda and not has_l3_cda %}data-disabled="true" data-reason="Clinical data not available for L1 CDA documents"{% elif not processed_sections|length and not enhanced_allergies|length and not medications|length and not allergies|length and not problems|length and not procedures|length and not vital_signs|length %}data-disabled="true" data-reason="No structured clinical data available"{% endif %}
+                {% if not processed_sections|length and not enhanced_allergies|length and not medications|length and not allergies|length and not problems|length and not procedures|length and not vital_signs|length %}data-disabled="true" data-reason="No structured clinical data available"{% endif %}
                 type="button"
-                {% if has_l1_cda and not has_l3_cda %}disabled title="Clinical data not available for L1 CDA documents"{% elif not processed_sections|length and not enhanced_allergies|length and not medications|length and not allergies|length and not problems|length and not procedures|length and not vital_signs|length %}disabled title="No structured clinical data available"{% endif %}>
+                {% if not processed_sections|length and not enhanced_allergies|length and not medications|length and not allergies|length and not problems|length and not procedures|length and not vital_signs|length %}disabled title="No structured clinical data available"{% endif %}>
             <i class="fa-solid fa-notes-medical me-1"></i>Clinical Information
             
             {# Count all clinical sections that have content - including extended sections #}
@@ -97,16 +99,21 @@
             {% endwith %} {# has_allergies #}
             {% endwith %} {# has_medications #}
         </button>
+        {% endif %} {# End conditional for Clinical Information tab - only show for L3 CDA #}
 
-        <button id="pdf-tab-btn" class="tab-button{% if has_l3_cda and not has_embedded_pdfs %} text-muted{% endif %}"
+        {# Original Clinical Document tab - enabled for L1 CDA, disabled for L3 CDA without embedded PDFs #}
+        <button id="pdf-tab-btn" class="tab-button{% if cda_type == "L3" and not has_embedded_pdfs %} text-muted{% endif %}"
                 data-action="show-extended-tab"
                 data-section-id="extended_patient"
                 data-tab-type="pdfs"
-                {% if has_l3_cda and not has_embedded_pdfs %}data-disabled="true" data-reason="No Original Clinical Documents available for this L3 CDA"{% elif not has_embedded_pdfs %}data-disabled="true" data-reason="No Original Clinical Documents available"{% endif %}
+                {% if cda_type == "L3" and not has_embedded_pdfs %}data-disabled="true" data-reason="No Original Clinical Documents available for this L3 CDA"{% endif %}
                 type="button"
-                {% if has_l3_cda and not has_embedded_pdfs %}disabled title="No Original Clinical Documents available for this L3 CDA"{% elif not has_embedded_pdfs %}disabled title="No Original Clinical Documents available"{% endif %}>
+                {% if cda_type == "L3" and not has_embedded_pdfs %}disabled title="No Original Clinical Documents available for this L3 CDA"{% endif %}>
             <i class="fa-solid fa-file-pdf me-1"></i>Original Clinical Document
-            {% if has_embedded_pdfs %}
+            {# For L1 CDA documents, show count as 1 (the original document), for L3 show embedded PDFs count #}
+            {% if cda_type == "L1" %}
+            <span class="badge bg-healthcare-grey ms-2">1</span>
+            {% elif has_embedded_pdfs %}
             <span class="badge bg-healthcare-teal ms-2">{{ embedded_pdfs|length }}</span>
             {% else %}
             <span class="badge bg-secondary ms-2">0</span>
@@ -161,11 +168,13 @@
         </div>
     </div>
 
-    {# Clinical Information Tab Content #}
+    {# Clinical Information Tab Content - only show for L3 CDA documents #}
+    {% if has_l3_cda and cda_type != "L1" %}
     <div class="clinical-tab-content" id="extended_patient_clinical">
         {# RESTORED WITH MINIMAL CLEAN STRUCTURE #}
         {% include 'patient_data/components/clinical_information_content.html' %}
     </div>
+    {% endif %}
 
     {# Original Clinical Documents Tab Content #}
     <div class="clinical-tab-content" id="extended_patient_pdfs">
