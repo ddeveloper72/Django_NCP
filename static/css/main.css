@@ -15076,19 +15076,20 @@ a:hover i[class*=fa-], a:hover [class*=fa-] {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
+  background: #4a7c59;
+  border: 1px solid #2d5a27;
   border-radius: 6px;
   padding: 0.25rem 0.5rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #2d3748;
+  color: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 }
 .country-flag-badge:hover {
-  border-color: #005f5f;
-  box-shadow: 0 2px 6px rgba(0, 95, 95, 0.15);
+  background: #2d5a27;
+  border-color: #2d5a27;
+  box-shadow: 0 2px 6px rgba(45, 90, 39, 0.25);
 }
 .country-flag-badge .flag-image {
   width: 20px;
@@ -15100,7 +15101,7 @@ a:hover i[class*=fa-], a:hover [class*=fa-] {
 }
 .country-flag-badge .flag-fallback {
   font-size: 1rem;
-  color: #005f5f;
+  color: #ffffff;
   flex-shrink: 0;
 }
 .country-flag-badge .country-name {
@@ -15123,6 +15124,17 @@ a:hover i[class*=fa-], a:hover [class*=fa-] {
 .country-flag-compact .flag-fallback {
   font-size: 0.9rem;
   color: #005f5f;
+}
+
+.flag-xs {
+  width: 16px;
+  height: 12px;
+  border-radius: 2px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .flag-emoji,

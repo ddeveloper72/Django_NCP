@@ -4,7 +4,7 @@
 {% block title %}Patient Search - {{ country.name }}{% endblock %}
 
 {% block page_context %}
-<!-- Breadcrumb Navigation -->
+{# Breadcrumb Navigation #}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
@@ -33,23 +33,29 @@
 
 {% block content %}
 <div class="patient-search-page">
-    <div class="country-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1>
-                {% if country_code %}
-                <img src="{% static 'flags/' %}{{ country_code }}.webp" alt="{{ country.name }} flag"
-                    class="country-flag">
-                {% endif %}
-                {{ country.name }} Patient Search
-            </h1>
-        </div>
+    {# Page Header with integrated design #}
+    <div class="page-header">
+        <h1>
+            {% if country_code %}
+            <img src="{% static 'flags/' %}{{ country_code }}.webp" alt="{{ country.name }} flag" class="country-flag me-2">
+            {% endif %}
+            <i class="fa fa-search me-2" aria-hidden="true"></i>EU NCP Patient Document Search
+        </h1>
+        <p class="page-subtitle">
+            Query patient medical records from EU member states using country and patient identifier
+        </p>
     </div>
 
-    <div class="search-form">
+    {# Main content container with proper grid layout #}
+    <div class="container-fluid">
+        <div class="row">
+            {# Main search form column #}
+            <div class="col-lg-8">
+                <div class="search-form">
         {% if form_fields %}
-        <!-- ISM Information -->
+        {# ISM Information display section #}
         <div class="ism-info">
-            <h4>🌍 International Search Mask (ISM)</h4>
+            <h4><i class="fa fa-globe" aria-hidden="true"></i> International Search Mask (ISM)</h4>
             <p class="mb-1">
                 <strong>Country:</strong> {{ country.name }} |
                 <strong>Fields:</strong> {{ form_fields|length }}
@@ -61,10 +67,10 @@
             </p>
         </div>
 
-        <!-- ISM Type Selection (only show for countries with multiple ISM types) -->
+        {# ISM Type Selection - only show for countries with multiple ISM types #}
         {% if has_ism_types %}
         <div class="ism-type-selection">
-            <h5 class="ism-type-title">📋 ISM Data Source</h5>
+            <h5 class="ism-type-title"><i class="fa fa-clipboard-list" aria-hidden="true"></i> ISM Data Source</h5>
             <div class="ism-type-options">
                 {% for ism_value, ism_label in ism_type_choices %}
                 <div class="ism-type-option {% if current_ism_type == ism_value %}selected{% endif %}"
@@ -88,7 +94,7 @@
         </div>
         {% endif %}
 
-        <!-- Patient Search Form -->
+        {# Patient Search Form with dynamic field rendering #}
         <form method="post" id="patientSearchForm" novalidate>
             {% csrf_token %}
 
@@ -130,13 +136,13 @@
             </div>
             {% endfor %}
 
-            <!-- Local CDA Search Option -->
+            {# Local CDA Search Option for testing with local documents #}
             <div class="local-search-section">
                 <div class="local-search-option">
                     <input type="checkbox" name="use_local_search" id="use_local_search" class="local-search-checkbox">
                     <div class="local-search-content">
                         <label for="use_local_search" class="local-search-label">
-                            🏠 Search Local CDA Documents
+                            <i class="fa fa-home" aria-hidden="true"></i> Search Local CDA Documents
                         </label>
                         <div class="local-search-description">
                             Search Patient Summary documents in local test data following PS Display Guidelines for {{
@@ -146,9 +152,9 @@
                 </div>
             </div>
 
-            <!-- Break Glass Section -->
+            {# Break Glass Section - Emergency access without patient consent #}
             <div class="break-glass-section">
-                <h5 class="break-glass-title">🚨 Emergency Access</h5>
+                <h5 class="break-glass-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Emergency Access</h5>
                 <div class="break-glass-checkbox">
                     <input type="checkbox" name="break_glass" id="break_glass" {% if break_glass %}checked{% endif %}
                         onchange="toggleBreakGlassReason()">
@@ -170,22 +176,22 @@
                 </div>
             </div>
 
-            <!-- Form Actions -->
+            {# Form Actions - Submit and Reset buttons #}
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary" onclick="resetForm()">
-                    🔄 Reset Form
+                    <i class="fa fa-refresh" aria-hidden="true"></i> Reset Form
                 </button>
                 <button type="submit" class="btn btn-primary">
-                    🔍 Search Patient
+                    <i class="fa fa-search" aria-hidden="true"></i> Search Patient
                 </button>
             </div>
         </form>
 
         {% else %}
-        <!-- No ISM Available -->
+        {# No ISM Available - Display warning when search form unavailable #}
         <div class="no-ism-message">
             <div class="alert alert-warning">
-                <h4>⚠️ No Search Form Available</h4>
+                <h4><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> No Search Form Available</h4>
                 <p>
                     The International Search Mask (ISM) for {{ country.name }} is not currently available.
                     This could be due to:
@@ -197,63 +203,158 @@
                 </ul>
                 <div class="mt-3">
                     <a href="/portal/country/{{ country_code }}/refresh-ism/" class="btn btn-primary">
-                        🔄 Try Refreshing ISM
+                        <i class="fa fa-refresh" aria-hidden="true"></i> Try Refreshing ISM
                     </a>
                     <a href="{% url 'country_selection' %}" class="btn btn-secondary ms-2">
-                        ← Choose Another Country
+                        <i class="fa fa-arrow-left" aria-hidden="true"></i> Choose Another Country
                     </a>
                 </div>
             </div>
         </div>
         {% endif %}
+                </div>
+            </div>
+
+            {# Sidebar with helpful information #}
+            <div class="col-lg-4">
+                <div class="search-info-sidebar">
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fa fa-info-circle me-2" aria-hidden="true"></i>Search Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>How it works:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fa fa-check text-success me-2" aria-hidden="true"></i>Enter patient details</li>
+                                <li><i class="fa fa-check text-success me-2" aria-hidden="true"></i>Select country of origin</li>
+                                <li><i class="fa fa-check text-success me-2" aria-hidden="true"></i>System searches EU databases</li>
+                                <li><i class="fa fa-check text-success me-2" aria-hidden="true"></i>View matching records</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fa fa-globe me-2" aria-hidden="true"></i>Supported Countries
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="supported-countries">
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    <img src="{% static 'flags/IE.webp' %}" alt="Ireland flag" class="flag-xs me-1">IE Ireland
+                                </span>
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    <img src="{% static 'flags/IT.webp' %}" alt="Italy flag" class="flag-xs me-1">IT Italy
+                                </span>
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    <img src="{% static 'flags/GR.webp' %}" alt="Greece flag" class="flag-xs me-1">GR Greece
+                                </span>
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    <img src="{% static 'flags/LU.webp' %}" alt="Luxembourg flag" class="flag-xs me-1">LU Luxembourg
+                                </span>
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    <img src="{% static 'flags/LV.webp' %}" alt="Latvia flag" class="flag-xs me-1">LV Latvia
+                                </span>
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    <img src="{% static 'flags/MT.webp' %}" alt="Malta flag" class="flag-xs me-1">MT Malta
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fa fa-shield me-2" aria-hidden="true"></i>Data Protection
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="small mb-2">
+                                <i class="fa fa-lock text-success me-2" aria-hidden="true"></i>GDPR Compliant
+                            </p>
+                            <p class="small mb-2">
+                                <i class="fa fa-certificate text-primary me-2" aria-hidden="true"></i>EU Healthcare Standards
+                            </p>
+                            <p class="small mb-0">
+                                <i class="fa fa-user-shield text-info me-2" aria-hidden="true"></i>Patient Consent Required
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Search Results -->
+    {# Search Results display section #}
     {% if search_results %}
-    <div class="search-results">
-        <h3>Search Results</h3>
-
-        {% if search_results.patients %}
-        <div class="patients-list">
-            {% for patient in search_results.patients %}
-            <div class="patient-card">
-                <div class="patient-info">
-                    <h4>{{ patient.name }}</h4>
-                    <p><strong>Date of Birth:</strong> {{ patient.birth_date }}</p>
-                    {% if patient.patient_identifiers %}
-                    {% for identifier in patient.patient_identifiers %}
-                    <p><strong>{% if identifier.assigningAuthorityName %}{{ identifier.assigningAuthorityName }}{% else
-                            %}Patient ID ({{ identifier.root|slice:":15" }}){% endif %}:</strong> {{
-                        identifier.extension }}</p>
-                    {% endfor %}
-                    {% else %}
-                    <p><strong>Patient ID:</strong> No CDA identifiers available</p>
-                    {% endif %}
-                    {% if patient.address %}
-                    <p><strong>Address:</strong> {{ patient.address }}</p>
-                    {% endif %}
-                </div>
-                <div class="patient-actions">
-                    <a href="{% url 'ehealth_portal:patient_documents' patient.id %}" class="btn btn-primary">
-                        📋 View Documents
-                    </a>
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="search-results">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h3 class="mb-0">
+                                <i class="fa fa-list-alt me-2" aria-hidden="true"></i>Search Results
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {% if search_results.patients %}
+                            <div class="patients-list">
+                                {% for patient in search_results.patients %}
+                                <div class="patient-card card mb-3">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-8">
+                                                <div class="patient-info">
+                                                    <h4><i class="fa fa-user me-2 text-primary" aria-hidden="true"></i>{{ patient.name }}</h4>
+                                                    <p><strong>Date of Birth:</strong> {{ patient.birth_date }}</p>
+                                                    {% if patient.patient_identifiers %}
+                                                    {% for identifier in patient.patient_identifiers %}
+                                                    <p><strong>{% if identifier.assigningAuthorityName %}{{ identifier.assigningAuthorityName }}{% else
+                                                            %}Patient ID ({{ identifier.root|slice:":15" }}){% endif %}:</strong> {{
+                                                        identifier.extension }}</p>
+                                                    {% endfor %}
+                                                    {% else %}
+                                                    <p><strong>Patient ID:</strong> No CDA identifiers available</p>
+                                                    {% endif %}
+                                                    {% if patient.address %}
+                                                    <p><strong>Address:</strong> {{ patient.address }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 text-end">
+                                                <div class="patient-actions">
+                                                    <a href="{% url 'ehealth_portal:patient_documents' patient.id %}" class="btn btn-primary btn-lg">
+                                                        <i class="fa fa-file-text" aria-hidden="true"></i> View Documents
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="no-results">
+                                <div class="alert alert-info">
+                                    <h4><i class="fa fa-info-circle me-2" aria-hidden="true"></i>No Patients Found</h4>
+                                    <p>No patients were found matching your search criteria. Please try:</p>
+                                    <ul>
+                                        <li>Checking the spelling of the entered information</li>
+                                        <li>Using different search criteria</li>
+                                        <li>Verifying the patient exists in {{ country.name }}'s system</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
-            {% endfor %}
         </div>
-        {% else %}
-        <div class="no-results">
-            <div class="alert alert-info">
-                <h4>No Patients Found</h4>
-                <p>No patients were found matching your search criteria. Please try:</p>
-                <ul>
-                    <li>Checking the spelling of the entered information</li>
-                    <li>Using different search criteria</li>
-                    <li>Verifying the patient exists in {{ country.name }}'s system</li>
-                </ul>
-            </div>
-        </div>
-        {% endif %}
     </div>
     {% endif %}
 </div>

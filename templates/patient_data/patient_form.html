@@ -34,37 +34,33 @@
 {% endblock %}
 
 {% block content %}
-<div class="patient-form-container">
-                <a href="/" class="btn btn-outline-primary btn-sm">
-                    <i class="fa-solid fa-home"></i> Home
-                </a>
-                <a href="/portal/" class="btn btn-secondary btn-sm">
-                    <i class="fa-solid fa-search"></i> Portal Search
-                </a>
-            </div>
-        </div>
-    </div> -->
-
-    <div class="form-header">
-        <h1 class="page-title">EU NCP Patient Document Search</h1>
+<div class="dashboard-page">
+    {# Page Header with integrated Healthcare Organisation design #}
+    <div class="page-header">
+        <h1>
+            <i class="fa fa-search me-2" aria-hidden="true"></i>EU NCP Patient Document Search
+        </h1>
         <p class="page-subtitle">
             Query patient medical records from EU member states using country and patient identifier
         </p>
     </div>
 
-    <div class="patient-form-wrapper">
-        <div class="form-card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fa-solid fa-search fa-lg me-2 text-white" style="font-size: 1.6rem !important; color: white !important; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important; margin-right: 0.8rem !important;"></i>
-                    NCP Document Query
-                </h2>
-                <p class="card-description">
-                    Enter the patient's country and identifier to retrieve their Patient Summary (PS) documents
-                </p>
-            </div>
-
-            <div class="card-content">
+    {# Main content container with proper grid layout #}
+    <div class="container-fluid">
+        <div class="row">
+            {# Main search form column #}
+            <div class="col-lg-8">
+                <div class="search-form">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="mb-0">
+                                <i class="fa fa-search me-2" aria-hidden="true"></i>NCP Document Query
+                            </h2>
+                            <p class="mb-0 mt-2">
+                                Enter the patient's country and identifier to retrieve their Patient Summary (PS) documents
+                            </p>
+                        </div>
+                        <div class="card-body">
                 <form method="post" class="patient-search-form">
                     {% csrf_token %}
 
@@ -106,66 +102,100 @@
                         </div>
                     </div>
 
-                    <!-- Form Actions -->
+                    {# Form Actions - Submit and Reset buttons #}
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary btn-large">
-                            <i class="icon-search"></i>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fa fa-search" aria-hidden="true"></i>
                             <span class="btn-text-full">Query Patient Documents</span>
                             <span class="btn-text-short">Search</span>
                         </button>
 
                         <button type="reset" class="btn btn-secondary">
-                            <i class="icon-refresh"></i>
+                            <i class="fa fa-refresh" aria-hidden="true"></i>
                             <span class="btn-text-full">Clear Form</span>
                             <span class="btn-text-short">Clear</span>
                         </button>
 
                         <a href="{% url 'patient_data:test_patients' %}" class="btn btn-info">
-                            <i class="fa-solid fa-database"></i>
+                            <i class="fa fa-database" aria-hidden="true"></i>
                             <span class="btn-text-full">View Test Patients</span>
                             <span class="btn-text-short">Tests</span>
                         </a>
                     </div>
                 </form>
-            </div>
-        </div>
-
-        <!-- Search Information -->
-        <div class="search-info-card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="icon-info"></i>
-                    Search Information
-                </h3>
-            </div>
-
-            <div class="card-content">
-                <div class="info-section">
-                    <h4>How it works:</h4>
-                    <ol>
-                        <li>Enter the patient's name and other known details</li>
-                        <li>Select the country of origin if known</li>
-                        <li>Our system searches EU member state databases</li>
-                        <li>View matching patient records and clinical documents</li>
-                    </ol>
-                </div>
-
-                <div class="info-section">
-                    <h4>Supported Countries:</h4>
-                    <div class="country-badges">
-                        <span class="country-badge">🇮🇪 Ireland</span>
-                        <span class="country-badge">🇮🇹 Italy</span>
-                        <span class="country-badge">🇬🇷 Greece</span>
-                        <span class="country-badge">🇱🇺 Luxembourg</span>
-                        <span class="country-badge">🇱🇻 Latvia</span>
-                        <span class="country-badge">🇲🇹 Malta</span>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="info-section">
-                    <h4>Privacy & Security:</h4>
-                    <p>All searches are logged and comply with EU GDPR regulations. Patient data is encrypted and access
-                        is audited.</p>
+            {# Sidebar with helpful information #}
+            <div class="col-lg-4">
+                <div class="search-info-sidebar">
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fa fa-info-circle me-2" aria-hidden="true"></i>Search Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>How it works:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fa fa-check text-success me-2" aria-hidden="true"></i>Enter patient details</li>
+                                <li><i class="fa fa-check text-success me-2" aria-hidden="true"></i>Select country of origin</li>
+                                <li><i class="fa fa-check text-success me-2" aria-hidden="true"></i>System searches EU databases</li>
+                                <li><i class="fa fa-check text-success me-2" aria-hidden="true"></i>View matching records</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fa fa-globe me-2" aria-hidden="true"></i>Supported Countries
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="supported-countries">
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    <img src="{% static 'flags/IE.webp' %}" alt="Ireland flag" class="flag-xs me-1">IE Ireland
+                                </span>
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    <img src="{% static 'flags/IT.webp' %}" alt="Italy flag" class="flag-xs me-1">IT Italy
+                                </span>
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    <img src="{% static 'flags/GR.webp' %}" alt="Greece flag" class="flag-xs me-1">GR Greece
+                                </span>
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    <img src="{% static 'flags/LU.webp' %}" alt="Luxembourg flag" class="flag-xs me-1">LU Luxembourg
+                                </span>
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    <img src="{% static 'flags/LV.webp' %}" alt="Latvia flag" class="flag-xs me-1">LV Latvia
+                                </span>
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    <img src="{% static 'flags/MT.webp' %}" alt="Malta flag" class="flag-xs me-1">MT Malta
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fa fa-shield me-2" aria-hidden="true"></i>Data Protection
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="small mb-2">
+                                <i class="fa fa-lock text-success me-2" aria-hidden="true"></i>GDPR Compliant
+                            </p>
+                            <p class="small mb-2">
+                                <i class="fa fa-certificate text-primary me-2" aria-hidden="true"></i>EU Healthcare Standards
+                            </p>
+                            <p class="small mb-0">
+                                <i class="fa fa-user-shield text-info me-2" aria-hidden="true"></i>Patient Consent Required
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
