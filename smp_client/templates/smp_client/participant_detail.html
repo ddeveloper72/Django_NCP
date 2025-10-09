@@ -46,7 +46,7 @@
                     <button class="btn btn-sm btn-outline-primary copy-btn" 
                             data-copy="{{ request.build_absolute_uri }}{{ participant.participant_scheme.scheme_id }}::{{ participant.participant_identifier }}/"
                             aria-label="Copy SMP URL to clipboard">
-                        📋 Copy
+                        <i class="fa fa-copy" aria-hidden="true"></i> Copy
                     </button>
                 </div>
             </div>
@@ -54,11 +54,11 @@
     </div>
 
     <div class="content-section">
-        <h2 class="section-title">📋 Participant Information</h2>
+        <h2 class="section-title"><i class="fa fa-user" aria-hidden="true"></i> Participant Information</h2>
 
         <div class="info-grid">
             <div class="info-card">
-                <h3>🆔 Identity</h3>
+                <h3><i class="fa fa-id-card" aria-hidden="true"></i> Identity</h3>
                 <div class="detail-group">
                     <div class="detail-item">
                         <div class="detail-label">Participant ID</div>
@@ -96,7 +96,7 @@
             </div>
 
             <div class="info-card">
-                <h3>🌐 SMP Configuration</h3>
+                <h3><i class="fa fa-globe" aria-hidden="true"></i> SMP Configuration</h3>
                 <div class="detail-group">
                     <div class="detail-item">
                         <div class="detail-label">SMP URL</div>
@@ -115,7 +115,7 @@
 
             {% if participant.contact_email or participant.organization_type %}
             <div class="info-card">
-                <h3>📞 Contact Information</h3>
+                <h3><i class="fa fa-phone" aria-hidden="true"></i> Contact Information</h3>
                 <div class="detail-group">
                     {% if participant.contact_email %}
                     <div class="detail-item">
@@ -141,7 +141,7 @@
 
     {% if service_group and services %}
     <div class="services-section">
-        <h2 class="section-title">🛠️ Services & Endpoints</h2>
+        <h2 class="section-title"><i class="fa fa-cogs" aria-hidden="true"></i> Services & Endpoints</h2>
         
         <div class="service-group-info">
             <div class="alert alert-info">
@@ -154,7 +154,7 @@
             <article class="service-card" role="article" aria-labelledby="service-{{ forloop.counter }}">
                 <div class="service-header">
                     <h3 id="service-{{ forloop.counter }}" class="service-title">
-                        🔧 {{ service.document_identifier }}
+                        <i class="fa fa-wrench" aria-hidden="true"></i> {{ service.document_identifier }}
                     </h3>
                     <div class="service-meta">
                         <span class="service-type">{{ service.process_identifier }}</span>
@@ -174,7 +174,7 @@
 
                 {% if service.endpoints.all %}
                 <div class="endpoints-section">
-                    <h4 class="endpoints-title">🔗 Service Endpoints</h4>
+                    <h4 class="endpoints-title"><i class="fa fa-link" aria-hidden="true"></i> Service Endpoints</h4>
                     <div class="endpoints-list">
                         {% for endpoint in service.endpoints.all %}
                         <div class="endpoint-item">

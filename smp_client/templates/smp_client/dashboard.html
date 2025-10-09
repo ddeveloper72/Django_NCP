@@ -10,7 +10,7 @@
 {% block content %}
 <div class="dashboard-container">
     <div class="smp-dashboard-header">
-        <h1>🌐 SMP Management Dashboard</h1>
+        <h1><i class="fa fa-globe" aria-hidden="true"></i> SMP Management Dashboard</h1>
         <p>Service Metadata Publishing for EU eHealth Network</p>
     </div>
 
@@ -52,7 +52,7 @@
                 <a href="{% url 'smp_client:list_documents' %}" class="action-btn">View Documents</a>
             </div>
             <div class="action-card">
-                <h3>⚙️ Manage Services</h3>
+                <h3><i class="fa fa-cogs" aria-hidden="true"></i> Manage Services</h3>
                 <p>Configure service metadata and endpoints</p>
                 <a href="/admin/smp_client/" class="action-btn">Admin Interface</a>
             </div>
@@ -66,7 +66,7 @@
             <strong>European SMP Server:</strong> https://smp-ehealth-trn.acc.edelivery.tech.ec.europa.eu/
         </div>
         <button type="button" class="action-btn sync-btn" aria-describedby="sync-description">
-            🔄 Sync with European SMP
+            <i class="fa fa-sync" aria-hidden="true"></i> Sync with European SMP
         </button>
         <div id="sync-description" class="sr-only">
             Synchronize participant and service data with the European SMP test server
@@ -75,7 +75,7 @@
     </div>
 
     <div class="smp-content-section">
-        <h2 class="smp-section-title">📋 Recent Activity</h2>
+        <h2 class="smp-section-title"><i class="fa fa-list" aria-hidden="true"></i> Recent Activity</h2>
         <div class="recent-list">
             {% if recent_queries %}
                 {% for query in recent_queries %}
@@ -98,7 +98,7 @@
     </div>
 
     <div class="smp-content-section">
-        <h2 class="smp-section-title">👥 Recent Participants</h2>
+        <h2 class="smp-section-title"><i class="fa fa-users" aria-hidden="true"></i> Recent Participants</h2>
         <div class="recent-list">
             {% if recent_participants %}
                 {% for participant in recent_participants %}
