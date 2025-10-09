@@ -40,31 +40,6 @@
         </li>
     </ol>
 </nav>
-
-<div class="page-context-content">
-    <div class="page-info">
-        <span class="page-location">
-            <i class="fa fa-file-medical"></i> CDA Document
-        </span>
-    </div>
-    <div class="page-actions">
-        {% if session_id %}
-        <a href="{% url 'patient_data:smart_patient_search' session_id %}"
-            class="btn btn-outline-secondary btn-sm">
-            <i class="fa fa-arrow-left page-action-icon"></i> Back to Patient
-        </a>
-        {% elif patient_identity and patient_identity.session_id %}
-        <a href="{% url 'patient_data:smart_patient_search' patient_identity.session_id %}"
-            class="btn btn-outline-secondary btn-sm">
-            <i class="fa fa-arrow-left page-action-icon"></i> Back to Patient
-        </a>
-        {% else %}
-        <a href="{% url 'patient_data:patient_data_form' %}" class="btn btn-outline-secondary btn-sm">
-            <i class="fa fa-arrow-left page-action-icon"></i> Back to Search
-        </a>
-        {% endif %}
-    </div>
-</div>
 {% endblock %}
 
 {% block content %}

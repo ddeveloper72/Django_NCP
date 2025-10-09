@@ -462,176 +462,172 @@ a.btn[href*="logout"]:hover {
   }
 }
 
-/* Healthcare Navigation Tabs */
+/* Healthcare Navigation Tabs - Clean Dashboard Style */
 .nav-tabs-healthcare {
-  border-bottom: 2px solid var(--healthcare-blue);
+  border-bottom: 1px solid #e2e8f0;
   margin-bottom: 0;
+  background: transparent;
 }
 
 .nav-tabs-healthcare .nav-link {
   @include healthcare-tab-layout;
   @include tab-icon-center;
 
-  color: var(--healthcare-navy);
-  background-color: transparent;
-  border: 1px solid transparent;
-  border-radius: 0.5rem 0.5rem 0 0;
+  color: #6b7280; // Muted gray text
+  background-color: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
   font-weight: 500;
-  margin-bottom: -2px;
-  transition: all 0.3s ease;
+  margin-bottom: 0.5rem;
+  margin-right: 0.75rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-size: 0.875rem;
 }
 
 .nav-tabs-healthcare .nav-link:hover {
-  color: var(--healthcare-blue);
-  background-color: var(--healthcare-light-blue);
-  border-color: var(--healthcare-blue) var(--healthcare-blue) transparent;
+  color: #374151;
+  background-color: #ffffff;
+  border-color: #d1d5db;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
 }
 
 .nav-tabs-healthcare .nav-link.active {
-  color: white;
-  background-color: var(--healthcare-blue);
-  border-color: var(--healthcare-blue);
+  color: #005f5f; // Healthcare Organisation teal
+  background-color: #ffffff;
+  border-color: #005f5f;
   font-weight: 600;
+  box-shadow: 0 3px 8px rgba(0, 95, 95, 0.2);
 }
 
 .nav-tabs-healthcare .nav-link.active:hover {
-  color: white;
-  background-color: var(--healthcare-blue);
+  color: #005f5f;
+  background-color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .nav-tabs-healthcare .nav-link i {
   color: inherit;
   transition: color 0.2s ease;
+  font-size: 1rem;
 }
 
 .nav-tabs-healthcare .badge {
-  background-color: $hco-secondary-green-light;
-  color: $hco-primary-teal;
+  background-color: #6b7280;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
-/* Integrated Patient Header Tabs - Enhanced 3D Effects */
+/* Integrated Patient Header Tabs - Clean Dashboard Style */
 .card .nav-tabs-healthcare {
-  border-bottom: 1px solid #dee2e6;
-  margin-bottom: 0;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+  background: #f8f9fa;
   border-radius: 0;
-  padding: 0.5rem 1rem;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  box-shadow: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .card .nav-tabs-healthcare .nav-link {
   @include healthcare-tab-layout;
   @include tab-icon-center;
 
-  color: var(--healthcare-navy);
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border: 1px solid #dee2e6;
-  border-radius: 0.75rem 0.75rem 0 0;
-  font-weight: 600;
-  margin-bottom: -1px;
-  margin-right: 0.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #6b7280;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  margin-bottom: 0;
+  margin-right: 0;
+  transition: all 0.2s ease;
   position: relative;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-shadow: none;
+  min-width: 160px;
+  justify-content: center;
+  padding: 0.75rem 1rem;
 }
 
 .card .nav-tabs-healthcare .nav-link:hover {
-  color: var(--healthcare-dark-blue);
-  background: linear-gradient(
-    135deg,
-    #ffffff 0%,
-    var(--healthcare-light-blue) 100%
-  );
-  border-color: var(--healthcare-blue) var(--healthcare-blue) #dee2e6;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 94, 184, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
+  color: #374151;
+  background-color: #ffffff;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .card .nav-tabs-healthcare .nav-link.active {
-  color: var(--healthcare-text-light);
-  background: linear-gradient(
-    135deg,
-    var(--healthcare-blue) 0%,
-    var(--healthcare-dark-blue) 100%
-  );
-  border-color: var(--healthcare-blue) var(--healthcare-blue)
-    var(--healthcare-blue);
-  font-weight: 700;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 94, 184, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  z-index: 10;
-  position: relative;
+  color: #005f5f; // Healthcare Organisation teal
+  background-color: #ffffff;
+  border-color: #005f5f;
+  font-weight: 600;
+  box-shadow: 0 3px 8px rgba(0, 95, 95, 0.2);
 }
 
 .card .nav-tabs-healthcare .nav-link.active:hover {
-  background: linear-gradient(
-    135deg,
-    var(--healthcare-dark-blue) 0%,
-    var(--healthcare-blue) 100%
-  );
-  border-color: var(--healthcare-dark-blue) var(--healthcare-dark-blue)
-    var(--healthcare-dark-blue);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 94, 184, 0.5), 0 3px 8px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  color: #005f5f;
+  background-color: #ffffff;
+  border-color: #005f5f;
+  transform: translateY(-1px);
 }
 
-/* Enhanced Badge Styling in Tabs */
+/* Clean Badge Styling in Tabs - Dashboard Style */
 .card .nav-tabs-healthcare .nav-link .badge {
   // Badge styling handled by healthcare-tab-layout mixin
-  border-radius: 50% !important; // Override to ensure circular badges
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px !important; // Rounded pill style like dashboard
+  box-shadow: none;
+  border: none;
   
-  /* WCAG 2.2 COMPLIANT: Default inactive tab badges */
-  background-color: var(--healthcare-blue) !important; /* #005eb8 - Healthcare blue */
-  color: white !important; /* 7.2:1 contrast ratio (WCAG AAA) */
+  /* Clean default inactive tab badges */
+  background-color: #6b7280 !important; /* Muted gray */
+  color: white !important;
   font-weight: 600;
-  min-width: 18px;
-  min-height: 18px;
+  font-size: 0.75rem;
+  min-width: 20px;
+  min-height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0.125rem 0.375rem;
 }
 
-/* WCAG 2.2 COMPLIANT: Active tab badges - maximum contrast */
+/* Active tab badges - Healthcare Organisation teal */
 .card .nav-tabs-healthcare .nav-link.active .badge {
-  background-color: white !important; /* Pure white background */
-  color: var(--healthcare-blue) !important; /* Healthcare blue #005eb8 text */
-  border: 2px solid var(--healthcare-blue) !important; /* Strong border for definition */
-  font-weight: 700; /* Bold for better readability */
-  box-shadow: 0 2px 4px rgba(0, 94, 184, 0.2); /* Subtle healthcare blue shadow */
+  background-color: #005f5f !important; /* Healthcare Organisation teal */
+  color: white !important;
+  border: none !important;
+  font-weight: 700;
+  box-shadow: none;
 }
 
-/* WCAG 2.2 COMPLIANT: Hover states for interactive feedback */
+/* Hover states for interactive feedback */
 .card .nav-tabs-healthcare .nav-link:hover .badge {
-  background-color: #004a9f !important; /* Darker healthcare blue for hover */
-  color: white !important; /* Maintain white text */
-  transform: scale(1.05); /* Subtle visual feedback */
+  background-color: #374151 !important; /* Darker gray for hover */
+  color: white !important;
+  transform: none; /* No scaling for cleaner look */
   transition: all 0.2s ease;
 }
 
-/* WCAG 2.2 COMPLIANT: Active tab hover state */
+/* Active tab hover state */
 .card .nav-tabs-healthcare .nav-link.active:hover .badge {
-  background-color: #f8f9fa !important; /* Very light gray for active hover */
-  color: #004a9f !important; /* Darker healthcare blue for better contrast */
-  border-color: #004a9f !important;
-  transform: scale(1.05);
+  background-color: #004a4a !important; /* Darker teal for active hover */
+  color: white !important;
+  border: none !important;
+  transform: none;
 }
 
-/* WCAG 2.2 COMPLIANT: Disabled tab badges - ensure visibility */
+/* Disabled tab badges - muted */
 .card .nav-tabs-healthcare .nav-link:disabled .badge,
 .card .nav-tabs-healthcare .nav-link[disabled] .badge {
-  background-color: var(--healthcare-blue) !important; /* Dark blue background */
-  color: white !important; /* White text for maximum contrast */
-  border: 2px solid rgba(255, 255, 255, 0.8) !important; /* Light border for definition */
-  font-weight: 600;
+  background-color: #d1d5db !important; /* Light gray background */
+  color: #9ca3af !important; /* Muted gray text */
+  border: none !important;
+  font-weight: 500;
   opacity: 0.8; /* Slight transparency to indicate disabled state */
 }
 
@@ -641,91 +637,88 @@ a.btn[href*="logout"]:hover {
   background-color: #004a9f !important; /* Darker blue on hover */
   color: white !important; /* Maintain white text */
   border-color: rgba(255, 255, 255, 0.9) !important; /* Stronger border on hover */
-  transform: none; /* No scale effect for disabled items */
-  opacity: 0.9; /* Slightly less transparent on hover */
 }
 
-/* ACCESSIBILITY FIX: Override bg-info badge color for tab badges specifically */
+/* Clean override for bg-info badge in tabs */
 .card .nav-tabs-healthcare .nav-link.active .badge.bg-info {
-  color: var(--healthcare-blue) !important; /* Override white text on white background */
-  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: white !important;
+  background-color: #005f5f !important; /* Healthcare Organisation teal */
+  border: none !important;
 }
 
-/* Tab Icons Enhancement */
+/* Clean Tab Icons */
 .card .nav-tabs-healthcare .nav-link i {
-  // Icon styling handled by tab-icon-center mixin
-  transition: transform 0.3s ease;
+  color: inherit;
+  transition: color 0.2s ease;
+  font-size: 1rem;
 }
 
-.card .nav-tabs-healthcare .nav-link:hover i,
-.card .nav-tabs-healthcare .nav-link.active i {
-  transform: scale(1.1);
-}
-
-/* Extended Patient Information Custom Tab Buttons - Enhanced 3D Design */
+/* Extended Patient Information Custom Tab Buttons - Clean Dashboard Style */
 .tab-navigation {
   display: flex;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 0.75rem;
-  padding: 0.5rem;
-  gap: 0.25rem;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  gap: 0.5rem;
+  box-shadow: none;
+  border: 1px solid #e5e7eb;
 }
 
 .tab-button {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-  border: 1px solid #dee2e6 !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
   cursor: pointer;
-  font-weight: 600 !important;
-  color: var(--healthcare-navy) !important;
-  border-radius: 0.5rem !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+  border-radius: 0.375rem !important;
+  transition: all 0.2s ease !important;
   position: relative;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  text-shadow: none !important;
   margin-right: 0 !important;
   padding: 0.75rem 1rem;
+  font-size: 0.875rem;
 
-  // Simple badge alignment
+  // Clean badge alignment
   .badge {
     vertical-align: middle;
     margin-left: 0.5rem;
+    background-color: #6b7280;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.5rem;
   }
 
   // Icon styling
   i {
     margin-right: 0.5rem;
     vertical-align: middle;
+    color: inherit;
   }
 }
 
 .tab-button:hover {
-  color: var(--healthcare-dark-blue) !important;
-  background: linear-gradient(
-    135deg,
-    #ffffff 0%,
-    var(--healthcare-light-blue) 100%
-  ) !important;
-  border-color: var(--healthcare-blue) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 8px rgba(0, 94, 184, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6) !important;
+  color: #374151 !important;
+  background-color: #ffffff !important;
+  border-color: #d1d5db !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  text-shadow: none !important;
 }
 
 .tab-button.active,
 .nav-tabs .tab-button.active,
 .nav-tabs .nav-link.tab-button.active {
-  color: #2d3748 !important; // Dark gray text for excellent readability
-  background: #f8f9fa !important; // Light gray background for contrast
-  border-color: var(--healthcare-blue) !important;
-  font-weight: 700 !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 12px rgba(0, 94, 184, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
-  text-shadow: none !important; // No text shadow for crisp text
+  color: #005f5f !important; // Healthcare Organisation teal
+  background-color: #ffffff !important;
+  border-color: #005f5f !important;
+  font-weight: 600 !important;
+  transform: none !important;
+  box-shadow: 0 3px 8px rgba(0, 95, 95, 0.2) !important;
+  text-shadow: none !important;
   z-index: 10;
 }
 
@@ -733,8 +726,8 @@ a.btn[href*="logout"]:hover {
 .nav-tabs .nav-link.active.tab-button,
 .nav-tabs .nav-link.tab-button.active,
 .nav-tabs .tab-button.nav-link.active {
-  color: #2d3748 !important; // Force dark gray text over Bootstrap's white text
-  background: #f8f9fa !important; // Light background for contrast
+  color: #005f5f !important; // Healthcare Organisation teal
+  background-color: #ffffff !important;
 }
 
 .tab-button.active:hover,
@@ -742,28 +735,23 @@ a.btn[href*="logout"]:hover {
 .nav-tabs .nav-link.tab-button.active:hover,
 .nav-tabs .nav-link.active.tab-button:hover,
 .nav-tabs .tab-button.nav-link.active:hover {
-  color: #1a202c !important; // Even darker gray text for better hover contrast
-  background: #e2e8f0 !important; // Slightly darker light background for hover feedback
-  border-color: var(--healthcare-blue) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 16px rgba(0, 94, 184, 0.3), 0 3px 8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  color: #005f5f !important;
+  background-color: #ffffff !important;
+  border-color: #005f5f !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 8px rgba(0, 95, 95, 0.25) !important;
 }
 
-/* Tab Button Badge Styling - Handled by Enhanced CDA file */
-/* Simple badge styling is defined in static/scss/pages/_enhanced_cda.scss */
-/* This allows for cleaner, more maintainable badge styling per page/component */
+.tab-button.active .badge {
+  background-color: #005f5f !important;
+  color: #ffffff !important;
+}
 
-/* Tab Button Icons Enhancement */
+/* Clean Tab Button Icons */
 .tab-button i {
   margin-right: 0.5rem !important;
   font-size: 1rem !important;
-  transition: transform 0.3s ease !important;
-}
-
-.tab-button:hover i,
-.tab-button.active i {
-  transform: scale(1.1) !important;
+  transition: color 0.2s ease !important;
 }
 
 /* Tab Content Styling */
@@ -1570,6 +1558,53 @@ i.fab {
   color: var(--healthcare-white, #ffffff) !important;
 }
 
+/* Navigation Badge Icon Default Colors - WCAG 2.2 Accessibility Fix */
+.navbar .badge i.fa-solid,
+.navbar .badge i.far,
+.navbar .badge i.fab,
+nav .badge i.fa-solid,
+nav .badge i.far,
+nav .badge i.fab,
+body nav .badge i.fa-solid,
+body nav .badge i.far,
+body nav .badge i.fab {
+  color: #2d3748 !important; /* Dark gray for high contrast on light badges */
+}
+
+/* Navigation Badge Icon Colors for Dark Badge Backgrounds */
+.navbar .badge.bg-primary i.fa-solid,
+.navbar .badge.bg-primary i.far,
+.navbar .badge.bg-primary i.fab,
+.navbar .badge.bg-secondary i.fa-solid,
+.navbar .badge.bg-secondary i.far,
+.navbar .badge.bg-secondary i.fab,
+.navbar .badge.bg-success i.fa-solid,
+.navbar .badge.bg-success i.far,
+.navbar .badge.bg-success i.fab,
+.navbar .badge.bg-danger i.fa-solid,
+.navbar .badge.bg-danger i.far,
+.navbar .badge.bg-danger i.fab,
+.navbar .badge.bg-info i.fa-solid,
+.navbar .badge.bg-info i.far,
+.navbar .badge.bg-info i.fab,
+nav .badge.bg-primary i.fa-solid,
+nav .badge.bg-primary i.far,
+nav .badge.bg-primary i.fab,
+nav .badge.bg-secondary i.fa-solid,
+nav .badge.bg-secondary i.far,
+nav .badge.bg-secondary i.fab,
+nav .badge.bg-success i.fa-solid,
+nav .badge.bg-success i.far,
+nav .badge.bg-success i.fab,
+nav .badge.bg-danger i.fa-solid,
+nav .badge.bg-danger i.far,
+nav .badge.bg-danger i.fab,
+nav .badge.bg-info i.fa-solid,
+nav .badge.bg-info i.far,
+nav .badge.bg-info i.fab {
+  color: #ffffff !important; /* White for dark badge backgrounds */
+}
+
 /* Override for navigation elements - highest specificity */
 .navbar .badge:hover i.fa-solid,
 .navbar .badge:hover i.far,
@@ -1638,31 +1673,23 @@ body nav .badge:hover i.fa-user-injured,
 /* Enhanced Data Display Tabs (Structured Data, Original Content, etc.) */
 .nav-pills .nav-link,
 .nav-tabs .nav-link {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border: 1px solid #dee2e6;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   padding: 0.75rem 1.25rem;
-  font-weight: 600;
-  color: var(--healthcare-navy);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  color: #6b7280;
   margin-right: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .nav-pills .nav-link:hover,
 .nav-tabs .nav-link:hover {
-  color: var(--healthcare-dark-blue);
-  background: linear-gradient(
-    135deg,
-    #ffffff 0%,
-    var(--healthcare-light-blue) 100%
-  );
-  border-color: var(--healthcare-blue);
+  color: #374151;
+  background-color: #ffffff;
+  border-color: #d1d5db;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 94, 184, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .nav-pills .nav-link.active,

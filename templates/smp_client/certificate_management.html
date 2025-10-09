@@ -4,6 +4,25 @@
 {% block title %}{{ title }} - EU NCP Portal{% endblock %}
 
 {% block content %}
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'home' %}" class="breadcrumb-link">
+                <i class="fa fa-home" aria-hidden="true"></i> Home
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'smp_client:dashboard' %}" class="breadcrumb-link">
+                <i class="fa fa-cogs" aria-hidden="true"></i> SMP Management
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fa fa-certificate" aria-hidden="true"></i> Certificate Management
+        </li>
+    </ol>
+</nav>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -13,11 +32,12 @@
                     {{ title }}
                 </h1>
                 <div>
-                    <a href="{% url 'smp_client:dashboard' %}" class="btn btn-outline-secondary">
-                        <i class="fa-solid fa-arrow-left me-1"></i>
-                        Back to Dashboard
-                    </a>
                     <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadCertificateModal">
+                        <i class="fa-solid fa-upload me-1"></i>
+                        Upload Certificate
+                    </button>
+                </div>
+            </div>
                         <i class="fa-solid fa-plus me-1"></i>
                         Upload Certificate
                     </button>

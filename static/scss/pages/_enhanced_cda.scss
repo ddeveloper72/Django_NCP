@@ -909,6 +909,64 @@ main {
 
 .healthcare-content {
   color: #212529;
+  
+  // Remove hover effects from all icons in healthcare content
+  .fa-solid,
+  .fa,
+  .fas,
+  .far,
+  .fal,
+  .fat,
+  .fad,
+  .fab {
+    transition: none !important;
+    
+    &:hover {
+      color: inherit !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  }
+  
+  // Specific styling for contact and ID icons to match SMP pattern
+  .fa-id-card,
+  .fa-phone,
+  .fa-envelope,
+  .fa-address-book,
+  .fa-building,
+  .fa-globe {
+    &.text-secondary {
+      color: #6c757d !important;
+      
+      &:hover {
+        color: #6c757d !important;
+      }
+    }
+    
+    &.text-success {
+      color: #28a745 !important;
+      
+      &:hover {
+        color: #28a745 !important;
+      }
+    }
+    
+    &.text-primary {
+      color: #007bff !important;
+      
+      &:hover {
+        color: #007bff !important;
+      }
+    }
+    
+    &.text-info {
+      color: #17a2b8 !important;
+      
+      &:hover {
+        color: #17a2b8 !important;
+      }
+    }
+  }
 }
 
 .provider-name,

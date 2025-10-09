@@ -599,19 +599,20 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
+  background: $hco-secondary-green-light;
+  border: 1px solid $hco-secondary-green;
   border-radius: 6px;
   padding: 0.25rem 0.5rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: $text-dark;
+  color: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 
   &:hover {
-    border-color: $hco-primary-teal;
-    box-shadow: 0 2px 6px rgba(0, 95, 95, 0.15);
+    background: $hco-secondary-green;
+    border-color: $hco-secondary-green;
+    box-shadow: 0 2px 6px rgba(45, 90, 39, 0.25);
   }
 
   .flag-image {
@@ -625,7 +626,7 @@
 
   .flag-fallback {
     font-size: 1rem;
-    color: $hco-primary-teal;
+    color: #ffffff;
     flex-shrink: 0;
   }
 
@@ -653,6 +654,18 @@
     font-size: 0.9rem;
     color: $hco-primary-teal;
   }
+}
+
+// Flag sizing classes for badges
+.flag-xs {
+  width: 16px;
+  height: 12px;
+  border-radius: 2px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 // Legacy flag emoji/icon support (deprecated)
