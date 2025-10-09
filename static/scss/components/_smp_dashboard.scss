@@ -634,56 +634,141 @@
   }
 }
 
+// =====================================================
+// SMP DASHBOARD HEADER ALIGNMENT
+// Align headers with participant card content
+// =====================================================
+
+.smp-dashboard-header {
+  margin-bottom: 2rem;
+  // Add left padding to align with card content
+  padding-left: $space-lg; // Match card padding for perfect alignment
+  
+  h1 {
+    color: #2d3748;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    
+    i {
+      color: $hco-primary-teal;
+    }
+  }
+  
+  p {
+    color: #4a5568;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .btn {
+    margin-top: 0.5rem;
+  }
+}
+
 // Participant Search Styles
 .search-section {
-  background: #f7fafc;
-  border-radius: 0.5rem;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  // Transform into a unified card design
+  background: white; // Clean white card background
+  border-radius: $border-radius-lg; // Match participant card border radius
+  padding: 2.5rem; // Generous padding for comfort
+  margin-bottom: 3rem; // Separation from results
+  border: 1px solid $border-light; // Subtle border like participant cards
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); // Soft shadow matching cards
+  
+  // Add subtle Healthcare Organisation accent
+  border-top: 4px solid $hco-primary-teal; // Professional accent strip
 
   .search-form {
     .form-grid {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr auto;
-      gap: 1rem;
-      align-items: end;
+      gap: 1.5rem;
+      align-items: stretch;
 
       @media (max-width: 768px) {
         grid-template-columns: 1fr;
-        gap: 1rem;
+        gap: 1.5rem;
       }
     }
 
     .form-group {
       display: flex;
       flex-direction: column;
-
+      // Remove individual card styling for unified parent card design
+      
       .form-label {
         font-weight: 600;
         color: #2d3748;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+        padding-left: 0.25rem;
+        height: 1.5rem;
+        display: flex;
+        align-items: flex-end;
+        line-height: 1.2;
+        text-align: left; // Ensure left alignment
       }
 
       .form-control {
-        padding: 0.75rem;
+        padding: 1rem 1.25rem;
         border: 2px solid #e2e8f0;
-        border-radius: 0.375rem;
+        border-radius: $border-radius-md;
         font-size: 1rem;
         transition: all 0.3s ease;
+        background: #ffffff;
+        height: 3.25rem;
+        line-height: 1.2;
+        box-sizing: border-box;
+        width: 100%; // Ensure full width within container
+        
+        // Special styling for select dropdowns
+        &:is(select) {
+          appearance: none;
+          background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23666' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 1rem center;
+          background-size: 16px 12px;
+          padding-right: 3rem;
+          cursor: pointer;
+        }
 
         &:focus {
           outline: none;
-          border-color: $primary-blue;
-          box-shadow: 0 0 0 3px rgba(8, 90, 159, 0.1);
+          border-color: $hco-primary-teal;
+          box-shadow: 0 0 0 4px rgba(0, 95, 95, 0.1);
         }
       }
-
+      
       .form-text {
-        font-size: 0.8rem;
-        color: #718096;
-        margin-top: 0.25rem;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #6b7280;
+        text-align: left; // Ensure left alignment for help text
+        padding-left: 0.25rem;
+      }
+      
+      .btn {
+        padding: 1rem 2rem;
+        font-weight: 600;
+        border-radius: $border-radius-md;
+        height: 3.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid transparent;
+        box-sizing: border-box;
+        margin-top: calc(1.5rem + 0.75rem);
+        width: 100%; // Ensure full width within container
+        text-align: center; // Center button text
+        
+        // Ensure icon and text are centered
+        i {
+          margin-right: 0.5rem;
+        }
       }
     }
   }
@@ -692,6 +777,8 @@
 .results-section {
   .results-header {
     margin-bottom: 1.5rem;
+    // Add left padding to align with card content
+    padding-left: $space-lg; // Match card padding for perfect alignment
 
     h2 {
       color: #2d3748;
@@ -702,49 +789,52 @@
 
   .participants-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); // Increased minimum width for better spacing
+    gap: 2.5rem; // Significantly increased gap between cards
+    padding: 1rem 0; // Added vertical padding
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
+      gap: 2rem; // Reduced gap on mobile but still generous
+      padding: 0.5rem 0;
     }
   }
 
   .participant-card {
-    background: #f7fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
+    background: white;
+    border: 1px solid $border-light;
+    border-radius: $border-radius-md;
+    padding: $space-lg;
     transition: all 0.3s ease;
-    cursor: pointer;
-
-    &:hover,
-    &:focus {
-      border-color: $primary-blue;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    
+    &:hover {
+      border-color: $hco-primary-teal;
+      box-shadow: 0 4px 12px rgba(0, 95, 95, 0.1);
       transform: translateY(-2px);
     }
 
-    .participant-header {
-      margin-bottom: 1rem;
+    .participant-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $hco-primary-teal;
+      margin-bottom: $space-md;
+      line-height: 1.3;
+    }
 
-      .participant-name {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 0.5rem;
+    p {
+      margin-bottom: $space-sm;
+      color: $text-dark;
+      
+      strong {
+        color: $text-muted;
+        font-weight: 500;
+        display: inline-block;
+        min-width: 120px;
       }
     }
 
-    .participant-details {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .participant-actions {
-      text-align: right;
+    .btn {
+      margin-top: $space-md;
     }
   }
 
@@ -765,8 +855,8 @@
   }
 }
 
-// Participant Detail Styles
-.participant-header {
+// Participant Detail Styles (for detail page)
+.participant-detail-header {
   display: flex;
   align-items: center;
   gap: 1rem;

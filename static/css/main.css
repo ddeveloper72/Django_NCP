@@ -15103,23 +15103,50 @@ a:hover i[class*=fa-], a:hover [class*=fa-] {
     font-size: 2.5rem;
   }
 }
-.search-section {
-  background: #f7fafc;
-  border-radius: 0.5rem;
-  padding: 2rem;
+.smp-dashboard-header {
   margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding-left: 1.5rem;
+}
+.smp-dashboard-header h1 {
+  color: #2d3748;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.smp-dashboard-header h1 i {
+  color: #005f5f;
+}
+.smp-dashboard-header p {
+  color: #4a5568;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+.smp-dashboard-header .btn {
+  margin-top: 0.5rem;
+}
+
+.search-section {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 2.5rem;
+  margin-bottom: 3rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-top: 4px solid #005f5f;
 }
 .search-section .search-form .form-grid {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr auto;
-  gap: 1rem;
-  align-items: end;
+  gap: 1.5rem;
+  align-items: stretch;
 }
 @media (max-width: 768px) {
   .search-section .search-form .form-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.5rem;
   }
 }
 .search-section .search-form .form-group {
@@ -15129,29 +15156,69 @@ a:hover i[class*=fa-], a:hover [class*=fa-] {
 .search-section .search-form .form-group .form-label {
   font-weight: 600;
   color: #2d3748;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  padding-left: 0.25rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  line-height: 1.2;
+  text-align: left;
 }
 .search-section .search-form .form-group .form-control {
-  padding: 0.75rem;
+  padding: 1rem 1.25rem;
   border: 2px solid #e2e8f0;
   border-radius: 0.375rem;
   font-size: 1rem;
   transition: all 0.3s ease;
+  background: #ffffff;
+  height: 3.25rem;
+  line-height: 1.2;
+  box-sizing: border-box;
+  width: 100%;
+}
+.search-section .search-form .form-group .form-control:is(select) {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23666' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px 12px;
+  padding-right: 3rem;
+  cursor: pointer;
 }
 .search-section .search-form .form-group .form-control:focus {
   outline: none;
   border-color: #005f5f;
-  box-shadow: 0 0 0 3px rgba(8, 90, 159, 0.1);
+  box-shadow: 0 0 0 4px rgba(0, 95, 95, 0.1);
 }
 .search-section .search-form .form-group .form-text {
-  font-size: 0.8rem;
-  color: #718096;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-align: left;
+  padding-left: 0.25rem;
+}
+.search-section .search-form .form-group .btn {
+  padding: 1rem 2rem;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  height: 3.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  box-sizing: border-box;
+  margin-top: 2.25rem;
+  width: 100%;
+  text-align: center;
+}
+.search-section .search-form .form-group .btn i {
+  margin-right: 0.5rem;
 }
 
 .results-section .results-header {
   margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
 }
 .results-section .results-header h2 {
   color: #2d3748;
@@ -15160,44 +15227,48 @@ a:hover i[class*=fa-], a:hover [class*=fa-] {
 }
 .results-section .participants-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 2.5rem;
+  padding: 1rem 0;
 }
 @media (max-width: 768px) {
   .results-section .participants-grid {
     grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 0.5rem 0;
   }
 }
 .results-section .participant-card {
-  background: #f7fafc;
-  border: 2px solid #e2e8f0;
-  border-radius: 0.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
   padding: 1.5rem;
   transition: all 0.3s ease;
-  cursor: pointer;
 }
-.results-section .participant-card:hover, .results-section .participant-card:focus {
+.results-section .participant-card:hover {
   border-color: #005f5f;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 95, 95, 0.1);
   transform: translateY(-2px);
 }
-.results-section .participant-card .participant-header {
-  margin-bottom: 1rem;
-}
-.results-section .participant-card .participant-header .participant-name {
-  font-size: 1.3rem;
+.results-section .participant-card .participant-name {
+  font-size: 1.25rem;
   font-weight: 600;
-  color: #2d3748;
+  color: #005f5f;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+.results-section .participant-card p {
   margin-bottom: 0.5rem;
+  color: #2d3748;
 }
-.results-section .participant-card .participant-details {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+.results-section .participant-card p strong {
+  color: #718096;
+  font-weight: 500;
+  display: inline-block;
+  min-width: 120px;
 }
-.results-section .participant-card .participant-actions {
-  text-align: right;
+.results-section .participant-card .btn {
+  margin-top: 1rem;
 }
 .results-section .no-results {
   text-align: center;
@@ -15213,25 +15284,25 @@ a:hover i[class*=fa-], a:hover [class*=fa-] {
   margin-bottom: 0.5rem;
 }
 
-.participant-header {
+.participant-detail-header {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-bottom: 2rem;
 }
-.participant-header .flag-emoji {
+.participant-detail-header .flag-emoji {
   font-size: 2rem;
 }
-.participant-header .participant-title {
+.participant-detail-header .participant-title {
   flex: 1;
 }
-.participant-header .participant-title .participant-name {
+.participant-detail-header .participant-title .participant-name {
   font-size: 2rem;
   font-weight: 700;
   color: #2d3748;
   margin-bottom: 0.5rem;
 }
-.participant-header .participant-title .participant-id {
+.participant-detail-header .participant-title .participant-id {
   font-family: "Courier New", monospace;
   background: rgba(0, 0, 0, 0.1);
   padding: 0.5rem 1rem;

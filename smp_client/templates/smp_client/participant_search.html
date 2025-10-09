@@ -10,7 +10,7 @@
 {% block content %}
 <div class="dashboard-container">
     <div class="smp-dashboard-header">
-        <h1>🔍 Participant Search</h1>
+        <h1><i class="fa fa-search" aria-hidden="true"></i> Participant Search</h1>
         <p>Search SMP participants across the EU eHealth Network</p>
         <a href="{% url 'smp_client:dashboard' %}" class="btn btn-secondary" aria-label="Return to SMP Dashboard">
             ← Back to Dashboard
@@ -25,7 +25,7 @@
                     <input 
                         type="text" 
                         id="search"
-                        name="search" 
+                        name="q" 
                         value="{{ search_query }}" 
                         placeholder="Enter participant name, domain, or identifier"
                         class="form-control"
@@ -36,10 +36,10 @@
 
                 <div class="form-group">
                     <label for="domain_filter" class="form-label">Service Domain</label>
-                    <select id="domain_filter" name="domain_filter" class="form-control" aria-label="Filter by service domain">
+                    <select id="domain_filter" name="domain" class="form-control" aria-label="Filter by service domain">
                         <option value="">All Domains</option>
                         {% for domain in domains %}
-                        <option value="{{ domain.domain_code }}" {% if domain_filter==domain.domain_code %}selected{% endif %}>
+                        <option value="{{ domain.domain_code }}" {% if domain_filter == domain.domain_code %}selected{% endif %}>
                             {{ domain.display_name }}
                         </option>
                         {% endfor %}
@@ -48,11 +48,11 @@
 
                 <div class="form-group">
                     <label for="country_filter" class="form-label">Country</label>
-                    <select id="country_filter" name="country_filter" class="form-control" aria-label="Filter by country">
+                    <select id="country_filter" name="country" class="form-control" aria-label="Filter by country">
                         <option value="">All Countries</option>
                         {% for country in countries %}
                         {% if country %}
-                        <option value="{{ country }}" {% if country_filter==country %}selected{% endif %}>
+                        <option value="{{ country }}" {% if country_filter == country %}selected{% endif %}>
                             {% if country == 'IE' %}🇮🇪 Ireland
                             {% elif country == 'BE' %}🇧🇪 Belgium
                             {% elif country == 'AT' %}🇦🇹 Austria
@@ -66,7 +66,7 @@
 
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary" aria-label="Search participants">
-                        🔍 Search Participants
+                        <i class="fa fa-search" aria-hidden="true"></i> Search Participants
                     </button>
                 </div>
             </div>
@@ -81,62 +81,37 @@
 
         <div class="participants-grid" role="main" aria-label="Search results">
             {% for participant in participants %}
-            <article class="participant-card" role="article" aria-labelledby="participant-{{ participant.id }}">
-                <div class="participant-header">
-                    <h3 id="participant-{{ participant.id }}" class="participant-name">
-                        {% if participant.country_code == 'IE' %}🇮🇪
-                        {% elif participant.country_code == 'BE' %}🇧🇪
-                        {% elif participant.country_code == 'AT' %}🇦🇹
-                        {% elif participant.country_code == 'HU' %}🇭🇺
-                        {% else %}🇪🇺{% endif %}
-                        {{ participant.name }}
-                    </h3>
-                </div>
+            <div class="participant-card" role="article" aria-labelledby="participant-{{ participant.id }}">
+                <h3 id="participant-{{ participant.id }}" class="participant-name">
+                    {% if participant.country_code == 'IE' %}🇮🇪
+                    {% elif participant.country_code == 'BE' %}🇧🇪
+                    {% elif participant.country_code == 'AT' %}🇦🇹
+                    {% elif participant.country_code == 'HU' %}🇭🇺
+                    {% else %}🇪🇺{% endif %}
+                    {{ participant.participant_name|default:participant.participant_identifier }}
+                </h3>
 
-                <div class="participant-details">
-                    <div class="detail-item">
-                        <div class="detail-label">Participant ID</div>
-                        <div class="detail-value">{{ participant.participant_id }}</div>
-                    </div>
+                <p><strong>Participant ID:</strong> {{ participant.participant_id }}</p>
+                <p><strong>Country:</strong> {{ participant.country_code }}</p>
+                <p><strong>Domain:</strong> {{ participant.domain.display_name|default:participant.domain.domain_code }}</p>
+                {% if participant.organization_type %}
+                <p><strong>Organization Type:</strong> {{ participant.organization_type }}</p>
+                {% endif %}
+                {% if participant.contact_email %}
+                <p><strong>Contact:</strong> {{ participant.contact_email }}</p>
+                {% endif %}
 
-                    <div class="detail-item">
-                        <div class="detail-label">Country</div>
-                        <div class="detail-value">{{ participant.country_code }}</div>
-                    </div>
-
-                    <div class="detail-item">
-                        <div class="detail-label">Domain</div>
-                        <div class="detail-value">{{ participant.service_domain }}</div>
-                    </div>
-
-                    {% if participant.organization_type %}
-                    <div class="detail-item">
-                        <div class="detail-label">Organization Type</div>
-                        <div class="detail-value">{{ participant.organization_type }}</div>
-                    </div>
-                    {% endif %}
-
-                    {% if participant.contact_email %}
-                    <div class="detail-item">
-                        <div class="detail-label">Contact</div>
-                        <div class="detail-value">{{ participant.contact_email }}</div>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <div class="participant-actions">
-                    <a href="{% url 'smp_client:participant_detail' participant.id %}" 
-                       class="btn btn-primary"
-                       aria-label="View details for {{ participant.name }}">
-                        View Details →
-                    </a>
-                </div>
-            </article>
+                <a href="{% url 'smp_client:participant_detail' participant.id %}" 
+                   class="btn btn-primary"
+                   aria-label="View details for {{ participant.participant_name|default:participant.participant_identifier }}">
+                    View Details →
+                </a>
+            </div>
             {% endfor %}
         </div>
         {% else %}
         <div class="no-results" role="status" aria-live="polite">
-            <div class="no-results-icon">🔍</div>
+            <div class="no-results-icon"><i class="fa fa-search" aria-hidden="true"></i></div>
             <h3>No participants found</h3>
             <p>Try adjusting your search criteria or filters</p>
         </div>
