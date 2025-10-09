@@ -54,12 +54,12 @@
 .clinical-section .clinical-tab-content {
   display: none;
   width: 100%;
-  min-height: 200px;
+  min-height: auto; // Remove fixed min-height to prevent unnecessary empty space
 
   &.active {
     display: block;
     width: 100%;
-    min-height: 200px;
+    min-height: auto; // Remove fixed min-height to prevent unnecessary empty space
   }
 }
 
@@ -68,7 +68,7 @@
   background: white;
   border-radius: 0 0 0.375rem 0.375rem;
   width: 100%;
-  min-height: 300px; // Ensure container height
+  min-height: auto; // Remove fixed min-height - let content determine height
   position: relative;
   overflow: hidden; // Ensure content doesn't escape
   contain: layout; // CSS containment to prevent layout issues
@@ -125,7 +125,7 @@
     &.active {
       display: block;
       width: 100%;
-      min-height: 250px;
+      min-height: auto; // Remove fixed min-height on mobile too
       padding: 1rem;
     }
   }

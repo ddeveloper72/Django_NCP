@@ -21834,19 +21834,19 @@ img.context-flag {
 .clinical-section .clinical-tab-content {
   display: none;
   width: 100%;
-  min-height: 200px;
+  min-height: auto;
 }
 .clinical-section .clinical-tab-content.active {
   display: block;
   width: 100%;
-  min-height: 200px;
+  min-height: auto;
 }
 
 .extended-tab-content-container {
   background: white;
   border-radius: 0 0 0.375rem 0.375rem;
   width: 100%;
-  min-height: 300px;
+  min-height: auto;
   position: relative;
   overflow: hidden;
   contain: layout;
@@ -21892,7 +21892,7 @@ img.context-flag {
   .clinical-tab-content.active {
     display: block;
     width: 100%;
-    min-height: 250px;
+    min-height: auto;
     padding: 1rem;
   }
 }
