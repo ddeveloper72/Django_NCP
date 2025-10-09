@@ -7,7 +7,7 @@
 <div class="dashboard-page">
     <!-- Page Header -->
     <div class="page-header">
-        <h1>📄 SMP Documents</h1>
+        <h1><i class="fa fa-file-text" aria-hidden="true"></i> SMP Documents</h1>
         <p class="page-subtitle">Service Metadata Publisher Document Management</p>
     </div>
 
@@ -60,18 +60,18 @@
                         </div>
                     </div>
                     <div class="document-actions">
-                        <a href="{{ url('smp_client:document_detail', document.id) }}"
+                        <a href="{% url 'smp_client:document_detail' document.id %}"
                             class="btn btn-sm btn-outline-primary">
-                            👁️ View
+                            <i class="fa fa-eye" aria-hidden="true"></i> View
                         </a>
-                        <a href="{{ url('smp_client:document_edit', document.id) }}"
+                        <a href="{% url 'smp_client:document_edit' document.id %}"
                             class="btn btn-sm btn-outline-secondary">
-                            ✏️ Edit
+                            <i class="fa fa-edit" aria-hidden="true"></i> Edit
                         </a>
                         <button data-delete-document="{{ document.id }}"
                                 data-delete-url="{% url 'smp_client:document_delete' '0' %}"
                                 class="btn btn-sm btn-outline-danger">
-                            🗑️ Delete
+                            <i class="fa fa-trash" aria-hidden="true"></i> Delete
                         </button>
                     </div>
                 </div>
@@ -79,11 +79,11 @@
             </div>
             {% else %}
             <div class="empty-state">
-                <div class="empty-icon">📄</div>
+                <div class="empty-icon"><i class="fa fa-file-text" aria-hidden="true"></i></div>
                 <h3>No Documents Found</h3>
                 <p>There are no SMP documents configured yet. Start by adding your first document.</p>
                 <a href="{% url 'smp_client:smp_editor' %}" class="btn btn-primary">
-                    ➕ Add First Document
+                    <i class="fa fa-plus" aria-hidden="true"></i> Add First Document
                 </a>
             </div>
             {% endif %}
@@ -94,13 +94,13 @@
             <h2 class="section-title">Quick Actions</h2>
             <div class="actions-grid">
                 <div class="action-card">
-                    <div class="action-icon">📄</div>
+                    <div class="action-icon"><i class="fa fa-file-text" aria-hidden="true"></i></div>
                     <h3>Create Document</h3>
                     <p>Add a new SMP document configuration.</p>
                     <a href="{% url 'smp_client:smp_editor' %}" class="btn btn-primary">Create</a>
                 </div>
                 <div class="action-card">
-                    <div class="action-icon">📁</div>
+                    <div class="action-icon"><i class="fa fa-folder" aria-hidden="true"></i></div>
                     <h3>Import Documents</h3>
                     <p>Import documents from XML files.</p>
                     <button class="btn btn-secondary">Import</button>
