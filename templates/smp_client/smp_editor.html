@@ -2,10 +2,43 @@
 
 {% block title %}SMP Editor{% endblock %}
 
+{% block page_context %}
+<!-- Navigation Breadcrumbs -->
+<nav aria-label="breadcrumb" class="breadcrumb-nav">
+    <div class="container">
+        <ol class="breadcrumb breadcrumb-enhanced mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'home' %}" class="text-decoration-none">
+                    <i class="fa fa-home me-1" aria-hidden="true"></i>Home
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'smp_client:dashboard' %}" class="text-decoration-none">
+                    <i class="fa fa-globe me-1" aria-hidden="true"></i>SMP Management
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="fa fa-edit me-1" aria-hidden="true"></i>SMP Editor
+            </li>
+        </ol>
+    </div>
+</nav>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h1>SMP Editor</h1>
-    <p>Service Metadata Publisher Editor - Configure and manage SMP entries</p>
+    <!-- Page Header with Back Navigation -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1>SMP Editor</h1>
+            <p class="mb-0">Service Metadata Publisher Editor - Configure and manage SMP entries</p>
+        </div>
+        <div>
+            <a href="{% url 'smp_client:dashboard' %}" class="btn btn-secondary" aria-label="Return to SMP dashboard">
+                <i class="fa fa-arrow-left me-1" aria-hidden="true"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
 
     <div class="alert alert-info">
         <i class="fa-solid fa-info-circle"></i>
