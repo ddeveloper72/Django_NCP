@@ -15072,9 +15072,16 @@ a:hover i[class*=fa-], a:hover [class*=fa-] {
   border: 1px solid #f5c6cb;
 }
 
-.flag-emoji {
+.flag-emoji,
+.flag-icon {
   font-size: 1.5rem;
   margin-right: 10px;
+}
+.flag-emoji i,
+.flag-icon i {
+  font-size: 1.25rem;
+  margin-right: 0.5rem;
+  vertical-align: middle;
 }
 
 @media (max-width: 768px) {
@@ -15256,6 +15263,11 @@ a:hover i[class*=fa-], a:hover [class*=fa-] {
   color: #005f5f;
   margin-bottom: 1rem;
   line-height: 1.3;
+}
+.results-section .participant-card .participant-name i {
+  margin-right: 0.5rem;
+  font-size: 1rem;
+  vertical-align: middle;
 }
 .results-section .participant-card p {
   margin-bottom: 0.5rem;

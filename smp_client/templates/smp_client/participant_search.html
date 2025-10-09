@@ -53,11 +53,11 @@
                         {% for country in countries %}
                         {% if country %}
                         <option value="{{ country }}" {% if country_filter == country %}selected{% endif %}>
-                            {% if country == 'IE' %}🇮🇪 Ireland
-                            {% elif country == 'BE' %}🇧🇪 Belgium
-                            {% elif country == 'AT' %}🇦🇹 Austria
-                            {% elif country == 'HU' %}🇭🇺 Hungary
-                            {% else %}🇪🇺 {{ country }}{% endif %}
+                            {% if country == 'IE' %}<i class="fa fa-flag" aria-hidden="true"></i> Ireland
+                            {% elif country == 'BE' %}<i class="fa fa-flag" aria-hidden="true"></i> Belgium
+                            {% elif country == 'AT' %}<i class="fa fa-flag" aria-hidden="true"></i> Austria
+                            {% elif country == 'HU' %}<i class="fa fa-flag" aria-hidden="true"></i> Hungary
+                            {% else %}<i class="fa fa-globe" aria-hidden="true"></i> {{ country }}{% endif %}
                         </option>
                         {% endif %}
                         {% endfor %}
@@ -83,11 +83,11 @@
             {% for participant in participants %}
             <div class="participant-card" role="article" aria-labelledby="participant-{{ participant.id }}">
                 <h3 id="participant-{{ participant.id }}" class="participant-name">
-                    {% if participant.country_code == 'IE' %}🇮🇪
-                    {% elif participant.country_code == 'BE' %}🇧🇪
-                    {% elif participant.country_code == 'AT' %}🇦🇹
-                    {% elif participant.country_code == 'HU' %}🇭🇺
-                    {% else %}🇪🇺{% endif %}
+                    {% if participant.country_code == 'IE' %}<i class="fa fa-flag" aria-hidden="true" style="color: #009639;"></i>
+                    {% elif participant.country_code == 'BE' %}<i class="fa fa-flag" aria-hidden="true" style="color: #ed2939;"></i>
+                    {% elif participant.country_code == 'AT' %}<i class="fa fa-flag" aria-hidden="true" style="color: #ed2939;"></i>
+                    {% elif participant.country_code == 'HU' %}<i class="fa fa-flag" aria-hidden="true" style="color: #477050;"></i>
+                    {% else %}<i class="fa fa-globe" aria-hidden="true" style="color: #005f5f;"></i>{% endif %}
                     {{ participant.participant_name|default:participant.participant_identifier }}
                 </h3>
 
