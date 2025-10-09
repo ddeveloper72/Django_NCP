@@ -583,10 +583,25 @@ a.btn[href*="logout"]:hover {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+/* ACCESSIBILITY FIX: Ensure all tab badges have proper contrast */
+.card .nav-tabs-healthcare .nav-link .badge.bg-info,
+.card .nav-tabs-healthcare .nav-link .badge.bg-secondary,
+.card .nav-tabs-healthcare .nav-link .badge.bg-success,
+.card .nav-tabs-healthcare .nav-link .badge.bg-warning {
+  color: white !important; /* Dark badges get white text */
+  background-color: var(--healthcare-blue) !important; /* Consistent dark background */
+}
+
 .card .nav-tabs-healthcare .nav-link.active .badge {
   background-color: rgba(255, 255, 255, 0.9) !important;
   color: var(--healthcare-blue) !important;
   border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ACCESSIBILITY FIX: Override bg-info badge color for tab badges specifically */
+.card .nav-tabs-healthcare .nav-link.active .badge.bg-info {
+  color: var(--healthcare-blue) !important; /* Override white text on white background */
+  background-color: rgba(255, 255, 255, 0.95) !important;
 }
 
 /* Tab Icons Enhancement */
