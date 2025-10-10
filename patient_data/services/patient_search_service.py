@@ -1,6 +1,7 @@
 """
 EU Patient Search Services
 Basic implementation for patient search and credential management
+Enhanced with FHIR integration for unified search across CDA and FHIR sources
 """
 
 from dataclasses import dataclass
@@ -294,35 +295,41 @@ class EUPatientSearchService:
                 "gender": "",
             }
 
-    def search_patient(self, credentials: PatientCredentials) -> List[PatientMatch]:
+    def search_patient(self, credentials: PatientCredentials, use_local_cda: bool = True, use_hapi_fhir: bool = True) -> List[PatientMatch]:
         """
-        Search for patient documents using NCP-to-NCP query
+        Search for patient documents using NCP-to-NCP query with development options
 
         Args:
             credentials: Country code and patient identifier
+            use_local_cda: Whether to search local CDA documents (default: True)
+            use_hapi_fhir: Whether to search HAPI FHIR server (default: True)
 
         Returns:
-            List of patient matches with CDA documents
+            List of patient matches from selected sources
         """
         self.logger.info(
-            f"NCP Query - Patient ID: {credentials.patient_id} from {credentials.country_code}"
+            f"NCP Query - Patient ID: {credentials.patient_id} from {credentials.country_code} "
+            f"(CDA: {use_local_cda}, FHIR: {use_hapi_fhir})"
         )
 
         matches = []
 
         if credentials.patient_id:
-            # Use the new CDA indexing system to find documents
-            from .cda_document_index import get_cda_indexer
+            # Search CDA documents if enabled
+            if use_local_cda:
+                self.logger.info(f"Searching local CDA documents for patient {credentials.patient_id}")
+                # Use the new CDA indexing system to find documents
+                from .cda_document_index import get_cda_indexer
 
-            indexer = get_cda_indexer()
-            documents = indexer.find_patient_documents(
-                credentials.patient_id, credentials.country_code
-            )
+                indexer = get_cda_indexer()
+                documents = indexer.find_patient_documents(
+                    credentials.patient_id, credentials.country_code
+                )
 
-            if documents:
-                # Group documents by type (L1, L3)
-                l1_docs = [doc for doc in documents if doc.cda_type == "L1"]
-                l3_docs = [doc for doc in documents if doc.cda_type == "L3"]
+                if documents:
+                    # Group documents by type (L1, L3)
+                    l1_docs = [doc for doc in documents if doc.cda_type == "L1"]
+                    l3_docs = [doc for doc in documents if doc.cda_type == "L3"]
 
                 # Prepare document lists for user selection
                 l1_document_list = []
@@ -421,108 +428,103 @@ class EUPatientSearchService:
                         "family_name": patient_info["family_name"],
                         "birth_date": patient_info["birth_date"],
                         "gender": patient_info["gender"],
+                        "source": "CDA",  # Mark as CDA source
                     },
                     available_documents=["L1_CDA", "L3_CDA", "eDispensation", "ePS"],
                 )
                 matches.append(match)
-
             else:
-                # Fallback to mock data if not found in index
-                self.logger.warning(
-                    f"Patient {credentials.patient_id} not found in index, using fallback"
-                )
-                patient_info = self.extract_patient_info_from_cda(
-                    ""
-                )  # Returns default values
+                if use_local_cda:  # Only log if CDA search was enabled
+                    self.logger.info(f"No CDA documents found for patient {credentials.patient_id}")
 
-                # Create fallback mock CDA content
-                l1_cda_content = """<?xml version="1.0" encoding="UTF-8"?>
-<ClinicalDocument xmlns="urn:hl7-org:v3">
-    <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
-    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1" extension="L1"/>
-    <recordTarget>
-        <patientRole>
-            <id assigningAuthorityName="Mock Authority" extension="{}" root="2.16.840.1.113883.2.9.4.3.2"/>
-            <patient>
-                <name>
-                    <family>Patient</family>
-                    <given>Mock</given>
-                </name>
-                <administrativeGenderCode code="U"/>
-                <birthTime value=""/>
-            </patient>
-        </patientRole>
-    </recordTarget>
-    <component>
-        <nonXMLBody>
-            <text mediaType="application/pdf" representation="B64">
-                Mock PDF content
-            </text>
-        </nonXMLBody>
-    </component>
-</ClinicalDocument>""".format(
-                    credentials.patient_id
-                )
-
-                l3_cda_content = """<?xml version="1.0" encoding="UTF-8"?>
-<ClinicalDocument xmlns="urn:hl7-org:v3">
-    <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
-    <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1" extension="L3"/>
-    <recordTarget>
-        <patientRole>
-            <id assigningAuthorityName="Mock Authority" extension="{}" root="2.16.840.1.113883.2.9.4.3.2"/>
-            <patient>
-                <name>
-                    <family>Patient</family>
-                    <given>Mock</given>
-                </name>
-                <administrativeGenderCode code="U"/>
-                <birthTime value=""/>
-            </patient>
-        </patientRole>
-    </recordTarget>
-    <component>
-        <structuredBody>
-            <component>
-                <section>
-                    <title>Mock Clinical Section</title>
-                    <text>No real clinical data available for this patient ID.</text>
-                </section>
-            </component>
-        </structuredBody>
-    </component>
-</ClinicalDocument>""".format(
-                    credentials.patient_id
-                )
-
-                l1_file_path = f"mock/l1_{credentials.patient_id}.xml"
-                l3_file_path = f"mock/l3_{credentials.patient_id}.xml"
-
-                # Create fallback match
-                match = PatientMatch(
-                    patient_id=credentials.patient_id,
-                    given_name=patient_info["given_name"],
-                    family_name=patient_info["family_name"],
-                    birth_date=patient_info["birth_date"],
-                    gender=patient_info["gender"],
-                    country_code=credentials.country_code,
-                    match_score=1.0,
-                    confidence_score=1.0,
-                    l1_cda_path=l1_file_path,
-                    l3_cda_path=l3_file_path,
-                    l1_cda_content=l1_cda_content,
-                    l3_cda_content=l3_cda_content,
-                    patient_data={
-                        "id": credentials.patient_id,
-                        "name": f"{patient_info['given_name']} {patient_info['family_name']}",
-                        "given_name": patient_info["given_name"],
-                        "family_name": patient_info["family_name"],
-                        "birth_date": patient_info["birth_date"],
-                        "gender": patient_info["gender"],
-                    },
-                    available_documents=["L1_CDA", "L3_CDA", "eDispensation", "ePS"],
-                )
-                matches.append(match)
+            # Search FHIR if enabled and either no CDA search was done or no CDA results found
+            if use_hapi_fhir and (not use_local_cda or not matches):
+                self.logger.info(f"Searching HAPI FHIR server for patient {credentials.patient_id}")
+                
+                try:
+                    # Import FHIR services
+                    from eu_ncp_server.services.fhir_integration import hapi_fhir_service
+                    from .fhir_bundle_parser import FHIRBundleParser
+                    
+                    # Search HAPI FHIR server
+                    search_result = hapi_fhir_service.search_patients({
+                        'identifier': credentials.patient_id
+                    })
+                    
+                    # Extract patients from search results
+                    fhir_patients = search_result.get('patients', [])
+                    
+                    if fhir_patients and len(fhir_patients) > 0:
+                        self.logger.info(f"Found {len(fhir_patients)} FHIR patients matching {credentials.patient_id}")
+                        
+                        # For each FHIR patient, try to get their Patient Summary Bundle
+                        for fhir_patient in fhir_patients:
+                            patient_id = fhir_patient.get('id')
+                            if patient_id:
+                                try:
+                                    # Get Patient Summary Bundle 
+                                    ps_bundle = hapi_fhir_service.get_patient_summary(patient_id, "system_search")
+                                    
+                                    if ps_bundle:
+                                        self.logger.info(f"Retrieved Patient Summary Bundle for FHIR patient {patient_id}")
+                                        
+                                        # Parse FHIR Bundle using FHIRBundleParser
+                                        bundle_parser = FHIRBundleParser()
+                                        parsed_data = bundle_parser.parse_patient_summary_bundle(ps_bundle)
+                                        
+                                        if parsed_data and parsed_data.get('patient_identity'):
+                                            patient_identity = parsed_data['patient_identity']
+                                            
+                                            # Create PatientMatch from FHIR data
+                                            match = PatientMatch(
+                                                patient_id=credentials.patient_id,
+                                                given_name=patient_identity.get('given_name', 'Unknown'),
+                                                family_name=patient_identity.get('family_name', 'Patient'),
+                                                birth_date=patient_identity.get('birth_date', ''),
+                                                gender=patient_identity.get('gender', ''),
+                                                country_code=credentials.country_code,
+                                                match_score=1.0,
+                                                confidence_score=0.9,  # Slightly lower for FHIR since it's external
+                                                # Store FHIR Bundle as JSON in patient_data
+                                                patient_data={
+                                                    "id": credentials.patient_id,
+                                                    "name": f"{patient_identity.get('given_name', 'Unknown')} {patient_identity.get('family_name', 'Patient')}",
+                                                    "given_name": patient_identity.get('given_name', 'Unknown'),
+                                                    "family_name": patient_identity.get('family_name', 'Patient'),
+                                                    "birth_date": patient_identity.get('birth_date', ''),
+                                                    "gender": patient_identity.get('gender', ''),
+                                                    "source": "FHIR",
+                                                    "fhir_bundle": ps_bundle,  # Store original FHIR Bundle
+                                                    "clinical_sections": parsed_data.get('clinical_sections', []),
+                                                    "fhir_patient_id": patient_id
+                                                },
+                                                available_documents=["FHIR_Patient_Summary"],
+                                                # No CDA content for FHIR patients
+                                                l1_cda_content=None,
+                                                l3_cda_content=None,
+                                                l1_cda_path=None,
+                                                l3_cda_path=None
+                                            )
+                                            matches.append(match)
+                                            
+                                            self.logger.info(f"Successfully created PatientMatch from FHIR data for {patient_identity.get('given_name')} {patient_identity.get('family_name')}")
+                                            
+                                except Exception as e:
+                                    self.logger.error(f"Error processing FHIR patient {patient_id}: {e}")
+                                    continue
+                                    
+                    # If FHIR search also found nothing, fall back to mock data                        
+                    if not matches:
+                        self.logger.warning(f"No results found in CDA or FHIR for patient {credentials.patient_id}, using fallback")
+                        # Fallback to mock data continues below...
+                        
+                except Exception as e:
+                    self.logger.error(f"Error during FHIR search: {e}")
+                    # Continue without FHIR results if search fails
+                
+                # If no results found in either CDA or FHIR, return empty list
+                if not matches:
+                    self.logger.info(f"No patient found with ID {credentials.patient_id} in {credentials.country_code} from either CDA or FHIR sources")
 
         return matches
 

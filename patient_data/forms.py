@@ -71,6 +71,23 @@ class PatientDataForm(forms.Form):
         help_text="The unique patient identifier provided by the patient (e.g., national health ID)",
     )
 
+    # Development options for testing different data sources
+    use_local_cda = forms.BooleanField(
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={"class": "development-search-checkbox"}),
+        label="Search Local CDA",
+        help_text="Search Patient Summary documents in local CDA test data",
+    )
+
+    use_hapi_fhir = forms.BooleanField(
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={"class": "development-search-checkbox"}),
+        label="Search HAPI FHIR Server",
+        help_text="Search Patient Summary Bundles from hapi.fhir.org/baseR4",
+    )
+
     def save(self):
         """Save form data as a simplified PatientData object"""
         # For now, create a minimal record

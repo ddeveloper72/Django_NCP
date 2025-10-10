@@ -2158,12 +2158,18 @@ def patient_data_view(request):
             # Extract the NCP query parameters
             country_code = form.cleaned_data["country_code"]
             patient_id = form.cleaned_data["patient_id"]
+            
+            # Extract development flags
+            use_local_cda = form.cleaned_data.get("use_local_cda", True)
+            use_hapi_fhir = form.cleaned_data.get("use_hapi_fhir", True)
 
-            # Log the NCP query
+            # Log the NCP query with development options
             logger.info(
-                "NCP Document Query: Patient ID %s from %s",
+                "NCP Document Query: Patient ID %s from %s (CDA: %s, FHIR: %s)",
                 patient_id,
                 country_code,
+                use_local_cda,
+                use_hapi_fhir,
             )
 
             # Create search credentials for NCP-to-NCP query
@@ -2172,9 +2178,9 @@ def patient_data_view(request):
                 patient_id=patient_id,
             )
 
-            # Search for matching CDA documents
+            # Search for matching documents with development options
             search_service = EUPatientSearchService()
-            matches = search_service.search_patient(credentials)
+            matches = search_service.search_patient(credentials, use_local_cda, use_hapi_fhir)
 
             if matches:
                 # Get the first (best) match
@@ -2211,6 +2217,12 @@ def patient_data_view(request):
                     "selected_l3_index": match.selected_l3_index,
                     "document_summary": match.get_document_summary(),
                     "available_document_types": match.get_available_document_types(),
+                    # FHIR integration - detect source type
+                    "data_source": match.patient_data.get("source", "CDA"),  # "CDA" or "FHIR"
+                    "is_fhir_source": match.patient_data.get("source") == "FHIR",
+                    "fhir_bundle": match.patient_data.get("fhir_bundle") if match.patient_data.get("source") == "FHIR" else None,
+                    "clinical_sections": match.patient_data.get("clinical_sections", []),
+                    "fhir_patient_id": match.patient_data.get("fhir_patient_id") if match.patient_data.get("source") == "FHIR" else None,
                 }
 
                 # Create PatientSession for secure session management

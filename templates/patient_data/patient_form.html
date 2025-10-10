@@ -102,6 +102,41 @@
                         </div>
                     </div>
 
+                    {# Development Search Options #}
+                    <div class="development-search-section">
+                        <h6 class="development-options-title">
+                            <i class="fa-solid fa-flask me-1"></i>Development Options
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="development-search-option">
+                                    <input type="checkbox" name="use_local_cda" id="use_local_cda" class="development-search-checkbox" checked>
+                                    <div class="development-search-content">
+                                        <label for="use_local_cda" class="development-search-label">
+                                            <i class="fa-solid fa-file-medical me-1"></i>Search Local CDA
+                                        </label>
+                                        <div class="development-search-description">
+                                            Search Patient Summary documents in local CDA test data
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="development-search-option">
+                                    <input type="checkbox" name="use_hapi_fhir" id="use_hapi_fhir" class="development-search-checkbox" checked>
+                                    <div class="development-search-content">
+                                        <label for="use_hapi_fhir" class="development-search-label">
+                                            <i class="fa-solid fa-cloud me-1"></i>Search HAPI FHIR Server
+                                        </label>
+                                        <div class="development-search-description">
+                                            Search Patient Summary Bundles from hapi.fhir.org/baseR4
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {# Form Actions - Submit and Reset buttons #}
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary btn-lg">
