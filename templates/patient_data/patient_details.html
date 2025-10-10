@@ -70,7 +70,12 @@
                     </h5>
                     {% if has_cda_match %}
                     <small class="text-light">
-                        Source: {{ source_country }} • Document: Patient Summary ({{ preferred_cda_type|default:"L3" }})
+                        Source: {{ source_country }} • Document: 
+                        {% if patient_summary.data_source == "FHIR" %}
+                            FHIR Patient Summary Bundle
+                        {% else %}
+                            Patient Summary ({{ preferred_cda_type|default:"L3" }})
+                        {% endif %}
                     </small>
                     {% endif %}
                 </div>
@@ -135,7 +140,13 @@
                         {% if has_cda_match and patient_summary.file_path %}
                         <div class="col-md-12">
                             <label class="form-label text-muted small">Source File:</label>
-                            <p class="mb-0 font-monospace small">{{ patient_summary.file_path|default:"Unknown" }}</p>
+                            <p class="mb-0 font-monospace small">
+                                {% if patient_summary.data_source == "FHIR" %}
+                                    {{ cda_file_name }}
+                                {% else %}
+                                    {{ patient_summary.file_path|default:"Unknown" }}
+                                {% endif %}
+                            </p>
                         </div>
                         {% endif %}
                     </div>
@@ -163,8 +174,8 @@
                             <div class="d-flex align-items-center">
                                 <i class="fa-solid fa-eye me-2"></i>
                                 <div>
-                                    <div class="fw-bold">View CDA Document</div>
-                                    <small class="d-block">{{ selected_cda_type }} Browser View</small>
+                                    <div class="fw-bold">View Patient Summary</div>
+                                    <small class="d-block">Interactive Clinical View</small>
                                 </div>
                             </div>
                         {% else %}
@@ -200,10 +211,8 @@
                             <div class="d-flex align-items-center">
                                 <i class="fa-solid fa-download me-2"></i>
                                 <div>
-                                    <div class="fw-bold">CDA Download</div>
-                                    <small class="d-block">
-                                        {% if l1_available %}L1 Document (PDF Structure){% else %}{{ preferred_cda_type|default:"L3" }} Document{% endif %}
-                                    </small>
+                                    <div class="fw-bold">Download Patient Summary</div>
+                                    <small class="d-block">PDF for Print/Share</small>
                                 </div>
                             </div>
                         </a>
@@ -270,17 +279,27 @@
                                 <small class="d-flex justify-content-between">
                                     <span class="text-muted">Available Types:</span>
                                     <span>
-                                        {% if l1_available %}L1 CDA{% endif %}
-                                        {% if l1_available and l3_available %}, {% endif %}
-                                        {% if l3_available %}L3 CDA{% endif %}
-                                        {% if not l1_available and not l3_available %}Unknown{% endif %}
+                                        {% if patient_summary.data_source == "FHIR" %}
+                                            FHIR Bundle
+                                        {% else %}
+                                            {% if l1_available %}L1 CDA{% endif %}
+                                            {% if l1_available and l3_available %}, {% endif %}
+                                            {% if l3_available %}L3 CDA{% endif %}
+                                            {% if not l1_available and not l3_available %}Unknown{% endif %}
+                                        {% endif %}
                                     </span>
                                 </small>
                             </div>
                             <div class="col-12">
                                 <small class="d-flex justify-content-between">
-                                    <span class="text-muted">Rendering:</span>
-                                    <span>{{ preferred_cda_type }} CDA</span>
+                                    <span class="text-muted">Document Type:</span>
+                                    <span>
+                                        {% if patient_summary.data_source == "FHIR" %}
+                                            FHIR Bundle
+                                        {% else %}
+                                            {{ preferred_cda_type }} CDA
+                                        {% endif %}
+                                    </span>
                                 </small>
                             </div>
                         </div>
