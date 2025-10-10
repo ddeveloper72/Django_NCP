@@ -21,8 +21,9 @@ import json
 
 
 def home_view(request):
-    """Home page with SMP source configuration"""
+    """Home page with SMP source configuration and system status"""
     from smp_client.models import SMPConfiguration
+    from .services import SystemStatusService
 
     # Get current SMP configuration
     try:
@@ -40,10 +41,14 @@ def home_view(request):
         current_smp_ui_url = "#"
         current_smp_api_url = "#"
 
+    # Get system status
+    system_status = SystemStatusService.get_system_status()
+
     context = {
         "current_smp_name": current_smp_name,
         "current_smp_ui_url": current_smp_ui_url,
         "current_smp_api_url": current_smp_api_url,
+        "system_status": system_status,
     }
     return render(request, "home.html", context)
 

@@ -433,18 +433,51 @@
                 </div>
             </div>
         </div>
+    </div>
+</section>
 
-        <!-- Status Indicator -->
-        <div class="row mt-5">
-            <div class="col-12">
-                <div class="status-indicator">
-                    <div class="status-content">
-                        <div class="status-icon">
-                            <i class="fa fa-check-circle" aria-hidden="true"></i>
+<!-- System Status Section -->
+<section class="system-status-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10">
+                <div class="system-status-card">
+                    <div class="status-header">
+                        <div class="status-badge">
+                            <i class="fa {% if system_status.overall_status == 'operational' %}fa-check-circle{% elif system_status.overall_status == 'warning' %}fa-exclamation-triangle text-warning{% else %}fa-times-circle text-danger{% endif %}" aria-hidden="true"></i>
+                            <span class="status-label">System {% if system_status.overall_status == 'operational' %}Operational{% elif system_status.overall_status == 'warning' %}Warning{% elif system_status.overall_status == 'degraded' %}Degraded{% else %}{{ system_status.overall_status|title }}{% endif %}</span>
                         </div>
-                        <div class="status-text">
-                            <strong>System Status:</strong> All API endpoints are accessible and operational.
-                            Authentication-free access enabled for Java portal integration.
+                        <div class="last-updated">
+                            Last updated: <time>{{ system_status.last_updated|date:"M d, Y H:i" }}</time>
+                        </div>
+                    </div>
+                    <div class="status-details">
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <div class="status-metric">
+                                    <i class="fa fa-globe {% if system_status.components.api_gateway.status == 'online' %}text-success{% elif system_status.components.api_gateway.status == 'warning' %}text-warning{% else %}text-danger{% endif %}" aria-hidden="true"></i>
+                                    <span class="metric-label">API Gateway</span>
+                                    <span class="metric-status {% if system_status.components.api_gateway.status == 'online' %}online{% elif system_status.components.api_gateway.status == 'warning' %}warning{% else %}offline{% endif %}">{{ system_status.components.api_gateway.label }}</span>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-metric">
+                                    <i class="fa fa-database {% if system_status.components.smp_services.status == 'online' %}text-success{% elif system_status.components.smp_services.status == 'warning' %}text-warning{% else %}text-danger{% endif %}" aria-hidden="true"></i>
+                                    <span class="metric-label">SMP Services</span>
+                                    <span class="metric-status {% if system_status.components.smp_services.status == 'online' %}online{% elif system_status.components.smp_services.status == 'warning' %}warning{% else %}offline{% endif %}">{{ system_status.components.smp_services.label }}</span>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-metric">
+                                    <i class="fa fa-shield {% if system_status.components.authentication.status == 'online' %}text-success{% elif system_status.components.authentication.status == 'warning' %}text-warning{% else %}text-danger{% endif %}" aria-hidden="true"></i>
+                                    <span class="metric-label">Authentication</span>
+                                    <span class="metric-status {% if system_status.components.authentication.status == 'online' %}online{% elif system_status.components.authentication.status == 'warning' %}warning{% else %}offline{% endif %}">{{ system_status.components.authentication.label }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="integration-note">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            Authentication-free access available for Java portal integration and external services.
                         </div>
                     </div>
                 </div>

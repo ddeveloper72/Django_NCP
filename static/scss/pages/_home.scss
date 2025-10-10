@@ -943,3 +943,189 @@ html {
     border: 1px solid $border-color !important;
   }
 }
+
+// =====================================================
+// SYSTEM STATUS SECTION - MOBILE FIRST
+// =====================================================
+
+.system-status-section {
+  padding: $space-lg $space-md;
+  background: #ffffff;
+  
+  @media (min-width: 768px) {
+    padding: $space-xl $space-lg;
+  }
+  
+  @media (min-width: 1200px) {
+    padding: calc($space-xl * 1.5) $space-xl;
+  }
+}
+
+// =====================================================
+// SYSTEM STATUS DASHBOARD - MEANINGFUL HEALTHCARE MONITORING
+// =====================================================
+
+.system-status-section {
+  padding: $space-xl $space-md calc($space-xl * 1.5);
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-top: 1px solid rgba($hco-primary-teal, 0.1);
+  
+  @media (min-width: 768px) {
+    padding: calc($space-xl * 1.5) $space-lg calc($space-xl * 2);
+  }
+}
+
+.system-status-card {
+  background: $white;
+  border-radius: $border-radius-lg;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba($hco-primary-teal, 0.15);
+  overflow: hidden;
+}
+
+.status-header {
+  background: linear-gradient(135deg, rgba($hco-secondary-green, 0.05) 0%, rgba($hco-primary-teal, 0.03) 100%);
+  padding: $space-lg $space-xl;
+  border-bottom: 1px solid rgba($hco-secondary-green, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $space-md;
+  
+  @media (max-width: 767px) {
+    padding: $space-lg;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $space-sm;
+  }
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+  
+  i {
+    color: $hco-secondary-green;
+    font-size: 1.25rem;
+  }
+  
+  .status-label {
+    color: $text-dark;
+    font-weight: 600;
+    font-size: $font-size-lg;
+  }
+}
+
+.last-updated {
+  color: $text-muted;
+  font-size: $font-size-sm;
+  
+  time {
+    font-weight: 500;
+  }
+}
+
+.status-details {
+  padding: $space-xl;
+  
+  @media (max-width: 767px) {
+    padding: $space-lg;
+  }
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $space-lg;
+  margin-bottom: $space-xl;
+  
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+    gap: $space-md;
+    margin-bottom: $space-lg;
+  }
+}
+
+.status-item {
+  .status-metric {
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+    padding: $space-md;
+    background: rgba($hco-primary-teal, 0.03);
+    border-radius: $border-radius-md;
+    border-left: 3px solid $hco-secondary-green;
+    transition: all 0.3s ease;
+    text-align: center;
+    
+    &:hover {
+      background: rgba($hco-primary-teal, 0.08);
+      transform: translateY(-1px);
+    }
+    
+    i {
+      font-size: 1.5rem;
+      width: auto;
+      text-align: center;
+      align-self: center;
+      // ✅ ACCESSIBILITY: Context-aware icon colors
+      @include smart-icon-color($white, $text-dark, $hco-primary-teal);
+    }
+    
+    .metric-label {
+      color: $text-dark !important;        // ✅ WCAG: 12.8:1 contrast ratio
+      font-weight: 600;
+      font-size: $font-size-base;
+      line-height: 1.2;
+    }
+    
+    .metric-status {
+      font-size: $font-size-sm;
+      font-weight: 600;
+      padding: 0.375rem 0.75rem;
+      border-radius: $border-radius-sm;
+      align-self: center;
+      min-width: 80px;
+      
+      &.online {
+        background: $hco-secondary-green !important;   // ✅ WCAG: 8.1:1 contrast
+        color: $white !important;                      // High contrast text
+        border: 1px solid $hco-secondary-green;
+      }
+      
+      &.offline {
+        background: $error-red !important;             // ✅ WCAG: 5.6:1 contrast  
+        color: $white !important;                      // High contrast text
+        border: 1px solid $error-red;
+      }
+      
+      &.warning {
+        background: $warning-orange !important;        // ✅ WCAG: 4.8:1 contrast
+        color: $text-dark !important;                  // High contrast text
+        border: 1px solid $warning-orange;
+      }
+    }
+  }
+}
+
+.integration-note {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-sm;
+  padding: $space-md;
+  background: rgba($hco-primary-teal, 0.05);
+  border-radius: $border-radius-md;
+  border: 1px solid rgba($hco-primary-teal, 0.1);
+  color: $text-dark !important;              // ✅ WCAG: 12.8:1 contrast ratio
+  font-size: $font-size-sm;
+  line-height: 1.5;
+  
+  i {
+    color: $hco-primary-teal !important;     // ✅ WCAG: 7.2:1 contrast ratio
+    font-size: 1rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+  }
+}
