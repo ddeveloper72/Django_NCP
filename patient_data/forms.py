@@ -88,6 +88,20 @@ class PatientDataForm(forms.Form):
         help_text="Search Patient Summary Bundles from hapi.fhir.org/baseR4",
     )
 
+    def clean(self):
+        """Validate that at least one data source is selected"""
+        cleaned_data = super().clean()
+        use_local_cda = cleaned_data.get("use_local_cda")
+        use_hapi_fhir = cleaned_data.get("use_hapi_fhir")
+
+        # Ensure at least one data source is selected
+        if not use_local_cda and not use_hapi_fhir:
+            raise forms.ValidationError(
+                "Please select at least one data source to search (Local CDA or HAPI FHIR Server)."
+            )
+
+        return cleaned_data
+
     def save(self):
         """Save form data as a simplified PatientData object"""
         # For now, create a minimal record

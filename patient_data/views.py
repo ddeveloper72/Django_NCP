@@ -2197,7 +2197,7 @@ def patient_data_view(request):
 
                 # Prepare patient data for secure storage
                 patient_session_data = {
-                    "file_path": match.file_path,
+                    "file_path": match.file_path or "FHIR_BUNDLE",  # Handle None file_path for FHIR
                     "country_code": match.country_code,
                     "confidence_score": match.confidence_score,
                     "patient_data": match.patient_data,
@@ -2600,6 +2600,24 @@ def direct_patient_view(request, patient_id):
         return redirect("patient_data:patient_data_form")
 
 
+def _get_display_filename(match_data):
+    """Helper function to get appropriate display filename for different data sources"""
+    data_source = match_data.get("data_source", "CDA")
+    
+    if data_source == "FHIR":
+        # For FHIR sources, show FHIR patient ID or bundle info
+        fhir_patient_id = match_data.get("fhir_patient_id")
+        if fhir_patient_id:
+            return f"FHIR Patient {fhir_patient_id}"
+        return "FHIR Patient Summary Bundle"
+    else:
+        # For CDA sources, show file basename if available
+        file_path = match_data.get("file_path")
+        if file_path and file_path != "FHIR_BUNDLE":
+            return os.path.basename(file_path)
+        return "CDA Document"
+
+
 def patient_details_view(request, patient_id):
     """
     View for displaying patient details and CDA documents
@@ -2856,8 +2874,9 @@ def patient_details_view(request, patient_id):
             "address": match_data["patient_data"].get("address", {}),
             "contact_info": match_data["patient_data"].get("contact_info", {}),
             "cda_type": match_data.get("preferred_cda_type", "L3"),
-            "file_path": match_data["file_path"],
+            "file_path": match_data.get("file_path"),  # Use .get() to handle None values
             "confidence_score": match_data["confidence_score"],
+            "data_source": match_data["patient_data"].get("source", "CDA"),  # Track data source
         }
 
         # Enhance patient summary with terminology processing if CDA content available
@@ -2982,7 +3001,7 @@ def patient_details_view(request, patient_id):
                 "match_confidence": round(match_data["confidence_score"] * 100, 1),
                 "source_country": match_data["country_code"],
                 "source_country_display": country_display,
-                "cda_file_name": os.path.basename(match_data["file_path"]),
+                "cda_file_name": _get_display_filename(match_data),
                 # L1/L3 CDA availability information
                 "l1_available": match_data.get("has_l1", False),
                 "l3_available": match_data.get("has_l3", False),

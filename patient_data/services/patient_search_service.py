@@ -437,8 +437,8 @@ class EUPatientSearchService:
                 if use_local_cda:  # Only log if CDA search was enabled
                     self.logger.info(f"No CDA documents found for patient {credentials.patient_id}")
 
-            # Search FHIR if enabled and either no CDA search was done or no CDA results found
-            if use_hapi_fhir and (not use_local_cda or not matches):
+            # Search FHIR if enabled (independent of CDA results)
+            if use_hapi_fhir:
                 self.logger.info(f"Searching HAPI FHIR server for patient {credentials.patient_id}")
                 
                 try:

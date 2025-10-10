@@ -20829,6 +20829,11 @@ input[type=checkbox] {
   border-color: #005f5f;
   background: rgb(84.8, 255, 255);
 }
+.development-search-section .development-search-option.active {
+  border-color: #22c55e;
+  background: rgb(225.8337662338, 249.9662337662, 234.7168831169);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
+}
 .development-search-section .development-search-option .development-search-checkbox {
   margin-top: 2px;
   transform: scale(1.2);

@@ -110,28 +110,42 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="development-search-option">
-                                    <input type="checkbox" name="use_local_cda" id="use_local_cda" class="development-search-checkbox" checked>
+                                    {{ form.use_local_cda }}
                                     <div class="development-search-content">
-                                        <label for="use_local_cda" class="development-search-label">
-                                            <i class="fa-solid fa-file-medical me-1"></i>Search Local CDA
+                                        <label for="{{ form.use_local_cda.id_for_label }}" class="development-search-label">
+                                            <i class="fa-solid fa-file-medical me-1"></i>{{ form.use_local_cda.label }}
                                         </label>
                                         <div class="development-search-description">
-                                            Search Patient Summary documents in local CDA test data
+                                            {{ form.use_local_cda.help_text }}
                                         </div>
                                     </div>
+                                    {% if form.use_local_cda.errors %}
+                                    <div class="field-errors">
+                                        {% for error in form.use_local_cda.errors %}
+                                        <span class="error-message">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="development-search-option">
-                                    <input type="checkbox" name="use_hapi_fhir" id="use_hapi_fhir" class="development-search-checkbox" checked>
+                                    {{ form.use_hapi_fhir }}
                                     <div class="development-search-content">
-                                        <label for="use_hapi_fhir" class="development-search-label">
-                                            <i class="fa-solid fa-cloud me-1"></i>Search HAPI FHIR Server
+                                        <label for="{{ form.use_hapi_fhir.id_for_label }}" class="development-search-label">
+                                            <i class="fa-solid fa-cloud me-1"></i>{{ form.use_hapi_fhir.label }}
                                         </label>
                                         <div class="development-search-description">
-                                            Search Patient Summary Bundles from hapi.fhir.org/baseR4
+                                            {{ form.use_hapi_fhir.help_text }}
                                         </div>
                                     </div>
+                                    {% if form.use_hapi_fhir.errors %}
+                                    <div class="field-errors">
+                                        {% for error in form.use_hapi_fhir.errors %}
+                                        <span class="error-message">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -242,4 +256,76 @@
 {% block extra_js %}
 <!-- Patient form functionality is now externalized -->
 <script src="{% static 'js/patient_forms.js' %}"></script>
+
+<!-- Development Checkboxes Interactive Enhancement -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cdaCheckbox = document.getElementById('id_use_local_cda');
+    const fhirCheckbox = document.getElementById('id_use_hapi_fhir');
+    const form = document.querySelector('.patient-search-form');
+    
+    function updateCheckboxVisualState() {
+        // Update visual state of checkbox containers
+        const cdaContainer = cdaCheckbox.closest('.development-search-option');
+        const fhirContainer = fhirCheckbox.closest('.development-search-option');
+        
+        // Add/remove visual indicators based on checkbox state
+        if (cdaCheckbox.checked) {
+            cdaContainer.classList.add('active');
+        } else {
+            cdaContainer.classList.remove('active');
+        }
+        
+        if (fhirCheckbox.checked) {
+            fhirContainer.classList.add('active');
+        } else {
+            fhirContainer.classList.remove('active');
+        }
+        
+        // Ensure at least one is always checked (client-side validation)
+        if (!cdaCheckbox.checked && !fhirCheckbox.checked) {
+            // Re-check the one that was just unchecked
+            if (event.target === cdaCheckbox) {
+                fhirCheckbox.checked = true;
+            } else {
+                cdaCheckbox.checked = true;
+            }
+            updateCheckboxVisualState();
+            
+            // Show user-friendly message
+            alert('At least one data source must be selected for patient search.');
+        }
+        
+        // Update search button text to reflect selected sources
+        updateSubmitButtonText();
+    }
+    
+    function updateSubmitButtonText() {
+        const submitBtn = document.querySelector('button[type="submit"]');
+        const btnTextFull = submitBtn.querySelector('.btn-text-full');
+        
+        if (cdaCheckbox.checked && fhirCheckbox.checked) {
+            btnTextFull.textContent = 'Query Patient Documents (CDA + FHIR)';
+        } else if (cdaCheckbox.checked) {
+            btnTextFull.textContent = 'Query Patient Documents (CDA Only)';
+        } else if (fhirCheckbox.checked) {
+            btnTextFull.textContent = 'Query Patient Documents (FHIR Only)';
+        }
+    }
+    
+    // Add event listeners
+    cdaCheckbox.addEventListener('change', updateCheckboxVisualState);
+    fhirCheckbox.addEventListener('change', updateCheckboxVisualState);
+    
+    // Initialize visual state
+    updateCheckboxVisualState();
+    
+    // Add form submission handler to log development options
+    form.addEventListener('submit', function(e) {
+        console.log('🔍 Development Search Options:');
+        console.log('  - Local CDA:', cdaCheckbox.checked);
+        console.log('  - HAPI FHIR:', fhirCheckbox.checked);
+    });
+});
+</script>
 {% endblock %}

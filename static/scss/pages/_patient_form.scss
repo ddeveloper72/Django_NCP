@@ -407,6 +407,12 @@
       background: lighten($primary-blue, 48%);
     }
 
+    &.active {
+      border-color: $success-green;
+      background: lighten($success-green, 48%);
+      box-shadow: 0 2px 8px rgba($success-green, 0.15);
+    }
+
     .development-search-checkbox {
       margin-top: 2px;
       transform: scale(1.2);
