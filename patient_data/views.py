@@ -3415,16 +3415,42 @@ def patient_cda_view(request, session_id, cda_type=None):
         # Extract data components from FHIR response
         admin_data = fhir_data.get('administrative_data', {})
         clinical_arrays = fhir_data.get('clinical_arrays', {})
-        patient_data = fhir_data.get('patient_data')
+        patient_data = fhir_data.get('patient_data', {})
+        patient_information = fhir_data.get('patient_information', {})
         
-        # Build context using FHIR data
+        # Use patient_information if available, otherwise patient_data
+        patient_demographics = patient_information if patient_information else patient_data
+        
+        # Build context using FHIR data with proper template structure
         context = {
             'session_id': session_id,
-            'patient_data': patient_data,
+            'patient_data': patient_demographics,
+            'patient_identity': {
+                'patient_id': patient_demographics.get('identifier', [{}])[0].get('value', 'Unknown') if patient_demographics.get('identifier') else 'Unknown',
+                'session_id': session_id,
+                'given_name': patient_demographics.get('given_name', 'Unknown'),
+                'family_name': patient_demographics.get('family_name', 'Patient'),
+                'full_name': f"{patient_demographics.get('given_name', 'Unknown')} {patient_demographics.get('family_name', 'Patient')}",
+                'birth_date': patient_demographics.get('birth_date', 'Unknown'),
+                'gender': patient_demographics.get('gender', 'Unknown'),
+                'patient_identifiers': patient_demographics.get('identifier', []),
+                'primary_patient_id': patient_demographics.get('identifier', [{}])[0].get('value', 'Unknown') if patient_demographics.get('identifier') else 'Unknown',
+                'secondary_patient_id': None,
+            },
             'admin_data': admin_data,
             'clinical_arrays': clinical_arrays,
             'fhir_processing': True,
-            'data_source': 'FHIR'
+            'data_source': 'FHIR',
+            'source_country': 'Unknown',  # TODO: Extract from FHIR bundle if available
+            'source_language': 'en',  # TODO: Extract from FHIR bundle if available
+            'translation_quality': 'High',  # FHIR has structured data
+            'patient_summary': {
+                'data_source': 'FHIR',
+                'file_path': 'FHIR_BUNDLE',
+                'confidence_score': 0.95,
+            },
+            'has_administrative_data': bool(admin_data),
+            'has_clinical_data': bool(clinical_arrays),
         }
         
         # Add clinical arrays to context for template compatibility
@@ -3440,14 +3466,8 @@ def patient_cda_view(request, session_id, cda_type=None):
                 "coded_results": {"blood_group": [], "diagnostic_results": []},
             })
         
-        # Add administrative data if available
-        if admin_data:
-            context.update({
-                "administrative_data": admin_data,
-                "has_administrative_data": True,
-            })
-        
         logger.info(f"[FHIR] Context built using FHIR data for session {session_id}")
+        logger.info(f"[FHIR] Patient identity: {context['patient_identity']['given_name']} {context['patient_identity']['family_name']}")
         
         # Render template with FHIR data
         return render(request, "patient_data/enhanced_patient_cda.html", context)
