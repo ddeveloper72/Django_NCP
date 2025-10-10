@@ -217,6 +217,11 @@ FHIR_CONFIG = {
     },
 }
 
+# HAPI FHIR Server Configuration
+HAPI_FHIR_BASE_URL = os.getenv("HAPI_FHIR_BASE_URL", "https://hapi.fhir.org/baseR4")
+HAPI_FHIR_TIMEOUT = int(os.getenv("HAPI_FHIR_TIMEOUT", "30"))
+HAPI_FHIR_CACHE_TIMEOUT = int(os.getenv("HAPI_FHIR_CACHE_TIMEOUT", "300"))  # 5 minutes
+
 # Patient Portal Configuration
 PORTAL_CONFIG = {
     "TITLE": os.getenv("PORTAL_TITLE", "Ireland eHealth Portal"),
