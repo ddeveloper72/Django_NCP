@@ -155,7 +155,7 @@
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary btn-lg">
                             <i class="fa fa-search" aria-hidden="true"></i>
-                            <span class="btn-text-full">Query Patient Documents</span>
+                            <span class="btn-text-full">Patient Search</span>
                             <span class="btn-text-short">Search</span>
                         </button>
 
@@ -295,27 +295,54 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show user-friendly message
             alert('At least one data source must be selected for patient search.');
         }
-        
-        // Update search button text to reflect selected sources
-        updateSubmitButtonText();
     }
     
-    function updateSubmitButtonText() {
-        const submitBtn = document.querySelector('button[type="submit"]');
-        const btnTextFull = submitBtn.querySelector('.btn-text-full');
+    // Make entire container clickable
+    function makeContainerClickable(checkbox) {
+        const container = checkbox.closest('.development-search-option');
         
-        if (cdaCheckbox.checked && fhirCheckbox.checked) {
-            btnTextFull.textContent = 'Query Patient Documents (CDA + FHIR)';
-        } else if (cdaCheckbox.checked) {
-            btnTextFull.textContent = 'Query Patient Documents (CDA Only)';
-        } else if (fhirCheckbox.checked) {
-            btnTextFull.textContent = 'Query Patient Documents (FHIR Only)';
-        }
+        // Add clickable styling
+        container.style.cursor = 'pointer';
+        
+        // Handle container click
+        container.addEventListener('click', function(e) {
+            // Don't trigger if clicking directly on checkbox or label
+            if (e.target === checkbox || e.target.closest('label')) {
+                return;
+            }
+            
+            // Toggle the checkbox
+            checkbox.checked = !checkbox.checked;
+            
+            // Trigger change event to update UI
+            checkbox.dispatchEvent(new Event('change'));
+        });
+        
+        // Add hover effect enhancement
+        container.addEventListener('mouseenter', function() {
+            if (!checkbox.checked) {
+                container.style.borderColor = '#007bff';
+                container.style.transform = 'translateY(-1px)';
+                container.style.boxShadow = '0 4px 12px rgba(0, 123, 255, 0.15)';
+            }
+        });
+        
+        container.addEventListener('mouseleave', function() {
+            if (!checkbox.checked) {
+                container.style.borderColor = '';
+                container.style.transform = '';
+                container.style.boxShadow = '';
+            }
+        });
     }
     
     // Add event listeners
     cdaCheckbox.addEventListener('change', updateCheckboxVisualState);
     fhirCheckbox.addEventListener('change', updateCheckboxVisualState);
+    
+    // Make containers clickable
+    makeContainerClickable(cdaCheckbox);
+    makeContainerClickable(fhirCheckbox);
     
     // Initialize visual state
     updateCheckboxVisualState();
