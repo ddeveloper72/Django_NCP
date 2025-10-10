@@ -100,6 +100,15 @@
                             Extended Patient Information
                         </button>
                     </li>
+
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="clinical-tab" data-bs-toggle="tab"
+                            data-bs-target="#clinical-content" type="button" role="tab"
+                            aria-controls="clinical-content" aria-selected="false">
+                            <i class="fa-solid fa-notes-medical me-2"></i>
+                            Clinical Information
+                        </button>
+                    </li>
                 </ul>
 
                 <!-- Integrated Tab Content -->
@@ -266,6 +275,21 @@
                     <div class="tab-pane fade" id="extended-content" role="tabpanel" aria-labelledby="extended-tab">
                         <div class="p-4">
                             {% include 'patient_data/components/extended_patient_info.html' %}
+                        </div>
+                    </div>
+
+                    <!-- Clinical Information Tab Content -->
+                    <div class="tab-pane fade" id="clinical-content" role="tabpanel" aria-labelledby="clinical-tab">
+                        <div class="p-4">
+                            {% if clinical_arrays %}
+                                {% include 'patient_data/components/clinical_information_content.html' %}
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fa-solid fa-info-circle me-2"></i>
+                                    <strong>No Clinical Information Available</strong>
+                                    <p class="mb-0">Clinical data is not available for this patient or has not been processed yet.</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
 
