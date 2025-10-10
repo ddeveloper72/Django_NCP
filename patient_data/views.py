@@ -3421,12 +3421,28 @@ def patient_cda_view(request, session_id, cda_type=None):
         # Use patient_information if available, otherwise patient_data
         patient_demographics = patient_information if patient_information else patient_data
         
+        # Extract country from patient address
+        def extract_country_from_address(patient_data):
+            """Extract country code from patient address data"""
+            addresses = patient_data.get('address', [])
+            if addresses and isinstance(addresses, list) and len(addresses) > 0:
+                return addresses[0].get('country', 'Unknown')
+            return 'Unknown'
+        
+        # Extract primary patient identifier
+        def extract_primary_patient_id(patient_data):
+            """Extract primary patient identifier from FHIR identifiers"""
+            identifiers = patient_data.get('identifier', [])
+            if identifiers and isinstance(identifiers, list) and len(identifiers) > 0:
+                return identifiers[0].get('value', 'Unknown')
+            return patient_data.get('id', 'Unknown')  # Fallback to resource ID
+        
         # Build context using FHIR data with proper template structure
         context = {
             'session_id': session_id,
             'patient_data': patient_demographics,
             'patient_identity': {
-                'patient_id': patient_demographics.get('identifier', [{}])[0].get('value', 'Unknown') if patient_demographics.get('identifier') else 'Unknown',
+                'patient_id': extract_primary_patient_id(patient_demographics),
                 'session_id': session_id,
                 'given_name': patient_demographics.get('given_name', 'Unknown'),
                 'family_name': patient_demographics.get('family_name', 'Patient'),
@@ -3434,14 +3450,14 @@ def patient_cda_view(request, session_id, cda_type=None):
                 'birth_date': patient_demographics.get('birth_date', 'Unknown'),
                 'gender': patient_demographics.get('gender', 'Unknown'),
                 'patient_identifiers': patient_demographics.get('identifier', []),
-                'primary_patient_id': patient_demographics.get('identifier', [{}])[0].get('value', 'Unknown') if patient_demographics.get('identifier') else 'Unknown',
+                'primary_patient_id': extract_primary_patient_id(patient_demographics),
                 'secondary_patient_id': None,
             },
             'admin_data': admin_data,
             'clinical_arrays': clinical_arrays,
             'fhir_processing': True,
             'data_source': 'FHIR',
-            'source_country': 'Unknown',  # TODO: Extract from FHIR bundle if available
+            'source_country': extract_country_from_address(patient_demographics),
             'source_language': 'en',  # TODO: Extract from FHIR bundle if available
             'translation_quality': 'High',  # FHIR has structured data
             'patient_summary': {
@@ -3468,6 +3484,10 @@ def patient_cda_view(request, session_id, cda_type=None):
         
         logger.info(f"[FHIR] Context built using FHIR data for session {session_id}")
         logger.info(f"[FHIR] Patient identity: {context['patient_identity']['given_name']} {context['patient_identity']['family_name']}")
+        logger.info(f"[FHIR] Patient ID: {context['patient_identity']['patient_id']}")
+        logger.info(f"[FHIR] Source Country: {context['source_country']}")
+        logger.info(f"[FHIR] Available identifiers: {patient_demographics.get('identifier', [])}")
+        logger.info(f"[FHIR] Available addresses: {patient_demographics.get('address', [])}")
         
         # Render template with FHIR data
         return render(request, "patient_data/enhanced_patient_cda.html", context)

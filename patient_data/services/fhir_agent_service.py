@@ -611,7 +611,10 @@ class FHIRAgentService:
             "id": patient.get("id"),
             "name": {},
             "birth_date": patient.get("birthDate"),
-            "gender": patient.get("gender")
+            "gender": patient.get("gender"),
+            "identifier": patient.get("identifier", []),
+            "address": patient.get("address", []),
+            "telecom": patient.get("telecom", [])
         }
         
         # Extract name
