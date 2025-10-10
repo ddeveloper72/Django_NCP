@@ -401,22 +401,34 @@
     border-radius: $border-radius-md;
     border: 2px solid $neutral-lighter;
     transition: all $transition-normal;
+    cursor: pointer;
+    user-select: none; // Prevent text selection when clicking
 
     &:hover {
       border-color: $primary-blue;
       background: lighten($primary-blue, 48%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba($primary-blue, 0.15);
     }
 
     &.active {
       border-color: $success-green;
       background: lighten($success-green, 48%);
       box-shadow: 0 2px 8px rgba($success-green, 0.15);
+      
+      &:hover {
+        border-color: darken($success-green, 10%);
+        background: lighten($success-green, 45%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba($success-green, 0.2);
+      }
     }
 
     .development-search-checkbox {
       margin-top: 2px;
       transform: scale(1.2);
       accent-color: $primary-blue;
+      pointer-events: none; // Prevent direct clicking to avoid double triggers
     }
 
     .development-search-content {

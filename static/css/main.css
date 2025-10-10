@@ -20824,20 +20824,31 @@ input[type=checkbox] {
   border-radius: 0.375rem;
   border: 2px solid #e2e8f0;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
 }
 .development-search-section .development-search-option:hover {
   border-color: #005f5f;
   background: rgb(84.8, 255, 255);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 95, 95, 0.15);
 }
 .development-search-section .development-search-option.active {
   border-color: #22c55e;
   background: rgb(225.8337662338, 249.9662337662, 234.7168831169);
   box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
 }
+.development-search-section .development-search-option.active:hover {
+  border-color: rgb(26.4935064935, 153.5064935065, 73.2467532468);
+  background: rgb(212.7857142857, 247.7142857143, 225.6428571429);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}
 .development-search-section .development-search-option .development-search-checkbox {
   margin-top: 2px;
   transform: scale(1.2);
   accent-color: #005f5f;
+  pointer-events: none;
 }
 .development-search-section .development-search-option .development-search-content {
   flex: 1;

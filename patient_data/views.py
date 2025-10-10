@@ -4166,6 +4166,71 @@ def patient_cda_view(request, session_id, cda_type=None):
         translation_quality = "Basic"
         extended_header_data = {}
 
+        # 🆕 FHIR AGENT PROCESSING - Check if this is a FHIR document first
+        data_source = match_data.get("patient_data", {}).get("source", "CDA")
+        
+        if data_source == "FHIR":
+            logger.info(f"[FHIR AGENT] Detected FHIR data source for session {session_id}")
+            
+            try:
+                # Import and initialize FHIR Agent Service
+                from .services.fhir_agent_service import FHIRAgentService
+                
+                fhir_agent = FHIRAgentService()
+                
+                # Get FHIR Bundle content from session
+                fhir_bundle_content = fhir_agent.get_fhir_bundle_from_session(session_id)
+                
+                if fhir_bundle_content:
+                    logger.info(f"[FHIR AGENT] Processing FHIR Bundle for session {session_id}")
+                    
+                    # Extract FHIR data using the agent
+                    fhir_context_data = fhir_agent.extract_patient_context_data(
+                        fhir_bundle_content, session_id
+                    )
+                    
+                    if fhir_context_data and not fhir_context_data.get("error"):
+                        logger.info(f"[FHIR AGENT] Successfully processed FHIR Bundle")
+                        
+                        # Override processing variables with FHIR data
+                        sections_count = len(fhir_context_data.get("clinical_arrays", {}))
+                        medical_terms_count = sum(
+                            len(section) for section in fhir_context_data.get("clinical_arrays", {}).values()
+                        )
+                        uses_coded_sections = True  # FHIR is inherently coded
+                        coded_sections_count = sections_count
+                        coded_sections_percentage = 100 if sections_count > 0 else 0
+                        translation_quality = "High"  # FHIR has structured data
+                        
+                        # Set FHIR-specific processing result
+                        processing_result = {
+                            "success": True,
+                            "data_source": "FHIR",
+                            "clinical_arrays": fhir_context_data.get("clinical_arrays", {}),
+                            "admin_data": fhir_context_data.get("admin_data", {}),
+                            "patient_data": fhir_context_data.get("patient_data", {}),
+                            "has_clinical_data": fhir_context_data.get("has_clinical_data", False),
+                        }
+                        
+                        logger.info(f"[FHIR AGENT] Ready to render with {sections_count} clinical sections")
+                        
+                        # Skip CDA processing - jump directly to context building
+                        # Set a flag to bypass CDA logic below
+                        fhir_processing_complete = True
+                        
+                    else:
+                        logger.error(f"[FHIR AGENT] Failed to process FHIR Bundle: {fhir_context_data.get('error_message', 'Unknown error')}")
+                        fhir_processing_complete = False
+                else:
+                    logger.warning(f"[FHIR AGENT] No FHIR Bundle content found for session {session_id}")
+                    fhir_processing_complete = False
+                    
+            except Exception as e:
+                logger.error(f"[FHIR AGENT] Error processing FHIR Bundle: {str(e)}")
+                fhir_processing_complete = False
+        else:
+            fhir_processing_complete = False
+
         # DEBUG: Check CDA content before condition
         print(f"💥 [DEBUG] Pre-condition check:")
         print(f"💥 [DEBUG] cda_content exists: {cda_content is not None}")
@@ -4174,7 +4239,8 @@ def patient_cda_view(request, session_id, cda_type=None):
         print(f"💥 [DEBUG] cda_content.strip() length: {len(cda_content.strip()) if cda_content else 0}")
         
         if (
-            cda_content
+            not fhir_processing_complete
+            and cda_content
             and cda_content.strip()
             and "<!-- No CDA content available -->" not in cda_content
         ):
@@ -4623,35 +4689,59 @@ def patient_cda_view(request, session_id, cda_type=None):
                 logger.warning(f"Failed to check for embedded PDFs: {pdf_error}")
 
         # Build complete context for Enhanced CDA Display
-        context = {
-            "session_id": session_id,  # Session ID for URL routing
-            "patient_identity": {
-                "patient_id": patient_government_id,  # Display the government ID
-                "session_id": session_id,  # Keep session ID for URL routing
-                "given_name": (
-                    patient_data.given_name
-                    if patient_data
-                    else patient_info.get("given_name", "Unknown")
-                ),
-                "family_name": (
-                    patient_data.family_name
-                    if patient_data
-                    else patient_info.get("family_name", "Patient")
-                ),
-                "birth_date": (
-                    patient_data.birth_date
-                    if patient_data
-                    else patient_info.get("birth_date", "Unknown")
-                ),
-                "gender": (
-                    patient_data.gender
-                    if patient_data
-                    else patient_info.get("gender", "Unknown")
-                ),
-                "patient_identifiers": [],
-                "primary_patient_id": patient_government_id,
-                "secondary_patient_id": None,
-            },
+        # 🆕 Use FHIR data if FHIR processing was successful, otherwise use CDA data
+        if fhir_processing_complete and 'processing_result' in locals():
+            # FHIR data context
+            fhir_patient_data = processing_result.get("patient_data", {})
+            fhir_clinical_arrays = processing_result.get("clinical_arrays", {})
+            fhir_admin_data = processing_result.get("admin_data", {})
+            
+            logger.info(f"[FHIR AGENT] Building context with FHIR data - {len(fhir_clinical_arrays)} clinical sections")
+            
+            context = {
+                "session_id": session_id,  # Session ID for URL routing
+                "patient_identity": {
+                    "patient_id": patient_government_id,  # Display the government ID
+                    "session_id": session_id,  # Keep session ID for URL routing
+                    "given_name": fhir_patient_data.get("given_name", "Unknown"),
+                    "family_name": fhir_patient_data.get("family_name", "Patient"),
+                    "birth_date": fhir_patient_data.get("birth_date", "Unknown"),
+                    "gender": fhir_patient_data.get("gender", "Unknown"),
+                    "patient_identifiers": fhir_patient_data.get("identifier", []),
+                    "primary_patient_id": patient_government_id,
+                    "secondary_patient_id": None,
+                },
+        else:
+            # CDA data context (existing logic)
+            context = {
+                "session_id": session_id,  # Session ID for URL routing
+                "patient_identity": {
+                    "patient_id": patient_government_id,  # Display the government ID
+                    "session_id": session_id,  # Keep session ID for URL routing
+                    "given_name": (
+                        patient_data.given_name
+                        if patient_data
+                        else patient_info.get("given_name", "Unknown")
+                    ),
+                    "family_name": (
+                        patient_data.family_name
+                        if patient_data
+                        else patient_info.get("family_name", "Patient")
+                    ),
+                    "birth_date": (
+                        patient_data.birth_date
+                        if patient_data
+                        else patient_info.get("birth_date", "Unknown")
+                    ),
+                    "gender": (
+                        patient_data.gender
+                        if patient_data
+                        else patient_info.get("gender", "Unknown")
+                    ),
+                    "patient_identifiers": [],
+                    "primary_patient_id": patient_government_id,
+                    "secondary_patient_id": None,
+                },
             "source_country": match_data.get("country_code", "Unknown"),
             "source_language": source_language,
             "cda_type": actual_cda_type,
@@ -4668,9 +4758,59 @@ def patient_cda_view(request, session_id, cda_type=None):
         logger.info(f"[DEBUG] - Search result exists: {search_result is not None}")
         logger.info(f"[DEBUG] - Search result has_l3_cda: {search_result_has_l3}")
 
-        # Prioritize session extended data over search result for L1/L3 flags
-        context.update(
-            {
+        # 🆕 Update context with clinical data - use FHIR data if available, otherwise CDA data
+        if fhir_processing_complete and 'processing_result' in locals():
+            # FHIR data updates
+            fhir_clinical_arrays = processing_result.get("clinical_arrays", {})
+            fhir_admin_data = processing_result.get("admin_data", {})
+            
+            # For FHIR documents, L1/L3 concepts don't apply - they have structured data
+            context.update({
+                "has_l1_cda": False,  # FHIR doesn't use L1/L3 concept
+                "has_l3_cda": False,  # FHIR doesn't use L1/L3 concept
+                "has_fhir_data": True,  # New flag for FHIR documents
+            })
+            
+            # Set processed_sections from FHIR clinical arrays
+            processed_sections = []
+            for section_name, section_data in fhir_clinical_arrays.items():
+                if section_data:  # Only include sections with data
+                    processed_sections.append({
+                        "section_name": section_name,
+                        "section_title": section_name.replace("_", " ").title(),
+                        "entry_count": len(section_data),
+                        "entries": section_data,
+                        "source": "FHIR",
+                    })
+            
+            context.update({
+                "confidence": int(match_data.get("confidence_score", 0.95) * 100),
+                "file_name": "FHIR Patient Summary Bundle",
+                "translation_quality": translation_quality,
+                "sections_count": sections_count,
+                "processed_sections": processed_sections,
+                "enhanced_allergies": fhir_clinical_arrays.get("allergies", []),
+                "medical_terms_count": medical_terms_count,
+                "coded_sections_count": coded_sections_count,
+                "coded_sections_percentage": coded_sections_percentage,
+                "uses_coded_sections": uses_coded_sections,
+                "translation_result": {"sections": processed_sections},
+                "safety_alerts": [],
+                "allergy_alerts": [],
+                "has_safety_alerts": False,
+                # FHIR-specific patient_summary data
+                "patient_summary": {
+                    "data_source": "FHIR",
+                    "file_path": "FHIR_BUNDLE",
+                    "confidence_score": match_data.get("confidence_score", 0.95),
+                },
+                "session_id": session_id,
+                "cda_file_name": "FHIR_BUNDLE",
+                "administrative_data": fhir_admin_data,
+                "has_administrative_data": bool(fhir_admin_data),
+        else:
+            # CDA data updates (existing logic)
+            context.update({
                 "has_l1_cda": (
                     request.session.get(f"patient_match_{session_id}", {}).get("has_l1")
                     if f"patient_match_{session_id}" in request.session
@@ -4701,22 +4841,10 @@ def patient_cda_view(request, session_id, cda_type=None):
                         )
                     )
                 ),
-            }
-        )
+                "has_fhir_data": False,
+            })
 
-        logger.info(f"[DEBUG] Final context has_l3_cda: {context.get('has_l3_cda')}")
-        logger.info(
-            f"[DEBUG] L3 Button should be: {'ENABLED' if context.get('has_l3_cda') else 'DISABLED'}"
-        )
-        logger.info(
-            f"[DEBUG] Processed sections count: {len(processed_sections) if 'processed_sections' in locals() else 'NOT_DEFINED'}"
-        )
-        logger.info(
-            f"[DEBUG] Clinical Info tab should be: {'ENABLED' if len(processed_sections) > 0 else 'DISABLED'}"
-        )
-
-        context.update(
-            {
+            context.update({
                 "confidence": int(match_data.get("confidence_score", 0.95) * 100),
                 "file_name": match_data.get("file_path", "unknown.xml"),
                 "translation_quality": translation_quality,
@@ -4943,6 +5071,38 @@ def patient_cda_view(request, session_id, cda_type=None):
                     logger.info(
                         f"[CLINICAL ARRAYS SESSION] Added {total_clinical_items} clinical array items to context: med={len(clinical_arrays['medications'])}, all={len(clinical_arrays['allergies'])}, prob={len(clinical_arrays['problems'])}, proc={len(clinical_arrays['procedures'])}, vs={len(clinical_arrays['vital_signs'])}"
                     )
+        
+        # 🆕 Add FHIR clinical arrays to context if FHIR processing was successful
+        elif fhir_processing_complete and 'processing_result' in locals():
+            fhir_clinical_arrays = processing_result.get("clinical_arrays", {})
+            
+            # Map FHIR arrays to expected context structure
+            context.update({
+                "medications": fhir_clinical_arrays.get("medications", []),
+                "allergies": fhir_clinical_arrays.get("allergies", []),
+                "problems": fhir_clinical_arrays.get("conditions", []),  # FHIR uses "conditions"
+                "procedures": fhir_clinical_arrays.get("procedures", []),
+                "vital_signs": fhir_clinical_arrays.get("observations", []),  # FHIR observations can include vitals
+                "results": fhir_clinical_arrays.get("diagnostic_reports", []),
+                "immunizations": fhir_clinical_arrays.get("immunizations", []),
+                "medical_devices": [],  # FHIR doesn't have a direct equivalent, could be in observations
+                "conditions": fhir_clinical_arrays.get("conditions", []),  # Add conditions separately for FHIR
+                "observations": fhir_clinical_arrays.get("observations", []),  # Add observations separately for FHIR
+                "encounters": fhir_clinical_arrays.get("encounters", []),  # Add encounters for FHIR
+            })
+            
+            total_fhir_items = sum(len(arr) for arr in fhir_clinical_arrays.values())
+            logger.info(
+                f"[FHIR CLINICAL ARRAYS] Added {total_fhir_items} FHIR clinical items to context: "
+                f"med={len(fhir_clinical_arrays.get('medications', []))}, "
+                f"all={len(fhir_clinical_arrays.get('allergies', []))}, "
+                f"cond={len(fhir_clinical_arrays.get('conditions', []))}, "
+                f"proc={len(fhir_clinical_arrays.get('procedures', []))}, "
+                f"obs={len(fhir_clinical_arrays.get('observations', []))}, "
+                f"imm={len(fhir_clinical_arrays.get('immunizations', []))}"
+            )
+            
+        # Continue with CDA processing only if not FHIR
                     
                     # EXTENDED CLINICAL SECTIONS DETECTION (when clinical arrays exist)
                     try:
