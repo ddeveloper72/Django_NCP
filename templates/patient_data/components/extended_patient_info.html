@@ -378,13 +378,23 @@
                 </h5>
                 <p class="card-text text-muted mb-3">
                     Extended patient information is not available for this document. 
-                    The system was unable to extract additional patient data from the CDA content.
+                    The system was unable to extract additional patient data from the 
+                    {% if patient_summary.data_source == "FHIR" or cda_file_name and "fhir" in cda_file_name|lower or "bundle" in cda_file_name|lower or session_id and "fhir" in session_id|lower %}
+                        FHIR Bundle content
+                    {% else %}
+                        CDA content
+                    {% endif %}.
                 </p>
                 <div class="alert alert-light border-start border-info border-3 ps-3 mb-0">
                     <small class="text-muted">
                         <i class="fa-solid fa-lightbulb me-1 text-warning"></i>
                         <strong>Note:</strong> Extended information includes administrative data, contact details, 
-                        healthcare provider information, and document metadata. This may be available in other document types or formats.
+                        healthcare provider information, and document metadata. 
+                        {% if patient_summary.data_source == "FHIR" or cda_file_name and "fhir" in cda_file_name|lower or "bundle" in cda_file_name|lower or session_id and "fhir" in session_id|lower %}
+                            This data may be available in other FHIR resources or CDA document formats.
+                        {% else %}
+                            This may be available in other CDA document types (L1/L3) or FHIR formats.
+                        {% endif %}
                     </small>
                 </div>
             </div>
