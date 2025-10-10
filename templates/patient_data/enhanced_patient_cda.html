@@ -36,7 +36,12 @@
         </li>
         {% endif %}
         <li class="breadcrumb-item active" aria-current="page">
-            <i class="fa fa-file-medical" aria-hidden="true"></i> CDA Document
+            <i class="fa fa-file-medical" aria-hidden="true"></i> 
+            {% if patient_summary.data_source == "FHIR" %}
+                Patient Summary Bundle
+            {% else %}
+                Patient Summary Document
+            {% endif %}
         </li>
     </ol>
 </nav>
@@ -143,7 +148,15 @@
                                             {{ source_country|country_name }}
                                         </span>
                                     </p>
-                                    <p><strong>CDA Type:</strong> {{ cda_type }}</p>
+                                    <p><strong>Document Type:</strong> 
+                                        {% if patient_summary.data_source == "FHIR" or cda_file_name and "fhir" in cda_file_name|lower or "bundle" in cda_file_name|lower or session_id and "fhir" in session_id|lower %}
+                                            <span class="badge bg-primary">FHIR Bundle</span>
+                                        {% else %}
+                                            <span class="badge {% if cda_type == 'L1' %}bg-info{% elif cda_type == 'L3' %}bg-success{% else %}bg-secondary{% endif %}">
+                                                {% if cda_type == 'L1' %}L1 Original{% elif cda_type == 'L3' %}L3 Summary{% else %}{{ cda_type|default:"Unknown" }}{% endif %}
+                                            </span>
+                                        {% endif %}
+                                    </p>
                                     <p><strong>Translation Quality:</strong>
                                         <span class="badge {% if 'High' in translation_quality %}bg-success{% elif 'Medium' in translation_quality %}bg-warning{% else %}bg-secondary{% endif %}"
                                               {% tooltip "translation_quality" "top" %}>
@@ -162,36 +175,69 @@
                                 </div>
                             </div>
 
-                            <!-- CDA Type Information Badges -->
+                            <!-- Document Type Information Badges -->
+                            <!-- DEBUG: Show available variables -->
+                            {% comment %}
+                            DEBUG INFO:
+                            - patient_summary.data_source: {{ patient_summary.data_source|default:"Not set" }}
+                            - cda_file_name: {{ cda_file_name|default:"Not set" }}
+                            - session_id: {{ session_id|default:"Not set" }}
+                            {% endcomment %}
                             <div class="row mt-3">
                                 <div class="col-12">
-                                    <div class="d-flex align-items-center gap-2" aria-label="CDA Document Type Information">
+                                    <div class="d-flex align-items-center gap-2" aria-label="Document Type Information">
                                         {% if session_id %}
+                                        
+                                        <!-- FHIR Bundle Badge -->
+                                        {% if patient_summary.data_source == "FHIR" or cda_file_name and "fhir" in cda_file_name|lower or "bundle" in cda_file_name|lower or session_id and "fhir" in session_id|lower %}
+                                        <!-- FHIR is available and currently active -->
+                                        <div class="badge bg-primary text-center d-flex flex-column align-items-center" style="min-width: 80px; min-height: 60px; padding: 0.5rem;">
+                                            <i class="fa-solid fa-cube mb-1" style="font-size: 1.2em;"></i>
+                                            <div style="font-size: 0.75em; font-weight: 600; line-height: 1.1;">FHIR</div>
+                                            <div style="font-size: 0.65em; line-height: 1.1;">Bundle</div>
+                                            <i class="fa-solid fa-check mt-1" style="font-size: 0.7em;" title="Currently active"></i>
+                                        </div>
+                                        {% else %}
+                                        <!-- FHIR not available -->
+                                        <div class="badge bg-light text-dark text-center d-flex flex-column align-items-center" style="min-width: 80px; min-height: 60px; padding: 0.5rem;">
+                                            <i class="fa-solid fa-cube mb-1 text-muted" style="font-size: 1.2em;"></i>
+                                            <div style="font-size: 0.75em; font-weight: 600; line-height: 1.1;">FHIR</div>
+                                            <div style="font-size: 0.55em; line-height: 1.1; color: #6c757d;">Not Available</div>
+                                        </div>
+                                        {% endif %}
+                                        
                                         <!-- L1 Document Type Badge -->
                                         {% if has_l1_cda %}
-                                        <span class="badge {% if cda_type == 'L1' %}bg-primary{% else %}bg-secondary{% endif %} fs-6 px-3 py-2">
-                                            <i class="fa-solid fa-file-medical me-2"></i>L1 Original Document
-                                            {% if cda_type == 'L1' %}<i class="fa-solid fa-check ms-2" title="Currently active"></i>{% endif %}
-                                        </span>
+                                        <div class="badge {% if cda_type == 'L1' and patient_summary.data_source != 'FHIR' %}bg-primary{% else %}bg-secondary{% endif %} text-center d-flex flex-column align-items-center" style="min-width: 80px; min-height: 60px; padding: 0.5rem;">
+                                            <i class="fa-solid fa-file-medical mb-1" style="font-size: 1.2em;"></i>
+                                            <div style="font-size: 0.75em; font-weight: 600; line-height: 1.1;">L1</div>
+                                            <div style="font-size: 0.65em; line-height: 1.1;">Original</div>
+                                            {% if cda_type == 'L1' and patient_summary.data_source != 'FHIR' %}<i class="fa-solid fa-check mt-1" style="font-size: 0.7em;" title="Currently active"></i>{% endif %}
+                                        </div>
                                         {% else %}
-                                        <span class="badge bg-light text-dark fs-6 px-3 py-2">
-                                            <i class="fa-solid fa-file-medical me-2"></i>L1 Original Document
-                                            <small class="ms-2">(Not Available)</small>
-                                        </span>
+                                        <div class="badge bg-light text-dark text-center d-flex flex-column align-items-center" style="min-width: 80px; min-height: 60px; padding: 0.5rem;">
+                                            <i class="fa-solid fa-file-medical mb-1 text-muted" style="font-size: 1.2em;"></i>
+                                            <div style="font-size: 0.75em; font-weight: 600; line-height: 1.1;">L1</div>
+                                            <div style="font-size: 0.55em; line-height: 1.1; color: #6c757d;">Not Available</div>
+                                        </div>
                                         {% endif %}
                                         
                                         <!-- L3 Document Type Badge -->
                                         {% if has_l3_cda %}
-                                        <span class="badge {% if cda_type == 'L3' %}bg-primary{% else %}bg-secondary{% endif %} fs-6 px-3 py-2">
-                                            <i class="fa-solid fa-language me-2"></i>L3 Patient Summary
-                                            {% if cda_type == 'L3' %}<i class="fa-solid fa-check ms-2" title="Currently active"></i>{% endif %}
-                                        </span>
+                                        <div class="badge {% if cda_type == 'L3' and patient_summary.data_source != 'FHIR' %}bg-primary{% else %}bg-secondary{% endif %} text-center d-flex flex-column align-items-center" style="min-width: 80px; min-height: 60px; padding: 0.5rem;">
+                                            <i class="fa-solid fa-language mb-1" style="font-size: 1.2em;"></i>
+                                            <div style="font-size: 0.75em; font-weight: 600; line-height: 1.1;">L3</div>
+                                            <div style="font-size: 0.65em; line-height: 1.1;">Summary</div>
+                                            {% if cda_type == 'L3' and patient_summary.data_source != 'FHIR' %}<i class="fa-solid fa-check mt-1" style="font-size: 0.7em;" title="Currently active"></i>{% endif %}
+                                        </div>
                                         {% else %}
-                                        <span class="badge bg-light text-dark fs-6 px-3 py-2">
-                                            <i class="fa-solid fa-language me-2"></i>L3 Patient Summary
-                                            <small class="ms-2">(Not Available)</small>
-                                        </span>
+                                        <div class="badge bg-light text-dark text-center d-flex flex-column align-items-center" style="min-width: 80px; min-height: 60px; padding: 0.5rem;">
+                                            <i class="fa-solid fa-language mb-1 text-muted" style="font-size: 1.2em;"></i>
+                                            <div style="font-size: 0.75em; font-weight: 600; line-height: 1.1;">L3</div>
+                                            <div style="font-size: 0.55em; line-height: 1.1; color: #6c757d;">Not Available</div>
+                                        </div>
                                         {% endif %}
+                                        
                                         {% else %}
                                         <div class="alert alert-warning">
                                             <i class="fa-solid fa-exclamation-triangle me-2"></i>
@@ -200,9 +246,12 @@
                                         {% endif %}
                                     </div>
                                     <small class="text-muted d-block mt-2">
+                                        <strong>FHIR:</strong> Fast Healthcare Interoperability Resources Bundle |
                                         <strong>L1:</strong> Original clinical document from source country |
                                         <strong>L3:</strong> Standardized European Patient Summary
-                                        {% if cda_type == 'L1' and has_l1_cda %}
+                                        {% if patient_summary.data_source == "FHIR" %}
+                                        | Currently viewing: <strong>FHIR Bundle</strong>
+                                        {% elif cda_type == 'L1' and has_l1_cda %}
                                         | Currently viewing: <strong>Original clinical data</strong>
                                         {% elif cda_type == 'L3' and has_l3_cda %}
                                         | Currently viewing: <strong>European Patient Summary</strong>

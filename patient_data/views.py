@@ -4733,6 +4733,15 @@ def patient_cda_view(request, session_id, cda_type=None):
                 "safety_alerts": [],
                 "allergy_alerts": [],
                 "has_safety_alerts": False,
+                # Add patient_summary for FHIR badge template compatibility
+                "patient_summary": {
+                    "data_source": match_data.get("patient_data", {}).get("source", "CDA"),
+                    "file_path": match_data.get("file_path"),
+                    "confidence_score": match_data.get("confidence_score", 0.95),
+                },
+                # Add session_id and cda_file_name for FHIR badge template compatibility
+                "session_id": session_id,
+                "cda_file_name": match_data.get("file_path", "unknown.xml"),
                 "administrative_data": {
                     "document_creation_date": None,
                     "document_last_update_date": None,
