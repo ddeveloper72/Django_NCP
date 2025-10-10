@@ -72,6 +72,26 @@ def test_fhir_agent_service():
                     print(f"   Data source: {context_data.get('data_source', 'Unknown')}")
                     print(f"   Has admin data: {'administrative_data' in context_data}")
                     print(f"   Has clinical arrays: {'clinical_arrays' in context_data}")
+                    
+                    # Debug patient data extraction
+                    patient_data = context_data.get('patient_data', {})
+                    patient_information = context_data.get('patient_information', {})
+                    
+                    print(f"\n🔍 Patient Data Debug:")
+                    print(f"   patient_data keys: {list(patient_data.keys()) if patient_data else 'None'}")
+                    print(f"   patient_information keys: {list(patient_information.keys()) if patient_information else 'None'}")
+                    
+                    if patient_data:
+                        print(f"   patient_data.given_name: {patient_data.get('given_name', 'NOT_FOUND')}")
+                        print(f"   patient_data.family_name: {patient_data.get('family_name', 'NOT_FOUND')}")
+                        print(f"   patient_data.birth_date: {patient_data.get('birth_date', 'NOT_FOUND')}")
+                        print(f"   patient_data.gender: {patient_data.get('gender', 'NOT_FOUND')}")
+                    
+                    if patient_information:
+                        print(f"   patient_information.given_name: {patient_information.get('given_name', 'NOT_FOUND')}")
+                        print(f"   patient_information.family_name: {patient_information.get('family_name', 'NOT_FOUND')}")
+                        print(f"   patient_information.birth_date: {patient_information.get('birth_date', 'NOT_FOUND')}")
+                        print(f"   patient_information.gender: {patient_information.get('gender', 'NOT_FOUND')}")
                 else:
                     error_msg = context_data.get('error', 'Unknown error') if context_data else 'No data returned'
                     print(f"❌ Context extraction failed: {error_msg}")
@@ -341,7 +361,9 @@ def test_fhir_agent_service(session_key, test_bundle):
             patient_info = context_data.get("patient_information", {})
             if patient_info:
                 print(f"👤 Patient Information:")
-                print(f"   - Name: {patient_info.get('name', 'Unknown')}")
+                given_name = patient_info.get('given_name', 'Unknown')
+                family_name = patient_info.get('family_name', 'Unknown')
+                print(f"   - Name: {given_name} {family_name}")
                 print(f"   - Birth Date: {patient_info.get('birth_date', 'Unknown')}")
                 print(f"   - Gender: {patient_info.get('gender', 'Unknown')}")
             

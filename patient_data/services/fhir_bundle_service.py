@@ -98,7 +98,7 @@ class FHIRBundleService:
         if bundle.entry:
             for entry in bundle.entry:
                 if entry.resource:
-                    resource_type = entry.resource.resource_type
+                    resource_type = entry.resource.get_resource_type()
                     if resource_type in self.supported_resource_types:
                         resources[resource_type].append(entry.resource)
 
