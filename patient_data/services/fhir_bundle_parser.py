@@ -835,13 +835,15 @@ class FHIRBundleParser:
         addresses = patient.get('address', [])
         for address in addresses:
             formatted_address = {
-                'use': address.get('use', 'Unknown'),
-                'type': address.get('type', 'Unknown'),
-                'line': address.get('line', []),
-                'city': address.get('city', 'Unknown'),
-                'state': address.get('state', 'Unknown'),
-                'postal_code': address.get('postalCode', 'Unknown'),
-                'country': address.get('country', 'Unknown'),
+                'use': address.get('use', 'home'),
+                'type': address.get('type', 'physical'),
+                'street_lines': address.get('line', []),  # Template expects 'street_lines'
+                'street': ', '.join(address.get('line', [])) if address.get('line') else None,  # Fallback for 'street'
+                'city': address.get('city'),
+                'state': address.get('state'),
+                'postal_code': address.get('postalCode'),
+                'postalCode': address.get('postalCode'),  # Support both naming conventions
+                'country': address.get('country'),
                 'period': address.get('period', {}),
                 'full_address': self._format_address(address)
             }
@@ -850,10 +852,15 @@ class FHIRBundleParser:
         # Extract telecom information
         telecoms = patient.get('telecom', [])
         for telecom in telecoms:
+            telecom_value = telecom.get('value', '')
+            # Clean up tel: prefix if present
+            if telecom_value.startswith('tel:'):
+                telecom_value = telecom_value[4:]
+            
             formatted_telecom = {
-                'system': telecom.get('system', 'Unknown'),
-                'value': telecom.get('value', 'Unknown'),
-                'use': telecom.get('use', 'Unknown'),
+                'system': telecom.get('system', 'phone'),
+                'value': telecom_value,
+                'use': telecom.get('use', 'home'),
                 'rank': telecom.get('rank', 0),
                 'period': telecom.get('period', {}),
                 'display_name': self._format_telecom_display(telecom)
@@ -874,12 +881,66 @@ class FHIRBundleParser:
         
         # Extract practitioners
         for practitioner in practitioner_resources:
+            # Process practitioner addresses (array format)
+            practitioner_addresses = []
+            addresses = practitioner.get('address', [])
+            for address in addresses:
+                formatted_address = {
+                    'use': address.get('use', 'work'),
+                    'type': address.get('type', 'physical'),
+                    'street_lines': address.get('line', []),
+                    'street': ', '.join(address.get('line', [])) if address.get('line') else None,
+                    'city': address.get('city'),
+                    'state': address.get('state'),
+                    'postal_code': address.get('postalCode'),
+                    'postalCode': address.get('postalCode'),
+                    'country': address.get('country'),
+                    'period': address.get('period', {}),
+                    'full_address': self._format_address(address)
+                }
+                practitioner_addresses.append(formatted_address)
+            
+            # Process practitioner telecoms
+            practitioner_telecoms = []
+            telecoms = practitioner.get('telecom', [])
+            for telecom in telecoms:
+                telecom_value = telecom.get('value', '')
+                # Clean up tel: prefix and handle invalid values
+                if telecom_value.startswith('tel:'):
+                    telecom_value = telecom_value[4:]
+                # Skip invalid/empty telecoms
+                if telecom_value and telecom_value != '0':
+                    formatted_telecom = {
+                        'system': telecom.get('system', 'phone'),
+                        'value': telecom_value,
+                        'use': telecom.get('use', 'work'),
+                        'rank': telecom.get('rank', 0),
+                        'period': telecom.get('period', {}),
+                        'display_name': self._format_telecom_display(telecom)
+                    }
+                    practitioner_telecoms.append(formatted_telecom)
+            
+            # Process practitioner identifiers
+            practitioner_identifiers = []
+            identifiers = practitioner.get('identifier', [])
+            for identifier in identifiers:
+                formatted_identifier = {
+                    'system': identifier.get('system', ''),
+                    'value': identifier.get('value', ''),
+                    'type': identifier.get('type', {}).get('text', 'Official'),
+                    'use': identifier.get('use', 'official')
+                }
+                practitioner_identifiers.append(formatted_identifier)
+            
             formatted_practitioner = {
                 'id': practitioner.get('id', 'Unknown'),
                 'name': self._format_practitioner_name(practitioner),
+                'family_name': self._extract_practitioner_family_name(practitioner),
+                'given_names': self._extract_practitioner_given_names(practitioner),
                 'qualification': practitioner.get('qualification', []),
-                'telecom': practitioner.get('telecom', []),
-                'address': practitioner.get('address', []),
+                'addresses': practitioner_addresses,
+                'telecoms': practitioner_telecoms,
+                'identifiers': practitioner_identifiers,
                 'gender': practitioner.get('gender', 'Unknown'),
                 'active': practitioner.get('active', True)
             }
@@ -887,12 +948,69 @@ class FHIRBundleParser:
         
         # Extract organizations
         for organization in organization_resources:
+            # Process organization address (can be single object or array)
+            organization_addresses = []
+            address_data = organization.get('address')
+            
+            if address_data:
+                # Handle both single address object and array of addresses
+                addresses_to_process = [address_data] if isinstance(address_data, dict) else address_data
+                
+                for address in addresses_to_process:
+                    formatted_address = {
+                        'use': address.get('use', 'work'),
+                        'type': address.get('type', 'physical'),
+                        'street_lines': address.get('line', []),
+                        'street': ', '.join(address.get('line', [])) if address.get('line') else None,
+                        'city': address.get('city'),
+                        'state': address.get('state'),
+                        'postal_code': address.get('postalCode'),
+                        'postalCode': address.get('postalCode'),
+                        'country': address.get('country'),
+                        'period': address.get('period', {}),
+                        'full_address': self._format_address(address)
+                    }
+                    organization_addresses.append(formatted_address)
+            
+            # Process organization telecoms
+            organization_telecoms = []
+            telecoms = organization.get('telecom', [])
+            for telecom in telecoms:
+                telecom_value = telecom.get('value', '')
+                # Clean up tel: prefix and handle invalid values
+                if telecom_value.startswith('tel:'):
+                    telecom_value = telecom_value[4:]
+                # Skip invalid/empty telecoms
+                if telecom_value and telecom_value != '0':
+                    formatted_telecom = {
+                        'system': telecom.get('system', 'phone'),
+                        'value': telecom_value,
+                        'use': telecom.get('use', 'work'),
+                        'rank': telecom.get('rank', 0),
+                        'period': telecom.get('period', {}),
+                        'display_name': self._format_telecom_display(telecom)
+                    }
+                    organization_telecoms.append(formatted_telecom)
+            
+            # Process organization identifiers
+            organization_identifiers = []
+            identifiers = organization.get('identifier', [])
+            for identifier in identifiers:
+                formatted_identifier = {
+                    'system': identifier.get('system', ''),
+                    'value': identifier.get('value', ''),
+                    'type': identifier.get('type', {}).get('text', 'Official'),
+                    'use': identifier.get('use', 'official')
+                }
+                organization_identifiers.append(formatted_identifier)
+            
             formatted_organization = {
                 'id': organization.get('id', 'Unknown'),
-                'name': organization.get('name', 'Unknown'),
+                'name': organization.get('name', 'Unknown Organization'),
                 'type': organization.get('type', []),
-                'telecom': organization.get('telecom', []),
-                'address': organization.get('address', []),
+                'addresses': organization_addresses,
+                'telecoms': organization_telecoms,
+                'identifiers': organization_identifiers,
                 'active': organization.get('active', True),
                 'contact': organization.get('contact', [])
             }
@@ -940,14 +1058,29 @@ class FHIRBundleParser:
     
     def _format_telecom_display(self, telecom: Dict[str, Any]) -> str:
         """Format telecom information for display"""
-        system = telecom.get('system', 'Unknown')
-        value = telecom.get('value', 'Unknown')
+        system = telecom.get('system', 'phone')
+        value = telecom.get('value', '')
         use = telecom.get('use', '')
         
+        # Clean up tel: prefix if present
+        if value.startswith('tel:'):
+            value = value[4:]
+        
+        # Format system name for display
+        system_display = {
+            'phone': 'Phone',
+            'fax': 'Fax',
+            'email': 'Email',
+            'pager': 'Pager',
+            'url': 'Website',
+            'sms': 'SMS'
+        }.get(system.lower(), system.title())
+        
         if use:
-            return f"{system.title()} ({use}): {value}"
+            use_display = use.title()
+            return f"{system_display} ({use_display}): {value}"
         else:
-            return f"{system.title()}: {value}"
+            return f"{system_display}: {value}"
     
     def _format_practitioner_name(self, practitioner: Dict[str, Any]) -> str:
         """Format practitioner name from FHIR HumanName structure"""
@@ -975,6 +1108,20 @@ class FHIRBundleParser:
             parts.extend(name['suffix'])
         
         return ' '.join(parts) if parts else 'Unknown Practitioner'
+    
+    def _extract_practitioner_family_name(self, practitioner: Dict[str, Any]) -> str:
+        """Extract family name from practitioner resource"""
+        names = practitioner.get('name', [])
+        if names and names[0].get('family'):
+            return names[0]['family']
+        return 'Unknown'
+    
+    def _extract_practitioner_given_names(self, practitioner: Dict[str, Any]) -> List[str]:
+        """Extract given names from practitioner resource"""
+        names = practitioner.get('name', [])
+        if names and names[0].get('given'):
+            return names[0]['given']
+        return []
 
 
 class FHIRBundleParserError(Exception):

@@ -3,13 +3,13 @@
 <!-- Extended Patient Healthcare Team Component -->
 <!-- This component provides content for the Healthcare Team tab -->
 
-{% if healthcare_data and healthcare_data.author_hcp or healthcare_data.organization %}
+{% if healthcare_data and healthcare_data.practitioners or healthcare_data.organizations %}
 <!-- Single Unified Healthcare Information Section -->
 <div class="healthcare-info-unified">
     <div class="row g-3">
         <!-- Healthcare Provider Information -->
-        {% if healthcare_data.author_hcp %}
-        {% with author_hcp=healthcare_data.author_hcp %}
+        {% if healthcare_data.practitioners %}
+        {% for practitioner in healthcare_data.practitioners %}
         <div class="col-md-6">
             <div class="healthcare-card h-100">
                 <div class="healthcare-header">
@@ -18,37 +18,37 @@
                 </div>
                 <div class="healthcare-content">
                     <div class="provider-name">
-                        {% if author_hcp.title %}{{ author_hcp.title }} {% endif %}
-                        {{ author_hcp.given_name|default:"" }} {{ author_hcp.family_name|default:"" }}
-                        {% if not author_hcp.given_name and not author_hcp.family_name %}Document Author{% endif %}
+                        {{ practitioner.name|default:"Document Author" }}
                     </div>
 
-                    {% if author_hcp.ids %}
+                    {% if practitioner.identifiers %}
                     <div class="provider-details mt-3">
                         <div class="detail-section-title">Professional Identifiers</div>
-                        {% for id_info in author_hcp.ids %}
+                        {% for identifier in practitioner.identifiers %}
                         <div class="id-item">
                             <i class="fa-solid fa-id-card text-secondary me-2"></i>
-                            <span class="id-value">{{ id_info.extension|default:"ID" }}</span>
-                            {% if id_info.root %}
-                            <span class="id-system">({{ id_info.root }})</span>
+                            <span class="id-value">{{ identifier.value|default:"ID" }}</span>
+                            {% if identifier.system %}
+                            <span class="id-system">({{ identifier.system }})</span>
                             {% endif %}
                         </div>
                         {% endfor %}
                     </div>
                     {% endif %}
 
-                    {% if author_hcp.code %}
+                    {% if practitioner.qualification %}
                     <div class="provider-details mt-3">
-                        <div class="detail-section-title">Professional Code</div>
-                        <span class="provider-code">{{ author_hcp.code }}</span>
+                        <div class="detail-section-title">Professional Qualifications</div>
+                        {% for qual in practitioner.qualification %}
+                        <span class="provider-code">{{ qual.code.text|default:qual.code.coding.0.display|default:"Qualified Practitioner" }}</span>
+                        {% endfor %}
                     </div>
                     {% endif %}
 
-                    {% if author_hcp.telecoms %}
+                    {% if practitioner.telecoms %}
                     <div class="provider-details mt-3">
                         <div class="detail-section-title">Contact Information</div>
-                        {% for telecom in author_hcp.telecoms %}
+                        {% for telecom in practitioner.telecoms %}
                         <div class="d-flex align-items-center mb-2">
                             {% if telecom.system == 'phone' %}
                             <i class="fa-solid fa-phone text-success me-2"></i>
@@ -63,10 +63,10 @@
                     </div>
                     {% endif %}
 
-                    {% if author_hcp.addresses %}
+                    {% if practitioner.addresses %}
                     <div class="provider-details mt-3">
                         <div class="detail-section-title">Professional Address</div>
-                        {% for address in author_hcp.addresses %}
+                        {% for address in practitioner.addresses %}
                         <div class="address-display">
                             {% if address.street_lines %}
                                 {% for line in address.street_lines %}
@@ -85,12 +85,12 @@
                 </div>
             </div>
         </div>
-        {% endwith %}
+        {% endfor %}
         {% endif %}
 
         <!-- Healthcare Organization Information -->
-        {% if healthcare_data.organization %}
-        {% with org=healthcare_data.organization %}
+        {% if healthcare_data.organizations %}
+        {% for organization in healthcare_data.organizations %}
         <div class="col-md-6">
             <div class="healthcare-card h-100">
                 <div class="healthcare-header">
@@ -99,28 +99,28 @@
                 </div>
                 <div class="healthcare-content">
                     <div class="organization-name">
-                        {{ org.name|default:"Healthcare Organization" }}
+                        {{ organization.name|default:"Healthcare Organization" }}
                     </div>
 
-                    {% if org.ids %}
+                    {% if organization.identifiers %}
                     <div class="organization-details mt-3">
                         <div class="detail-section-title">Organization Identifiers</div>
-                        {% for id_info in org.ids %}
+                        {% for identifier in organization.identifiers %}
                         <div class="id-item">
                             <i class="fa-solid fa-building text-secondary me-2"></i>
-                            <span class="id-value">{{ id_info.extension|default:"ID" }}</span>
-                            {% if id_info.root %}
-                            <span class="id-system">({{ id_info.root }})</span>
+                            <span class="id-value">{{ identifier.value|default:"ID" }}</span>
+                            {% if identifier.system %}
+                            <span class="id-system">({{ identifier.system }})</span>
                             {% endif %}
                         </div>
                         {% endfor %}
                     </div>
                     {% endif %}
 
-                    {% if org.telecoms %}
+                    {% if organization.telecoms %}
                     <div class="organization-details mt-3">
                         <div class="detail-section-title">Contact Information</div>
-                        {% for telecom in org.telecoms %}
+                        {% for telecom in organization.telecoms %}
                         <div class="provider-telecom">
                             {% if telecom.system == 'phone' %}
                             <i class="fa-solid fa-phone text-success me-2"></i>
@@ -136,10 +136,10 @@
                     </div>
                     {% endif %}
 
-                    {% if org.addresses %}
+                    {% if organization.addresses %}
                     <div class="organization-details mt-3">
                         <div class="detail-section-title">Organization Address</div>
-                        {% for address in org.addresses %}
+                        {% for address in organization.addresses %}
                         <div class="address-display">
                             {% if address.street_lines %}
                                 {% for line in address.street_lines %}
@@ -158,39 +158,37 @@
                 </div>
             </div>
         </div>
-        {% endwith %}
+        {% endfor %}
         {% endif %}
     </div>
 
     <!-- Additional Healthcare Information -->
-    {% if healthcare_data.legal_authenticator %}
+    {% if healthcare_data.healthcare_team %}
     <div class="row mt-4">
         <div class="col-12">
             <div class="healthcare-card">
                 <div class="healthcare-header">
-                    <i class="fa-solid fa-certificate me-2"></i>
-                    <strong>Legal Authenticator</strong>
+                    <i class="fa-solid fa-users me-2"></i>
+                    <strong>Healthcare Team</strong>
                 </div>
-                {% with auth=healthcare_data.legal_authenticator %}
                 <div class="healthcare-content">
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="detail-section-title">Authenticator</div>
+                        {% for team_member in healthcare_data.healthcare_team %}
+                        <div class="col-md-6 mb-3">
+                            <div class="detail-section-title">Team Member</div>
                             <div class="fw-medium">
-                                {% if auth.title %}{{ auth.title }} {% endif %}
-                                {{ auth.given_name|default:"" }} {{ auth.family_name|default:"" }}
-                                {% if not auth.given_name and not auth.family_name %}Legal Authenticator{% endif %}
+                                {{ team_member.display|default:"Healthcare Team Member" }}
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            {% if auth.time %}
-                            <div class="detail-section-title">Authentication Time</div>
-                            <div class="small">{{ auth.time }}</div>
+                            {% if team_member.reference %}
+                            <div class="small text-muted">Reference: {{ team_member.reference }}</div>
+                            {% endif %}
+                            {% if team_member.type %}
+                            <div class="small text-muted">Type: {{ team_member.type }}</div>
                             {% endif %}
                         </div>
+                        {% endfor %}
                     </div>
                 </div>
-                {% endwith %}
             </div>
         </div>
     </div>
