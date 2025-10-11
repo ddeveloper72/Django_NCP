@@ -3418,6 +3418,22 @@ def patient_cda_view(request, session_id, cda_type=None):
         patient_data = fhir_data.get('patient_data', {})
         patient_information = fhir_data.get('patient_information', {})
         
+        # Ensure clinical_arrays is truthy if there's any clinical data
+        has_any_clinical_data = any(
+            clinical_arrays.get(key, []) for key in [
+                'medications', 'allergies', 'conditions', 'problems', 
+                'procedures', 'observations', 'vital_signs', 'immunizations',
+                'diagnostic_reports', 'results'
+            ]
+        )
+        
+        # If we have clinical data but clinical_arrays is empty dict, create a proper structure
+        if has_any_clinical_data and not clinical_arrays:
+            clinical_arrays = fhir_data.get('clinical_arrays', {})
+        elif has_any_clinical_data:
+            # Ensure clinical_arrays has a truthy value for template
+            clinical_arrays['has_data'] = True
+        
         # Use patient_information if available, otherwise patient_data
         patient_demographics = patient_information if patient_information else patient_data
         
@@ -3441,23 +3457,12 @@ def patient_cda_view(request, session_id, cda_type=None):
         context = {
             'session_id': session_id,
             'patient_data': patient_demographics,
-            'patient_identity': {
-                'patient_id': extract_primary_patient_id(patient_demographics),
-                'session_id': session_id,
-                'given_name': patient_demographics.get('given_name', 'Unknown'),
-                'family_name': patient_demographics.get('family_name', 'Patient'),
-                'full_name': f"{patient_demographics.get('given_name', 'Unknown')} {patient_demographics.get('family_name', 'Patient')}",
-                'birth_date': patient_demographics.get('birth_date', 'Unknown'),
-                'gender': patient_demographics.get('gender', 'Unknown'),
-                'patient_identifiers': patient_demographics.get('identifier', []),
-                'primary_patient_id': extract_primary_patient_id(patient_demographics),
-                'secondary_patient_id': None,
-            },
+            'patient_identity': fhir_data.get('patient_identity', {}),  # Use processed FHIR data
             'admin_data': admin_data,
             'clinical_arrays': clinical_arrays,
             'fhir_processing': True,
             'data_source': 'FHIR',
-            'source_country': extract_country_from_address(patient_demographics),
+            'source_country': fhir_data.get('patient_identity', {}).get('source_country', 'Unknown'),  # Use from FHIR data
             'source_language': 'en',  # TODO: Extract from FHIR bundle if available
             'translation_quality': 'High',  # FHIR has structured data
             'patient_summary': {
@@ -3467,6 +3472,12 @@ def patient_cda_view(request, session_id, cda_type=None):
             },
             'has_administrative_data': bool(admin_data),
             'has_clinical_data': bool(clinical_arrays),
+            
+            # Extended patient information for Extended Patient Information tab
+            'administrative_data': fhir_data.get('administrative_data', {}),
+            'contact_data': fhir_data.get('contact_data', {}),
+            'healthcare_data': fhir_data.get('healthcare_data', {}),
+            'patient_extended_data': fhir_data.get('patient_extended_data', {}),
         }
         
         # Add clinical arrays to context for template compatibility
@@ -5636,6 +5647,23 @@ def patient_cda_view(request, session_id, cda_type=None):
                 context["contact_info"] = enhanced_extended_data.get(
                     "contact_data", {}
                 )  # Template compatibility
+                
+                # CRITICAL: Add clinical arrays for clinical sections display
+                enhanced_clinical_arrays = enhanced_extended_data.get("clinical_arrays", {})
+                if enhanced_clinical_arrays:
+                    # Override existing clinical arrays with enhanced FHIR data
+                    context["medications"] = enhanced_clinical_arrays.get("medications", [])
+                    context["allergies"] = enhanced_clinical_arrays.get("allergies", [])
+                    context["conditions"] = enhanced_clinical_arrays.get("conditions", [])
+                    context["problems"] = enhanced_clinical_arrays.get("problems", [])
+                    context["procedures"] = enhanced_clinical_arrays.get("procedures", [])
+                    context["observations"] = enhanced_clinical_arrays.get("observations", [])
+                    context["vital_signs"] = enhanced_clinical_arrays.get("vital_signs", [])
+                    context["immunizations"] = enhanced_clinical_arrays.get("immunizations", [])
+                    context["diagnostic_reports"] = enhanced_clinical_arrays.get("diagnostic_reports", [])
+                    context["results"] = enhanced_clinical_arrays.get("results", [])
+                    logger.info(f"[FHIR CLINICAL] Enhanced clinical arrays added to context: {list(enhanced_clinical_arrays.keys())}")
+                    logger.info(f"[FHIR CLINICAL] Medications: {len(enhanced_clinical_arrays.get('medications', []))}, Allergies: {len(enhanced_clinical_arrays.get('allergies', []))}")
 
                 # Enhanced CDA Parser healthcare data override (always prefer fresh extraction)
                 enhanced_healthcare_data = {}

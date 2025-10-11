@@ -170,9 +170,9 @@ This is not data duplication but necessary clinical context preservation.
                                 {% elif address.street %}
                                     {{ address.street }}
                                 {% endif %}
-                                {% if address.city or address.postal_code or address.postalCode or address.country %}
+                                {% if address.city or address.postal_code or address.country %}
                                     {% if address.street_lines or address.street %}<br>{% endif %}
-                                    {% if address.city %}{{ address.city }}{% endif %}{% if address.postal_code or address.postalCode %}{% if address.city %}, {% endif %}{{ address.postal_code|default:address.postalCode }}{% endif %}{% if address.country %}{% if address.city or address.postal_code or address.postalCode %}<br>{% endif %}{{ address.country|country_name }}{% endif %}
+                                    {% if address.city %}{{ address.city }}{% endif %}{% if address.postal_code %}{% if address.city %}, {% endif %}{{ address.postal_code }}{% endif %}{% if address.country %}{% if address.city or address.postal_code %}<br>{% endif %}{{ address.country|country_name }}{% endif %}
                                 {% endif %}
                             </small>
                         </div>

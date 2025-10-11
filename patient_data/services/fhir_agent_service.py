@@ -1,14 +1,14 @@
 """
 FHIR Agent Service - Bridge between FHIR Bundle parsing and Django view layer
 
-This service acts as the interface between FHIRBundleService (data extraction) 
+This service acts as the interface between FHIRBundleParser (enhanced data extraction) 
 and patient_cda_view (template rendering). It transforms FHIR Bundle data into
 the same context structure expected by CDA templates for unified UI rendering.
 
 Architecture:
-- Leverages existing FHIRBundleService for resource extraction
+- Leverages enhanced FHIRBundleParser for comprehensive resource extraction
 - Outputs data in CDA-compatible format for template consistency
-- Provides clinical sections matching CDA section structure
+- Provides clinical sections AND extended patient information
 - Maintains Healthcare Organisation UI standards
 """
 
@@ -16,7 +16,7 @@ import json
 import logging
 from typing import Dict, List, Optional, Any, Union
 
-from .fhir_bundle_service import FHIRBundleService
+from .fhir_bundle_parser import FHIRBundleParser
 from .session_data_service import SessionDataService
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class FHIRAgentService:
     """
     
     def __init__(self):
-        self.fhir_bundle_service = FHIRBundleService()
+        self.fhir_bundle_parser = FHIRBundleParser()  # Use enhanced parser
         
     def extract_patient_context_data(
         self, 
@@ -51,11 +51,11 @@ class FHIRAgentService:
         try:
             logger.info(f"[FHIR AGENT] Processing FHIR Bundle for session {session_id}")
             
-            # Parse FHIR Bundle using existing service
-            bundle_result = self.fhir_bundle_service.parse_fhir_bundle(fhir_bundle_content)
+            # Parse FHIR Bundle using enhanced parser with extended patient information
+            bundle_result = self.fhir_bundle_parser.parse_patient_summary_bundle(fhir_bundle_content)
             
             if not bundle_result.get("success", False):
-                logger.warning(f"[FHIR AGENT] Strict FHIR parsing failed: {bundle_result.get('error')}")
+                logger.warning(f"[FHIR AGENT] Enhanced FHIR parsing failed: {bundle_result.get('error')}")
                 logger.info(f"[FHIR AGENT] Attempting fallback parsing for session {session_id}")
                 
                 # Try fallback parsing for basic FHIR structures
@@ -63,25 +63,15 @@ class FHIRAgentService:
                 if fallback_result and not fallback_result.get("error"):
                     return fallback_result
                 else:
-                    logger.error(f"[FHIR AGENT] Both strict and fallback parsing failed")
+                    logger.error(f"[FHIR AGENT] Both enhanced and fallback parsing failed")
                     return self._create_error_context(session_id, bundle_result.get('error'))
-                
-            patient_summary = bundle_result.get("patient_summary", {})
             
-            # Transform to CDA-compatible context structure
-            context_data = self._transform_to_cda_context(patient_summary, session_id)
+            # Enhanced parser already returns the extended patient information!
+            # No need for additional transformation - return the enhanced data directly
+            logger.info(f"[FHIR AGENT] Enhanced FHIR parsing successful with extended patient information")
+            logger.info(f"[FHIR AGENT] Extended data available: admin={bool(bundle_result.get('administrative_data'))}, contact={bool(bundle_result.get('contact_data'))}, healthcare={bool(bundle_result.get('healthcare_data'))}")
             
-            # Add FHIR-specific metadata
-            context_data.update({
-                "data_source": "FHIR",
-                "bundle_id": bundle_result.get("bundle_id"),
-                "bundle_timestamp": bundle_result.get("bundle_timestamp"),
-                "resource_counts": bundle_result.get("resource_counts", {}),
-                "fhir_agent_processed": True,
-            })
-            
-            logger.info(f"[FHIR AGENT] Successfully processed {len(patient_summary)} sections")
-            return context_data
+            return bundle_result
             
         except Exception as e:
             logger.error(f"[FHIR AGENT] Error processing FHIR Bundle: {str(e)}")
@@ -692,16 +682,88 @@ class FHIRAgentService:
     
     def get_fhir_bundle_from_session(self, session_id: str) -> Optional[Union[str, dict]]:
         """
-        Retrieve FHIR Bundle content from session data.
+        Retrieve FHIR Bundle content from encrypted session data.
         
-        Uses existing SessionDataService patterns to locate FHIR Bundle content
-        in the session management system.
+        Works with PatientSession model and decrypts stored FHIR Bundle data.
         """
         try:
-            # Use SessionDataService to get patient data
-            from django.contrib.sessions.models import Session
+            from patient_data.models import PatientSession
+            from patient_data.services.session_data_service import SessionDataService
+            from django.http import HttpRequest
             
-            # Search for session data containing FHIR bundle
+            # Get the PatientSession
+            try:
+                patient_session = PatientSession.objects.get(session_id=session_id)
+                logger.info(f"[FHIR AGENT] Found PatientSession for {session_id}")
+                
+                # Create a mock request object for SessionDataService
+                class MockRequest:
+                    def __init__(self):
+                        self.session = {}
+                
+                mock_request = MockRequest()
+                
+                # Use SessionDataService to get patient data with proper decryption
+                session_service = SessionDataService()
+                patient_data, debug_info = session_service.get_patient_data(mock_request, session_id)
+                
+                if patient_data:
+                    logger.info(f"[FHIR AGENT] Retrieved patient data for {session_id}")
+                    logger.debug(f"[FHIR AGENT] Debug info: {debug_info}")
+                    
+                    # Check various possible FHIR Bundle locations in the data
+                    fhir_bundle = None
+                    
+                    # Option 1: Direct FHIR Bundle in patient_data
+                    if isinstance(patient_data, dict):
+                        if patient_data.get("resourceType") == "Bundle":
+                            fhir_bundle = patient_data
+                        # Option 2: Nested in patient_data structure
+                        elif patient_data.get("patient_data", {}).get("fhir_bundle"):
+                            fhir_bundle = patient_data["patient_data"]["fhir_bundle"]
+                        # Option 3: In cda_content as JSON string
+                        elif patient_data.get("cda_content"):
+                            cda_content = patient_data["cda_content"]
+                            if isinstance(cda_content, str):
+                                try:
+                                    import json
+                                    parsed_content = json.loads(cda_content)
+                                    if parsed_content.get("resourceType") == "Bundle":
+                                        fhir_bundle = parsed_content
+                                except json.JSONDecodeError:
+                                    pass
+                        # Option 4: Direct access to various data keys
+                        for key in ["fhir_data", "bundle_data", "clinical_data", "patient_bundle"]:
+                            if patient_data.get(key):
+                                data = patient_data[key]
+                                if isinstance(data, dict) and data.get("resourceType") == "Bundle":
+                                    fhir_bundle = data
+                                    break
+                                elif isinstance(data, str):
+                                    try:
+                                        import json
+                                        parsed_data = json.loads(data)
+                                        if parsed_data.get("resourceType") == "Bundle":
+                                            fhir_bundle = parsed_data
+                                            break
+                                    except json.JSONDecodeError:
+                                        continue
+                    
+                    if fhir_bundle:
+                        logger.info(f"[FHIR AGENT] Successfully extracted FHIR Bundle for {session_id}")
+                        logger.info(f"[FHIR AGENT] Bundle type: {fhir_bundle.get('type')}, entries: {len(fhir_bundle.get('entry', []))}")
+                        return fhir_bundle
+                    else:
+                        logger.warning(f"[FHIR AGENT] Patient data found but no FHIR Bundle detected for {session_id}")
+                        logger.debug(f"[FHIR AGENT] Available keys: {list(patient_data.keys()) if isinstance(patient_data, dict) else 'Not a dict'}")
+                else:
+                    logger.warning(f"[FHIR AGENT] No patient data retrieved for {session_id}")
+                    
+            except PatientSession.DoesNotExist:
+                logger.warning(f"[FHIR AGENT] No PatientSession found for {session_id}")
+                
+            # Fallback: Try Django session storage for backwards compatibility
+            from django.contrib.sessions.models import Session
             session_key = f"patient_match_{session_id}"
             
             for db_session in Session.objects.all():
@@ -709,14 +771,11 @@ class FHIRAgentService:
                     session_data = db_session.get_decoded()
                     if session_key in session_data:
                         match_data = session_data[session_key]
-                        
-                        # Check if this contains FHIR bundle data
                         if match_data.get("patient_data", {}).get("source") == "FHIR":
                             fhir_bundle = match_data.get("patient_data", {}).get("fhir_bundle")
                             if fhir_bundle:
-                                logger.info(f"[FHIR AGENT] Found FHIR Bundle in session for {session_id}")
+                                logger.info(f"[FHIR AGENT] Found FHIR Bundle in Django session storage for {session_id}")
                                 return fhir_bundle
-                                
                 except Exception:
                     continue
                     
@@ -725,4 +784,6 @@ class FHIRAgentService:
             
         except Exception as e:
             logger.error(f"[FHIR AGENT] Error retrieving FHIR Bundle: {str(e)}")
+            import traceback
+            logger.debug(f"[FHIR AGENT] Traceback: {traceback.format_exc()}")
             return None

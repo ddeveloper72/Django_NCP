@@ -10,16 +10,13 @@
                 type="button">
             <i class="fa-solid fa-user me-1"></i>Personal Information
             {# Show badge if any contact information exists #}
-            {% if contact_data.addresses or contact_data.telecoms or administrative_data.patient_contact_info.addresses or administrative_data.patient_contact_info.telecoms or administrative_data.guardian.contact_info.addresses or administrative_data.guardian.contact_info.telecoms or administrative_data.other_contacts %}
+            {% if contact_data.addresses or contact_data.telecoms or contact_data.contacts %}
             <span class="badge bg-primary ms-2">
-                {# Calculate contact count: primary + admin + guardian + other contacts #}
-                {% with primary_count=contact_data.addresses|length|add:contact_data.telecoms|length %}
-                {% with admin_count=administrative_data.patient_contact_info.addresses|length|add:administrative_data.patient_contact_info.telecoms|length %}
-                {% with guardian_count=administrative_data.guardian.contact_info.addresses|length|add:administrative_data.guardian.contact_info.telecoms|length %}
-                {% with other_contacts_count=administrative_data.other_contacts|length %}
-                    {# Each other contact typically has 1-2 contact methods (address + phone), so multiply by 2 as estimate #}
-                    {{ primary_count|add:admin_count|add:guardian_count|add:other_contacts_count|add:other_contacts_count }}
-                {% endwith %}
+                {# Calculate contact count: addresses + telecoms + additional contacts #}
+                {% with address_count=contact_data.addresses|length %}
+                {% with telecom_count=contact_data.telecoms|length %}
+                {% with contacts_count=contact_data.contacts|length %}
+                    {{ address_count|add:telecom_count|add:contacts_count }}
                 {% endwith %}
                 {% endwith %}
                 {% endwith %}
