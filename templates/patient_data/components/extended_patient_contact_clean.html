@@ -215,17 +215,17 @@ This is not data duplication but necessary clinical context preservation.
                         {% for telecom in contact_data.telecoms %}
                         <div class="mb-2">
                             <div class="d-flex align-items-center">
-                                {% if telecom.type == 'phone' %}
+                                {% if telecom.system == 'phone' %}
                                 <i class="fa-solid fa-phone text-info me-2"></i>
-                                {% elif telecom.type == 'email' %}
+                                {% elif telecom.system == 'email' %}
                                 <i class="fa-solid fa-envelope text-info me-2"></i>
-                                {% elif telecom.type == 'fax' %}
+                                {% elif telecom.system == 'fax' %}
                                 <i class="fa-solid fa-fax text-info me-2"></i>
                                 {% else %}
                                 <i class="fa-solid fa-info-circle text-info me-2"></i>
                                 {% endif %}
                                 <small class="text-secondary-accessible flex-grow-1">
-                                    <strong>{{ telecom.display_value }}</strong>
+                                    <strong>{{ telecom.display|default:telecom.value }}</strong>
                                     {% if telecom.use %}<br><em>{{ telecom.use|capfirst }}</em>{% endif %}
                                 </small>
                             </div>

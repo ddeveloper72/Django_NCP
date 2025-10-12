@@ -723,7 +723,7 @@ class FHIRBundleParser:
         return clinical_arrays
     
     def _extract_patient_identity(self, patient_resources: List[Dict]) -> Dict[str, Any]:
-        """Extract patient identity information for UI display"""
+        """Extract comprehensive patient identity information for UI display"""
         if not patient_resources:
             return {
                 'given_name': 'Unknown',
@@ -732,21 +732,113 @@ class FHIRBundleParser:
                 'birth_date': 'Unknown',
                 'gender': 'Unknown',
                 'patient_id': 'Unknown',
-                'source_country': 'Unknown'
+                'source_country': 'Unknown',
+                'marital_status': 'Unknown',
+                'deceased': False,
+                'active': True,
+                'preferred_language': 'Unknown',
+                'patient_identifiers': []
             }
         
         patient = patient_resources[0]  # Use first patient resource
         
-        # Extract name components
+        # Extract name components with full FHIR R4 HumanName compliance
         given_name = 'Unknown'
         family_name = 'Patient'
+        full_name = 'Unknown Patient'
+        prefix = []
+        suffix = []
+        name_use = 'usual'  # Default use
+        name_text = None
+        name_period = {}
+        
         names = patient.get('name', [])
         if names:
+            # Use first name (primary name)
             name = names[0]
-            if name.get('given'):
-                given_name = ' '.join(name['given'])
-            if name.get('family'):
-                family_name = name['family']
+            
+            # FHIR R4 HumanName standard fields
+            name_use = name.get('use', 'usual')  # usual | official | temp | nickname | anonymous | old | maiden
+            name_text = name.get('text')  # Text representation of the full name
+            family_name = name.get('family', 'Patient')  # Family name (Surname)
+            given_names = name.get('given', [])  # Given names array (includes middle names)
+            prefix = name.get('prefix', [])  # Parts that come before the name
+            suffix = name.get('suffix', [])  # Parts that come after the name  
+            name_period = name.get('period', {})  # Time period when name was/is in use
+            
+            # Process given names
+            if given_names:
+                given_name = ' '.join(given_names)  # Combine all given names for display
+            
+            # Create full name from components if text not provided
+            if name_text:
+                full_name = name_text
+            else:
+                # Construct full name from components
+                name_parts = []
+                if prefix:
+                    name_parts.extend(prefix)
+                if given_names:
+                    name_parts.extend(given_names)
+                if family_name != 'Patient':
+                    name_parts.append(family_name)
+                if suffix:
+                    name_parts.extend(suffix)
+                full_name = ' '.join(name_parts) if name_parts else 'Unknown Patient'
+        
+        # Extract patient identifiers with full FHIR R4 Identifier compliance
+        identifiers = patient.get('identifier', [])
+        formatted_identifiers = []
+        patient_id = 'Unknown'
+        
+        for identifier in identifiers:
+            # Extract type as CodeableConcept
+            identifier_type = identifier.get('type', {})
+            type_text = 'Unknown'
+            type_coding = []
+            
+            if identifier_type:
+                # Get text representation
+                type_text = identifier_type.get('text', 'Unknown')
+                
+                # If no text, try to get from coding
+                if type_text == 'Unknown':
+                    codings = identifier_type.get('coding', [])
+                    if codings:
+                        type_text = codings[0].get('display', codings[0].get('code', 'Unknown'))
+                        type_coding = codings
+            
+            # Extract assigner organization
+            assigner = identifier.get('assigner', {})
+            assigner_display = 'Unknown'
+            if assigner:
+                assigner_display = assigner.get('display', assigner.get('reference', 'Unknown'))
+            
+            # FHIR R4 compliant identifier structure
+            formatted_id = {
+                # === FHIR R4 Standard Fields ===
+                'use': identifier.get('use', 'usual'),  # usual | official | temp | secondary | old
+                'type': {  # CodeableConcept
+                    'text': type_text,
+                    'coding': type_coding
+                },
+                'system': identifier.get('system', 'Unknown'),  # The namespace URI
+                'value': identifier.get('value', 'Unknown'),  # The unique value
+                'period': identifier.get('period', {}),  # Time period when valid
+                'assigner': {  # Organization reference
+                    'display': assigner_display,
+                    'reference': assigner.get('reference', None)
+                },
+                
+                # === Legacy Template Compatibility ===
+                'type_text': type_text,  # For simple template access
+                'assigner_display': assigner_display  # For simple template access
+            }
+            formatted_identifiers.append(formatted_id)
+            
+            # Use first identifier as primary patient ID
+            if patient_id == 'Unknown':
+                patient_id = identifier.get('value', 'Unknown')
         
         # Extract source country from address
         source_country = 'Unknown'
@@ -757,20 +849,78 @@ class FHIRBundleParser:
             if country_code and country_code != 'Unknown':
                 source_country = country_code  # Will be processed by country_name template filter
         
+        # Extract marital status
+        marital_status = 'Unknown'
+        if patient.get('maritalStatus'):
+            marital_status = patient['maritalStatus'].get('text', 
+                patient['maritalStatus'].get('coding', [{}])[0].get('display', 'Unknown'))
+        
+        # Extract preferred language
+        preferred_language = 'Unknown'
+        communication = patient.get('communication', [])
+        if communication:
+            for comm in communication:
+                if comm.get('preferred', False):
+                    language = comm.get('language', {})
+                    preferred_language = language.get('text', 
+                        language.get('coding', [{}])[0].get('display', 'Unknown'))
+                    break
+            # If no preferred language found, use first available
+            if preferred_language == 'Unknown' and communication:
+                language = communication[0].get('language', {})
+                preferred_language = language.get('text', 
+                    language.get('coding', [{}])[0].get('display', 'Unknown'))
+        
+        # Extract birth date and format it properly
+        birth_date = patient.get('birthDate', 'Unknown')
+        if birth_date != 'Unknown' and birth_date:
+            try:
+                # Ensure consistent date formatting for UI
+                from datetime import datetime
+                if len(birth_date) == 10:  # YYYY-MM-DD format
+                    # Keep the original format for now
+                    pass
+            except:
+                birth_date = 'Unknown'
+        
         return {
+            # === Legacy/Template Compatibility Fields ===
             'given_name': given_name,
             'family_name': family_name,
-            'full_name': f"{given_name} {family_name}",
-            'birth_date': patient.get('birthDate', 'Unknown'),
-            'gender': patient.get('gender', 'Unknown').capitalize(),
-            'patient_id': patient.get('id', 'Unknown'),
-            'source_country': source_country
+            'full_name': full_name,
+            'prefix': prefix,
+            'suffix': suffix,
+            
+            # === FHIR R4 HumanName Compliant Fields ===
+            'name': {
+                'use': name_use,  # usual | official | temp | nickname | anonymous | old | maiden
+                'text': name_text or full_name,  # Text representation of the full name
+                'family': family_name,  # Family name (often called 'Surname')
+                'given': names[0].get('given', []) if names else [],  # Given names array (includes middle names)
+                'prefix': prefix,  # Parts that come before the name (array)
+                'suffix': suffix,  # Parts that come after the name (array)
+                'period': name_period  # Time period when name was/is in use
+            },
+            
+            # === Additional Patient Data ===
+            'birth_date': birth_date,
+            'gender': patient.get('gender', 'Unknown').capitalize() if patient.get('gender') else 'Unknown',
+            'patient_id': patient_id,
+            'patient_identifiers': formatted_identifiers,
+            'source_country': source_country,
+            'marital_status': marital_status,
+            'deceased': patient.get('deceasedBoolean', False),
+            'deceased_date': patient.get('deceasedDateTime', None),
+            'active': patient.get('active', True),
+            'preferred_language': preferred_language,
+            'multiple_birth': patient.get('multipleBirthBoolean', False),
+            'multiple_birth_integer': patient.get('multipleBirthInteger', None)
         }
     
     def _extract_administrative_data(self, patient_resources: List[Dict], 
                                    composition_resources: List[Dict],
                                    fhir_bundle: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract administrative data for Extended Patient Information tab"""
+        """Extract comprehensive administrative data for Extended Patient Information tab"""
         administrative_data = {}
         
         if patient_resources:
@@ -784,46 +934,260 @@ class FHIRBundleParser:
                     'system': identifier.get('system', 'Unknown'),
                     'value': identifier.get('value', 'Unknown'),
                     'type': identifier.get('type', {}).get('text', 'Unknown'),
-                    'use': identifier.get('use', 'Unknown')
+                    'use': identifier.get('use', 'Unknown'),
+                    'assigner': identifier.get('assigner', {}).get('display', 'Unknown')
                 })
+            
+            # Extract communication preferences
+            communication_prefs = []
+            communications = patient.get('communication', [])
+            for comm in communications:
+                language = comm.get('language', {})
+                language_text = language.get('text', '')
+                if not language_text:
+                    codings = language.get('coding', [])
+                    if codings:
+                        language_text = codings[0].get('display', codings[0].get('code', 'Unknown'))
+                
+                communication_prefs.append({
+                    'language': language_text,
+                    'preferred': comm.get('preferred', False)
+                })
+            
+            # Extract marital status
+            marital_status = 'Unknown'
+            if patient.get('maritalStatus'):
+                marital_status = patient['maritalStatus'].get('text', 
+                    patient['maritalStatus'].get('coding', [{}])[0].get('display', 'Unknown'))
             
             # Patient administrative details
             administrative_data.update({
                 'patient_identifiers': formatted_identifiers,
-                'marital_status': patient.get('maritalStatus', {}).get('text', 'Unknown'),
-                'communication': patient.get('communication', []),
+                'marital_status': marital_status,
+                'communication': communication_prefs,
+                'patient_languages': [cp['language'] for cp in communication_prefs],  # For template compatibility
                 'deceased': patient.get('deceasedBoolean', False),
+                'deceased_date': patient.get('deceasedDateTime', None),
                 'multiple_birth': patient.get('multipleBirthBoolean', False),
-                'active': patient.get('active', True)
+                'multiple_birth_integer': patient.get('multipleBirthInteger', None),
+                'active': patient.get('active', True),
+                'birth_date': patient.get('birthDate', 'Unknown'),
+                'gender': patient.get('gender', 'Unknown').capitalize() if patient.get('gender') else 'Unknown'
             })
+            
+            # Extract links to other patients (for family relationships)
+            links = patient.get('link', [])
+            formatted_links = []
+            for link in links:
+                formatted_links.append({
+                    'other': link.get('other', {}),
+                    'type': link.get('type', 'Unknown')
+                })
+            administrative_data['patient_links'] = formatted_links
+            
+            # Extract emergency contacts and guardians from patient.contact
+            # and format them for the template's expected structure
+            other_contacts = []
+            contacts = patient.get('contact', [])
+            for contact in contacts:
+                # Extract relationship
+                relationships = contact.get('relationship', [])
+                relationship_text = 'Unknown'
+                if relationships:
+                    rel = relationships[0]
+                    relationship_text = rel.get('text', '')
+                    if not relationship_text:
+                        codings = rel.get('coding', [])
+                        if codings:
+                            relationship_text = codings[0].get('display', codings[0].get('code', 'Unknown'))
+                
+                # Extract name
+                name = contact.get('name', {})
+                given_name = ' '.join(name.get('given', [])) if name.get('given') else ''
+                family_name = name.get('family', '')
+                
+                # Extract telecom
+                phone = ''
+                email = ''
+                fax = ''
+                other_telecoms = []
+                contact_telecoms = contact.get('telecom', [])
+                for ct in contact_telecoms:
+                    value = ct.get('value', '')
+                    if value.startswith('tel:'):
+                        value = value[4:]
+                    elif value.startswith('mailto:'):
+                        value = value[7:]
+                    elif value.startswith('fax:'):
+                        value = value[4:]
+                    
+                    system = ct.get('system', 'unknown')
+                    if system == 'phone':
+                        phone = value
+                    elif system == 'email':
+                        email = value
+                    elif system == 'fax':
+                        fax = value
+                    else:
+                        other_telecoms.append({
+                            'system': system,
+                            'value': value,
+                            'use': ct.get('use', 'unknown')
+                        })
+                
+                # Extract address
+                address = contact.get('address', {})
+                full_address = ''
+                if address:
+                    addr_parts = []
+                    if address.get('line'):
+                        addr_parts.extend(address['line'])
+                    if address.get('city'):
+                        addr_parts.append(address['city'])
+                    if address.get('postalCode'):
+                        addr_parts.append(address['postalCode'])
+                    if address.get('country'):
+                        addr_parts.append(address['country'])
+                    full_address = ', '.join(addr_parts)
+                
+                other_contacts.append({
+                    'given_name': given_name,
+                    'family_name': family_name,
+                    'relationship': relationship_text,
+                    'contact_type': relationship_text,  # For template compatibility
+                    'role': relationship_text,  # For template compatibility
+                    'phone': phone,
+                    'email': email,
+                    'address': full_address,
+                    'gender': contact.get('gender', 'Unknown'),
+                    'organization': contact.get('organization', {}).get('display', '')
+                })
+            
+            administrative_data['other_contacts'] = other_contacts
+            
+            # Extract guardian information (look for guardian relationship in contacts)
+            guardian = None
+            for contact in contacts:
+                relationships = contact.get('relationship', [])
+                for rel in relationships:
+                    rel_text = rel.get('text', '').lower()
+                    rel_code = ''
+                    codings = rel.get('coding', [])
+                    if codings:
+                        rel_code = codings[0].get('code', '').lower()
+                    
+                    # Check if this contact is a guardian
+                    if ('guardian' in rel_text or 'parent' in rel_text or 
+                        'mother' in rel_text or 'father' in rel_text or
+                        'next of kin' in rel_text or 'legal' in rel_text or
+                        rel_code in ['guardian', 'parent', 'mother', 'father']):
+                        
+                        # Extract guardian details
+                        name = contact.get('name', {})
+                        given_name = ' '.join(name.get('given', [])) if name.get('given') else ''
+                        family_name = name.get('family', '')
+                        
+                        # Extract relationship
+                        relationship = rel.get('text', '')
+                        if not relationship:
+                            if codings:
+                                relationship = codings[0].get('display', codings[0].get('code', 'Guardian'))
+                        
+                        # Extract contact info
+                        contact_info = {
+                            'addresses': [],
+                            'telecoms': []
+                        }
+                        
+                        # Guardian address
+                        if contact.get('address'):
+                            addr = contact['address']
+                            contact_info['addresses'].append({
+                                'street_lines': addr.get('line', []),
+                                'city': addr.get('city'),
+                                'state': addr.get('state'),
+                                'postal_code': addr.get('postalCode'),
+                                'country': addr.get('country'),
+                                'full_address': self._format_address(addr)
+                            })
+                        
+                        # Guardian telecom
+                        for ct in contact.get('telecom', []):
+                            value = ct.get('value', '')
+                            if value.startswith('tel:'):
+                                value = value[4:]
+                            elif value.startswith('mailto:'):
+                                value = value[7:]
+                            
+                            contact_info['telecoms'].append({
+                                'system': ct.get('system', 'Unknown'),
+                                'value': value,
+                                'use': ct.get('use', 'Unknown'),
+                                'display': self._format_telecom_display(ct)
+                            })
+                        
+                        guardian = {
+                            'given_name': given_name,
+                            'family_name': family_name,
+                            'relationship': relationship,
+                            'role': relationship,  # For template compatibility
+                            'contact_info': contact_info,
+                            'gender': contact.get('gender', 'Unknown'),
+                            'organization': contact.get('organization', {}).get('display', '')
+                        }
+                        break
+                
+                if guardian:
+                    break
+            
+            administrative_data['guardian'] = guardian
         
         # Document metadata from Composition
         if composition_resources:
             composition = composition_resources[0]
+            
+            # Extract authors with more detail
+            authors = []
+            for author in composition.get('author', []):
+                authors.append({
+                    'reference': author.get('reference', ''),
+                    'display': author.get('display', 'Unknown'),
+                    'type': author.get('type', 'Unknown')
+                })
+            
             administrative_data.update({
                 'document_id': composition.get('id', 'Unknown'),
                 'document_title': composition.get('title', 'Patient Summary'),
                 'document_status': composition.get('status', 'Unknown'),
                 'document_date': composition.get('date', 'Unknown'),
                 'document_type': composition.get('type', {}).get('text', 'Patient Summary'),
+                'document_type_code': composition.get('type', {}).get('coding', [{}])[0].get('code', 'Unknown'),
                 'custodian': composition.get('custodian', {}).get('display', 'Unknown'),
-                'author': [author.get('display', 'Unknown') for author in composition.get('author', [])]
+                'author': [author['display'] for author in authors],  # For template compatibility
+                'authors': authors,  # Detailed author information
+                'confidentiality': composition.get('confidentiality', 'Unknown'),
+                'language': composition.get('language', 'Unknown')
             })
         
         # Bundle metadata
         administrative_data.update({
             'bundle_id': fhir_bundle.get('id', 'Unknown'),
             'bundle_type': fhir_bundle.get('type', 'Unknown'),
-            'bundle_timestamp': fhir_bundle.get('timestamp', 'Unknown')
+            'bundle_timestamp': fhir_bundle.get('timestamp', 'Unknown'),
+            'bundle_total': fhir_bundle.get('total', 0),
+            'bundle_identifier': fhir_bundle.get('identifier', {})
         })
         
         return administrative_data
     
     def _extract_contact_data(self, patient_resources: List[Dict]) -> Dict[str, Any]:
-        """Extract contact information for Extended Patient Information tab"""
+        """Extract comprehensive contact information for Extended Patient Information tab"""
         contact_data = {
             'addresses': [],
-            'telecoms': []
+            'telecoms': [],
+            'contacts': [],  # Emergency contacts, guardians, etc.
+            'general_practitioner': [],
+            'managing_organization': None
         }
         
         if not patient_resources:
@@ -831,23 +1195,138 @@ class FHIRBundleParser:
             
         patient = patient_resources[0]
         
-        # Extract addresses
+        # Extract addresses with full FHIR R4 Address compliance
         addresses = patient.get('address', [])
         for address in addresses:
+            # FHIR R4 Address standard fields
+            address_lines = address.get('line', [])
+            
             formatted_address = {
-                'use': address.get('use', 'home'),
-                'type': address.get('type', 'physical'),
-                'street_lines': address.get('line', []),  # Template expects 'street_lines'
-                'street': ', '.join(address.get('line', [])) if address.get('line') else None,  # Fallback for 'street'
-                'city': address.get('city'),
-                'state': address.get('state'),
-                'postal_code': address.get('postalCode'),
-                'postalCode': address.get('postalCode'),  # Support both naming conventions
-                'country': address.get('country'),
-                'period': address.get('period', {}),
-                'full_address': self._format_address(address)
+                # === FHIR R4 Standard Fields ===
+                'use': address.get('use', 'home'),  # home | work | temp | old | billing
+                'type': address.get('type', 'physical'),  # postal | physical | both
+                'text': self._format_address_text(address),  # Text representation
+                'line': address_lines,  # Street name, number, direction & P.O. Box (array)
+                'city': address.get('city'),  # Name of city, town etc.
+                'district': address.get('district'),  # District name (aka county)
+                'state': address.get('state'),  # Sub-unit of country
+                'postalCode': address.get('postalCode'),  # Postal code for area
+                'country': address.get('country'),  # Country (ISO 3166 code)
+                'period': address.get('period', {}),  # Time period when address was/is in use
+                
+                # === Template Compatibility Fields ===
+                'street_lines': address_lines,  # Template expects 'street_lines'
+                'street': ', '.join(address_lines) if address_lines else None,  # Combined street
+                'postal_code': address.get('postalCode'),  # Snake_case for template
+                'full_address': self._format_address(address)  # Complete formatted address
             }
             contact_data['addresses'].append(formatted_address)
+        
+        # Extract telecom information (phone, email, etc.)
+        telecoms = patient.get('telecom', [])
+        for telecom in telecoms:
+            # Clean up tel: prefix and other system prefixes
+            value = telecom.get('value', '')
+            if value.startswith('tel:'):
+                value = value[4:]  # Remove 'tel:' prefix
+            elif value.startswith('mailto:'):
+                value = value[7:]  # Remove 'mailto:' prefix
+            elif value.startswith('fax:'):
+                value = value[4:]  # Remove 'fax:' prefix
+            
+            formatted_telecom = {
+                'system': telecom.get('system', 'Unknown'),
+                'value': value,
+                'use': telecom.get('use', 'Unknown'),
+                'rank': telecom.get('rank', 1),
+                'period': telecom.get('period', {}),
+                'display': self._format_telecom_display(telecom)
+            }
+            contact_data['telecoms'].append(formatted_telecom)
+        
+        # Extract patient contacts (emergency contacts, guardians, next of kin)
+        contacts = patient.get('contact', [])
+        for contact in contacts:
+            formatted_contact = {
+                'relationship': [],
+                'name': {},
+                'telecom': [],
+                'address': {},
+                'gender': contact.get('gender', 'Unknown'),
+                'organization': contact.get('organization', {}),
+                'period': contact.get('period', {})
+            }
+            
+            # Extract relationship types
+            relationships = contact.get('relationship', [])
+            for relationship in relationships:
+                rel_text = relationship.get('text', '')
+                if not rel_text:
+                    # Try to get from coding
+                    codings = relationship.get('coding', [])
+                    if codings:
+                        rel_text = codings[0].get('display', codings[0].get('code', 'Unknown'))
+                formatted_contact['relationship'].append(rel_text)
+            
+            # Extract contact name
+            if contact.get('name'):
+                name = contact['name']
+                formatted_contact['name'] = {
+                    'given': ' '.join(name.get('given', [])),
+                    'family': name.get('family', ''),
+                    'full_name': f"{' '.join(name.get('given', []))} {name.get('family', '')}".strip(),
+                    'prefix': name.get('prefix', []),
+                    'suffix': name.get('suffix', [])
+                }
+            
+            # Extract contact telecom
+            contact_telecoms = contact.get('telecom', [])
+            for ct in contact_telecoms:
+                value = ct.get('value', '')
+                if value.startswith('tel:'):
+                    value = value[4:]
+                elif value.startswith('mailto:'):
+                    value = value[7:]
+                
+                formatted_contact['telecom'].append({
+                    'system': ct.get('system', 'Unknown'),
+                    'value': value,
+                    'use': ct.get('use', 'Unknown')
+                })
+            
+            # Extract contact address
+            if contact.get('address'):
+                addr = contact['address']
+                formatted_contact['address'] = {
+                    'street_lines': addr.get('line', []),
+                    'city': addr.get('city'),
+                    'state': addr.get('state'),
+                    'postal_code': addr.get('postalCode'),
+                    'country': addr.get('country'),
+                    'full_address': self._format_address(addr)
+                }
+            
+            contact_data['contacts'].append(formatted_contact)
+        
+        # Extract general practitioner references
+        gp_refs = patient.get('generalPractitioner', [])
+        for gp_ref in gp_refs:
+            contact_data['general_practitioner'].append({
+                'reference': gp_ref.get('reference', ''),
+                'display': gp_ref.get('display', 'Unknown'),
+                'type': gp_ref.get('type', 'Practitioner')
+            })
+        
+        # Extract managing organization
+        if patient.get('managingOrganization'):
+            org = patient['managingOrganization']
+            contact_data['managing_organization'] = {
+                'reference': org.get('reference', ''),
+                'display': org.get('display', 'Unknown'),
+                'type': org.get('type', 'Organization')
+            }
+        
+        return contact_data
         
         # Extract telecom information
         telecoms = patient.get('telecom', [])
@@ -948,9 +1427,31 @@ class FHIRBundleParser:
         
         # Extract organizations
         for organization in organization_resources:
+            # GDPR Data Protection: Filter out Cyprus organizations to prevent data contamination
+            org_name = organization.get('name', '').lower()
+            if any(term in org_name for term in ['cyprus', 'ehealthlab', 'university of cyprus']):
+                logger.warning(f"GDPR Filter: Excluding Cyprus organization from parsing: {organization.get('name')}")
+                continue
+            
+            # Check address for Cyprus contamination
+            address_data = organization.get('address')
+            is_cyprus_org = False
+            
+            if address_data:
+                addresses_to_check = [address_data] if isinstance(address_data, dict) else address_data
+                for address in addresses_to_check:
+                    country = address.get('country', '').lower()
+                    city = address.get('city', '').lower()
+                    if country == 'cy' or 'cyprus' in country or 'nicosia' in city:
+                        is_cyprus_org = True
+                        break
+            
+            if is_cyprus_org:
+                logger.warning(f"GDPR Filter: Excluding organization with Cyprus address: {organization.get('name')}")
+                continue
+            
             # Process organization address (can be single object or array)
             organization_addresses = []
-            address_data = organization.get('address')
             
             if address_data:
                 # Handle both single address object and array of addresses
@@ -1055,6 +1556,20 @@ class FHIRBundleParser:
             parts.append(address['country'])
         
         return ', '.join(parts) if parts else 'Unknown Address'
+    
+    def _format_address_text(self, address: Dict[str, Any]) -> str:
+        """
+        Format FHIR address into text representation according to FHIR R4 specification.
+        
+        The 'text' field should be a text representation of the address that can be
+        displayed to human users. If provided, this supersedes the structured address parts.
+        """
+        # If text is already provided in FHIR data, use it
+        if address.get('text'):
+            return address['text']
+        
+        # Otherwise, construct from structured parts
+        return self._format_address(address)
     
     def _format_telecom_display(self, telecom: Dict[str, Any]) -> str:
         """Format telecom information for display"""
