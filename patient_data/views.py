@@ -3989,13 +3989,21 @@ def patient_cda_view(request, session_id, cda_type=None):
         # EXTRACT PATIENT GOVERNMENT ID FROM SESSION TOKEN
         # Session stores patient_id (aGVhbHRoY2FyZUlkMTIz) mapped to session_id (418650)
         patient_government_id = None
-        if match_data and "patient_data" in match_data:
-            # Try to get the real patient government ID from session data
-            patient_government_id = (
-                match_data["patient_data"].get("primary_patient_id")
-                or match_data["patient_data"].get("patient_id")
-                or match_data["patient_data"].get("government_id")
-            )
+        if match_data:
+            # Handle both old and new session data structures
+            patient_info = None
+            if "patient_data" in match_data:
+                patient_info = match_data["patient_data"]
+            elif "patient_identity" in match_data:
+                patient_info = match_data["patient_identity"]
+                
+            if patient_info:
+                # Try to get the real patient government ID from session data
+                patient_government_id = (
+                    patient_info.get("primary_patient_id")
+                    or patient_info.get("patient_id")
+                    or patient_info.get("government_id")
+                )
 
         if not patient_government_id:
             # Fallback: use session_id if no government ID found
@@ -4013,7 +4021,18 @@ def patient_cda_view(request, session_id, cda_type=None):
 
         if match_data and not db_patient_exists:
             # This is an NCP query result - create temp patient from session data
-            patient_info = match_data["patient_data"]
+            # Handle both old and new session data structures
+            patient_info = None
+            if "patient_data" in match_data:
+                # Old structure
+                patient_info = match_data["patient_data"]
+            elif "patient_identity" in match_data:
+                # New structure from enhanced FHIR bundle parser
+                patient_info = match_data["patient_identity"]
+            
+            if not patient_info:
+                logger.error(f"No patient info found in match_data. Keys: {list(match_data.keys())}")
+                raise KeyError("patient_info not found in session data")
 
             # Create a temporary patient object (not saved to DB)
             patient_data = PatientData(
@@ -4884,6 +4903,51 @@ def patient_cda_view(request, session_id, cda_type=None):
                 and len(enhanced_processing_result.get("sections", [])) == 0,
             }
         )
+
+        # ENHANCED FHIR BUNDLE PROCESSING: Process FHIR bundles for healthcare provider and clinical data
+        if match_data.get("data_source") == "FHIR" and "fhir_bundle" in match_data:
+            logger.info(f"[FHIR BUNDLE] Processing FHIR bundle for session {session_id}")
+            try:
+                from .services.fhir_bundle_parser import FHIRBundleParser
+                
+                fhir_parser = FHIRBundleParser()
+                fhir_bundle = match_data["fhir_bundle"]
+                parsed_fhir_data = fhir_parser.parse_patient_summary_bundle(fhir_bundle)
+                
+                if parsed_fhir_data and parsed_fhir_data.get("success"):
+                    logger.info(f"[FHIR BUNDLE] Successfully parsed FHIR bundle with {parsed_fhir_data.get('sections_count', 0)} sections")
+                    
+                    # Extract healthcare provider information
+                    healthcare_data = parsed_fhir_data.get("healthcare_data", {})
+                    if healthcare_data:
+                        logger.info(f"[FHIR BUNDLE] Healthcare data found: {len(healthcare_data.get('practitioners', []))} practitioners, {len(healthcare_data.get('organizations', []))} organizations")
+                        
+                        # Add healthcare provider information to context in the format expected by templates
+                        context.update({
+                            "healthcare_data": healthcare_data,  # This is what the template expects
+                            "has_healthcare_data": len(healthcare_data.get("practitioners", [])) > 0 or len(healthcare_data.get("organizations", [])) > 0,
+                        })
+                    
+                    # Extract clinical arrays for clinical information tab
+                    clinical_arrays = parsed_fhir_data.get("clinical_arrays", {})
+                    if clinical_arrays:
+                        logger.info(f"[FHIR BUNDLE] Clinical arrays found with {sum(len(v) if isinstance(v, list) else 0 for v in clinical_arrays.values())} total items")
+                        context.update(clinical_arrays)
+                    
+                    # Extract extended patient data  
+                    extended_data = parsed_fhir_data.get("patient_extended_data", {})
+                    if extended_data:
+                        context["extended_data"] = extended_data
+                        context["has_extended_data"] = True
+                        logger.info(f"[FHIR BUNDLE] Extended patient data added to context")
+                        
+                else:
+                    logger.warning(f"[FHIR BUNDLE] Failed to parse FHIR bundle for session {session_id}")
+                    
+            except Exception as e:
+                logger.error(f"[FHIR BUNDLE] Error processing FHIR bundle for session {session_id}: {e}")
+                import traceback
+                traceback.print_exc()
 
         # CLINICAL ARRAYS EXTRACTION: Add clinical arrays for Clinical Information tab (Session-based patient path)
         # Only execute this fallback if medications weren't already extracted by comprehensive processing

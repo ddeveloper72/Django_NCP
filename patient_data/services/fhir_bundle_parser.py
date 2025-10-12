@@ -1633,7 +1633,15 @@ class FHIRBundleParser:
     def _extract_healthcare_data(self, practitioner_resources: List[Dict],
                                organization_resources: List[Dict],
                                composition_resources: List[Dict]) -> Dict[str, Any]:
-        """Extract healthcare provider data for Extended Patient Information tab"""
+        """Extract healthcare provider data for Extended Patient Information tab
+        
+        This method maps FHIR resources to match both the template structure and CDA compatibility:
+        - practitioners: Array for new FHIR template structure
+        - organizations: Array for new FHIR template structure  
+        - healthcare_team: Composition author references
+        - author_hcp: CDA-compatible author mapping (first practitioner)
+        - custodian_organization: CDA-compatible organization mapping (first organization)
+        """
         healthcare_data = {
             'practitioners': [],
             'organizations': [],
@@ -1755,8 +1763,10 @@ class FHIRBundleParser:
                     }
                     organization_addresses.append(formatted_address)
             
-            # Process organization telecoms
+            # Process organization telecoms from both direct and contact sources
             organization_telecoms = []
+            
+            # Direct telecoms at organization level
             telecoms = organization.get('telecom', [])
             for telecom in telecoms:
                 telecom_value = telecom.get('value', '')
@@ -1774,6 +1784,47 @@ class FHIRBundleParser:
                         'display_name': self._format_telecom_display(telecom)
                     }
                     organization_telecoms.append(formatted_telecom)
+            
+            # Contact structure telecoms (FHIR Organization.contact format)
+            contacts = organization.get('contact', [])
+            for contact in contacts:
+                contact_telecoms = contact.get('telecom', [])
+                for telecom in contact_telecoms:
+                    telecom_value = telecom.get('value', '')
+                    # Clean up tel: prefix and handle invalid values
+                    if telecom_value.startswith('tel:'):
+                        telecom_value = telecom_value[4:]
+                    # Skip invalid/empty telecoms
+                    if telecom_value and telecom_value != '0':
+                        formatted_telecom = {
+                            'system': telecom.get('system', 'phone'),
+                            'value': telecom_value,
+                            'use': telecom.get('use', 'work'),
+                            'rank': telecom.get('rank', 0),
+                            'period': telecom.get('period', {}),
+                            'display_name': self._format_telecom_display(telecom),
+                            'source': 'contact'
+                        }
+                        organization_telecoms.append(formatted_telecom)
+                
+                # Also extract contact addresses if they differ from organization address
+                contact_address = contact.get('address', {})
+                if contact_address and contact_address not in organization_addresses:
+                    formatted_contact_address = {
+                        'use': contact_address.get('use', 'work'),
+                        'type': contact_address.get('type', 'physical'),
+                        'street_lines': contact_address.get('line', []),
+                        'street': ', '.join(contact_address.get('line', [])) if contact_address.get('line') else None,
+                        'city': contact_address.get('city'),
+                        'state': contact_address.get('state'),
+                        'postal_code': contact_address.get('postalCode'),
+                        'postalCode': contact_address.get('postalCode'),
+                        'country': contact_address.get('country'),
+                        'period': contact_address.get('period', {}),
+                        'full_address': self._format_address(contact_address),
+                        'source': 'contact'
+                    }
+                    organization_addresses.append(formatted_contact_address)
             
             # Process organization identifiers
             organization_identifiers = []
@@ -1810,7 +1861,163 @@ class FHIRBundleParser:
                     'type': author.get('type', 'Author')
                 })
         
+        # FALLBACK: If no practitioners found, try to extract from composition authors
+        if not healthcare_data['practitioners'] and composition_resources:
+            logger.info("No Practitioner resources found, attempting to extract from Composition authors")
+            
+            for composition in composition_resources:
+                authors = composition.get('author', [])
+                title = composition.get('title', 'Document')
+                date = composition.get('date', 'Unknown date')
+                
+                for author in authors:
+                    # Create a synthetic practitioner from composition author
+                    display_name = author.get('display', 'Document Author')
+                    reference = author.get('reference', '')
+                    
+                    # Extract practitioner ID from reference if possible
+                    practitioner_id = 'composition-author'
+                    if reference.startswith('Practitioner/'):
+                        practitioner_id = reference.replace('Practitioner/', '')
+                    elif reference.startswith('urn:uuid:'):
+                        practitioner_id = reference.replace('urn:uuid:', '')
+                    
+                    synthetic_practitioner = {
+                        'id': practitioner_id,
+                        'name': display_name,
+                        'family_name': display_name.split()[-1] if ' ' in display_name else display_name,
+                        'given_names': display_name.split()[:-1] if ' ' in display_name else [],
+                        'qualification': [{'code': {'text': f'Author of {title}', 'coding': [{'code': 'DOC_AUTHOR', 'display': f'Author of {title}'}]}}],
+                        'addresses': [],
+                        'telecoms': [],
+                        'identifiers': [{'system': 'composition-reference', 'value': reference, 'type': 'Reference'}],
+                        'gender': 'Unknown',
+                        'active': True,
+                        'source': 'composition-author',
+                        'document_title': title,
+                        'document_date': date
+                    }
+                    
+                    healthcare_data['practitioners'].append(synthetic_practitioner)
+                    logger.info(f"Created synthetic practitioner from composition author: {display_name}")
+        
+        # ADDITIONAL FALLBACK: If still no practitioners and no filtered organizations, create minimal info
+        if not healthcare_data['practitioners'] and not healthcare_data['organizations']:
+            logger.info("No healthcare provider information found, creating minimal fallback entry")
+            
+            fallback_practitioner = {
+                'id': 'unknown-provider',
+                'name': 'Healthcare Provider',
+                'family_name': 'Provider',
+                'given_names': ['Healthcare'],
+                'qualification': [{'code': {'text': 'Document author/provider information not available in bundle', 'coding': [{'code': 'UNKNOWN', 'display': 'Provider information not available'}]}}],
+                'addresses': [],
+                'telecoms': [],
+                'identifiers': [],
+                'gender': 'Unknown',
+                'active': True,
+                'source': 'fallback',
+                'note': 'Provider information not included in the FHIR Patient Summary'
+            }
+            
+            healthcare_data['practitioners'].append(fallback_practitioner)
+        
+        # CDA COMPATIBILITY MAPPING: Map FHIR resources to CDA-style structure for backwards compatibility
+        self._add_cda_compatibility_mapping(healthcare_data, composition_resources)
+        
         return healthcare_data
+    
+    def _add_cda_compatibility_mapping(self, healthcare_data: Dict[str, Any], composition_resources: List[Dict]) -> None:
+        """Add CDA-style mappings to healthcare data for backwards compatibility
+        
+        Maps FHIR practitioner and organization resources to CDA-style fields:
+        - author_hcp: Maps to first practitioner with proper CDA structure
+        - custodian_organization: Maps to first organization with proper CDA structure
+        - legal_authenticator: If specified in composition
+        """
+        
+        # Map first practitioner to author_hcp (CDA-style)
+        if healthcare_data['practitioners']:
+            first_practitioner = healthcare_data['practitioners'][0]
+            
+            # Convert FHIR practitioner to CDA-style author_hcp structure
+            healthcare_data['author_hcp'] = {
+                'id': first_practitioner.get('id'),
+                'family_name': first_practitioner.get('family_name', 'Unknown'),
+                'given_name': ' '.join(first_practitioner.get('given_names', [])) if first_practitioner.get('given_names') else 'Unknown',
+                'full_name': first_practitioner.get('name', 'Unknown Healthcare Provider'),
+                'title': self._extract_practitioner_title(first_practitioner),
+                'role': self._extract_practitioner_role(first_practitioner),
+                'identifiers': first_practitioner.get('identifiers', []),
+                'telecoms': first_practitioner.get('telecoms', []),
+                'addresses': first_practitioner.get('addresses', []),
+                'qualifications': first_practitioner.get('qualification', []),
+                'active': first_practitioner.get('active', True),
+                'source': 'fhir-practitioner',
+                'fhir_reference': f"Practitioner/{first_practitioner.get('id')}"
+            }
+            logger.info(f"Mapped first practitioner to author_hcp: {healthcare_data['author_hcp']['full_name']}")
+        
+        # Map first organization to custodian_organization (CDA-style)  
+        if healthcare_data['organizations']:
+            first_organization = healthcare_data['organizations'][0]
+            
+            # Convert FHIR organization to CDA-style custodian structure
+            healthcare_data['custodian_organization'] = {
+                'id': first_organization.get('id'),
+                'name': first_organization.get('name', 'Unknown Healthcare Organization'),
+                'identifiers': first_organization.get('identifiers', []),
+                'telecoms': first_organization.get('telecoms', []),
+                'addresses': first_organization.get('addresses', []),
+                'type': first_organization.get('type', []),
+                'contact': first_organization.get('contact', []),
+                'active': first_organization.get('active', True),
+                'source': 'fhir-organization',
+                'fhir_reference': f"Organization/{first_organization.get('id')}"
+            }
+            logger.info(f"Mapped first organization to custodian_organization: {healthcare_data['custodian_organization']['name']}")
+        
+        # Check composition for legal authenticator (if different from author)
+        if composition_resources:
+            composition = composition_resources[0]
+            
+            # In FHIR, legal authenticator would typically be identified by specific author roles
+            # For now, we'll use the author as legal authenticator if no separate one is found
+            if healthcare_data.get('author_hcp') and not healthcare_data.get('legal_authenticator'):
+                healthcare_data['legal_authenticator'] = {
+                    'family_name': healthcare_data['author_hcp']['family_name'],
+                    'given_name': healthcare_data['author_hcp']['given_name'],
+                    'full_name': healthcare_data['author_hcp']['full_name'],
+                    'title': healthcare_data['author_hcp'].get('title'),
+                    'role': healthcare_data['author_hcp'].get('role', 'Document Author'),
+                    'signature_code': 'S',  # Signed
+                    'time': composition.get('date'),
+                    'source': 'fhir-composition-author',
+                    'fhir_reference': healthcare_data['author_hcp'].get('fhir_reference')
+                }
+                logger.info(f"Mapped author as legal_authenticator: {healthcare_data['legal_authenticator']['full_name']}")
+    
+    def _extract_practitioner_title(self, practitioner: Dict[str, Any]) -> str:
+        """Extract practitioner title from qualifications or name"""
+        qualifications = practitioner.get('qualification', [])
+        if qualifications:
+            for qual in qualifications:
+                code = qual.get('code', {})
+                if code.get('text'):
+                    return code['text']
+                elif code.get('coding') and code['coding']:
+                    return code['coding'][0].get('display', 'Healthcare Professional')
+        return 'Healthcare Professional'
+    
+    def _extract_practitioner_role(self, practitioner: Dict[str, Any]) -> str:
+        """Extract practitioner role from source or qualifications"""
+        source = practitioner.get('source')
+        if source == 'composition-author':
+            return 'Document Author'
+        elif source == 'fallback':
+            return 'Healthcare Provider'
+        else:
+            return 'Healthcare Professional'
     
     def _format_address(self, address: Dict[str, Any]) -> str:
         """Format FHIR address into readable string"""
