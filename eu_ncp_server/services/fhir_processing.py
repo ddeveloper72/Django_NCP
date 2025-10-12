@@ -320,7 +320,7 @@ class FHIRResourceProcessor:
         return {}
     
     def _extract_annotation_text(self, annotations: List[Dict[str, Any]]) -> str:
-        """Extract text from FHIR Annotation array"""
+        """Extract text from FHIR Annotation array (simplified for text display)"""
         if not annotations:
             return ""
         
@@ -330,6 +330,80 @@ class FHIRResourceProcessor:
                 texts.append(annotation['text'])
         
         return ' '.join(texts)
+    
+    def _extract_annotation_data(self, annotations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Extract complete FHIR R4 Annotation data with author and time information"""
+        if not annotations:
+            return []
+        
+        annotation_data = []
+        for annotation in annotations:
+            if not annotation.get('text'):
+                continue  # Skip annotations without required text
+            
+            # Extract author information (either Reference or string)
+            author_info = {}
+            if annotation.get('authorReference'):
+                author_ref = annotation['authorReference']
+                author_info = {
+                    'type': 'reference',
+                    'reference': author_ref.get('reference', ''),
+                    'display': author_ref.get('display', 'Unknown Author'),
+                    'resource_type': self._extract_reference_type(author_ref.get('reference', ''))
+                }
+            elif annotation.get('authorString'):
+                author_info = {
+                    'type': 'string',
+                    'display': annotation['authorString'],
+                    'reference': None,
+                    'resource_type': 'string'
+                }
+            else:
+                author_info = {
+                    'type': 'unknown',
+                    'display': 'Unknown Author',
+                    'reference': None,
+                    'resource_type': 'unknown'
+                }
+            
+            # Format annotation with full FHIR R4 compliance
+            formatted_annotation = {
+                'text': annotation['text'],  # Required field
+                'author': author_info,
+                'time': annotation.get('time'),  # Optional dateTime
+                'timestamp_display': self._format_datetime_display(annotation.get('time')),
+                'markdown_text': annotation['text'],  # Annotation text is markdown format
+                'has_author': bool(annotation.get('authorReference') or annotation.get('authorString')),
+                'has_timestamp': bool(annotation.get('time'))
+            }
+            
+            annotation_data.append(formatted_annotation)
+        
+        return annotation_data
+    
+    def _extract_reference_type(self, reference: str) -> str:
+        """Extract resource type from FHIR reference string"""
+        if not reference:
+            return 'unknown'
+        
+        # FHIR reference format: ResourceType/id
+        if '/' in reference:
+            return reference.split('/')[0]
+        
+        return 'unknown'
+    
+    def _format_datetime_display(self, datetime_str: Optional[str]) -> Optional[str]:
+        """Format FHIR dateTime for display"""
+        if not datetime_str:
+            return None
+        
+        try:
+            from datetime import datetime
+            # Parse FHIR dateTime format (ISO 8601)
+            dt = datetime.fromisoformat(datetime_str.replace('Z', '+00:00'))
+            return dt.strftime('%Y-%m-%d %H:%M')
+        except (ValueError, AttributeError):
+            return datetime_str  # Return as-is if parsing fails
     
     def _validate_bundle(self, bundle: Dict[str, Any]) -> bool:
         """Validate FHIR Bundle structure"""

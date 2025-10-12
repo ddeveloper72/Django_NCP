@@ -394,6 +394,20 @@ class FHIRBundleParser:
                     'severity': severity,
                     'manifestation': manifestation_text
                 })
+        
+        # Extract FHIR R4 Annotation notes (clinical comments about allergies)
+        notes = []
+        annotation_text = ''
+        if allergy.get('note'):
+            # Import the enhanced annotation processor
+            from eu_ncp_server.services.fhir_processing import FHIRResourceProcessor
+            processor = FHIRResourceProcessor()
+            
+            # Extract full annotation data with author and timestamp
+            notes = processor._extract_annotation_data(allergy['note'])
+            
+            # Also extract simple text for backward compatibility
+            annotation_text = processor._extract_annotation_text(allergy['note'])
 
         return {
             'id': allergy.get('id'),
@@ -404,6 +418,9 @@ class FHIRBundleParser:
             'category': allergy.get('category', ['Unknown'])[0] if allergy.get('category') else 'Unknown',
             'reactions': reactions,
             'onset_date': allergy.get('onsetDateTime', 'Unknown') if not is_negative_assertion else 'Not applicable',
+            'notes': notes,  # Full FHIR R4 Annotation data
+            'note_text': annotation_text,  # Simple text for display
+            'has_notes': bool(notes),
             'resource_type': 'AllergyIntolerance',
             'display_text': f"Allergy: {allergen} ({clinical_status})",
             'is_negative_assertion': is_negative_assertion
@@ -460,6 +477,20 @@ class FHIRBundleParser:
             effective_period = f"{start} to {end}"
         elif is_negative_assertion:
             effective_period = 'Not applicable'
+        
+        # Extract FHIR R4 Annotation notes (prescriber notes, patient instructions, etc.)
+        notes = []
+        annotation_text = ''
+        if medication.get('note'):
+            # Import the enhanced annotation processor
+            from eu_ncp_server.services.fhir_processing import FHIRResourceProcessor
+            processor = FHIRResourceProcessor()
+            
+            # Extract full annotation data with author and timestamp
+            notes = processor._extract_annotation_data(medication['note'])
+            
+            # Also extract simple text for backward compatibility
+            annotation_text = processor._extract_annotation_text(medication['note'])
 
         return {
             'id': medication.get('id'),
@@ -468,6 +499,9 @@ class FHIRBundleParser:
             'dosage': dosage_text,
             'effective_period': effective_period,
             'taken': medication.get('taken', 'Unknown'),
+            'notes': notes,  # Full FHIR R4 Annotation data
+            'note_text': annotation_text,  # Simple text for display
+            'has_notes': bool(notes),
             'resource_type': 'MedicationStatement',
             'display_text': f"Medication: {medication_name} ({status})",
             'is_negative_assertion': is_negative_assertion
@@ -532,6 +566,20 @@ class FHIRBundleParser:
             onset_date = condition.get('onsetDateTime', condition.get('onsetString', 'Unknown'))
         else:
             onset_date = 'Not applicable'
+        
+        # Extract FHIR R4 Annotation notes (clinical comments, additional context)
+        notes = []
+        annotation_text = ''
+        if condition.get('note'):
+            # Import the enhanced annotation processor
+            from eu_ncp_server.services.fhir_processing import FHIRResourceProcessor
+            processor = FHIRResourceProcessor()
+            
+            # Extract full annotation data with author and timestamp
+            notes = processor._extract_annotation_data(condition['note'])
+            
+            # Also extract simple text for backward compatibility
+            annotation_text = processor._extract_annotation_text(condition['note'])
 
         return {
             'id': condition.get('id'),
@@ -541,6 +589,9 @@ class FHIRBundleParser:
             'category': category,
             'severity': severity,
             'onset_date': onset_date,
+            'notes': notes,  # Full FHIR R4 Annotation data
+            'note_text': annotation_text,  # Simple text for display
+            'has_notes': bool(notes),
             'resource_type': 'Condition',
             'display_text': f"Condition: {condition_name} ({clinical_status})",
             'is_negative_assertion': is_negative_assertion
