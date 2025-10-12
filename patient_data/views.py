@@ -4905,6 +4905,12 @@ def patient_cda_view(request, session_id, cda_type=None):
         )
 
         # ENHANCED FHIR BUNDLE PROCESSING: Process FHIR bundles for healthcare provider and clinical data
+        logger.info(f"[FHIR DEBUG] Checking FHIR bundle processing conditions:")
+        logger.info(f"[FHIR DEBUG] match_data keys: {list(match_data.keys())}")
+        logger.info(f"[FHIR DEBUG] data_source: '{match_data.get('data_source')}'")
+        logger.info(f"[FHIR DEBUG] has fhir_bundle: {'fhir_bundle' in match_data}")
+        logger.info(f"[FHIR DEBUG] condition result: {match_data.get('data_source') == 'FHIR' and 'fhir_bundle' in match_data}")
+        
         if match_data.get("data_source") == "FHIR" and "fhir_bundle" in match_data:
             logger.info(f"[FHIR BUNDLE] Processing FHIR bundle for session {session_id}")
             try:
