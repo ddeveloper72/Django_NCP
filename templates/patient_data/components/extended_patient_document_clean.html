@@ -64,7 +64,7 @@
                     {% if administrative_data.custodian_organization %}
                     {% with custodian=administrative_data.custodian_organization %}
                     <div class="custodian-name">
-                        {{ custodian.name|default:"Health Service Executive" }}
+                        {{ custodian.name|default:"Document Custodian Organization" }}
                     </div>
 
                     {% if custodian.ids %}
@@ -123,16 +123,16 @@
                     {% endwith %}
                     {% else %}
                     <div class="custodian-name">
-                        Health Service Executive
+                        Document Custodian Organization
                     </div>
                     <div class="custodian-details mt-3">
                         <div class="detail-item">
                             <span class="detail-label">Organization:</span>
-                            <span class="detail-value">Health Service Executive</span>
+                            <span class="detail-value">Document Custodian Organization</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Country:</span>
-                            <span class="detail-value">Ireland</span>
+                            <span class="detail-value">Not Available</span>
                         </div>
                     </div>
                     {% endif %}

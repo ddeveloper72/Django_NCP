@@ -182,6 +182,11 @@ class FHIRBundleParser:
                 resources_by_type.get('Composition', [])
             )
             
+            # Map custodian organization from healthcare_data to administrative_data for template compatibility
+            if healthcare_data.get('custodian_organization'):
+                administrative_data['custodian_organization'] = healthcare_data['custodian_organization']
+                logger.info(f"Mapped custodian organization to administrative_data: {administrative_data['custodian_organization']['name']}")
+            
             # Create clinical arrays for view compatibility
             clinical_arrays = self._create_clinical_arrays(clinical_sections)
             
