@@ -1855,9 +1855,21 @@ class FHIRBundleParser:
             composition = composition_resources[0]
             authors = composition.get('author', [])
             for author in authors:
+                reference = author.get('reference', 'Unknown')
+                display_name = author.get('display', 'Unknown')
+                
+                # If no display name, try to resolve the reference
+                if display_name == 'Unknown' and reference.startswith('Practitioner/'):
+                    practitioner_id = reference.split('/')[-1]
+                    # Find the practitioner in our parsed practitioners
+                    for practitioner in healthcare_data['practitioners']:
+                        if practitioner.get('id') == practitioner_id:
+                            display_name = practitioner.get('name', 'Healthcare Professional')
+                            break
+                
                 healthcare_data['healthcare_team'].append({
-                    'reference': author.get('reference', 'Unknown'),
-                    'display': author.get('display', 'Unknown'),
+                    'reference': reference,
+                    'display': display_name,
                     'type': author.get('type', 'Author')
                 })
         
