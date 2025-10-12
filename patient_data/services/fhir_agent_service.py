@@ -771,10 +771,25 @@ class FHIRAgentService:
                     session_data = db_session.get_decoded()
                     if session_key in session_data:
                         match_data = session_data[session_key]
-                        if match_data.get("patient_data", {}).get("source") == "FHIR":
-                            fhir_bundle = match_data.get("patient_data", {}).get("fhir_bundle")
+                        
+                        # Check multiple patterns for FHIR data source detection
+                        is_fhir_source = (
+                            match_data.get("data_source") in ["FHIR", "FHIR_Enhanced"] or
+                            match_data.get("patient_data", {}).get("source") == "FHIR" or
+                            "fhir_bundle" in match_data
+                        )
+                        
+                        if is_fhir_source:
+                            # Try different locations for FHIR bundle
+                            fhir_bundle = (
+                                match_data.get("fhir_bundle") or
+                                match_data.get("patient_data", {}).get("fhir_bundle")
+                            )
+                            
                             if fhir_bundle:
                                 logger.info(f"[FHIR AGENT] Found FHIR Bundle in Django session storage for {session_id}")
+                                logger.info(f"[FHIR AGENT] Data source: {match_data.get('data_source')}")
+                                logger.info(f"[FHIR AGENT] Emergency contacts available: {match_data.get('has_emergency_contacts', False)}")
                                 return fhir_bundle
                 except Exception:
                     continue

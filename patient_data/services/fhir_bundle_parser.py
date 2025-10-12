@@ -1726,6 +1726,32 @@ class FHIRBundleParser:
                 'source': 'FHIR RelatedPerson'
             }
             
+            # Add convenience fields for template access
+            # Extract primary phone number
+            primary_phone = None
+            primary_email = None
+            for telecom in contact_telecoms:
+                if telecom.get('system') == 'phone' and not primary_phone:
+                    primary_phone = telecom.get('value')
+                elif telecom.get('system') == 'email' and not primary_email:
+                    primary_email = telecom.get('value')
+            
+            emergency_contact['phone'] = primary_phone
+            emergency_contact['email'] = primary_email
+            emergency_contact['full_name'] = contact_name.get('full_name', '')
+            
+            # Extract primary relationship display
+            relationship_display = 'Contact'
+            if relationship_info:
+                for rel in relationship_info:
+                    if rel.get('display'):
+                        relationship_display = rel['display']
+                        break
+                    elif rel.get('text'):
+                        relationship_display = rel['text']
+                        break
+            emergency_contact['relationship_display'] = relationship_display
+            
             emergency_contacts.append(emergency_contact)
         
         return emergency_contacts
