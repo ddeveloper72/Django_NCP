@@ -48,7 +48,7 @@ class FHIRBundleParser:
         self.supported_resource_types = [
             'Patient', 'Composition', 'AllergyIntolerance', 'MedicationStatement',
             'Condition', 'Procedure', 'Observation', 'Immunization', 
-            'DiagnosticReport', 'Practitioner', 'Organization', 'Device'
+            'DiagnosticReport', 'Practitioner', 'Organization', 'Device', 'RelatedPerson'
         ]
         
         # Clinical section mapping for UI consistency
@@ -97,6 +97,11 @@ class FHIRBundleParser:
                 'section_type': 'medical_devices',
                 'display_name': 'Medical Devices',
                 'icon': 'fa-microchip'
+            },
+            'RelatedPerson': {
+                'section_type': 'emergency_contacts',
+                'display_name': 'Emergency Contacts',
+                'icon': 'fa-users'
             }
         }
     
@@ -161,7 +166,13 @@ class FHIRBundleParser:
             )
             
             contact_data = self._extract_contact_data(
-                resources_by_type.get('Patient', [])
+                resources_by_type.get('Patient', []),
+                resources_by_type.get('RelatedPerson', [])
+            )
+            
+            # Extract emergency contacts from RelatedPerson resources
+            emergency_contacts = self._extract_emergency_contacts(
+                resources_by_type.get('RelatedPerson', [])
             )
             
             healthcare_data = self._extract_healthcare_data(
@@ -191,12 +202,14 @@ class FHIRBundleParser:
                 # Extended patient information for Extended Patient Information tab
                 'administrative_data': administrative_data,
                 'contact_data': contact_data,
+                'emergency_contacts': emergency_contacts,
                 'healthcare_data': healthcare_data,
                 'patient_extended_data': {
                     'administrative': administrative_data,
                     'contact': contact_data,
+                    'emergency_contacts': emergency_contacts,
                     'healthcare': healthcare_data,
-                    'has_extended_data': bool(administrative_data or contact_data or healthcare_data)
+                    'has_extended_data': bool(administrative_data or contact_data or emergency_contacts or healthcare_data)
                 },
                 
                 'bundle_metadata': {
@@ -1462,12 +1475,13 @@ class FHIRBundleParser:
         
         return administrative_data
     
-    def _extract_contact_data(self, patient_resources: List[Dict]) -> Dict[str, Any]:
+    def _extract_contact_data(self, patient_resources: List[Dict], related_person_resources: List[Dict] = None) -> Dict[str, Any]:
         """Extract comprehensive contact information for Extended Patient Information tab"""
         contact_data = {
             'addresses': [],
             'telecoms': [],
             'contacts': [],  # Emergency contacts, guardians, etc.
+            'emergency_contacts': [],  # Specific emergency contacts from RelatedPerson
             'general_practitioner': [],
             'managing_organization': None
         }
@@ -1608,7 +1622,113 @@ class FHIRBundleParser:
                 'type': org.get('type', 'Organization')
             }
         
+        # Extract emergency contacts from RelatedPerson resources
+        if related_person_resources:
+            emergency_contacts = self._extract_emergency_contacts(related_person_resources)
+            contact_data['emergency_contacts'] = emergency_contacts
+            
+            # Also add to general contacts for template compatibility
+            for emergency_contact in emergency_contacts:
+                # Convert to format expected by template
+                formatted_emergency_contact = {
+                    'name': emergency_contact.get('name', {}),
+                    'relationship': emergency_contact.get('relationship', []),
+                    'telecom': emergency_contact.get('telecom', []),
+                    'address': emergency_contact.get('address', []),
+                    'type': 'emergency_contact',
+                    'source': 'FHIR RelatedPerson'
+                }
+                contact_data['contacts'].append(formatted_emergency_contact)
+        
         return contact_data
+    
+    def _extract_emergency_contacts(self, related_person_resources: List[Dict]) -> List[Dict[str, Any]]:
+        """Extract emergency contact information from RelatedPerson resources
+        
+        This method extracts next of kin, emergency contacts, and guardians from FHIR RelatedPerson resources
+        to match the contact information available in CDA documents.
+        """
+        emergency_contacts = []
+        
+        if not related_person_resources:
+            return emergency_contacts
+        
+        for related_person in related_person_resources:
+            # Extract name information
+            names = related_person.get('name', [])
+            contact_name = {}
+            if names:
+                name = names[0]
+                contact_name = {
+                    'given': name.get('given', []),
+                    'family': name.get('family', ''),
+                    'text': name.get('text', ''),
+                    'full_name': name.get('text', '') or f"{' '.join(name.get('given', []))} {name.get('family', '')}".strip()
+                }
+            
+            # Extract relationship information
+            relationships = related_person.get('relationship', [])
+            relationship_info = []
+            for rel in relationships:
+                coding = rel.get('coding', [])
+                if coding:
+                    relationship_info.append({
+                        'code': coding[0].get('code', ''),
+                        'display': coding[0].get('display', ''),
+                        'system': coding[0].get('system', '')
+                    })
+                relationship_info.append({
+                    'text': rel.get('text', 'Contact')
+                })
+            
+            # Extract contact information
+            telecoms = related_person.get('telecom', [])
+            contact_telecoms = []
+            for telecom in telecoms:
+                value = telecom.get('value', '')
+                # Clean up prefixes
+                if value.startswith('tel:'):
+                    value = value[4:]
+                elif value.startswith('mailto:'):
+                    value = value[7:]
+                
+                contact_telecoms.append({
+                    'system': telecom.get('system', 'phone'),
+                    'value': value,
+                    'use': telecom.get('use', 'home'),
+                    'rank': telecom.get('rank', 1)
+                })
+            
+            # Extract address information
+            addresses = related_person.get('address', [])
+            contact_addresses = []
+            for address in addresses:
+                contact_addresses.append({
+                    'use': address.get('use', 'home'),
+                    'type': address.get('type', 'physical'),
+                    'line': address.get('line', []),
+                    'city': address.get('city', ''),
+                    'state': address.get('state', ''),
+                    'postalCode': address.get('postalCode', ''),
+                    'country': address.get('country', ''),
+                    'full_address': self._format_address(address)
+                })
+            
+            # Build emergency contact entry
+            emergency_contact = {
+                'id': related_person.get('id', ''),
+                'active': related_person.get('active', True),
+                'name': contact_name,
+                'relationship': relationship_info,
+                'telecom': contact_telecoms,
+                'address': contact_addresses,
+                'patient_reference': related_person.get('patient', {}).get('reference', ''),
+                'source': 'FHIR RelatedPerson'
+            }
+            
+            emergency_contacts.append(emergency_contact)
+        
+        return emergency_contacts
         
         # Extract telecom information
         telecoms = patient.get('telecom', [])
@@ -1858,19 +1978,53 @@ class FHIRBundleParser:
                 reference = author.get('reference', 'Unknown')
                 display_name = author.get('display', 'Unknown')
                 
-                # If no display name, try to resolve the reference
-                if display_name == 'Unknown' and reference.startswith('Practitioner/'):
-                    practitioner_id = reference.split('/')[-1]
-                    # Find the practitioner in our parsed practitioners
-                    for practitioner in healthcare_data['practitioners']:
-                        if practitioner.get('id') == practitioner_id:
-                            display_name = practitioner.get('name', 'Healthcare Professional')
-                            break
+                # Enhanced reference resolution for both Practitioner/ and urn:uuid: references
+                if display_name == 'Unknown':
+                    resolved_name = None
+                    
+                    # Handle Practitioner/ references
+                    if reference.startswith('Practitioner/'):
+                        practitioner_id = reference.split('/')[-1]
+                        # Find the practitioner in our parsed practitioners
+                        for practitioner in healthcare_data['practitioners']:
+                            if practitioner.get('id') == practitioner_id:
+                                resolved_name = practitioner.get('name', 'Healthcare Professional')
+                                break
+                    
+                    # Handle urn:uuid: references
+                    elif reference.startswith('urn:uuid:'):
+                        uuid_reference = reference
+                        # Find the practitioner by UUID reference
+                        for practitioner in healthcare_data['practitioners']:
+                            practitioner_ids = practitioner.get('identifiers', [])
+                            for identifier in practitioner_ids:
+                                if identifier.get('value') == uuid_reference:
+                                    resolved_name = practitioner.get('name', 'Healthcare Professional')
+                                    break
+                            if resolved_name:
+                                break
+                    
+                    # If reference couldn't be resolved, provide informative fallback
+                    if resolved_name:
+                        display_name = resolved_name
+                    else:
+                        # Extract meaningful info from the reference
+                        if reference.startswith('urn:uuid:'):
+                            uuid_short = reference.split(':')[-1][:8] + "..."
+                            display_name = f"Healthcare Provider (ref: {uuid_short})"
+                        elif reference.startswith('Practitioner/'):
+                            prac_id = reference.split('/')[-1][:10] + "..." if len(reference.split('/')[-1]) > 10 else reference.split('/')[-1]
+                            display_name = f"Healthcare Provider (ID: {prac_id})"
+                        else:
+                            display_name = "Healthcare Provider (reference not resolved)"
+                        
+                        # Log the broken reference for debugging
+                        logger.warning(f"FHIR Bundle: Could not resolve author reference '{reference}' - no matching Practitioner resource found in bundle")
                 
                 healthcare_data['healthcare_team'].append({
                     'reference': reference,
-                    'display': display_name,
-                    'type': author.get('type', 'Author')
+                    'display_name': display_name,  # Changed from 'display' to 'display_name' for template compatibility
+                    'role': author.get('type', 'Author')  # Changed from 'type' to 'role' for template compatibility
                 })
         
         # FALLBACK: If no practitioners found, try to extract from composition authors
