@@ -1,10 +1,11 @@
 """
 FHIR Resource Processing Service
-Patient Summary Processing and FHIR R4 Resource Parsing
+Enhanced FHIR R4 Data Types and Resource Processing
 
 This service handles:
 - FHIR Bundle parsing and validation
 - Patient Summary component extraction
+- Complete FHIR R4 data type processing (Quantity, Timing, Range, Ratio, etc.)
 - Clinical data conversion to display format
 - FHIR resource serialization and deserialization
 - Cross-border healthcare data standardization
@@ -404,6 +405,296 @@ class FHIRResourceProcessor:
             return dt.strftime('%Y-%m-%d %H:%M')
         except (ValueError, AttributeError):
             return datetime_str  # Return as-is if parsing fails
+    
+    # ===================================================================
+    # FHIR R4 Data Type Processors
+    # Comprehensive support for all major FHIR data types
+    # ===================================================================
+    
+    def _extract_quantity_data(self, quantity: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract complete FHIR R4 Quantity data structure"""
+        if not quantity:
+            return {}
+        
+        return {
+            'value': quantity.get('value'),
+            'comparator': quantity.get('comparator'),  # <, <=, >=, >
+            'unit': quantity.get('unit'),
+            'system': quantity.get('system'),  # UCUM system preferred
+            'code': quantity.get('code'),
+            'display_value': self._format_quantity_display(quantity),
+            'is_ucum_compliant': self._is_ucum_quantity(quantity)
+        }
+    
+    def _format_quantity_display(self, quantity: Dict[str, Any]) -> str:
+        """Format quantity for human-readable display"""
+        if not quantity or not quantity.get('value'):
+            return 'Unknown quantity'
+        
+        value = quantity.get('value')
+        unit = quantity.get('unit', quantity.get('code', ''))
+        comparator = quantity.get('comparator', '')
+        
+        # Format display value
+        display = f"{comparator}{value}"
+        if unit:
+            display += f" {unit}"
+        
+        return display
+    
+    def _is_ucum_quantity(self, quantity: Dict[str, Any]) -> bool:
+        """Check if quantity uses UCUM system"""
+        system = quantity.get('system', '')
+        return 'unitsofmeasure.org' in system.lower() or 'ucum.org' in system.lower()
+    
+    def _extract_range_data(self, range_obj: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract FHIR R4 Range data structure"""
+        if not range_obj:
+            return {}
+        
+        return {
+            'low': self._extract_quantity_data(range_obj.get('low', {})),
+            'high': self._extract_quantity_data(range_obj.get('high', {})),
+            'display_range': self._format_range_display(range_obj),
+            'has_bounds': bool(range_obj.get('low') or range_obj.get('high'))
+        }
+    
+    def _format_range_display(self, range_obj: Dict[str, Any]) -> str:
+        """Format range for human-readable display"""
+        if not range_obj:
+            return 'Unknown range'
+        
+        low = range_obj.get('low')
+        high = range_obj.get('high')
+        
+        if low and high:
+            low_display = self._format_quantity_display(low)
+            high_display = self._format_quantity_display(high)
+            return f"{low_display} - {high_display}"
+        elif low:
+            return f"≥ {self._format_quantity_display(low)}"
+        elif high:
+            return f"≤ {self._format_quantity_display(high)}"
+        else:
+            return 'Unknown range'
+    
+    def _extract_ratio_data(self, ratio: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract FHIR R4 Ratio data structure"""
+        if not ratio:
+            return {}
+        
+        return {
+            'numerator': self._extract_quantity_data(ratio.get('numerator', {})),
+            'denominator': self._extract_quantity_data(ratio.get('denominator', {})),
+            'display_ratio': self._format_ratio_display(ratio),
+            'has_ratio': bool(ratio.get('numerator') and ratio.get('denominator'))
+        }
+    
+    def _format_ratio_display(self, ratio: Dict[str, Any]) -> str:
+        """Format ratio for human-readable display"""
+        if not ratio:
+            return 'Unknown ratio'
+        
+        numerator = ratio.get('numerator')
+        denominator = ratio.get('denominator')
+        
+        if numerator and denominator:
+            num_display = self._format_quantity_display(numerator)
+            den_display = self._format_quantity_display(denominator)
+            return f"{num_display} : {den_display}"
+        else:
+            return 'Incomplete ratio'
+    
+    def _extract_period_data(self, period: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract FHIR R4 Period data structure"""
+        if not period:
+            return {}
+        
+        return {
+            'start': period.get('start'),
+            'end': period.get('end'),
+            'start_display': self._format_datetime_display(period.get('start')),
+            'end_display': self._format_datetime_display(period.get('end')),
+            'is_ongoing': bool(period.get('start') and not period.get('end')),
+            'duration_display': self._calculate_period_duration(period)
+        }
+    
+    def _calculate_period_duration(self, period: Dict[str, Any]) -> Optional[str]:
+        """Calculate and format period duration"""
+        start = period.get('start')
+        end = period.get('end')
+        
+        if not start:
+            return None
+        
+        try:
+            from datetime import datetime
+            start_dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
+            
+            if end:
+                end_dt = datetime.fromisoformat(end.replace('Z', '+00:00'))
+                duration = end_dt - start_dt
+                days = duration.days
+                if days > 365:
+                    years = days // 365
+                    return f"~{years} year{'s' if years != 1 else ''}"
+                elif days > 30:
+                    months = days // 30
+                    return f"~{months} month{'s' if months != 1 else ''}"
+                else:
+                    return f"{days} day{'s' if days != 1 else ''}"
+            else:
+                return "Ongoing"
+        except (ValueError, AttributeError):
+            return None
+    
+    def _extract_timing_data(self, timing: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract FHIR R4 Timing data structure for medication schedules"""
+        if not timing:
+            return {}
+        
+        timing_data = {
+            'event': timing.get('event', []),  # Specific times
+            'code': self._extract_codeable_concept(timing.get('code', {})),
+            'display_schedule': self._format_timing_display(timing)
+        }
+        
+        # Process repeat schedule
+        repeat = timing.get('repeat', {})
+        if repeat:
+            timing_data['repeat'] = {
+                'bounds': self._extract_timing_bounds(repeat.get('bounds')),
+                'count': repeat.get('count'),
+                'count_max': repeat.get('countMax'),
+                'duration': repeat.get('duration'),
+                'duration_unit': repeat.get('durationUnit'),
+                'frequency': repeat.get('frequency'),
+                'frequency_max': repeat.get('frequencyMax'),
+                'period': repeat.get('period'),
+                'period_unit': repeat.get('periodUnit'),
+                'day_of_week': repeat.get('dayOfWeek', []),
+                'time_of_day': repeat.get('timeOfDay', []),
+                'when': repeat.get('when', []),
+                'offset': repeat.get('offset')
+            }
+        
+        return timing_data
+    
+    def _extract_timing_bounds(self, bounds: Any) -> Dict[str, Any]:
+        """Extract timing bounds (Duration, Range, or Period)"""
+        if not bounds:
+            return {}
+        
+        if isinstance(bounds, dict):
+            # Determine bounds type and extract accordingly
+            if 'start' in bounds or 'end' in bounds:
+                return {'type': 'Period', 'data': self._extract_period_data(bounds)}
+            elif 'low' in bounds or 'high' in bounds:
+                return {'type': 'Range', 'data': self._extract_range_data(bounds)}
+            elif 'value' in bounds and 'unit' in bounds:
+                return {'type': 'Duration', 'data': self._extract_quantity_data(bounds)}
+        
+        return {}
+    
+    def _format_timing_display(self, timing: Dict[str, Any]) -> str:
+        """Format timing for human-readable display"""
+        # Check for simple code first
+        code = timing.get('code', {})
+        if code and code.get('text'):
+            return code['text']
+        
+        # Check for specific events
+        events = timing.get('event', [])
+        if events and not timing.get('repeat'):
+            event_times = [self._format_datetime_display(event) for event in events[:3]]
+            return f"At specific times: {', '.join(event_times)}"
+        
+        repeat = timing.get('repeat', {})
+        if not repeat:
+            if events:
+                event_times = [self._format_datetime_display(event) for event in events[:3]]
+                return f"At specific times: {', '.join(event_times)}"
+            return 'As directed'
+        
+        # Build schedule description from repeat elements
+        frequency = repeat.get('frequency', 1)
+        period = repeat.get('period', 1)
+        period_unit = repeat.get('periodUnit', 'd')
+        
+        # Convert period unit to readable format
+        unit_map = {'s': 'second', 'min': 'minute', 'h': 'hour', 'd': 'day', 'wk': 'week', 'mo': 'month', 'a': 'year'}
+        unit_display = unit_map.get(period_unit, period_unit)
+        
+        if frequency == 1 and period == 1:
+            return f"Once per {unit_display}"
+        elif frequency > 1 and period == 1:
+            return f"{frequency} times per {unit_display}"
+        else:
+            return f"{frequency} time{'s' if frequency != 1 else ''} every {period} {unit_display}{'s' if period != 1 else ''}"
+    
+    def _extract_attachment_data(self, attachment: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract FHIR R4 Attachment data structure"""
+        if not attachment:
+            return {}
+        
+        return {
+            'content_type': attachment.get('contentType'),
+            'language': attachment.get('language'),
+            'data': attachment.get('data'),  # base64 encoded
+            'url': attachment.get('url'),
+            'size': attachment.get('size'),
+            'hash': attachment.get('hash'),
+            'title': attachment.get('title'),
+            'creation': attachment.get('creation'),
+            'creation_display': self._format_datetime_display(attachment.get('creation')),
+            'has_inline_data': bool(attachment.get('data')),
+            'has_external_url': bool(attachment.get('url')),
+            'display_title': attachment.get('title', 'Attachment'),
+            'size_display': self._format_file_size(attachment.get('size'))
+        }
+    
+    def _format_file_size(self, size_bytes: Optional[int]) -> Optional[str]:
+        """Format file size for human-readable display"""
+        if not size_bytes:
+            return None
+        
+        if size_bytes < 1024:
+            return f"{size_bytes} B"
+        elif size_bytes < 1024 * 1024:
+            return f"{size_bytes / 1024:.1f} KB"
+        else:
+            return f"{size_bytes / (1024 * 1024):.1f} MB"
+    
+    def _extract_coding_data(self, coding: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract FHIR R4 Coding data structure"""
+        if not coding:
+            return {}
+        
+        return {
+            'system': coding.get('system'),
+            'version': coding.get('version'),
+            'code': coding.get('code'),
+            'display': coding.get('display'),
+            'user_selected': coding.get('userSelected', False),
+            'display_text': coding.get('display', coding.get('code', 'Unknown code'))
+        }
+    
+    def _extract_codeable_concept(self, concept: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract FHIR R4 CodeableConcept data structure"""
+        if not concept:
+            return {}
+        
+        codings = []
+        for coding in concept.get('coding', []):
+            codings.append(self._extract_coding_data(coding))
+        
+        return {
+            'coding': codings,
+            'text': concept.get('text'),
+            'display_text': concept.get('text') or (codings[0]['display_text'] if codings else 'Unknown concept'),
+            'has_multiple_codings': len(codings) > 1,
+            'primary_coding': codings[0] if codings else {}
+        }
     
     def _validate_bundle(self, bundle: Dict[str, Any]) -> bool:
         """Validate FHIR Bundle structure"""

@@ -69,6 +69,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # CRITICAL: GDPR Patient Session Isolation Middleware (MUST BE FIRST)
+    "patient_data.middleware.session_isolation.PatientSessionIsolationMiddleware",
     # Patient Session Management Middleware
     "patient_data.middleware.session_security.PatientSessionMiddleware",
     "patient_data.middleware.session_security.SessionSecurityMiddleware",
@@ -330,6 +332,12 @@ LOGGING = {
         "patient_data.security": {
             "handlers": ["console", "file"],
             "level": "WARNING",
+            "propagate": False,
+        },
+        # CRITICAL: GDPR Session Isolation Audit Logging
+        "patient_data.middleware.session_isolation": {
+            "handlers": ["console", "file", "audit_file"],
+            "level": "INFO",
             "propagate": False,
         },
         "django.template": {

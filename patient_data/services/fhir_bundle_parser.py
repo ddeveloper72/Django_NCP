@@ -377,23 +377,73 @@ class FHIRBundleParser:
             if is_negative_assertion:
                 verification_status = 'Not applicable'
         
-        # Extract severity and reactions (only for actual allergies)
+        # Extract severity and reactions with FHIR R4 data type support (only for actual allergies)
         reactions = []
         if not is_negative_assertion:
+            # Import enhanced FHIR processor for complex data types
+            from eu_ncp_server.services.fhir_processing import FHIRResourceProcessor
+            processor = FHIRResourceProcessor()
+            
             for reaction in allergy.get('reaction', []):
-                severity = reaction.get('severity', 'Unknown')
+                # Extract reaction severity with FHIR R4 CodeableConcept support
+                severity = 'Unknown'
+                severity_data = {}
+                if reaction.get('severity'):
+                    severity = reaction['severity']
+                    # Note: severity in FHIR R4 is a code (mild | moderate | severe)
+                    severity_data = {'code': severity, 'display': severity.capitalize()}
+                
+                # Extract manifestation with FHIR R4 CodeableConcept support
                 manifestation_text = 'Unknown reaction'
+                manifestation_data = {}
                 if reaction.get('manifestation'):
                     manifestation = reaction['manifestation'][0]
-                    if manifestation.get('coding'):
-                        manifestation_text = manifestation['coding'][0].get('display', 'Unknown reaction')
-                    elif manifestation.get('text'):
-                        manifestation_text = manifestation['text']
+                    manifestation_data = processor._extract_codeable_concept(manifestation)
+                    manifestation_text = manifestation_data.get('display_text', 'Unknown reaction')
+                
+                # Extract onset with FHIR R4 Period support if available
+                onset_data = {}
+                onset_text = 'Unknown onset'
+                if reaction.get('onset'):
+                    onset_text = reaction['onset']
+                elif reaction.get('onsetPeriod'):
+                    onset_data = processor._extract_period_data(reaction['onsetPeriod'])
+                    onset_text = onset_data.get('start_display', 'Unknown onset')
+                
+                # Extract exposure route with FHIR R4 CodeableConcept support
+                exposure_route_data = {}
+                exposure_route_text = 'Unknown route'
+                if reaction.get('exposureRoute'):
+                    exposure_route_data = processor._extract_codeable_concept(reaction['exposureRoute'])
+                    exposure_route_text = exposure_route_data.get('display_text', 'Unknown route')
                 
                 reactions.append({
                     'severity': severity,
-                    'manifestation': manifestation_text
+                    'severity_data': severity_data,
+                    'manifestation': manifestation_text,
+                    'manifestation_data': manifestation_data,
+                    'onset': onset_text,
+                    'onset_data': onset_data,
+                    'exposure_route': exposure_route_text,
+                    'exposure_route_data': exposure_route_data,
+                    'substance': reaction.get('substance', {}),  # Additional substance if different from main allergen
+                    'description': reaction.get('description', ''),
+                    'note': reaction.get('note', '')
                 })
+        
+        # Extract category with FHIR R4 support for multiple categories
+        categories = []
+        category_display = 'Unknown'
+        if allergy.get('category'):
+            categories = allergy['category']  # Can be multiple: food, medication, environment, biologic
+            category_display = ', '.join(categories) if categories else 'Unknown'
+        
+        # Extract criticality (low | high | unable-to-assess)
+        criticality = allergy.get('criticality', 'Unknown')
+        
+        # Extract type with enhanced display
+        allergy_type = allergy.get('type', 'Unknown')
+        type_display = allergy_type.replace('_', ' ').title() if allergy_type != 'Unknown' else 'Unknown'
         
         # Extract FHIR R4 Annotation notes (clinical comments about allergies)
         notes = []
@@ -414,16 +464,22 @@ class FHIRBundleParser:
             'allergen': allergen,
             'clinical_status': clinical_status,
             'verification_status': verification_status,
-            'type': allergy.get('type', 'Unknown'),
-            'category': allergy.get('category', ['Unknown'])[0] if allergy.get('category') else 'Unknown',
+            'type': allergy_type,
+            'type_display': type_display,
+            'category': categories,
+            'category_display': category_display,
+            'criticality': criticality,
             'reactions': reactions,
-            'onset_date': allergy.get('onsetDateTime', 'Unknown') if not is_negative_assertion else 'Not applicable',
+            'reaction_count': len(reactions),
+            'onset_date': allergy.get('onsetDateTime', allergy.get('onsetString', 'Unknown')) if not is_negative_assertion else 'Not applicable',
             'notes': notes,  # Full FHIR R4 Annotation data
             'note_text': annotation_text,  # Simple text for display
             'has_notes': bool(notes),
+            'has_reactions': bool(reactions),
             'resource_type': 'AllergyIntolerance',
             'display_text': f"Allergy: {allergen} ({clinical_status})",
-            'is_negative_assertion': is_negative_assertion
+            'is_negative_assertion': is_negative_assertion,
+            'severity_summary': self._get_allergy_severity_summary(reactions) if reactions else 'Not applicable'
         }
     
     def _parse_medication_resource(self, medication: Dict[str, Any]) -> Dict[str, Any]:
@@ -448,33 +504,83 @@ class FHIRBundleParser:
             else:
                 medication_name = display
         
-        # Extract dosage information
+        # Extract enhanced dosage information with FHIR R4 data types
         dosage_text = 'No dosage information'
+        dosage_timing = {}
+        dosage_quantity = {}
+        dosage_route = {}
+        
         if not is_negative_assertion:
             dosages = medication.get('dosage', [])
             if dosages:
                 dosage = dosages[0]
+                
+                # Import enhanced FHIR processor for data type extraction
+                from eu_ncp_server.services.fhir_processing import FHIRResourceProcessor
+                processor = FHIRResourceProcessor()
+                
+                # Extract text instruction
                 if dosage.get('text'):
                     dosage_text = dosage['text']
+                
+                # Extract structured dose and rate with FHIR R4 Quantity support
                 elif dosage.get('doseAndRate'):
                     dose_rate = dosage['doseAndRate'][0]
                     if dose_rate.get('doseQuantity'):
-                        dose_qty = dose_rate['doseQuantity']
-                        dosage_text = f"{dose_qty.get('value', '')} {dose_qty.get('unit', '')}"
+                        dosage_quantity = processor._extract_quantity_data(dose_rate['doseQuantity'])
+                        dosage_text = dosage_quantity.get('display_value', 'Unknown dose')
+                    elif dose_rate.get('doseRange'):
+                        dose_range = processor._extract_range_data(dose_rate['doseRange'])
+                        dosage_text = dose_range.get('display_range', 'Unknown dose range')
+                
+                # Extract timing information with FHIR R4 Timing support
+                if dosage.get('timing'):
+                    dosage_timing = processor._extract_timing_data(dosage['timing'])
+                    if dosage_timing.get('display_schedule'):
+                        timing_text = dosage_timing['display_schedule']
+                        if dosage_text != 'No dosage information':
+                            dosage_text += f" - {timing_text}"
+                        else:
+                            dosage_text = timing_text
+                
+                # Extract route with FHIR R4 CodeableConcept support
+                if dosage.get('route'):
+                    dosage_route = processor._extract_codeable_concept(dosage['route'])
+                    route_text = dosage_route.get('display_text', '')
+                    if route_text and dosage_text != 'No dosage information':
+                        dosage_text += f" ({route_text})"
         else:
             dosage_text = 'Not applicable - no medication information'
         
-        # Extract status and effective period
+        # Extract status and effective period with FHIR R4 Period support
         status = medication.get('status', 'Unknown')
         if is_negative_assertion:
             status = 'No information available'
             
         effective_period = 'Unknown period'
+        effective_period_data = {}
         if not is_negative_assertion and medication.get('effectivePeriod'):
-            period = medication['effectivePeriod']
-            start = period.get('start', 'Unknown start')
-            end = period.get('end', 'Ongoing')
-            effective_period = f"{start} to {end}"
+            # Import enhanced FHIR processor for Period extraction
+            from eu_ncp_server.services.fhir_processing import FHIRResourceProcessor
+            processor = FHIRResourceProcessor()
+            
+            effective_period_data = processor._extract_period_data(medication['effectivePeriod'])
+            
+            # Use enhanced period display or fallback to basic format
+            if effective_period_data.get('start_display') or effective_period_data.get('end_display'):
+                start = effective_period_data.get('start_display', 'Unknown start')
+                end = effective_period_data.get('end_display', 'Ongoing')
+                effective_period = f"{start} to {end}"
+                
+                # Add duration if calculated
+                if effective_period_data.get('duration_display'):
+                    effective_period += f" ({effective_period_data['duration_display']})"
+            else:
+                # Fallback to basic display
+                period = medication['effectivePeriod']
+                start = period.get('start', 'Unknown start')
+                end = period.get('end', 'Ongoing')
+                effective_period = f"{start} to {end}"
         elif is_negative_assertion:
             effective_period = 'Not applicable'
         
@@ -627,35 +733,160 @@ class FHIRBundleParser:
         }
     
     def _parse_observation_resource(self, observation: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse FHIR Observation resource"""
-        # Extract observation name
+        """Parse FHIR Observation resource with comprehensive FHIR R4 data type support"""
+        # Import enhanced FHIR processor for complex data types
+        from eu_ncp_server.services.fhir_processing import FHIRResourceProcessor
+        processor = FHIRResourceProcessor()
+        
+        # Extract observation name with FHIR R4 CodeableConcept support
         code = observation.get('code', {})
         observation_name = 'Unknown observation'
-        if code.get('coding'):
-            coding = code['coding'][0]
-            observation_name = coding.get('display', coding.get('code', 'Unknown observation'))
-        elif code.get('text'):
-            observation_name = code['text']
+        code_data = {}
+        if code:
+            code_data = processor._extract_codeable_concept(code)
+            observation_name = code_data.get('display_text', 'Unknown observation')
         
-        # Extract value
+        # Extract value with comprehensive FHIR R4 data type support
         value_text = 'No value'
-        if observation.get('valueQuantity'):
-            value_qty = observation['valueQuantity']
-            value_text = f"{value_qty.get('value', '')} {value_qty.get('unit', '')}"
-        elif observation.get('valueString'):
-            value_text = observation['valueString']
-        elif observation.get('valueCodeableConcept', {}).get('text'):
-            value_text = observation['valueCodeableConcept']['text']
+        value_data = {}
+        value_type = 'none'
         
+        # FHIR R4 supports multiple value types for observations
+        if observation.get('valueQuantity'):
+            value_type = 'quantity'
+            value_data = processor._extract_quantity_data(observation['valueQuantity'])
+            value_text = value_data.get('display_value', 'Unknown quantity')
+        elif observation.get('valueCodeableConcept'):
+            value_type = 'concept'
+            value_data = processor._extract_codeable_concept(observation['valueCodeableConcept'])
+            value_text = value_data.get('display_text', 'Unknown concept')
+        elif observation.get('valueString'):
+            value_type = 'string'
+            value_text = observation['valueString']
+            value_data = {'text': value_text}
+        elif observation.get('valueBoolean') is not None:
+            value_type = 'boolean'
+            value_text = 'Yes' if observation['valueBoolean'] else 'No'
+            value_data = {'boolean': observation['valueBoolean']}
+        elif observation.get('valueInteger') is not None:
+            value_type = 'integer'
+            value_text = str(observation['valueInteger'])
+            value_data = {'integer': observation['valueInteger']}
+        elif observation.get('valueRange'):
+            value_type = 'range'
+            value_data = processor._extract_range_data(observation['valueRange'])
+            value_text = value_data.get('display_range', 'Unknown range')
+        elif observation.get('valueRatio'):
+            value_type = 'ratio'
+            value_data = processor._extract_ratio_data(observation['valueRatio'])
+            value_text = value_data.get('display_ratio', 'Unknown ratio')
+        elif observation.get('valuePeriod'):
+            value_type = 'period'
+            value_data = processor._extract_period_data(observation['valuePeriod'])
+            start = value_data.get('start_display', 'Unknown start')
+            end = value_data.get('end_display', 'Unknown end')
+            value_text = f"{start} to {end}"
+        elif observation.get('valueDateTime'):
+            value_type = 'datetime'
+            value_text = processor._format_datetime_display(observation['valueDateTime'])
+            value_data = {'datetime': observation['valueDateTime'], 'display': value_text}
+        elif observation.get('valueTime'):
+            value_type = 'time'
+            value_text = observation['valueTime']
+            value_data = {'time': value_text}
+        elif observation.get('valueAttachment'):
+            value_type = 'attachment'
+            value_data = processor._extract_attachment_data(observation['valueAttachment'])
+            value_text = value_data.get('display_title', 'Attachment')
+        
+        # Extract effective date/time with FHIR R4 support
+        effective_date = 'Unknown date'
+        effective_data = {}
+        if observation.get('effectiveDateTime'):
+            effective_date = processor._format_datetime_display(observation['effectiveDateTime'])
+            effective_data = {'type': 'datetime', 'value': observation['effectiveDateTime'], 'display': effective_date}
+        elif observation.get('effectivePeriod'):
+            effective_data = processor._extract_period_data(observation['effectivePeriod'])
+            start = effective_data.get('start_display', 'Unknown start')
+            end = effective_data.get('end_display', 'Unknown end')
+            effective_date = f"{start} to {end}"
+            effective_data['type'] = 'period'
+        elif observation.get('effectiveInstant'):
+            effective_date = processor._format_datetime_display(observation['effectiveInstant'])
+            effective_data = {'type': 'instant', 'value': observation['effectiveInstant'], 'display': effective_date}
+        
+        # Extract category with FHIR R4 CodeableConcept support
+        category_text = 'Unknown'
+        category_data = {}
+        if observation.get('category'):
+            categories = observation['category']
+            if categories:
+                category_data = processor._extract_codeable_concept(categories[0])
+                category_text = category_data.get('display_text', 'Unknown')
+        
+        # Extract reference range with FHIR R4 Range support
+        reference_ranges = []
+        for ref_range in observation.get('referenceRange', []):
+            range_data = {
+                'low': processor._extract_quantity_data(ref_range.get('low', {})) if ref_range.get('low') else {},
+                'high': processor._extract_quantity_data(ref_range.get('high', {})) if ref_range.get('high') else {},
+                'type': processor._extract_codeable_concept(ref_range.get('type', {})) if ref_range.get('type') else {},
+                'applies_to': [processor._extract_codeable_concept(concept) for concept in ref_range.get('appliesTo', [])],
+                'age': processor._extract_range_data(ref_range.get('age', {})) if ref_range.get('age') else {},
+                'text': ref_range.get('text', '')
+            }
+            
+            # Create display text for reference range
+            range_display = []
+            if range_data['low']:
+                range_display.append(f"Low: {range_data['low'].get('display_value', 'Unknown')}")
+            if range_data['high']:
+                range_display.append(f"High: {range_data['high'].get('display_value', 'Unknown')}")
+            range_data['display'] = ', '.join(range_display) if range_display else range_data.get('text', 'Unknown range')
+            
+            reference_ranges.append(range_data)
+        
+        # Extract interpretation with FHIR R4 CodeableConcept support
+        interpretation_text = ''
+        interpretation_data = {}
+        if observation.get('interpretation'):
+            interpretations = observation['interpretation']
+            if interpretations:
+                interpretation_data = processor._extract_codeable_concept(interpretations[0])
+                interpretation_text = interpretation_data.get('display_text', '')
+        
+        # Extract status and method
+        status = observation.get('status', 'Unknown')
+        method_text = ''
+        method_data = {}
+        if observation.get('method'):
+            method_data = processor._extract_codeable_concept(observation['method'])
+            method_text = method_data.get('display_text', '')
+
         return {
             'id': observation.get('id'),
             'observation_name': observation_name,
+            'code_data': code_data,
             'value': value_text,
-            'status': observation.get('status', 'Unknown'),
-            'effective_date': observation.get('effectiveDateTime', 'Unknown date'),
-            'category': observation.get('category', [{}])[0].get('coding', [{}])[0].get('display', 'Unknown'),
+            'value_data': value_data,
+            'value_type': value_type,
+            'status': status.capitalize(),
+            'effective_date': effective_date,
+            'effective_data': effective_data,
+            'category': category_text,
+            'category_data': category_data,
+            'reference_ranges': reference_ranges,
+            'has_reference_ranges': bool(reference_ranges),
+            'interpretation': interpretation_text,
+            'interpretation_data': interpretation_data,
+            'method': method_text,
+            'method_data': method_data,
+            'body_site': processor._extract_codeable_concept(observation.get('bodySite', {})) if observation.get('bodySite') else {},
+            'component': observation.get('component', []),  # Multi-component observations
+            'has_components': bool(observation.get('component')),
             'resource_type': 'Observation',
-            'display_text': f"Observation: {observation_name} = {value_text}"
+            'display_text': f"Observation: {observation_name} = {value_text}",
+            'clinical_significance': self._assess_observation_significance(observation, value_data, reference_ranges, interpretation_text)
         }
     
     def _parse_immunization_resource(self, immunization: Dict[str, Any]) -> Dict[str, Any]:
@@ -1688,6 +1919,84 @@ class FHIRBundleParser:
         if names and names[0].get('given'):
             return names[0]['given']
         return []
+    
+    def _get_allergy_severity_summary(self, reactions: List[Dict[str, Any]]) -> str:
+        """Generate summary of allergy reaction severities"""
+        if not reactions:
+            return 'No reactions recorded'
+        
+        severities = [reaction.get('severity', 'Unknown').lower() for reaction in reactions]
+        
+        # Count severity levels
+        severe_count = severities.count('severe')
+        moderate_count = severities.count('moderate')
+        mild_count = severities.count('mild')
+        unknown_count = severities.count('unknown')
+        
+        # Build summary
+        summary_parts = []
+        if severe_count > 0:
+            summary_parts.append(f"{severe_count} severe")
+        if moderate_count > 0:
+            summary_parts.append(f"{moderate_count} moderate")
+        if mild_count > 0:
+            summary_parts.append(f"{mild_count} mild")
+        if unknown_count > 0:
+            summary_parts.append(f"{unknown_count} unknown severity")
+        
+        if summary_parts:
+            return f"{len(reactions)} reaction{'s' if len(reactions) != 1 else ''}: {', '.join(summary_parts)}"
+        else:
+            return f"{len(reactions)} reaction{'s' if len(reactions) != 1 else ''} recorded"
+    
+    def _assess_observation_significance(self, observation: Dict[str, Any], value_data: Dict[str, Any], 
+                                        reference_ranges: List[Dict[str, Any]], interpretation: str) -> str:
+        """Assess clinical significance of observation value"""
+        # Check interpretation first
+        if interpretation:
+            interpretation_lower = interpretation.lower()
+            if any(term in interpretation_lower for term in ['high', 'elevated', 'increased', 'above']):
+                return 'Above normal'
+            elif any(term in interpretation_lower for term in ['low', 'decreased', 'below']):
+                return 'Below normal'
+            elif any(term in interpretation_lower for term in ['normal', 'within', 'reference']):
+                return 'Within normal range'
+            elif any(term in interpretation_lower for term in ['critical', 'panic', 'alert']):
+                return 'Critical value'
+            elif any(term in interpretation_lower for term in ['abnormal', 'unusual']):
+                return 'Abnormal'
+        
+        # Try to assess based on reference ranges if available
+        if reference_ranges and value_data.get('value') is not None:
+            try:
+                obs_value = float(value_data['value'])
+                for ref_range in reference_ranges:
+                    low_data = ref_range.get('low', {})
+                    high_data = ref_range.get('high', {})
+                    
+                    low_value = low_data.get('value')
+                    high_value = high_data.get('value')
+                    
+                    if low_value is not None and obs_value < float(low_value):
+                        return 'Below reference range'
+                    elif high_value is not None and obs_value > float(high_value):
+                        return 'Above reference range'
+                    elif low_value is not None and high_value is not None:
+                        if float(low_value) <= obs_value <= float(high_value):
+                            return 'Within reference range'
+            except (ValueError, TypeError):
+                pass  # Could not convert to numeric for comparison
+        
+        # Check observation status for additional context
+        status = observation.get('status', '').lower()
+        if status in ['cancelled', 'entered-in-error']:
+            return 'Invalid result'
+        elif status == 'preliminary':
+            return 'Preliminary result'
+        elif status == 'amended':
+            return 'Amended result'
+        
+        return 'Result recorded'
 
 
 class FHIRBundleParserError(Exception):

@@ -2227,22 +2227,30 @@ def patient_data_view(request):
                 }
 
                 # Create PatientSession for secure session management
-                patient_session = PatientSession.objects.create(
-                    session_id=session_id,
-                    user=request.user,
-                    country_code=country_code,
-                    search_criteria_hash=hash(f"{country_code}_{patient_id}"),
-                    status="active",
-                    expires_at=timezone.now() + timedelta(hours=8),
-                    client_ip=request.META.get("REMOTE_ADDR", ""),
-                    last_action="patient_search_successful",
-                    encryption_key_version=1,  # Set default encryption version
-                )
-
-                # Encrypt and store patient data
-                patient_session.encrypt_patient_data(patient_session_data)
-
-                # Also keep traditional session storage for backward compatibility
+                # Handle anonymous users for public patient search
+                session_user = request.user if request.user.is_authenticated else None
+                
+                if session_user:
+                    # Authenticated user - create full PatientSession
+                    patient_session = PatientSession.objects.create(
+                        session_id=session_id,
+                        user=session_user,
+                        country_code=country_code,
+                        search_criteria_hash=hash(f"{country_code}_{patient_id}"),
+                        status="active",
+                        expires_at=timezone.now() + timedelta(hours=8),
+                        client_ip=request.META.get("REMOTE_ADDR", ""),
+                        last_action="patient_search_successful",
+                        encryption_key_version=1,  # Set default encryption version
+                    )
+                    
+                    # Encrypt and store patient data for authenticated users
+                    patient_session.encrypt_patient_data(patient_session_data)
+                else:
+                    # Anonymous user - use session storage only (no PatientSession model)
+                    logger.info(f"Anonymous patient search for {patient_id} from {country_code}")
+                
+                # Store in Django session for both authenticated and anonymous users
                 request.session[f"patient_match_{session_id}"] = patient_session_data
 
                 # Add success message

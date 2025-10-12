@@ -329,6 +329,80 @@ class HAPIFHIRIntegrationService:
             logger.error(f"Patient search in HAPI FHIR failed: {str(e)}")
             raise HAPIFHIRIntegrationError(f"Patient search failed: {str(e)}")
     
+    def search_patient_documents(self, patient_id: str) -> Dict[str, Any]:
+        """
+        Search for patient documents (Compositions) in HAPI FHIR server
+        
+        Args:
+            patient_id: Unique patient identifier
+            
+        Returns:
+            Search results with patient document information
+        """
+        try:
+            # Search for Compositions (patient documents) for this patient
+            fhir_params = {
+                'subject': f'Patient/{patient_id}',
+                '_count': '50'
+            }
+            
+            search_results = self._make_request('GET', 'Composition', params=fhir_params)
+            
+            # Process composition results
+            documents = []
+            for entry in search_results.get('entry', []):
+                resource = entry.get('resource', {})
+                if resource.get('resourceType') == 'Composition':
+                    doc_info = self._extract_composition_info(resource)
+                    documents.append(doc_info)
+            
+            result = {
+                'total': search_results.get('total', len(documents)),
+                'documents': documents,
+                'patient_id': patient_id,
+                'search_timestamp': datetime.now(timezone.utc).isoformat()
+            }
+            
+            audit_logger.info(f"Patient document search in HAPI FHIR: patient_id={patient_id}, results={len(documents)}")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Patient document search in HAPI FHIR failed: {str(e)}")
+            raise HAPIFHIRIntegrationError(f"Patient document search failed: {str(e)}")
+    
+    def _extract_composition_info(self, composition_resource: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract relevant information from FHIR Composition resource"""
+        composition_info = {
+            'id': composition_resource.get('id'),
+            'title': composition_resource.get('title', 'Patient Document'),
+            'status': composition_resource.get('status', 'unknown'),
+            'date': composition_resource.get('date'),
+            'type': composition_resource.get('type', {}).get('text', 'Patient Summary'),
+            'subject_reference': composition_resource.get('subject', {}).get('reference'),
+            'author': [],
+            'custodian': composition_resource.get('custodian', {}).get('display'),
+            'sections': []
+        }
+        
+        # Extract authors
+        for author in composition_resource.get('author', []):
+            composition_info['author'].append({
+                'reference': author.get('reference'),
+                'display': author.get('display', 'Unknown Author')
+            })
+        
+        # Extract sections
+        for section in composition_resource.get('section', []):
+            section_info = {
+                'title': section.get('title', 'Unknown Section'),
+                'code': section.get('code', {}).get('text', 'Unknown'),
+                'entry_count': len(section.get('entry', []))
+            }
+            composition_info['sections'].append(section_info)
+        
+        return composition_info
+    
     def _validate_fhir_bundle(self, bundle: Dict[str, Any]) -> bool:
         """Validate basic FHIR Bundle structure"""
         required_fields = ['resourceType', 'type']
