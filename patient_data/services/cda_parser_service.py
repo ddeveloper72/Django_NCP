@@ -509,7 +509,12 @@ class CDAParserService:
             ):
                 if line_elem.text:
                     street_lines.append(line_elem.text)
+            
+            # Store in multiple formats for compatibility
             address["streetAddressLine"] = street_lines
+            address["street_lines"] = street_lines  # FHIR compatibility
+            if street_lines:
+                address["street"] = ", ".join(street_lines)  # Template compatibility
 
             # City
             city_elem = addr_elem.find(".//cda:city", self.NAMESPACES)
@@ -531,6 +536,21 @@ class CDAParserService:
             if country_elem is not None and country_elem.text:
                 address["country"] = country_elem.text
 
+            # Create full_address for display
+            address_parts = []
+            if street_lines:
+                address_parts.extend(street_lines)
+            if address.get("city"):
+                address_parts.append(address["city"])
+            if address.get("state"):
+                address_parts.append(address["state"])
+            if address.get("postalCode"):
+                address_parts.append(address["postalCode"])
+            if address.get("country"):
+                address_parts.append(address["country"])
+            
+            address["full_address"] = ", ".join(address_parts) if address_parts else ""
+
         except Exception as e:
             logger.warning(f"Error extracting address: {e}")
 
@@ -540,25 +560,49 @@ class CDAParserService:
         """Extract telecom information"""
         telecom = {}
         try:
-            telecom["value"] = telecom_elem.get("value", "")
+            raw_value = telecom_elem.get("value", "")
             telecom["use"] = telecom_elem.get("use", "")
 
-            # Parse value to determine type
-            value = telecom["value"]
-            if value.startswith("tel:"):
-                telecom["type"] = "phone"
-                telecom["number"] = value.replace("tel:", "")
-            elif value.startswith("mailto:"):
-                telecom["type"] = "email"
-                telecom["email"] = value.replace("mailto:", "")
-            elif value.startswith("http"):
-                telecom["type"] = "url"
-                telecom["url"] = value
+            # Parse value to determine type and clean it
+            if raw_value.startswith("tel:"):
+                cleaned_value = raw_value.replace("tel:", "")
+                # Skip invalid/empty telecoms (0, empty, etc.)
+                if cleaned_value and cleaned_value != "0" and len(cleaned_value.strip()) > 0:
+                    telecom["system"] = "phone"  # Use system instead of type for FHIR compatibility
+                    telecom["type"] = "phone"    # Keep type for backward compatibility
+                    telecom["value"] = cleaned_value
+                    telecom["number"] = cleaned_value
+                else:
+                    return None  # Skip invalid telecom
+            elif raw_value.startswith("mailto:"):
+                cleaned_value = raw_value.replace("mailto:", "")
+                if cleaned_value and len(cleaned_value.strip()) > 0:
+                    telecom["system"] = "email"
+                    telecom["type"] = "email"
+                    telecom["value"] = cleaned_value
+                    telecom["email"] = cleaned_value
+                else:
+                    return None  # Skip invalid telecom
+            elif raw_value.startswith("http"):
+                if len(raw_value.strip()) > 0:
+                    telecom["system"] = "url"
+                    telecom["type"] = "url"
+                    telecom["value"] = raw_value
+                    telecom["url"] = raw_value
+                else:
+                    return None  # Skip invalid telecom
             else:
-                telecom["type"] = "other"
+                # For other values, check if they look valid
+                if raw_value and len(raw_value.strip()) > 0 and raw_value != "0":
+                    telecom["system"] = "other"
+                    telecom["type"] = "other"
+                    telecom["value"] = raw_value
+                else:
+                    return None  # Skip invalid telecom
 
         except Exception as e:
             logger.warning(f"Error extracting telecom: {e}")
+            return None
 
         return telecom
 

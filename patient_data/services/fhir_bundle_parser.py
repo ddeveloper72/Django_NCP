@@ -162,6 +162,7 @@ class FHIRBundleParser:
             administrative_data = self._extract_administrative_data(
                 resources_by_type.get('Patient', []),
                 resources_by_type.get('Composition', []),
+                resources_by_type.get('RelatedPerson', []),
                 fhir_bundle
             )
             
@@ -1214,6 +1215,7 @@ class FHIRBundleParser:
     
     def _extract_administrative_data(self, patient_resources: List[Dict], 
                                    composition_resources: List[Dict],
+                                   related_person_resources: List[Dict],
                                    fhir_bundle: Dict[str, Any]) -> Dict[str, Any]:
         """Extract comprehensive administrative data for Extended Patient Information tab"""
         administrative_data = {}
@@ -1360,8 +1362,10 @@ class FHIRBundleParser:
             
             administrative_data['other_contacts'] = other_contacts
             
-            # Extract guardian information (look for guardian relationship in contacts)
+            # Extract guardian information (look for guardian relationship in contacts and emergency contacts)
             guardian = None
+            
+            # First check Patient.contact data
             for contact in contacts:
                 relationships = contact.get('relationship', [])
                 for rel in relationships:
@@ -1377,7 +1381,7 @@ class FHIRBundleParser:
                         'next of kin' in rel_text or 'legal' in rel_text or
                         rel_code in ['guardian', 'parent', 'mother', 'father']):
                         
-                        # Extract guardian details
+                        # Extract guardian details from Patient.contact
                         name = contact.get('name', {})
                         given_name = ' '.join(name.get('given', [])) if name.get('given') else ''
                         family_name = name.get('family', '')
@@ -1434,6 +1438,66 @@ class FHIRBundleParser:
                 
                 if guardian:
                     break
+            
+            # If no guardian found in Patient.contact, check emergency contacts from RelatedPerson resources
+            if not guardian and related_person_resources:
+                # Extract emergency contacts for guardian detection
+                emergency_contacts = self._extract_emergency_contacts(related_person_resources)
+                
+                for emergency_contact in emergency_contacts:
+                    # Check if this emergency contact could be a guardian
+                    relationship = emergency_contact.get('relationship_display', '').lower()
+                    
+                    if ('guardian' in relationship or 'parent' in relationship or 
+                        'mother' in relationship or 'father' in relationship or
+                        'next of kin' in relationship or 'legal' in relationship or
+                        'emergency' in relationship):
+                        
+                        # Convert emergency contact to guardian format
+                        contact_info = {
+                            'addresses': [],
+                            'telecoms': []
+                        }
+                        
+                        # Add address if available
+                        addresses = emergency_contact.get('address', [])
+                        if addresses:
+                            addr = addresses[0]  # Take first address
+                            contact_info['addresses'].append({
+                                'street_lines': addr.get('line', []),
+                                'city': addr.get('city', ''),
+                                'state': addr.get('state', ''),
+                                'postal_code': addr.get('postalCode', ''),
+                                'country': addr.get('country', ''),
+                                'full_address': addr.get('full_address', '')
+                            })
+                        
+                        # Add telecoms
+                        telecoms = emergency_contact.get('telecom', [])
+                        for telecom in telecoms:
+                            contact_info['telecoms'].append({
+                                'system': telecom.get('system', 'Unknown'),
+                                'value': telecom.get('value', ''),
+                                'use': telecom.get('use', 'Unknown'),
+                                'display': f"{telecom.get('system', 'Contact').title()}: {telecom.get('value', '')}"
+                            })
+                        
+                        # Extract name from the name structure
+                        name_info = emergency_contact.get('name', {})
+                        given_names = name_info.get('given', [])
+                        given_name = ' '.join(given_names) if given_names else ''
+                        family_name = name_info.get('family', '')
+                        
+                        guardian = {
+                            'given_name': given_name,
+                            'family_name': family_name,
+                            'relationship': emergency_contact.get('relationship_display', 'Emergency Contact'),
+                            'role': emergency_contact.get('relationship_display', 'Emergency Contact'),
+                            'contact_info': contact_info,
+                            'gender': emergency_contact.get('gender', 'Unknown'),
+                            'organization': emergency_contact.get('organization', '')
+                        }
+                        break
             
             administrative_data['guardian'] = guardian
         

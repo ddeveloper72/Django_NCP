@@ -4137,8 +4137,18 @@ def patient_cda_view(request, session_id, cda_type=None):
                 # New structure from enhanced FHIR bundle parser
                 patient_info = match_data["patient_identity"]
             
+            # If not found in match_data, check full session data
             if not patient_info:
-                logger.error(f"No patient info found in match_data. Keys: {list(match_data.keys())}")
+                logger.info(f"No patient info in match_data, checking full session data")
+                if "patient_identity" in request.session:
+                    patient_info = request.session["patient_identity"]
+                    logger.info(f"Found patient_identity in full session data")
+                elif "patient_info" in request.session:
+                    patient_info = request.session["patient_info"]
+                    logger.info(f"Found patient_info in full session data")
+            
+            if not patient_info:
+                logger.error(f"No patient info found in match_data or session. Match data keys: {list(match_data.keys())}, Session keys: {list(request.session.keys())}")
                 raise KeyError("patient_info not found in session data")
 
             # Create a temporary patient object (not saved to DB)
@@ -5927,11 +5937,77 @@ def patient_cda_view(request, session_id, cda_type=None):
                     )
 
                 # Use enhanced healthcare data if available, otherwise fallback to original
-                context["healthcare_data"] = (
+                healthcare_data_raw = (
                     enhanced_healthcare_data
                     if enhanced_healthcare_data
                     else enhanced_extended_data.get("healthcare_data", {})
                 )
+                
+                # Transform CDA healthcare data structure to template-expected FHIR structure
+                if healthcare_data_raw and not healthcare_data_raw.get("practitioners"):
+                    # Convert CDA structure (author_hcp, organization, legal_authenticator) 
+                    # to FHIR structure (practitioners, organizations)
+                    transformed_healthcare_data = {
+                        "practitioners": [],
+                        "organizations": []
+                    }
+                    
+                    # Convert author_hcp to practitioner
+                    if healthcare_data_raw.get("author_hcp"):
+                        author_hcp = healthcare_data_raw["author_hcp"]
+                        practitioner = {
+                            "name": author_hcp.get("full_name", 
+                                   f"{author_hcp.get('given_name', '')} {author_hcp.get('family_name', '')}".strip() or 
+                                   "Document Author"),
+                            "identifiers": [],
+                            "qualification": [],
+                            "telecoms": []
+                        }
+                        transformed_healthcare_data["practitioners"].append(practitioner)
+                        logger.info(f"[CDA→FHIR TRANSFORM] Converted author_hcp to practitioner: {practitioner['name']}")
+                    
+                    # Convert legal_authenticator to practitioner
+                    if healthcare_data_raw.get("legal_authenticator"):
+                        legal_auth = healthcare_data_raw["legal_authenticator"]
+                        practitioner = {
+                            "name": legal_auth.get("full_name", 
+                                   f"{legal_auth.get('given_name', '')} {legal_auth.get('family_name', '')}".strip() or 
+                                   "Legal Authenticator"),
+                            "identifiers": [],
+                            "qualification": [{
+                                "code": {
+                                    "text": "Legal Authenticator",
+                                    "coding": [{
+                                        "display": "Legal Authenticator"
+                                    }]
+                                }
+                            }],
+                            "telecoms": []
+                        }
+                        transformed_healthcare_data["practitioners"].append(practitioner)
+                        logger.info(f"[CDA→FHIR TRANSFORM] Converted legal_authenticator to practitioner: {practitioner['name']}")
+                    
+                    # Convert organization to organizations array
+                    if healthcare_data_raw.get("organization"):
+                        org = healthcare_data_raw["organization"]
+                        organization = {
+                            "name": org.get("name", "Healthcare Organization"),
+                            "identifiers": [],
+                            "telecoms": [],
+                            "addresses": []
+                        }
+                        transformed_healthcare_data["organizations"].append(organization)
+                        logger.info(f"[CDA→FHIR TRANSFORM] Converted organization: {organization['name']}")
+                    
+                    # Use transformed data if we converted anything
+                    if transformed_healthcare_data["practitioners"] or transformed_healthcare_data["organizations"]:
+                        context["healthcare_data"] = transformed_healthcare_data
+                        logger.info(f"[CDA→FHIR TRANSFORM] Successfully transformed CDA healthcare data: {len(transformed_healthcare_data['practitioners'])} practitioners, {len(transformed_healthcare_data['organizations'])} organizations")
+                    else:
+                        context["healthcare_data"] = healthcare_data_raw
+                else:
+                    # Already in correct format or empty
+                    context["healthcare_data"] = healthcare_data_raw
                 # Store patient-specific extended data in session
                 request.session[f"patient_extended_data_{session_id}"] = (
                     enhanced_extended_data

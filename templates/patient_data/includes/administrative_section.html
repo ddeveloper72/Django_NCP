@@ -272,42 +272,87 @@ Displays comprehensive administrative contacts including participants (emergency
                     {% for address in administrative_data.custodian_organization.addresses %}
                     <div class="admin-info-row">
                         <div class="admin-label">
-                            <i class="fa-solid fa-map-marker-alt"></i> Address:
+                            <i class="fa-solid fa-map-marker-alt"></i> Organization Address:
                         </div>
                         <div class="admin-value">
-                            {% if address.street %}
-                            {{ address.street }}
+                            {% comment %} Handle multiple street address formats {% endcomment %}
+                            {% if address.streetAddressLine %}
+                                {% for line in address.streetAddressLine %}
+                                    {{ line }}{% if not forloop.last %}<br>{% endif %}
+                                {% endfor %}
+                            {% elif address.street_lines %}
+                                {% for line in address.street_lines %}
+                                    {{ line }}{% if not forloop.last %}<br>{% endif %}
+                                {% endfor %}
+                            {% elif address.street %}
+                                {{ address.street }}
                             {% endif %}
-                            {% if address.city %},
-                            {{ address.city }}
+                            {% if address.city %}
+                                {% if address.streetAddressLine or address.street_lines or address.street %}<br>{% endif %}
+                                {{ address.city }}
+                            {% endif %}
+                            {% if address.state %}
+                                {{ address.state }}
                             {% endif %}
                             {% if address.postalCode %}
-                            {{ address.postalCode }}
+                                {{ address.postalCode }}
                             {% endif %}
-                            {% if address.country %},
-                            {{ address.country }}{% endif %}
+                            {% if address.country %}
+                                <br>{{ address.country }}
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
                     {% endif %}
 
-                    {% if administrative_data.custodian_organization.telecoms %}
-                    {% for telecom in administrative_data.custodian_organization.telecoms %}
+                    {% comment %} Add organization identifiers if available {% endcomment %}
+                    {% if administrative_data.custodian_organization.identifiers %}
+                    {% for identifier in administrative_data.custodian_organization.identifiers %}
+                    {% if identifier.value and identifier.value != '0' %}
                     <div class="admin-info-row">
                         <div class="admin-label">
-                            {% if telecom.type == 'email' %}
+                            <i class="fa-solid fa-id-card"></i> {{ identifier.type|default:"Organization ID" }}:
+                        </div>
+                        <div class="admin-value">
+                            {{ identifier.value }}
+                            {% if identifier.system %}
+                            <small class="text-muted">({{ identifier.system }})</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if administrative_data.custodian_organization.telecoms %}
+                    {% for telecom in administrative_data.custodian_organization.telecoms %}
+                    {% if telecom.value and telecom.value != '0' %}
+                    <div class="admin-info-row">
+                        <div class="admin-label">
+                            {% if telecom.system == 'email' or telecom.type == 'email' %}
                             <i class="fa-solid fa-envelope"></i> Email:
-                            {% elif telecom.type == 'phone' %}
+                            {% elif telecom.system == 'phone' or telecom.type == 'phone' %}
                             <i class="fa-solid fa-phone"></i> Phone:
+                            {% elif telecom.system == 'url' or telecom.type == 'url' %}
+                            <i class="fa-solid fa-globe"></i> Website:
                             {% else %}
                             <i class="fa-solid fa-info-circle"></i>
-                            {{ telecom.type|title }}:
+                            {{ telecom.system|default:telecom.type|title }}:
                             {% endif %}
                         </div>
                         <div class="admin-value">
-                            {{ telecom.value|replace:"mailto:",""|replace:"tel:",'' }}
+                            {% if telecom.system == 'email' or telecom.type == 'email' %}
+                            <a href="mailto:{{ telecom.value }}">{{ telecom.value }}</a>
+                            {% elif telecom.system == 'phone' or telecom.type == 'phone' %}
+                            <a href="tel:{{ telecom.value }}">{{ telecom.value }}</a>
+                            {% elif telecom.system == 'url' or telecom.type == 'url' %}
+                            <a href="{{ telecom.value }}" target="_blank">{{ telecom.value }}</a>
+                            {% else %}
+                            {{ telecom.value }}
+                            {% endif %}
                         </div>
                     </div>
+                    {% endif %}
                     {% endfor %}
                     {% endif %}
                 </div>

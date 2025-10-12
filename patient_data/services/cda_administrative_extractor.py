@@ -34,6 +34,7 @@ class OrganizationInfo:
     name: str = ""
     addresses: List[Dict] = None
     telecoms: List[Dict] = None
+    identifiers: List[Dict] = None
     organization_type: str = ""
 
     def __post_init__(self):
@@ -41,6 +42,8 @@ class OrganizationInfo:
             self.addresses = []
         if self.telecoms is None:
             self.telecoms = []
+        if self.identifiers is None:
+            self.identifiers = []
 
 
 @dataclass
@@ -488,6 +491,13 @@ class CDAAdministrativeExtractor:
         if name_elem is not None and name_elem.text:
             org_info.name = name_elem.text.strip()
 
+        # Extract organization identifiers
+        id_elements = org_element.findall(".//id", self.namespaces)
+        for id_elem in id_elements:
+            identifier = self._parse_identifier(id_elem)
+            if identifier:
+                org_info.identifiers.append(identifier)
+
         # Extract contact information
         contact_info = self._extract_contact_from_element(org_element, source_country)
         org_info.addresses = contact_info.addresses
@@ -529,12 +539,22 @@ class CDAAdministrativeExtractor:
         """
         address = {}
 
-        # Extract address components
+        # Extract address components - handle both streetAddressLine and individual components
         street_lines = []
+        
+        # Method 1: Extract streetAddressLine elements
         street_addrs = addr_element.findall(".//streetAddressLine", self.namespaces)
         for street in street_addrs:
-            if street.text:
+            if street.text and street.text.strip():
                 street_lines.append(street.text.strip())
+
+        # Method 2: If no streetAddressLine, try individual street components
+        if not street_lines:
+            # Try alternative street element names
+            for street_tag in ["street", "streetName", "houseNumber"]:
+                street_elem = addr_element.find(f".//{street_tag}", self.namespaces)
+                if street_elem is not None and street_elem.text and street_elem.text.strip():
+                    street_lines.append(street_elem.text.strip())
 
         if street_lines:
             address["street"] = ", ".join(street_lines)
@@ -577,7 +597,12 @@ class CDAAdministrativeExtractor:
         if use_attr:
             address["use"] = use_attr
 
-        return address if address else None
+        # Return None if address is effectively empty (only has use attribute)
+        essential_fields = ["street", "city", "postalCode", "state", "country"]
+        if not any(address.get(field) for field in essential_fields):
+            return None
+
+        return address
 
     def _parse_telecom(
         self, telecom_element: ET.Element, source_country: str = "UNKNOWN"
@@ -594,6 +619,10 @@ class CDAAdministrativeExtractor:
         # Extract value
         value_attr = telecom_element.get("value")
         if value_attr:
+            # Validate telecom value - filter out invalid/empty telecoms
+            if self._is_invalid_telecom(value_attr):
+                return None
+                
             telecom["value"] = value_attr
 
             # Country-specific telecom formatting and validation
@@ -630,6 +659,64 @@ class CDAAdministrativeExtractor:
             telecom["use"] = use_attr
 
         return telecom if telecom else None
+
+    def _is_invalid_telecom(self, value: str) -> bool:
+        """
+        Check if telecom value is invalid/empty and should be filtered out
+        
+        Returns True if telecom should be excluded from results
+        """
+        if not value or not value.strip():
+            return True
+            
+        # Remove protocol prefix for validation
+        clean_value = value
+        if value.startswith(("tel:", "fax:", "mailto:")):
+            clean_value = value.split(":", 1)[1] if ":" in value else ""
+        
+        # Filter out invalid/empty values
+        invalid_patterns = [
+            "",           # Empty after prefix removal
+            "0",          # Just "0" (common invalid placeholder)
+            "0 ()",       # "0 ()" pattern
+            "()",         # Empty parentheses
+            " ()",        # Space with empty parentheses
+        ]
+        
+        return clean_value.strip() in invalid_patterns
+
+    def _parse_identifier(self, id_element: ET.Element) -> Optional[Dict]:
+        """
+        Parse identifier information from XML element
+        
+        Args:
+            id_element: XML id element
+            
+        Returns:
+            Dictionary with identifier information or None if invalid
+        """
+        identifier = {}
+        
+        # Extract root (namespace/system)
+        root_attr = id_element.get("root")
+        if root_attr:
+            identifier["system"] = root_attr
+            
+        # Extract extension (the actual ID value)
+        extension_attr = id_element.get("extension")
+        if extension_attr:
+            identifier["value"] = extension_attr
+            
+        # Extract assigningAuthorityName if present
+        authority_name = id_element.get("assigningAuthorityName")
+        if authority_name:
+            identifier["assigning_authority"] = authority_name
+            
+        # Return only if we have at least a system or value
+        if identifier.get("system") or identifier.get("value"):
+            return identifier
+            
+        return None
 
     def _get_name_part(self, name_element: ET.Element, part_type: str) -> str:
         """Extract specific part of a name (family, given, prefix)"""

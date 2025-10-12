@@ -1,0 +1,1002 @@
+{
+  "resourceType": "Bundle",
+  "id": "diana-ferreira-ips",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/ips/StructureDefinition/Bundle-uv-ips"
+    ]
+  },
+  "identifier": {
+    "system": "urn:oid:2.16.840.1.113883.2.9.2.120.4.8",
+    "value": "diana-ferreira-ips-20251012"
+  },
+  "type": "document",
+  "timestamp": "2025-10-12T18:11:33+00:00",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:78a0151b-555e-4e8f-bcb7-6b06e75f3778",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "diana-ferreira-composition",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Composition-uv-ips"
+          ]
+        },
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "60591-5",
+              "display": "Patient summary Document"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "date": "2025-10-12T17:57:34+00:00",
+        "author": [
+          {
+            "reference": "Organization/centro-hospitalar-lisboa"
+          }
+        ],
+        "title": "International Patient Summary for Diana Ferreira",
+        "confidentiality": "N",
+        "section": [
+          {
+            "title": "Allergies and Intolerances",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "48765-2",
+                  "display": "Allergies and adverse reactions Document"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient has documented allergies to kiwi fruit, aspirin, latex, and lactose intolerance.</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "AllergyIntolerance/allergy-1"
+              },
+              {
+                "reference": "AllergyIntolerance/allergy-2"
+              },
+              {
+                "reference": "AllergyIntolerance/allergy-3"
+              },
+              {
+                "reference": "AllergyIntolerance/allergy-4"
+              }
+            ]
+          },
+          {
+            "title": "Medication Summary",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "10160-0",
+                  "display": "History of Medication use Narrative"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Current medications include Eutirox for hypothyroidism, Triapin for pre-eclampsia, Tresiba for diabetes, Augmentin for kidney infection, and Combivent for asthma.</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "MedicationStatement/medication-1"
+              },
+              {
+                "reference": "MedicationStatement/medication-2"
+              },
+              {
+                "reference": "MedicationStatement/medication-3"
+              },
+              {
+                "reference": "MedicationStatement/medication-4"
+              },
+              {
+                "reference": "MedicationStatement/medication-5"
+              }
+            ]
+          },
+          {
+            "title": "Problem List",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "11450-4",
+                  "display": "Problem list - Reported"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Active conditions include allergic asthma, hypothyroidism, Brugada syndrome, type 2 diabetes, severe pre-eclampsia, and acute pyelonephritis.</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "Condition/condition-1"
+              },
+              {
+                "reference": "Condition/condition-2"
+              },
+              {
+                "reference": "Condition/condition-3"
+              },
+              {
+                "reference": "Condition/condition-4"
+              },
+              {
+                "reference": "Condition/condition-5"
+              },
+              {
+                "reference": "Condition/condition-6"
+              },
+              {
+                "reference": "Condition/condition-7"
+              }
+            ]
+          },
+          {
+            "title": "History of Procedures",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "47519-4",
+                  "display": "History of Procedures Document"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient has history of thyroidectomy, cardioverter defibrillator implantation, and C-section delivery.</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "Procedure/procedure-1"
+              },
+              {
+                "reference": "Procedure/procedure-2"
+              },
+              {
+                "reference": "Procedure/procedure-3"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:140979da-158c-42e1-afe4-5d27e733a936",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "2-1234-W7",
+        "name": [
+          {
+            "family": "Ferreira",
+            "given": [
+              "Diana"
+            ]
+          }
+        ],
+        "birthDate": "1982-05-08",
+        "gender": "female",
+        "address": [
+          {
+            "line": [
+              "155, Avenida da Liberdade"
+            ],
+            "city": "Lisbon",
+            "postalCode": "1250-141",
+            "country": "PT"
+          }
+        ],
+        "telecom": [
+          {
+            "value": "351211234567",
+            "use": "home",
+            "system": "phone"
+          },
+          {
+            "value": "paciente@gmail.com",
+            "use": "home",
+            "system": "email"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Patient-uv-ips"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.17.710.850.1000.990.1.1000",
+            "value": "2-1234-W7"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b166c391-41b2-4293-b6c8-49ffd301018f",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "centro-hospitalar-lisboa",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/StructureDefinition/Organization"
+          ]
+        },
+        "name": "Centro Hospitalar de Lisboa Central",
+        "address": [
+          {
+            "line": [
+              "Alameda de Santo António dos Capuchos"
+            ],
+            "city": "Lisboa",
+            "postalCode": "1169-050",
+            "country": "PT"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4824409b-331f-46e4-86a8-e834d8553257",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "medication-1",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "status": "active",
+        "medicationCodeableConcept": {
+          "text": "Eutirox (Levothyroxine)",
+          "coding": [
+            {
+              "display": "Eutirox (Levothyroxine)"
+            }
+          ]
+        },
+        "reasonCode": [
+          {
+            "text": "Hormone replacement therapy for hypothyroidism"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationStatement-uv-ips"
+          ]
+        },
+        "effectiveDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d5643417-e5e2-4419-a9e0-fda38390ccfa",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "medication-2",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "status": "active",
+        "medicationCodeableConcept": {
+          "text": "Triapin",
+          "coding": [
+            {
+              "display": "Triapin"
+            }
+          ]
+        },
+        "reasonCode": [
+          {
+            "text": "Treatment of severe pre-eclampsia during pregnancy"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationStatement-uv-ips"
+          ]
+        },
+        "effectiveDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:28569fd9-84f8-43d3-9635-861490ca1b6c",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "medication-3",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "status": "active",
+        "medicationCodeableConcept": {
+          "text": "Tresiba (Insulin Degludec)",
+          "coding": [
+            {
+              "display": "Tresiba (Insulin Degludec)"
+            }
+          ]
+        },
+        "reasonCode": [
+          {
+            "text": "Type 2 diabetes mellitus (developed from gestational diabetes)"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationStatement-uv-ips"
+          ]
+        },
+        "effectiveDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1dbb2c20-664c-4427-b50c-0d1f055407a2",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "medication-4",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "status": "active",
+        "medicationCodeableConcept": {
+          "text": "Augmentin (Amoxicillin + Clavulanic Acid)",
+          "coding": [
+            {
+              "display": "Augmentin (Amoxicillin + Clavulanic Acid)"
+            }
+          ]
+        },
+        "reasonCode": [
+          {
+            "text": "Acute pyelonephritis (kidney infection)"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationStatement-uv-ips"
+          ]
+        },
+        "effectiveDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0a5bd7d2-42e4-4f4d-9b74-1934a6f49c5c",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "medication-5",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "status": "active",
+        "medicationCodeableConcept": {
+          "text": "Combivent Unidose (Ipratropium + Salbutamol)",
+          "coding": [
+            {
+              "display": "Combivent Unidose (Ipratropium + Salbutamol)"
+            }
+          ]
+        },
+        "reasonCode": [
+          {
+            "text": "Allergic asthma (aggravated by smoking)"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationStatement-uv-ips"
+          ]
+        },
+        "effectiveDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4a9f1ab0-4d1a-429c-b1b2-8af27eb26b82",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "allergy-1",
+        "patient": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "text": "Kiwi fruit",
+          "coding": [
+            {
+              "display": "Kiwi fruit"
+            }
+          ]
+        },
+        "reaction": [
+          {
+            "manifestation": [
+              {
+                "text": "Eczema",
+                "coding": [
+                  {
+                    "display": "Eczema"
+                  }
+                ]
+              }
+            ],
+            "severity": "moderate"
+          }
+        ],
+        "category": [
+          "food"
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/AllergyIntolerance-uv-ips"
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+              "code": "confirmed"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:44abc481-69e4-4f7d-a0db-ffe24c7ad42f",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "allergy-2",
+        "patient": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "text": "Acetylsalicylic acid (Aspirin)",
+          "coding": [
+            {
+              "display": "Acetylsalicylic acid (Aspirin)"
+            }
+          ]
+        },
+        "reaction": [
+          {
+            "manifestation": [
+              {
+                "text": "Asthma",
+                "coding": [
+                  {
+                    "display": "Asthma"
+                  }
+                ]
+              }
+            ],
+            "severity": "severe"
+          }
+        ],
+        "category": [
+          "medication"
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/AllergyIntolerance-uv-ips"
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+              "code": "confirmed"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8221257f-4fbd-4ddb-9e13-1cba0b0174e5",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "allergy-3",
+        "patient": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "text": "Latex",
+          "coding": [
+            {
+              "display": "Latex"
+            }
+          ]
+        },
+        "reaction": [
+          {
+            "manifestation": [
+              {
+                "text": "Urticaria (hives)",
+                "coding": [
+                  {
+                    "display": "Urticaria (hives)"
+                  }
+                ]
+              }
+            ],
+            "severity": "moderate"
+          }
+        ],
+        "category": [
+          "environment"
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/AllergyIntolerance-uv-ips"
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+              "code": "confirmed"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:67b5aa9d-99f6-44d4-8ae5-d177b749f813",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "allergy-4",
+        "patient": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "text": "Lactose",
+          "coding": [
+            {
+              "display": "Lactose"
+            }
+          ]
+        },
+        "reaction": [
+          {
+            "manifestation": [
+              {
+                "text": "Gastrointestinal symptoms",
+                "coding": [
+                  {
+                    "display": "Gastrointestinal symptoms"
+                  }
+                ]
+              }
+            ],
+            "severity": "mild"
+          }
+        ],
+        "category": [
+          "food"
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/AllergyIntolerance-uv-ips"
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+              "code": "confirmed"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:eef3d2a3-cc1c-425a-ae61-2c62ea3de1af",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-1",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "text": "Allergic Asthma",
+          "coding": [
+            {
+              "display": "Allergic Asthma"
+            }
+          ]
+        },
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "onsetDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4a50bdcb-c626-4cf8-af3e-54a431777d63",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-2",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "text": "Hypothyroidism",
+          "coding": [
+            {
+              "display": "Hypothyroidism"
+            }
+          ]
+        },
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "onsetDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f950823d-33ce-46b0-80d2-ebae1184b4ba",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-3",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "resolved"
+            }
+          ]
+        },
+        "code": {
+          "text": "Thyroid Cancer",
+          "coding": [
+            {
+              "display": "Thyroid Cancer"
+            }
+          ]
+        },
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "onsetDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f953e2ac-0319-4ee5-acf8-cc065154e0cd",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-4",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "text": "Brugada Syndrome",
+          "coding": [
+            {
+              "display": "Brugada Syndrome"
+            }
+          ]
+        },
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "onsetDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d529c723-9557-46fd-a434-73766fd0f2d9",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-5",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "text": "Type 2 Diabetes Mellitus",
+          "coding": [
+            {
+              "display": "Type 2 Diabetes Mellitus"
+            }
+          ]
+        },
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "onsetDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:dbf968ea-df08-4444-a2d6-25f920bf3f5b",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-6",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "text": "Pre-eclampsia (Severe)",
+          "coding": [
+            {
+              "display": "Pre-eclampsia (Severe)"
+            }
+          ]
+        },
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "onsetDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9bf567d2-e7ee-4da0-9738-e55e14b620f5",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-7",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "text": "Acute Pyelonephritis",
+          "coding": [
+            {
+              "display": "Acute Pyelonephritis"
+            }
+          ]
+        },
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "onsetDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d0094f0f-fee1-4cff-b89e-50573c356f31",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "procedure-1",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "status": "completed",
+        "code": {
+          "text": "Thyroidectomy",
+          "coding": [
+            {
+              "display": "Thyroidectomy"
+            }
+          ]
+        },
+        "note": [
+          {
+            "text": "Performed: During adolescence"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Procedure-uv-ips"
+          ]
+        },
+        "performedDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1138413f-b4d9-4be3-abc6-ffe31890628e",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "procedure-2",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "status": "completed",
+        "code": {
+          "text": "Cardioverter Defibrillator Implantation",
+          "coding": [
+            {
+              "display": "Cardioverter Defibrillator Implantation"
+            }
+          ]
+        },
+        "note": [
+          {
+            "text": "Performed: Age 31, for Brugada Syndrome"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Procedure-uv-ips"
+          ]
+        },
+        "performedDateTime": "2025-10-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4280478d-1998-4238-bfe9-be1a32b15a93",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "procedure-3",
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "status": "completed",
+        "code": {
+          "text": "C-section Delivery",
+          "coding": [
+            {
+              "display": "C-section Delivery"
+            }
+          ]
+        },
+        "note": [
+          {
+            "text": "Performed: Previous pregnancy (complicated by gestational diabetes)"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Procedure-uv-ips"
+          ]
+        },
+        "performedDateTime": "2025-10-12"
+      }
+    }
+  ]
+}
