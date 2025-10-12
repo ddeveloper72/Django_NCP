@@ -5051,6 +5051,20 @@ def patient_cda_view(request, session_id, cda_type=None):
                             "has_healthcare_data": len(healthcare_data.get("practitioners", [])) > 0 or len(healthcare_data.get("organizations", [])) > 0,
                         })
                     
+                    # Extract administrative data for Extended Patient Information tab (CRITICAL FIX)
+                    administrative_data = parsed_fhir_data.get("administrative_data", {})
+                    if administrative_data:
+                        logger.info(f"[FHIR BUNDLE] Administrative data found with custodian: {bool(administrative_data.get('custodian_organization'))}")
+                        context.update({
+                            "administrative_data": administrative_data,  # This is what the template expects for organization data
+                            "has_administrative_data": bool(administrative_data),
+                        })
+                        
+                        # Log custodian organization details for debugging
+                        custodian_org = administrative_data.get('custodian_organization')
+                        if custodian_org:
+                            logger.info(f"[FHIR BUNDLE] Custodian organization: {custodian_org.get('name', 'Unknown')} from {custodian_org.get('addresses', [{}])[0].get('city', 'Unknown') if custodian_org.get('addresses') else 'Unknown'}")
+                    
                     # Extract clinical arrays for clinical information tab
                     clinical_arrays = parsed_fhir_data.get("clinical_arrays", {})
                     if clinical_arrays:
