@@ -21,7 +21,7 @@ from .cda_test_views import (
 from .debug_views import debug_cda_index
 
 sys.path.append(os.path.dirname(__file__))
-from debug_session_view import debug_session_view
+# from debug_session_view import debug_session_view  # Temporarily disabled
 
 from .clean_cda_views import clean_patient_cda_view
 from .clinical_data_debugger import clinical_data_api, clinical_data_debugger
@@ -48,7 +48,7 @@ app_name = "patient_data"
 urlpatterns = [
     # Debug views
     path("debug/cda-index/", debug_cda_index, name="debug_cda_index"),
-    path("debug/session/", debug_session_view, name="debug_session"),
+    # path("debug/session/", debug_session_view, name="debug_session"),  # Temporarily disabled
     path("debug/session-manager/", session_manager_view, name="session_manager"),
     # Clinical Data Debugger
     path(

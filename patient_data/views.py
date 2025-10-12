@@ -3508,6 +3508,113 @@ def patient_cda_view(request, session_id, cda_type=None):
         logger.info(f"[FHIR] Available identifiers: {patient_demographics.get('identifier', [])}")
         logger.info(f"[FHIR] Available addresses: {patient_demographics.get('address', [])}")
         
+        # Map FHIR emergency contacts to template expected structure
+        contact_data = context.get('contact_data', {})
+        administrative_data = context.get('administrative_data', {})
+        
+        if contact_data.get('emergency_contacts'):
+            logger.info(f"[FHIR] Mapping {len(contact_data['emergency_contacts'])} emergency contacts to administrative_data")
+            
+            # Ensure administrative_data is mutable
+            if not isinstance(administrative_data, dict):
+                administrative_data = {}
+            
+            # Map emergency contacts to the template's expected structure
+            emergency_contacts = contact_data['emergency_contacts']
+            
+            # Map first emergency contact as guardian/next of kin if available
+            if emergency_contacts:
+                first_contact = emergency_contacts[0]
+                
+                # Create guardian structure expected by template
+                administrative_data['guardian'] = {
+                    'given_name': first_contact.get('name', {}).get('given', [''])[0] if isinstance(first_contact.get('name', {}).get('given'), list) else first_contact.get('name', {}).get('given', ''),
+                    'family_name': first_contact.get('name', {}).get('family', '') or first_contact.get('full_name', '').split()[-1],
+                    'relationship': first_contact.get('relationship_display', 'Next of Kin'),
+                    'role': first_contact.get('relationship_display', 'Next of Kin'),
+                    'contact_info': {
+                        'telecoms': [],
+                        'addresses': []
+                    }
+                }
+                
+                # Add phone and email to telecoms
+                if first_contact.get('phone'):
+                    administrative_data['guardian']['contact_info']['telecoms'].append({
+                        'type': 'phone',
+                        'display_value': first_contact['phone'],
+                        'value': first_contact['phone']
+                    })
+                
+                if first_contact.get('email'):
+                    administrative_data['guardian']['contact_info']['telecoms'].append({
+                        'type': 'email',
+                        'display_value': first_contact['email'],
+                        'value': first_contact['email']
+                    })
+                
+                # Add address information
+                if first_contact.get('address'):
+                    for addr in first_contact['address']:
+                        administrative_data['guardian']['contact_info']['addresses'].append({
+                            'street': ', '.join(addr.get('line', [])),
+                            'city': addr.get('city', ''),
+                            'postalCode': addr.get('postalCode', ''),
+                            'country': addr.get('country', '')
+                        })
+                
+                logger.info(f"[FHIR] Mapped emergency contact '{first_contact.get('full_name', 'Unknown')}' as guardian")
+            
+            # Map additional emergency contacts to other_contacts if there are more than one
+            if len(emergency_contacts) > 1:
+                administrative_data['other_contacts'] = []
+                
+                for contact in emergency_contacts[1:]:
+                    other_contact = {
+                        'given_name': contact.get('name', {}).get('given', [''])[0] if isinstance(contact.get('name', {}).get('given'), list) else contact.get('name', {}).get('given', ''),
+                        'family_name': contact.get('name', {}).get('family', '') or contact.get('full_name', '').split()[-1],
+                        'relationship': contact.get('relationship_display', 'Emergency Contact'),
+                        'contact_type': contact.get('relationship_display', 'Emergency Contact'),
+                        'contact_info': {
+                            'telecoms': [],
+                            'addresses': []
+                        }
+                    }
+                    
+                    # Add contact details
+                    if contact.get('phone'):
+                        other_contact['contact_info']['telecoms'].append({
+                            'type': 'phone',
+                            'display_value': contact['phone'],
+                            'value': contact['phone']
+                        })
+                    
+                    if contact.get('email'):
+                        other_contact['contact_info']['telecoms'].append({
+                            'type': 'email',
+                            'display_value': contact['email'],
+                            'value': contact['email']
+                        })
+                    
+                    # Add address information
+                    if contact.get('address'):
+                        for addr in contact['address']:
+                            other_contact['contact_info']['addresses'].append({
+                                'street': ', '.join(addr.get('line', [])),
+                                'city': addr.get('city', ''),
+                                'postalCode': addr.get('postalCode', ''),
+                                'country': addr.get('country', '')
+                            })
+                    
+                    administrative_data['other_contacts'].append(other_contact)
+                
+                logger.info(f"[FHIR] Mapped {len(emergency_contacts) - 1} additional emergency contacts to other_contacts")
+            
+            # Update the context with the mapped data
+            context['administrative_data'] = administrative_data
+            
+            logger.info(f"[FHIR] Emergency contact mapping complete - Guardian: {bool(administrative_data.get('guardian'))}, Other contacts: {len(administrative_data.get('other_contacts', []))}")
+        
         # Render template with FHIR data
         return render(request, "patient_data/enhanced_patient_cda.html", context)
 
