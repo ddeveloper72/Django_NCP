@@ -9,6 +9,8 @@ import logging
 from typing import Dict, Any, Optional
 from django.utils import timezone
 
+from ..services.patient_demographics_service import PatientDemographicsService
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,6 +20,10 @@ class ContextBuilder:
     
     Ensures consistent context structure across different data sources
     """
+    
+    def __init__(self):
+        """Initialize context builder with unified patient demographics service"""
+        self.demographics_service = PatientDemographicsService()
     
     @staticmethod
     def detect_data_source(request, session_id: str) -> str:
@@ -109,25 +115,62 @@ class ContextBuilder:
             'processing_warnings': [],
         }
     
-    @staticmethod
-    def add_patient_data(context: Dict[str, Any], patient_data: Dict[str, Any]) -> None:
+    def add_patient_data(self, context: Dict[str, Any], patient_data: Dict[str, Any]) -> None:
         """
-        Add patient demographic data to context
+        Add patient demographic data to context using unified service
         
         Args:
             context: Context dictionary to update
-            patient_data: Patient demographic information
+            patient_data: Patient demographic information from session
         """
-        context['patient_data'] = patient_data
-        context['patient_information'] = patient_data  # Alias for compatibility
-        context['patient_identity'] = patient_data     # Additional alias
+        # Convert session data to unified demographics model
+        demographics = self.demographics_service.extract_from_session_data(patient_data)
         
-        # Set display name for UI
-        given_name = patient_data.get('given_name', '')
-        family_name = patient_data.get('family_name', '')
-        context['patient_display_name'] = f"{given_name} {family_name}".strip()
+        # Create unified template context with backward compatibility
+        patient_context = self.demographics_service.create_unified_template_context(demographics)
         
-        logger.info(f"Added patient data for: {context['patient_display_name']}")
+        # Add to main context
+        context.update(patient_context)
+        
+        logger.info(f"Added unified patient data for: {demographics.get_display_name()}")
+    
+    def add_patient_data_from_cda(self, context: Dict[str, Any], xml_root) -> None:
+        """
+        Add patient demographic data from CDA XML using unified service
+        
+        Args:
+            context: Context dictionary to update
+            xml_root: CDA XML root element
+        """
+        # Extract demographics from CDA XML
+        demographics = self.demographics_service.extract_from_cda_xml(xml_root)
+        
+        # Create unified template context with backward compatibility
+        patient_context = self.demographics_service.create_unified_template_context(demographics)
+        
+        # Add to main context
+        context.update(patient_context)
+        
+        logger.info(f"Added CDA patient data for: {demographics.get_display_name()}")
+    
+    def add_patient_data_from_fhir(self, context: Dict[str, Any], fhir_bundle: Dict[str, Any]) -> None:
+        """
+        Add patient demographic data from FHIR bundle using unified service
+        
+        Args:
+            context: Context dictionary to update
+            fhir_bundle: FHIR bundle containing patient resource
+        """
+        # Extract demographics from FHIR bundle
+        demographics = self.demographics_service.extract_from_fhir_bundle(fhir_bundle)
+        
+        # Create unified template context with backward compatibility
+        patient_context = self.demographics_service.create_unified_template_context(demographics)
+        
+        # Add to main context
+        context.update(patient_context)
+        
+        logger.info(f"Added FHIR patient data for: {demographics.get_display_name()}")
     
     @staticmethod
     def add_administrative_data(context: Dict[str, Any], admin_data: Dict[str, Any]) -> None:

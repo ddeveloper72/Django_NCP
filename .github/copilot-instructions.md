@@ -218,3 +218,5 @@ This enhanced [copilot-instructions.md](http://_vscodecontentref_/3) now incorpo
 6. **AI Guidance**: Specific instructions for feature implementation, debugging, refactoring, and compliance validation
 
 The updated guidance provides comprehensive knowledge for AI coding agents to work effectively with this sophisticated European healthcare application while maintaining security, compliance, and architectural integrity.
+
+For additional project details, refer to the [project documents located in](.github/).

@@ -273,7 +273,7 @@ class CDAViewProcessor:
             parsed_data: Parsed CDA data
             match_data: Original session match data
         """
-        # Add patient data from match data
+        # Add patient data from match data using unified service
         patient_info = match_data.get('patient_data', {})
         if patient_info:
             self.context_builder.add_patient_data(context, patient_info)

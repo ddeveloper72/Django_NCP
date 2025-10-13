@@ -69,6 +69,13 @@ except ImportError:
     # Fallback if administrative extractor not available
     CDAAdministrativeExtractor = None
 
+# Import unified patient demographics service
+try:
+    from patient_data.services.patient_demographics_service import PatientDemographicsService
+except ImportError:
+    # Fallback if patient demographics service not available
+    PatientDemographicsService = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -201,6 +208,12 @@ class EnhancedCDAXMLParser:
         else:
             self.admin_extractor = None
 
+        # Initialize unified patient demographics service
+        if PatientDemographicsService:
+            self.demographics_service = PatientDemographicsService()
+        else:
+            self.demographics_service = None
+
     def _detect_and_update_namespaces(self, xml_content: str) -> None:
         """
         Dynamically detect namespaces from XML document for EU member state compatibility
@@ -256,8 +269,17 @@ class EnhancedCDAXMLParser:
             cleaned_xml = self._clean_xml_content(xml_content)
             root = ET.fromstring(cleaned_xml)
 
-            # Extract basic document info
-            patient_info = self._extract_patient_info(root)
+            # Extract basic document info using unified demographics service
+            if self.demographics_service:
+                # Use unified patient demographics service
+                demographics = self.demographics_service.extract_from_cda_xml(root)
+                patient_info = demographics.to_legacy_context()
+                logger.info(f"[UNIFIED] Extracted patient demographics: {demographics.get_display_name()}")
+            else:
+                # Fallback to legacy method
+                patient_info = self._extract_patient_info(root)
+                logger.warning("[LEGACY] Using legacy patient info extraction")
+            
             administrative_data = self._extract_administrative_data(root)
 
             # Extract clinical sections with coded data
@@ -865,135 +887,8 @@ class EnhancedCDAXMLParser:
             logger.warning(f"Failed to extract text content: {str(e)}")
             return ""
 
-    def _extract_patient_info(self, root: ET.Element) -> Dict[str, Any]:
-        """Extract comprehensive patient information with enhanced administrative data integration"""
-        try:
-            # Find patient role with proper namespace
-            patient_role = root.find(
-                ".//{urn:hl7-org:v3}recordTarget/{urn:hl7-org:v3}patientRole"
-            )
-            if patient_role is None:
-                return self._create_default_patient_info()
-
-            # Extract all patient ID elements with full details
-            patient_id_elems = patient_role.findall("cda:id", self.namespaces)
-            patient_id = "Unknown"
-            patient_identifiers = []
-
-            for patient_id_elem in patient_id_elems:
-                extension = patient_id_elem.get("extension", "")
-                authority = patient_id_elem.get("assigningAuthorityName", "")
-                root_val = patient_id_elem.get("root", "")
-
-                # Use first non-empty extension as primary patient_id
-                if patient_id == "Unknown" and extension:
-                    patient_id = extension
-
-                # Create identifier object structure expected by template
-                if extension:
-                    identifier_obj = {
-                        "extension": extension,
-                        "assigningAuthorityName": authority,
-                        "root": root_val,
-                    }
-                    patient_identifiers.append(identifier_obj)
-
-            # Extract patient name
-            patient = patient_role.find("{urn:hl7-org:v3}patient")
-            if patient is not None:
-                name = patient.find("{urn:hl7-org:v3}name")
-                if name is not None:
-                    given = name.find("{urn:hl7-org:v3}given")
-                    family = name.find("{urn:hl7-org:v3}family")
-                    given_name = given.text if given is not None else "Unknown"
-                    family_name = family.text if family is not None else "Unknown"
-                else:
-                    given_name = family_name = "Unknown"
-            else:
-                given_name = family_name = "Unknown"
-
-            # Extract birth date and gender
-            birth_date = "Unknown"
-            birth_date_raw = "Unknown"
-            gender = "Unknown"
-            if patient is not None:
-                birth_elem = patient.find("{urn:hl7-org:v3}birthTime")
-                if birth_elem is not None:
-                    birth_date_raw = birth_elem.get("value", "Unknown")
-                    # Format the birth date for consistent display
-                    if default_formatter and birth_date_raw != "Unknown":
-                        birth_date = default_formatter.format_patient_birth_date(
-                            birth_date_raw
-                        )
-                    else:
-                        birth_date = birth_date_raw
-
-                gender_elem = patient.find("{urn:hl7-org:v3}administrativeGenderCode")
-                if gender_elem is not None:
-                    gender = gender_elem.get(
-                        "displayName", gender_elem.get("code", "Unknown")
-                    )
-
-            # Extract enhanced contact information using administrative extractor if available
-            patient_contact_data = DotDict()
-            if self.admin_extractor:
-                try:
-                    # Extract patient contact info using enhanced extractor
-                    admin_data = self.admin_extractor.extract_administrative_data(
-                        ET.tostring(root, encoding="unicode")
-                    )
-                    if admin_data and admin_data.patient_contact_info:
-                        contact_info = admin_data.patient_contact_info
-                        patient_contact_data = DotDict(
-                            {
-                                "addresses": (
-                                    contact_info.addresses
-                                    if contact_info.addresses
-                                    else []
-                                ),
-                                "telecoms": (
-                                    contact_info.telecoms
-                                    if contact_info.telecoms
-                                    else []
-                                ),
-                                "has_enhanced_contact_data": True,
-                            }
-                        )
-                except Exception as e:
-                    logger.warning(
-                        f"Failed to extract enhanced patient contact info: {str(e)}"
-                    )
-                    patient_contact_data = DotDict({"has_enhanced_contact_data": False})
-            else:
-                # Fallback to basic contact extraction
-                addresses = self._extract_basic_patient_addresses(patient_role)
-                telecoms = self._extract_basic_patient_telecoms(patient_role)
-                patient_contact_data = DotDict(
-                    {
-                        "addresses": addresses,
-                        "telecoms": telecoms,
-                        "has_enhanced_contact_data": False,
-                    }
-                )
-
-            logger.info(
-                f"Extracted patient info: {given_name} {family_name}, ID: {patient_id}, Enhanced Contact: {patient_contact_data.get('has_enhanced_contact_data', False)}"
-            )
-
-            return {
-                "patient_id": patient_id,
-                "given_name": given_name,
-                "family_name": family_name,
-                "birth_date": birth_date,
-                "birth_date_raw": birth_date_raw,  # Keep raw format for calculations
-                "gender": gender,
-                "patient_identifiers": patient_identifiers,
-                "contact_info": patient_contact_data,
-                "full_name": f"{given_name} {family_name}".strip(),
-            }
-        except Exception as e:
-            logger.warning(f"Failed to extract patient info: {str(e)}")
-            return self._create_default_patient_info()
+    # REMOVED: _extract_patient_info method has been replaced by PatientDemographicsService
+    # This consolidation eliminates 132 lines of duplicate patient extraction logic
 
     def _extract_administrative_data(self, root: ET.Element) -> Dict[str, Any]:
         """Extract comprehensive administrative data with enhanced contact information"""
