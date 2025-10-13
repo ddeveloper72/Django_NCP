@@ -643,16 +643,40 @@ class CDAViewProcessor:
                 }
                 addresses.append(formatted_address)
             elif isinstance(address_data, dict):
+                # Handle both new format (street_lines) and old format (line)
+                street_lines = address_data.get('street_lines', address_data.get('line', []))
+                if not street_lines and address_data.get('street'):
+                    # Fallback to single street field
+                    street_lines = [address_data['street']]
+                
                 formatted_address = {
                     'use': address_data.get('use', 'work'),
                     'text': address_data.get('text', ''),
-                    'line': address_data.get('line', []),
+                    'line': street_lines,
                     'city': address_data.get('city', ''),
                     'state': address_data.get('state', ''),
-                    'postal_code': address_data.get('postal_code', ''),
+                    'postal_code': address_data.get('postal_code', address_data.get('postalCode', '')),
                     'country': address_data.get('country', '')
                 }
                 addresses.append(formatted_address)
+        
+        # Check for direct address components at the provider level (CDA administrative data)
+        if not addresses and any(field in provider_data for field in ['street_lines', 'street', 'city', 'postal_code', 'postalCode']):
+            # Build address from direct CDA administrative fields
+            street_lines = provider_data.get('street_lines', [])
+            if not street_lines and provider_data.get('street'):
+                street_lines = [provider_data['street']]
+                
+            formatted_address = {
+                'use': provider_data.get('use', 'work'),
+                'text': '',
+                'line': street_lines,
+                'city': provider_data.get('city', ''),
+                'state': provider_data.get('state', ''),
+                'postal_code': provider_data.get('postal_code', provider_data.get('postalCode', '')),
+                'country': provider_data.get('country', '')
+            }
+            addresses.append(formatted_address)
         
         return addresses
     

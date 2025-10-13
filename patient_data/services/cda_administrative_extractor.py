@@ -557,7 +557,8 @@ class CDAAdministrativeExtractor:
                     street_lines.append(street_elem.text.strip())
 
         if street_lines:
-            address["street"] = ", ".join(street_lines)
+            address["street_lines"] = street_lines
+            address["street"] = ", ".join(street_lines)  # Keep for backward compatibility
 
         # Extract city
         city_elem = addr_element.find(".//city", self.namespaces)
@@ -580,7 +581,8 @@ class CDAAdministrativeExtractor:
                 # Luxembourg format (e.g., 9160)
                 pass  # Use as-is
 
-            address["postalCode"] = postal_code
+            address["postal_code"] = postal_code
+            address["postalCode"] = postal_code  # Keep for backward compatibility
 
         # Extract state/county (particularly important for Ireland)
         state_elem = addr_element.find(".//state", self.namespaces)
