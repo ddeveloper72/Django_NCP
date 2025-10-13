@@ -188,7 +188,7 @@ class CDAViewProcessor:
     
     def _parse_cda_document(self, cda_content: str, session_id: str) -> Optional[Dict[str, Any]]:
         """
-        Parse CDA document using CDA display service
+        Parse CDA document using multiple parsing strategies
         
         Args:
             cda_content: CDA XML content
@@ -200,19 +200,54 @@ class CDAViewProcessor:
         try:
             logger.info(f"[CDA PROCESSOR] Parsing CDA document for session {session_id}")
             
-            # Use CDA display service for enhanced parsing
-            clinical_data = self.cda_display_service.extract_patient_clinical_data(session_id)
+            # Strategy 1: Use CDA display service for enhanced parsing
+            try:
+                clinical_data = self.cda_display_service.extract_patient_clinical_data(session_id)
+                if clinical_data and clinical_data.get('sections'):
+                    logger.info(f"[CDA PROCESSOR] CDA display service parsed successfully - {len(clinical_data['sections'])} sections")
+                    return clinical_data
+            except Exception as e:
+                logger.warning(f"[CDA PROCESSOR] CDA display service failed: {e}")
             
-            if clinical_data:
-                logger.info(f"[CDA PROCESSOR] CDA document parsed successfully")
-                return clinical_data
-            else:
-                # Fallback to comprehensive service
-                logger.info("[CDA PROCESSOR] Falling back to comprehensive clinical data service")
+            # Strategy 2: Use comprehensive service for clinical arrays extraction (working method)
+            logger.info("[CDA PROCESSOR] Using comprehensive service for clinical arrays extraction")
+            try:
+                # Get clinical arrays directly (this method works from our test)
+                clinical_arrays = self.comprehensive_service.get_clinical_arrays_for_display(cda_content)
+                
+                if clinical_arrays and any(clinical_arrays.values()):
+                    logger.info(f"[CDA PROCESSOR] Successfully extracted clinical arrays: {list(clinical_arrays.keys())}")
+                    
+                    # Build sections from clinical arrays for template compatibility
+                    sections = self._build_sections_from_clinical_arrays(clinical_arrays)
+                    
+                    return {
+                        'success': True,
+                        'sections': sections,
+                        'clinical_data': clinical_arrays,
+                        'has_clinical_data': bool(clinical_arrays),
+                        'source': 'comprehensive_service_arrays'
+                    }
+                
+            except Exception as e:
+                logger.warning(f"[CDA PROCESSOR] Comprehensive service clinical arrays failed: {e}")
+            
+            # Strategy 3: Fallback to comprehensive data extraction (if needed)
+            logger.info("[CDA PROCESSOR] Falling back to comprehensive clinical data service")
+            try:
                 comprehensive_data = self.comprehensive_service.extract_comprehensive_clinical_data(
                     cda_content, 'Unknown'  # TODO: Extract country from session
                 )
-                return comprehensive_data
+                if comprehensive_data and comprehensive_data.get('success') != False:
+                    logger.info("[CDA PROCESSOR] Comprehensive data extraction successful")
+                    return comprehensive_data
+                else:
+                    logger.warning(f"[CDA PROCESSOR] Comprehensive data extraction failed or returned success=False")
+            except Exception as e:
+                logger.warning(f"[CDA PROCESSOR] Comprehensive data extraction error: {e}")
+            
+            logger.error("[CDA PROCESSOR] All parsing strategies failed")
+            return None
                 
         except Exception as e:
             logger.error(f"[CDA PROCESSOR] CDA document parsing error: {e}")
@@ -410,6 +445,98 @@ class CDAViewProcessor:
         context.update(compatibility_vars)
         
         logger.info(f"[CDA PROCESSOR] Added template compatibility variables: {list(compatibility_vars.keys())}")
+    
+    def _build_sections_from_clinical_arrays(self, clinical_arrays: Dict[str, List]) -> List[Dict[str, Any]]:
+        """
+        Build sections from clinical arrays for template compatibility
+        
+        Args:
+            clinical_arrays: Dictionary of clinical data arrays
+            
+        Returns:
+            List of section dictionaries compatible with templates
+        """
+        sections = []
+        
+        # Map clinical arrays to section definitions
+        section_mappings = {
+            'medications': {
+                'section_code': '10160-0',
+                'title': 'History of Medication use',
+                'display_name': 'Medications',
+                'icon': 'fa-solid fa-pills'
+            },
+            'allergies': {
+                'section_code': '48765-2', 
+                'title': 'Allergies and Intolerances',
+                'display_name': 'Allergies and Intolerances',
+                'icon': 'fa-solid fa-exclamation-triangle'
+            },
+            'problems': {
+                'section_code': '11450-4',
+                'title': 'Problem list - Reported',
+                'display_name': 'Medical Problems', 
+                'icon': 'fa-solid fa-list-ul'
+            },
+            'vital_signs': {
+                'section_code': '8716-3',
+                'title': 'Vital signs',
+                'display_name': 'Vital Signs',
+                'icon': 'fa-solid fa-heartbeat'
+            },
+            'procedures': {
+                'section_code': '47519-4',
+                'title': 'History of Procedures',
+                'display_name': 'Procedures',
+                'icon': 'fa-solid fa-user-md'
+            },
+            'results': {
+                'section_code': '30954-2',
+                'title': 'Relevant diagnostic tests/laboratory data',
+                'display_name': 'Laboratory Results',
+                'icon': 'fa-solid fa-flask'
+            },
+            'immunizations': {
+                'section_code': '11369-6',
+                'title': 'History of immunization',
+                'display_name': 'Immunizations',
+                'icon': 'fa-solid fa-syringe'
+            }
+        }
+        
+        # Build sections from arrays
+        for array_name, items in clinical_arrays.items():
+            if items and array_name in section_mappings:
+                mapping = section_mappings[array_name]
+                
+                # Convert items to entries format
+                entries = []
+                for item in items:
+                    if isinstance(item, dict):
+                        # Create entry from clinical array item
+                        entry = {
+                            'entry_type': array_name.rstrip('s'),  # medication, allergy, etc.
+                            'display_name': item.get('display_name', item.get('name', 'Unknown')),
+                            'data': item
+                        }
+                        entries.append(entry)
+                
+                section = {
+                    'section_id': f"{array_name}_section",
+                    'section_code': mapping['section_code'],
+                    'title': mapping['title'],
+                    'display_name': mapping['display_name'],
+                    'icon': mapping['icon'],
+                    'entries': entries,
+                    'entry_count': len(entries),
+                    'has_entries': len(entries) > 0,
+                    'source': 'clinical_arrays'
+                }
+                
+                sections.append(section)
+                logger.info(f"[CDA PROCESSOR] Built {array_name} section with {len(entries)} entries")
+        
+        return sections
     
     def _format_healthcare_provider_data(self, healthcare_provider_data: Dict[str, Any]) -> Dict[str, Any]:
         """
