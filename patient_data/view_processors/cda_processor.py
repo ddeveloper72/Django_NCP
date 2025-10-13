@@ -49,6 +49,11 @@ class CDAViewProcessor:
             self._comprehensive_service = ComprehensiveClinicalDataService()
         return self._comprehensive_service
     
+    def _store_cda_content_for_service(self, cda_content: str):
+        """Store CDA content to be used with comprehensive service"""
+        self._cda_content = cda_content
+        logger.info("[CDA PROCESSOR] Stored CDA content for comprehensive service")
+    
     def process_cda_document(self, request, session_id: str, cda_type: Optional[str] = None) -> HttpResponse:
         """
         Router-compatible wrapper for CDA document processing
@@ -123,11 +128,12 @@ class CDAViewProcessor:
                     session_id,
                     context
                 )
-            
+
+            # Store CDA content for comprehensive service
+            self._store_cda_content_for_service(cda_content)
+
             # Build context from parsed CDA data
-            self._build_cda_context(context, parsed_data, match_data)
-            
-            # Add CDA-specific metadata
+            self._build_cda_context(context, parsed_data, match_data)            # Add CDA-specific metadata
             self._add_cda_metadata(context, match_data, cda_content, actual_cda_type)
             
             # Finalize context
@@ -271,6 +277,24 @@ class CDAViewProcessor:
                 
                 if admin_dict:
                     self.context_builder.add_administrative_data(context, admin_dict)
+            
+        # Extract healthcare provider data using comprehensive service
+        if hasattr(self, '_cda_content'):
+            logger.info("[CDA PROCESSOR] Extracting healthcare provider data")
+            admin_data_for_display = self.comprehensive_service.get_administrative_data_for_display(self._cda_content)
+            if admin_data_for_display:
+                healthcare_provider_data = admin_data_for_display.get('healthcare_provider_data', {})
+                if healthcare_provider_data:
+                    # Format healthcare data for template
+                    healthcare_data = self._format_healthcare_provider_data(healthcare_provider_data)
+                    self.context_builder.add_healthcare_data(context, healthcare_data)
+                    logger.info(f"[CDA PROCESSOR] Added healthcare provider data with {len(healthcare_data.get('practitioners', []))} practitioners and {len(healthcare_data.get('organizations', []))} organizations")
+                else:
+                    logger.info("[CDA PROCESSOR] No healthcare provider data found in administrative data")
+            else:
+                logger.warning("[CDA PROCESSOR] No administrative data returned from comprehensive service")
+        else:
+            logger.warning("[CDA PROCESSOR] No CDA content stored for healthcare provider extraction")
     
     def _add_cda_metadata(
         self,
@@ -386,6 +410,112 @@ class CDAViewProcessor:
         context.update(compatibility_vars)
         
         logger.info(f"[CDA PROCESSOR] Added template compatibility variables: {list(compatibility_vars.keys())}")
+    
+    def _format_healthcare_provider_data(self, healthcare_provider_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Format CDA healthcare provider data for template display
+        
+        Args:
+            healthcare_provider_data: Raw healthcare provider data from comprehensive service
+            
+        Returns:
+            Formatted healthcare data structure for template
+        """
+        healthcare_data = {
+            'practitioners': [],
+            'organizations': [],
+            'healthcare_team': []
+        }
+        
+        try:
+            # Extract author HCP (main healthcare provider)
+            author_hcp = healthcare_provider_data.get('author_hcp', {})
+            if author_hcp:
+                practitioner = {
+                    'id': author_hcp.get('provider_id', 'unknown'),
+                    'name': {
+                        'given': [author_hcp.get('given_name', '')],
+                        'family': author_hcp.get('family_name', ''),
+                        'full_name': f"{author_hcp.get('given_name', '')} {author_hcp.get('family_name', '')}".strip()
+                    },
+                    'role': author_hcp.get('role', 'Healthcare Provider'),
+                    'organization': author_hcp.get('organization_name', ''),
+                    'timestamp': author_hcp.get('timestamp', ''),
+                    'type': 'Author'
+                }
+                healthcare_data['practitioners'].append(practitioner)
+                healthcare_data['healthcare_team'].append(practitioner)
+                logger.info(f"[CDA PROCESSOR] Added author HCP: {practitioner['name']['full_name']}")
+            
+            # Extract legal authenticator
+            legal_authenticator = healthcare_provider_data.get('legal_authenticator', {})
+            if legal_authenticator:
+                practitioner = {
+                    'id': legal_authenticator.get('authenticator_id', 'unknown'),
+                    'name': {
+                        'given': [legal_authenticator.get('given_name', '')],
+                        'family': legal_authenticator.get('family_name', ''),
+                        'full_name': f"{legal_authenticator.get('given_name', '')} {legal_authenticator.get('family_name', '')}".strip()
+                    },
+                    'role': 'Legal Authenticator',
+                    'organization': legal_authenticator.get('organization_name', ''),
+                    'authentication_time': legal_authenticator.get('authentication_time', ''),
+                    'type': 'Legal Authenticator'
+                }
+                healthcare_data['practitioners'].append(practitioner)
+                healthcare_data['healthcare_team'].append(practitioner)
+                logger.info(f"[CDA PROCESSOR] Added legal authenticator: {practitioner['name']['full_name']}")
+            
+            # Extract custodian organization
+            custodian_org = healthcare_provider_data.get('custodian_organization', {})
+            if custodian_org:
+                organization = {
+                    'id': custodian_org.get('organization_id', 'unknown'),
+                    'name': custodian_org.get('organization_name', ''),
+                    'type': [{'text': 'Custodian Organization'}],
+                    'address': [],
+                    'telecom': custodian_org.get('telecom', []),
+                    'active': True
+                }
+                
+                # Add address if available
+                address = custodian_org.get('address')
+                if address:
+                    organization['address'].append({
+                        'use': 'work',
+                        'text': address,
+                        'line': [address],
+                        'city': '',
+                        'state': '',
+                        'postal_code': '',
+                        'country': ''
+                    })
+                
+                healthcare_data['organizations'].append(organization)
+                logger.info(f"[CDA PROCESSOR] Added custodian organization: {organization['name']}")
+            
+            # Extract preferred HCP if available
+            preferred_hcp = healthcare_provider_data.get('preferred_hcp', {})
+            if preferred_hcp:
+                practitioner = {
+                    'id': preferred_hcp.get('provider_id', 'unknown'),
+                    'name': {
+                        'given': [preferred_hcp.get('given_name', '')],
+                        'family': preferred_hcp.get('family_name', ''),
+                        'full_name': f"{preferred_hcp.get('given_name', '')} {preferred_hcp.get('family_name', '')}".strip()
+                    },
+                    'role': preferred_hcp.get('role', 'Preferred Healthcare Provider'),
+                    'organization': preferred_hcp.get('organization_name', ''),
+                    'type': 'Preferred Provider'
+                }
+                healthcare_data['practitioners'].append(practitioner)
+                healthcare_data['healthcare_team'].append(practitioner)
+                logger.info(f"[CDA PROCESSOR] Added preferred HCP: {practitioner['name']['full_name']}")
+            
+        except Exception as e:
+            logger.error(f"[CDA PROCESSOR] Error formatting healthcare provider data: {e}")
+        
+        return healthcare_data
     
     def _handle_cda_error(
         self,
