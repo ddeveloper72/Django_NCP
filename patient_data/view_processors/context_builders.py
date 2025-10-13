@@ -142,15 +142,36 @@ class ContextBuilder:
         context['has_administrative_data'] = bool(admin_data)
         
         # Validate custodian organization (critical for organization display)
-        custodian_org = admin_data.get('custodian_organization')
+        # Handle both dictionary and object attribute access
+        custodian_org = None
+        if isinstance(admin_data, dict):
+            custodian_org = admin_data.get('custodian_organization')
+        elif hasattr(admin_data, 'custodian_organization'):
+            custodian_org = getattr(admin_data, 'custodian_organization')
+        
         if custodian_org:
-            org_name = custodian_org.get('name', 'Unknown Organization')
-            addresses = custodian_org.get('addresses', [])
+            # Extract organization name - handle both dict and object
+            if isinstance(custodian_org, dict):
+                org_name = custodian_org.get('name', 'Unknown Organization')
+                addresses = custodian_org.get('addresses', [])
+            elif hasattr(custodian_org, 'name'):
+                org_name = getattr(custodian_org, 'name', 'Unknown Organization')
+                addresses = getattr(custodian_org, 'addresses', []) if hasattr(custodian_org, 'addresses') else []
+            else:
+                org_name = str(custodian_org) 
+                addresses = []
+            
             location = 'Unknown Location'
             if addresses:
                 addr = addresses[0]
-                city = addr.get('city', '')
-                country = addr.get('country', '')
+                if isinstance(addr, dict):
+                    city = addr.get('city', '')
+                    country = addr.get('country', '')
+                elif hasattr(addr, 'city') and hasattr(addr, 'country'):
+                    city = getattr(addr, 'city', '')
+                    country = getattr(addr, 'country', '')
+                else:
+                    city = country = ''
                 location = f"{city}, {country}" if city and country else 'Unknown Location'
             
             logger.info(f"Added custodian organization: {org_name} from {location}")
