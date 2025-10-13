@@ -1116,6 +1116,20 @@ class EnhancedCDAXMLParser:
                         }
                     ),
                     "organization": author_org,
+                    "contact_info": DotDict(
+                        {
+                            "addresses": (
+                                admin_data.author_hcp.contact_info.addresses
+                                if admin_data.author_hcp.contact_info
+                                else []
+                            ),
+                            "telecoms": (
+                                admin_data.author_hcp.contact_info.telecoms
+                                if admin_data.author_hcp.contact_info
+                                else []
+                            ),
+                        }
+                    ),
                 }
             )
             author_information.append(author_info)
@@ -1191,7 +1205,45 @@ class EnhancedCDAXMLParser:
                     if admin_data.legal_authenticator
                     else ""
                 ),
+                "role": (
+                    admin_data.legal_authenticator.role
+                    if admin_data.legal_authenticator
+                    else "Legal Authenticator"
+                ),
                 "organization": legal_auth_org,
+                "organization_name": legal_auth_org.name,
+                "contact_info": DotDict(
+                    {
+                        "addresses": (
+                            admin_data.legal_authenticator.contact_info.addresses
+                            if admin_data.legal_authenticator
+                            and admin_data.legal_authenticator.contact_info
+                            else []
+                        ),
+                        "telecoms": (
+                            admin_data.legal_authenticator.contact_info.telecoms
+                            if admin_data.legal_authenticator
+                            and admin_data.legal_authenticator.contact_info
+                            else []
+                        ),
+                    }
+                ),
+                "contact_details": DotDict(
+                    {
+                        "addresses": (
+                            admin_data.legal_authenticator.contact_info.addresses
+                            if admin_data.legal_authenticator
+                            and admin_data.legal_authenticator.contact_info
+                            else []
+                        ),
+                        "telecoms": (
+                            admin_data.legal_authenticator.contact_info.telecoms
+                            if admin_data.legal_authenticator
+                            and admin_data.legal_authenticator.contact_info
+                            else []
+                        ),
+                    }
+                ),
             }
         )
 
@@ -1240,7 +1292,27 @@ class EnhancedCDAXMLParser:
                         if hasattr(primary_author.person, "title")
                         else ""
                     ),
+                    "role": (
+                        primary_author.person.role
+                        if hasattr(primary_author.person, "role")
+                        else ""
+                    ),
                     "organization": primary_author.organization,
+                    "organization_name": (
+                        primary_author.organization.name
+                        if hasattr(primary_author.organization, "name")
+                        else ""
+                    ),
+                    "contact_info": (
+                        primary_author.contact_info
+                        if hasattr(primary_author, "contact_info")
+                        else DotDict({"addresses": [], "telecoms": []})
+                    ),
+                    "contact_details": (
+                        primary_author.contact_info
+                        if hasattr(primary_author, "contact_info")
+                        else DotDict({"addresses": [], "telecoms": []})
+                    ),
                 }
             ),
             # Additional fields from enhanced extractor

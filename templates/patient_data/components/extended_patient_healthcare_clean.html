@@ -177,13 +177,30 @@
                         <div class="col-md-6 mb-3">
                             <div class="detail-section-title">Team Member</div>
                             <div class="fw-medium">
-                                {{ team_member.display|default:"Healthcare Team Member" }}
+                                {{ team_member.name|default:"Healthcare Team Member" }}
                             </div>
-                            {% if team_member.reference %}
-                            <div class="small text-muted">Reference: {{ team_member.reference }}</div>
+                            {% if team_member.roles %}
+                            <div class="small text-primary">
+                                <i class="fa-solid fa-user-tag me-1"></i>
+                                Type: {{ team_member.roles|join:", " }}
+                            </div>
+                            {% elif team_member.type %}
+                            <div class="small text-primary">
+                                <i class="fa-solid fa-user-tag me-1"></i>
+                                Type: {{ team_member.type }}
+                            </div>
                             {% endif %}
-                            {% if team_member.type %}
-                            <div class="small text-muted">Type: {{ team_member.type }}</div>
+                            {% if team_member.organization %}
+                            <div class="small text-muted">
+                                <i class="fa-solid fa-building me-1"></i>
+                                {{ team_member.organization }}
+                            </div>
+                            {% endif %}
+                            {% if team_member.authentication_time %}
+                            <div class="small text-muted">
+                                <i class="fa-solid fa-clock me-1"></i>
+                                Authenticated: {{ team_member.authentication_time|date:"Y-m-d H:i" }}
+                            </div>
                             {% endif %}
                         </div>
                         {% endfor %}

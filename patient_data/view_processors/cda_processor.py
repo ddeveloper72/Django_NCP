@@ -427,48 +427,85 @@ class CDAViewProcessor:
             'healthcare_team': []
         }
         
+        # Track added providers by name to prevent duplicates (same person, different roles)
+        providers_by_name = {}
+        
         try:
             # Extract author HCP (main healthcare provider)
             author_hcp = healthcare_provider_data.get('author_hcp', {})
-            if author_hcp:
-                practitioner = {
-                    'id': author_hcp.get('provider_id', 'unknown'),
-                    'name': {
-                        'given': [author_hcp.get('given_name', '')],
-                        'family': author_hcp.get('family_name', ''),
-                        'full_name': f"{author_hcp.get('given_name', '')} {author_hcp.get('family_name', '')}".strip()
-                    },
-                    'role': author_hcp.get('role', 'Healthcare Provider'),
-                    'organization': author_hcp.get('organization_name', ''),
-                    'timestamp': author_hcp.get('timestamp', ''),
-                    'type': 'Author'
-                }
-                healthcare_data['practitioners'].append(practitioner)
-                healthcare_data['healthcare_team'].append(practitioner)
-                logger.info(f"[CDA PROCESSOR] Added author HCP: {practitioner['name']['full_name']}")
+            if author_hcp and author_hcp.get('given_name') and author_hcp.get('family_name'):
+                full_name = f"{author_hcp.get('given_name', '')} {author_hcp.get('family_name', '')}".strip()
+                
+                if full_name not in providers_by_name:
+                    practitioner = {
+                        'id': author_hcp.get('provider_id', 'unknown'),
+                        'name': full_name,
+                        'name_details': {
+                            'given': [author_hcp.get('given_name', '')],
+                            'family': author_hcp.get('family_name', ''),
+                            'full_name': full_name
+                        },
+                        'role': author_hcp.get('role', 'Healthcare Provider'),
+                        'roles': ['Author'],  # Track multiple roles
+                        'organization': author_hcp.get('organization_name', ''),
+                        'timestamp': author_hcp.get('timestamp', ''),
+                        'type': 'Author',
+                        'telecoms': self._extract_contact_telecoms(author_hcp),
+                        'addresses': self._extract_contact_addresses(author_hcp),
+                        'identifiers': self._extract_provider_identifiers(author_hcp),
+                        'qualification': self._extract_provider_qualifications(author_hcp)
+                    }
+                    healthcare_data['practitioners'].append(practitioner)
+                    healthcare_data['healthcare_team'].append(practitioner)
+                    providers_by_name[full_name] = practitioner
+                    logger.info(f"[CDA PROCESSOR] Added author HCP: {practitioner['name']}")
+                else:
+                    # Same person, add role
+                    existing = providers_by_name[full_name]
+                    if 'Author' not in existing['roles']:
+                        existing['roles'].append('Author')
+                    logger.info(f"[CDA PROCESSOR] Added Author role to existing provider: {full_name}")
             
             # Extract legal authenticator
             legal_authenticator = healthcare_provider_data.get('legal_authenticator', {})
-            if legal_authenticator:
-                practitioner = {
-                    'id': legal_authenticator.get('authenticator_id', 'unknown'),
-                    'name': {
-                        'given': [legal_authenticator.get('given_name', '')],
-                        'family': legal_authenticator.get('family_name', ''),
-                        'full_name': f"{legal_authenticator.get('given_name', '')} {legal_authenticator.get('family_name', '')}".strip()
-                    },
-                    'role': 'Legal Authenticator',
-                    'organization': legal_authenticator.get('organization_name', ''),
-                    'authentication_time': legal_authenticator.get('authentication_time', ''),
-                    'type': 'Legal Authenticator'
-                }
-                healthcare_data['practitioners'].append(practitioner)
-                healthcare_data['healthcare_team'].append(practitioner)
-                logger.info(f"[CDA PROCESSOR] Added legal authenticator: {practitioner['name']['full_name']}")
+            if legal_authenticator and legal_authenticator.get('given_name') and legal_authenticator.get('family_name'):
+                full_name = f"{legal_authenticator.get('given_name', '')} {legal_authenticator.get('family_name', '')}".strip()
+                
+                if full_name not in providers_by_name:
+                    practitioner = {
+                        'id': legal_authenticator.get('authenticator_id', 'unknown'),
+                        'name': full_name,
+                        'name_details': {
+                            'given': [legal_authenticator.get('given_name', '')],
+                            'family': legal_authenticator.get('family_name', ''),
+                            'full_name': full_name
+                        },
+                        'role': 'Legal Authenticator',
+                        'roles': ['Legal Authenticator'],  # Track multiple roles
+                        'organization': legal_authenticator.get('organization_name', ''),
+                        'authentication_time': legal_authenticator.get('authentication_time', ''),
+                        'type': 'Legal Authenticator',
+                        'telecoms': self._extract_contact_telecoms(legal_authenticator),
+                        'addresses': self._extract_contact_addresses(legal_authenticator),
+                        'identifiers': self._extract_provider_identifiers(legal_authenticator),
+                        'qualification': self._extract_provider_qualifications(legal_authenticator)
+                    }
+                    healthcare_data['practitioners'].append(practitioner)
+                    healthcare_data['healthcare_team'].append(practitioner)
+                    providers_by_name[full_name] = practitioner
+                    logger.info(f"[CDA PROCESSOR] Added legal authenticator: {practitioner['name']}")
+                else:
+                    # Same person, add role
+                    existing = providers_by_name[full_name]
+                    if 'Legal Authenticator' not in existing['roles']:
+                        existing['roles'].append('Legal Authenticator')
+                    if legal_authenticator.get('authentication_time'):
+                        existing['authentication_time'] = legal_authenticator.get('authentication_time')
+                    logger.info(f"[CDA PROCESSOR] Added Legal Authenticator role to existing provider: {full_name}")
             
             # Extract custodian organization
             custodian_org = healthcare_provider_data.get('custodian_organization', {})
-            if custodian_org:
+            if custodian_org and custodian_org.get('organization_name'):
                 organization = {
                     'id': custodian_org.get('organization_id', 'unknown'),
                     'name': custodian_org.get('organization_name', ''),
@@ -496,26 +533,182 @@ class CDAViewProcessor:
             
             # Extract preferred HCP if available
             preferred_hcp = healthcare_provider_data.get('preferred_hcp', {})
-            if preferred_hcp:
-                practitioner = {
-                    'id': preferred_hcp.get('provider_id', 'unknown'),
-                    'name': {
-                        'given': [preferred_hcp.get('given_name', '')],
-                        'family': preferred_hcp.get('family_name', ''),
-                        'full_name': f"{preferred_hcp.get('given_name', '')} {preferred_hcp.get('family_name', '')}".strip()
-                    },
-                    'role': preferred_hcp.get('role', 'Preferred Healthcare Provider'),
-                    'organization': preferred_hcp.get('organization_name', ''),
-                    'type': 'Preferred Provider'
-                }
-                healthcare_data['practitioners'].append(practitioner)
-                healthcare_data['healthcare_team'].append(practitioner)
-                logger.info(f"[CDA PROCESSOR] Added preferred HCP: {practitioner['name']['full_name']}")
+            if preferred_hcp and preferred_hcp.get('given_name') and preferred_hcp.get('family_name'):
+                full_name = f"{preferred_hcp.get('given_name', '')} {preferred_hcp.get('family_name', '')}".strip()
+                
+                if full_name not in providers_by_name:
+                    practitioner = {
+                        'id': preferred_hcp.get('provider_id', 'unknown'),
+                        'name': full_name,
+                        'name_details': {
+                            'given': [preferred_hcp.get('given_name', '')],
+                            'family': preferred_hcp.get('family_name', ''),
+                            'full_name': full_name
+                        },
+                        'role': preferred_hcp.get('role', 'Preferred Healthcare Provider'),
+                        'roles': ['Preferred Provider'],  # Track multiple roles
+                        'organization': preferred_hcp.get('organization_name', ''),
+                        'type': 'Preferred Provider',
+                        'telecoms': self._extract_contact_telecoms(preferred_hcp),
+                        'addresses': self._extract_contact_addresses(preferred_hcp),
+                        'identifiers': self._extract_provider_identifiers(preferred_hcp),
+                        'qualification': self._extract_provider_qualifications(preferred_hcp)
+                    }
+                    healthcare_data['practitioners'].append(practitioner)
+                    healthcare_data['healthcare_team'].append(practitioner)
+                    providers_by_name[full_name] = practitioner
+                    logger.info(f"[CDA PROCESSOR] Added preferred HCP: {practitioner['name']}")
+                else:
+                    # Same person, add role
+                    existing = providers_by_name[full_name]
+                    if 'Preferred Provider' not in existing['roles']:
+                        existing['roles'].append('Preferred Provider')
+                    logger.info(f"[CDA PROCESSOR] Added Preferred Provider role to existing provider: {full_name}")
             
         except Exception as e:
             logger.error(f"[CDA PROCESSOR] Error formatting healthcare provider data: {e}")
         
         return healthcare_data
+    
+    def _extract_contact_telecoms(self, provider_data: dict) -> list:
+        """Extract contact telecoms from provider data"""
+        telecoms = []
+        
+        # Check for contact_info or contact_details
+        contact_info = provider_data.get('contact_info', provider_data.get('contact_details', {}))
+        
+        if isinstance(contact_info, dict):
+            # Extract telecoms from contact info
+            telecom_list = contact_info.get('telecoms', [])
+            for telecom in telecom_list:
+                if isinstance(telecom, dict) and telecom.get('value'):
+                    formatted_telecom = {
+                        'system': telecom.get('type', telecom.get('system', 'phone')),
+                        'value': telecom.get('display_value', telecom.get('value', '')),
+                        'use': telecom.get('use', 'work')
+                    }
+                    telecoms.append(formatted_telecom)
+        
+        # Also check for direct telecom field
+        if 'telecom' in provider_data:
+            telecom_data = provider_data['telecom']
+            if isinstance(telecom_data, list):
+                for telecom in telecom_data:
+                    if isinstance(telecom, dict) and telecom.get('value'):
+                        formatted_telecom = {
+                            'system': telecom.get('system', 'phone'),
+                            'value': telecom.get('value', ''),
+                            'use': telecom.get('use', 'work')
+                        }
+                        telecoms.append(formatted_telecom)
+        
+        return telecoms
+    
+    def _extract_contact_addresses(self, provider_data: dict) -> list:
+        """Extract contact addresses from provider data"""
+        addresses = []
+        
+        # Check for contact_info or contact_details
+        contact_info = provider_data.get('contact_info', provider_data.get('contact_details', {}))
+        
+        if isinstance(contact_info, dict):
+            # Extract addresses from contact info
+            address_list = contact_info.get('addresses', [])
+            for address in address_list:
+                if isinstance(address, dict):
+                    formatted_address = {
+                        'use': address.get('use', 'work'),
+                        'text': address.get('text', ''),
+                        'line': address.get('street_lines', []),
+                        'city': address.get('city', ''),
+                        'state': address.get('state', ''),
+                        'postal_code': address.get('postal_code', ''),
+                        'country': address.get('country', '')
+                    }
+                    addresses.append(formatted_address)
+        
+        # Also check for direct address field
+        if 'address' in provider_data:
+            address_data = provider_data['address']
+            if isinstance(address_data, str) and address_data.strip():
+                # Simple string address
+                formatted_address = {
+                    'use': 'work',
+                    'text': address_data,
+                    'line': [address_data],
+                    'city': '',
+                    'state': '',
+                    'postal_code': '',
+                    'country': ''
+                }
+                addresses.append(formatted_address)
+            elif isinstance(address_data, dict):
+                formatted_address = {
+                    'use': address_data.get('use', 'work'),
+                    'text': address_data.get('text', ''),
+                    'line': address_data.get('line', []),
+                    'city': address_data.get('city', ''),
+                    'state': address_data.get('state', ''),
+                    'postal_code': address_data.get('postal_code', ''),
+                    'country': address_data.get('country', '')
+                }
+                addresses.append(formatted_address)
+        
+        return addresses
+    
+    def _extract_provider_identifiers(self, provider_data: dict) -> list:
+        """Extract provider identifiers from provider data"""
+        identifiers = []
+        
+        # Provider ID
+        if provider_data.get('provider_id'):
+            identifiers.append({
+                'value': provider_data['provider_id'],
+                'system': provider_data.get('id_root', 'unknown'),
+                'use': 'usual'
+            })
+        
+        # Authenticator ID for legal authenticators
+        if provider_data.get('authenticator_id'):
+            identifiers.append({
+                'value': provider_data['authenticator_id'],
+                'system': provider_data.get('id_root', 'unknown'),
+                'use': 'official'
+            })
+        
+        return identifiers
+    
+    def _extract_provider_qualifications(self, provider_data: dict) -> list:
+        """Extract provider qualifications/codes from provider data"""
+        qualifications = []
+        
+        # Function code (role/specialty)
+        if provider_data.get('function_code'):
+            qualifications.append({
+                'code': {
+                    'text': provider_data.get('function_display_name', provider_data.get('role', '')),
+                    'coding': [{
+                        'code': provider_data['function_code'],
+                        'display': provider_data.get('function_display_name', ''),
+                        'system': provider_data.get('function_code_system', '')
+                    }]
+                }
+            })
+        
+        # Professional code
+        if provider_data.get('code'):
+            qualifications.append({
+                'code': {
+                    'text': provider_data.get('code_display_name', provider_data.get('role', '')),
+                    'coding': [{
+                        'code': provider_data['code'],
+                        'display': provider_data.get('code_display_name', ''),
+                        'system': provider_data.get('code_system', '')
+                    }]
+                }
+            })
+        
+        return qualifications
     
     def _handle_cda_error(
         self,
