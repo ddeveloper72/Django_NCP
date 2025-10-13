@@ -188,19 +188,25 @@ class CDAViewProcessor:
     
     def _parse_cda_document(self, cda_content: str, session_id: str) -> Optional[Dict[str, Any]]:
         """
-        Parse CDA document using multiple parsing strategies
+        Parse CDA document using specialized extractors from working branch
         
         Args:
             cda_content: CDA XML content
             session_id: Session identifier
             
         Returns:
-            Parsed CDA data or None if parsing failed
+            Parsed CDA data with actual clinical details
         """
         try:
-            logger.info(f"[CDA PROCESSOR] Parsing CDA document for session {session_id}")
+            logger.info(f"[CDA PROCESSOR] Parsing CDA document for session {session_id} using specialized extractors")
             
-            # Strategy 1: Use CDA display service for enhanced parsing
+            # Strategy 1: Use specialized extractors for actual clinical data (from working branch)
+            clinical_data = self._extract_with_specialized_extractors(cda_content)
+            if clinical_data and clinical_data.get('sections'):
+                logger.info(f"[CDA PROCESSOR] Specialized extractors parsed successfully - {len(clinical_data['sections'])} sections")
+                return clinical_data
+            
+            # Strategy 2: Use CDA display service for enhanced parsing
             try:
                 clinical_data = self.cda_display_service.extract_patient_clinical_data(session_id)
                 if clinical_data and clinical_data.get('sections'):
@@ -209,7 +215,7 @@ class CDAViewProcessor:
             except Exception as e:
                 logger.warning(f"[CDA PROCESSOR] CDA display service failed: {e}")
             
-            # Strategy 2: Use comprehensive service for clinical arrays extraction (working method)
+            # Strategy 3: Use comprehensive service for clinical arrays extraction (fallback)
             logger.info("[CDA PROCESSOR] Using comprehensive service for clinical arrays extraction")
             try:
                 # Get clinical arrays directly (this method works from our test)
@@ -232,7 +238,7 @@ class CDAViewProcessor:
             except Exception as e:
                 logger.warning(f"[CDA PROCESSOR] Comprehensive service clinical arrays failed: {e}")
             
-            # Strategy 3: Fallback to comprehensive data extraction (if needed)
+            # Strategy 4: Fallback to comprehensive data extraction (if needed)
             logger.info("[CDA PROCESSOR] Falling back to comprehensive clinical data service")
             try:
                 comprehensive_data = self.comprehensive_service.extract_comprehensive_clinical_data(
@@ -372,6 +378,188 @@ class CDAViewProcessor:
             'display_filename': self._get_display_filename(match_data),
         })
     
+    def _extract_with_specialized_extractors(self, cda_content: str) -> Optional[Dict[str, Any]]:
+        """
+        Extract clinical data using specialized extractors from working branch
+        
+        Args:
+            cda_content: CDA XML content
+            
+        Returns:
+            Extracted clinical data with actual condition names and medication details
+        """
+        try:
+            logger.info("[CDA PROCESSOR] Using specialized extractors for actual clinical data")
+            
+            sections = []
+            clinical_arrays = {
+                'medications': [],
+                'allergies': [],
+                'problems': [],
+                'procedures': [],
+                'vital_signs': [],
+                'results': [],
+                'immunizations': [],
+                'medical_devices': [],
+            }
+            
+            # Import specialized extractors
+            from ..services.history_of_past_illness_extractor import HistoryOfPastIllnessExtractor
+            from ..services.immunizations_extractor import ImmunizationsExtractor
+            from ..services.pregnancy_history_extractor import PregnancyHistoryExtractor
+            from ..services.social_history_extractor import SocialHistoryExtractor
+            from ..services.physical_findings_extractor import PhysicalFindingsExtractor
+            from ..services.coded_results_extractor import CodedResultsExtractor
+            
+            # History of Past Illness Extractor
+            try:
+                history_extractor = HistoryOfPastIllnessExtractor()
+                history_entries = history_extractor.extract_history_of_past_illness(cda_content)
+                if history_entries:
+                    logger.info(f"[SPECIALIZED] History of Past Illness: {len(history_entries)} entries extracted")
+                    
+                    # Convert to clinical arrays format for problems
+                    for entry in history_entries:
+                        clinical_arrays['problems'].append({
+                            'name': entry.problem_name,
+                            'type': entry.problem_type,
+                            'status': entry.problem_status,
+                            'time_period': entry.time_period,
+                            'health_status': entry.health_status,
+                            'code': entry.problem_code,
+                            'code_system': entry.problem_code_system,
+                            'display': entry.problem_code_display,
+                            'source': 'specialized_extractor'
+                        })
+                    
+                    # Create section for template
+                    sections.append({
+                        'title': 'History of Past Illness',
+                        'code': '11348-0',
+                        'entries': history_entries,
+                        'entry_count': len(history_entries),
+                        'has_entries': True,
+                        'medical_terminology_count': sum(1 for e in history_entries if e.problem_code)
+                    })
+            except Exception as e:
+                logger.warning(f"[CDA PROCESSOR] History of Past Illness extraction failed: {e}")
+            
+            # Immunizations Extractor
+            try:
+                immunizations_extractor = ImmunizationsExtractor()
+                immunization_entries = immunizations_extractor.extract_immunizations(cda_content)
+                if immunization_entries:
+                    logger.info(f"[SPECIALIZED] Immunizations: {len(immunization_entries)} entries extracted")
+                    
+                    # Convert to clinical arrays format
+                    for entry in immunization_entries:
+                        clinical_arrays['immunizations'].append({
+                            'name': entry.vaccination_name,
+                            'brand_name': entry.brand_name,
+                            'date_administered': entry.vaccination_date,
+                            'dose_number': entry.dose_number,
+                            'agent': entry.agent,
+                            'manufacturer': entry.marketing_authorization_holder,
+                            'lot_number': entry.batch_lot_number,
+                            'code': getattr(entry, 'vaccination_code', ''),
+                            'code_system': getattr(entry, 'vaccination_code_system', ''),
+                            'source': 'specialized_extractor'
+                        })
+                    
+                    sections.append({
+                        'title': 'Immunizations',
+                        'code': '11369-6',
+                        'entries': immunization_entries,
+                        'entry_count': len(immunization_entries),
+                        'has_entries': True,
+                        'medical_terminology_count': sum(1 for e in immunization_entries if getattr(e, 'vaccination_code', ''))
+                    })
+            except Exception as e:
+                logger.warning(f"[CDA PROCESSOR] Immunizations extraction failed: {e}")
+            
+            # Physical Findings Extractor (for vital signs and results)
+            try:
+                physical_extractor = PhysicalFindingsExtractor()
+                physical_entries = physical_extractor.extract_physical_findings(cda_content)
+                if physical_entries:
+                    logger.info(f"[SPECIALIZED] Physical Findings: {len(physical_entries)} entries extracted")
+                    
+                    # Convert to clinical arrays format for vital signs and results
+                    for entry in physical_entries:
+                        if 'vital' in entry.observation_type.lower() or 'sign' in entry.observation_type.lower():
+                            clinical_arrays['vital_signs'].append({
+                                'name': entry.observation_type,
+                                'value': entry.observation_value,
+                                'unit': entry.value_unit,
+                                'date': entry.observation_time,
+                                'status': entry.status,
+                                'source': 'specialized_extractor'
+                            })
+                        else:
+                            clinical_arrays['results'].append({
+                                'name': entry.observation_type,
+                                'value': entry.observation_value,
+                                'unit': entry.value_unit,
+                                'date': entry.observation_time,
+                                'status': entry.status,
+                                'source': 'specialized_extractor'
+                            })
+                    
+                    sections.append({
+                        'title': 'Physical Findings',
+                        'code': '29545-1',
+                        'entries': physical_entries,
+                        'entry_count': len(physical_entries),
+                        'has_entries': True,
+                        'medical_terminology_count': sum(1 for e in physical_entries if e.observation_code)
+                    })
+            except Exception as e:
+                logger.warning(f"[CDA PROCESSOR] Physical Findings extraction failed: {e}")
+            
+            # Coded Results Extractor (for blood group and diagnostic results)
+            try:
+                coded_extractor = CodedResultsExtractor()
+                coded_results = coded_extractor.extract_coded_results(cda_content)
+                if coded_results and (coded_results.get('blood_group') or coded_results.get('diagnostic_results')):
+                    logger.info(f"[SPECIALIZED] Coded Results: blood_group={len(coded_results.get('blood_group', []))}, diagnostic={len(coded_results.get('diagnostic_results', []))}")
+                    
+                    # Add blood group and diagnostic results to clinical arrays
+                    if coded_results.get('blood_group'):
+                        clinical_arrays['results'].extend(coded_results['blood_group'])
+                    if coded_results.get('diagnostic_results'):
+                        clinical_arrays['results'].extend(coded_results['diagnostic_results'])
+                    
+                    sections.append({
+                        'title': 'Coded Results',
+                        'code': '30954-2',
+                        'entries': coded_results,
+                        'entry_count': len(coded_results.get('blood_group', [])) + len(coded_results.get('diagnostic_results', [])),
+                        'has_entries': True,
+                        'medical_terminology_count': len(coded_results.get('blood_group', [])) + len(coded_results.get('diagnostic_results', []))
+                    })
+            except Exception as e:
+                logger.warning(f"[CDA PROCESSOR] Coded Results extraction failed: {e}")
+            
+            # Return structured data if we extracted anything
+            if sections or any(clinical_arrays.values()):
+                logger.info(f"[SPECIALIZED] Successfully extracted {len(sections)} sections with specialized extractors")
+                return {
+                    'success': True,
+                    'sections': sections,
+                    'clinical_data': clinical_arrays,
+                    'has_clinical_data': bool(sections),
+                    'source': 'specialized_extractors'
+                }
+            
+            logger.info("[SPECIALIZED] No clinical data extracted with specialized extractors")
+            return None
+            
+        except Exception as e:
+            logger.error(f"[CDA PROCESSOR] Specialized extractor error: {e}")
+            import traceback
+            logger.error(f"Full traceback: {traceback.format_exc()}")
+            return None
+
     def _get_display_filename(self, match_data: Dict[str, Any]) -> str:
         """Get appropriate display filename for CDA document"""
         file_path = match_data.get('file_path', '')
@@ -409,17 +597,21 @@ class CDAViewProcessor:
         # Map sections to compatibility variables based on section codes
         if sections:
             for section in sections:
-                section_code = section.get('section_code', '')
+                # Support both 'code' and 'section_code' fields for compatibility
+                section_code = section.get('code', section.get('section_code', ''))
                 section_id = section.get('section_id', '')
+                
+                logger.debug(f"[COMPATIBILITY] Processing section: {section.get('title', 'Unknown')} with code: {section_code}")
                 
                 # Map specific section codes to template variables
                 if section_code in ['10160-0', '10164-2']:  # Medication sections
                     compatibility_vars['medications'].append(section)
                 elif section_code in ['48765-2', '48766-0']:  # Allergy sections
                     compatibility_vars['allergies'].append(section)
-                elif section_code in ['11450-4', '11348-0']:  # Problem lists
+                elif section_code in ['11450-4', '11348-0']:  # Problem lists & History of Past Illness
                     compatibility_vars['problems'].append(section)
-                elif section_code in ['8716-3']:  # Vital signs / Physical findings
+                    compatibility_vars['history_of_past_illness'].append(section)
+                elif section_code in ['8716-3', '29545-1']:  # Vital signs / Physical findings
                     compatibility_vars['vital_signs'].append(section)
                     compatibility_vars['physical_findings'].append(section)
                 elif section_code in ['47519-4']:  # Procedures
@@ -440,6 +632,27 @@ class CDAViewProcessor:
                 else:
                     # Additional sections not mapped to specific variables
                     compatibility_vars['additional_sections'].append(section)
+        
+        # Also populate compatibility variables from clinical_arrays if available
+        clinical_arrays = context.get('clinical_arrays', {})
+        if clinical_arrays:
+            # Map clinical arrays to individual variables for template compatibility
+            if clinical_arrays.get('problems'):
+                compatibility_vars['problems'].extend(clinical_arrays['problems'])
+            if clinical_arrays.get('immunizations'):
+                compatibility_vars['immunizations'].extend(clinical_arrays['immunizations'])
+            if clinical_arrays.get('vital_signs'):
+                compatibility_vars['vital_signs'].extend(clinical_arrays['vital_signs'])
+            if clinical_arrays.get('results'):
+                compatibility_vars['physical_findings'].extend(clinical_arrays['results'])
+            if clinical_arrays.get('medications'):
+                compatibility_vars['medications'].extend(clinical_arrays['medications'])
+            if clinical_arrays.get('allergies'):
+                compatibility_vars['allergies'].extend(clinical_arrays['allergies'])
+            if clinical_arrays.get('procedures'):
+                compatibility_vars['procedures'].extend(clinical_arrays['procedures'])
+            
+            logger.info(f"[COMPATIBILITY] Populated from clinical_arrays: problems={len(clinical_arrays.get('problems', []))}, immunizations={len(clinical_arrays.get('immunizations', []))}")
         
         # Add all compatibility variables to context
         context.update(compatibility_vars)
