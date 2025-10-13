@@ -161,8 +161,8 @@
     {# Clinical Information Tab Content - only show for L3 CDA documents #}
     {% if has_l3_cda and cda_type != "L1" %}
     <div class="clinical-tab-content" id="extended_patient_clinical">
-        {# RESTORED WITH MINIMAL CLEAN STRUCTURE #}
-        {% include 'patient_data/components/clinical_information_content.html' %}
+        {# FLAT STRUCTURE - NO NESTED WRAPPER #}
+        {% include 'patient_data/components/clinical_information_toplevel.html' %}
     </div>
     {% endif %}
 
