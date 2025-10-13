@@ -515,29 +515,17 @@ class EnhancedCDAXMLParser:
         for entry_idx, entry in enumerate(all_entries):
             logger.debug(f"Processing entry {entry_idx}")
 
-            # Apply enhanced extraction strategies
+            # Apply unified extraction strategies (consolidated from 8 methods to 3)
             entry_codes = []
 
-            # Strategy 1: Extract all elements with codes (comprehensive)
-            self._extract_coded_elements_systematic_enhanced(entry, entry_codes)
+            # Unified Strategy 1: Code-based extraction (combines coded_elements & enhanced)
+            self._extract_code_elements_unified(entry, entry_codes)
 
-            # Strategy 2: Extract all text elements with references
-            self._extract_text_elements_systematic(entry, entry_codes)
+            # Unified Strategy 2: Contextual extraction (combines text, time, status, value)
+            self._extract_contextual_elements_unified(entry, entry_codes)
 
-            # Strategy 3: Extract all time elements with context
-            self._extract_time_elements_systematic(entry, entry_codes)
-
-            # Strategy 4: Extract all status elements
-            self._extract_status_elements_systematic(entry, entry_codes)
-
-            # Strategy 5: Extract all value/quantity elements
-            self._extract_value_elements_systematic(entry, entry_codes)
-
-            # Strategy 6: Enhanced nested entry discovery for Italian L3 patterns
-            self._extract_nested_entries_systematic(entry, entry_codes)
-
-            # Strategy 7: Extract medication-specific codes (important for Italian L3)
-            self._extract_medication_codes_systematic(entry, entry_codes)
+            # Unified Strategy 3: Structural extraction (combines nested entries & medications)
+            self._extract_structural_elements_unified(entry, entry_codes)
 
             # Add discovered codes to main collection
             codes.extend(entry_codes)
@@ -546,119 +534,6 @@ class EnhancedCDAXMLParser:
             f"[SUCCESS] Extracted {len(codes)} total coded elements (enhanced EU extraction)"
         )
         return ClinicalCodesCollection(codes=codes)
-
-    def _extract_coded_elements_systematic(
-        self, entry: ET.Element, codes: List[ClinicalCode]
-    ):
-        """Extract all elements that contain medical codes systematically"""
-
-        # Find all code elements
-        code_elements = entry.findall(".//cda:code", self.namespaces)
-        for code_elem in code_elements:
-            code = self._extract_clinical_code(code_elem)
-            if code:
-                codes.append(code)
-
-        # Find all value elements with codes
-        value_elements = entry.findall(".//cda:value[@code]", self.namespaces)
-        for value_elem in value_elements:
-            code = self._extract_clinical_code(value_elem)
-            if code:
-                codes.append(code)
-
-        # Find translation elements
-        translation_elements = entry.findall(".//cda:translation", self.namespaces)
-        for trans_elem in translation_elements:
-            code = self._extract_clinical_code(trans_elem)
-            if code:
-                codes.append(code)
-
-    def _extract_text_elements_systematic(
-        self, entry: ET.Element, codes: List[ClinicalCode]
-    ):
-        """Extract text content with medical significance"""
-
-        # Process originalText elements with references
-        original_texts = entry.findall(".//cda:originalText", self.namespaces)
-        for text_elem in original_texts:
-            ref_elem = text_elem.find("cda:reference", self.namespaces)
-            if ref_elem is not None:
-                # Create text-based code entry for tracking
-                ref_value = ref_elem.get("value", "").replace("#", "")
-                if ref_value and text_elem.text:
-                    # This helps track narrative references
-                    pass  # Could create text-reference codes here
-
-    def _extract_time_elements_systematic(
-        self, entry: ET.Element, codes: List[ClinicalCode]
-    ):
-        """Extract time-related elements with clinical context"""
-
-        # Process effectiveTime elements - these often have clinical significance
-        effective_times = entry.findall(".//cda:effectiveTime", self.namespaces)
-        for time_elem in effective_times:
-            # Check if time has associated codes or context
-            # Since ElementTree doesn't have getparent(), search parent context differently
-            # Look for codes in the same entry context
-            parent_codes = entry.findall(".//cda:code", self.namespaces)
-            for parent_code in parent_codes:
-                code = self._extract_clinical_code(parent_code)
-                if code:
-                    # Add temporal context to the code
-                    time_value = time_elem.get("value")
-                    if time_value:
-                        code.display_name = (
-                            f"{code.display_name} (Effective: {time_value})"
-                            if code.display_name
-                            else f"(Effective: {time_value})"
-                        )
-                    codes.append(code)
-                    break  # Only add temporal context once per time element
-
-    def _extract_status_elements_systematic(
-        self, entry: ET.Element, codes: List[ClinicalCode]
-    ):
-        """Extract status-related elements"""
-
-        # Status codes often indicate clinical state
-        status_codes = entry.findall(".//cda:statusCode", self.namespaces)
-        for status_elem in status_codes:
-            code_value = status_elem.get("code")
-            if code_value:
-                # Create status-based clinical code
-                status_code = ClinicalCode(
-                    code=code_value,
-                    system="2.16.840.1.113883.5.14",  # HL7 ActStatus
-                    system_name="HL7 ActStatus",
-                    display_name=f"Status: {code_value}",
-                )
-                codes.append(status_code)
-
-    def _extract_value_elements_systematic(
-        self, entry: ET.Element, codes: List[ClinicalCode]
-    ):
-        """Extract value/quantity elements with units and codes"""
-
-        # Find all value elements
-        for elem in entry.iter():
-            if elem.tag.endswith("}value") or "value" in elem.tag.lower():
-                # Check for coded values
-                if elem.get("code") and elem.get("codeSystem"):
-                    code = self._extract_clinical_code(elem)
-                    if code:
-                        codes.append(code)
-
-                # Check for unit codes
-                unit = elem.get("unit")
-                if unit:
-                    # Create unit-based code for UCUM units
-                    unit_code = ClinicalCode(
-                        code=unit,
-                        system="2.16.840.1.113883.6.8",  # UCUM
-                        system_name="UCUM",
-                        display_name=f"Unit: {unit}",
-                    )
-                    codes.append(unit_code)
 
     def _extract_clinical_code(self, elem: ET.Element) -> Optional[ClinicalCode]:
         """Extract a clinical code from a coded element - handles country variations"""
@@ -696,79 +571,188 @@ class EnhancedCDAXMLParser:
             original_text_ref=original_text_ref,
         )
 
-    def _extract_coded_elements_systematic_enhanced(
-        self, entry: ET.Element, codes: List[ClinicalCode]
-    ):
-        """Enhanced extraction for Italian L3 and EU member state compatibility"""
+    # UNIFIED EXTRACTION METHODS - Phase 2 Consolidation
+    # Consolidates 8 systematic methods into 3 configurable strategies
+    
+    def _extract_code_elements_unified(self, entry: ET.Element, codes: List[ClinicalCode]):
+        """
+        Unified code-based extraction strategy
+        
+        Consolidates:
+        - _extract_coded_elements_systematic()
+        - _extract_coded_elements_systematic_enhanced()
+        
+        Extracts all elements that contain medical codes with enhanced EU compatibility
+        """
+        # Strategy 1A: Basic coded elements extraction
+        # Find all code elements
+        code_elements = entry.findall(".//cda:code", self.namespaces)
+        for code_elem in code_elements:
+            code = self._extract_clinical_code(code_elem)
+            if code:
+                codes.append(code)
 
-        # Original systematic extraction
-        self._extract_coded_elements_systematic(entry, codes)
+        # Find all value elements with codes
+        value_elements = entry.findall(".//cda:value[@code]", self.namespaces)
+        for value_elem in value_elements:
+            code = self._extract_clinical_code(value_elem)
+            if code:
+                codes.append(code)
 
-        # Enhanced: Search across all namespaces
+        # Find translation elements
+        translation_elements = entry.findall(".//cda:translation", self.namespaces)
+        for trans_elem in translation_elements:
+            code = self._extract_clinical_code(trans_elem)
+            if code:
+                codes.append(code)
+
+        # Strategy 1B: Enhanced extraction for EU member state compatibility
+        # Search across all namespaces for broader compatibility
         for ns_prefix in self.namespaces.keys():
+            if ns_prefix == "cda":
+                continue  # Already processed above
+                
             # Find code elements with alternative namespace prefixes
-            code_elements = entry.findall(f".//{ns_prefix}:code", self.namespaces)
-            for code_elem in code_elements:
+            alt_code_elements = entry.findall(f".//{ns_prefix}:code", self.namespaces)
+            for code_elem in alt_code_elements:
                 code = self._extract_clinical_code(code_elem)
                 if code:
                     codes.append(code)
 
             # Find value elements with codes in alternative namespaces
-            value_elements = entry.findall(
-                f".//{ns_prefix}:value[@code]", self.namespaces
-            )
-            for value_elem in value_elements:
+            alt_value_elements = entry.findall(f".//{ns_prefix}:value[@code]", self.namespaces)
+            for value_elem in alt_value_elements:
                 code = self._extract_clinical_code(value_elem)
                 if code:
                     codes.append(code)
 
-    def _extract_nested_entries_systematic(
-        self, entry: ET.Element, codes: List[ClinicalCode]
-    ):
-        """Extract codes from nested entry structures (Italian L3 pattern)"""
+    def _extract_contextual_elements_unified(self, entry: ET.Element, codes: List[ClinicalCode]):
+        """
+        Unified contextual extraction strategy
+        
+        Consolidates:
+        - _extract_text_elements_systematic()
+        - _extract_time_elements_systematic()
+        - _extract_status_elements_systematic()
+        - _extract_value_elements_systematic()
+        
+        Extracts contextual elements like text references, temporal data, status codes, and units
+        """
+        # Strategy 2A: Text elements with medical significance
+        # Process originalText elements with references
+        original_texts = entry.findall(".//cda:originalText", self.namespaces)
+        for text_elem in original_texts:
+            ref_elem = text_elem.find("cda:reference", self.namespaces)
+            if ref_elem is not None:
+                # Create text-based code entry for tracking narrative references
+                ref_value = ref_elem.get("value", "").replace("#", "")
+                if ref_value and text_elem.text:
+                    # Track narrative references for completeness
+                    pass  # Could create text-reference codes here if needed
 
-        # Find nested entryRelationship elements (common in Italian L3)
+        # Strategy 2B: Time-related elements with clinical context
+        effective_times = entry.findall(".//cda:effectiveTime", self.namespaces)
+        for time_elem in effective_times:
+            # Look for codes in the same entry context
+            parent_codes = entry.findall(".//cda:code", self.namespaces)
+            for parent_code in parent_codes:
+                code = self._extract_clinical_code(parent_code)
+                if code:
+                    # Add temporal context to the code
+                    time_value = time_elem.get("value")
+                    if time_value:
+                        code.display_name = (
+                            f"{code.display_name} (Effective: {time_value})"
+                            if code.display_name
+                            else f"(Effective: {time_value})"
+                        )
+                    codes.append(code)
+                    break  # Only add temporal context once per time element
+
+        # Strategy 2C: Status-related elements
+        status_codes = entry.findall(".//cda:statusCode", self.namespaces)
+        for status_elem in status_codes:
+            code_value = status_elem.get("code")
+            if code_value:
+                # Create status-based clinical code
+                status_code = ClinicalCode(
+                    code=code_value,
+                    system="2.16.840.1.113883.5.14",  # HL7 ActStatus
+                    system_name="HL7 ActStatus",
+                    display_name=f"Status: {code_value}",
+                )
+                codes.append(status_code)
+
+        # Strategy 2D: Value/quantity elements with units and codes
+        for elem in entry.iter():
+            if elem.tag.endswith("}value") or "value" in elem.tag.lower():
+                # Check for coded values
+                if elem.get("code") and elem.get("codeSystem"):
+                    code = self._extract_clinical_code(elem)
+                    if code:
+                        codes.append(code)
+
+                # Check for unit codes (UCUM compliance)
+                unit = elem.get("unit")
+                if unit:
+                    # Create unit-based code for UCUM units
+                    unit_code = ClinicalCode(
+                        code=unit,
+                        system="2.16.840.1.113883.6.8",  # UCUM
+                        system_name="UCUM",
+                        display_name=f"Unit: {unit}",
+                    )
+                    codes.append(unit_code)
+
+    def _extract_structural_elements_unified(self, entry: ET.Element, codes: List[ClinicalCode]):
+        """
+        Unified structural extraction strategy
+        
+        Consolidates:
+        - _extract_nested_entries_systematic()
+        - _extract_medication_codes_systematic()
+        
+        Extracts codes from complex nested structures and medication-specific elements
+        """
+        # Strategy 3A: Nested entry structures (Italian L3 pattern)
+        # Find nested entryRelationship elements
         nested_relations = entry.findall(".//cda:entryRelationship", self.namespaces)
         for relation in nested_relations:
             # Extract codes from nested observations/acts
             for child in relation:
                 if child.tag.endswith("}observation") or child.tag.endswith("}act"):
-                    # Recursively extract codes from nested elements
+                    # Recursively extract codes using unified code extraction
                     nested_codes = []
-                    self._extract_coded_elements_systematic(child, nested_codes)
+                    self._extract_code_elements_unified(child, nested_codes)
                     codes.extend(nested_codes)
 
-        # Find component elements within entries (another Italian L3 pattern)
+        # Find component elements within entries
         components = entry.findall(".//cda:component", self.namespaces)
         for comp in components:
             comp_codes = []
-            self._extract_coded_elements_systematic(comp, comp_codes)
+            self._extract_code_elements_unified(comp, comp_codes)
             codes.extend(comp_codes)
 
-    def _extract_medication_codes_systematic(
-        self, entry: ET.Element, codes: List[ClinicalCode]
-    ):
-        """Extract medication-specific codes important for Italian L3 documents"""
-
+        # Strategy 3B: Medication-specific extraction (important for Italian L3)
         # Find manufacturedProduct elements (medication codes)
         products = entry.findall(".//cda:manufacturedProduct", self.namespaces)
         for product in products:
             product_codes = []
-            self._extract_coded_elements_systematic(product, product_codes)
+            self._extract_code_elements_unified(product, product_codes)
             codes.extend(product_codes)
 
         # Find substance administration codes
         substances = entry.findall(".//cda:substanceAdministration", self.namespaces)
         for substance in substances:
             substance_codes = []
-            self._extract_coded_elements_systematic(substance, substance_codes)
+            self._extract_code_elements_unified(substance, substance_codes)
             codes.extend(substance_codes)
 
         # Find pharmacy-specific elements
         pharm_elements = entry.findall(".//pharm:*", self.namespaces)
         for pharm_elem in pharm_elements:
             pharm_codes = []
-            self._extract_coded_elements_systematic(pharm_elem, pharm_codes)
+            self._extract_code_elements_unified(pharm_elem, pharm_codes)
             codes.extend(pharm_codes)
 
     def _map_code_system_to_name(self, code_system: str) -> str:
