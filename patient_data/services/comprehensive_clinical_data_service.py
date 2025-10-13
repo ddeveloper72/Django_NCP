@@ -1136,6 +1136,40 @@ class ComprehensiveClinicalDataService:
                 medication_data['period_info'] = period_info
                 logger.info(f"Using enhanced period info: {medication_data['period']}")
 
+        # Set display_name for template compatibility (critical for frontend display)
+        display_name = None
+        
+        # Priority 1: Use explicit medication name if available
+        if medication_data.get('medication_name'):
+            display_name = medication_data['medication_name']
+        
+        # Priority 2: Use substance/ingredient display name
+        elif medication_data.get('ingredient_display'):
+            display_name = medication_data['ingredient_display']
+        
+        # Priority 3: Use any name from fields
+        elif fields.get('medication_name'):
+            display_name = fields['medication_name']
+        elif fields.get('substance_name'):
+            display_name = fields['substance_name']
+        
+        # Priority 4: Build name from available components
+        if not display_name:
+            name_parts = []
+            if medication_data.get('active_ingredient', {}).get('display_name'):
+                name_parts.append(medication_data['active_ingredient']['display_name'])
+            if medication_data.get('pharmaceutical_form'):
+                name_parts.append(medication_data['pharmaceutical_form'])
+            if name_parts:
+                display_name = ' '.join(name_parts)
+        
+        # Final fallback
+        if not display_name:
+            display_name = "History of Medication use Narrative"
+        
+        medication_data['display_name'] = display_name
+        medication_data['name'] = display_name  # Also set 'name' for backward compatibility
+        
         # Include original fields for debugging/completeness
         medication_data['original_fields'] = fields
         
@@ -1313,6 +1347,28 @@ class ComprehensiveClinicalDataService:
             # Convert to enhanced data structure
             medication_data['data'] = self._convert_valueset_fields_to_medication_data(fields_for_conversion)
         
+        # Extract display_name for template compatibility
+        display_name = None
+        
+        # Priority 1: Use medication name from CDA
+        if 'medication' in cda_medication and isinstance(cda_medication['medication'], dict):
+            display_name = cda_medication['medication'].get('name', '').strip()
+        
+        # Priority 2: Use display_name from converted data
+        if not display_name and 'data' in medication_data:
+            display_name = medication_data['data'].get('display_name', '').strip()
+        
+        # Priority 3: Use ingredient display from converted data
+        if not display_name and 'data' in medication_data:
+            display_name = medication_data['data'].get('ingredient_display', '').strip()
+        
+        # Final fallback
+        if not display_name:
+            display_name = "History of Medication use Narrative"
+        
+        medication_data['display_name'] = display_name
+        medication_data['name'] = display_name  # For template compatibility
+        
         return medication_data
 
     def _extract_enhanced_problems(self, raw_problems: List[Dict]) -> List[Dict]:
@@ -1377,11 +1433,42 @@ class ComprehensiveClinicalDataService:
         try:
             formatted_problem = {}
             
-            # Extract problem name and code
-            problem_info = problem_detail.get("problem", {})
-            code_info = problem_info.get("code", {})
+            # Enhanced name extraction with multiple fallback strategies
+            display_name = ""
             
-            formatted_problem["name"] = code_info.get("displayName", "Medical Problem")
+            # Strategy 1: Try direct displayName from problem detail (CTS resolved)
+            if "displayName" in problem_detail:
+                display_name = str(problem_detail["displayName"]).strip()
+            
+            # Strategy 2: Try nested problem info structure
+            if not display_name:
+                problem_info = problem_detail.get("problem", {})
+                code_info = problem_info.get("code", {})
+                display_name = code_info.get("displayName", "").strip()
+                
+                # If displayName is empty, try other sources
+                if not display_name:
+                    # Try the 'name' field from problem_info
+                    display_name = problem_info.get("name", "").strip()
+            
+            # Strategy 3: Try direct name field from problem detail
+            if not display_name and "name" in problem_detail:
+                display_name = str(problem_detail["name"]).strip()
+            
+            # Strategy 4: Try problem code resolution (should be already resolved by CTS)
+            if not display_name:
+                problem_info = problem_detail.get("problem", {})
+                code_info = problem_info.get("code", {})
+                if code_info.get("code"):
+                    display_name = code_info.get("code", "").strip()
+            
+            # Strategy 5: Final fallback only if we have no other information
+            if not display_name:
+                display_name = "Medical Problem"
+                logger.warning(f"Problem extraction falling back to generic name for problem_detail: {list(problem_detail.keys())}")
+            
+            formatted_problem["name"] = display_name
+            formatted_problem["display_name"] = display_name  # For template consistency
             formatted_problem["code"] = code_info.get("code", "")
             formatted_problem["code_system"] = code_info.get("codeSystemName", "")
             
@@ -1436,10 +1523,67 @@ class ComprehensiveClinicalDataService:
     def _format_legacy_problem_for_display(self, problem_entry: Dict) -> Dict:
         """Format legacy problem entry for display"""
         try:
+            # Enhanced name extraction for legacy format
+            display_name = ""
+            
+            # Strategy 1: Try display_name field (CTS resolved)
+            if "display_name" in problem_entry:
+                display_name = str(problem_entry["display_name"]).strip()
+            
+            # Strategy 2: Try name field
+            if not display_name and "name" in problem_entry:
+                display_name = str(problem_entry["name"]).strip()
+            
+            # Strategy 3: Try displayName field
+            if not display_name and "displayName" in problem_entry:
+                display_name = str(problem_entry["displayName"]).strip()
+            
+            # Strategy 4: Check if there's nested code info
+            if not display_name and "code_info" in problem_entry:
+                code_info = problem_entry["code_info"]
+                if isinstance(code_info, dict):
+                    display_name = code_info.get("displayName", "").strip()
+            
+            # Strategy 5: Check the code field directly (CTS resolved)
+            if not display_name and "code" in problem_entry:
+                code_data = problem_entry["code"]
+                if isinstance(code_data, dict):
+                    # Try displayName from code dictionary (CTS resolved)
+                    display_name = code_data.get("displayName", "").strip()
+                    # Try name from code dictionary
+                    if not display_name:
+                        display_name = code_data.get("name", "").strip()
+                    
+                    # If displayName is still empty, try CTS resolution
+                    if not display_name and code_data.get("code") and code_data.get("codeSystem"):
+                        try:
+                            from translation_services.terminology_translator import TerminologyTranslator
+                            translator = TerminologyTranslator()
+                            resolved_name = translator.resolve_code(
+                                code_data.get("code"),
+                                code_data.get("codeSystem")
+                            )
+                            if resolved_name and resolved_name.strip():
+                                display_name = resolved_name.strip()
+                                logger.info(f"CTS resolved problem code {code_data.get('code')} to '{display_name}'")
+                        except Exception as e:
+                            logger.warning(f"CTS resolution failed for problem code {code_data.get('code')}: {e}")
+            
+            # Final fallback
+            if not display_name:
+                display_name = "Medical Problem"
+                # Show more detailed info for debugging
+                code_data = problem_entry.get("code", {})
+                if isinstance(code_data, dict):
+                    logger.warning(f"Legacy problem extraction falling back to generic name. Problem keys: {list(problem_entry.keys())}, Code keys: {list(code_data.keys())}")
+                else:
+                    logger.warning(f"Legacy problem extraction falling back to generic name for problem_entry: {list(problem_entry.keys())}")
+            
             formatted_problem = {
-                "name": problem_entry.get("display_name", "Medical Problem"),
-                "type": "Medical Problem",
-                "status": "active",
+                "name": display_name,
+                "display_name": display_name,  # For template consistency
+                "type": problem_entry.get("type", "Clinical finding"),
+                "status": problem_entry.get("status", "active"),
                 "code": problem_entry.get("code", ""),
                 "source": problem_entry.get("source", "cda_parser")
             }
