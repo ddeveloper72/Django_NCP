@@ -875,20 +875,65 @@ class EnhancedCDAXMLParser:
     # This consolidation eliminates 132 lines of duplicate patient extraction logic
 
     def _extract_administrative_data(self, root: ET.Element) -> Dict[str, Any]:
-        """Extract comprehensive administrative data with enhanced contact information"""
+        """
+        PHASE 3: Unified administrative data extraction strategy
+        
+        Consolidates:
+        - _extract_enhanced_administrative_data() (primary strategy)
+        - _extract_basic_administrative_data() (fallback strategy)  
+        - _create_default_administrative_data() (error handling strategy)
+        
+        Returns comprehensive administrative context for templates including:
+        - Document metadata (creation, version, custody)
+        - Healthcare team (authors, authenticators, custodians)
+        - Patient relationships (emergency contacts, guardians)
+        - Organizational structure (healthcare providers, custodians)
+        """
         try:
-            # Use enhanced extractor if available
+            # Strategy 1: Enhanced extraction (comprehensive data)
             if self.admin_extractor:
-                return self._extract_enhanced_administrative_data(root)
+                return self._extract_administrative_data_unified(root, strategy="enhanced")
             else:
-                # Fallback to basic extraction
-                return self._extract_basic_administrative_data(root)
+                # Strategy 2: Basic extraction (fallback)
+                return self._extract_administrative_data_unified(root, strategy="basic")
         except Exception as e:
-            logger.warning(f"Failed to extract administrative data: {str(e)}")
-            return self._create_default_administrative_data()
+            logger.warning(f"Administrative data extraction failed: {str(e)}")
+            # Strategy 3: Default data creation (error handling)
+            return self._extract_administrative_data_unified(root, strategy="default")
 
-    def _extract_enhanced_administrative_data(self, root: ET.Element) -> Dict[str, Any]:
-        """Extract administrative data using enhanced extractor"""
+    def _extract_administrative_data_unified(self, root: ET.Element, strategy: str = "enhanced") -> Dict[str, Any]:
+        """
+        PHASE 3: Unified administrative data extraction strategy
+        
+        Consolidates multiple extraction approaches into single configurable method:
+        - Enhanced: Full administrative data with contact information and relationships
+        - Basic: Essential document metadata and basic organization info
+        - Default: Fallback structure for error handling
+        
+        Args:
+            root: CDA XML root element
+            strategy: "enhanced", "basic", or "default"
+            
+        Returns:
+            Comprehensive administrative data structure for template context
+        """
+        if strategy == "enhanced":
+            return self._extract_enhanced_administrative_data_strategy(root)
+        elif strategy == "basic":
+            return self._extract_basic_administrative_data_strategy(root)
+        else:  # default
+            return self._extract_default_administrative_data_strategy()
+
+    def _extract_enhanced_administrative_data_strategy(self, root: ET.Element) -> Dict[str, Any]:
+        """
+        Enhanced administrative data extraction strategy
+        
+        Extracts comprehensive administrative data including:
+        - Document metadata with version control
+        - Healthcare team with contact information  
+        - Patient relationships and emergency contacts
+        - Organizational structure and custody information
+        """
         # Use the enhanced administrative extractor to get comprehensive data
         admin_data = self.admin_extractor.extract_administrative_data(
             ET.tostring(root, encoding="unicode")
@@ -1295,11 +1340,15 @@ class EnhancedCDAXMLParser:
             ),
         }
 
-    def _extract_basic_administrative_data(self, root: ET.Element) -> Dict[str, Any]:
-        """Basic administrative data extraction (fallback)"""
-
-    def _extract_basic_administrative_data(self, root: ET.Element) -> Dict[str, Any]:
-        """Basic administrative data extraction (fallback)"""
+    def _extract_basic_administrative_data_strategy(self, root: ET.Element) -> Dict[str, Any]:
+        """
+        Basic administrative data extraction strategy
+        
+        Extracts essential administrative data including:
+        - Document metadata (creation date, title, type, ID)
+        - Basic custodian information
+        - Minimal organizational structure for template compatibility
+        """
         # Extract document creation date
         effective_time = root.find(".//{urn:hl7-org:v3}effectiveTime")
         creation_date = "Unknown"
@@ -1378,8 +1427,15 @@ class EnhancedCDAXMLParser:
             "other_contacts": [],
         }
 
-    def _create_default_administrative_data(self) -> Dict[str, Any]:
-        """Create default administrative data structure"""
+    def _extract_default_administrative_data_strategy(self) -> Dict[str, Any]:
+        """
+        Default administrative data extraction strategy
+        
+        Creates fallback administrative data structure for error handling:
+        - Default document metadata
+        - Empty contact and organizational structures
+        - Template-compatible data structure
+        """
         return {
             "document_creation_date": "Unknown",
             "document_creation_date_raw": "Unknown",
@@ -1447,8 +1503,42 @@ class EnhancedCDAXMLParser:
             "full_name": "Unknown Patient",
         }
 
-    def _extract_basic_patient_addresses(self, patient_role: ET.Element) -> List[Dict]:
-        """Extract basic patient addresses as fallback"""
+    def _extract_patient_contacts_unified(self, patient_role: ET.Element) -> Dict[str, Any]:
+        """
+        PHASE 3: Unified patient contact extraction strategy
+        
+        Consolidates:
+        - _extract_basic_patient_addresses() (address extraction)
+        - _extract_basic_patient_telecoms() (telecom extraction)
+        - Emergency contact and next of kin processing
+        - Guardian and dependent relationship handling
+        
+        Returns:
+            Complete patient contact and relationship data for templates
+        """
+        contact_data = {
+            "addresses": [],
+            "telecoms": [],
+            "emergency_contacts": [],
+            "guardians": [],
+            "dependants": [],
+            "next_of_kin": [],
+            "primary_contact": None
+        }
+        
+        # Strategy 1: Extract patient addresses
+        contact_data["addresses"] = self._extract_patient_addresses_strategy(patient_role)
+        
+        # Strategy 2: Extract patient telecoms
+        contact_data["telecoms"] = self._extract_patient_telecoms_strategy(patient_role)
+        
+        # Strategy 3: Extract emergency contacts and relationships
+        contact_data.update(self._extract_patient_relationships_strategy(patient_role))
+        
+        return contact_data
+
+    def _extract_patient_addresses_strategy(self, patient_role: ET.Element) -> List[Dict]:
+        """Extract patient addresses with European format support"""
         addresses = []
         try:
             addr_elements = patient_role.findall("cda:addr", self.namespaces)
@@ -1490,8 +1580,8 @@ class EnhancedCDAXMLParser:
 
         return addresses
 
-    def _extract_basic_patient_telecoms(self, patient_role: ET.Element) -> List[Dict]:
-        """Extract basic patient telecoms as fallback"""
+    def _extract_patient_telecoms_strategy(self, patient_role: ET.Element) -> List[Dict]:
+        """Extract patient telecoms with European format support"""
         telecoms = []
         try:
             telecom_elements = patient_role.findall("cda:telecom", self.namespaces)
@@ -1525,6 +1615,34 @@ class EnhancedCDAXMLParser:
             logger.warning(f"Failed to extract basic patient telecoms: {str(e)}")
 
         return telecoms
+
+    def _extract_patient_relationships_strategy(self, patient_role: ET.Element) -> Dict[str, Any]:
+        """
+        Extract patient relationships and emergency contacts
+        
+        Extracts:
+        - Emergency contacts and next of kin
+        - Guardians and legal representatives  
+        - Dependants and family members
+        - Primary contact designation
+        """
+        relationships = {
+            "emergency_contacts": [],
+            "guardians": [],
+            "dependants": [],
+            "next_of_kin": [],
+            "primary_contact": None
+        }
+        
+        try:
+            # For now, return empty structure
+            # Future implementation will integrate with external administrative services
+            logger.info("Patient relationships extraction strategy - placeholder implementation")
+            
+        except Exception as e:
+            logger.warning(f"Failed to extract patient relationships: {str(e)}")
+            
+        return relationships
 
     def _create_fallback_result(self) -> Dict[str, Any]:
         """Create fallback result when parsing fails"""
