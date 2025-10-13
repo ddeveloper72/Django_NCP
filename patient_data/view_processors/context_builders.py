@@ -20,6 +20,59 @@ class ContextBuilder:
     """
     
     @staticmethod
+    def detect_data_source(request, session_id: str) -> str:
+        """
+        Detect whether the session contains FHIR or CDA data
+        
+        Args:
+            request: Django request object
+            session_id: Session identifier
+            
+        Returns:
+            'FHIR' or 'CDA' based on data source detection
+        """
+        try:
+            # Get session data
+            match_data = request.session.get(f"patient_match_{session_id}", {})
+            
+            # Check for explicit data_source flag (Portuguese FHIR integration)
+            explicit_data_source = match_data.get("data_source")
+            if explicit_data_source:
+                logger.info(f"[DETECT] Explicit data_source found: {explicit_data_source}")
+                return explicit_data_source.upper()
+            
+            # Check for FHIR bundle presence (Portuguese FHIR integration)
+            if "fhir_bundle" in match_data:
+                logger.info(f"[DETECT] FHIR bundle detected in session {session_id}")
+                return "FHIR"
+            
+            # Check for CDA content (traditional CDA integration)
+            # Look for CDA-specific markers in session data
+            if any(key in match_data for key in ["has_l1", "has_l3", "cda_content"]):
+                logger.info(f"[DETECT] CDA content detected in session {session_id}")
+                return "CDA"
+            
+            # Check for country code patterns that indicate FHIR (Portugal)
+            country_code = match_data.get("country_code", "").upper()
+            if country_code == "PT":
+                logger.info(f"[DETECT] Portuguese country code detected, assuming FHIR for session {session_id}")
+                return "FHIR"
+            
+            # Default fallback - if we have any patient data, assume CDA
+            patient_info = match_data.get("patient_info", {})
+            if patient_info:
+                logger.info(f"[DETECT] Patient data found, defaulting to CDA for session {session_id}")
+                return "CDA"
+            
+            # Ultimate fallback
+            logger.warning(f"[DETECT] Could not determine data source for session {session_id}, defaulting to CDA")
+            return "CDA"
+            
+        except Exception as e:
+            logger.error(f"[DETECT] Error detecting data source for session {session_id}: {e}")
+            return "CDA"
+    
+    @staticmethod
     def build_base_context(session_id: str, data_source: str) -> Dict[str, Any]:
         """
         Build base context structure common to all data sources

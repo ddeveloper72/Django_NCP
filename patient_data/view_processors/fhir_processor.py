@@ -34,6 +34,36 @@ class FHIRViewProcessor:
         self.fhir_agent = FHIRAgentService()
         self.context_builder = ContextBuilder()
     
+    def process_fhir_document(self, request, session_id: str, cda_type: Optional[str] = None) -> HttpResponse:
+        """
+        Router-compatible wrapper for FHIR document processing
+        
+        Args:
+            request: Django HTTP request
+            session_id: Session identifier
+            cda_type: CDA type preference (unused for FHIR but kept for interface consistency)
+            
+        Returns:
+            HttpResponse with rendered template
+        """
+        logger.info(f"[FHIR PROCESSOR] Router called process_fhir_document for session {session_id}")
+        
+        # Get match data from session
+        match_data = request.session.get(f"patient_match_{session_id}", {})
+        
+        if not match_data:
+            logger.error(f"[FHIR PROCESSOR] No session data found for session {session_id}")
+            context = self.context_builder.build_base_context(session_id, 'FHIR')
+            return self._handle_fhir_error(
+                request,
+                f"No patient session data found for session {session_id}",
+                session_id,
+                context
+            )
+        
+        # Delegate to the main processing method
+        return self.process_fhir_patient_view(request, session_id, match_data, cda_type)
+    
     def process_fhir_patient_view(
         self, 
         request, 
