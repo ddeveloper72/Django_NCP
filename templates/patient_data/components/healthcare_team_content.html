@@ -1,0 +1,444 @@
+{# Healthcare Team & Contacts Content - Phase 3B Integration #}
+{% load patient_filters %}
+
+<div class="healthcare-team-container">
+    {# Check if we have any administrative or healthcare data #}
+    {% if administrative_data or healthcare_data %}
+        
+        {# Emergency Contacts & Next of Kin Section #}
+        {% if administrative_data.emergency_contacts or administrative_data.guardians or administrative_data.other_contacts %}
+        <div class="emergency-contacts-section mb-4">
+            <div class="collapsible-wrapper">
+                <input id="toggle-emergency-contacts" class="toggle-input" type="checkbox" checked>
+                <label for="toggle-emergency-contacts" class="collapsible-label-title">
+                    <div class="clinical-section-title-row">
+                        <div class="clinical-section-title">
+                            <i class="fa-solid fa-users-medical me-2 text-danger"></i>
+                            <span>Emergency Contacts & Next of Kin</span>
+                        </div>
+                        <div class="clinical-badge-container">
+                            {% with total_contacts=administrative_data.emergency_contacts|length %}
+                            {% with total_guardians=administrative_data.guardians|length %}
+                            {% with total_others=administrative_data.other_contacts|length %}
+                            {% with grand_total=total_contacts|add:total_guardians|add:total_others %}
+                            <span class="clinical-badge {% if grand_total > 0 %}populated{% else %}empty{% endif %}">
+                                {{ grand_total }} Contact{{ grand_total|pluralize }}
+                            </span>
+                            {% endwith %}
+                            {% endwith %}
+                            {% endwith %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                </label>
+                <div class="collapsible-content-title">
+                    <div class="content-inner-title">
+                        
+                        {# Emergency Contacts #}
+                        {% if administrative_data.emergency_contacts %}
+                        <div class="emergency-contacts-group mb-4">
+                            <h5 class="text-danger mb-3">
+                                <i class="fa-solid fa-phone me-2"></i>Emergency Contacts
+                            </h5>
+                            <div class="row">
+                                {% for contact in administrative_data.emergency_contacts %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-danger">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-danger">
+                                                {{ contact.full_name|default:"Unknown Contact" }}
+                                            </h6>
+                                            {% if contact.role %}
+                                                <p class="text-muted small mb-2">{{ contact.role }}</p>
+                                            {% endif %}
+                                            {% if contact.relationship %}
+                                                <p class="mb-2">
+                                                    <strong>Relationship:</strong> {{ contact.relationship }}
+                                                </p>
+                                            {% endif %}
+                                            
+                                            {# Contact Information #}
+                                            {% if contact.contact_info.telecoms %}
+                                                {% for telecom in contact.contact_info.telecoms %}
+                                                    <p class="mb-1 small">
+                                                        {% if telecom.type == "phone" %}
+                                                            <i class="fa-solid fa-phone me-1"></i>
+                                                        {% elif telecom.type == "email" %}
+                                                            <i class="fa-solid fa-envelope me-1"></i>
+                                                        {% else %}
+                                                            <i class="fa-solid fa-address-book me-1"></i>
+                                                        {% endif %}
+                                                        {{ telecom.display_value|default:telecom.value }}
+                                                    </p>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {# Guardians & Legal Representatives #}
+                        {% if administrative_data.guardians %}
+                        <div class="guardians-group mb-4">
+                            <h5 class="text-warning mb-3">
+                                <i class="fa-solid fa-shield-halved me-2"></i>Guardians & Legal Representatives
+                            </h5>
+                            <div class="row">
+                                {% for guardian in administrative_data.guardians %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-warning">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-warning">
+                                                {{ guardian.full_name|default:"Unknown Guardian" }}
+                                            </h6>
+                                            {% if guardian.role %}
+                                                <p class="text-muted small mb-2">{{ guardian.role }}</p>
+                                            {% endif %}
+                                            {% if guardian.relationship %}
+                                                <p class="mb-2">
+                                                    <strong>Legal Relationship:</strong> {{ guardian.relationship }}
+                                                </p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {# Other Contacts #}
+                        {% if administrative_data.other_contacts %}
+                        <div class="other-contacts-group">
+                            <h5 class="text-info mb-3">
+                                <i class="fa-solid fa-address-book me-2"></i>Additional Contacts
+                            </h5>
+                            <div class="row">
+                                {% for contact in administrative_data.other_contacts %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card border-info">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-info">
+                                                {{ contact.full_name|default:"Unknown Contact" }}
+                                            </h6>
+                                            {% if contact.role or contact.specialty %}
+                                                <p class="text-muted small mb-0">
+                                                    {{ contact.role|default:contact.specialty }}
+                                                </p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# Healthcare Team Section #}
+        {% if healthcare_data.practitioners or administrative_data.healthcare_providers %}
+        <div class="healthcare-team-section mb-4">
+            <div class="collapsible-wrapper">
+                <input id="toggle-healthcare-team" class="toggle-input" type="checkbox" checked>
+                <label for="toggle-healthcare-team" class="collapsible-label-title">
+                    <div class="clinical-section-title-row">
+                        <div class="clinical-section-title">
+                            <i class="fa-solid fa-user-doctor me-2 text-primary"></i>
+                            <span>Healthcare Team</span>
+                        </div>
+                        <div class="clinical-badge-container">
+                            {% with team_count=healthcare_data.practitioners|length %}
+                            {% with provider_count=administrative_data.healthcare_providers|length %}
+                            {% with total_team=team_count|add:provider_count %}
+                            <span class="clinical-badge {% if total_team > 0 %}populated{% else %}empty{% endif %}">
+                                {{ total_team }} Provider{{ total_team|pluralize }}
+                            </span>
+                            {% endwith %}
+                            {% endwith %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                </label>
+                <div class="collapsible-content-title">
+                    <div class="content-inner-title">
+                        
+                        {# Healthcare Practitioners #}
+                        {% if healthcare_data.practitioners %}
+                        <div class="practitioners-table-container bg-white border rounded-3 shadow-sm overflow-hidden mb-4">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mb-0">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th scope="col" class="fw-bold">
+                                                <i class="fa-solid fa-user-doctor me-2"></i>Healthcare Professional
+                                            </th>
+                                            <th scope="col" class="fw-bold">
+                                                <i class="fa-solid fa-briefcase me-2"></i>Role & Specialty
+                                            </th>
+                                            <th scope="col" class="fw-bold">
+                                                <i class="fa-solid fa-building me-2"></i>Organization
+                                            </th>
+                                            <th scope="col" class="fw-bold">
+                                                <i class="fa-solid fa-phone me-2"></i>Contact
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for practitioner in healthcare_data.practitioners %}
+                                        <tr>
+                                            <td class="practitioner-name-cell">
+                                                <div class="practitioner-name-container">
+                                                    <div class="practitioner-title fw-bold text-primary mb-1">
+                                                        {{ practitioner.name|default:"Unknown Practitioner" }}
+                                                    </div>
+                                                    {% if practitioner.identifiers %}
+                                                        <div class="practitioner-id text-muted small">
+                                                            <i class="fa-solid fa-id-badge me-1"></i>
+                                                            {{ practitioner.identifiers.0.value }}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td class="practitioner-role-cell">
+                                                {% if practitioner.roles %}
+                                                    {% for role in practitioner.roles %}
+                                                        <span class="badge bg-primary me-1 mb-1">{{ role }}</span>
+                                                    {% endfor %}
+                                                {% elif practitioner.role %}
+                                                    <span class="badge bg-primary">{{ practitioner.role }}</span>
+                                                {% endif %}
+                                                {% if practitioner.specialty %}
+                                                    <div class="text-muted small mt-1">{{ practitioner.specialty }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td class="practitioner-org-cell">
+                                                {% if practitioner.organization %}
+                                                    <div class="fw-semibold">{{ practitioner.organization }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td class="practitioner-contact-cell">
+                                                {% if practitioner.telecoms %}
+                                                    {% for telecom in practitioner.telecoms %}
+                                                        <div class="small mb-1">
+                                                            {% if telecom.system == "phone" %}
+                                                                <i class="fa-solid fa-phone me-1"></i>
+                                                            {% elif telecom.system == "email" %}
+                                                                <i class="fa-solid fa-envelope me-1"></i>
+                                                            {% endif %}
+                                                            {{ telecom.value }}
+                                                        </div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {# Legal Authenticators #}
+                        {% if administrative_data.legal_authenticators %}
+                        <div class="legal-authenticators-group mb-4">
+                            <h5 class="text-success mb-3">
+                                <i class="fa-solid fa-certificate me-2"></i>Legal Authenticators & Document Signers
+                            </h5>
+                            <div class="row">
+                                {% for authenticator in administrative_data.legal_authenticators %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-success">
+                                                {{ authenticator.full_name|default:"Unknown Authenticator" }}
+                                            </h6>
+                                            <p class="text-muted small mb-2">Legal Authenticator</p>
+                                            {% if authenticator.authentication_time %}
+                                                <p class="mb-2 small">
+                                                    <strong>Authentication:</strong> {{ authenticator.authentication_time }}
+                                                </p>
+                                            {% endif %}
+                                            {% if authenticator.organization_name %}
+                                                <p class="mb-0 small">
+                                                    <strong>Organization:</strong> {{ authenticator.organization_name }}
+                                                </p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# Healthcare Organizations Section #}
+        {% if healthcare_data.organizations or administrative_data.organizations %}
+        <div class="healthcare-organizations-section mb-4">
+            <div class="collapsible-wrapper">
+                <input id="toggle-healthcare-orgs" class="toggle-input" type="checkbox">
+                <label for="toggle-healthcare-orgs" class="collapsible-label-title">
+                    <div class="clinical-section-title-row">
+                        <div class="clinical-section-title">
+                            <i class="fa-solid fa-hospital me-2 text-secondary"></i>
+                            <span>Healthcare Organizations</span>
+                        </div>
+                        <div class="clinical-badge-container">
+                            {% with org_count=healthcare_data.organizations|length %}
+                            {% with admin_org_count=administrative_data.organizations|length %}
+                            {% with total_orgs=org_count|add:admin_org_count %}
+                            <span class="clinical-badge {% if total_orgs > 0 %}populated{% else %}empty{% endif %}">
+                                {{ total_orgs }} Organization{{ total_orgs|pluralize }}
+                            </span>
+                            {% endwith %}
+                            {% endwith %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                </label>
+                <div class="collapsible-content-title">
+                    <div class="content-inner-title">
+                        
+                        {# Display Organizations #}
+                        <div class="row">
+                            {% for organization in healthcare_data.organizations %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            {{ organization.name|default:"Unknown Organization" }}
+                                        </h6>
+                                        {% if organization.type %}
+                                            {% for org_type in organization.type %}
+                                                <span class="badge bg-secondary me-1">{{ org_type.text }}</span>
+                                            {% endfor %}
+                                        {% endif %}
+                                        {% if organization.address %}
+                                            <div class="mt-2 small text-muted">
+                                                {% for addr in organization.address %}
+                                                    <p class="mb-1">{{ addr.text|default:addr.line.0 }}</p>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            {% for organization in administrative_data.organizations %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            {{ organization.name|default:"Unknown Organization" }}
+                                        </h6>
+                                        {% if organization.organization_type %}
+                                            <span class="badge bg-secondary">{{ organization.organization_type }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# Document Metadata Section #}
+        {% if administrative_data.document_metadata %}
+        <div class="document-metadata-section">
+            <div class="collapsible-wrapper">
+                <input id="toggle-document-metadata" class="toggle-input" type="checkbox">
+                <label for="toggle-document-metadata" class="collapsible-label-title">
+                    <div class="clinical-section-title-row">
+                        <div class="clinical-section-title">
+                            <i class="fa-solid fa-file-medical me-2 text-info"></i>
+                            <span>Document Information</span>
+                        </div>
+                        <div class="clinical-badge-container">
+                            <span class="clinical-badge info">Metadata</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                </label>
+                <div class="collapsible-content-title">
+                    <div class="content-inner-title">
+                        
+                        <div class="document-metadata-grid">
+                            <div class="row">
+                                {% if administrative_data.document_metadata.creation_date %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="metadata-item">
+                                        <strong>Creation Date:</strong>
+                                        <span class="text-muted">{{ administrative_data.document_metadata.creation_date }}</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if administrative_data.document_metadata.last_update %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="metadata-item">
+                                        <strong>Last Update:</strong>
+                                        <span class="text-muted">{{ administrative_data.document_metadata.last_update }}</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if administrative_data.document_metadata.version %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="metadata-item">
+                                        <strong>Version:</strong>
+                                        <span class="text-muted">{{ administrative_data.document_metadata.version }}</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if administrative_data.document_metadata.custodian.name %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="metadata-item">
+                                        <strong>Custodian:</strong>
+                                        <span class="text-muted">{{ administrative_data.document_metadata.custodian.name }}</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    {% else %}
+        {# No administrative or healthcare data available #}
+        <div class="alert alert-warning">
+            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+            <strong>Administrative Data Processing</strong>
+            <p class="mb-0">
+                Healthcare team and contact information is being processed. 
+                This may include emergency contacts, healthcare providers, and organizational details.
+            </p>
+        </div>
+    {% endif %}
+
+</div>

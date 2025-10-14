@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 import logging
 from datetime import datetime
 
-from ..models.patient_demographics import PatientDemographics, PatientIdentifier
+from patient_data.models import PatientDemographics, PatientIdentifierData
 
 
 logger = logging.getLogger(__name__)
@@ -240,7 +240,7 @@ class PatientDemographicsService:
     
     # Private helper methods for CDA extraction
     
-    def _extract_cda_identifiers(self, patient_role: ET.Element) -> List[PatientIdentifier]:
+    def _extract_cda_identifiers(self, patient_role: ET.Element) -> List[PatientIdentifierData]:
         """Extract patient identifiers from CDA patientRole element"""
         identifiers = []
         
@@ -251,7 +251,7 @@ class PatientDemographicsService:
             assigning_authority = id_element.get('assigningAuthorityName', '')
             
             if extension:  # Only add if extension exists
-                identifier = PatientIdentifier(
+                identifier = PatientIdentifierData(
                     extension=extension,
                     root=root,
                     assigning_authority_name=assigning_authority,
@@ -298,7 +298,7 @@ class PatientDemographicsService:
     
     # Private helper methods for FHIR extraction
     
-    def _extract_fhir_identifiers(self, patient_resource: Dict[str, Any]) -> List[PatientIdentifier]:
+    def _extract_fhir_identifiers(self, patient_resource: Dict[str, Any]) -> List[PatientIdentifierData]:
         """Extract patient identifiers from FHIR Patient resource"""
         identifiers = []
         
@@ -308,7 +308,7 @@ class PatientDemographicsService:
             assigning_org = id_data.get('assigner', {}).get('display', '')
             
             if extension:
-                identifier = PatientIdentifier(
+                identifier = PatientIdentifierData(
                     extension=extension,
                     root=system,
                     assigning_authority_name=assigning_org,

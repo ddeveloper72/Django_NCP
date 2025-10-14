@@ -109,6 +109,16 @@
                             Clinical Information
                         </button>
                     </li>
+
+                    <!-- PHASE 3B: Healthcare Team & Contacts Tab -->
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="healthcare-team-tab" data-bs-toggle="tab"
+                            data-bs-target="#healthcare-team-content" type="button" role="tab"
+                            aria-controls="healthcare-team-content" aria-selected="false">
+                            <i class="fa-solid fa-users me-2"></i>
+                            Healthcare Team & Contacts
+                        </button>
+                    </li>
                 </ul>
 
                 <!-- Integrated Tab Content -->
@@ -148,6 +158,38 @@
                                             {{ patient_identity.patient_identifiers.0.root }}
                                         </span>
                                         {% endif %}
+                                    {% endif %}
+                                    
+                                    {# Patient Contact Information from Administrative Data #}
+                                    {% if administrative_data.addresses and administrative_data.addresses|length > 0 %}
+                                    <p><i class="fa-solid fa-location-dot text-info me-1"></i>
+                                        <strong>Address:</strong><br>
+                                        {% for address in administrative_data.addresses %}
+                                        <span class="text-muted">
+                                            {% for street in address.street_lines %}{{ street }}{% if not forloop.last %}, {% endif %}{% endfor %}<br>
+                                            {{ address.city }}{% if address.postal_code %}, {{ address.postal_code }}{% endif %}{% if address.country %}<br>{{ address.country }}{% endif %}
+                                        </span>
+                                        {% if not forloop.last %}<br>{% endif %}
+                                        {% endfor %}
+                                    </p>
+                                    {% endif %}
+                                    
+                                    {% if administrative_data.telecoms and administrative_data.telecoms|length > 0 %}
+                                    <p><i class="fa-solid fa-phone text-info me-1"></i>
+                                        <strong>Contact:</strong><br>
+                                        {% for telecom in administrative_data.telecoms %}
+                                        <span class="text-muted">
+                                            {% if telecom.type == 'phone' %}
+                                                <i class="fa-solid fa-phone me-1"></i>{{ telecom.value|slice:"4:" }}
+                                            {% elif telecom.type == 'email' %}
+                                                <i class="fa-solid fa-envelope me-1"></i>{{ telecom.value|slice:"7:" }}
+                                            {% else %}
+                                                {{ telecom.value }}
+                                            {% endif %}
+                                        </span>
+                                        {% if not forloop.last %}<br>{% endif %}
+                                        {% endfor %}
+                                    </p>
                                     {% endif %}
                                 </div>
                                 <div class="col-md-6">
@@ -288,6 +330,21 @@
                                     <i class="fa-solid fa-info-circle me-2"></i>
                                     <strong>No Clinical Information Available</strong>
                                     <p class="mb-0">Clinical data is not available for this patient or has not been processed yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- PHASE 3B: Healthcare Team & Contacts Tab Content -->
+                    <div class="tab-pane fade" id="healthcare-team-content" role="tabpanel" aria-labelledby="healthcare-team-tab">
+                        <div class="p-4">
+                            {% if administrative_data or healthcare_data %}
+                                {% include 'patient_data/components/healthcare_team_content.html' %}
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fa-solid fa-info-circle me-2"></i>
+                                    <strong>No Healthcare Team Information Available</strong>
+                                    <p class="mb-0">Healthcare team and contact information is not available for this patient or has not been processed yet.</p>
                                 </div>
                             {% endif %}
                         </div>

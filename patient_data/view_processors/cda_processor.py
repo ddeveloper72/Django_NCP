@@ -84,6 +84,80 @@ class CDAViewProcessor:
         # Delegate to the main processing method
         return self.process_cda_patient_view(request, session_id, match_data, cda_type)
     
+    def build_cda_context(
+        self, 
+        request, 
+        session_id: str, 
+        match_data: Dict[str, Any], 
+        cda_type: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Build CDA context dictionary for template rendering
+        
+        Args:
+            request: Django HTTP request
+            session_id: Session identifier
+            match_data: Session match data containing CDA content
+            cda_type: CDA type preference ('L1' or 'L3')
+            
+        Returns:
+            Dict[str, Any]: Context dictionary for template rendering
+        """
+        logger.info(f"[CDA PROCESSOR] Building CDA context for session {session_id}")
+        
+        try:
+            # Initialize base context
+            context = self.context_builder.build_base_context(session_id, 'CDA')
+            
+            # Extract CDA content from match data
+            cda_content, actual_cda_type = self._get_cda_content(match_data, cda_type)
+            if not cda_content:
+                context.update({
+                    'processing_failed': True,
+                    'error_type': 'CDA Content Missing',
+                    'error_details': "No CDA content found in session data",
+                    'suggested_action': 'Please verify the CDA document is available.',
+                })
+                return context
+            
+            # Parse CDA document
+            parsed_data = self._parse_cda_document(cda_content, session_id)
+            if not parsed_data:
+                context.update({
+                    'processing_failed': True,
+                    'error_type': 'CDA Parsing Failed',
+                    'error_details': "CDA document parsing failed",
+                    'suggested_action': 'Please verify the CDA document is valid.',
+                })
+                return context
+
+            # Store CDA content for comprehensive service
+            self._store_cda_content_for_service(cda_content)
+
+            # Build context from parsed CDA data
+            self._build_cda_context(context, parsed_data, match_data)
+            
+            # Add CDA-specific metadata
+            self._add_cda_metadata(context, match_data, cda_content, actual_cda_type)
+            
+            # Finalize context
+            context = self.context_builder.finalize_context(context)
+            
+            logger.info(f"[CDA PROCESSOR] Successfully built CDA context for session {session_id}")
+            
+            return context
+            
+        except Exception as e:
+            logger.error(f"[CDA PROCESSOR] Error building CDA context: {e}")
+            context = self.context_builder.build_base_context(session_id, 'CDA')
+            context.update({
+                'processing_failed': True,
+                'error_type': 'CDA Processing Error',
+                'error_details': str(e),
+                'suggested_action': 'Please verify the CDA document is valid or try a different document type.',
+            })
+            return context
+    
     def process_cda_patient_view(
         self, 
         request, 
@@ -105,47 +179,20 @@ class CDAViewProcessor:
         """
         logger.info(f"[CDA PROCESSOR] Processing CDA patient view for session {session_id}")
         
-        try:
-            # Initialize base context
-            context = self.context_builder.build_base_context(session_id, 'CDA')
-            
-            # Extract CDA content from match data
-            cda_content, actual_cda_type = self._get_cda_content(match_data, cda_type)
-            if not cda_content:
-                return self._handle_cda_error(
-                    request,
-                    "No CDA content found in session data",
-                    session_id,
-                    context
-                )
-            
-            # Parse CDA document
-            parsed_data = self._parse_cda_document(cda_content, session_id)
-            if not parsed_data:
-                return self._handle_cda_error(
-                    request,
-                    "CDA document parsing failed",
-                    session_id,
-                    context
-                )
-
-            # Store CDA content for comprehensive service
-            self._store_cda_content_for_service(cda_content)
-
-            # Build context from parsed CDA data
-            self._build_cda_context(context, parsed_data, match_data)            # Add CDA-specific metadata
-            self._add_cda_metadata(context, match_data, cda_content, actual_cda_type)
-            
-            # Finalize context
-            context = self.context_builder.finalize_context(context)
-            
-            logger.info(f"[CDA PROCESSOR] Successfully processed CDA patient view for session {session_id}")
-            
-            return render(request, 'patient_data/enhanced_patient_cda.html', context)
-            
-        except Exception as e:
-            logger.error(f"[CDA PROCESSOR] Error processing CDA patient view: {e}")
-            return self._handle_cda_error(request, str(e), session_id, context)
+        # Build context using the new shared method
+        context = self.build_cda_context(request, session_id, match_data, cda_type)
+        
+        # Check if there were processing errors
+        if context.get('processing_failed', False):
+            return self._handle_cda_error(
+                request,
+                context.get('error_details', 'Unknown error'),
+                session_id,
+                context
+            )
+        
+        logger.info(f"[CDA PROCESSOR] Successfully processed CDA patient view for session {session_id}")
+        return render(request, 'patient_data/enhanced_patient_cda.html', context)
     
     def _get_cda_content(self, match_data: Dict[str, Any], cda_type: Optional[str]) -> tuple:
         """
@@ -278,6 +325,15 @@ class CDAViewProcessor:
         if patient_info:
             self.context_builder.add_patient_data(context, patient_info)
         
+        # CRITICAL FIX: Add patient identity from Enhanced CDA XML Parser if available
+        # This ensures correct patient ID and demographics are displayed
+        if parsed_data and 'patient_identity' in parsed_data:
+            cda_patient_identity = parsed_data['patient_identity']
+            if cda_patient_identity and isinstance(cda_patient_identity, dict):
+                # Override with Enhanced CDA XML Parser patient identity
+                context['patient_identity'] = cda_patient_identity
+                logger.info(f"[CDA PROCESSOR] Using Enhanced CDA XML Parser patient identity - Patient ID: {cda_patient_identity.get('patient_id', 'NOT_FOUND')}")
+        
         # Add clinical data from CDA parsing
         if parsed_data:
             # CDA parsing returns different structure than FHIR
@@ -380,16 +436,53 @@ class CDAViewProcessor:
     
     def _extract_with_specialized_extractors(self, cda_content: str) -> Optional[Dict[str, Any]]:
         """
-        Extract clinical data using specialized extractors from working branch
+        Extract clinical data using Enhanced CDA XML Parser with Phase 3A administrative methods
         
         Args:
             cda_content: CDA XML content
             
         Returns:
-            Extracted clinical data with actual condition names and medication details
+            Extracted clinical data with administrative data from Phase 3A unified methods
         """
         try:
-            logger.info("[CDA PROCESSOR] Using specialized extractors for actual clinical data")
+            logger.info("[CDA PROCESSOR] Using Enhanced CDA XML Parser with Phase 3A administrative methods")
+            
+            # PHASE 3A: Use Enhanced CDA XML Parser for unified administrative data extraction
+            from ..services.enhanced_cda_xml_parser import EnhancedCDAXMLParser
+            
+            parser = EnhancedCDAXMLParser()
+            enhanced_result = parser.parse_cda_content(cda_content)
+            
+            # DEBUG: Log what we got from Enhanced CDA XML Parser
+            logger.info(f"[CDA PROCESSOR DEBUG] Enhanced result keys: {list(enhanced_result.keys()) if enhanced_result else 'None'}")
+            admin_data = enhanced_result.get('administrative_data', {}) if enhanced_result else {}
+            logger.info(f"[CDA PROCESSOR DEBUG] Administrative data type: {type(admin_data)}, length: {len(admin_data) if isinstance(admin_data, dict) else 'N/A'}")
+            logger.info(f"[CDA PROCESSOR DEBUG] Has administrative data: {bool(admin_data)}")
+            
+            # MODIFIED: Always use Enhanced CDA XML Parser result if it exists, regardless of administrative_data
+            if enhanced_result:
+                logger.info(f"[CDA PROCESSOR] Enhanced CDA XML Parser succeeded - using result")
+                admin_data = enhanced_result.get('administrative_data', {})
+                if admin_data:
+                    logger.info(f"[CDA PROCESSOR] Found {len(admin_data)} administrative data fields")
+                
+                # Transform administrative data for Healthcare Team & Contacts template compatibility
+                transformed_admin_data = self._transform_administrative_data(admin_data) if admin_data else {}
+                
+                # Return enhanced result with transformed administrative data for Healthcare Team & Contacts tab
+                return {
+                    'success': True,
+                    'sections': enhanced_result.get('sections', []),
+                    'clinical_data': {},
+                    'administrative_data': transformed_admin_data,
+                    'patient_identity': enhanced_result.get('patient_identity', {}),
+                    'has_clinical_data': len(enhanced_result.get('sections', [])) > 0,
+                    'has_administrative_data': bool(transformed_admin_data),
+                    'source': 'enhanced_cda_xml_parser_phase3a'
+                }
+            
+            # Fallback to original specialized extractors if Enhanced CDA XML Parser fails
+            logger.info("[CDA PROCESSOR] Enhanced CDA XML Parser failed, falling back to specialized extractors")
             
             sections = []
             clinical_arrays = {
@@ -1073,6 +1166,103 @@ class CDAViewProcessor:
             })
         
         return qualifications
+    
+    def _transform_administrative_data(self, raw_admin_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Transform Enhanced CDA XML Parser administrative data to Healthcare Team & Contacts template format
+        
+        Maps Phase 3A unified administrative methods output to template-expected field names and structures.
+        
+        Args:
+            raw_admin_data: Administrative data from Enhanced CDA XML Parser
+            
+        Returns:
+            Transformed administrative data for template compatibility
+        """
+        transformed = {}
+        
+        # Transform guardian (single dict) to guardians (list)
+        if 'guardian' in raw_admin_data and raw_admin_data['guardian']:
+            guardian = raw_admin_data['guardian']
+            if isinstance(guardian, dict) and guardian.get('family_name'):
+                # Ensure guardian has full_name field for template compatibility
+                if not guardian.get('full_name'):
+                    given_name = guardian.get('given_name', '')
+                    family_name = guardian.get('family_name', '')
+                    guardian['full_name'] = f"{given_name} {family_name}".strip()
+                transformed['guardians'] = [guardian]
+            else:
+                transformed['guardians'] = []
+        else:
+            transformed['guardians'] = []
+        
+        # other_contacts already matches template expectation (list)
+        transformed['other_contacts'] = raw_admin_data.get('other_contacts', [])
+        
+        # Transform emergency_contacts (not in current data, but prepare for future)
+        transformed['emergency_contacts'] = []
+        
+        # Transform author_hcp (single dict) to healthcare_providers (list)
+        healthcare_providers = []
+        if 'author_hcp' in raw_admin_data and raw_admin_data['author_hcp']:
+            hcp = raw_admin_data['author_hcp']
+            if isinstance(hcp, dict) and hcp.get('full_name'):
+                healthcare_providers.append({
+                    'name': hcp.get('full_name', 'Unknown Provider'),
+                    'role': 'Healthcare Professional',
+                    'type': 'Author',
+                    'contact_info': hcp.get('contact_info', {})
+                })
+        
+        # Add preferred_hcp if available
+        if 'preferred_hcp' in raw_admin_data and raw_admin_data['preferred_hcp']:
+            preferred = raw_admin_data['preferred_hcp']
+            if isinstance(preferred, dict) and preferred.get('name'):
+                healthcare_providers.append({
+                    'name': preferred.get('name', 'Unknown Provider'),
+                    'role': 'Preferred Healthcare Professional',
+                    'type': 'Preferred',
+                    'contact_info': {}
+                })
+        
+        transformed['healthcare_providers'] = healthcare_providers
+        
+        # Transform legal_authenticator (single dict) to legal_authenticators (list)
+        if 'legal_authenticator' in raw_admin_data and raw_admin_data['legal_authenticator']:
+            auth = raw_admin_data['legal_authenticator']
+            if isinstance(auth, dict) and auth.get('full_name'):
+                transformed['legal_authenticators'] = [auth]
+            else:
+                transformed['legal_authenticators'] = []
+        else:
+            transformed['legal_authenticators'] = []
+        
+        # Transform custodian_organization (single dict) to organizations (list)
+        organizations = []
+        if 'custodian_organization' in raw_admin_data and raw_admin_data['custodian_organization']:
+            org = raw_admin_data['custodian_organization']
+            if isinstance(org, dict) and org.get('name'):
+                organizations.append({
+                    'name': org.get('name', 'Unknown Organization'),
+                    'type': 'Custodian',
+                    'addresses': org.get('addresses', []),
+                    'contact_info': {}
+                })
+        transformed['organizations'] = organizations
+        
+        # Transform document metadata
+        transformed['document_metadata'] = {
+            'creation_date': raw_admin_data.get('document_creation_date', ''),
+            'document_title': raw_admin_data.get('document_title', ''),
+            'document_type': raw_admin_data.get('document_type', ''),
+            'document_id': raw_admin_data.get('document_id', ''),
+            'last_update_date': raw_admin_data.get('document_last_update_date', ''),
+            'version_number': raw_admin_data.get('document_version_number', '')
+        }
+        
+        logger.info(f"[CDA PROCESSOR] Transformed administrative data: {len(transformed['guardians'])} guardians, {len(transformed['other_contacts'])} other contacts, {len(transformed['healthcare_providers'])} providers, {len(transformed['legal_authenticators'])} authenticators, {len(transformed['organizations'])} organizations")
+        
+        return transformed
     
     def _handle_cda_error(
         self,

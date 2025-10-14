@@ -2929,6 +2929,10 @@ def patient_details_view(request, patient_id):
             "immunizations": [],
         }
         
+        # PHASE 3B: Initialize administrative data variables for template context
+        administrative_data = {}
+        healthcare_data = {}
+        
         try:
             # Import and use the comprehensive clinical data service
             from .services.comprehensive_clinical_data_service import ComprehensiveClinicalDataService
@@ -2951,6 +2955,13 @@ def patient_details_view(request, patient_id):
                     logger.info(
                         f"[PATIENT_DETAILS] Clinical arrays extracted: problems={len(clinical_arrays['problems'])}, allergies={len(clinical_arrays['allergies'])}, medications={len(clinical_arrays['medications'])}"
                     )
+                    
+                    # PHASE 3B: Extract administrative data from enhanced parser for Healthcare Team & Contacts tab
+                    administrative_data = comprehensive_data.get("administrative_data", {})
+                    healthcare_data = comprehensive_data.get("healthcare_data", {})
+                    
+                    logger.info(f"[PHASE_3B] Administrative data extracted: {len(administrative_data)} keys")
+                    logger.info(f"[PHASE_3B] Healthcare data extracted: {len(healthcare_data)} keys")
                     
                     # ENHANCED: Integrate Enhanced CDA Helper for 9-column allergies format
                     try:
@@ -3041,6 +3052,14 @@ def patient_details_view(request, patient_id):
                     "coded_results": {"blood_group": [], "diagnostic_results": []},  # Initialize for template compatibility
                 }
             )
+            
+            # PHASE 3B: Add administrative and healthcare data to context for Healthcare Team & Contacts tab
+            context.update({
+                "administrative_data": administrative_data,
+                "healthcare_data": healthcare_data,
+                "has_administrative_data": bool(administrative_data and any(administrative_data.values())),
+                "has_healthcare_data": bool(healthcare_data and any(healthcare_data.values())),
+            })
             total_clinical_items = sum(
                 len(arr) for arr in clinical_arrays.values()
             )
@@ -3061,6 +3080,14 @@ def patient_details_view(request, patient_id):
                     "coded_results": {"blood_group": [], "diagnostic_results": []},  # Initialize for template compatibility
                 }
             )
+            
+            # PHASE 3B: Initialize empty administrative data for template compatibility
+            context.update({
+                "administrative_data": {},
+                "healthcare_data": {},
+                "has_administrative_data": False,
+                "has_healthcare_data": False,
+            })
             logger.info(f"[PATIENT_DETAILS] Added empty clinical arrays to context for patient {patient_id}")
 
         return render(request, "patient_data/patient_details.html", context)
@@ -3449,14 +3476,14 @@ def patient_cda_view(request, session_id, cda_type=None):
     # Route to appropriate processor based on document type (country agnostic)
     if data_source == "FHIR":
         logger.info(f"[ROUTER] Routing to FHIR processor for session {session_id}")
-        context = fhir_processor.process_fhir_document(request, session_id, cda_type)
+        response = fhir_processor.process_fhir_document(request, session_id, cda_type)
     else:
         logger.info(f"[ROUTER] Routing to CDA processor for session {session_id}")
-        context = cda_processor.process_cda_document(request, session_id, cda_type)
+        response = cda_processor.process_cda_document(request, session_id, cda_type)
     
-    # Return rendered template with processed context
-    logger.info(f"[ROUTER] Rendering template with {data_source} context for session {session_id}")
-    return render(request, "patient_data/enhanced_patient_cda.html", context)
+    # Return response directly from processor (already rendered)
+    logger.info(f"[ROUTER] Returning {data_source} response for session {session_id}")
+    return response
 
 
 @login_required

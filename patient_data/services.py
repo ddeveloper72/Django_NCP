@@ -27,6 +27,7 @@ class SimplePatientResult:
 
 
 @dataclass
+@dataclass
 class PatientCredentials:
     """Patient search credentials from form submission"""
 

@@ -7,6 +7,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
+from dataclasses import dataclass, field
+from typing import List, Dict, Any
 import uuid
 
 
@@ -902,3 +904,108 @@ class Tooltip(models.Model):
             }
         except cls.DoesNotExist:
             return None
+
+
+# Data Classes for Service Layer
+@dataclass
+class PatientIdentifierData:
+    """Patient identifier for service layer - separate from Django model"""
+    extension: str = ""
+    root: str = ""
+    assigning_authority_name: str = ""
+    identifier_type: str = ""
+    
+    def get_display_id(self) -> str:
+        """Return formatted identifier"""
+        return self.extension or self.root or "Unknown"
+    
+    def to_dict(self) -> Dict[str, str]:
+        """Convert to dictionary for template context"""
+        return {
+            'extension': self.extension,
+            'root': self.root,
+            'assigning_authority_name': self.assigning_authority_name,
+            'identifier_type': self.identifier_type,
+            'display_id': self.get_display_id()
+        }
+
+@dataclass
+class PatientDemographics:
+    """Unified patient demographics model"""
+    given_name: str = "Unknown"
+    family_name: str = "Unknown"
+    birth_date: str = ""
+    gender: str = "Unknown"
+    patient_id: str = ""
+    identifiers: List[PatientIdentifierData] = field(default_factory=list)
+    
+    def to_legacy_context(self) -> dict:
+        """Convert to legacy context format for template rendering"""
+        return {
+            'given_name': self.given_name,
+            'family_name': self.family_name,
+            'full_name': f"{self.given_name} {self.family_name}".strip(),
+            'display_name': f"{self.given_name} {self.family_name}".strip(),
+            'birth_date': self.birth_date,
+            'gender': self.gender,
+            'patient_id': self.patient_id,
+            'primary_identifier': self.identifiers[0].get_display_id() if self.identifiers else "Unknown",
+            'patient_identifiers': [identifier.to_dict() for identifier in self.identifiers]
+        }
+    
+    def get_display_name(self) -> str:
+        """Return formatted patient name"""
+        if self.given_name and self.family_name:
+            return f"{self.given_name} {self.family_name}"
+        return f"{self.given_name or 'Unknown'} {self.family_name or 'Unknown'}"
+        
+    def get_formatted_birth_date(self) -> str:
+        """Return formatted birth date"""
+        if self.birth_date:
+            try:
+                # Handle different date formats
+                if len(self.birth_date) == 8:  # YYYYMMDD
+                    return f"{self.birth_date[6:8]}/{self.birth_date[4:6]}/{self.birth_date[:4]}"
+                elif '-' in self.birth_date:  # YYYY-MM-DD
+                    parts = self.birth_date.split('-')
+                    if len(parts) == 3:
+                        return f"{parts[2]}/{parts[1]}/{parts[0]}"
+            except:
+                pass
+        return self.birth_date or "Unknown"
+        
+    def get_primary_identifier(self) -> 'PatientIdentifier':
+        """Return primary patient identifier"""
+        if self.identifiers:
+            return self.identifiers[0]
+        return None
+    
+    def to_template_context(self) -> Dict[str, Any]:
+        """Create comprehensive template context for patient demographics"""
+        return {
+            'display_name': self.get_display_name(),
+            'formatted_birth_date': self.get_formatted_birth_date(),
+            'demographics': {
+                'given_name': self.given_name,
+                'family_name': self.family_name,
+                'birth_date': self.birth_date,
+                'gender': self.gender,
+                'patient_id': self.patient_id
+            },
+            'primary_identifier': self.identifiers[0].to_dict() if self.identifiers else None,
+            'all_identifiers': [id_data.to_dict() for id_data in self.identifiers],
+            'is_female': self.gender.lower() in ['female', 'f'],
+            'is_male': self.gender.lower() in ['male', 'm']
+        }
+    
+    @classmethod
+    def from_session_data(cls, session_data: Dict[str, Any]) -> 'PatientDemographics':
+        """Create PatientDemographics from session data format"""
+        return cls(
+            given_name=session_data.get('given_name', 'Unknown'),
+            family_name=session_data.get('family_name', 'Unknown'),
+            birth_date=session_data.get('birth_date', ''),
+            gender=session_data.get('gender', 'Unknown'),
+            patient_id=session_data.get('patient_id', ''),
+            identifiers=session_data.get('identifiers', [])
+        )

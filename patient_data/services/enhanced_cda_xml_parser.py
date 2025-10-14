@@ -926,18 +926,29 @@ class EnhancedCDAXMLParser:
 
     def _extract_enhanced_administrative_data_strategy(self, root: ET.Element) -> Dict[str, Any]:
         """
-        Enhanced administrative data extraction strategy
+        Enhanced administrative data extraction strategy - Phase 3A Consolidated
         
         Extracts comprehensive administrative data including:
         - Document metadata with version control
         - Healthcare team with contact information  
         - Patient relationships and emergency contacts
         - Organizational structure and custody information
+        
+        PHASE 3A: Consolidated from CDAAdministrativeExtractor, NonClinicalCDAParser,
+        and EnhancedAdministrativeExtractor for unified administrative extraction
         """
-        # Use the enhanced administrative extractor to get comprehensive data
+        # PHASE 3A: Detect source country for optimized parsing
+        source_country = self._detect_source_country_phase3a(root)
+        
+        # PHASE 3A: Detect document type (L1 vs L3) for optimized processing
+        document_type = self._detect_document_type_phase3a(root)
+        
+        # PHASE 3A: Use consolidated administrative extractor with country optimization
         admin_data = self.admin_extractor.extract_administrative_data(
             ET.tostring(root, encoding="unicode")
         )
+        
+        logger.info(f"[PHASE 3A] Administrative extraction - Country: {source_country}, Type: {document_type}, Fields: {len(admin_data.__dict__) if admin_data else 0}")
 
         # Extract document creation date with fallback
         effective_time = root.find(".//{urn:hl7-org:v3}effectiveTime")
@@ -1339,6 +1350,314 @@ class EnhancedCDAXMLParser:
                 else []
             ),
         }
+
+    def _detect_source_country_phase3a(self, root: ET.Element) -> str:
+        """
+        PHASE 3A: Detect the source country of the CDA document to optimize parsing
+        
+        Consolidated from CDAAdministrativeExtractor for country-specific optimizations.
+        Supports European healthcare cross-border interoperability.
+
+        Returns:
+            Country code (e.g., 'IE', 'PT', 'LU', 'IT', 'MT') or 'UNKNOWN'
+        """
+        try:
+            # Check language code first
+            language_code = root.get("languageCode")
+            if language_code:
+                country_mapping = {
+                    "en-IE": "IE",  # Ireland
+                    "pt-PT": "PT",  # Portugal  
+                    "fr-LU": "LU",  # Luxembourg (French)
+                    "de-LU": "LU",  # Luxembourg (German)
+                    "en-GB": "GB",  # United Kingdom
+                    "fr-FR": "FR",  # France
+                    "de-DE": "DE",  # Germany
+                    "it-IT": "IT",  # Italy
+                    "es-ES": "ES",  # Spain
+                    "en-MT": "MT",  # Malta (English)
+                    "mt-MT": "MT",  # Malta (Maltese)
+                }
+                if language_code in country_mapping:
+                    logger.info(f"[PHASE 3A] Detected country from language code {language_code}: {country_mapping[language_code]}")
+                    return country_mapping[language_code]
+
+            # Check custodian organization for country indicators
+            custodian = root.find(
+                ".//custodian/assignedCustodian/representedCustodianOrganization/name",
+                self.namespaces,
+            )
+            if custodian is not None and custodian.text:
+                custodian_name = custodian.text.lower()
+                if (
+                    "ireland" in custodian_name
+                    or "irish" in custodian_name
+                    or "hse" in custodian_name
+                ):
+                    logger.info(f"[PHASE 3A] Detected Ireland from custodian: {custodian.text}")
+                    return "IE"
+                elif "portugal" in custodian_name or "portuguese" in custodian_name or "sns" in custodian_name:
+                    logger.info(f"[PHASE 3A] Detected Portugal from custodian: {custodian.text}")
+                    return "PT"
+                elif (
+                    "luxembourg" in custodian_name or "luxembourgish" in custodian_name
+                ):
+                    logger.info(f"[PHASE 3A] Detected Luxembourg from custodian: {custodian.text}")
+                    return "LU"
+                elif "italy" in custodian_name or "italian" in custodian_name or "italia" in custodian_name:
+                    logger.info(f"[PHASE 3A] Detected Italy from custodian: {custodian.text}")
+                    return "IT"
+                elif "malta" in custodian_name or "maltese" in custodian_name:
+                    logger.info(f"[PHASE 3A] Detected Malta from custodian: {custodian.text}")
+                    return "MT"
+
+            # Check address country codes
+            patient_country = root.find(
+                ".//recordTarget/patientRole/addr/country", self.namespaces
+            )
+            if patient_country is not None and patient_country.text:
+                country_code = patient_country.text.upper()
+                logger.info(f"[PHASE 3A] Detected country from patient address: {country_code}")
+                return country_code
+
+            logger.info("[PHASE 3A] Country detection failed - using UNKNOWN")
+            return "UNKNOWN"
+
+        except Exception as e:
+            logger.warning(f"[PHASE 3A] Error detecting source country: {e}")
+            return "UNKNOWN"
+
+    def _detect_document_type_phase3a(self, root: ET.Element) -> str:
+        """
+        PHASE 3A: Detect CDA document type (L1 vs L3) to optimize parsing strategy
+        
+        Consolidated from L1CDAAdministrativeExtractor for document type-aware extraction.
+        
+        Returns:
+            Document type: 'L1' (embedded PDF content) or 'L3' (structured clinical data)
+        """
+        try:
+            # L1 documents typically have embedded PDF content in observationMedia or text elements
+            pdf_content = root.find(".//{urn:hl7-org:v3}observationMedia")
+            if pdf_content is not None:
+                # Check for base64 encoded content (typical L1 pattern)
+                value_elem = pdf_content.find(".//{urn:hl7-org:v3}value")
+                if value_elem is not None and value_elem.text:
+                    # Basic check for base64 content
+                    content = value_elem.text.strip()
+                    if len(content) > 100 and content.replace(' ', '').replace('\n', '').isalnum():
+                        logger.info("[PHASE 3A] Detected L1 document type - embedded PDF content found")
+                        return "L1"
+            
+            # Check for embedded text content (another L1 pattern)
+            text_elements = root.findall(".//{urn:hl7-org:v3}text")
+            for text_elem in text_elements:
+                if text_elem.text and len(text_elem.text.strip()) > 1000:
+                    # Large text blocks often indicate L1 documents
+                    logger.info("[PHASE 3A] Detected L1 document type - large text content found")
+                    return "L1"
+            
+            # Check for structured clinical sections (L3 pattern)
+            structured_sections = root.findall(".//{urn:hl7-org:v3}section")
+            clinical_sections = 0
+            for section in structured_sections:
+                code_elem = section.find(".//{urn:hl7-org:v3}code")
+                if code_elem is not None:
+                    code = code_elem.get("code", "")
+                    # Common L3 clinical section codes
+                    if any(clinical_code in code for clinical_code in [
+                        "48765-2",  # Allergies
+                        "10160-0",  # History of medication
+                        "11369-6",  # Immunizations  
+                        "30954-2",  # Results
+                        "46241-6",  # Hospital admission diagnosis
+                        "11535-2",  # Hospital discharge diagnosis
+                    ]):
+                        clinical_sections += 1
+            
+            if clinical_sections >= 2:
+                logger.info(f"[PHASE 3A] Detected L3 document type - {clinical_sections} structured clinical sections found")
+                return "L3"
+            
+            # Default to L3 if unsure (safer for processing)
+            logger.info("[PHASE 3A] Defaulting to L3 document type - structured format assumed")
+            return "L3"
+            
+        except Exception as e:
+            logger.warning(f"[PHASE 3A] Error detecting document type: {e}")
+            return "L3"  # Default to L3
+
+    def _extract_patient_languages_phase3a(self, root: ET.Element) -> List[str]:
+        """
+        PHASE 3A: Extract patient language communication preferences
+        
+        Consolidated from CDAAdministrativeExtractor for language-aware processing.
+        Supports European multilingual healthcare documentation.
+        """
+        languages = []
+        try:
+            # Look for language communication in patient section
+            lang_elements = root.findall(
+                ".//recordTarget/patientRole/patient/languageCommunication/languageCode",
+                self.namespaces,
+            )
+
+            for lang_elem in lang_elements:
+                lang_code = lang_elem.get("code")
+                if lang_code:
+                    languages.append(lang_code)
+                    logger.debug(f"[PHASE 3A] Found patient language: {lang_code}")
+
+            if languages:
+                logger.info(f"[PHASE 3A] Extracted {len(languages)} patient languages: {languages}")
+            else:
+                logger.info("[PHASE 3A] No patient language preferences found")
+                
+        except Exception as e:
+            logger.warning(f"[PHASE 3A] Error extracting patient languages: {e}")
+
+        return languages
+
+    def _extract_participants_phase3a(self, root: ET.Element, source_country: str = "UNKNOWN") -> List[Dict[str, Any]]:
+        """
+        PHASE 3A: Extract participant information (emergency contacts, next of kin, dependencies)
+        
+        Consolidated from CDAAdministrativeExtractor for comprehensive contact extraction.
+        Supports European healthcare relationship management.
+        """
+        participants = []
+        try:
+            # Look for participant elements with various type codes
+            participant_elements = root.findall(".//participant", self.namespaces)
+            
+            for participant in participant_elements:
+                participant_info = {}
+                type_code = participant.get("typeCode")
+                
+                if type_code:
+                    participant_info["role"] = f"Participant ({type_code})"
+                    
+                    # Extract person information
+                    person_elem = participant.find(".//associatedPerson", self.namespaces)
+                    if person_elem is not None:
+                        name_elem = person_elem.find("name", self.namespaces)
+                        if name_elem is not None:
+                            family_elem = name_elem.find("family", self.namespaces) 
+                            given_elem = name_elem.find("given", self.namespaces)
+                            
+                            if family_elem is not None and family_elem.text:
+                                participant_info["family_name"] = family_elem.text.strip()
+                            if given_elem is not None and given_elem.text:
+                                participant_info["given_name"] = given_elem.text.strip()
+                            
+                            # Extract contact information
+                            addr_elem = participant.find(".//addr", self.namespaces)
+                            if addr_elem is not None:
+                                participant_info["address"] = self._parse_address_phase3a(addr_elem, source_country)
+                            
+                            telecom_elems = participant.findall(".//telecom", self.namespaces)
+                            if telecom_elems:
+                                participant_info["telecoms"] = [
+                                    self._parse_telecom_phase3a(telecom, source_country) 
+                                    for telecom in telecom_elems
+                                ]
+                    
+                    if participant_info.get("family_name") or participant_info.get("given_name"):
+                        participants.append(participant_info)
+                        logger.debug(f"[PHASE 3A] Found participant: {participant_info.get('given_name', '')} {participant_info.get('family_name', '')} ({type_code})")
+            
+            logger.info(f"[PHASE 3A] Extracted {len(participants)} participants")
+                        
+        except Exception as e:
+            logger.warning(f"[PHASE 3A] Error extracting participants: {e}")
+
+        return participants
+
+    def _parse_address_phase3a(self, addr_element: ET.Element, source_country: str = "UNKNOWN") -> Dict[str, Any]:
+        """
+        PHASE 3A: Parse address information with country-specific optimizations
+        
+        Consolidated from CDAAdministrativeExtractor for European address formats.
+        """
+        address = {}
+        try:
+            # Extract street address lines
+            street_lines = []
+            street_addrs = addr_element.findall("streetAddressLine", self.namespaces)
+            for street in street_addrs:
+                if street.text and street.text.strip():
+                    street_lines.append(street.text.strip())
+            
+            if street_lines:
+                address["street_lines"] = street_lines
+                address["street"] = ", ".join(street_lines)
+
+            # Extract city
+            city_elem = addr_element.find("city", self.namespaces)
+            if city_elem is not None and city_elem.text:
+                address["city"] = city_elem.text.strip()
+
+            # Extract postal code with country-specific formatting
+            postal_elem = addr_element.find("postalCode", self.namespaces)
+            if postal_elem is not None and postal_elem.text:
+                postal_code = postal_elem.text.strip()
+                
+                # Country-specific postal code formatting
+                if source_country == "IE":
+                    postal_code = postal_code.upper()  # Irish Eircode format
+                
+                address["postal_code"] = postal_code
+
+            # Extract country
+            country_elem = addr_element.find("country", self.namespaces)
+            if country_elem is not None and country_elem.text:
+                address["country"] = country_elem.text.strip()
+
+            # Extract use code
+            use_attr = addr_element.get("use")
+            if use_attr:
+                address["use"] = use_attr
+                
+        except Exception as e:
+            logger.warning(f"[PHASE 3A] Error parsing address: {e}")
+
+        return address
+
+    def _parse_telecom_phase3a(self, telecom_element: ET.Element, source_country: str = "UNKNOWN") -> Dict[str, Any]:
+        """
+        PHASE 3A: Parse telecom information with country-specific optimizations
+        
+        Consolidated from CDAAdministrativeExtractor for European telecom formats.
+        """
+        telecom = {}
+        try:
+            # Extract value (phone number, email, etc.)
+            value = telecom_element.get("value")
+            if value:
+                telecom["value"] = value
+                
+                # Determine telecom type
+                if value.startswith("tel:"):
+                    telecom["type"] = "phone"
+                    telecom["number"] = value.replace("tel:", "")
+                elif value.startswith("mailto:"):
+                    telecom["type"] = "email"
+                    telecom["email"] = value.replace("mailto:", "")
+                elif value.startswith("fax:"):
+                    telecom["type"] = "fax"
+                    telecom["number"] = value.replace("fax:", "")
+                else:
+                    telecom["type"] = "other"
+
+            # Extract use code
+            use_attr = telecom_element.get("use")
+            if use_attr:
+                telecom["use"] = use_attr
+                
+        except Exception as e:
+            logger.warning(f"[PHASE 3A] Error parsing telecom: {e}")
+
+        return telecom
 
     def _extract_basic_administrative_data_strategy(self, root: ET.Element) -> Dict[str, Any]:
         """

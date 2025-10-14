@@ -1,20 +1,10 @@
-{# Clinical Information Content - Collapsible Version #}
+{# Clinical Information Content - Flat Structure for Clinical Information Tab #}
 {% load patient_filters %}
 {% load medication_filters %}
 
 <div class="clinical-information-container">
-    {# Check if we have any clinical data - including extended sections #}
-    {% if medications or allergies or problems or vital_signs or procedures or immunizations or history_of_past_illness or pregnancy_history or social_history or physical_findings or coded_results or laboratory_results or advance_directives or additional_sections %}
-        
-        {# Main Clinical Sections Container #}
-        <div class="collapsible-wrapper">
-            <input id="toggle-clinical-sections" class="toggle-input" type="checkbox" checked>
-            <label for="toggle-clinical-sections" class="collapsible-label-main">
-                <i class="fa-solid fa-stethoscope me-2"></i>Clinical Information
-            </label>
-            <div class="collapsible-content-main">
-                <div class="content-inner-main">
-                    
+    {# Clinical Sections - Each as standalone accordion #}
+                
                     {# Medical Problems Section #}
                     {% if problems and problems|length > 0 %}
                     <div class="clinical-section">
@@ -669,6 +659,7 @@
                     {% endif %}
                     
                     {# Allergies Section - MANDATORY (always displayed) #}
+                    {% if allergies and allergies|length > 0 %}
                     <div class="clinical-section">
                         <div class="collapsible-wrapper">
                             <input id="toggle-allergies" class="toggle-input" type="checkbox">
@@ -695,7 +686,6 @@
                                         
                                         {# PRIORITY 1: Check if allergies data has clinical_table structure (NEW 9-COLUMN FORMAT) #}
                                         {% if allergies.0.clinical_table %}
-                                            {# Continue with existing clinical table structure... #}
                                         {# NEW 9-COLUMN CLINICAL TABLE STRUCTURE from Enhanced CDA Processor #}
                                         <div class="clinical-table">
                                             {# Desktop Table Layout #}
@@ -873,6 +863,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                     {% else %}
                     {# Empty state for mandatory allergies section #}
                     <div class="clinical-section">
@@ -1374,9 +1365,6 @@
                         </div>
                     </div>
                     {% endif %}
-                    
-                </div>
-            </div>
             
             {# ========================================= #}
             {# EXTENDED CLINICAL SECTIONS GROUP HEADER #}
@@ -2865,7 +2853,7 @@
                                     <div class="clinical-section-title-row">
                                         <div class="clinical-section-title">
                                             <i class="fa-solid fa-file-medical me-2"></i>
-                                            <span>{{ section.title|default:"Additional Clinical Section" }}</span>
+                                            <span>{{ section.title|extract_section_title|default:"Additional Clinical Section" }}</span>
                                         </div>
                                         <div class="clinical-badge-container">
                                             <span class="clinical-badge extended">Available</span>
@@ -2885,16 +2873,16 @@
                         </div>
                         {% endfor %}
                         {% endif %}
-                    
-                    </div>
-                    {% endif %}
-        </div>
-        
-    {% else %}
+            </div>
+            {% endif %}
+    
+    {# Global fallback message when no clinical sections have any data #}
+    {# Global fallback message when no clinical sections have any data #}
+    {# This checks if we have no visible clinical sections at all #}
+    {% if not problems and not medications and not allergies and not procedures and not medical_devices and not vital_signs and not history_of_past_illness and not immunizations and not pregnancy_history and not social_history and not physical_findings and not coded_results.blood_group and not coded_results.diagnostic_results and not laboratory_results and not advance_directives and not additional_sections %}
         <div class="alert alert-info" role="alert">
             <i class="fa-solid fa-info-circle me-2"></i>
             No clinical information available for this patient.
         </div>
     {% endif %}
-</div>
 </div>
