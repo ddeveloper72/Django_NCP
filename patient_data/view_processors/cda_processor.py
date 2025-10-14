@@ -392,6 +392,14 @@ class CDAViewProcessor:
                 logger.warning("[CDA PROCESSOR] No administrative data returned from comprehensive service")
         else:
             logger.warning("[CDA PROCESSOR] No CDA content stored for healthcare provider extraction")
+        
+        # Add hide flags from parsed_data if available (Enhanced CDA XML Parser path)
+        if parsed_data:
+            hide_flags = ['hide_mandatory_allergies', 'hide_mandatory_procedures', 'hide_mandatory_devices']
+            for flag in hide_flags:
+                if flag in parsed_data:
+                    context[flag] = parsed_data[flag]
+                    logger.info(f"[CDA PROCESSOR] Added {flag}: {parsed_data[flag]}")
     
     def _add_cda_metadata(
         self,
@@ -469,16 +477,38 @@ class CDAViewProcessor:
                 # Transform administrative data for Healthcare Team & Contacts template compatibility
                 transformed_admin_data = self._transform_administrative_data(admin_data) if admin_data else {}
                 
+                # Check for overlapping sections to avoid duplication in UI
+                sections = enhanced_result.get('sections', [])
+                hide_mandatory_allergies = False
+                hide_mandatory_procedures = False
+                hide_mandatory_devices = False
+                
+                # Check section titles for overlapping content
+                for section in sections:
+                    title = section.get('title', '').lower()
+                    if 'allerg' in title or 'adverse' in title:
+                        hide_mandatory_allergies = True
+                    elif 'procedure' in title or 'history of procedure' in title:
+                        hide_mandatory_procedures = True
+                    elif 'device' in title or 'medical device' in title:
+                        hide_mandatory_devices = True
+                
+                logger.info(f"[CDA PROCESSOR] Hide flags - allergies: {hide_mandatory_allergies}, procedures: {hide_mandatory_procedures}, devices: {hide_mandatory_devices}")
+                
                 # Return enhanced result with transformed administrative data for Healthcare Team & Contacts tab
                 return {
                     'success': True,
-                    'sections': enhanced_result.get('sections', []),
+                    'sections': sections,
                     'clinical_data': {},
                     'administrative_data': transformed_admin_data,
                     'patient_identity': enhanced_result.get('patient_identity', {}),
-                    'has_clinical_data': len(enhanced_result.get('sections', [])) > 0,
+                    'has_clinical_data': len(sections) > 0,
                     'has_administrative_data': bool(transformed_admin_data),
-                    'source': 'enhanced_cda_xml_parser_phase3a'
+                    'source': 'enhanced_cda_xml_parser_phase3a',
+                    # Add hide flags to the return context
+                    'hide_mandatory_allergies': hide_mandatory_allergies,
+                    'hide_mandatory_procedures': hide_mandatory_procedures,
+                    'hide_mandatory_devices': hide_mandatory_devices
                 }
             
             # Fallback to original specialized extractors if Enhanced CDA XML Parser fails
@@ -750,7 +780,31 @@ class CDAViewProcessor:
         # Add all compatibility variables to context
         context.update(compatibility_vars)
         
+        # Add flags to hide mandatory sections when corresponding extended sections exist
+        additional_sections = compatibility_vars.get('additional_sections', [])
+        
+        # Check for overlapping sections to avoid duplication in UI
+        hide_mandatory_allergies = False
+        hide_mandatory_procedures = False
+        hide_mandatory_devices = False
+        
+        for section in additional_sections:
+            title = section.get('title', '').lower()
+            if 'allerg' in title or 'adverse' in title:
+                hide_mandatory_allergies = True
+            elif 'procedure' in title or 'history of procedure' in title:
+                hide_mandatory_procedures = True
+            elif 'device' in title or 'medical device' in title:
+                hide_mandatory_devices = True
+        
+        context.update({
+            'hide_mandatory_allergies': hide_mandatory_allergies,
+            'hide_mandatory_procedures': hide_mandatory_procedures,
+            'hide_mandatory_devices': hide_mandatory_devices
+        })
+        
         logger.info(f"[CDA PROCESSOR] Added template compatibility variables: {list(compatibility_vars.keys())}")
+        logger.info(f"[CDA PROCESSOR] Hide flags - allergies: {hide_mandatory_allergies}, procedures: {hide_mandatory_procedures}, devices: {hide_mandatory_devices}")
     
     def _build_sections_from_clinical_arrays(self, clinical_arrays: Dict[str, List]) -> List[Dict[str, Any]]:
         """

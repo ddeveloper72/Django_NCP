@@ -865,7 +865,8 @@
                     </div>
                     {% endif %}
                     {% else %}
-                    {# Empty state for mandatory allergies section #}
+                    {# Only show empty mandatory allergies section if no related extended section exists #}
+                    {% if not hide_mandatory_allergies %}
                     <div class="clinical-section">
                         <div class="collapsible-wrapper">
                             <input id="toggle-allergies" class="toggle-input" type="checkbox">
@@ -891,6 +892,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                     {% endif %}
                     
                     {# Procedures Section - MANDATORY #}
@@ -1078,7 +1080,8 @@
                         </div>
                     </div>
                     {% else %}
-                    {# Empty state for mandatory procedures section #}
+                    {# Only show empty mandatory procedures section if no related extended section exists #}
+                    {% if not hide_mandatory_procedures %}
                     <div class="clinical-section">
                         <div class="collapsible-wrapper">
                             <input id="toggle-procedures" class="toggle-input" type="checkbox">
@@ -1104,6 +1107,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                     {% endif %}
                     
                     {# Medical Devices Section - MANDATORY #}
@@ -1282,7 +1286,8 @@
                         </div>
                     </div>
                     {% else %}
-                    {# Empty state for mandatory medical devices section #}
+                    {# Only show empty mandatory medical devices section if no related extended section exists #}
+                    {% if not hide_mandatory_devices %}
                     <div class="clinical-section">
                         <div class="collapsible-wrapper">
                             <input id="toggle-medical-devices" class="toggle-input" type="checkbox">
@@ -1308,6 +1313,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                     {% endif %}
                     
                     {# Vital Signs Section #}
