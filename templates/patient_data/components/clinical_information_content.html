@@ -2865,7 +2865,34 @@
                                     <div class="content-inner-title">
                                         <p class="mb-3 text-muted">{{ section.description|default:"Additional clinical information" }}</p>
                                         <div class="additional-section-content">
-                                            {{ section.content|safe }}
+                                            {% if section.content.translated %}
+                                                {# Handle dual-language content structure #}
+                                                <div class="dual-language-content">
+                                                    <div class="translated-content">
+                                                        {{ section.content.translated|safe }}
+                                                    </div>
+                                                    {% if section.content.original and section.content.original != section.content.translated %}
+                                                        <div class="original-content mt-3 border-top pt-3">
+                                                            <h6 class="text-muted">
+                                                                <i class="fa-solid fa-language me-1"></i>
+                                                                Original Language
+                                                            </h6>
+                                                            {{ section.content.original|safe }}
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if section.content.medical_terms and section.content.medical_terms > 0 %}
+                                                        <div class="medical-terms-info mt-2">
+                                                            <small class="text-muted">
+                                                                <i class="fa-solid fa-stethoscope me-1"></i>
+                                                                {{ section.content.medical_terms }} medical terms identified
+                                                            </small>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            {% else %}
+                                                {# Handle simple string content #}
+                                                {{ section.content|safe }}
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
