@@ -2871,8 +2871,21 @@
                                     <div class="content-inner-title">
                                         <p class="mb-3 text-muted">{{ section.description|default:"Additional clinical information" }}</p>
                                         <div class="additional-section-content">
-                                            {% if section.content.translated %}
-                                                {# Handle dual-language content structure #}
+                                            {% if section.has_ps_table and section.ps_table_html %}
+                                                {# Use professionally rendered PS Table HTML from Enhanced CDA XML Parser #}
+                                                <div class="ps-table-content">
+                                                    {{ section.ps_table_html|safe }}
+                                                </div>
+                                                {% if section.clinical_codes and section.clinical_codes|length > 0 %}
+                                                    <div class="medical-terms-info mt-2">
+                                                        <small class="text-muted">
+                                                            <i class="fa-solid fa-stethoscope me-1"></i>
+                                                            {{ section.clinical_codes|length }} medical terms identified
+                                                        </small>
+                                                    </div>
+                                                {% endif %}
+                                            {% elif section.content.translated %}
+                                                {# Fallback: Handle dual-language content structure #}
                                                 <div class="dual-language-content">
                                                     <div class="translated-content">
                                                         {{ section.content.translated|safe }}
@@ -2896,7 +2909,7 @@
                                                     {% endif %}
                                                 </div>
                                             {% else %}
-                                                {# Handle simple string content #}
+                                                {# Fallback: Handle simple string content #}
                                                 {{ section.content|safe }}
                                             {% endif %}
                                         </div>
