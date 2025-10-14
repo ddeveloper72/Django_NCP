@@ -493,6 +493,25 @@ class CDAViewProcessor:
                     elif 'device' in title or 'medical device' in title:
                         hide_mandatory_devices = True
                 
+                # CRITICAL: Apply PS Table Renderer to convert raw sections to rich HTML tables
+                logger.info(f"[CDA PROCESSOR] Applying PS Table Renderer to {len(sections)} sections")
+                try:
+                    from ..services.ps_table_renderer import PSTableRenderer
+                    ps_renderer = PSTableRenderer(target_language='en')
+                    
+                    # Render sections using PS Table Renderer for rich formatted display
+                    if sections:
+                        rendered_sections = ps_renderer.render_section_tables(sections)
+                        logger.info(f"[CDA PROCESSOR] PS Table Renderer processed {len(rendered_sections)} sections")
+                        # Use the rendered sections instead of raw sections
+                        sections = rendered_sections
+                    else:
+                        logger.warning("[CDA PROCESSOR] No sections to render with PS Table Renderer")
+                        
+                except Exception as e:
+                    logger.error(f"[CDA PROCESSOR] PS Table Renderer failed: {e}")
+                    logger.warning("[CDA PROCESSOR] Falling back to raw sections without PS rendering")
+                
                 logger.info(f"[CDA PROCESSOR] Hide flags - allergies: {hide_mandatory_allergies}, procedures: {hide_mandatory_procedures}, devices: {hide_mandatory_devices}")
                 
                 # Return enhanced result with transformed administrative data for Healthcare Team & Contacts tab
