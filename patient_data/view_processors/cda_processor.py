@@ -977,26 +977,74 @@ class CDAViewProcessor:
     def _parse_problem_list_xml(self, root) -> Dict[str, Any]:
         """Parse problem list XML into structured data"""
         problems = []
+        namespaces = {'hl7': 'urn:hl7-org:v3'}
         
-        # Find table rows in tbody
-        for tr in root.findall('.//tbody/tr'):
-            tds = tr.findall('td')
-            if len(tds) >= 5:  # Expecting 5 columns: Problem, Type, Time, Status, Severity
-                problem_name = self._extract_text_from_element(tds[0])
-                problem_type = self._extract_text_from_element(tds[1])
-                time_info = self._extract_text_from_element(tds[2])
-                status = self._extract_text_from_element(tds[3])
-                severity = self._extract_text_from_element(tds[4])
-                
-                problems.append({
-                    'data': {
-                        'active_problem': {'value': problem_name, 'display_value': problem_name},
-                        'problem_type': {'value': problem_type, 'display_value': problem_type},
-                        'time': {'value': time_info, 'display_value': time_info},
-                        'problem_status': {'value': status, 'display_value': status},
-                        'severity': {'value': severity, 'display_value': severity}
-                    }
-                })
+        # Strategy 1: Extract from table rows with proper namespace handling
+        text_section = root.find('.//hl7:text', namespaces) or root.find('.//text')
+        if text_section is not None:
+            # Look for table rows with namespaces
+            rows = text_section.findall('.//hl7:tr', namespaces) or text_section.findall('.//tr')
+            
+            for tr in rows:
+                # Find table cells with namespaces
+                tds = tr.findall('.//hl7:td', namespaces) or tr.findall('.//td')
+                if len(tds) >= 5:  # Expecting 5 columns: Problem, Type, Time, Status, Severity
+                    problem_name = self._extract_text_from_element(tds[0])
+                    problem_type = self._extract_text_from_element(tds[1])
+                    time_info = self._extract_text_from_element(tds[2])
+                    status = self._extract_text_from_element(tds[3])
+                    severity = self._extract_text_from_element(tds[4])
+                    
+                    # Only add if we have meaningful data (not empty)
+                    if problem_name and problem_name.strip():
+                        problems.append({
+                            'data': {
+                                'active_problem': {'value': problem_name, 'display_value': problem_name},
+                                'problem_type': {'value': problem_type or 'Clinical finding', 'display_value': problem_type or 'Clinical finding'},
+                                'time': {'value': time_info or 'Not specified', 'display_value': time_info or 'Not specified'},
+                                'problem_status': {'value': status or 'Active', 'display_value': status or 'Active'},
+                                'severity': {'value': severity or 'Not specified', 'display_value': severity or 'Not specified'}
+                            }
+                        })
+        
+        # Strategy 2: If no table data found, extract from narrative paragraphs (fallback)
+        if not problems and text_section is not None:
+            paragraphs = text_section.findall('.//hl7:paragraph', namespaces) or text_section.findall('.//paragraph')
+            
+            for paragraph in paragraphs:
+                text = self._extract_text_from_element(paragraph)
+                if text and text.strip():
+                    # Parse narrative text like "Predominantly allergic asthma since 1994-10-03"
+                    problem_name = "Unknown"
+                    time_info = "Not specified"
+                    status = "Active"
+                    
+                    # Extract problem name and timing
+                    if ' since ' in text:
+                        parts = text.split(' since ')
+                        problem_name = parts[0].strip()
+                        time_info = f"since {parts[1].strip()}"
+                    else:
+                        problem_name = text.strip()
+                    
+                    # Check for severity indicators
+                    severity = "Not specified"
+                    if 'severe' in text.lower():
+                        severity = "Severe"
+                    elif 'moderate' in text.lower():
+                        severity = "Moderate"
+                    elif 'mild' in text.lower():
+                        severity = "Mild"
+                    
+                    problems.append({
+                        'data': {
+                            'active_problem': {'value': problem_name, 'display_value': problem_name},
+                            'problem_type': {'value': 'Clinical finding', 'display_value': 'Clinical finding'},
+                            'time': {'value': time_info, 'display_value': time_info},
+                            'problem_status': {'value': status, 'display_value': status},
+                            'severity': {'value': severity, 'display_value': severity}
+                        }
+                    })
         
         return {
             'clinical_table': {
@@ -1009,7 +1057,7 @@ class CDAViewProcessor:
                 ],
                 'rows': problems
             }
-        } if problems else {}
+        }
     
     def _parse_medication_xml(self, root) -> Dict[str, Any]:
         """Parse medication XML into structured data"""
