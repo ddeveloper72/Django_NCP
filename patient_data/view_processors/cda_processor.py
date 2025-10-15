@@ -485,7 +485,13 @@ class CDAViewProcessor:
                 
                 # Check section titles for overlapping content
                 for section in sections:
-                    title = section.get('title', '').lower()
+                    # Handle title structure from Enhanced CDA XML Parser (dict with coded/translated)
+                    title_data = section.get('title', '')
+                    if isinstance(title_data, dict):
+                        title = title_data.get('translated', title_data.get('coded', '')).lower()
+                    else:
+                        title = str(title_data).lower()
+                    
                     if 'allerg' in title or 'adverse' in title:
                         hide_mandatory_allergies = True
                     elif 'procedure' in title or 'history of procedure' in title:
@@ -743,37 +749,59 @@ class CDAViewProcessor:
                 section_code = section.get('code', section.get('section_code', ''))
                 section_id = section.get('section_id', '')
                 
-                logger.debug(f"[COMPATIBILITY] Processing section: {section.get('title', 'Unknown')} with code: {section_code}")
+                # Extract just the code part from Extended format like "10160-0 (2.16.840.1.113883.6.1)"
+                clean_code = section_code.split(' ')[0] if section_code else ''
+                
+                logger.debug(f"[COMPATIBILITY] Processing section: {section.get('title', 'Unknown')} with code: {section_code} -> clean: {clean_code}")
                 
                 # Map specific section codes to template variables
-                if section_code in ['10160-0', '10164-2']:  # Medication sections
-                    compatibility_vars['medications'].append(section)
-                elif section_code in ['48765-2', '48766-0']:  # Allergy sections
-                    compatibility_vars['allergies'].append(section)
-                elif section_code in ['11450-4', '11348-0']:  # Problem lists & History of Past Illness
-                    compatibility_vars['problems'].append(section)
-                    compatibility_vars['history_of_past_illness'].append(section)
-                elif section_code in ['8716-3', '29545-1']:  # Vital signs / Physical findings
-                    compatibility_vars['vital_signs'].append(section)
-                    compatibility_vars['physical_findings'].append(section)
-                elif section_code in ['47519-4']:  # Procedures
-                    compatibility_vars['procedures'].append(section)
-                elif section_code in ['11369-6']:  # Immunization
-                    compatibility_vars['immunizations'].append(section)
-                elif section_code in ['30954-2', '18748-4', '34530-6']:  # Results sections
-                    compatibility_vars['coded_results']['diagnostic_results'].append(section)
-                    compatibility_vars['laboratory_results'].append(section)
+                if clean_code in ['10160-0', '10164-2']:  # Medication sections
+                    enhanced_section = self._enhance_section_with_clinical_codes(section)
+                    compatibility_vars['medications'].append(enhanced_section)
+                    logger.debug(f"[COMPATIBILITY] Added medication section: {section.get('title', 'Unknown')}")
+                elif clean_code in ['48765-2', '48766-0']:  # Allergy sections
+                    enhanced_section = self._enhance_section_with_clinical_codes(section)
+                    compatibility_vars['allergies'].append(enhanced_section)
+                    logger.debug(f"[COMPATIBILITY] Added allergy section: {section.get('title', 'Unknown')}")
+                elif clean_code in ['11450-4', '11348-0']:  # Problem lists & History of Past Illness
+                    enhanced_section = self._enhance_section_with_clinical_codes(section)
+                    compatibility_vars['problems'].append(enhanced_section)
+                    compatibility_vars['history_of_past_illness'].append(enhanced_section)
+                    logger.debug(f"[COMPATIBILITY] Added problem section: {section.get('title', 'Unknown')}")
+                elif clean_code in ['8716-3', '29545-1']:  # Vital signs / Physical findings
+                    # Extract clinical codes and enhance section data for template compatibility
+                    enhanced_section = self._enhance_section_with_clinical_codes(section)
+                    compatibility_vars['vital_signs'].append(enhanced_section)
+                    compatibility_vars['physical_findings'].append(enhanced_section)
+                    logger.debug(f"[COMPATIBILITY] Added vital signs/physical findings section: {section.get('title', 'Unknown')}")
+                elif clean_code in ['47519-4']:  # Procedures
+                    enhanced_section = self._enhance_section_with_clinical_codes(section)
+                    compatibility_vars['procedures'].append(enhanced_section)
+                    logger.debug(f"[COMPATIBILITY] Added procedure section: {section.get('title', 'Unknown')}")
+                elif clean_code in ['11369-6']:  # Immunization
+                    enhanced_section = self._enhance_section_with_clinical_codes(section)
+                    compatibility_vars['immunizations'].append(enhanced_section)
+                    logger.debug(f"[COMPATIBILITY] Added immunization section: {section.get('title', 'Unknown')}")
+                elif clean_code in ['30954-2', '18748-4', '34530-6']:  # Results sections
+                    enhanced_section = self._enhance_section_with_clinical_codes(section)
+                    compatibility_vars['coded_results']['diagnostic_results'].append(enhanced_section)
+                    compatibility_vars['laboratory_results'].append(enhanced_section)
                 elif section_code in ['10157-6']:  # History of past illness
-                    compatibility_vars['history_of_past_illness'].append(section)
+                    enhanced_section = self._enhance_section_with_clinical_codes(section)
+                    compatibility_vars['history_of_past_illness'].append(enhanced_section)
                 elif section_code in ['10162-6']:  # Pregnancy history
-                    compatibility_vars['pregnancy_history'].append(section)
+                    enhanced_section = self._enhance_section_with_clinical_codes(section)
+                    compatibility_vars['pregnancy_history'].append(enhanced_section)
                 elif section_code in ['29762-2']:  # Social history
-                    compatibility_vars['social_history'].append(section)
+                    enhanced_section = self._enhance_section_with_clinical_codes(section)
+                    compatibility_vars['social_history'].append(enhanced_section)
                 elif section_code in ['42348-3']:  # Advance directives
-                    compatibility_vars['advance_directives'].append(section)
+                    enhanced_section = self._enhance_section_with_clinical_codes(section)
+                    compatibility_vars['advance_directives'].append(enhanced_section)
                 else:
-                    # Additional sections not mapped to specific variables
-                    compatibility_vars['additional_sections'].append(section)
+                    # Additional sections not mapped to specific variables - also enhance with codes
+                    enhanced_section = self._enhance_section_with_clinical_codes(section)
+                    compatibility_vars['additional_sections'].append(enhanced_section)
         
         # Also populate compatibility variables from clinical_arrays if available
         clinical_arrays = context.get('clinical_arrays', {})
@@ -808,7 +836,13 @@ class CDAViewProcessor:
         hide_mandatory_devices = False
         
         for section in additional_sections:
-            title = section.get('title', '').lower()
+            # Handle title structure from Enhanced CDA XML Parser (dict with coded/translated)
+            title_data = section.get('title', '')
+            if isinstance(title_data, dict):
+                title = title_data.get('translated', title_data.get('coded', '')).lower()
+            else:
+                title = str(title_data).lower()
+                
             if 'allerg' in title or 'adverse' in title:
                 hide_mandatory_allergies = True
             elif 'procedure' in title or 'history of procedure' in title:
@@ -824,6 +858,314 @@ class CDAViewProcessor:
         
         logger.info(f"[CDA PROCESSOR] Added template compatibility variables: {list(compatibility_vars.keys())}")
         logger.info(f"[CDA PROCESSOR] Hide flags - allergies: {hide_mandatory_allergies}, procedures: {hide_mandatory_procedures}, devices: {hide_mandatory_devices}")
+    
+    def _enhance_section_with_clinical_codes(self, section: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Extract clinical codes from Enhanced CDA section and enhance with template-compatible fields
+        
+        Args:
+            section: Enhanced CDA section with clinical_codes
+            
+        Returns:
+            Enhanced section with template-compatible code fields and structured data
+        """
+        enhanced_section = section.copy()
+        
+        # Extract clinical codes from Enhanced CDA section
+        clinical_codes = section.get('clinical_codes', {})
+        if hasattr(clinical_codes, 'codes') and clinical_codes.codes:
+            # Get the first available clinical code for primary display
+            primary_code = clinical_codes.codes[0]
+            
+            # Add template-compatible fields for physical findings
+            enhanced_section.update({
+                'observation_code': getattr(primary_code, 'code', ''),
+                'observation_code_system': getattr(primary_code, 'system', ''),
+                'observation_display': getattr(primary_code, 'display', getattr(primary_code, 'text', '')),
+                'observation_oid': getattr(primary_code, 'system', 'Unknown'),
+                # Format code with OID for CTS integration
+                'observation_code_with_oid': f"{getattr(primary_code, 'code', '')} ({getattr(primary_code, 'system', '')})" if getattr(primary_code, 'system', '') else getattr(primary_code, 'code', '')
+            })
+            
+            logger.debug(f"[CODE ENHANCEMENT] Added clinical code fields: {getattr(primary_code, 'code', '')} ({getattr(primary_code, 'system', '')})")
+        else:
+            # Fallback - try to extract codes from existing section data
+            section_code = section.get('section_code', '')
+            if section_code:
+                # Parse Extended format like "8716-3 (2.16.840.1.113883.6.1)"
+                if '(' in section_code and ')' in section_code:
+                    code_part = section_code.split(' ')[0]
+                    oid_part = section_code.split('(')[1].split(')')[0] if '(' in section_code else ''
+                    enhanced_section.update({
+                        'observation_code': code_part,
+                        'observation_code_system': oid_part,
+                        'observation_display': section.get('title', {}).get('translated', 'Unknown') if isinstance(section.get('title'), dict) else str(section.get('title', 'Unknown')),
+                        'observation_oid': oid_part,
+                        'observation_code_with_oid': section_code
+                    })
+                    logger.debug(f"[CODE ENHANCEMENT] Enhanced section with parsed code: {code_part} ({oid_part})")
+        
+        # Parse XML content into structured data for template compatibility
+        content = section.get('content', {})
+        if isinstance(content, dict) and 'translated' in content:
+            xml_content = content['translated']
+            structured_data = self._parse_xml_content_to_structured_data(xml_content, section.get('section_code', ''))
+            if structured_data:
+                enhanced_section.update(structured_data)
+                logger.debug(f"[CONTENT PARSING] Extracted {len(structured_data)} structured data items from section content")
+        
+        return enhanced_section
+    
+    def _parse_xml_content_to_structured_data(self, xml_content: str, section_code: str) -> Dict[str, Any]:
+        """
+        Parse XML content from Enhanced CDA sections into structured data for templates
+        
+        Args:
+            xml_content: XML content string from Enhanced CDA section
+            section_code: Section code to determine parsing strategy
+            
+        Returns:
+            Dictionary with structured data for template rendering
+        """
+        from xml.etree import ElementTree as ET
+        from xml.etree.ElementTree import ParseError
+        import re
+        
+        try:
+            # Clean section code for matching
+            clean_code = section_code.split(' ')[0] if section_code else ''
+            
+            # Remove namespace prefixes to simplify parsing
+            clean_content = re.sub(r'<ns\d+:', '<', xml_content)
+            clean_content = re.sub(r'</ns\d+:', '</', clean_content)
+            
+            # Wrap content in root element and parse
+            wrapped_content = f"<root>{clean_content}</root>"
+            root = ET.fromstring(wrapped_content)
+            
+            # Handle problem lists (11450-4)
+            if clean_code == '11450-4':
+                return self._parse_problem_list_xml(root)
+            
+            # Handle medication history (10160-0) 
+            elif clean_code == '10160-0':
+                return self._parse_medication_xml(root)
+            
+            # Handle allergies (48765-2)
+            elif clean_code == '48765-2':
+                return self._parse_allergy_xml(root)
+                
+            # Handle procedures (47519-4)
+            elif clean_code == '47519-4':
+                return self._parse_procedure_xml(root)
+                
+            # Handle physical findings (8716-3)
+            elif clean_code == '8716-3':
+                return self._parse_physical_findings_xml(root)
+            
+            # Generic fallback - extract basic info
+            else:
+                return self._parse_generic_xml(root)
+                
+        except ParseError as e:
+            logger.warning(f"[CONTENT PARSING] Failed to parse XML content: {e}")
+            return {}
+        except Exception as e:
+            logger.error(f"[CONTENT PARSING] Unexpected error parsing XML: {e}")
+            return {}
+    
+    def _parse_problem_list_xml(self, root) -> Dict[str, Any]:
+        """Parse problem list XML into structured data"""
+        problems = []
+        
+        # Find table rows in tbody
+        for tr in root.findall('.//tbody/tr'):
+            tds = tr.findall('td')
+            if len(tds) >= 5:  # Expecting 5 columns: Problem, Type, Time, Status, Severity
+                problem_name = self._extract_text_from_element(tds[0])
+                problem_type = self._extract_text_from_element(tds[1])
+                time_info = self._extract_text_from_element(tds[2])
+                status = self._extract_text_from_element(tds[3])
+                severity = self._extract_text_from_element(tds[4])
+                
+                problems.append({
+                    'data': {
+                        'active_problem': {'value': problem_name, 'display_value': problem_name},
+                        'problem_type': {'value': problem_type, 'display_value': problem_type},
+                        'time': {'value': time_info, 'display_value': time_info},
+                        'problem_status': {'value': status, 'display_value': status},
+                        'severity': {'value': severity, 'display_value': severity}
+                    }
+                })
+        
+        return {
+            'clinical_table': {
+                'headers': [
+                    {'key': 'active_problem', 'label': 'Active Problem', 'primary': True},
+                    {'key': 'problem_type', 'label': 'Problem Type', 'primary': False},
+                    {'key': 'time', 'label': 'Time', 'primary': False},
+                    {'key': 'problem_status', 'label': 'Problem Status', 'primary': False},
+                    {'key': 'severity', 'label': 'Severity', 'primary': False}
+                ],
+                'rows': problems
+            }
+        } if problems else {}
+    
+    def _parse_medication_xml(self, root) -> Dict[str, Any]:
+        """Parse medication XML into structured data"""
+        # Implementation for medication parsing
+        return {}
+    
+    def _parse_allergy_xml(self, root) -> Dict[str, Any]:
+        """Parse allergy XML into structured data"""
+        allergies = []
+        
+        # Strategy 1: Extract from paragraphs (narrative format) - this is the primary data source
+        namespaces = {'hl7': 'urn:hl7-org:v3'}
+        
+        # Look for paragraphs in the text section
+        text_section = root.find('.//hl7:text', namespaces) or root.find('.//text')
+        if text_section is not None:
+            paragraphs = text_section.findall('.//hl7:paragraph', namespaces) or text_section.findall('.//paragraph')
+            
+            for paragraph in paragraphs:
+                text = self._extract_text_from_element(paragraph)
+                if text and ('allergy' in text.lower() or 'intolerance' in text.lower()):
+                    # Parse narrative text like "Food allergy to Kiwi fruit, Reaction: Eczema"
+                    allergen = "Unknown"
+                    reaction = "Unknown"
+                    allergy_type = "Unknown"
+                    status = "Active"  # Default for documented allergies
+                    
+                    # Extract allergen
+                    if 'allergy to' in text.lower():
+                        parts = text.lower().split('allergy to')
+                        if len(parts) > 1:
+                            allergen_part = parts[1].split(',')[0].strip()
+                            allergen = allergen_part.title()
+                    elif 'intolerance to' in text.lower():
+                        parts = text.lower().split('intolerance to')
+                        if len(parts) > 1:
+                            allergen_part = parts[1].split(',')[0].strip()
+                            allergen = allergen_part.title()
+                    
+                    # Extract reaction
+                    if 'reaction:' in text.lower():
+                        reaction_part = text.lower().split('reaction:')[1].strip()
+                        reaction = reaction_part.title()
+                    
+                    # Determine allergy type
+                    if 'food' in text.lower():
+                        allergy_type = "Food allergy"
+                    elif 'medication' in text.lower():
+                        allergy_type = "Medication allergy"
+                    elif 'intolerance' in text.lower():
+                        allergy_type = "Food intolerance"
+                    else:
+                        allergy_type = "Allergy"
+                    
+                    # Create properly structured data
+                    allergies.append({
+                        'data': {
+                            'allergen': {'value': allergen, 'display_value': allergen},
+                            'type': {'value': allergy_type, 'display_value': allergy_type},
+                            'reaction': {'value': reaction, 'display_value': reaction},
+                            'status': {'value': status, 'display_value': status},
+                            'severity': {'value': 'Not specified', 'display_value': 'Not specified'},
+                            'date': {'value': 'Not specified', 'display_value': 'Not specified'}
+                        }
+                    })
+        
+        # Strategy 2: Extract timing information from table if available
+        if allergies:  # Only try table extraction if we found allergies in narratives
+            tables = root.findall('.//hl7:table', namespaces) or root.findall('.//table')
+            if tables:
+                table = tables[0]
+                tbody = table.find('.//hl7:tbody', namespaces) or table.find('.//tbody')
+                if tbody is not None:
+                    rows = tbody.findall('.//hl7:tr', namespaces) or tbody.findall('.//tr')
+                    
+                    # Try to extract timing data from table rows
+                    for i, tr in enumerate(rows):
+                        if i < len(allergies):  # Don't exceed allergies found in narratives
+                            cells = tr.findall('.//hl7:td', namespaces) or tr.findall('.//td')
+                            
+                            # Look for date information in cells
+                            for cell in cells:
+                                cell_text = self._extract_text_from_element(cell)
+                                if cell_text and ('since' in cell_text.lower() or 'until' in cell_text.lower() or 'from' in cell_text.lower()):
+                                    # Update the date for this allergy
+                                    allergies[i]['data']['date'] = {
+                                        'value': cell_text,
+                                        'display_value': cell_text
+                                    }
+                                    break
+        
+        # Fallback: If no structured data found, create generic entry
+        if not allergies:
+            all_text = self._extract_text_from_element(root)
+            if all_text and ('allergy' in all_text.lower() or 'allergic' in all_text.lower()):
+                allergies.append({
+                    'data': {
+                        'allergen': {'value': 'Multiple allergies documented', 'display_value': 'Multiple allergies documented'},
+                        'type': {'value': 'See clinical notes', 'display_value': 'See clinical notes'},
+                        'reaction': {'value': 'Various', 'display_value': 'Various'},
+                        'status': {'value': 'Active', 'display_value': 'Active'},
+                        'severity': {'value': 'See clinical notes', 'display_value': 'See clinical notes'},
+                        'date': {'value': 'Not specified', 'display_value': 'Not specified'}
+                    }
+                })
+        
+        return {
+            'clinical_table': {
+                'headers': [
+                    {'key': 'allergen', 'label': 'Allergen', 'primary': True},
+                    {'key': 'type', 'label': 'Type', 'primary': False},
+                    {'key': 'reaction', 'label': 'Reaction', 'primary': False},
+                    {'key': 'status', 'label': 'Status', 'primary': False},
+                    {'key': 'severity', 'label': 'Severity', 'primary': False},
+                    {'key': 'date', 'label': 'Date', 'primary': False}
+                ],
+                'rows': allergies
+            }
+        } if allergies else {}
+    
+    def _parse_procedure_xml(self, root) -> Dict[str, Any]:
+        """Parse procedure XML into structured data"""
+        # Implementation for procedure parsing
+        return {}
+    
+    def _parse_physical_findings_xml(self, root) -> Dict[str, Any]:
+        """Parse physical findings XML into structured data"""
+        # Implementation for physical findings parsing
+        return {}
+    
+    def _parse_generic_xml(self, root) -> Dict[str, Any]:
+        """Parse generic XML content"""
+        # Extract basic text content
+        return {}
+    
+    def _extract_text_from_element(self, element) -> str:
+        """Extract clean text from XML element, handling nested content tags"""
+        if element is None:
+            return "-"
+        
+        # Try to find content tags first
+        content_elements = element.findall('.//content')
+        if content_elements:
+            # Get text from the last content element (most specific)
+            text = content_elements[-1].text
+            if text and text.strip():
+                return text.strip()
+        
+        # Fallback to element text
+        text = element.text
+        if text and text.strip():
+            return text.strip()
+        
+        # If no direct text, try to get all text content
+        all_text = ''.join(element.itertext()).strip()
+        return all_text if all_text else "-"
     
     def _build_sections_from_clinical_arrays(self, clinical_arrays: Dict[str, List]) -> List[Dict[str, Any]]:
         """
