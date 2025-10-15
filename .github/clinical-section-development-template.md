@@ -80,6 +80,8 @@ Document which view processor method is used and how it processes the informatio
    - **Verify Headers**: Check headers have correct `'label'` property for template compatibility
    - **Verify Row Data**: Ensure rows contain `'data'` wrapper with proper value objects
    - **Common Pitfall**: Empty table cells - implement narrative text parsing as fallback
+   - **Template Compatibility**: Ensure enhanced clinical_arrays are passed to template compatibility layer
+   - **Enhanced CDA Integration**: Verify enhanced parsing results reach template through clinical_arrays parameter
 
 #### **Phase 3: UI Integration Documentation**
 
@@ -166,9 +168,13 @@ Based on the analysis, refine and improve this process guide:
    - **❌ Don't**: Use `'display'` property in headers (templates expect `'label'`)  
    - **❌ Don't**: Create flat row structures (templates expect `row.data.field` pattern)
    - **❌ Don't**: Skip Enhanced CDA validation (always verify parser working first)
+   - **❌ Don't**: Forget template compatibility layer - enhanced parsing must reach templates
+   - **❌ Don't**: Call template compatibility with original sections when enhanced clinical_arrays exist
    - **✅ Do**: Parse narrative paragraphs for primary data
    - **✅ Do**: Use table data for supplementary information (dates, timing)
    - **✅ Do**: Test each step of data flow independently
+   - **✅ Do**: Pass enhanced clinical_arrays to template compatibility when available
+   - **✅ Do**: Verify enhanced data overwrites placeholder data in template context
 
 #### **Phase 6: Implementation Guidelines**
 
@@ -231,7 +237,9 @@ UI showing "Unknown" or empty data?
 │               ├── NO → Change 'display' to 'label' 
 │               └── YES → Rows have 'data' wrapper?
 │                   ├── NO → Add row data wrapper
-│                   └── YES → Check XML parsing logic
+│                   └── YES → Enhanced parsing reaching template?
+│                       ├── NO → Fix template compatibility layer
+│                       └── YES → Check XML parsing logic
 └── NO → Section working correctly ✓
 ```
 
@@ -277,7 +285,9 @@ This prompt template was used to document the complete allergies section process
 - ✅ **CTS integration** with formatted codes for terminology resolution
 - ✅ **UI rendering** in beautiful, accessible clinical tables
 
-### **Real-World Case Study: Diana Ferreira Allergies**
+### **Real-World Case Studies**
+
+#### **Case Study 1: Diana Ferreira Allergies**
 
 **Problem**: Enhanced CDA XML Parser working (696 codes) but UI showing "Allergen (Code: Unknown)"
 
@@ -302,6 +312,35 @@ This prompt template was used to document the complete allergies section process
 - Lactose (Food allergy) → Diarrhea [since 1983-05-05]  
 - Acetylsalicylic Acid (Medication allergy) → Asthma [from 1994 until 2010]
 - Latex (Allergy) → Urticaria [since 1990-01-10]
+
+#### **Case Study 2: Diana Ferreira Medical Problems**
+
+**Problem**: Enhanced CDA XML Parser working (6 real conditions) but UI showing "Medical Problem, Clinical finding, -, -, -" placeholder data
+
+**Root Cause Analysis**:
+1. ✅ Enhanced CDA XML Parser: Working correctly, extracting problems with structured entry parsing
+2. ✅ View Processor: `_parse_problem_list_xml` correctly parsing 6 real conditions 
+3. ❌ Template Compatibility: Enhanced clinical_arrays not reaching template compatibility layer
+4. ❌ Data Flow: Original sections passed to template instead of enhanced clinical_arrays
+
+**Solution Implementation**:
+1. **Enhanced Template Compatibility**: Modified `_add_template_compatibility_variables` to accept enhanced clinical_arrays parameter
+   ```python
+   def _add_template_compatibility_variables(self, context, sections, enhanced_clinical_arrays=None):
+   ```
+2. **Data Flow Priority**: Use enhanced clinical_arrays when available, fall back to context data
+3. **Integration Fix**: Pass enhanced clinical_arrays from _enhance_sections_with_updated_parsing method
+4. **Template Context**: Enhanced parsing results properly override placeholder data
+
+**Final Result**: 6 real medical problems + 1 remaining placeholder displayed correctly
+- Predominantly allergic asthma (Clinical finding, Active)
+- Postprocedural hypothyroidism (Clinical finding, Active)  
+- Other specified cardiac arrhythmias (Clinical finding, Active)
+- Type 2 diabetes mellitus (Clinical finding, Active)
+- Severe pre-eclampsia (Problem, Active, Severe)
+- Acute tubulo-interstitial nephritis (Problem, Active, Moderate To Severe)
+
+**Key Learning**: Template compatibility layer must receive enhanced parsing results, not original section data.
 
 ---
 
