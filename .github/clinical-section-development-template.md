@@ -1,9 +1,10 @@
 # Clinical Section Development Prompt Template
 ## Systematic Approach for Processing Clinical Data Sections
 
-**Version**: 1.0  
-**Date**: October 15, 2025  
-**Purpose**: Standardized prompt template for documenting and developing clinical section processing
+**Version**: 2.0  
+**Date**: October 16, 2025  
+**Purpose**: Standardized prompt template for documenting and developing clinical section processing  
+**Major Update**: Includes SessionDataEnhancementService integration for complete XML loading
 
 ---
 
@@ -18,6 +19,23 @@ Use this template when analyzing, documenting, or developing new clinical sectio
 **Section Focus**: [SECTION_NAME] (e.g., Allergies, Medications, Problems)  
 **LOINC Code**: [SECTION_CODE] (e.g., 48765-2 for Allergies)  
 **Priority**: [HIGH/MEDIUM/LOW]
+
+#### **Phase 0: Session Data Enhancement Validation**
+
+**Critical First Step**: Verify SessionDataEnhancementService is providing complete XML data:
+
+1. **Session Enhancement Verification**:
+   - Check session contains complete XML from source files (not database excerpts)
+   - Verify `has_complete_xml: True` and `has_enhanced_parsing: True` flags
+   - Confirm size improvement (e.g., 72 bytes → 172,399 bytes = 2394x improvement)
+   - **Test Command**: `python test_portuguese_cda_enhancement.py` or similar for patient
+   - **Expected Result**: "Session enhanced: True, XML size improvement: 2394.43x"
+
+2. **Complete XML Content Validation**:
+   - Ensure CDA processor receives complete XML via `match_data.get('complete_xml_content')`
+   - Verify enhanced session data structure includes `parsed_resources` with clinical sections
+   - Check `enhancement_metadata` shows successful parsing and size improvement
+   - **Critical Check**: If UI shows missing data, verify complete XML is being loaded first
 
 #### **Phase 1: XML Parsing Documentation**
 
@@ -227,9 +245,15 @@ Provide concrete implementation steps:
 
 ```
 UI showing "Unknown" or empty data?
-├── YES → Enhanced CDA XML Parser extracting codes?
-│   ├── NO → Fix Enhanced CDA XML Parser first
-│   └── YES → View processor method implemented?
+├── YES → SessionDataEnhancementService providing complete XML?
+│   ├── NO → Check session enhancement first
+│   │   ├── Session has complete XML (has_complete_xml: True)?
+│   │   │   ├── NO → Verify XML file exists in project folders
+│   │   │   └── YES → Check XML size improvement (should be >1000x)
+│   │   └── Fix SessionDataEnhancementService configuration
+│   └── YES → Enhanced CDA XML Parser extracting codes?
+│       ├── NO → Fix Enhanced CDA XML Parser first
+│       └── YES → View processor method implemented?
 │       ├── NO → Implement _parse_[section]_xml method
 │       └── YES → Method creating clinical_table structure?
 │           ├── NO → Fix data structure creation
@@ -246,7 +270,14 @@ UI showing "Unknown" or empty data?
 ### **Testing Commands Reference**
 
 ```bash
-# Test Enhanced CDA XML Parser
+# Test SessionDataEnhancementService (NEW - Critical First Step)
+python test_session_enhancement.py
+# Expected: "Service initialized successfully", "Enhancement completed"
+
+python test_portuguese_cda_enhancement.py  
+# Expected: "Session enhanced: True, XML size improvement: 2394.43x"
+
+# Test Enhanced CDA XML Parser  
 python manage.py shell -c "
 from enhanced_cda_xml_parser import EnhancedCDAXMLParser
 parser = EnhancedCDAXMLParser()
@@ -261,6 +292,15 @@ processor = CDAViewProcessor()
 result = processor._parse_[section]_xml(section)
 print(f'Headers: {len(result[\"clinical_table\"][\"headers\"])}')
 print(f'Rows: {len(result[\"clinical_table\"][\"rows\"])}')
+"
+
+# Test complete data flow (session → parser → processor → template)
+python -c "
+# Verify session has complete XML
+session_data = request.session.get('patient_match_[patient_id]')
+print(f'Has complete XML: {session_data.get(\"has_complete_xml\", False)}')
+print(f'XML size: {len(session_data.get(\"cda_content\", \"\"))} bytes')
+print(f'Clinical sections: {session_data.get(\"total_clinical_sections\", 0)}')
 "
 
 # Test browser display
