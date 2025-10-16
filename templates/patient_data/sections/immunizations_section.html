@@ -91,7 +91,7 @@
                                             {% for code in cell_data|safe_get:"codes" %}
                                             <span class="badge bg-success me-1 mb-1"
                                                 title="{% firstof code.system }}: {{ code.code }}">
-                                                {{ code.display_name code.code %}
+                                                {% code.display_name code.code %}
                                             </span>
                                             {% endfor %}
                                         </div>
@@ -135,7 +135,7 @@
 
             {# Original Content Tab #}
             <div id="immunizations_{{ section_index }}_original" class="clinical-tab-content">
-                {% include 'patient_data/sections/original_content.html' %>
+                {% include 'patient_data/sections/original_content.html' %}
             </div>
         </div>
 

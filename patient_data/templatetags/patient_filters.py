@@ -637,30 +637,45 @@ def extract_section_title(title_data, prefer="translated"):
         prefer: Which version to prefer ('translated', 'coded', 'original')
 
     Returns:
-        Clean section title string
+        Clean section title string (marked as safe if HTML content detected)
     """
+    from django.utils.safestring import mark_safe
+    
     if not title_data:
         return "Clinical Section"
 
-    # If it's already a string, return it
+    # If it's already a string, check if it's HTML and mark as safe if needed
     if isinstance(title_data, str):
+        if '<div' in title_data and 'table-cell-enhanced' in title_data:
+            return mark_safe(title_data)
         return title_data
 
     # If it's a dictionary, extract the preferred version
     if isinstance(title_data, dict):
+        result = None
+        
         # Try preferred version first
         if prefer in title_data and title_data[prefer]:
-            return str(title_data[prefer])
-
-        # Fallback order: translated -> coded -> original -> any available
-        for key in ["translated", "coded", "original"]:
-            if key in title_data and title_data[key]:
-                return str(title_data[key])
-
-        # If none of the standard keys work, try any available key
-        for key, value in title_data.items():
-            if value:
-                return str(value)
+            result = str(title_data[prefer])
+        else:
+            # Fallback order: translated -> coded -> original -> any available
+            for key in ["translated", "coded", "original"]:
+                if key in title_data and title_data[key]:
+                    result = str(title_data[key])
+                    break
+            
+            # If none of the standard keys work, try any available key
+            if not result:
+                for key, value in title_data.items():
+                    if value:
+                        result = str(value)
+                        break
+        
+        # Check if result contains HTML and mark as safe if needed
+        if result and '<div' in result and 'table-cell-enhanced' in result:
+            return mark_safe(result)
+        elif result:
+            return result
 
     # Final fallback
     return "Clinical Section"
