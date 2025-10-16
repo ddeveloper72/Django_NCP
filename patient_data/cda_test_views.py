@@ -242,7 +242,7 @@ def smart_patient_search_view(request, patient_id):
         print(f"Search completed. Found {len(matches) if matches else 0} matches")
 
         if matches:
-            # Store the search results in session for patient_details_view
+            # Create initial match data (traditional structure)
             match_data = {
                 "patient_data": {
                     "given_name": matches[0].given_name,
@@ -270,7 +270,30 @@ def smart_patient_search_view(request, patient_id):
                 "search_timestamp": timezone.now().isoformat(),
             }
 
-            # Store in session using the same key format as regular searches
+            # ENHANCEMENT: Load complete XML resources from source files
+            print(f"=== ENHANCING SESSION WITH COMPLETE XML RESOURCES ===")
+            try:
+                from .services.session_data_enhancement_service import SessionDataEnhancementService
+                enhancement_service = SessionDataEnhancementService()
+                
+                # Enhance match_data with complete XML and all clinical resources
+                enhanced_match_data = enhancement_service.enhance_session_with_complete_xml(
+                    match_data, patient_id, target_patient["country_code"]
+                )
+                
+                # Log enhancement results
+                enhancement_summary = enhancement_service.get_enhanced_session_summary(enhanced_match_data)
+                print(f"Enhancement completed: {enhancement_summary}")
+                logger.info(f"Session enhanced for patient {patient_id}: {enhancement_summary}")
+                
+                match_data = enhanced_match_data
+                
+            except Exception as e:
+                logger.error(f"Session enhancement failed, using original data: {e}")
+                print(f"=== SESSION ENHANCEMENT FAILED: {e} ===")
+                # Continue with original match_data
+
+            # Store enhanced session data 
             session_key = f"patient_match_{patient_id}"
             request.session[session_key] = match_data
 
