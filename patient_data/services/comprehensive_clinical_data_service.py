@@ -286,6 +286,13 @@ class ComprehensiveClinicalDataService:
                     f"[CLINICAL ARRAYS] Enhanced parser: med={len([m for m in clinical_arrays['medications'] if enhanced_medications_found])}, CDA Parser: med={len([m for m in clinical_arrays['medications'] if not enhanced_medications_found])}, all={len(clinical_arrays['allergies'])}, prob={len(clinical_arrays['problems'])}"
                 )
 
+            # CRITICAL: Fix template compatibility for medication objects
+            # Template expects .coded/.translated structure but comprehensive service creates .code/.displayName structure
+            self._fix_medication_template_compatibility(clinical_arrays["medications"])
+            
+            # CRITICAL: Clean up data quality issues
+            self._remove_duplicate_and_placeholder_data(clinical_arrays)
+
             # If we have fewer items from both CDA parser and enhanced parser but sections exist, use section count as fallback
             total_clinical_items = sum(len(arr) for arr in clinical_arrays.values())
             if total_clinical_items == 0 and sections_found:
@@ -1370,6 +1377,162 @@ class ComprehensiveClinicalDataService:
         medication_data['name'] = display_name  # For template compatibility
         
         return medication_data
+
+    def _fix_medication_template_compatibility(self, medications: List) -> None:
+        """Fix medication object structure for template compatibility
+        
+        Template expects: med.route.coded, med.route.translated
+        But service creates: med.route = {'code': 'xxx', 'displayName': 'yyy'}
+        
+        Need to convert dictionary structure to object-like structure or add missing keys
+        """
+        for medication in medications:
+            if not medication:
+                continue
+                
+            # Handle both dictionary and object-like medication structures
+            self._fix_medication_attribute_compatibility(medication, 'route')
+            self._fix_medication_attribute_compatibility(medication, 'pharmaceutical_form')
+            self._fix_medication_attribute_compatibility(medication, 'active_ingredients')
+            self._fix_medication_attribute_compatibility(medication, 'schedule')
+            
+            logger.info(f"[TEMPLATE_COMPAT] Fixed medication template compatibility for: {getattr(medication, 'name', getattr(medication, 'medication_name', 'Unknown'))}")
+    
+    def _fix_medication_attribute_compatibility(self, medication, attribute_name: str) -> None:
+        """Fix individual medication attribute for template compatibility"""
+        try:
+            # Import DotDict here to avoid circular imports
+            from patient_data.services.enhanced_cda_xml_parser import DotDict
+            
+            # Check if medication has this attribute (object-style access)
+            if hasattr(medication, attribute_name):
+                attr_value = getattr(medication, attribute_name, None)
+                
+                if isinstance(attr_value, dict):
+                    # Convert dictionary structure: {'code': 'xxx', 'displayName': 'yyy'} 
+                    # to include: {'code': 'xxx', 'displayName': 'yyy', 'coded': 'xxx', 'translated': 'yyy'}
+                    if 'code' in attr_value and 'coded' not in attr_value:
+                        attr_value['coded'] = attr_value.get('code', '')
+                        
+                    if ('displayName' in attr_value or 'display_name' in attr_value) and 'translated' not in attr_value:
+                        attr_value['translated'] = attr_value.get('displayName', attr_value.get('display_name', ''))
+                    
+                    # CRITICAL FIX: Convert nested dictionary to DotDict for template dot notation access
+                    if not isinstance(attr_value, DotDict):
+                        dotdict_attr_value = DotDict(attr_value)
+                        setattr(medication, attribute_name, dotdict_attr_value)
+                        logger.info(f"[TEMPLATE_COMPAT] Converted {attribute_name} to DotDict for template access: {dotdict_attr_value}")
+                    else:
+                        logger.info(f"[TEMPLATE_COMPAT] Fixed {attribute_name} structure: {attr_value}")
+                    
+                elif isinstance(attr_value, str):
+                    # Convert string to DotDict structure with coded/translated
+                    new_attr_value = DotDict({
+                        'coded': attr_value,
+                        'translated': attr_value
+                    })
+                    setattr(medication, attribute_name, new_attr_value)
+                    logger.info(f"[TEMPLATE_COMPAT] Converted {attribute_name} string to DotDict: {new_attr_value}")
+            
+            # CRITICAL: Also check dictionary-style access for CDA Parser medications
+            elif isinstance(medication, dict) and attribute_name in medication:
+                attr_value = medication[attribute_name]
+                
+                if isinstance(attr_value, dict):
+                    # Convert dictionary structure: {'code': 'xxx', 'displayName': 'yyy'} 
+                    # to include: {'code': 'xxx', 'displayName': 'yyy', 'coded': 'xxx', 'translated': 'yyy'}
+                    if 'code' in attr_value and 'coded' not in attr_value:
+                        attr_value['coded'] = attr_value.get('code', '')
+                        
+                    if ('displayName' in attr_value or 'display_name' in attr_value) and 'translated' not in attr_value:
+                        attr_value['translated'] = attr_value.get('displayName', attr_value.get('display_name', ''))
+                    
+                    # CRITICAL FIX: Convert nested dictionary to DotDict for template dot notation access
+                    if not isinstance(attr_value, DotDict):
+                        dotdict_attr_value = DotDict(attr_value)
+                        medication[attribute_name] = dotdict_attr_value
+                        logger.info(f"[TEMPLATE_COMPAT] Converted dict {attribute_name} to DotDict for template access: {dotdict_attr_value}")
+                    else:
+                        logger.info(f"[TEMPLATE_COMPAT] Fixed dict {attribute_name} structure: {attr_value}")
+                    
+                elif isinstance(attr_value, str):
+                    # Convert string to DotDict structure with coded/translated
+                    new_attr_value = DotDict({
+                        'coded': attr_value,
+                        'translated': attr_value
+                    })
+                    medication[attribute_name] = new_attr_value
+                    logger.info(f"[TEMPLATE_COMPAT] Converted dict {attribute_name} string to DotDict: {new_attr_value}")
+                    
+            # Also check dictionary-style access for medications that might be dicts with 'data' key
+            elif isinstance(medication, dict) and 'data' in medication:
+                med_data = medication['data']
+                if attribute_name in med_data:
+                    attr_value = med_data[attribute_name]
+                    
+                    if isinstance(attr_value, dict):
+                        if 'code' in attr_value and 'coded' not in attr_value:
+                            attr_value['coded'] = attr_value.get('code', '')
+                            
+                        if ('displayName' in attr_value or 'display_name' in attr_value) and 'translated' not in attr_value:
+                            attr_value['translated'] = attr_value.get('displayName', attr_value.get('display_name', ''))
+                        
+                        logger.info(f"[TEMPLATE_COMPAT] Fixed {attribute_name} in data structure: {attr_value}")
+                        
+        except Exception as e:
+            logger.warning(f"[TEMPLATE_COMPAT] Error fixing {attribute_name}: {e}")
+            pass
+
+    def _remove_duplicate_and_placeholder_data(self, clinical_arrays: Dict[str, List]) -> None:
+        """Remove duplicate entries and placeholder data from clinical arrays"""
+        
+        # Remove placeholder medications if real medications exist
+        real_medications = [m for m in clinical_arrays["medications"] if getattr(m, "source", None) != "section_fallback"]
+        if real_medications:
+            # Keep only real medications, remove placeholders
+            clinical_arrays["medications"] = real_medications
+            logger.info(f"[DATA_CLEANUP] Removed placeholder medications, kept {len(real_medications)} real medications")
+        
+        # Deduplicate problems by name/display_name to prevent repeating entries
+        seen_problems = set()
+        unique_problems = []
+        for problem in clinical_arrays["problems"]:
+            # Create a unique key from problem name/display
+            problem_key = None
+            if isinstance(problem, dict):
+                if 'data' in problem and isinstance(problem['data'], dict):
+                    # Handle enhanced format
+                    problem_key = problem['data'].get('problem_name', problem['data'].get('display_name', ''))
+                else:
+                    # Handle direct format
+                    problem_key = problem.get('problem_name', problem.get('display_name', problem.get('name', '')))
+            
+            if problem_key and problem_key not in seen_problems:
+                seen_problems.add(problem_key)
+                unique_problems.append(problem)
+                
+        if len(unique_problems) != len(clinical_arrays["problems"]):
+            logger.info(f"[DATA_CLEANUP] Deduplicated problems: {len(clinical_arrays['problems'])} -> {len(unique_problems)}")
+            clinical_arrays["problems"] = unique_problems
+
+        # Remove empty or invalid medication entries
+        valid_medications = []
+        for med in clinical_arrays["medications"]:
+            # Check if medication has meaningful data
+            has_name = False
+            if isinstance(med, dict):
+                if 'data' in med and isinstance(med['data'], dict):
+                    med_data = med['data']
+                    has_name = bool(med_data.get('medication_name') or med_data.get('substance_name') or med_data.get('display_name'))
+                else:
+                    has_name = bool(med.get('medication_name') or med.get('substance_name') or med.get('display_name') or med.get('name'))
+            
+            if has_name:
+                valid_medications.append(med)
+            else:
+                logger.info(f"[DATA_CLEANUP] Removed invalid medication entry: {med}")
+                
+        clinical_arrays["medications"] = valid_medications
 
     def _extract_enhanced_problems(self, raw_problems: List[Dict]) -> List[Dict]:
         """Extract rich clinical problem data from CDA parser results"""
