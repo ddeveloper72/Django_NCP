@@ -3040,6 +3040,25 @@ def patient_details_view(request, patient_id):
 
         # Add clinical arrays to context if available (unpack for template compatibility)
         if clinical_arrays:
+            # DEBUG: Log medication data structure for troubleshooting
+            medications = clinical_arrays["medications"]
+            logger.info(f"[DEBUG_MEDICATIONS] Count: {len(medications)}")
+            if medications:
+                for i, med in enumerate(medications[:3], 1):  # Log first 3 medications
+                    logger.info(f"[DEBUG_MED_{i}] Keys: {list(med.keys())}")
+                    logger.info(f"[DEBUG_MED_{i}] medication_name: {med.get('medication_name', 'MISSING')}")
+                    logger.info(f"[DEBUG_MED_{i}] name: {med.get('name', 'MISSING')}")
+                    logger.info(f"[DEBUG_MED_{i}] display_name: {med.get('display_name', 'MISSING')}")
+                    if 'data' in med:
+                        data = med['data']
+                        logger.info(f"[DEBUG_MED_{i}] data.medication_name: {data.get('medication_name', 'MISSING')}")
+                        logger.info(f"[DEBUG_MED_{i}] data.dose_quantity: {data.get('dose_quantity', 'MISSING')}")
+                        logger.info(f"[DEBUG_MED_{i}] data.route_display: {data.get('route_display', 'MISSING')}")
+                        logger.info(f"[DEBUG_MED_{i}] data.pharmaceutical_form: {data.get('pharmaceutical_form', 'MISSING')}")
+                        logger.info(f"[DEBUG_MED_{i}] data.ingredient_display: {data.get('ingredient_display', 'MISSING')}")
+                    else:
+                        logger.info(f"[DEBUG_MED_{i}] NO DATA FIELD")
+            
             context.update(
                 {
                     "medications": clinical_arrays["medications"],
@@ -3066,6 +3085,22 @@ def patient_details_view(request, patient_id):
             logger.info(
                 f"[PATIENT_DETAILS] Added {total_clinical_items} clinical array items to context for patient {patient_id}"
             )
+            
+            # DEBUG: Log medication structure for troubleshooting
+            medications = clinical_arrays.get("medications", [])
+            logger.info(f"[DEBUG_MEDICATIONS] Patient {patient_id} - Medication count: {len(medications)}")
+            if medications:
+                first_med = medications[0]
+                logger.info(f"[DEBUG_MEDICATIONS] First medication structure keys: {list(first_med.keys())}")
+                logger.info(f"[DEBUG_MEDICATIONS] medication_name: {first_med.get('medication_name', 'MISSING')}")
+                logger.info(f"[DEBUG_MEDICATIONS] name: {first_med.get('name', 'MISSING')}")
+                if 'data' in first_med:
+                    data_fields = first_med['data']
+                    logger.info(f"[DEBUG_MEDICATIONS] data fields: {list(data_fields.keys())}")
+                    logger.info(f"[DEBUG_MEDICATIONS] data.medication_name: {data_fields.get('medication_name', 'MISSING')}")
+                    logger.info(f"[DEBUG_MEDICATIONS] data.dose_quantity: {data_fields.get('dose_quantity', 'MISSING')}")
+                else:
+                    logger.info(f"[DEBUG_MEDICATIONS] No 'data' field found")
         else:
             # Ensure clinical arrays exist even if empty for template compatibility
             context.update(

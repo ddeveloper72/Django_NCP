@@ -289,11 +289,9 @@ class ComprehensiveClinicalDataService:
             # CRITICAL: Fix template compatibility for medication objects
             # Template expects .coded/.translated structure but comprehensive service creates .code/.displayName structure
             self._fix_medication_template_compatibility(clinical_arrays["medications"])
-            
-            # CRITICAL: Clean up data quality issues
-            self._remove_duplicate_and_placeholder_data(clinical_arrays)
 
-            # If we have fewer items from both CDA parser and enhanced parser but sections exist, use section count as fallback
+            # CRITICAL: Clean up data quality issues
+            self._remove_duplicate_and_placeholder_data(clinical_arrays)            # If we have fewer items from both CDA parser and enhanced parser but sections exist, use section count as fallback
             total_clinical_items = sum(len(arr) for arr in clinical_arrays.values())
             if total_clinical_items == 0 and sections_found:
                 logger.info(
@@ -1396,6 +1394,10 @@ class ComprehensiveClinicalDataService:
             self._fix_medication_attribute_compatibility(medication, 'active_ingredients')
             self._fix_medication_attribute_compatibility(medication, 'schedule')
             
+            # Fix specific dosage and schedule fields for template compatibility
+            self._fix_dosage_field_compatibility(medication)
+            self._fix_schedule_field_compatibility(medication)
+            
             logger.info(f"[TEMPLATE_COMPAT] Fixed medication template compatibility for: {getattr(medication, 'name', getattr(medication, 'medication_name', 'Unknown'))}")
     
     def _fix_medication_attribute_compatibility(self, medication, attribute_name: str) -> None:
@@ -1764,3 +1766,102 @@ class ComprehensiveClinicalDataService:
         except Exception as e:
             logger.warning(f"Error formatting legacy problem: {e}")
             return {}
+
+    def _fix_dosage_field_compatibility(self, medication) -> None:
+        """Fix dosage field compatibility for template access"""
+        try:
+            # Create dose_quantity from doseQuantity if it exists
+            dose_quantity_data = None
+            if hasattr(medication, 'doseQuantity'):
+                dose_quantity_data = getattr(medication, 'doseQuantity', None)
+            elif isinstance(medication, dict) and 'doseQuantity' in medication:
+                dose_quantity_data = medication.get('doseQuantity')
+                
+            if dose_quantity_data:
+                # Handle complex doseQuantity structures
+                if isinstance(dose_quantity_data, dict):
+                    if 'low' in dose_quantity_data and 'high' in dose_quantity_data:
+                        # Range: e.g., 1-2 tablets
+                        low_val = dose_quantity_data['low'].get('value', '')
+                        high_val = dose_quantity_data['high'].get('value', '')
+                        unit = dose_quantity_data['low'].get('unit', dose_quantity_data['high'].get('unit', ''))
+                        dose_display = f"{low_val}-{high_val} {unit}".strip()
+                    elif 'value' in dose_quantity_data:
+                        # Single value
+                        value = dose_quantity_data.get('value', '')
+                        unit = dose_quantity_data.get('unit', '')
+                        dose_display = f"{value} {unit}".strip()
+                    else:
+                        dose_display = str(dose_quantity_data)
+                else:
+                    dose_display = str(dose_quantity_data)
+                
+                # Set dose_quantity for template access
+                if hasattr(medication, '__setattr__'):
+                    setattr(medication, 'dose_quantity', dose_display)
+                elif isinstance(medication, dict):
+                    medication['dose_quantity'] = dose_display
+                
+                logger.info(f"[DOSAGE_COMPAT] Created dose_quantity: {dose_display}")
+                        
+        except Exception as e:
+            logger.warning(f"Error fixing dosage field compatibility: {e}")
+
+    def _fix_schedule_field_compatibility(self, medication) -> None:
+        """Fix schedule field compatibility for template access"""
+        try:
+            # Import DotDict here to avoid circular imports
+            from patient_data.services.enhanced_cda_xml_parser import DotDict
+            
+            # Create schedule from event_code or effective_time if it exists
+            schedule_display = None
+            
+            # Try event_code first (common for frequency)
+            if hasattr(medication, 'event_code'):
+                event_code = getattr(medication, 'event_code', None)
+            elif isinstance(medication, dict) and 'event_code' in medication:
+                event_code = medication.get('event_code')
+            else:
+                event_code = None
+                
+            if event_code:
+                # Map common event codes to readable schedule
+                if event_code == 'ACM':
+                    schedule_display = 'Before breakfast'
+                else:
+                    schedule_display = event_code
+                    
+            # If no schedule found, try to extract from effective_time
+            if not schedule_display:
+                effective_time = None
+                if hasattr(medication, 'effective_time'):
+                    effective_time = getattr(medication, 'effective_time', None)
+                elif isinstance(medication, dict) and 'effective_time' in medication:
+                    effective_time = medication.get('effective_time')
+                    
+                if effective_time and isinstance(effective_time, list):
+                    for time_entry in effective_time:
+                        if isinstance(time_entry, dict) and 'event_code' in time_entry:
+                            event_code = time_entry['event_code']
+                            if event_code == 'ACM':
+                                schedule_display = 'Before breakfast'
+                            else:
+                                schedule_display = event_code
+                            break
+            
+            # Set schedule for template access if found
+            if schedule_display:
+                schedule_obj = DotDict({
+                    'coded': schedule_display,
+                    'translated': schedule_display
+                })
+                
+                if hasattr(medication, '__setattr__'):
+                    setattr(medication, 'schedule', schedule_obj)
+                elif isinstance(medication, dict):
+                    medication['schedule'] = schedule_obj
+                
+                logger.info(f"[SCHEDULE_COMPAT] Created schedule: {schedule_display}")
+                        
+        except Exception as e:
+            logger.warning(f"Error fixing schedule field compatibility: {e}")

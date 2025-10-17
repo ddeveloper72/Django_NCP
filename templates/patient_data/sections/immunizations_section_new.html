@@ -1,0 +1,47 @@
+{# Immunizations Section Template - Inherits from clinical_section_base.html #}
+{% extends 'patient_data/base/clinical_section_base.html' %}
+{% load patient_filters %}
+
+{# Section Configuration #}
+{% block section_icon %}fa-solid fa-syringe{% endblock %}
+{% block header_class %}bg-primary{% endblock %}
+{% block section_title %}Immunizations{% endblock %}
+{% block table_header_class %}table-primary{% endblock %}
+
+{# Empty State Configuration #}
+{% block empty_icon %}fa-solid fa-syringe{% endblock %}
+{% block empty_title %}No Immunizations{% endblock %}
+{% block empty_message %}No immunization records available for this patient.{% endblock %}
+
+{# Desktop Table Headers #}
+{% block table_headers %}
+<th scope="col" class="fw-bold">
+    <i class="fa-solid fa-syringe me-2"></i>Vaccine
+</th>
+<th scope="col" class="fw-bold d-none d-lg-table-cell">
+    <i class="fa-solid fa-calendar me-2"></i>Date
+</th>
+<th scope="col" class="fw-bold d-none d-xl-table-cell">
+    <i class="fa-solid fa-info-circle me-2"></i>Status
+</th>
+{% endblock table_headers %}
+
+{# Mobile Card Content #}
+{% block mobile_card_content %}
+<div class="immunization-name fw-bold text-primary mb-2">
+    {% if item.vaccine_name %}{{ item.vaccine_name }}{% elif item.name %}{{ item.name }}{% elif item.display_name %}{{ item.display_name }}{% else %}Immunization{% endif %}
+</div>
+<div class="small text-muted">
+    {% if item.date %}Date: {{ item.date }}{% endif %}
+    {% if item.status %} | Status: {{ item.status }}{% endif %}
+</div>
+{% endblock mobile_card_content %}
+
+{# Desktop Table Row Content #}
+{% block table_row_content %}
+<td class="fw-medium">
+    {% if item.vaccine_name %}{{ item.vaccine_name }}{% elif item.name %}{{ item.name }}{% elif item.display_name %}{{ item.display_name }}{% else %}Immunization{% endif %}
+</td>
+<td class="d-none d-lg-table-cell text-muted">{{ item.date|default:'Not specified' }}</td>
+<td class="d-none d-xl-table-cell text-muted">{{ item.status|default:'Administered' }}</td>
+{% endblock table_row_content %}

@@ -384,10 +384,23 @@ class CDAViewProcessor:
                     context['has_clinical_data'] = bool(clinical_arrays)
                     logger.info(f"[CDA PROCESSOR] Added clinical arrays: {list(clinical_arrays.keys())}")
                     
-                    # CRITICAL FIX: Use enhanced clinical_arrays for template compatibility
-                    # This ensures our enhanced parsing data (6 real problems) reaches the template
-                    logger.info("[CDA PROCESSOR] Using enhanced clinical_arrays for template compatibility")
-                    self._add_template_compatibility_variables(context, sections, clinical_arrays)
+                    # CRITICAL FIX: Check if parsed_data has enhanced clinical arrays and use those instead
+                    if parsed_data.get('clinical_arrays'):
+                        enhanced_arrays = parsed_data['clinical_arrays']
+                        logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Found enhanced clinical arrays in parsed_data with keys: {list(enhanced_arrays.keys())} ***")
+                        if enhanced_arrays.get('medications'):
+                            logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Enhanced arrays have {len(enhanced_arrays['medications'])} medications ***")
+                            # DEBUG: Log first few medication details
+                            for i, med in enumerate(enhanced_arrays['medications'][:3]):
+                                name = med.get('name') or med.get('medication_name') or med.get('display_name', 'NO_NAME')
+                                logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Enhanced med {i}: name='{name}' ***")
+                        # Use enhanced clinical arrays for template compatibility instead of extracted ones
+                        logger.info("[CDA PROCESSOR] Using enhanced clinical_arrays from parsed_data for template compatibility")
+                        self._add_template_compatibility_variables(context, sections, enhanced_arrays)
+                    else:
+                        # FALLBACK: Use extracted clinical_arrays for template compatibility
+                        logger.info("[CDA PROCESSOR] Using extracted clinical_arrays for template compatibility")
+                        self._add_template_compatibility_variables(context, sections, clinical_arrays)
                 else:
                     # Fallback to original sections if no enhanced data
                     self._add_template_compatibility_variables(context, sections)
@@ -798,9 +811,16 @@ class CDAViewProcessor:
                 
                 # Map specific section codes to template variables
                 if clean_code in ['10160-0', '10164-2']:  # Medication sections
-                    enhanced_section = self._enhance_section_with_clinical_codes(section)
-                    compatibility_vars['medications'].append(enhanced_section)
-                    logger.debug(f"[COMPATIBILITY] Added medication section: {section.get('title', 'Unknown')}")
+                    logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Processing medication section with code {clean_code} ***")
+                    # CRITICAL FIX: Only add medication section if we don't have enhanced clinical arrays
+                    # This prevents duplicate medications from appearing
+                    if not enhanced_clinical_arrays or not enhanced_clinical_arrays.get('medications'):
+                        enhanced_section = self._enhance_section_with_clinical_codes(section)
+                        compatibility_vars['medications'].append(enhanced_section)
+                        logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Added medication section to compatibility_vars (no enhanced arrays) ***")
+                        logger.debug(f"[COMPATIBILITY] Added medication section: {section.get('title', 'Unknown')}")
+                    else:
+                        logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Skipped medication section - using enhanced clinical arrays instead ***")
                 elif clean_code in ['48765-2', '48766-0']:  # Allergy sections
                     enhanced_section = self._enhance_section_with_clinical_codes(section)
                     compatibility_vars['allergies'].append(enhanced_section)
@@ -867,7 +887,44 @@ class CDAViewProcessor:
             if clinical_arrays.get('results'):
                 compatibility_vars['physical_findings'].extend(clinical_arrays['results'])
             if clinical_arrays.get('medications'):
-                compatibility_vars['medications'].extend(clinical_arrays['medications'])
+                logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Adding {len(clinical_arrays['medications'])} medications from clinical_arrays to compatibility_vars ***")
+                
+                # CRITICAL FIX: Clean up medication data before adding to template context
+                cleaned_medications = []
+                for med in clinical_arrays['medications']:
+                    # Ensure we have a proper name
+                    med_name = med.get('name') or med.get('medication_name') or med.get('display_name', 'Unknown Medication')
+                    
+                    # Skip medications with no meaningful name
+                    if med_name in ['NO_NAME', '', None]:
+                        logger.warning(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Skipping medication with no name ***")
+                        continue
+                    
+                    # Ensure medication has required fields but preserve existing data
+                    if not med.get('name'):
+                        med['name'] = med_name
+                    if not med.get('display_name'):
+                        med['display_name'] = med_name
+                    
+                    # CRITICAL: Don't override existing route, dosage, schedule data from CDA parsing
+                    # The CDA parser already extracted: routeCode, doseQuantity, effectiveTime data
+                    # We just need to ensure proper template field mapping
+                    
+                    cleaned_medications.append(med)
+                
+                compatibility_vars['medications'].extend(cleaned_medications)
+                
+                # Log medication names and data structure
+                med_names = [med.get('name', 'NO_NAME') for med in cleaned_medications]
+                logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Clinical arrays medication names (cleaned): {med_names} ***")
+                
+                # Debug first medication's data structure to understand template field mapping
+                if cleaned_medications:
+                    first_med = cleaned_medications[0]
+                    logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: First medication data structure: {list(first_med.keys())} ***")
+                    logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Route data: {first_med.get('route', 'NOT_FOUND')} ***")
+                    logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Dose quantity: {first_med.get('dose_quantity', 'NOT_FOUND')} ***")
+                    logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Schedule data: {first_med.get('schedule', 'NOT_FOUND')} ***")
             if clinical_arrays.get('allergies'):
                 compatibility_vars['allergies'].extend(clinical_arrays['allergies'])
             if clinical_arrays.get('procedures'):
@@ -879,6 +936,13 @@ class CDAViewProcessor:
             logger.info("[COMPATIBILITY] No clinical_arrays available for template compatibility")
         # Add all compatibility variables to context
         context.update(compatibility_vars)
+        
+        # DEBUG: Log final medication count
+        final_med_count = len(context.get('medications', []))
+        logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Final context medications count: {final_med_count} ***")
+        if context.get('medications'):
+            final_med_names = [med.get('name', med.get('display_name', 'NO_NAME')) for med in context['medications'][:3]]
+            logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Final context medication names (first 3): {final_med_names} ***")
         
         # Add flags to hide mandatory sections when corresponding extended sections exist
         additional_sections = compatibility_vars.get('additional_sections', [])
@@ -1726,6 +1790,11 @@ class CDAViewProcessor:
                                     medication_name = med_data.get('medication_name', {}).get('value', 'Unknown')
                                     logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Row {i} medication_name: '{medication_name}' ***")
                                     
+                                    # Debug the actual CDA data structure for dose, route, schedule
+                                    logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Row {i} dose_quantity raw: {med_data.get('dose_quantity', 'NOT_FOUND')} ***")
+                                    logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Row {i} route raw: {med_data.get('route', 'NOT_FOUND')} ***")
+                                    logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Row {i} schedule raw: {med_data.get('schedule', 'NOT_FOUND')} ***")
+                                    
                                     # Override the active_ingredients.translated field with actual medication name
                                     if 'active_ingredients' not in med_data:
                                         med_data['active_ingredients'] = {}
@@ -1735,6 +1804,32 @@ class CDAViewProcessor:
                                     med_data['active_ingredients']['translated'] = medication_name
                                     logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Row {i} FIXED active_ingredients.translated: '{old_translated}' -> '{medication_name}' ***")
                                     
+                                    # CRITICAL FIX: Properly map CDA data structure instead of looking for .value
+                                    # Extract dose quantity from CDA structure: {'low': {'value': '1'}, 'high': {'value': '2'}}
+                                    dose_quantity_str = 'Dose not specified'
+                                    dose_data = med_data.get('dose_quantity', {})
+                                    if isinstance(dose_data, dict):
+                                        low_val = dose_data.get('low', {}).get('value') if isinstance(dose_data.get('low'), dict) else None
+                                        high_val = dose_data.get('high', {}).get('value') if isinstance(dose_data.get('high'), dict) else None
+                                        if low_val and high_val:
+                                            dose_quantity_str = f"{low_val}-{high_val}"
+                                        elif low_val:
+                                            dose_quantity_str = str(low_val)
+                                        elif dose_data.get('value'):  # Fallback to direct value
+                                            dose_quantity_str = str(dose_data['value'])
+                                    
+                                    # Extract route from CDA structure: {'code': '20053000', 'display_name': 'Oral use'}
+                                    route_str = 'Administration route not specified'
+                                    route_data = med_data.get('route', {})
+                                    if isinstance(route_data, dict):
+                                        route_str = route_data.get('display_name') or route_data.get('translated') or route_data.get('value', route_str)
+                                    
+                                    # Extract schedule from CDA structure: {'code': 'ACM', 'display_name': 'Morning'}  
+                                    schedule_str = 'Schedule not specified'
+                                    schedule_data = med_data.get('schedule', {})
+                                    if isinstance(schedule_data, dict):
+                                        schedule_str = schedule_data.get('display_name') or schedule_data.get('translated') or schedule_data.get('value', schedule_str)
+
                                     # Also ensure medication.name field exists for template compatibility
                                     enhanced_medication = {
                                         'display_name': medication_name,
@@ -1742,9 +1837,9 @@ class CDAViewProcessor:
                                         'active_ingredients': med_data.get('active_ingredients', {}).get('value', 'Not specified'),
                                         'pharmaceutical_form': med_data.get('pharmaceutical_form', {}).get('value', 'Tablet'),
                                         'strength': med_data.get('strength', {}).get('value', 'Not specified'),
-                                        'dose_quantity': med_data.get('dose_quantity', {}).get('value', 'Dose not specified'),
-                                        'route': med_data.get('route', {}).get('value', 'Administration route not specified'),
-                                        'schedule': med_data.get('schedule', {}).get('value', 'Schedule not specified'),
+                                        'dose_quantity': dose_quantity_str,  # FIXED: Use properly extracted dose
+                                        'route': route_str,  # FIXED: Use properly extracted route
+                                        'schedule': schedule_str,  # FIXED: Use properly extracted schedule
                                         'period': med_data.get('period', {}).get('value', 'Treatment timing not specified'),
                                         'indication': med_data.get('indication', {}).get('value', 'Medical indication not specified in available data'),
                                         'source': 'enhanced_parsing',
@@ -1754,14 +1849,25 @@ class CDAViewProcessor:
                                     enhanced_medications.append(enhanced_medication)
                             
                             enhanced_clinical_arrays['medications'] = enhanced_medications
-                            logger.info(f"[CDA PROCESSOR] Enhanced medications data: {len(enhanced_medications)} medications from structured parsing")
+                            logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Enhanced medications data: {len(enhanced_medications)} medications from structured parsing ***")
+                            
+                            # Log medication names for verification
+                            med_names = [med.get('name', 'NO_NAME') for med in enhanced_medications]
+                            logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Medication names: {med_names} ***")
             
             # Add enhanced clinical arrays to the Enhanced CDA result for template compatibility
             if enhanced_clinical_arrays:
                 enhanced_clinical_data = clinical_data.copy()
                 enhanced_clinical_data['clinical_arrays'] = enhanced_clinical_arrays
                 
-                # CRITICAL FIX: Update sections with clinical_table structure for template compatibility
+                # DEBUG: Log the enhanced clinical arrays
+                for array_name, array_data in enhanced_clinical_arrays.items():
+                    logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Enhanced {array_name}: {len(array_data)} items ***")
+                    if array_name == 'medications' and array_data:
+                        for i, med in enumerate(array_data[:2]):  # Log first 2 medications
+                            logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Enhanced med {i}: name={med.get('name', 'NO_NAME')}, display_name={med.get('display_name', 'NO_DISPLAY')} ***")
+                            if 'medication' in med:
+                                logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Enhanced med {i} medication.name={med['medication'].get('name', 'NO_MED_NAME')} ***")                # CRITICAL FIX: Update sections with clinical_table structure for template compatibility
                 # Ensure the sections have clinical_table format instead of raw translated content
                 if 'sections' in enhanced_clinical_data:
                     updated_sections = []
@@ -1806,10 +1912,13 @@ class CDAViewProcessor:
                                     'headers': medication_headers,
                                     'rows': medication_rows
                                 },
-                                'entry_count': len(medication_rows)
+                                'entry_count': len(medication_rows),
+                                # CRITICAL: Add structured_entries to trigger enhanced mobile-first template
+                                'structured_entries': enhanced_medications
                             })
                             updated_sections.append(updated_section)
-                            logger.info(f"[CDA PROCESSOR] Updated medication section with {len(medication_rows)} clinical_table rows")
+                            logger.info(f"[CDA PROCESSOR] Updated medication section with {len(medication_rows)} clinical_table rows and {len(enhanced_medications)} structured_entries")
+                        
                         
                         # Update problems section with clinical_table structure  
                         elif clean_code == '11450-4' and 'problems' in enhanced_clinical_arrays:

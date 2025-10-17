@@ -1,0 +1,307 @@
+{# Medications Section Template - Inherits from clinical_section_base.html #}
+{% extends 'patient_data/base/clinical_section_base.html' %}
+{% load patient_filters %}
+{% load medication_filters %}
+
+{# Section Configuration #}
+{% block section_icon %}fa-solid fa-pills{% endblock %}
+{% block header_class %}bg-primary{% endblock %}
+{% block section_title %}Medications{% endblock %}
+{% block table_header_class %}table-primary{% endblock %}
+
+{# Empty State Configuration #}
+{% block empty_icon %}fa-solid fa-pills{% endblock %}
+{% block empty_title %}No Medications Available{% endblock %}
+{% block empty_message %}No medication information is available for this patient.{% endblock %}
+
+{# Desktop Table Headers #}
+{% block table_headers %}
+<th scope="col" class="fw-bold">
+    <i class="fa-solid fa-pills me-2"></i>Medication Name
+</th>
+<th scope="col" class="fw-bold">
+    <i class="fa-solid fa-flask me-2"></i>Active Ingredient
+</th>
+<th scope="col" class="fw-bold d-none d-xl-table-cell">
+    <i class="fa-solid fa-capsules me-2"></i>Form
+</th>
+<th scope="col" class="fw-bold d-none d-lg-table-cell">
+    <i class="fa-solid fa-balance-scale me-2"></i>Dosage
+</th>
+<th scope="col" class="fw-bold d-none d-xl-table-cell">
+    <i class="fa-solid fa-route me-2"></i>Route
+</th>
+<th scope="col" class="fw-bold d-none d-xl-table-cell">
+    <i class="fa-solid fa-clock me-2"></i>Schedule
+</th>
+{% endblock table_headers %}
+
+{# Mobile Card Content #}
+{% block mobile_card_content %}
+<div class="medication-card-header d-flex justify-content-between align-items-start mb-3">
+    <div class="medication-name-section">
+        <h6 class="medication-name text-primary fw-bold mb-1">
+            {% if item.medication_name %}
+                {{ item.medication_name }}
+            {% elif item.name %}
+                {{ item.name }}
+            {% elif item.medication.name %}
+                {{ item.medication.name }}
+            {% else %}
+                Medication
+            {% endif %}
+        </h6>
+        {% if item.active_ingredients %}
+        <div class="medication-code text-muted small">
+            <i class="fa-solid fa-barcode me-1"></i>
+            Code: {{ item.active_ingredients.coded|default:item.active_ingredients }}
+        </div>
+        {% endif %}
+    </div>
+    <div class="medication-actions">
+        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#medication-details-{{ forloop.counter }}" aria-expanded="false">
+            <i class="fa-solid fa-info-circle"></i>
+        </button>
+    </div>
+</div>
+
+{# Active Ingredient Badge #}
+<div class="medication-ingredient mb-2">
+    {% if item.data.ingredient_display %}
+        <span class="badge bg-success fw-normal">{{ item.data.ingredient_display }}</span>
+    {% elif item.active_ingredients.translated %}
+        <span class="badge bg-success fw-normal">{{ item.active_ingredients.translated }}</span>
+    {% elif item.active_ingredients.coded %}
+        <span class="badge bg-success fw-normal">{{ item.active_ingredients.coded }}</span>
+    {% elif item.active_ingredients %}
+        <span class="badge bg-success fw-normal">{{ item.active_ingredients }}</span>
+    {% else %}
+        <span class="badge bg-secondary">Ingredient not specified</span>
+    {% endif %}
+</div>
+
+{# Expandable Medication Details #}
+<div class="collapse" id="medication-details-{{ forloop.counter }}">
+    <div class="medication-details-grid">
+        
+        {# Pharmaceutical Form #}
+        <div class="detail-row d-flex justify-content-between py-2 border-bottom">
+            <span class="detail-label fw-medium">Form:</span>
+            <span class="detail-value">
+                {% if item.data.pharmaceutical_form %}
+                    {{ item.data.pharmaceutical_form }}
+                {% elif item.pharmaceutical_form.display_value %}
+                    {{ item.pharmaceutical_form.display_value }}
+                {% elif item.pharmaceutical_form.value %}
+                    {{ item.pharmaceutical_form.value }}
+                {% elif item.pharmaceutical_form.translated %}
+                    {{ item.pharmaceutical_form.translated }}
+                {% elif item.pharmaceutical_form.coded %}
+                    {{ item.pharmaceutical_form.coded }}
+                {% elif item.pharmaceutical_form %}
+                    {{ item.pharmaceutical_form }}
+                {% else %}
+                    <span class="text-muted">Not specified</span>
+                {% endif %}
+            </span>
+        </div>
+        
+        {# Dosage #}
+        <div class="detail-row d-flex justify-content-between py-2 border-bottom">
+            <span class="detail-label fw-medium">Dosage:</span>
+            <span class="detail-value">
+                {% if item.data.dose_quantity %}
+                    <span class="fw-bold text-success">{{ item.data.dose_quantity }}</span>
+                {% elif item.dose_quantity.display_value %}
+                    <span class="fw-bold text-success">{{ item.dose_quantity.display_value }}</span>
+                {% elif item.dose_quantity.value %}
+                    <span class="fw-bold text-success">{{ item.dose_quantity.value }}</span>
+                {% elif item.dose_quantity %}
+                    <span class="fw-bold text-success">{{ item.dose_quantity }}</span>
+                {% elif item.dose.value %}
+                    <span class="fw-bold text-success">{{ item.dose.value }} {{ item.dose.unit|default:"" }}</span>
+                {% else %}
+                    <span class="text-muted">Not specified</span>
+                {% endif %}
+            </span>
+        </div>
+        
+        {# Administration Route #}
+        <div class="detail-row d-flex justify-content-between py-2 border-bottom">
+            <span class="detail-label fw-medium">Route:</span>
+            <span class="detail-value">
+                {% if item.data.route %}
+                    {{ item.data.route }}
+                {% elif item.route.display_value %}
+                    {{ item.route.display_value }}
+                {% elif item.route.value %}
+                    {{ item.route.value }}
+                {% elif item.route %}
+                    {{ item.route }}
+                {% else %}
+                    <span class="text-muted">Not specified</span>
+                {% endif %}
+            </span>
+        </div>
+        
+        {# Schedule/Frequency #}
+        <div class="detail-row d-flex justify-content-between py-2">
+            <span class="detail-label fw-medium">Schedule:</span>
+            <span class="detail-value">
+                {% if item.data.schedule %}
+                    {{ item.data.schedule }}
+                {% elif item.schedule.display_value %}
+                    {{ item.schedule.display_value }}
+                {% elif item.schedule.value %}
+                    {{ item.schedule.value }}
+                {% elif item.schedule %}
+                    {{ item.schedule }}
+                {% elif item.frequency %}
+                    {{ item.frequency }}
+                {% else %}
+                    <span class="text-muted">Not specified</span>
+                {% endif %}
+            </span>
+        </div>
+        
+    </div>
+</div>
+{% endblock mobile_card_content %}
+
+{# Desktop Table Row Content #}
+{% block table_row_content %}
+{# Medication Name Column #}
+<td class="medication-name-cell">
+    <div class="medication-name-container">
+        <div class="medication-title fw-bold text-primary mb-1">
+            {% if item.medication_name %}
+                {{ item.medication_name }}
+            {% elif item.name %}
+                {{ item.name }}
+            {% elif item.medication.name %}
+                {{ item.medication.name }}
+            {% else %}
+                Medication
+            {% endif %}
+        </div>
+        {% if item.active_ingredients %}
+        <div class="medication-code text-muted small">
+            <i class="fa-solid fa-barcode me-1"></i>
+            Code: {{ item.active_ingredients.coded|default:item.active_ingredients }}
+        </div>
+        {% endif %}
+    </div>
+</td>
+
+{# Active Ingredient Column #}
+<td class="ingredient-cell">
+    {% if item.data.ingredient_display %}
+        <span class="badge bg-success text-wrap fw-normal">{{ item.data.ingredient_display }}</span>
+    {% elif item.active_ingredients.translated %}
+        <span class="badge bg-success text-wrap fw-normal">{{ item.active_ingredients.translated }}</span>
+    {% elif item.active_ingredients.coded %}
+        <span class="badge bg-success text-wrap fw-normal">{{ item.active_ingredients.coded }}</span>
+    {% elif item.active_ingredients %}
+        <span class="badge bg-success text-wrap fw-normal">{{ item.active_ingredients }}</span>
+    {% else %}
+        <span class="text-muted">Not specified</span>
+    {% endif %}
+</td>
+
+{# Pharmaceutical Form Column (hidden on small screens) #}
+<td class="form-cell d-none d-xl-table-cell">
+    {% if item.data.pharmaceutical_form %}
+        {{ item.data.pharmaceutical_form }}
+    {% elif item.pharmaceutical_form.display_value %}
+        {{ item.pharmaceutical_form.display_value }}
+    {% elif item.pharmaceutical_form.value %}
+        {{ item.pharmaceutical_form.value }}
+    {% elif item.pharmaceutical_form.translated %}
+        {{ item.pharmaceutical_form.translated }}
+    {% elif item.pharmaceutical_form.coded %}
+        {{ item.pharmaceutical_form.coded }}
+    {% elif item.pharmaceutical_form %}
+        {{ item.pharmaceutical_form }}
+    {% else %}
+        <span class="text-muted">Not specified</span>
+    {% endif %}
+</td>
+
+{# Dosage Column (hidden on small screens) #}
+<td class="dosage-cell d-none d-lg-table-cell">
+    {% if item.data.dose_quantity %}
+        <span class="fw-bold text-success">{{ item.data.dose_quantity }}</span>
+    {% elif item.dose_quantity.display_value %}
+        <span class="fw-bold text-success">{{ item.dose_quantity.display_value }}</span>
+    {% elif item.dose_quantity.value %}
+        <span class="fw-bold text-success">{{ item.dose_quantity.value }}</span>
+    {% elif item.dose_quantity %}
+        <span class="fw-bold text-success">{{ item.dose_quantity }}</span>
+    {% elif item.dose.value %}
+        <span class="fw-bold text-success">{{ item.dose.value }} {{ item.dose.unit|default:"" }}</span>
+    {% else %}
+        <span class="text-muted">Not specified</span>
+    {% endif %}
+</td>
+
+{# Administration Route Column (hidden on small screens) #}
+<td class="route-cell d-none d-xl-table-cell">
+    {% if item.data.route %}
+        {{ item.data.route }}
+    {% elif item.route.display_value %}
+        {{ item.route.display_value }}
+    {% elif item.route.value %}
+        {{ item.route.value }}
+    {% elif item.route %}
+        {{ item.route }}
+    {% else %}
+        <span class="text-muted">Not specified</span>
+    {% endif %}
+</td>
+
+{# Schedule Column (hidden on small screens) #}
+<td class="schedule-cell d-none d-xl-table-cell">
+    {% if item.data.schedule %}
+        {{ item.data.schedule }}
+    {% elif item.schedule.display_value %}
+        {{ item.schedule.display_value }}
+    {% elif item.schedule.value %}
+        {{ item.schedule.value }}
+    {% elif item.schedule %}
+        {{ item.schedule }}
+    {% elif item.frequency %}
+        {{ item.frequency }}
+    {% else %}
+        <span class="text-muted">Not specified</span>
+    {% endif %}
+</td>
+{% endblock table_row_content %}
+
+{# Section-specific CSS #}
+{% block section_styles %}
+<style>
+.medication-card {
+    transition: transform 0.2s ease-in-out;
+}
+.medication-card:hover {
+    transform: translateY(-2px);
+}
+.medication-details-grid .detail-row:last-child {
+    border-bottom: none;
+}
+.medication-name {
+    line-height: 1.2;
+}
+@media (max-width: 576px) {
+    .medication-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .medication-actions {
+        margin-top: 0.5rem;
+        align-self: flex-end;
+    }
+}
+</style>
+{% endblock section_styles %}

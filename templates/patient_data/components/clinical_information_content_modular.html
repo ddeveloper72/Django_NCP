@@ -1,0 +1,91 @@
+{# Clinical Information Content - Modular Template Inheritance Version #}
+{% load patient_filters %}
+
+<div class="clinical-information-container">
+    
+    {# Medications Section #}
+    {% if medications and medications|length > 0 %}
+        {% include 'patient_data/sections/medications_section_new.html' with section_data=medications section_count=medications|length section_type='medications' section_title='Medications' %}
+    {% endif %}
+    
+    {# Medical Problems/Conditions Section #}
+    {% if problems and problems|length > 0 %}
+        {% include 'patient_data/sections/problems_section_new.html' with section_data=problems section_count=problems|length section_type='problems' section_title='Medical Problems' %}
+    {% endif %}
+    
+    {# Allergies Section #}
+    {% if allergies and allergies|length > 0 %}
+        {% include 'patient_data/sections/allergies_section_new.html' with section_data=allergies section_count=allergies|length section_type='allergies' section_title='Allergies & Intolerances' %}
+    {% endif %}
+    
+    {# Procedures Section #}
+    {% if procedures and procedures|length > 0 %}
+        {% include 'patient_data/sections/procedures_section_new.html' with section_data=procedures section_count=procedures|length section_type='procedures' section_title='Medical Procedures' %}
+    {% endif %}
+    
+    {# Vital Signs Section #}
+    {% if vital_signs and vital_signs|length > 0 %}
+        {% include 'patient_data/sections/vital_signs_section_new.html' with section_data=vital_signs section_count=vital_signs|length section_type='vital_signs' section_title='Vital Signs' %}
+    {% endif %}
+    
+    {# Results/Lab Results Section #}
+    {% if results and results|length > 0 %}
+        {% include 'patient_data/sections/results_section_new.html' with section_data=results section_count=results|length section_type='results' section_title='Laboratory Results' %}
+    {% endif %}
+    
+    {# Immunizations Section #}
+    {% if immunizations and immunizations|length > 0 %}
+        {% include 'patient_data/sections/immunizations_section_new.html' with section_data=immunizations section_count=immunizations|length section_type='immunizations' section_title='Immunizations' %}
+    {% endif %}
+    
+    {# Empty State - No Clinical Data #}
+    {% if not medications and not problems and not allergies and not procedures and not vital_signs and not results and not immunizations %}
+    <div class="empty-clinical-state text-center p-5">
+        <i class="fa-solid fa-file-medical fa-4x text-muted mb-4"></i>
+        <h4 class="text-muted mb-3">No Clinical Information Available</h4>
+        <p class="text-muted mb-0">No clinical data has been extracted from the CDA document for this patient.</p>
+    </div>
+    {% endif %}
+    
+</div>
+
+{# Global Clinical Information Styles #}
+<style>
+.clinical-information-container {
+    padding: 0;
+}
+
+.clinical-section {
+    margin-bottom: 1.5rem;
+}
+
+.clinical-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Mobile-first responsive adjustments */
+@media (max-width: 768px) {
+    .clinical-information-container {
+        padding: 0 0.5rem;
+    }
+    
+    .clinical-section {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Healthcare Organisation branding integration */
+.clinical-section .btn-primary {
+    background-color: var(--hse-primary-color, #007bff);
+    border-color: var(--hse-primary-color, #007bff);
+}
+
+.clinical-section .bg-primary {
+    background-color: var(--hse-primary-color, #007bff) !important;
+}
+
+.clinical-section .table-primary th {
+    background-color: var(--hse-primary-light, rgba(0, 123, 255, 0.1));
+    border-color: var(--hse-primary-color, #007bff);
+}
+</style>

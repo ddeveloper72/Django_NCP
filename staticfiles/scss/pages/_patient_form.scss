@@ -371,6 +371,93 @@
   }
 }
 
+// Development Search Options
+.development-search-section {
+  margin-bottom: $space-xl;
+  padding: $space-lg;
+  background: lighten($neutral-lightest, 2%);
+  border-radius: $border-radius-lg;
+  border: 2px dashed $neutral-lighter;
+
+  .development-options-title {
+    color: $text-dark;
+    font-weight: $font-weight-bold;
+    margin-bottom: $space-lg;
+    display: flex;
+    align-items: center;
+    font-size: $font-size-base;
+
+    i {
+      color: $warning-orange;
+    }
+  }
+
+  .development-search-option {
+    display: flex;
+    align-items: flex-start;
+    gap: $space-md;
+    padding: $space-md;
+    background: $white;
+    border-radius: $border-radius-md;
+    border: 2px solid $neutral-lighter;
+    transition: all $transition-normal;
+    cursor: pointer;
+    user-select: none; // Prevent text selection when clicking
+
+    &:hover {
+      border-color: $primary-blue;
+      background: lighten($primary-blue, 48%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba($primary-blue, 0.15);
+    }
+
+    &.active {
+      border-color: $success-green;
+      background: lighten($success-green, 48%);
+      box-shadow: 0 2px 8px rgba($success-green, 0.15);
+      
+      &:hover {
+        border-color: darken($success-green, 10%);
+        background: lighten($success-green, 45%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba($success-green, 0.2);
+      }
+    }
+
+    .development-search-checkbox {
+      margin-top: 2px;
+      transform: scale(1.2);
+      accent-color: $primary-blue;
+      pointer-events: none; // Prevent direct clicking to avoid double triggers
+    }
+
+    .development-search-content {
+      flex: 1;
+
+      .development-search-label {
+        font-weight: $font-weight-semibold;
+        color: $text-dark;
+        cursor: pointer;
+        margin: 0 0 $space-xs 0;
+        display: flex;
+        align-items: center;
+        font-size: $font-size-base;
+
+        i {
+          color: $primary-blue;
+        }
+      }
+
+      .development-search-description {
+        font-size: $font-size-sm;
+        color: $neutral-medium;
+        line-height: 1.4;
+        margin: 0;
+      }
+    }
+  }
+}
+
 // Responsive design
 @media (max-width: $breakpoint-md) {
   .patient-form-container {

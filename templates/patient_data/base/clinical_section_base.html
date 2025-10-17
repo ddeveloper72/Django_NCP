@@ -1,0 +1,108 @@
+{# Base Clinical Section Template #}
+{# Provides foundation for all clinical sections with mobile-first responsive design #}
+{% load patient_filters %}
+
+{# Section structure with template inheritance blocks #}
+<div class="clinical-section mb-4" data-section-type="{{ section_type|default:'unknown' }}">
+    
+    {# Section Header - Override with block section_header #}
+    {% block section_header %}
+    <div class="clinical-section-header {% block header_class %}bg-primary{% endblock %} text-white p-3 rounded-top">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="{% block section_icon %}fa-solid fa-list{% endblock %} me-3"></i>
+                <h5 class="mb-0">{% block section_title %}{{ section_title|default:'Clinical Section' }}{% endblock %}</h5>
+            </div>
+            <div class="clinical-section-badge">
+                {% block section_badge %}
+                <span class="badge bg-light text-dark">
+                    <i class="fa-solid fa-check me-1"></i>{{ section_count|default:0 }} Found
+                </span>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+    {% endblock section_header %}
+
+    {# Section Content - Override with block section_content #}
+    {% block section_content %}
+    <div class="clinical-section-content bg-white border border-top-0 rounded-bottom">
+        
+        {# Empty State #}
+        {% if not section_data or section_data|length == 0 %}
+            {% block empty_state %}
+            <div class="empty-state text-center p-5">
+                <i class="{% block empty_icon %}fa-solid fa-info-circle{% endblock %} fa-3x text-muted mb-3"></i>
+                <h6 class="text-muted mb-2">{% block empty_title %}No Data Available{% endblock %}</h6>
+                <p class="text-muted small mb-0">{% block empty_message %}No information available for this section.{% endblock %}</p>
+            </div>
+            {% endblock empty_state %}
+        {% else %}
+            
+            {# Mobile-First Content Structure #}
+            {% block content_structure %}
+            
+                {# Mobile Card Layout (default) #}
+                <div class="d-block d-lg-none">
+                    {% block mobile_content %}
+                    <div class="clinical-cards p-3">
+                        {% for item in section_data %}
+                        <div class="clinical-card mb-3 p-3 border rounded">
+                            {% block mobile_card_content %}
+                            {# Override this block in child templates for mobile card layout #}
+                            <div class="fw-bold mb-2">{{ item.display_name|default:item.name|default:'Unknown' }}</div>
+                            <div class="small text-muted">{{ item.description|default:'No description available' }}</div>
+                            {% endblock mobile_card_content %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endblock mobile_content %}
+                </div>
+
+                {# Desktop Table Layout #}
+                <div class="d-none d-lg-block">
+                    {% block desktop_content %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0 clinical-data-table" role="table">
+                            <caption class="sr-only">{% block table_caption %}Clinical data table{% endblock %}</caption>
+                            <thead class="{% block table_header_class %}table-primary{% endblock %}">
+                                <tr>
+                                    {% block table_headers %}
+                                    <th scope="col" class="fw-bold">Name</th>
+                                    <th scope="col" class="fw-bold">Details</th>
+                                    {% endblock table_headers %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in section_data %}
+                                <tr>
+                                    {% block table_row_content %}
+                                    {# Override this block in child templates for table row content #}
+                                    <td class="fw-medium">{{ item.display_name|default:item.name|default:'Unknown' }}</td>
+                                    <td class="text-muted">{{ item.description|default:'No description available' }}</td>
+                                    {% endblock table_row_content %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endblock desktop_content %}
+                </div>
+
+            {% endblock content_structure %}
+            
+        {% endif %}
+        
+    </div>
+    {% endblock section_content %}
+    
+</div>
+
+{# Additional blocks for child template customization #}
+{% block section_scripts %}
+{# Override for section-specific JavaScript #}
+{% endblock section_scripts %}
+
+{% block section_styles %}
+{# Override for section-specific CSS #}
+{% endblock section_styles %}

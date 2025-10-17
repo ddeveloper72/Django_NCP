@@ -1,0 +1,50 @@
+{# Vital Signs Section Template - Inherits from clinical_section_base.html #}
+{% extends 'patient_data/base/clinical_section_base.html' %}
+{% load patient_filters %}
+
+{# Section Configuration #}
+{% block section_icon %}fa-solid fa-heartbeat{% endblock %}
+{% block header_class %}bg-success{% endblock %}
+{% block section_title %}Vital Signs{% endblock %}
+{% block table_header_class %}table-success{% endblock %}
+
+{# Empty State Configuration #}
+{% block empty_icon %}fa-solid fa-heartbeat{% endblock %}
+{% block empty_title %}No Vital Signs{% endblock %}
+{% block empty_message %}No vital signs data available for this patient.{% endblock %}
+
+{# Desktop Table Headers #}
+{% block table_headers %}
+<th scope="col" class="fw-bold">
+    <i class="fa-solid fa-heartbeat me-2"></i>Vital Sign
+</th>
+<th scope="col" class="fw-bold d-none d-lg-table-cell">
+    <i class="fa-solid fa-thermometer-half me-2"></i>Value
+</th>
+<th scope="col" class="fw-bold d-none d-xl-table-cell">
+    <i class="fa-solid fa-calendar me-2"></i>Date
+</th>
+{% endblock table_headers %}
+
+{# Mobile Card Content #}
+{% block mobile_card_content %}
+<div class="vital-sign-name fw-bold text-success mb-2">
+    {% if item.title.translated %}{{ item.title.translated|safe }}{% elif item.title.original %}{{ item.title.original }}{% elif item.observation_name %}{{ item.observation_name }}{% else %}Vital Sign{% endif %}
+</div>
+<div class="small text-muted">
+    {% if item.content %}{{ item.content|truncatewords:10 }}{% endif %}
+    {% if item.value %}Value: {{ item.value }} {{ item.unit|default:'' }}{% endif %}
+    {% if item.date %} | Date: {{ item.date }}{% endif %}
+</div>
+{% endblock mobile_card_content %}
+
+{# Desktop Table Row Content #}
+{% block table_row_content %}
+<td class="fw-medium">
+    {% if item.title.translated %}{{ item.title.translated|safe }}{% elif item.title.original %}{{ item.title.original }}{% elif item.observation_name %}{{ item.observation_name }}{% else %}Vital Sign{% endif %}
+</td>
+<td class="d-none d-lg-table-cell text-muted">
+    {% if item.value %}{{ item.value }} {{ item.unit|default:'' }}{% elif item.content %}{{ item.content|truncatewords:8 }}{% else %}Not specified{% endif %}
+</td>
+<td class="d-none d-xl-table-cell text-muted">{{ item.date|default:'Not specified' }}</td>
+{% endblock table_row_content %}

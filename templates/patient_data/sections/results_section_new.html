@@ -1,0 +1,45 @@
+{# Results Section Template - Inherits from clinical_section_base.html #}
+{% extends 'patient_data/base/clinical_section_base.html' %}
+{% load patient_filters %}
+
+{# Section Configuration #}
+{% block section_icon %}fa-solid fa-vial{% endblock %}
+{% block header_class %}bg-secondary{% endblock %}
+{% block section_title %}Laboratory Results{% endblock %}
+{% block table_header_class %}table-secondary{% endblock %}
+
+{# Empty State Configuration #}
+{% block empty_icon %}fa-solid fa-vial{% endblock %}
+{% block empty_title %}No Lab Results{% endblock %}
+{% block empty_message %}No laboratory results available for this patient.{% endblock %}
+
+{# Desktop Table Headers #}
+{% block table_headers %}
+<th scope="col" class="fw-bold">
+    <i class="fa-solid fa-vial me-2"></i>Test
+</th>
+<th scope="col" class="fw-bold d-none d-lg-table-cell">
+    <i class="fa-solid fa-chart-line me-2"></i>Result
+</th>
+<th scope="col" class="fw-bold d-none d-xl-table-cell">
+    <i class="fa-solid fa-calendar me-2"></i>Date
+</th>
+{% endblock table_headers %}
+
+{# Mobile Card Content #}
+{% block mobile_card_content %}
+<div class="result-name fw-bold text-secondary mb-2">
+    {{ item.display_name|default:item.name|default:item.test_name|default:'Laboratory Test' }}
+</div>
+<div class="small text-muted">
+    {% if item.result %}Result: {{ item.result }} {{ item.unit|default:'' }}{% endif %}
+    {% if item.date %} | Date: {{ item.date }}{% endif %}
+</div>
+{% endblock mobile_card_content %}
+
+{# Desktop Table Row Content #}
+{% block table_row_content %}
+<td class="fw-medium">{{ item.display_name|default:item.name|default:item.test_name|default:'Laboratory Test' }}</td>
+<td class="d-none d-lg-table-cell text-muted">{{ item.result|default:'Not specified' }} {{ item.unit|default:'' }}</td>
+<td class="d-none d-xl-table-cell text-muted">{{ item.date|default:'Not specified' }}</td>
+{% endblock table_row_content %}

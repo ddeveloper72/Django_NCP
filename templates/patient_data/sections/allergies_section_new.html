@@ -1,0 +1,76 @@
+{# Allergies Section Template - Inherits from clinical_section_base.html #}
+{% extends 'patient_data/base/clinical_section_base.html' %}
+{% load patient_filters %}
+
+{# Section Configuration #}
+{% block section_icon %}fa-solid fa-exclamation-triangle{% endblock %}
+{% block header_class %}bg-danger{% endblock %}
+{% block section_title %}Allergies & Intolerances{% endblock %}
+{% block table_header_class %}table-danger{% endblock %}
+
+{# Empty State Configuration #}
+{% block empty_icon %}fa-solid fa-exclamation-triangle{% endblock %}
+{% block empty_title %}No Allergies{% endblock %}
+{% block empty_message %}No allergies or intolerances reported for this patient.{% endblock %}
+
+{# Desktop Table Headers #}
+{% block table_headers %}
+<th scope="col" class="fw-bold">
+    <i class="fa-solid fa-exclamation-triangle me-2"></i>Allergen
+</th>
+<th scope="col" class="fw-bold d-none d-lg-table-cell">
+    <i class="fa-solid fa-thermometer-half me-2"></i>Severity
+</th>
+<th scope="col" class="fw-bold d-none d-xl-table-cell">
+    <i class="fa-solid fa-stethoscope me-2"></i>Reaction
+</th>
+{% endblock table_headers %}
+
+{# Mobile Card Content #}
+{% block mobile_card_content %}
+<div class="allergy-name fw-bold text-danger mb-2">
+    {% if item.data.allergen.display_value %}
+        {{ item.data.allergen.display_value }}
+    {% elif item.data.allergen.value %}
+        {{ item.data.allergen.value }}
+    {% else %}
+        Allergen
+    {% endif %}
+</div>
+<div class="small text-muted">
+    {% if item.data.severity.display_value and item.data.severity.display_value != 'Not specified' %}
+        Severity: {{ item.data.severity.display_value }}
+    {% endif %}
+    {% if item.data.reaction.display_value and item.data.reaction.display_value != 'Not specified' %}
+        {% if item.data.severity.display_value and item.data.severity.display_value != 'Not specified' %} | {% endif %}
+        Reaction: {{ item.data.reaction.display_value }}
+    {% endif %}
+</div>
+{% endblock mobile_card_content %}
+
+{# Desktop Table Row Content #}
+{% block table_row_content %}
+<td class="fw-medium">
+    {% if item.data.allergen.display_value %}
+        {{ item.data.allergen.display_value }}
+    {% elif item.data.allergen.value %}
+        {{ item.data.allergen.value }}
+    {% else %}
+        Allergen
+    {% endif %}
+</td>
+<td class="d-none d-lg-table-cell text-muted">
+    {% if item.data.severity.display_value %}
+        {{ item.data.severity.display_value }}
+    {% else %}
+        Not specified
+    {% endif %}
+</td>
+<td class="d-none d-xl-table-cell text-muted">
+    {% if item.data.reaction.display_value %}
+        {{ item.data.reaction.display_value }}
+    {% else %}
+        Not specified
+    {% endif %}
+</td>
+{% endblock table_row_content %}

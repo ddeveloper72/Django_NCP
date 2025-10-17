@@ -1,0 +1,68 @@
+{# Procedures Section Template - Inherits from clinical_section_base.html #}
+{% extends 'patient_data/base/clinical_section_base.html' %}
+{% load patient_filters %}
+
+{# Section Configuration #}
+{% block section_icon %}fa-solid fa-user-md{% endblock %}
+{% block header_class %}bg-info{% endblock %}
+{% block section_title %}Medical Procedures{% endblock %}
+{% block table_header_class %}table-info{% endblock %}
+
+{# Empty State Configuration #}
+{% block empty_icon %}fa-solid fa-user-md{% endblock %}
+{% block empty_title %}No Procedures{% endblock %}
+{% block empty_message %}No medical procedures documented for this patient.{% endblock %}
+
+{# Desktop Table Headers #}
+{% block table_headers %}
+<th scope="col" class="fw-bold">
+    <i class="fa-solid fa-user-md me-2"></i>Procedure
+</th>
+<th scope="col" class="fw-bold d-none d-lg-table-cell">
+    <i class="fa-solid fa-calendar me-2"></i>Date
+</th>
+<th scope="col" class="fw-bold d-none d-xl-table-cell">
+    <i class="fa-solid fa-info-circle me-2"></i>Status
+</th>
+{% endblock table_headers %}
+
+{# Mobile Card Content #}
+{% block mobile_card_content %}
+<div class="procedure-name fw-bold text-info mb-2">
+    {% if item.title.translated %}
+        {{ item.title.translated|safe }}
+    {% elif item.title.original %}
+        {{ item.title.original }}
+    {% elif item.procedure_name %}
+        {{ item.procedure_name }}
+    {% elif item.display_name %}
+        {{ item.display_name }}
+    {% else %}
+        Medical Procedure
+    {% endif %}
+</div>
+<div class="small text-muted">
+    {% if item.date %}Date: {{ item.date }}{% endif %}
+    {% if item.status %} | Status: {{ item.status }}{% endif %}
+    {% if item.section_type %} | Type: {{ item.section_type|title }}{% endif %}
+</div>
+{% endblock mobile_card_content %}
+
+{# Desktop Table Row Content #}
+{% block table_row_content %}
+<td class="fw-medium">
+    {% if item.title.translated %}
+        {{ item.title.translated|safe }}
+    {% elif item.title.original %}
+        {{ item.title.original }}
+    {% elif item.procedure_name %}
+        {{ item.procedure_name }}
+    {% elif item.display_name %}
+        {{ item.display_name }}
+    {% else %}
+        Medical Procedure
+    {% endif %}
+</td>
+<td class="d-none d-lg-table-cell text-muted">{{ item.date|default:'Not specified' }}</td>
+<td class="d-none d-xl-table-cell text-muted">{{ item.status|default:'Completed' }}</td>
+{% endblock table_row_content %}

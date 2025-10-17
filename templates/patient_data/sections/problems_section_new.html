@@ -1,0 +1,45 @@
+{# Problems Section Template - Inherits from clinical_section_base.html #}
+{% extends 'patient_data/base/clinical_section_base.html' %}
+{% load patient_filters %}
+
+{# Section Configuration #}
+{% block section_icon %}fa-solid fa-triangle-exclamation{% endblock %}
+{% block header_class %}bg-warning{% endblock %}
+{% block section_title %}Medical Problems{% endblock %}
+{% block table_header_class %}table-warning{% endblock %}
+
+{# Empty State Configuration #}
+{% block empty_icon %}fa-solid fa-triangle-exclamation{% endblock %}
+{% block empty_title %}No Medical Problems{% endblock %}
+{% block empty_message %}No active medical problems reported for this patient.{% endblock %}
+
+{# Desktop Table Headers #}
+{% block table_headers %}
+<th scope="col" class="fw-bold">
+    <i class="fa-solid fa-triangle-exclamation me-2"></i>Problem
+</th>
+<th scope="col" class="fw-bold d-none d-lg-table-cell">
+    <i class="fa-solid fa-tags me-2"></i>Type
+</th>
+<th scope="col" class="fw-bold d-none d-xl-table-cell">
+    <i class="fa-solid fa-clock me-2"></i>Status
+</th>
+{% endblock table_headers %}
+
+{# Mobile Card Content #}
+{% block mobile_card_content %}
+<div class="problem-name fw-bold text-warning mb-2">
+    {{ item.name|default:'Medical Problem' }}
+</div>
+<div class="small text-muted">
+    {% if item.status %}Status: {{ item.status }}{% endif %}
+    {% if item.type %} | Type: {{ item.type }}{% endif %}
+</div>
+{% endblock mobile_card_content %}
+
+{# Desktop Table Row Content #}
+{% block table_row_content %}
+<td class="fw-medium">{{ item.name|default:'Medical Problem' }}</td>
+<td class="d-none d-lg-table-cell text-muted">{{ item.type|default:'Not specified' }}</td>
+<td class="d-none d-xl-table-cell text-muted">{{ item.status|default:'Active' }}</td>
+{% endblock table_row_content %}
