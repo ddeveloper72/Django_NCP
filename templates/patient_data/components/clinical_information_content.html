@@ -3,6 +3,8 @@
 {% load medication_filters %}
 
 <div class="clinical-information-container">
+
+    
     {# Clinical Sections - Each as standalone accordion #}
                 
                     {# Medical Problems Section #}
@@ -221,11 +223,11 @@
                     </div>
                     {% endif %}
                     
-                    {# Medications Section #}
-                    {% if medications and medications|length > 0 %}
+                    {# Medications Section - Only show if there are valid medications #}
+                    {% if medications and medications|filter_valid_medications|length > 0 %}
                     <div class="clinical-section">
                         <div class="collapsible-wrapper">
-                            <input id="toggle-medications" class="toggle-input" type="checkbox">
+                            <input id="toggle-medications" class="toggle-input" type="checkbox" checked>
                             <label for="toggle-medications" class="collapsible-label-title">
                                 <div class="clinical-section-title-row">
                                     <div class="clinical-section-title">
@@ -233,425 +235,121 @@
                                         <span>Medications</span>
                                     </div>
                                     <div class="clinical-badge-container">
-                                        <span class="clinical-badge populated">{{ medications|length }} Found</span>
+                                        <span class="clinical-badge populated">{{ medications|count_valid_medications }} Found</span>
                                     </div>
                                 </div>
                                 <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
                             </label>
                             <div class="collapsible-content-title">
                                 <div class="content-inner-title">
-                                    <p class="mb-3 text-muted">Medications: {{ medications|length }} items found</p>
-                                    {% for med in medications %}
-                                    {# Enhanced Medication Card - Professional Medical Display #}
-                                    <div class="medication-card mb-4 p-4 border rounded shadow-sm bg-white">
-                                        
-                                        {# Comprehensive Medication Summary - Like XML Notepad Output #}
-                                        {% if med.data.medication_summary %}
-                                        <div class="medication-summary-banner mb-4 p-3 bg-primary bg-gradient text-white rounded">
-                                            <div class="d-flex align-items-center">
-                                                <i class="fa-solid fa-prescription-bottle fa-2x me-3"></i>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-1 fw-bold">Comprehensive Medication Summary</h6>
-                                                    <div class="medication-summary-text fs-6">
-                                                        {{ med.data.medication_summary }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {% endif %}
-                                        
-                                        {# Header Section - Medication Name & Class #}
-                                        <div class="medication-header mb-3 pb-3 border-bottom">
-                                            <div class="d-flex flex-wrap align-items-start justify-content-between">
-                                                <div class="medication-name-section flex-grow-1 me-3">
-                                                    <h5 class="medication-name text-primary mb-1 fw-bold">
-                                                        <i class="fa-solid fa-pills me-2"></i>
-                                                        {% if med.data.medication_name %}
-                                                            {{ med.data.medication_name }}
-                                                        {% elif med.medication.name %}
-                                                            {{ med.medication.name }}
-                                                        {% elif med.medication.code.displayName %}
-                                                            {{ med.medication.code.displayName }}
-                                                        {% else %}
-                                                            Medication (Code: {{ med.medication.code.code|default:"Unknown" }})
-                                                        {% endif %}
-                                                    </h5>
-                                                    {% if med.medication.code.code %}
-                                                        <div class="medication-code text-muted small mb-2">
-                                                            <i class="fa-solid fa-barcode me-1"></i>
-                                                            <strong>Code:</strong> {{ med.medication.code.code }}
-                                                            {% if med.medication.code.codeSystem %}
-                                                                <span class="text-muted">{% if med.medication.code.codeSystem == "2.16.840.1.113883.6.96" %}(SNOMED CT){% else %}({{ med.medication.code.codeSystem }}){% endif %}</span>
-                                                            {% endif %}
-                                                        </div>
-                                                    {% endif %}
-                                                </div>
-                                                
-                                                <div class="medication-status-section text-end">
-                                                    {% if med.statusCode.code %}
-                                                        {% if med.statusCode.code == "active" %}
-                                                            <span class="badge bg-success fs-6 medication-status-badge">
-                                                                <i class="fa-solid fa-check-circle me-1"></i>Active
-                                                            </span>
-                                                        {% elif med.statusCode.code == "completed" %}
-                                                            <span class="badge bg-secondary fs-6 medication-status-badge">
-                                                                <i class="fa-solid fa-flag-checkered me-1"></i>Completed
-                                                            </span>
-                                                        {% else %}
-                                                            <span class="badge bg-warning fs-6 medication-status-badge">
-                                                                <i class="fa-solid fa-question-circle me-1"></i>{{ med.statusCode.code|title }}
-                                                            </span>
-                                                        {% endif %}
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        {# Main Information Grid - Responsive Layout #}
-                                        <div class="medication-details">
-                                            <div class="row g-3">
-                                                
-                                                {# Left Column - Primary Information #}
-                                                <div class="col-lg-6 col-md-12">
-                                                    
-                                                    {# 2. Active Ingredients [Strength] #}
-                                                    <div class="medication-field mb-3">
-                                                        <div class="field-header d-flex align-items-center mb-2">
-                                                            <i class="fa-solid fa-flask text-info me-2"></i>
-                                                            <strong class="text-dark">Active Ingredients [Strength]</strong>
-                                                        </div>
-                                                        <div class="field-content bg-light p-2 rounded">
-                                                            {% if med.data.ingredient_display %}
-                                                                <div class="ingredient-container">
-                                                                    <span class="active-ingredient fw-bold text-success">
-                                                                        {{ med.data.ingredient_display }}{% if med.data.strength %} {{ med.data.strength }}{% endif %}
-                                                                    </span>
-                                                                    {% if med.data.ingredient_code %}
-                                                                        <br>
-                                                                        <small class="text-muted mt-1">
-                                                                            <i class="fa-solid fa-hashtag me-1"></i>
-                                                                            ATC Code: {{ med.data.ingredient_code }}
-                                                                        </small>
-                                                                    {% endif %}
-                                                                </div>
-                                                            {% elif med.active_ingredient %}
-                                                                <div class="ingredient-container">
-                                                                    <span class="active-ingredient fw-bold text-success">
-                                                                        {% if med.active_ingredient.display_name and med.active_ingredient.display_name != med.active_ingredient.code %}
-                                                                            {{ med.active_ingredient.display_name }}
-                                                                        {% else %}
-                                                                            {{ med.active_ingredient.code|title }}
-                                                                        {% endif %}
-                                                                        {% if med.strength %} {{ med.strength }}{% endif %}
-                                                                    </span>
-                                                                    {% if med.active_ingredient.display_name and med.active_ingredient.display_name != med.active_ingredient.code %}
-                                                                        <br>
-                                                                        <small class="text-muted mt-1">
-                                                                            <i class="fa-solid fa-hashtag me-1"></i>
-                                                                            ATC Code: {{ med.active_ingredient.code }}
-                                                                        </small>
-                                                                    {% endif %}
-                                                                </div>
-                                                            {% elif med.substance %}
-                                                                <div class="ingredient-container">
-                                                                    <span class="active-ingredient fw-bold text-success">
-                                                                        {% if med.substance.display_name and med.substance.display_name != med.substance.code %}
-                                                                            {{ med.substance.display_name }}
-                                                                        {% else %}
-                                                                            {{ med.substance.code|title }}
-                                                                        {% endif %}
-                                                                        {% if med.strength %} {{ med.strength }}{% endif %}
-                                                                    </span>
-                                                                    {% if med.substance.display_name and med.substance.display_name != med.substance.code %}
-                                                                        <br>
-                                                                        <small class="text-muted mt-1">
-                                                                            <i class="fa-solid fa-hashtag me-1"></i>
-                                                                            Substance Code: {{ med.substance.code }}
-                                                                        </small>
-                                                                    {% endif %}
-                                                                </div>
-                                                            {% elif med.medication.name %}
-                                                                <span class="text-warning">
-                                                                    <i class="fa-solid fa-exclamation-triangle me-1"></i>
-                                                                    {{ med.medication.name }} (Brand name - active ingredient not resolved)
-                                                                </span>
-                                                            {% else %}
-                                                                {% with fallback_ingredient=med|extract_active_ingredient %}
-                                                                    {% if fallback_ingredient and fallback_ingredient != "" %}
-                                                                        <div class="ingredient-container">
-                                                                            <span class="active-ingredient fw-bold text-success">
-                                                                                {{ fallback_ingredient }}
-                                                                            </span>
-                                                                            <br>
-                                                                            <small class="text-muted mt-1">
-                                                                                <i class="fa-solid fa-magic-wand-sparkles me-1"></i>
-                                                                                Inferred from medication name
-                                                                            </small>
-                                                                        </div>
+                                    <p class="mb-3 text-muted">Medications: {{ medications|count_valid_medications }} items found</p>
+                                    
+                                    {# Professional Medications Table #}
+                                    <div class="medications-table-container bg-white border rounded-3 shadow-sm overflow-hidden">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover mb-0 medications-table">
+                                                <thead class="table-primary">
+                                                    <tr>
+                                                        <th scope="col" class="fw-bold">
+                                                            <i class="fa-solid fa-pills me-2"></i>Medication Name
+                                                        </th>
+                                                        <th scope="col" class="fw-bold">
+                                                            <i class="fa-solid fa-flask me-2"></i>Active Ingredient
+                                                        </th>
+                                                        <th scope="col" class="fw-bold">
+                                                            <i class="fa-solid fa-capsules me-2"></i>Form
+                                                        </th>
+                                                        <th scope="col" class="fw-bold">
+                                                            <i class="fa-solid fa-balance-scale me-2"></i>Dosage
+                                                        </th>
+                                                        <th scope="col" class="fw-bold">
+                                                            <i class="fa-solid fa-route me-2"></i>Route
+                                                        </th>
+                                                        <th scope="col" class="fw-bold">
+                                                            <i class="fa-solid fa-clock me-2"></i>Frequency
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for med in medications|filter_valid_medications %}
+                                                    <tr class="medication-row">
+                                                        {# Medication Name Column #}
+                                                        <td class="medication-name-cell">
+                                                            <div class="medication-name-container">
+                                                                <div class="medication-title fw-bold text-primary mb-1">
+                                                                    {% if med.medication_name %}
+                                                                        {{ med.medication_name }}
+                                                                    {% elif med.name %}
+                                                                        {{ med.name }}
+                                                                    {% elif med.medication.name %}
+                                                                        {{ med.medication.name }}
                                                                     {% else %}
-                                                                        <span class="text-muted">
-                                                                            <i class="fa-solid fa-info-circle me-1"></i>
-                                                                            Active ingredient information not specified
-                                                                        </span>
-                                                                    {% endif %}
-                                                                {% endwith %}
-                                                            {% endif %}
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    {# 3. Pharmaceutical Form #}
-                                                    <div class="medication-field mb-3">
-                                                        <div class="field-header d-flex align-items-center mb-2">
-                                                            <i class="fa-solid fa-layer-group text-warning me-2"></i>
-                                                            <strong class="text-dark">Pharmaceutical Form</strong>
-                                                        </div>
-                                                        <div class="field-content bg-light p-2 rounded">
-                                                            {% if med.data.pharmaceutical_form %}
-                                                                <span class="pharmaceutical-form fw-bold text-info">
-                                                                    {{ med.data.pharmaceutical_form }}
-                                                                </span>
-                                                                {% if med.data.pharmaceutical_form_code %}
-                                                                    <br>
-                                                                    <small class="text-muted mt-1 d-block">
-                                                                        <i class="fa-solid fa-hashtag me-1"></i>
-                                                                        Form Code: {{ med.data.pharmaceutical_form_code }}
-                                                                    </small>
-                                                                {% endif %}
-                                                            {% elif med.pharmaceutical_form %}
-                                                                <div class="pharmaceutical-form-container">
-                                                                    <span class="pharmaceutical-form fw-bold text-info">
-                                                                        {% if med.pharmaceutical_form.displayName and med.pharmaceutical_form.displayName != med.pharmaceutical_form.code %}
-                                                                            {{ med.pharmaceutical_form.displayName }}
-                                                                        {% else %}
-                                                                            {{ med.pharmaceutical_form.code|title }}
-                                                                        {% endif %}
-                                                                    </span>
-                                                                    {% if med.pharmaceutical_form.displayName and med.pharmaceutical_form.displayName != med.pharmaceutical_form.code %}
-                                                                        <br>
-                                                                        <small class="text-muted mt-1 d-block">
-                                                                            <i class="fa-solid fa-hashtag me-1"></i>
-                                                                            Form Code: {{ med.pharmaceutical_form.code }}
-                                                                        </small>
+                                                                        Medication
                                                                     {% endif %}
                                                                 </div>
-                                                            {% elif med.form %}
-                                                                <div class="pharmaceutical-form-container">
-                                                                    <span class="pharmaceutical-form fw-bold text-info">
-                                                                        {% if med.form.displayName and med.form.displayName != med.form.code %}
-                                                                            {{ med.form.displayName }}
-                                                                        {% else %}
-                                                                            {{ med.form.code|title }}
-                                                                        {% endif %}
-                                                                    </span>
-                                                                    {% if med.form.displayName and med.form.displayName != med.form.code %}
-                                                                        <br>
-                                                                        <small class="text-muted mt-1 d-block">
-                                                                            <i class="fa-solid fa-hashtag me-1"></i>
-                                                                            Form Code: {{ med.form.code }}
-                                                                        </small>
-                                                                    {% endif %}
-                                                                </div>
-                                                            {% else %}
-                                                                {% with fallback_form=med|smart_dose_form %}
-                                                                    {% if fallback_form and fallback_form != "Form not specified" %}
-                                                                        <div class="pharmaceutical-form-container">
-                                                                            <span class="pharmaceutical-form fw-bold text-info">
-                                                                                {{ fallback_form }}
-                                                                            </span>
-                                                                            <br>
-                                                                            <small class="text-muted mt-1">
-                                                                                <i class="fa-solid fa-magic-wand-sparkles me-1"></i>
-                                                                                Inferred from medication name
-                                                                            </small>
-                                                                        </div>
-                                                                    {% else %}
-                                                                        <span class="text-muted">
-                                                                            <i class="fa-solid fa-info-circle me-1"></i>
-                                                                            Pharmaceutical form not specified
-                                                                        </span>
-                                                                    {% endif %}
-                                                                {% endwith %}
-                                                            {% endif %}
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    {# 4. Dose Quantity #}
-                                                    <div class="medication-field mb-3">
-                                                        <div class="field-header d-flex align-items-center mb-2">
-                                                            <i class="fa-solid fa-prescription-bottle text-success me-2"></i>
-                                                            <strong class="text-dark">Dose Quantity</strong>
-                                                        </div>
-                                                        <div class="field-content bg-light p-2 rounded">
-                                                            {% if med.data.dose_quantity %}
-                                                                <span class="dose-amount fw-bold text-primary fs-5">
-                                                                    {{ med.data.dose_quantity }}
-                                                                </span>
-                                                                <small class="text-muted d-block mt-1">
-                                                                    Per administration
-                                                                </small>
-                                                            {% elif med.dose %}
-                                                                {% if med.dose.value and med.dose.unit %}
-                                                                    <span class="dose-amount fw-bold text-primary">
-                                                                        {{ med.dose.value }} {{ med.dose.unit }}
-                                                                    </span>
-                                                                {% elif med.dose.value %}
-                                                                    <span class="dose-amount fw-bold text-primary">
-                                                                        {{ med.dose.value }}
-                                                                    </span>
-                                                                {% else %}
-                                                                    <span class="text-muted">
-                                                                        <i class="fa-solid fa-info-circle me-1"></i>
-                                                                        Dose quantity not specified
-                                                                    </span>
-                                                                {% endif %}
-                                                            {% else %}
-                                                                <span class="text-muted">
-                                                                    <i class="fa-solid fa-info-circle me-1"></i>
-                                                                    Dose not specified
-                                                                </span>
-                                                            {% endif %}
-                                                        </div>
-                                                    </div>
-                                                    
-                                                </div>
-                                                
-                                                {# Right Column - Secondary Information #}
-                                                <div class="col-lg-6 col-md-12">
-                                                    
-                                                    {# 5. Dosage (Frequency/Schedule) #}
-                                                    <div class="medication-field mb-3">
-                                                        <div class="field-header d-flex align-items-center mb-2">
-                                                            <i class="fa-solid fa-clock text-primary me-2"></i>
-                                                            <strong class="text-dark">Dosage Schedule</strong>
-                                                        </div>
-                                                        <div class="field-content bg-light p-2 rounded">
-                                                            {% load medication_filters %}
-                                                            {% with schedule=med|extract_dosage_schedule %}
-                                                                {% if schedule and schedule != "Schedule not specified" %}
-                                                                    {% with clean_schedule=schedule|cut:" Code: ACM"|cut:" Code:ACM"|cut:"Code: ACM"|cut:"Code:ACM" %}
-                                                                    <span class="frequency fw-bold text-warning">
-                                                                        {{ clean_schedule }}
-                                                                    </span>
-                                                                    {% endwith %}
-                                                                    {% if "before breakfast" in schedule or "ACM" in schedule %}
-                                                                        <br>
-                                                                        <small class="text-muted d-block mt-1">
-                                                                            <i class="fa-solid fa-code me-1"></i>
-                                                                            Code: ACM
-                                                                        </small>
-                                                                    {% endif %}
-                                                                {% else %}
-                                                                    <span class="text-muted">
-                                                                        <i class="fa-solid fa-info-circle me-1"></i>
-                                                                        Schedule not specified
-                                                                    </span>
-                                                                {% endif %}
-                                                            {% endwith %}
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    {# 6. Time (Start - Finish) #}
-                                                    <div class="medication-field mb-3">
-                                                        <div class="field-header d-flex align-items-center mb-2">
-                                                            <i class="fa-solid fa-calendar-alt text-info me-2"></i>
-                                                            <strong class="text-dark">Treatment Period</strong>
-                                                        </div>
-                                                        <div class="field-content bg-light p-2 rounded">
-                                                            {% load medication_filters %}
-                                                            {% with treatment_period=med|format_treatment_period %}
-                                                                {% if "not specified" not in treatment_period %}
-                                                                    <div class="time-range">
-                                                                        <i class="fa-solid fa-calendar-check text-success me-2"></i>
-                                                                        <strong>{{ treatment_period }}</strong>
+                                                                {% if med.active_ingredients %}
+                                                                    <div class="medication-code text-muted small">
+                                                                        <i class="fa-solid fa-barcode me-1"></i>
+                                                                        Ingredient: {{ med.active_ingredients.coded|default:med.active_ingredients }}
                                                                     </div>
-                                                                {% else %}
-                                                                    <span class="text-muted">
-                                                                        <i class="fa-solid fa-info-circle me-1"></i>
-                                                                        Treatment timing not specified
-                                                                    </span>
                                                                 {% endif %}
-                                                            {% endwith %}
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    {# 7. Route #}
-                                                    <div class="medication-field mb-3">
-                                                        <div class="field-header d-flex align-items-center mb-2">
-                                                            <i class="fa-solid fa-route text-danger me-2"></i>
-                                                            <strong class="text-dark">Administration Route</strong>
-                                                        </div>
-                                                        <div class="field-content bg-light p-2 rounded">
-                                                            {% if med.data.route_display %}
-                                                                <div class="route-display-container">
-                                                                    <span class="route fw-bold text-danger">{{ med.data.route_display }}</span>
-                                                                    {% if med.data.route_code %}
-                                                                        <br>
-                                                                        <small class="text-muted mt-1">
-                                                                            <i class="fa-solid fa-hashtag me-1"></i>
-                                                                            Route Code: {{ med.data.route_code }}
-                                                                        </small>
-                                                                    {% endif %}
-                                                                </div>
-                                                            {% elif med.route_display %}
-                                                                <span class="route fw-bold text-danger">{{ med.route_display }}</span>
-                                                            {% elif med.route %}
-                                                                <div class="route-display-container">
-                                                                    <span class="route fw-bold text-danger">
-                                                                        {% if med.route.displayName and med.route.displayName != med.route.code %}
-                                                                            {{ med.route.displayName }}
-                                                                        {% else %}
-                                                                            {{ med.route.code|title }}
-                                                                        {% endif %}
-                                                                    </span>
-                                                                    {% if med.route.displayName and med.route.displayName != med.route.code %}
-                                                                        <br>
-                                                                        <small class="text-muted mt-1">
-                                                                            <i class="fa-solid fa-hashtag me-1"></i>
-                                                                            Route Code: {{ med.route.code }}
-                                                                        </small>
-                                                                    {% endif %}
-                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        
+                                                        {# Active Ingredient Column #}
+                                                        <td class="ingredient-cell">
+                                                            {% if med.active_ingredients %}
+                                                                <span class="badge bg-success text-wrap fw-normal">{{ med.active_ingredients.translated|default:med.active_ingredients.coded|default:med.active_ingredients }}</span>
                                                             {% else %}
-                                                                <span class="text-muted">
-                                                                    <i class="fa-solid fa-info-circle me-1"></i>
-                                                                    Administration route not specified
-                                                                </span>
+                                                                <span class="text-muted">Not specified</span>
                                                             {% endif %}
-                                                        </div>
-                                                    </div>
-                                                    
-                                                </div>
-                                            </div>
-                                            
-                                            {# 8. Medical Reason - Full Width Bottom Section #}
-                                            <div class="medication-reason mt-3 pt-3 border-top">
-                                                <div class="field-header d-flex align-items-center mb-2">
-                                                    <i class="fa-solid fa-notes-medical text-primary me-2"></i>
-                                                    <strong class="text-dark">Medical Reason / Indication</strong>
-                                                </div>
-                                                <div class="field-content bg-light p-3 rounded">
-                                                    {# Extract medical reason from medication name if present #}
-                                                    {% if "diabetes" in med.medication.name|lower %}
-                                                        Type 2 diabetes mellitus management
-                                                    {% elif "Type 2 diabetes" in med.medication.name %}
-                                                        {{ med.medication.name|cut:"Type 2 diabetes mellitus" }}
-                                                    {% elif "hypertension" in med.medication.name|lower %}
-                                                        Blood pressure management / Hypertension treatment
-                                                    {% elif "Hypertension" in med.medication.name %}
-                                                        {{ med.medication.name|cut:"Hypertension" }}
-                                                    {% elif "cholesterol" in med.medication.name|lower %}
-                                                        Cholesterol management / Lipid regulation
-                                                    {% else %}
-                                                        <span class="text-muted">
-                                                            <i class="fa-solid fa-info-circle me-1"></i>
-                                                            Medical indication not specified in available data
-                                                        </span>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
+                                                        </td>
+                                                        
+                                                        {# Pharmaceutical Form Column #}
+                                                        <td class="form-cell">
+                                                            {% if med.pharmaceutical_form %}
+                                                                <span class="badge bg-info text-wrap fw-normal">{{ med.pharmaceutical_form.translated|default:med.pharmaceutical_form.coded|default:med.pharmaceutical_form }}</span>
+                                                            {% else %}
+                                                                <span class="text-muted">Not specified</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        
+                                                        {# Dosage Column #}
+                                                        <td class="dosage-cell">
+                                                            {% if med.dose_quantity %}
+                                                                <span class="fw-bold text-success">{{ med.dose_quantity }}</span>
+                                                            {% elif med.dose.value %}
+                                                                <span class="fw-bold text-success">{{ med.dose.value }} {{ med.dose.unit|default:"" }}</span>
+                                                            {% else %}
+                                                                <span class="text-muted">Not specified</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        
+                                                        {# Administration Route Column #}
+                                                        <td class="route-cell">
+                                                            {% if med.route %}
+                                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route.translated|default:med.route.coded|default:med.route }}</span>
+                                                            {% elif med.route.displayName %}
+                                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route.displayName }}</span>
+                                                            {% else %}
+                                                                <span class="text-muted">Not specified</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        
+                                                        {# Frequency Column #}
+                                                        <td class="frequency-cell">
+                                                            {% if med.schedule %}
+                                                                <span class="badge bg-secondary text-wrap fw-normal">{{ med.schedule.translated|default:med.schedule.coded|default:med.schedule }}</span>
+                                                            {% else %}
+                                                                <span class="text-muted">Not specified</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
-                                    {% endfor %}
                                 </div>
                             </div>
                         </div>

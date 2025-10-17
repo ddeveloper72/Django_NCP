@@ -13,6 +13,68 @@ register = template.Library()
 
 
 @register.filter
+def count_valid_medications(medications):
+    """Count medications that have valid names (won't show as 'Medication')"""
+    if not medications:
+        return 0
+        
+    valid_count = 0
+    for med in medications:
+        # Use same logic as template to determine if medication has a valid name
+        has_name = False
+        
+        if hasattr(med, 'medication_name') and med.medication_name:
+            has_name = True
+        elif hasattr(med, 'name') and med.name:
+            has_name = True
+        elif hasattr(med, 'medication') and hasattr(med.medication, 'name') and med.medication.name:
+            has_name = True
+        elif isinstance(med, dict):
+            if med.get('medication_name'):
+                has_name = True
+            elif med.get('name'):
+                has_name = True
+            elif isinstance(med.get('medication'), dict) and med['medication'].get('name'):
+                has_name = True
+                
+        if has_name:
+            valid_count += 1
+            
+    return valid_count
+
+
+@register.filter
+def filter_valid_medications(medications):
+    """Filter to only include medications that have valid names"""
+    if not medications:
+        return []
+        
+    valid_medications = []
+    for med in medications:
+        # Use same logic as template to determine if medication has a valid name
+        has_name = False
+        
+        if hasattr(med, 'medication_name') and med.medication_name:
+            has_name = True
+        elif hasattr(med, 'name') and med.name:
+            has_name = True
+        elif hasattr(med, 'medication') and hasattr(med.medication, 'name') and med.medication.name:
+            has_name = True
+        elif isinstance(med, dict):
+            if med.get('medication_name'):
+                has_name = True
+            elif med.get('name'):
+                has_name = True
+            elif isinstance(med.get('medication'), dict) and med['medication'].get('name'):
+                has_name = True
+                
+        if has_name:
+            valid_medications.append(med)
+            
+    return valid_medications
+
+
+@register.filter
 def extract_strength(medication_name):
     """Extract strength information from medication name"""
     if not medication_name:
