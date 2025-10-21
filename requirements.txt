@@ -18,9 +18,11 @@ django-compressor==4.5.1
 django-cors-headers==4.7.0
 django-libsass==0.9
 djangorestframework==3.16.0
+fhir-kindling==1.0.3
 fhir.resources==8.1.0
 fhir_core==1.1.4
 fhirclient==4.3.1
+fhirpathpy==2.1.0
 fhirpy==2.0.15
 frozenlist==1.7.0
 html5lib==1.1
