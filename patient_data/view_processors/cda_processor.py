@@ -1557,9 +1557,26 @@ class CDAViewProcessor:
                     if direct_values and not dose_quantity_struct:
                         dose_quantity_struct = {
                             'value': direct_values[0],
-                            'unit': direct_units[0] if direct_units else ''
+                            'unit': direct_units[0] if direct_units else '',
+                            'display_name': f"{direct_values[0]} {direct_units[0] if direct_units else 'units'}"
                         }
                         logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted direct dose: {dose_quantity_struct} ***")
+                    
+                    # Format dose for display
+                    if dose_quantity_struct:
+                        if 'low' in dose_quantity_struct and 'high' in dose_quantity_struct:
+                            low_val = dose_quantity_struct['low']['value']
+                            high_val = dose_quantity_struct['high']['value']
+                            unit = dose_quantity_struct['low']['unit'] or dose_quantity_struct['high']['unit'] or 'units'
+                            dose_quantity_struct['display_name'] = f"{low_val}-{high_val} {unit}"
+                        elif 'low' in dose_quantity_struct:
+                            low_val = dose_quantity_struct['low']['value']
+                            unit = dose_quantity_struct['low']['unit'] or 'units'
+                            dose_quantity_struct['display_name'] = f"{low_val} {unit}"
+                        elif 'value' in dose_quantity_struct:
+                            val = dose_quantity_struct['value']
+                            unit = dose_quantity_struct['unit'] or 'units'
+                            dose_quantity_struct['display_name'] = f"{val} {unit}"
                 
                 # ENHANCED ROUTE EXTRACTION with lxml XPath precision
                 route_elements = sub_admin.xpath('.//hl7:routeCode', namespaces=namespaces)
@@ -1575,34 +1592,115 @@ class CDAViewProcessor:
                             'code': route_codes[0] if route_codes else '',
                             'display_name': route_displays[0] if route_displays else '',
                             'code_system': route_systems[0] if route_systems else '',
-                            'translated': route_displays[0] if route_displays else route_codes[0] if route_codes else ''
+                            'translated': self._translate_route_code(route_codes[0] if route_codes else '', route_displays[0] if route_displays else '')
                         }
                         logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted route via XPath: {route_struct} ***")
+                        break  # Use first valid route found
                 
-                # ENHANCED SCHEDULE EXTRACTION with lxml XPath precision
+                # ENHANCED SCHEDULE EXTRACTION with lxml XPath precision  
                 effective_time_elements = sub_admin.xpath('.//hl7:effectiveTime', namespaces=namespaces)
                 for eff_time_elem in effective_time_elements:
                     logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found effectiveTime element via lxml XPath ***")
                     
                     # Extract schedule from various attributes and child elements
                     institution_specified = eff_time_elem.xpath('./@institutionSpecified', namespaces=namespaces)
-                    if institution_specified:
+                    if institution_specified and not schedule_struct:
                         schedule_struct = {
                             'code': institution_specified[0],
-                            'display_name': self._map_schedule_code_to_display(institution_specified[0])
+                            'display_name': self._map_schedule_code_to_display(institution_specified[0]),
+                            'source': 'institutionSpecified'
                         }
                         logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted schedule from institutionSpecified: {schedule_struct} ***")
                     
-                    # Extract period information with XPath
-                    period_values = eff_time_elem.xpath('./hl7:period/@value', namespaces=namespaces)
-                    period_units = eff_time_elem.xpath('./hl7:period/@unit', namespaces=namespaces)
-                    if period_values:
-                        period_struct = {
-                            'value': period_values[0],
-                            'unit': period_units[0] if period_units else 'h',
-                            'display_name': f"Every {period_values[0]} {period_units[0] if period_units else 'hours'}"
+                    # Extract from PIVL_TS structure (common in CDA)
+                    pivl_elements = eff_time_elem.xpath('./hl7:comp[@typeCode="PIVL_TS"]', namespaces=namespaces)
+                    if pivl_elements and not schedule_struct:
+                        # Look for event codes within PIVL_TS
+                        event_codes = pivl_elements[0].xpath('.//hl7:event/@code', namespaces=namespaces)
+                        if event_codes:
+                            schedule_struct = {
+                                'code': event_codes[0], 
+                                'display_name': self._map_schedule_code_to_display(event_codes[0]),
+                                'source': 'PIVL_TS'
+                            }
+                            logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted schedule from PIVL_TS: {schedule_struct} ***")
+                    
+                    # Extract timing from text content as fallback
+                    if not schedule_struct:
+                        time_text_elems = eff_time_elem.xpath('.//text()', namespaces=namespaces)
+                        for text_content in time_text_elems:
+                            text_lower = text_content.lower().strip()
+                            if any(time_word in text_lower for time_word in ['morning', 'manhã', 'matin', 'morgen']):
+                                schedule_struct = {
+                                    'code': 'MORN',
+                                    'display_name': 'Morning',
+                                    'source': 'text_extraction'
+                                }
+                                logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted morning schedule from text: {text_content} ***")
+                                break
+                            elif any(time_word in text_lower for time_word in ['evening', 'noite', 'soir', 'abend']):
+                                schedule_struct = {
+                                    'code': 'EVE',
+                                    'display_name': 'Evening', 
+                                    'source': 'text_extraction'
+                                }
+                                logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted evening schedule from text: {text_content} ***")
+                                break
+                    
+                    # Check for frequency codes
+                    freq_codes = eff_time_elem.xpath('./hl7:freq/@code', namespaces=namespaces)
+                    if freq_codes and not schedule_struct:
+                        schedule_struct = {
+                            'code': freq_codes[0],
+                            'display_name': self._map_schedule_code_to_display(freq_codes[0]),
+                            'source': 'freq_code'
                         }
-                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted period via XPath: {period_struct} ***")
+                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted schedule from freq code: {schedule_struct} ***")
+                    
+                    # ENHANCED PERIOD/DATE EXTRACTION with multiple strategies
+                    if not period_struct:
+                        # Strategy 1: Extract period information with XPath
+                        period_values = eff_time_elem.xpath('./hl7:period/@value', namespaces=namespaces)
+                        period_units = eff_time_elem.xpath('./hl7:period/@unit', namespaces=namespaces)
+                        if period_values:
+                            period_struct = {
+                                'value': period_values[0],
+                                'unit': period_units[0] if period_units else 'h',
+                                'display_name': f"Every {period_values[0]} {period_units[0] if period_units else 'hours'}",
+                                'source': 'period_element'
+                            }
+                            logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted period via XPath: {period_struct} ***")
+                        
+                        # Strategy 2: Extract start date for "Since" format
+                        if not period_struct:
+                            start_dates = eff_time_elem.xpath('./hl7:low/@value', namespaces=namespaces)
+                            if start_dates:
+                                formatted_date = self._format_cda_date(start_dates[0])
+                                if formatted_date:
+                                    period_struct = {
+                                        'start_date': start_dates[0],
+                                        'formatted_date': formatted_date,
+                                        'display_name': f"Since {formatted_date}",
+                                        'source': 'start_date'
+                                    }
+                                    logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted start date: {period_struct} ***")
+                        
+                        # Strategy 3: Extract from IVL_TS structure
+                        if not period_struct:
+                            ivl_elements = eff_time_elem.xpath('./hl7:comp[@typeCode="IVL_TS"]', namespaces=namespaces)
+                            for ivl_elem in ivl_elements:
+                                ivl_start_dates = ivl_elem.xpath('./hl7:low/@value', namespaces=namespaces)
+                                if ivl_start_dates:
+                                    formatted_date = self._format_cda_date(ivl_start_dates[0])
+                                    if formatted_date:
+                                        period_struct = {
+                                            'start_date': ivl_start_dates[0],
+                                            'formatted_date': formatted_date,
+                                            'display_name': f"Since {formatted_date}",
+                                            'source': 'IVL_TS'
+                                        }
+                                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted IVL_TS date: {period_struct} ***")
+                                        break
                     
                     # Check for frequency codes
                     freq_codes = eff_time_elem.xpath('./hl7:freq/@code', namespaces=namespaces)
@@ -1752,21 +1850,29 @@ class CDAViewProcessor:
                 
                 # Only add if we have meaningful data
                 if med_name and med_name != "Medication":
-                    medications.append({
+                    # Enhanced data structure for Scenario A rendering
+                    medication_entry = {
                         'data': {
                             'medication_name': {'value': med_name, 'display_value': med_name},
-                            'active_ingredients': {'value': active_ingredient or 'Inferred from medication name', 'display_value': active_ingredient or 'Inferred from medication name'},
-                            'pharmaceutical_form': {'value': pharm_form, 'display_value': pharm_form + " (Inferred from medication name)" if pharm_form == "Tablet" else pharm_form},
+                            'active_ingredients': {
+                                'value': active_ingredient or 'Inferred from medication name', 
+                                'display_value': active_ingredient or 'Inferred from medication name'
+                            },
+                            'pharmaceutical_form': {
+                                'value': pharm_form, 
+                                'display_value': pharm_form if pharm_form != "Tablet" else pharm_form
+                            },
                             'strength': {'value': strength, 'display_value': strength},
-                            'dose_quantity': dose_quantity_struct if dose_quantity_struct else {'value': 'Dose not specified', 'display_value': 'Dose not specified'},
-                            'route': route_struct if route_struct else {'value': 'Administration route not specified', 'display_value': 'Administration route not specified'},
-                            'schedule': schedule_struct if schedule_struct else {'value': 'Schedule not specified', 'display_value': 'Schedule not specified'},
-                            'period': period_struct if period_struct else {'value': 'Treatment timing not specified', 'display_value': 'Treatment timing not specified'},
+                            'dose_quantity': self._format_dose_for_display(dose_quantity_struct),
+                            'route': self._format_route_for_display(route_struct),
+                            'schedule': self._format_schedule_for_display(schedule_struct),
+                            'period': self._format_period_for_display(period_struct),
                             'indication': {'value': 'Medical indication not specified in available data', 'display_value': 'Medical indication not specified in available data'}
                         }
-                    })
+                    }
                     
-                    logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted {med_name} with structures - dose: {bool(dose_quantity_struct)}, route: {bool(route_struct)}, schedule: {bool(schedule_struct)} ***")
+                    medications.append(medication_entry)
+                    logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted {med_name} with enhanced structures - dose: {bool(dose_quantity_struct)}, route: {bool(route_struct)}, schedule: {bool(schedule_struct)}, period: {bool(period_struct)} ***")
         
         return {
             'success': True,
@@ -1792,6 +1898,244 @@ class CDAViewProcessor:
             'QD': 'Once daily'
         }
         return schedule_mapping.get(code, code)
+    
+    def _translate_route_code(self, route_code: str, route_display: str) -> str:
+        """
+        Translate route codes to user-friendly display names.
+        
+        Enhanced route mapping for achieving Scenario A medication rendering.
+        """
+        # If we already have a good display name, use it
+        if route_display and route_display.strip():
+            return route_display.strip()
+        
+        # Enhanced route code mapping
+        route_mapping = {
+            # SNOMED CT route codes
+            '26643006': 'Oral use',
+            '78421000': 'Intramuscular use', 
+            '47625008': 'Intravenous use',
+            '372449004': 'Dental use',
+            '372450004': 'Endocervical use',
+            '372451000': 'Endosinusial use',
+            '372452007': 'Endotracheal use',
+            '372453002': 'Extra-amniotic use',
+            '372454008': 'Gastroenteral use',
+            '372457001': 'Gingival use',
+            '372458006': 'Intraamniotic use',
+            '372459003': 'Intra-arterial use',
+            '372460008': 'Intra-articular use',
+            '372461007': 'Intrabiliary use',
+            '372463005': 'Intracardiac use',
+            '372464004': 'Intracavernous use',
+            '372465003': 'Intracerebral use',
+            '372466002': 'Intracervical use',
+            '372467006': 'Intracisternal use',
+            '372468001': 'Intracorneal use',
+            '372469009': 'Intracoronary use',
+            '372470005': 'Intradermal use',
+            '372471009': 'Intradiscal use',
+            '372473007': 'Intraductal use',
+            '372474001': 'Intraduodenal use',
+            '372475000': 'Intradural use',
+            '372476004': 'Intraepidermal use',
+            '372477008': 'Intraesophageal use',
+            '372478003': 'Intragastric use',
+            '372479006': 'Intragingival use',
+            '372480009': 'Intraileal use',
+            '372481008': 'Intralesional use',
+            '372482001': 'Intralymphatic use',
+            '372484000': 'Intramedullar use',
+            '372485004': 'Intrameningeal use',
+            '372486003': 'Intraocular use',
+            '372487007': 'Intraosseous use',
+            '372488002': 'Intraovarian use',
+            '372489005': 'Intrapericardial use',
+            '372490001': 'Intraperitoneal use',
+            '372491002': 'Intrapleural use',
+            '372492009': 'Intraprostatic use',
+            '372493004': 'Intrapulmonary use',
+            '372494005': 'Intrasinal use',
+            '372495006': 'Intraspinal use',
+            '372496007': 'Intrasternal use',
+            '372497003': 'Intrasyndesmotic use',
+            '372498008': 'Intratesticular use',
+            '372499000': 'Intrathecal use',
+            '372500009': 'Intrathoracic use',
+            '372501008': 'Intratracheal use',
+            '372502001': 'Intratumor use',
+            '372503006': 'Intratympanic use',
+            '372504000': 'Intrauterine use',
+            '372505004': 'Intravascular use',
+            '372506003': 'Intraventricular use',
+            '372507007': 'Intravesical use',
+            '372508002': 'Iontophoresis',
+            '372509005': 'Laryngeal use',
+            '372510000': 'Nasal use',
+            '372511001': 'Ocular use',
+            '372512008': 'Ophthalmic use',
+            '372513003': 'Oral use',
+            '372514009': 'Oromucosal use',
+            '372515005': 'Other',
+            '372516006': 'Parenteral use',
+            '372517002': 'Periarticular use',
+            '372518007': 'Perineural use',
+            '372519004': 'Rectal use',
+            '372520005': 'Respiratory (inhalation)',
+            '372521009': 'Retrobulbar use',
+            '372522002': 'Subconjunctival use',
+            '372523007': 'Subcutaneous use',
+            '372524001': 'Sublingual use',
+            '372525000': 'Submucosal use',
+            '372526004': 'Topical',
+            '372527008': 'Transdermal use',
+            '372528003': 'Transmucosal use',
+            '372529006': 'Transplacental use',
+            '372530001': 'Urethral use',
+            '372531002': 'Vaginal use',
+            
+            # Common short codes
+            'PO': 'Oral use',
+            'IV': 'Intravenous use',
+            'IM': 'Intramuscular use',
+            'SC': 'Subcutaneous use',
+            'SL': 'Sublingual use',
+            'PR': 'Rectal use',
+            'TOP': 'Topical',
+            'INH': 'Inhalation',
+            'ORAL': 'Oral use',
+            'ORALE': 'Oral use',
+            'USO_ORALE': 'Oral use',
+            
+            # European language variations
+            'uso orale': 'Oral use',
+            'uso oral': 'Oral use',
+            'par voie orale': 'Oral use',
+            'perorale': 'Oral use',
+            'per os': 'Oral use'
+        }
+        
+        # Try direct lookup
+        if route_code in route_mapping:
+            return route_mapping[route_code]
+        
+        # Try case-insensitive lookup
+        route_code_lower = route_code.lower()
+        for code, display in route_mapping.items():
+            if code.lower() == route_code_lower:
+                return display
+        
+        # Return original code if no mapping found
+        return route_code if route_code else 'Not specified'
+    
+    def _format_cda_date(self, cda_date: str) -> str:
+        """
+        Format CDA date string to human-readable format.
+        
+        Converts dates like "19971006" or "1997-10-06" to "Oct 06, 1997"
+        """
+        import re
+        from datetime import datetime
+        
+        if not cda_date:
+            return None
+        
+        try:
+            # Remove any timezone info and clean up
+            date_clean = re.sub(r'[T\+\-].*$', '', cda_date)
+            
+            # Handle different date formats
+            if len(date_clean) == 8 and date_clean.isdigit():
+                # Format: YYYYMMDD (19971006)
+                year = date_clean[:4]
+                month = date_clean[4:6]
+                day = date_clean[6:8]
+                date_obj = datetime.strptime(f"{year}-{month}-{day}", "%Y-%m-%d")
+            elif '-' in date_clean:
+                # Format: YYYY-MM-DD
+                date_obj = datetime.strptime(date_clean[:10], "%Y-%m-%d")
+            elif '/' in date_clean:
+                # Format: DD/MM/YYYY or MM/DD/YYYY
+                parts = date_clean.split('/')
+                if len(parts) == 3:
+                    if len(parts[2]) == 4:  # DD/MM/YYYY or MM/DD/YYYY
+                        # Try both formats
+                        try:
+                            date_obj = datetime.strptime(date_clean, "%d/%m/%Y")
+                        except ValueError:
+                            date_obj = datetime.strptime(date_clean, "%m/%d/%Y")
+                    else:
+                        return None
+            else:
+                return None
+            
+            # Format as "Oct 06, 1997"
+            return date_obj.strftime("%b %d, %Y")
+            
+        except (ValueError, IndexError) as e:
+            logger.warning(f"[CDA PROCESSOR] Could not parse date '{cda_date}': {e}")
+            return cda_date  # Return original if parsing fails
+    
+    def _format_dose_for_display(self, dose_quantity_struct: dict) -> dict:
+        """Format dose quantity structure for optimal UI display."""
+        if not dose_quantity_struct:
+            return {'value': 'Dose not specified', 'display_value': 'Dose not specified'}
+        
+        # Use enhanced display_name if available
+        if 'display_name' in dose_quantity_struct:
+            return {
+                'value': dose_quantity_struct.get('display_name', 'Dose not specified'),
+                'display_value': dose_quantity_struct.get('display_name', 'Dose not specified'),
+                'source': dose_quantity_struct.get('source', 'enhanced')
+            }
+        
+        # Fallback to original structure
+        return dose_quantity_struct
+    
+    def _format_route_for_display(self, route_struct: dict) -> dict:
+        """Format route structure for optimal UI display."""
+        if not route_struct:
+            return {'value': 'Not specified', 'display_value': 'Not specified'}
+        
+        # Use translated display name for best UI experience
+        display_value = route_struct.get('translated', route_struct.get('display_name', route_struct.get('code', 'Not specified')))
+        
+        return {
+            'value': display_value,
+            'display_value': display_value,
+            'code': route_struct.get('code', ''),
+            'source': route_struct.get('source', 'enhanced')
+        }
+    
+    def _format_schedule_for_display(self, schedule_struct: dict) -> dict:
+        """Format schedule structure for optimal UI display."""
+        if not schedule_struct:
+            return {'value': 'Not specified', 'display_value': 'Not specified'}
+        
+        display_value = schedule_struct.get('display_name', schedule_struct.get('code', 'Not specified'))
+        
+        return {
+            'value': display_value,
+            'display_value': display_value,
+            'code': schedule_struct.get('code', ''),
+            'source': schedule_struct.get('source', 'enhanced')
+        }
+    
+    def _format_period_for_display(self, period_struct: dict) -> dict:
+        """Format period structure for optimal UI display (e.g., 'Since Oct 06, 1997')."""
+        if not period_struct:
+            return {'value': 'Not specified', 'display_value': 'Not specified'}
+        
+        # Use enhanced display_name if available (like "Since Oct 06, 1997")
+        if 'display_name' in period_struct:
+            return {
+                'value': period_struct.get('display_name', 'Not specified'),
+                'display_value': period_struct.get('display_name', 'Not specified'),
+                'source': period_struct.get('source', 'enhanced')
+            }
+        
+        # Fallback to original structure
+        return period_struct
     
     def _extract_enhanced_medication_strength(self, med_name: str, all_cell_text: str, tds: list) -> str:
         """
