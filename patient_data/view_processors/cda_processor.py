@@ -1407,11 +1407,31 @@ class CDAViewProcessor:
         }
     
     def _parse_medication_xml(self, root) -> Dict[str, Any]:
-        """Parse medication XML into structured data with enhanced compound medication support and full CDA structure extraction"""
+        """Parse medication XML into structured data with enhanced compound medication support and lxml-powered CDA structure extraction"""
         medications = []
         namespaces = {'hl7': 'urn:hl7-org:v3', 'pharm': 'urn:ihe:pharm:medication'}
         
-        logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Starting comprehensive CDA medication extraction ***")
+        logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Starting lxml-powered CDA medication extraction ***")
+        
+        # Convert ElementTree to lxml for advanced XPath capabilities
+        try:
+            from lxml import etree
+            import xml.etree.ElementTree as ET
+            
+            # Convert to string and reparse with lxml for enhanced XPath support
+            if hasattr(root, 'tag'):  # It's an ElementTree element
+                xml_string = ET.tostring(root, encoding='unicode')
+                lxml_root = etree.fromstring(xml_string)
+                logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Successfully converted to lxml for advanced parsing ***")
+            else:
+                lxml_root = root
+                logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Using lxml root directly ***")
+        except ImportError:
+            logger.warning("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: lxml not available, falling back to ElementTree ***")
+            lxml_root = root
+        except Exception as e:
+            logger.warning(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Error converting to lxml: {e}, using original root ***")
+            lxml_root = root
         
         # Strategy 1: Enhanced table extraction with compound medication support
         text_section = root.find('.//hl7:text', namespaces) or root.find('.//text')
@@ -1462,14 +1482,16 @@ class CDAViewProcessor:
                         
                         logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted {med_name} with strength: {strength} ***")
         
-        # Strategy 2: Extract from structured entry/substanceAdministration elements with full CDA structure extraction
-        entries = root.findall('.//hl7:entry', namespaces)
-        for entry_idx, entry in enumerate(entries):
-            sub_admin = entry.find('.//hl7:substanceAdministration', namespaces)
-            if sub_admin is not None:
-                logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Processing substanceAdministration entry {entry_idx} ***")
+        # Strategy 2: Enhanced substanceAdministration parsing with lxml XPath power
+        if hasattr(lxml_root, 'xpath'):
+            # Use lxml's advanced XPath to find all substanceAdministration elements with comprehensive data extraction
+            substance_admins = lxml_root.xpath('//hl7:entry/hl7:substanceAdministration', namespaces=namespaces)
+            logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found {len(substance_admins)} substanceAdministration entries via lxml XPath ***")
+            
+            for entry_idx, sub_admin in enumerate(substance_admins):
+                logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Processing lxml substanceAdministration entry {entry_idx} ***")
                 
-                # Extract medication data
+                # Extract medication data with enhanced XPath queries
                 med_name = "Medication"  # Default fallback
                 active_ingredient = ""
                 pharm_form = "Tablet"
@@ -1481,91 +1503,219 @@ class CDAViewProcessor:
                 schedule_struct = {}
                 period_struct = {}
                 
-                # Get medication name from consumable/manufacturedProduct
-                consumable = sub_admin.find('.//hl7:consumable/hl7:manufacturedProduct', namespaces)
-                if consumable is not None:
-                    # Try to get medication name
-                    name_elem = consumable.find('.//hl7:name', namespaces)
-                    if name_elem is not None:
-                        med_name = name_elem.text or med_name
-                    
-                    # Get manufactured material for details
-                    material = consumable.find('.//hl7:manufacturedMaterial', namespaces)
-                    if material is not None:
-                        # Get active ingredient from code displayName
-                        code_elem = material.find('hl7:code', namespaces)
-                        if code_elem is not None:
-                            display_name = code_elem.get('displayName', '').strip()
-                            if display_name:
-                                active_ingredient = display_name
-                                
-                        # Get pharmaceutical form
-                        form_elem = material.find('hl7:formCode', namespaces)
-                        if form_elem is not None:
-                            form_display = form_elem.get('displayName', '').strip()
-                            if form_display:
-                                pharm_form = form_display
+                # Enhanced medication name extraction with multiple XPath strategies
+                name_candidates = sub_admin.xpath('.//hl7:manufacturedProduct/hl7:manufacturedMaterial/hl7:name/text()', namespaces=namespaces) or \
+                                sub_admin.xpath('.//hl7:consumable/hl7:manufacturedProduct/hl7:manufacturedMaterial/hl7:code/@displayName', namespaces=namespaces) or \
+                                sub_admin.xpath('.//hl7:consumable//hl7:name/text()', namespaces=namespaces)
                 
-                # Extract dose quantity from doseQuantity element
-                dose_elem = sub_admin.find('.//hl7:doseQuantity', namespaces)
-                if dose_elem is not None:
-                    logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found doseQuantity element ***")
-                    # Extract low value
-                    low_elem = dose_elem.find('hl7:low', namespaces)
-                    if low_elem is not None:
-                        low_val = low_elem.get('value')
-                        low_unit = low_elem.get('unit', '')
-                        if low_val:
-                            dose_quantity_struct['low'] = {'value': low_val, 'unit': low_unit}
+                if name_candidates:
+                    med_name = name_candidates[0].strip()
+                    logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted medication name via XPath: '{med_name}' ***")
+                
+                # Enhanced active ingredient extraction
+                ingredient_candidates = sub_admin.xpath('.//hl7:manufacturedMaterial/hl7:code/@displayName', namespaces=namespaces) or \
+                                      sub_admin.xpath('.//hl7:ingredientSubstance/hl7:code/@displayName', namespaces=namespaces)
+                
+                if ingredient_candidates:
+                    active_ingredient = ingredient_candidates[0].strip()
+                    logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted active ingredient via XPath: '{active_ingredient}' ***")
+                
+                # Enhanced pharmaceutical form extraction
+                form_candidates = sub_admin.xpath('.//hl7:manufacturedMaterial/hl7:formCode/@displayName', namespaces=namespaces)
+                if form_candidates:
+                    pharm_form = form_candidates[0].strip()
+                    logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted pharmaceutical form via XPath: '{pharm_form}' ***")
+                
+                # ENHANCED DOSE EXTRACTION with lxml XPath precision
+                dose_elements = sub_admin.xpath('.//hl7:doseQuantity', namespaces=namespaces)
+                for dose_elem in dose_elements:
+                    logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found doseQuantity element via lxml XPath ***")
                     
-                    # Extract high value
-                    high_elem = dose_elem.find('hl7:high', namespaces)
-                    if high_elem is not None:
-                        high_val = high_elem.get('value')
-                        high_unit = high_elem.get('unit', '')
-                        if high_val:
-                            dose_quantity_struct['high'] = {'value': high_val, 'unit': high_unit}
+                    # Extract low value with XPath
+                    low_values = dose_elem.xpath('./hl7:low/@value', namespaces=namespaces)
+                    low_units = dose_elem.xpath('./hl7:low/@unit', namespaces=namespaces)
+                    if low_values:
+                        dose_quantity_struct['low'] = {
+                            'value': low_values[0],
+                            'unit': low_units[0] if low_units else ''
+                        }
+                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted dose low: {dose_quantity_struct['low']} ***")
+                    
+                    # Extract high value with XPath
+                    high_values = dose_elem.xpath('./hl7:high/@value', namespaces=namespaces)
+                    high_units = dose_elem.xpath('./hl7:high/@unit', namespaces=namespaces)
+                    if high_values:
+                        dose_quantity_struct['high'] = {
+                            'value': high_values[0],
+                            'unit': high_units[0] if high_units else ''
+                        }
+                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted dose high: {dose_quantity_struct['high']} ***")
                     
                     # Extract direct value if no low/high
-                    if not dose_quantity_struct and dose_elem.get('value'):
-                        dose_quantity_struct['value'] = dose_elem.get('value')
-                        dose_quantity_struct['unit'] = dose_elem.get('unit', '')
+                    direct_values = dose_elem.xpath('./@value', namespaces=namespaces)
+                    direct_units = dose_elem.xpath('./@unit', namespaces=namespaces)
+                    if direct_values and not dose_quantity_struct:
+                        dose_quantity_struct = {
+                            'value': direct_values[0],
+                            'unit': direct_units[0] if direct_units else ''
+                        }
+                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted direct dose: {dose_quantity_struct} ***")
                 
-                # Extract route from routeCode element
-                route_elem = sub_admin.find('.//hl7:routeCode', namespaces)
-                if route_elem is not None:
-                    logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found routeCode element ***")
-                    route_struct = {
-                        'code': route_elem.get('code', ''),
-                        'display_name': route_elem.get('displayName', ''),
-                        'code_system': route_elem.get('codeSystem', '')
-                    }
+                # ENHANCED ROUTE EXTRACTION with lxml XPath precision
+                route_elements = sub_admin.xpath('.//hl7:routeCode', namespaces=namespaces)
+                for route_elem in route_elements:
+                    logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found routeCode element via lxml XPath ***")
+                    
+                    route_codes = route_elem.xpath('./@code', namespaces=namespaces)
+                    route_displays = route_elem.xpath('./@displayName', namespaces=namespaces)
+                    route_systems = route_elem.xpath('./@codeSystem', namespaces=namespaces)
+                    
+                    if route_codes or route_displays:
+                        route_struct = {
+                            'code': route_codes[0] if route_codes else '',
+                            'display_name': route_displays[0] if route_displays else '',
+                            'code_system': route_systems[0] if route_systems else '',
+                            'translated': route_displays[0] if route_displays else route_codes[0] if route_codes else ''
+                        }
+                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted route via XPath: {route_struct} ***")
                 
-                # Extract schedule from effectiveTime element
-                effective_time_elem = sub_admin.find('.//hl7:effectiveTime', namespaces)
-                if effective_time_elem is not None:
-                    logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found effectiveTime element ***")
-                    # Extract schedule code if present
-                    schedule_code = effective_time_elem.get('institutionSpecified')
-                    if schedule_code:
+                # ENHANCED SCHEDULE EXTRACTION with lxml XPath precision
+                effective_time_elements = sub_admin.xpath('.//hl7:effectiveTime', namespaces=namespaces)
+                for eff_time_elem in effective_time_elements:
+                    logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found effectiveTime element via lxml XPath ***")
+                    
+                    # Extract schedule from various attributes and child elements
+                    institution_specified = eff_time_elem.xpath('./@institutionSpecified', namespaces=namespaces)
+                    if institution_specified:
                         schedule_struct = {
-                            'code': schedule_code,
-                            'display_name': self._map_schedule_code_to_display(schedule_code)
+                            'code': institution_specified[0],
+                            'display_name': self._map_schedule_code_to_display(institution_specified[0])
+                        }
+                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted schedule from institutionSpecified: {schedule_struct} ***")
+                    
+                    # Extract period information with XPath
+                    period_values = eff_time_elem.xpath('./hl7:period/@value', namespaces=namespaces)
+                    period_units = eff_time_elem.xpath('./hl7:period/@unit', namespaces=namespaces)
+                    if period_values:
+                        period_struct = {
+                            'value': period_values[0],
+                            'unit': period_units[0] if period_units else 'h',
+                            'display_name': f"Every {period_values[0]} {period_units[0] if period_units else 'hours'}"
+                        }
+                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted period via XPath: {period_struct} ***")
+                    
+                    # Check for frequency codes
+                    freq_codes = eff_time_elem.xpath('./hl7:freq/@code', namespaces=namespaces)
+                    if freq_codes and not schedule_struct:
+                        schedule_struct = {
+                            'code': freq_codes[0],
+                            'display_name': self._map_schedule_code_to_display(freq_codes[0])
+                        }
+                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted schedule from freq code: {schedule_struct} ***")
+        
+        else:
+            # Fallback to original ElementTree parsing if lxml not available
+            logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Using ElementTree fallback parsing ***")
+            entries = root.findall('.//hl7:entry', namespaces)
+            for entry_idx, entry in enumerate(entries):
+                sub_admin = entry.find('.//hl7:substanceAdministration', namespaces)
+                if sub_admin is not None:
+                    logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Processing ElementTree substanceAdministration entry {entry_idx} ***")
+                    
+                    # Extract medication data (original logic)
+                    med_name = "Medication"  # Default fallback
+                    active_ingredient = ""
+                    pharm_form = "Tablet"
+                    strength = "Not specified"
+                    
+                    # Get medication name from consumable/manufacturedProduct
+                    consumable = sub_admin.find('.//hl7:consumable/hl7:manufacturedProduct', namespaces)
+                    if consumable is not None:
+                        # Try to get medication name
+                        name_elem = consumable.find('.//hl7:name', namespaces)
+                        if name_elem is not None:
+                            med_name = name_elem.text or med_name
+                        
+                        # Get manufactured material for details
+                        material = consumable.find('.//hl7:manufacturedMaterial', namespaces)
+                        if material is not None:
+                            # Get active ingredient from code displayName
+                            code_elem = material.find('hl7:code', namespaces)
+                            if code_elem is not None:
+                                display_name = code_elem.get('displayName', '').strip()
+                                if display_name:
+                                    active_ingredient = display_name
+                                    
+                            # Get pharmaceutical form
+                            form_elem = material.find('hl7:formCode', namespaces)
+                            if form_elem is not None:
+                                form_display = form_elem.get('displayName', '').strip()
+                                if form_display:
+                                    pharm_form = form_display
+                    
+                    # Extract dose quantity from doseQuantity element
+                    dose_elem = sub_admin.find('.//hl7:doseQuantity', namespaces)
+                    if dose_elem is not None:
+                        logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found doseQuantity element (ElementTree) ***")
+                        # Extract low value
+                        low_elem = dose_elem.find('hl7:low', namespaces)
+                        if low_elem is not None:
+                            low_val = low_elem.get('value')
+                            low_unit = low_elem.get('unit', '')
+                            if low_val:
+                                dose_quantity_struct['low'] = {'value': low_val, 'unit': low_unit}
+                        
+                        # Extract high value
+                        high_elem = dose_elem.find('hl7:high', namespaces)
+                        if high_elem is not None:
+                            high_val = high_elem.get('value')
+                            high_unit = high_elem.get('unit', '')
+                            if high_val:
+                                dose_quantity_struct['high'] = {'value': high_val, 'unit': high_unit}
+                        
+                        # Extract direct value if no low/high
+                        if not dose_quantity_struct and dose_elem.get('value'):
+                            dose_quantity_struct['value'] = dose_elem.get('value')
+                            dose_quantity_struct['unit'] = dose_elem.get('unit', '')
+                    
+                    # Extract route from routeCode element
+                    route_elem = sub_admin.find('.//hl7:routeCode', namespaces)
+                    if route_elem is not None:
+                        logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found routeCode element (ElementTree) ***")
+                        route_struct = {
+                            'code': route_elem.get('code', ''),
+                            'display_name': route_elem.get('displayName', ''),
+                            'code_system': route_elem.get('codeSystem', ''),
+                            'translated': route_elem.get('displayName', '')
                         }
                     
-                    # Extract period information
-                    period_elem = effective_time_elem.find('hl7:period', namespaces)
-                    if period_elem is not None:
-                        period_value = period_elem.get('value')
-                        period_unit = period_elem.get('unit')
-                        if period_value:
-                            period_struct = {
-                                'value': period_value,
-                                'unit': period_unit or 'h',
-                                'display_name': f"Every {period_value} {period_unit or 'hours'}"
+                    # Extract schedule from effectiveTime element
+                    effective_time_elem = sub_admin.find('.//hl7:effectiveTime', namespaces)
+                    if effective_time_elem is not None:
+                        logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found effectiveTime element (ElementTree) ***")
+                        # Extract schedule code if present
+                        schedule_code = effective_time_elem.get('institutionSpecified')
+                        if schedule_code:
+                            schedule_struct = {
+                                'code': schedule_code,
+                                'display_name': self._map_schedule_code_to_display(schedule_code)
                             }
+                        
+                        # Extract period information
+                        period_elem = effective_time_elem.find('hl7:period', namespaces)
+                        if period_elem is not None:
+                            period_value = period_elem.get('value')
+                            period_unit = period_elem.get('unit')
+                            if period_value:
+                                period_struct = {
+                                    'value': period_value,
+                                    'unit': period_unit or 'h',
+                                    'display_name': f"Every {period_value} {period_unit or 'hours'}"
+                                }
                 
+                # Shared processing for both lxml and ElementTree results
                 # Extract from paragraph content as fallback (like Mario's Eutirox example)
+                text_section = root.find('.//hl7:text', namespaces) or root.find('.//text')
                 if not active_ingredient and text_section is not None:
                     paragraphs = text_section.findall('.//hl7:paragraph', namespaces) or text_section.findall('.//paragraph')
                     for para in paragraphs:
