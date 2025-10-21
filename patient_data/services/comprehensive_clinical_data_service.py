@@ -24,7 +24,9 @@ from patient_data.services.cda_parser_service import CDAParserService
 from patient_data.services.enhanced_cda_xml_parser import EnhancedCDAXMLParser
 from patient_data.services.ps_table_renderer import PSTableRenderer
 from patient_data.services.structured_cda_extractor import StructuredCDAExtractor
+from patient_data.services.enhanced_cts_response_service import EnhancedCTSResponseService
 from translation_services.terminology_translator import TerminologyTranslator
+from translation_services.enhanced_cts_service import enhanced_cts_service
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +40,7 @@ class ComprehensiveClinicalDataService:
         self.cda_parser = CDAParserService()
         self.structured_extractor = StructuredCDAExtractor()
         self.terminology_service = TerminologyTranslator()
+        self.enhanced_cts_service = EnhancedCTSResponseService()
 
     def extract_comprehensive_clinical_data(
         self, cda_content: str, session_data: dict = None
@@ -210,14 +213,27 @@ class ComprehensiveClinicalDataService:
                 "immunizations": [],
             }
 
-            # Enhanced parser sections for rich clinical data (priority for medications)
+            # PRIORITY: Check for detailed medications from Enhanced CDA XML Parser
             enhanced_data = comprehensive_data.get("clinical_sections", {}).get(
                 "enhanced_parser", {}
             )
+            
+            # If we have detailed medications from the enhanced parser, use them directly
+            if "detailed_medications" in enhanced_data:
+                detailed_meds = enhanced_data["detailed_medications"]
+                if detailed_meds:
+                    clinical_arrays["medications"] = detailed_meds
+                    logger.info(f"[DETAILED MEDICATIONS] Using {len(detailed_meds)} detailed medications from Enhanced CDA Parser")
+                    for med in detailed_meds[:3]:  # Debug first 3
+                        name = med.get('name', 'NO_NAME')
+                        dose = med.get('dose_quantity', 'NO_DOSE')
+                        route = med.get('route', 'NO_ROUTE')
+                        logger.info(f"[DETAILED MEDICATIONS] {name}: dose={dose}, route={route}")
+            
             sections_found = enhanced_data.get("sections_found", [])
             
-            # Extract rich clinical data from enhanced parser sections first
-            enhanced_medications_found = False
+            # Extract rich clinical data from enhanced parser sections first (skip if we have detailed medications)
+            enhanced_medications_found = len(clinical_arrays["medications"]) > 0  # True if we have detailed medications
             for section in sections_found:
                 if "structured_data" in section:
                     for entry in section["structured_data"]:
@@ -225,16 +241,16 @@ class ComprehensiveClinicalDataService:
                         section_type = entry.get("section_type", "")
                         entry_type = entry.get("type", "")
                         
-                        # Handle different entry types from enhanced parser
+                        # Handle different entry types from enhanced parser (skip medications if we have detailed ones)
                         if entry_type == "valueset_entry":
                             # For valueset entries, the data is in "fields"
                             entry_fields = entry.get("fields", {})
-                            if section_type == "medication" and entry_fields:
+                            if section_type == "medication" and entry_fields and not enhanced_medications_found:
                                 # Convert fields to data structure for template compatibility
                                 medication_data = self._convert_valueset_fields_to_medication_data(entry_fields)
                                 clinical_arrays["medications"].append(medication_data)
                                 enhanced_medications_found = True
-                        elif section_type == "medication" and entry_data:
+                        elif section_type == "medication" and entry_data and not enhanced_medications_found:
                             # Handle structured entries with data
                             clinical_arrays["medications"].append(entry_data)
                             enhanced_medications_found = True
@@ -522,6 +538,11 @@ class ComprehensiveClinicalDataService:
         if not data:
             return analysis
 
+        # CRITICAL FIX: Extract detailed medications from Enhanced parser
+        if "detailed_medications" in data:
+            analysis["detailed_medications"] = data["detailed_medications"]
+            logger.info(f"[ENHANCED_ANALYSIS] Preserved {len(data['detailed_medications'])} detailed medications from Enhanced parser")
+
         # Extract administrative data if available
         if "administrative_data" in data:
             analysis["administrative_data"] = data["administrative_data"]
@@ -699,8 +720,10 @@ class ComprehensiveClinicalDataService:
                 medication_data[med_key] = fields[field_key]
         
         # CTS Integration: Resolve administration route codes to display text
-        if 'administration_route' in fields:
-            route_data = fields['administration_route']
+        # Check multiple possible route field names (CDA uses 'routeCode', templates expect 'route_display')
+        route_source = fields.get('administration_route') or fields.get('routeCode') or fields.get('route')
+        if route_source:
+            route_data = route_source
             
             # Handle both simple codes and complex route structures
             route_code = None
@@ -708,9 +731,12 @@ class ComprehensiveClinicalDataService:
             
             if isinstance(route_data, dict):
                 route_code = route_data.get('code')
-                route_display = route_data.get('display_name') or route_data.get('display')
+                route_display = route_data.get('display_name') or route_data.get('displayName') or route_data.get('display')
             elif isinstance(route_data, str) and route_data.isdigit():
                 route_code = route_data
+            elif isinstance(route_data, str):
+                # Could be a display name already
+                route_display = route_data
             
             # Use CTS to resolve route code if available
             if route_code and not route_display:
@@ -727,13 +753,18 @@ class ComprehensiveClinicalDataService:
                     'code': route_code,
                     'display_name': route_display
                 }
-                # Also set for template compatibility
+                # CRITICAL: Set route_display for template compatibility
                 medication_data['route_display'] = route_display
             elif route_code:
                 medication_data['route'] = {
                     'code': route_code,
                     'display_name': route_code  # Fallback to code if no display found
                 }
+                medication_data['route_display'] = route_code
+        
+        # Also check for route_display directly from CDA parser
+        if 'route_display' in fields:
+            medication_data['route_display'] = fields['route_display']
         
         # CTS Integration: Resolve pharmaceutical form codes to display text
         if 'pharmaceutical_form' in fields:
@@ -826,27 +857,61 @@ class ComprehensiveClinicalDataService:
         # Also check for separate active ingredient fields
         elif 'active_ingredient_code' in fields:
             ingredient_code = fields['active_ingredient_code']
+            ingredient_code_system = fields.get('active_ingredient_code_system')
             ingredient_display = fields.get('active_ingredient_display') or fields.get('active_ingredient_name')
             
-            # Use CTS to resolve ingredient code
-            if ingredient_code and not ingredient_display:
+            # Use NEW Comprehensive Enhanced CTS to resolve ingredient code
+            if ingredient_code:
                 try:
-                    ingredient_display = self.terminology_service.resolve_code(ingredient_code)
-                    if ingredient_display:
-                        logger.info(f"CTS resolved active ingredient code {ingredient_code} to '{ingredient_display}'")
+                    comprehensive_response = enhanced_cts_service.get_comprehensive_code_data(
+                        code=ingredient_code,
+                        code_system_oid=ingredient_code_system,
+                        target_language='en',
+                        include_all_languages=True
+                    )
+                    
+                    if comprehensive_response:
+                        # Use comprehensive structured CTS response for full medication data
+                        medication_data['ingredient_display'] = comprehensive_response['code_name']
+                        medication_data['ingredient_code'] = comprehensive_response['code']  # ACTUAL CODE
+                        medication_data['ingredient_description'] = comprehensive_response['description']
+                        medication_data['therapeutic_class'] = comprehensive_response.get('description', '')
+                        medication_data['active_ingredient'] = {
+                            'code': comprehensive_response['code'],  # ACTUAL CTS CODE (e.g., H03AA01)
+                            'coded': comprehensive_response['code'],  # FOR TEMPLATE DISPLAY - ACTUAL CODE
+                            'display_name': comprehensive_response['code_name'],
+                            'description': comprehensive_response['description'],
+                            'code_system_id': comprehensive_response['code_system_id'],
+                            'code_system_version': comprehensive_response['code_system_version'],
+                            'languages': comprehensive_response['languages'],
+                            'cts_metadata': comprehensive_response['cts_metadata']
+                        }
+                        logger.info(f"Enhanced CTS resolved ingredient {ingredient_code} → {comprehensive_response['code']} ({comprehensive_response['code_name']})")
+                    else:
+                        # Fallback response
+                        medication_data['ingredient_code'] = ingredient_code
+                        medication_data['active_ingredient'] = {
+                            'code': ingredient_code,
+                            'coded': ingredient_code,  # Show actual code even if not resolved
+                            'display_name': ingredient_display or f"Code: {ingredient_code}"
+                        }
+                        
                 except Exception as e:
-                    logger.warning(f"Failed to resolve active ingredient code {ingredient_code} via CTS: {e}")
-            
-            # Set ingredient data
-            if ingredient_display:
-                medication_data['ingredient_display'] = ingredient_display
-                medication_data['ingredient_code'] = ingredient_code
-                medication_data['active_ingredient'] = {
-                    'code': ingredient_code,
-                    'display_name': ingredient_display
-                }
-            elif ingredient_code:
-                medication_data['ingredient_code'] = ingredient_code
+                    logger.warning(f"Enhanced CTS ingredient resolution failed for {ingredient_code}: {e}")
+                    # Fallback to basic resolution
+                    medication_data['ingredient_code'] = ingredient_code
+                    if ingredient_display:
+                        medication_data['ingredient_display'] = ingredient_display
+                    medication_data['active_ingredient'] = {
+                        'code': ingredient_code,
+                        'coded': ingredient_code,  # Always show the actual code
+                        'display_name': ingredient_display or f"Code: {ingredient_code}",
+                        'description': ingredient_display or f"Code: {ingredient_code}",
+                        'code_system_id': ingredient_code_system,
+                        'code_system_version': None,
+                        'languages': {},
+                        'cts_metadata': None
+                    }
         
         # Enhanced active ingredient extraction from CDA structure
         # Check for active ingredient data in consumable/manufactured material structure
@@ -886,11 +951,21 @@ class ComprehensiveClinicalDataService:
                             if isinstance(ingredient_data, dict):
                                 ingredient_substance = ingredient_data.get('ingredient_substance', {})
                                 ingredient_code = ingredient_substance.get('code')
+                                ingredient_code_system = ingredient_substance.get('code_system')
                                 
                                 if ingredient_code:
                                     try:
-                                        ingredient_display = self.terminology_service.resolve_code(ingredient_code)
-                                        if ingredient_display:
+                                        # Use NEW Comprehensive Enhanced CTS for full MVC data
+                                        comprehensive_response = enhanced_cts_service.get_comprehensive_code_data(
+                                            code=ingredient_code,
+                                            code_system_oid=ingredient_code_system,
+                                            target_language='en',
+                                            include_all_languages=True
+                                        )
+                                        
+                                        if comprehensive_response:
+                                            ingredient_display = comprehensive_response['code_name']
+                                            
                                             # Extract strength from ingredient quantity
                                             strength_info = ""
                                             if 'quantity' in ingredient_data:
@@ -905,19 +980,42 @@ class ComprehensiveClinicalDataService:
                                             
                                             ingredient_display_with_strength = f"{ingredient_display}{strength_info}"
                                             ingredient_displays.append(ingredient_display_with_strength)
-                                            ingredient_codes.append(ingredient_code)
+                                            ingredient_codes.append(comprehensive_response['code'])  # ACTUAL CTS CODE (e.g., H03AA01)
                                             
                                             if not primary_ingredient:
                                                 primary_ingredient = {
-                                                    'code': ingredient_code,
-                                                    'display_name': ingredient_display,
+                                                    'code': comprehensive_response['code'],  # ACTUAL CODE
+                                                    'coded': comprehensive_response['code'],  # FOR TEMPLATE - ACTUAL CODE
+                                                    'display_name': comprehensive_response['code_name'],
+                                                    'description': comprehensive_response['description'],
+                                                    'cts_metadata': comprehensive_response['cts_metadata'],
+                                                    'languages': comprehensive_response['languages'],
+                                                    'code_system_version': comprehensive_response['code_system_version'],
                                                     'strength': strength_info.strip()
                                                 }
                                             
-                                            logger.info(f"CTS resolved active ingredient code {ingredient_code} to '{ingredient_display}'{strength_info}")
+                                            logger.info(f"Enhanced CTS resolved ingredient {ingredient_code} → {comprehensive_response['code']} ({comprehensive_response['code_name']}){strength_info}")
+                                        else:
+                                            # Use fallback but still show actual code
+                                            ingredient_codes.append(ingredient_code)
+                                            ingredient_displays.append(f"Code: {ingredient_code}")
+                                            
                                     except Exception as e:
-                                        logger.warning(f"Failed to resolve active ingredient code {ingredient_code}: {e}")
+                                        logger.warning(f"Enhanced CTS ingredient resolution failed for {ingredient_code}: {e}")
                                         ingredient_codes.append(ingredient_code)
+                                        ingredient_displays.append(f"Code: {ingredient_code}")
+                                        
+                                        if not primary_ingredient:
+                                            primary_ingredient = {
+                                                'code': ingredient_code,
+                                                'coded': ingredient_code,  # Show actual code
+                                                'display_name': f"Code: {ingredient_code}",
+                                                'description': f"Code: {ingredient_code}",
+                                                'code_system_id': ingredient_code_system,
+                                                'code_system_version': None,
+                                                'languages': {},
+                                                'cts_metadata': None
+                                            }
                         
                         # Set combined ingredient display
                         if ingredient_displays:
@@ -938,20 +1036,55 @@ class ComprehensiveClinicalDataService:
                         
                         # Get active ingredient code
                         ingredient_code = ingredient_substance.get('code')
+                        ingredient_code_system = ingredient_substance.get('code_system')
+                        
                         if ingredient_code:
                             try:
-                                ingredient_display = self.terminology_service.resolve_code(ingredient_code)
-                                if ingredient_display:
-                                    medication_data['ingredient_display'] = ingredient_display
+                                # Use NEW Comprehensive Enhanced CTS for single ingredient
+                                comprehensive_response = enhanced_cts_service.get_comprehensive_code_data(
+                                    code=ingredient_code,
+                                    code_system_oid=ingredient_code_system,
+                                    target_language='en',
+                                    include_all_languages=True
+                                )
+                                
+                                if comprehensive_response:
+                                    medication_data['ingredient_display'] = comprehensive_response['code_name']
+                                    medication_data['ingredient_code'] = comprehensive_response['code']  # ACTUAL CODE
+                                    medication_data['ingredient_description'] = comprehensive_response['description']
+                                    medication_data['active_ingredient'] = {
+                                        'code': comprehensive_response['code'],  # ACTUAL CODE
+                                        'coded': comprehensive_response['code'],  # FOR TEMPLATE - ACTUAL CODE
+                                        'display_name': comprehensive_response['code_name'],
+                                        'description': comprehensive_response['description'],
+                                        'code_system_id': comprehensive_response['code_system_id'],
+                                        'code_system_version': comprehensive_response['code_system_version'],
+                                        'languages': comprehensive_response['languages'],
+                                        'cts_metadata': comprehensive_response['cts_metadata']
+                                    }
+                                    logger.info(f"Enhanced CTS resolved single ingredient {ingredient_code} → {comprehensive_response['code']} ({comprehensive_response['code_name']})")
+                                else:
+                                    # Fallback to show actual code
                                     medication_data['ingredient_code'] = ingredient_code
                                     medication_data['active_ingredient'] = {
                                         'code': ingredient_code,
-                                        'display_name': ingredient_display
+                                        'coded': ingredient_code,  # Show actual code
+                                        'display_name': f"Code: {ingredient_code}"
                                     }
-                                    logger.info(f"CTS resolved active ingredient code {ingredient_code} to '{ingredient_display}'")
+                                    
                             except Exception as e:
-                                logger.warning(f"Failed to resolve active ingredient code {ingredient_code}: {e}")
+                                logger.warning(f"Enhanced CTS single ingredient resolution failed for {ingredient_code}: {e}")
                                 medication_data['ingredient_code'] = ingredient_code
+                                medication_data['active_ingredient'] = {
+                                    'code': ingredient_code,
+                                    'coded': ingredient_code,  # Always show actual code
+                                    'display_name': f"Code: {ingredient_code}",
+                                    'description': f"Code: {ingredient_code}",
+                                    'code_system_id': ingredient_code_system,
+                                    'code_system_version': None,
+                                    'languages': {},
+                                    'cts_metadata': None
+                                }
                         
                         # Extract strength from ingredient quantity
                         if 'quantity' in ingredient_data:
@@ -1033,17 +1166,46 @@ class ComprehensiveClinicalDataService:
                 medication_data['quantity'] = str(quantity_data)
         
         # Enhanced dose quantity handling for CDA structure
-        if 'dose_quantity' in fields:
-            dose_data = fields['dose_quantity']
+        # Check both 'dose_quantity' and 'doseQuantity' (CDA field name)
+        dose_source = fields.get('dose_quantity') or fields.get('doseQuantity')
+        if dose_source:
+            dose_data = dose_source
             if isinstance(dose_data, dict):
-                # Handle range format with low/high values
-                low_value = dose_data.get('low', {}).get('value') if isinstance(dose_data.get('low'), dict) else dose_data.get('low')
-                high_value = dose_data.get('high', {}).get('value') if isinstance(dose_data.get('high'), dict) else dose_data.get('high')
+                # Handle range format with low/high values (CDA doseQuantity structure)
+                low_value = None
+                high_value = None
                 
+                # Extract low value
+                if 'low' in dose_data:
+                    low_data = dose_data['low']
+                    if isinstance(low_data, dict):
+                        low_value = low_data.get('value')
+                        low_unit = low_data.get('unit', '')
+                    else:
+                        low_value = low_data
+                        low_unit = ''
+                
+                # Extract high value  
+                if 'high' in dose_data:
+                    high_data = dose_data['high']
+                    if isinstance(high_data, dict):
+                        high_value = high_data.get('value')
+                        high_unit = high_data.get('unit', '')
+                    else:
+                        high_value = high_data
+                        high_unit = ''
+                
+                # Format dose quantity for display
                 if low_value and high_value:
-                    medication_data['dose_quantity'] = f"{low_value}-{high_value}"
+                    if low_unit:
+                        medication_data['dose_quantity'] = f"{low_value}-{high_value} {low_unit}"
+                    else:
+                        medication_data['dose_quantity'] = f"{low_value}-{high_value}"
                 elif low_value:
-                    medication_data['dose_quantity'] = str(low_value)
+                    if low_unit:
+                        medication_data['dose_quantity'] = f"{low_value} {low_unit}"
+                    else:
+                        medication_data['dose_quantity'] = str(low_value)
                 elif 'value' in dose_data:
                     # Single value dose quantity
                     value = dose_data.get('value', '')
@@ -1175,6 +1337,60 @@ class ComprehensiveClinicalDataService:
         medication_data['display_name'] = display_name
         medication_data['name'] = display_name  # Also set 'name' for backward compatibility
         
+        # TEMPLATE COMPATIBILITY: Add active_ingredients (plural) for template compatibility
+        # Templates expect item.active_ingredients.coded but we create item.active_ingredient.coded
+        if 'active_ingredient' in medication_data and medication_data['active_ingredient'] is not None:
+            medication_data['active_ingredients'] = [medication_data['active_ingredient']]  # Wrap in list for template
+            # Safe access to active_ingredient data
+            if isinstance(medication_data['active_ingredient'], dict):
+                coded_value = medication_data['active_ingredient'].get('coded', 'N/A')
+            else:
+                coded_value = 'N/A'
+            logger.info(f"Added active_ingredients for template compatibility: {coded_value}")
+        
+        # Handle medication status from statusCode or status_code
+        status_source = fields.get('statusCode') or fields.get('status_code') or fields.get('status')
+        if status_source:
+            if isinstance(status_source, dict):
+                status_code = status_source.get('code', '')
+                if status_code:
+                    medication_data['status'] = status_code
+                    medication_data['status_display'] = status_code.title()
+            elif isinstance(status_source, str):
+                medication_data['status'] = status_source
+                medication_data['status_display'] = status_source.title()
+        
+        # Handle medical reason from entryRelationship or medical_reason
+        medical_reason_source = fields.get('entryRelationship') or fields.get('entry_relationship') or fields.get('medical_reason')
+        if medical_reason_source:
+            if isinstance(medical_reason_source, dict):
+                # Look for observation data in entryRelationship
+                if 'observation' in medical_reason_source:
+                    obs_data = medical_reason_source['observation']
+                    if isinstance(obs_data, dict):
+                        if 'value' in obs_data:
+                            value_data = obs_data['value']
+                            if isinstance(value_data, dict):
+                                medical_reason_display = value_data.get('displayName', '')
+                                if medical_reason_display:
+                                    medication_data['medical_reason'] = medical_reason_display
+                                    medication_data['indication'] = medical_reason_display
+                
+                # Also check for direct display_text
+                elif 'display_text' in medical_reason_source:
+                    medication_data['medical_reason'] = medical_reason_source['display_text']
+                    medication_data['indication'] = medical_reason_source['display_text']
+            elif isinstance(medical_reason_source, str):
+                medication_data['medical_reason'] = medical_reason_source
+                medication_data['indication'] = medical_reason_source
+        
+        # Also check for medical_reason directly
+        if 'medical_reason' in fields and isinstance(fields['medical_reason'], dict):
+            reason_data = fields['medical_reason']
+            if 'display_text' in reason_data:
+                medication_data['medical_reason'] = reason_data['display_text']
+                medication_data['indication'] = reason_data['display_text']
+        
         # Include original fields for debugging/completeness
         medication_data['original_fields'] = fields
         
@@ -1188,6 +1404,22 @@ class ComprehensiveClinicalDataService:
         for field in ['class_code', 'mood_code', 'effective_time', 'dose', 'route', 'medication']:
             if field in cda_medication:
                 medication_data[field] = cda_medication[field]
+        
+        # CRITICAL FIX: Map CDA field names to template field names
+        # CDA XML uses 'doseQuantity', 'routeCode', 'statusCode' but template expects different names
+        field_mappings = {
+            'doseQuantity': 'dose_quantity',
+            'routeCode': 'route_code',
+            'statusCode': 'status_code',
+            'entryRelationship': 'entry_relationship',
+            'routeDisplay': 'route_display',
+            'route_display': 'route_display',  # Keep existing mapping
+        }
+        
+        # Apply CDA field mappings
+        for cda_field, template_field in field_mappings.items():
+            if cda_field in cda_medication:
+                medication_data[template_field] = cda_medication[cda_field]
         
         # Extract period information from effective_time data
         if 'effective_time' in cda_medication:
@@ -1268,6 +1500,24 @@ class ComprehensiveClinicalDataService:
                 fields_for_conversion['dose_quantity'] = dose_quantity_data
                 logger.info(f"Extracted doseQuantity from CDA: {dose_quantity_data}")
             
+            # CRITICAL: Extract route information for event path
+            if 'routeCode' in cda_medication:
+                route_data = cda_medication['routeCode']
+                fields_for_conversion['routeCode'] = route_data
+                logger.info(f"Extracted routeCode from CDA (event): {route_data}")
+            
+            # CRITICAL: Extract status information for event path
+            if 'statusCode' in cda_medication:
+                status_data = cda_medication['statusCode']
+                fields_for_conversion['statusCode'] = status_data
+                logger.info(f"Extracted statusCode from CDA (event): {status_data}")
+            
+            # CRITICAL: Extract medical reason for event path
+            if 'entryRelationship' in cda_medication:
+                entry_rel_data = cda_medication['entryRelationship']
+                fields_for_conversion['entryRelationship'] = entry_rel_data
+                logger.info(f"Extracted entryRelationship from CDA (event): {type(entry_rel_data)}")
+            
             # CRITICAL: Extract pharmaceutical form from CDA structure
             # Look for consumable/manufactured_product/manufactured_material/formCode
             if 'consumable' in cda_medication:
@@ -1300,6 +1550,23 @@ class ComprehensiveClinicalDataService:
             # Merge enhanced data with original medication data
             medication_data['data'] = enhanced_data
             
+            # CRITICAL: Ensure CDA fields are accessible in data structure for templates
+            # Copy critical CDA fields from medication root to data structure
+            cda_to_data_mappings = {
+                'route_display': 'route_display',
+                'dose_quantity': 'dose_quantity', 
+                'status': 'status',
+                'medical_reason': 'medical_reason',
+                'pharmaceutical_form': 'pharmaceutical_form'
+            }
+            
+            for cda_field, data_field in cda_to_data_mappings.items():
+                if cda_field in enhanced_data:
+                    medication_data['data'][data_field] = enhanced_data[cda_field]
+                    logger.debug(f"Mapped {cda_field} to data.{data_field}: {enhanced_data[cda_field]}")
+            
+            logger.info(f"Enhanced medication data keys: {list(enhanced_data.keys())}")
+            
             # Set display fields for template
             if event_display:
                 medication_data['data']['frequency_display'] = event_display
@@ -1331,6 +1598,24 @@ class ComprehensiveClinicalDataService:
                 fields_for_conversion['dose_quantity'] = dose_quantity_data
                 logger.info(f"Extracted doseQuantity from CDA (no event): {dose_quantity_data}")
             
+            # CRITICAL: Extract route information for no-event path
+            if 'routeCode' in cda_medication:
+                route_data = cda_medication['routeCode']
+                fields_for_conversion['routeCode'] = route_data
+                logger.info(f"Extracted routeCode from CDA (no event): {route_data}")
+            
+            # CRITICAL: Extract status information for no-event path
+            if 'statusCode' in cda_medication:
+                status_data = cda_medication['statusCode']
+                fields_for_conversion['statusCode'] = status_data
+                logger.info(f"Extracted statusCode from CDA (no event): {status_data}")
+            
+            # CRITICAL: Extract medical reason for no-event path
+            if 'entryRelationship' in cda_medication:
+                entry_rel_data = cda_medication['entryRelationship']
+                fields_for_conversion['entryRelationship'] = entry_rel_data
+                logger.info(f"Extracted entryRelationship from CDA (no event): {type(entry_rel_data)}")
+            
             # CRITICAL: Extract pharmaceutical form even without event code
             if 'consumable' in cda_medication:
                 consumable_data = cda_medication['consumable']
@@ -1350,7 +1635,24 @@ class ComprehensiveClinicalDataService:
                 fields_for_conversion['pharmaceutical_form'] = cda_medication['pharmaceutical_form']
             
             # Convert to enhanced data structure
-            medication_data['data'] = self._convert_valueset_fields_to_medication_data(fields_for_conversion)
+            enhanced_data = self._convert_valueset_fields_to_medication_data(fields_for_conversion)
+            medication_data['data'] = enhanced_data
+            
+            # CRITICAL: Ensure CDA fields are accessible in data structure for templates (no event path)
+            # Copy critical CDA fields from enhanced data to data structure
+            cda_to_data_mappings = {
+                'route_display': 'route_display',
+                'dose_quantity': 'dose_quantity', 
+                'pharmaceutical_form': 'pharmaceutical_form',
+                'medical_reason': 'medical_reason'
+            }
+            
+            for cda_field, data_field in cda_to_data_mappings.items():
+                if cda_field in enhanced_data:
+                    medication_data['data'][data_field] = enhanced_data[cda_field]
+                    logger.debug(f"Mapped {cda_field} to data.{data_field} (no event): {enhanced_data[cda_field]}")
+            
+            logger.info(f"Enhanced medication data keys (no event): {list(enhanced_data.keys())}")
         
         # Extract display_name for template compatibility
         display_name = None
@@ -1373,6 +1675,72 @@ class ComprehensiveClinicalDataService:
         
         medication_data['display_name'] = display_name
         medication_data['name'] = display_name  # For template compatibility
+        
+        # CRITICAL FIX: Create active_ingredient if missing (fallback for template compatibility)
+        if 'active_ingredient' not in medication_data and display_name:
+            # Create basic active ingredient structure from medication name
+            medication_data['active_ingredient'] = {
+                'code': 'UNKNOWN',  # Will be resolved by CTS if possible
+                'coded': 'UNKNOWN',  # Template expects this field
+                'name': display_name,
+                'display_name': display_name,
+                'description': display_name
+            }
+            logger.info(f"Created fallback active_ingredient for medication: {display_name}")
+        
+        # ENHANCED TEMPLATE COMPATIBILITY: Add individual fields that template expects
+        enhanced_data = medication_data.get('data', {})
+        
+        # Extract template fields from enhanced data
+        if enhanced_data:
+            # Pharmaceutical form
+            form_value = enhanced_data.get('form') or enhanced_data.get('pharmaceutical_form', 'Not specified')
+            if isinstance(form_value, dict):
+                medication_data['pharmaceutical_form'] = form_value.get('display_name', form_value.get('code', 'Not specified'))
+            else:
+                medication_data['pharmaceutical_form'] = form_value
+            
+            # Dose quantity
+            dose_value = enhanced_data.get('dose_quantity')
+            if isinstance(dose_value, dict):
+                # Handle CDA dose structure
+                if 'value' in dose_value and 'unit' in dose_value:
+                    medication_data['dose_quantity'] = f"{dose_value['value']} {dose_value['unit']}"
+                else:
+                    medication_data['dose_quantity'] = dose_value.get('display_value', 'Not specified')
+            else:
+                medication_data['dose_quantity'] = dose_value or 'Not specified'
+            
+            # Route
+            route_value = enhanced_data.get('route') or enhanced_data.get('route_display', 'Not specified')
+            if isinstance(route_value, dict):
+                medication_data['route'] = route_value.get('display_name', route_value.get('code', 'Not specified'))
+            else:
+                medication_data['route'] = route_value
+            
+            # Schedule/frequency
+            schedule_value = enhanced_data.get('frequency_display') or enhanced_data.get('frequency') or enhanced_data.get('schedule', 'Not specified')
+            if isinstance(schedule_value, dict):
+                medication_data['schedule'] = schedule_value.get('display_name', schedule_value.get('code', 'Not specified'))
+            else:
+                medication_data['schedule'] = schedule_value
+        else:
+            # Fallback values if no enhanced data
+            medication_data['pharmaceutical_form'] = 'Not specified'
+            medication_data['dose_quantity'] = 'Not specified'
+            medication_data['route'] = 'Not specified'
+            medication_data['schedule'] = 'Not specified'
+        
+        # TEMPLATE COMPATIBILITY: Add active_ingredients (plural) for template compatibility
+        # Templates expect item.active_ingredients.coded but we create item.active_ingredient.coded
+        if 'active_ingredient' in medication_data and medication_data['active_ingredient'] is not None:
+            medication_data['active_ingredients'] = [medication_data['active_ingredient']]  # Wrap in list for template
+            # Safe access to active_ingredient data
+            if isinstance(medication_data['active_ingredient'], dict):
+                coded_value = medication_data['active_ingredient'].get('coded', 'N/A')
+            else:
+                coded_value = 'N/A'
+            logger.info(f"Added active_ingredients for template compatibility: {coded_value}")
         
         return medication_data
 
@@ -1411,13 +1779,23 @@ class ComprehensiveClinicalDataService:
                 attr_value = getattr(medication, attribute_name, None)
                 
                 if isinstance(attr_value, dict):
-                    # Convert dictionary structure: {'code': 'xxx', 'displayName': 'yyy'} 
-                    # to include: {'code': 'xxx', 'displayName': 'yyy', 'coded': 'xxx', 'translated': 'yyy'}
+                    # Convert dictionary structure patterns to template-compatible format:
+                    # Pattern 1: {'code': 'xxx', 'displayName': 'yyy'} -> add 'coded' and 'translated'
+                    # Pattern 2: {'value': 'xxx', 'display_value': 'yyy'} -> add 'coded' and 'translated'
+                    
+                    # Handle code/displayName pattern
                     if 'code' in attr_value and 'coded' not in attr_value:
                         attr_value['coded'] = attr_value.get('code', '')
                         
                     if ('displayName' in attr_value or 'display_name' in attr_value) and 'translated' not in attr_value:
                         attr_value['translated'] = attr_value.get('displayName', attr_value.get('display_name', ''))
+                    
+                    # Handle value/display_value pattern (from CDA processor)
+                    if 'value' in attr_value and 'coded' not in attr_value:
+                        attr_value['coded'] = attr_value.get('value', '')
+                        
+                    if 'display_value' in attr_value and 'translated' not in attr_value:
+                        attr_value['translated'] = attr_value.get('display_value', '')
                     
                     # CRITICAL FIX: Convert nested dictionary to DotDict for template dot notation access
                     if not isinstance(attr_value, DotDict):
@@ -1441,13 +1819,23 @@ class ComprehensiveClinicalDataService:
                 attr_value = medication[attribute_name]
                 
                 if isinstance(attr_value, dict):
-                    # Convert dictionary structure: {'code': 'xxx', 'displayName': 'yyy'} 
-                    # to include: {'code': 'xxx', 'displayName': 'yyy', 'coded': 'xxx', 'translated': 'yyy'}
+                    # Convert dictionary structure patterns to template-compatible format:
+                    # Pattern 1: {'code': 'xxx', 'displayName': 'yyy'} -> add 'coded' and 'translated'
+                    # Pattern 2: {'value': 'xxx', 'display_value': 'yyy'} -> add 'coded' and 'translated'
+                    
+                    # Handle code/displayName pattern
                     if 'code' in attr_value and 'coded' not in attr_value:
                         attr_value['coded'] = attr_value.get('code', '')
                         
                     if ('displayName' in attr_value or 'display_name' in attr_value) and 'translated' not in attr_value:
                         attr_value['translated'] = attr_value.get('displayName', attr_value.get('display_name', ''))
+                    
+                    # Handle value/display_value pattern (from CDA processor)
+                    if 'value' in attr_value and 'coded' not in attr_value:
+                        attr_value['coded'] = attr_value.get('value', '')
+                        
+                    if 'display_value' in attr_value and 'translated' not in attr_value:
+                        attr_value['translated'] = attr_value.get('display_value', '')
                     
                     # CRITICAL FIX: Convert nested dictionary to DotDict for template dot notation access
                     if not isinstance(attr_value, DotDict):
@@ -1473,11 +1861,19 @@ class ComprehensiveClinicalDataService:
                     attr_value = med_data[attribute_name]
                     
                     if isinstance(attr_value, dict):
+                        # Handle code/displayName pattern
                         if 'code' in attr_value and 'coded' not in attr_value:
                             attr_value['coded'] = attr_value.get('code', '')
                             
                         if ('displayName' in attr_value or 'display_name' in attr_value) and 'translated' not in attr_value:
                             attr_value['translated'] = attr_value.get('displayName', attr_value.get('display_name', ''))
+                        
+                        # Handle value/display_value pattern (from CDA processor)
+                        if 'value' in attr_value and 'coded' not in attr_value:
+                            attr_value['coded'] = attr_value.get('value', '')
+                            
+                        if 'display_value' in attr_value and 'translated' not in attr_value:
+                            attr_value['translated'] = attr_value.get('display_value', '')
                         
                         logger.info(f"[TEMPLATE_COMPAT] Fixed {attribute_name} in data structure: {attr_value}")
                         
@@ -1489,11 +1885,28 @@ class ComprehensiveClinicalDataService:
         """Remove duplicate entries and placeholder data from clinical arrays"""
         
         # Remove placeholder medications if real medications exist
-        real_medications = [m for m in clinical_arrays["medications"] if getattr(m, "source", None) != "section_fallback"]
-        if real_medications:
-            # Keep only real medications, remove placeholders
+        # Enhanced CDA Parser medications are dictionaries without 'source' attribute
+        # CDA Parser medications are objects that may have 'source' attribute set to 'section_fallback'
+        real_medications = []
+        placeholder_medications = []
+        
+        for m in clinical_arrays["medications"]:
+            # Check if this is a placeholder medication
+            is_placeholder = False
+            if hasattr(m, "source") and getattr(m, "source", None) == "section_fallback":
+                is_placeholder = True
+            elif isinstance(m, dict) and m.get("source") == "section_fallback":
+                is_placeholder = True
+            
+            if is_placeholder:
+                placeholder_medications.append(m)
+            else:
+                real_medications.append(m)
+        
+        # Only remove placeholders if we have real medications
+        if real_medications and placeholder_medications:
             clinical_arrays["medications"] = real_medications
-            logger.info(f"[DATA_CLEANUP] Removed placeholder medications, kept {len(real_medications)} real medications")
+            logger.info(f"[DATA_CLEANUP] Removed {len(placeholder_medications)} placeholder medications, kept {len(real_medications)} real medications")
         
         # Deduplicate problems by name/display_name to prevent repeating entries
         seen_problems = set()
@@ -1517,24 +1930,57 @@ class ComprehensiveClinicalDataService:
             logger.info(f"[DATA_CLEANUP] Deduplicated problems: {len(clinical_arrays['problems'])} -> {len(unique_problems)}")
             clinical_arrays["problems"] = unique_problems
 
-        # Remove empty or invalid medication entries
-        valid_medications = []
+        # CRITICAL FIX: Deduplicate medications by name/substance to prevent massive duplication
+        seen_medications = set()
+        unique_medications = []
+        
         for med in clinical_arrays["medications"]:
-            # Check if medication has meaningful data
-            has_name = False
+            # Create a unique key from medication name/substance
+            med_key = None
             if isinstance(med, dict):
                 if 'data' in med and isinstance(med['data'], dict):
+                    # Handle enhanced format
                     med_data = med['data']
-                    has_name = bool(med_data.get('medication_name') or med_data.get('substance_name') or med_data.get('display_name'))
+                    med_key = (med_data.get('medication_name') or 
+                              med_data.get('substance_name') or 
+                              med_data.get('display_name', '')).strip().lower()
                 else:
-                    has_name = bool(med.get('medication_name') or med.get('substance_name') or med.get('display_name') or med.get('name'))
+                    # Handle direct format AND Enhanced CDA Parser format
+                    med_key = (med.get('medication_name') or 
+                              med.get('substance_name') or 
+                              med.get('display_name') or 
+                              med.get('name', '')).strip().lower()
             
-            if has_name:
-                valid_medications.append(med)
-            else:
-                logger.info(f"[DATA_CLEANUP] Removed invalid medication entry: {med}")
+            # Only add if we have a meaningful name and haven't seen this medication before
+            if med_key and med_key not in seen_medications:
+                seen_medications.add(med_key)
+                unique_medications.append(med)
+            elif not med_key:
+                logger.info(f"[DATA_CLEANUP] Removed medication entry with no name: {med}")
                 
-        clinical_arrays["medications"] = valid_medications
+        if len(unique_medications) != len(clinical_arrays["medications"]):
+            logger.info(f"[DATA_CLEANUP] CRITICAL: Deduplicated medications: {len(clinical_arrays['medications'])} -> {len(unique_medications)}")
+            clinical_arrays["medications"] = unique_medications
+        else:
+            # Still remove invalid entries even if no deduplication needed
+            valid_medications = []
+            for med in clinical_arrays["medications"]:
+                # Check if medication has meaningful data
+                has_name = False
+                if isinstance(med, dict):
+                    if 'data' in med and isinstance(med['data'], dict):
+                        med_data = med['data']
+                        has_name = bool(med_data.get('medication_name') or med_data.get('substance_name') or med_data.get('display_name'))
+                    else:
+                        # CRITICAL FIX: Include Enhanced CDA Parser 'name' field in validation
+                        has_name = bool(med.get('medication_name') or med.get('substance_name') or med.get('display_name') or med.get('name'))
+                
+                if has_name:
+                    valid_medications.append(med)
+                else:
+                    logger.info(f"[DATA_CLEANUP] Removed invalid medication entry: {med}")
+                    
+            clinical_arrays["medications"] = valid_medications
 
     def _extract_enhanced_problems(self, raw_problems: List[Dict]) -> List[Dict]:
         """Extract rich clinical problem data from CDA parser results"""

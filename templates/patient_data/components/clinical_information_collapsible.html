@@ -91,7 +91,15 @@
                                                             Medication (Code: {{ med.medication.code.code|default:"Unknown" }})
                                                         {% endif %}
                                                     </h5>
-                                                    {% if med.medication.code.code %}
+                                                    {% if med.consumable.manufactured_product.manufactured_material.ingredient.ingredient_substance.code %}
+                                                        <p class="medication-code text-muted mb-2">
+                                                            <small><strong>ATC Code:</strong> {{ med.consumable.manufactured_product.manufactured_material.ingredient.ingredient_substance.code }}</small>
+                                                            {% if med.medication.code.codeSystem %}
+                                                                <small class="ms-2"><strong>System:</strong> {{ med.medication.code.codeSystem }}</small>
+                                                            {% endif %}
+                                                            <small class="text-success ms-2">✓ TEST ATC</small>
+                                                        </p>
+                                                    {% elif med.medication.code.code %}
                                                         <p class="medication-code text-muted mb-2">
                                                             <small><strong>Code:</strong> {{ med.medication.code.code }}</small>
                                                             {% if med.medication.code.codeSystem %}

@@ -3072,6 +3072,15 @@ def patient_details_view(request, patient_id):
                 }
             )
             
+            # ENHANCED MEDICATIONS: Check for enhanced medications in session and override if available
+            enhanced_medications = request.session.get('enhanced_medications')
+            if enhanced_medications:
+                logger.info(f"[ENHANCED_MEDICATIONS] Found {len(enhanced_medications)} enhanced medications in session, overriding clinical arrays")
+                context["medications"] = enhanced_medications
+                logger.info(f"[ENHANCED_MEDICATIONS] First medication: {enhanced_medications[0].get('medication_name', 'Unknown')} - Dose: {enhanced_medications[0].get('dose_quantity', 'N/A')}")
+            else:
+                logger.info("[ENHANCED_MEDICATIONS] No enhanced medications found in session, using clinical arrays")
+            
             # PHASE 3B: Add administrative and healthcare data to context for Healthcare Team & Contacts tab
             context.update({
                 "administrative_data": administrative_data,
@@ -3351,6 +3360,7 @@ def patient_cda_view(request, session_id, cda_type=None):
         session_id: Session identifier from URL for privacy-compliant routing
         cda_type: Optional CDA type ('L1' or 'L3'). If None, defaults to L3 preference.
     """
+    print(f"**** ROUTER CALLED FOR SESSION {session_id}, CDA_TYPE: {cda_type} ****")
     logger.info(f"[ROUTER] patient_cda_view called for session_id: {session_id}, cda_type: {cda_type}")
     
     # Session data recovery logic for cross-session compatibility

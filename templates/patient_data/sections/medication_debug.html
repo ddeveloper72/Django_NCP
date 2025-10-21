@@ -1,0 +1,86 @@
+{% load patient_filters %}
+{% load medication_filters %}
+{# DEBUG: Simple medication display to see what data we have #}
+
+<div class="medical-section" id="medications-debug">
+    {% with section_data as med_list %}
+    {% if med_list and med_list|length > 0 %}
+        <h3>DEBUG: {{ med_list|length }} Medications Found</h3>
+        {% for med in med_list %}
+            <div style="border: 2px solid red; margin: 10px; padding: 10px;">
+                <h4>Medication {{ forloop.counter }}: {{ med.name|default:"NO_NAME" }}</h4>
+                
+                <div><strong>Available Keys:</strong> {{ med.keys|join:", " }}</div>
+                
+                <div><strong>Direct Fields:</strong></div>
+                <ul>
+                    <li>med.name: "{{ med.name|default:"NOT_FOUND" }}"</li>
+                    <li>med.display_name: "{{ med.display_name|default:"NOT_FOUND" }}"</li>
+                    <li>med.dose_quantity: "{{ med.dose_quantity|default:"NOT_FOUND" }}"</li>
+                    <li>med.route: "{{ med.route|default:"NOT_FOUND" }}"</li>
+                    <li>med.schedule: "{{ med.schedule|default:"NOT_FOUND" }}"</li>
+                    <li>med.pharmaceutical_form: "{{ med.pharmaceutical_form|default:"NOT_FOUND" }}"</li>
+                    <li>med.active_ingredients: "{{ med.active_ingredients|default:"NOT_FOUND" }}"</li>
+                </ul>
+                
+                {% if med.data %}
+                <div><strong>med.data Contents:</strong></div>
+                <ul>
+                    <li>med.data keys: {{ med.data.keys|join:", " }}</li>
+                    <li>med.data.dose_quantity: "{{ med.data.dose_quantity|default:"NOT_FOUND" }}"</li>
+                    <li>med.data.route_display: "{{ med.data.route_display|default:"NOT_FOUND" }}"</li>
+                    <li>med.data.schedule: "{{ med.data.schedule|default:"NOT_FOUND" }}"</li>
+                    <li>med.data.frequency_display: "{{ med.data.frequency_display|default:"NOT_FOUND" }}"</li>
+                    <li>med.data.pharmaceutical_form: "{{ med.data.pharmaceutical_form|default:"NOT_FOUND" }}"</li>
+                </ul>
+                {% endif %}
+                
+                {% if med.data.dose_quantity %}
+                <div><strong>med.data.dose_quantity Structure:</strong></div>
+                <ul>
+                    <li>Type: {{ med.data.dose_quantity|pprint }}</li>
+                    <li>Keys (if dict): {{ med.data.dose_quantity.keys|join:", "|default:"NOT_DICT" }}</li>
+                    <li>Value field: "{{ med.data.dose_quantity.value|default:"NO_VALUE_FIELD" }}"</li>
+                    <li>Display field: "{{ med.data.dose_quantity.display_value|default:"NO_DISPLAY_FIELD" }}"</li>
+                </ul>
+                {% endif %}
+                
+                <div><strong>Source Check:</strong></div>
+                <ul>
+                    <li>med.source: "{{ med.source|default:"NOT_FOUND" }}"</li>
+                    <li>med.data.source: "{{ med.data.source|default:"NOT_FOUND" }}"</li>
+                </ul>
+                
+                {% if med.route %}
+                <div><strong>Route Details:</strong></div>
+                <ul>
+                    <li>med.route: "{{ med.route }}"</li>
+                    <li>med.route.coded: "{{ med.route.coded|default:"NOT_FOUND" }}"</li>
+                    <li>med.route.translated: "{{ med.route.translated|default:"NOT_FOUND" }}"</li>
+                </ul>
+                {% endif %}
+                
+                {% if med.schedule %}
+                <div><strong>Schedule Details:</strong></div>
+                <ul>
+                    <li>med.schedule: "{{ med.schedule }}"</li>
+                    <li>med.schedule.coded: "{{ med.schedule.coded|default:"NOT_FOUND" }}"</li>
+                    <li>med.schedule.translated: "{{ med.schedule.translated|default:"NOT_FOUND" }}"</li>
+                </ul>
+                {% endif %}
+                
+                {% if med.pharmaceutical_form %}
+                <div><strong>Pharmaceutical Form Details:</strong></div>
+                <ul>
+                    <li>med.pharmaceutical_form: "{{ med.pharmaceutical_form }}"</li>
+                    <li>med.pharmaceutical_form.coded: "{{ med.pharmaceutical_form.coded|default:"NOT_FOUND" }}"</li>
+                    <li>med.pharmaceutical_form.translated: "{{ med.pharmaceutical_form.translated|default:"NOT_FOUND" }}"</li>
+                </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <h3>NO MEDICATIONS FOUND</h3>
+    {% endif %}
+    {% endwith %}
+</div>

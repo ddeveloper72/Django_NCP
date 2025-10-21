@@ -1,0 +1,49 @@
+{% load patient_filters %}
+{# Quick medication object debug - check what fields are available in the actual medication objects #}
+
+<div class="alert alert-warning border-warning p-3 mb-4">
+    <h6 class="text-warning">🔍 Medication Object Debug</h6>
+    {% for med in section_data|slice:":1" %}
+        <div class="row">
+            <div class="col-md-6">
+                <strong>Direct Fields:</strong>
+                <ul class="small">
+                    <li>med.dose_value: "{{ med.dose_value|default:"NOT_FOUND" }}"</li>
+                    <li>med.dose_unit: "{{ med.dose_unit|default:"NOT_FOUND" }}"</li>
+                    <li>med.dose_quantity: "{{ med.dose_quantity|default:"NOT_FOUND" }}"</li>
+                    <li>med.route_display: "{{ med.route_display|default:"NOT_FOUND" }}"</li>
+                    <li>med.administration_route: "{{ med.administration_route|default:"NOT_FOUND" }}"</li>
+                    <li>med.route: "{{ med.route|default:"NOT_FOUND" }}"</li>
+                </ul>
+                <strong>med.data Fields:</strong>
+                <ul class="small">
+                    <li>med.data.dose_quantity: "{{ med.data.dose_quantity|default:"NOT_FOUND" }}"</li>
+                    <li>med.data.route: "{{ med.data.route|default:"NOT_FOUND" }}"</li>
+                    <li>med.data.route_display: "{{ med.data.route_display|default:"NOT_FOUND" }}"</li>
+                    <li>med.data.schedule: "{{ med.data.schedule|default:"NOT_FOUND" }}"</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <strong>Schedule/Period Fields:</strong>
+                <ul class="small">
+                    <li>med.schedule: "{{ med.schedule|default:"NOT_FOUND" }}"</li>
+                    <li>med.frequency: "{{ med.frequency|default:"NOT_FOUND" }}"</li>
+                    <li>med.dosage_frequency: "{{ med.dosage_frequency|default:"NOT_FOUND" }}"</li>
+                    <li>med.period: "{{ med.period|default:"NOT_FOUND" }}"</li>
+                    <li>med.treatment_period: "{{ med.treatment_period|default:"NOT_FOUND" }}"</li>
+                    <li>med.start_date: "{{ med.start_date|default:"NOT_FOUND" }}"</li>
+                </ul>
+                <strong>Available Keys:</strong>
+                <ul class="small">
+                    <li>Keys: {{ med.keys|join:", "|default:"NOT_AVAILABLE" }}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="mt-2">
+            <strong>Source:</strong> {{ med.source|default:"NOT_FOUND" }}
+        </div>
+    {% endfor %}
+</div>
+
+{# Include the original medication section #}
+{% include 'patient_data/sections/medication_section.html' with section_data=section_data %}

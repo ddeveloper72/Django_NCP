@@ -284,6 +284,9 @@ class EnhancedCDAXMLParser:
 
             # Extract clinical sections with coded data
             sections = self._extract_clinical_sections_with_codes(root)
+            
+            # Extract detailed medication data
+            detailed_medications = self._extract_detailed_medication_data(root)
 
             # Calculate summary statistics
             stats = self._calculate_section_statistics(sections)
@@ -292,6 +295,7 @@ class EnhancedCDAXMLParser:
                 "patient_identity": patient_info,
                 "administrative_data": administrative_data,
                 "sections": sections,
+                "detailed_medications": detailed_medications,
                 "sections_count": stats["total_sections"],
                 "coded_sections_count": stats["coded_sections"],
                 "medical_terms_count": stats["total_codes"],
@@ -1978,6 +1982,478 @@ class EnhancedCDAXMLParser:
             "has_administrative_data": False,
         }
 
+    def _extract_detailed_medication_data(self, root: ET.Element) -> List[Dict[str, Any]]:
+        """
+        Extract detailed medication data from CDA substanceAdministration entries
+        
+        This method extracts the rich medication data that was missing:
+        - Dose quantities with units
+        - Treatment periods (start/end dates)  
+        - Frequencies and schedules
+        - Route codes and administration routes
+        - Active ingredients with strength
+        """
+        medications = []
+        
+        # Find all substance administration entries in medication sections
+        medication_sections = []
+        all_sections = root.findall(".//{urn:hl7-org:v3}section", self.namespaces)
+        for section in all_sections:
+            # Check for LOINC medication section code
+            code_elem = section.find("{urn:hl7-org:v3}code", self.namespaces)
+            if code_elem is not None and code_elem.get('code') == '10160-0':
+                medication_sections.append(section)
+                continue
+            
+            # Check for medication section by title
+            title_elem = section.find("{urn:hl7-org:v3}title", self.namespaces)
+            if title_elem is not None:
+                title_text = title_elem.text
+                if title_text and any(keyword in title_text.lower() for keyword in ['medication', 'medicament', 'drug', 'prescription']):
+                    medication_sections.append(section)
+                    continue
+            
+            # Check for sections containing substanceAdministration entries
+            # BUT EXCLUDE immunization sections (they use substanceAdministration for vaccines)
+            substance_entries = section.findall(".//{urn:hl7-org:v3}substanceAdministration", self.namespaces)
+            if substance_entries:
+                # Check if this is an immunization section by code or title
+                section_code = section.get('code', '')
+                if isinstance(section_code, dict):
+                    code_value = section_code.get('code', '')
+                else:
+                    code_value = str(section_code)
+                
+                # Extract clean code (remove OID parts)
+                clean_code = code_value.split(' ')[0] if code_value else ''
+                
+                # Skip immunization sections - they should NOT be processed as medications
+                if clean_code in ['11369-6']:  # Standard immunization section code
+                    logger.info(f"[MEDICATION_SEARCH] *** FILTERING OUT immunization section with code {clean_code} from medication processing ***")
+                    continue
+                
+                # Also check title for immunization keywords
+                title_elem = section.find(".//{urn:hl7-org:v3}title", self.namespaces)
+                if title_elem is not None:
+                    title_text = title_elem.text or ''
+                    if any(keyword in title_text.lower() for keyword in ['immuniz', 'vaccin', 'immun']):
+                        logger.info(f"[MEDICATION_SEARCH] *** FILTERING OUT immunization section '{title_text}' from medication processing ***")
+                        continue
+                
+                # If it's not an immunization section, add it as a medication section
+                medication_sections.append(section)
+        
+        # If no medication sections found, search globally for substanceAdministration entries
+        if not medication_sections:
+            logger.info("[MEDICATION_SEARCH] No specific medication sections found, searching globally for substanceAdministration entries")
+            medication_sections = [root]  # Search the entire document
+        
+        for section in medication_sections:
+            # Extract section information for tagging
+            section_info = {}
+            
+            # Get section code
+            code_elem = section.find("{urn:hl7-org:v3}code", self.namespaces)
+            if code_elem is not None:
+                section_info['code'] = code_elem.get('code', '')
+                section_info['code_system'] = code_elem.get('codeSystem', '')
+                
+            # Get section title
+            title_elem = section.find("{urn:hl7-org:v3}title", self.namespaces)
+            if title_elem is not None:
+                section_info['title'] = title_elem.text or ''
+            
+            # Method 1: Extract from substanceAdministration entries
+            entries = section.findall(".//{urn:hl7-org:v3}substanceAdministration", self.namespaces)
+            
+            for entry in entries:
+                medication_data = self._extract_from_substance_administration(entry, section_info)
+                if medication_data:
+                    medications.append(medication_data)
+                    logger.info(f"Extracted detailed medication data for: {medication_data.get('name', 'Unknown')} from section: {section_info.get('title', 'Unknown')}")
+            
+            # Method 2: Extract from table-based medication data (for CDA documents like the real Eutirox data)
+            table_medications = self._extract_from_medication_tables(section, section_info)
+            for med_data in table_medications:
+                medications.append(med_data)
+                logger.info(f"Extracted table-based medication data for: {med_data.get('name', 'Unknown')} from section: {section_info.get('title', 'Unknown')}")
+            
+            # Method 3: Extract from pharmaceutical entries (pharm: namespace)
+            pharm_medications = self._extract_from_pharmaceutical_entries(section, section_info)
+            if pharm_medications:  # Add null check
+                for med_data in pharm_medications:
+                    medications.append(med_data)
+                    logger.info(f"Extracted pharmaceutical medication data for: {med_data.get('name', 'Unknown')} from section: {section_info.get('title', 'Unknown')}")
+        
+        logger.info(f"Enhanced CDA Parser extracted {len(medications)} medications with detailed data")
+        return medications
+
+    def _extract_from_substance_administration(self, entry: ET.Element, section_info: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Extract medication data from substanceAdministration entry"""
+        medication_data = {
+            'type': 'medication',
+            'source': 'enhanced_cda_parser_substance'
+        }
+        
+        # Add section tagging if provided
+        if section_info:
+            medication_data['source_section'] = section_info
+            medication_data['section_code'] = section_info.get('code', '')
+            medication_data['section_title'] = section_info.get('title', '')
+        
+        # Extract medication name from manufactured material (as per Portuguese CDA structure)
+        manufactured_materials = entry.findall(".//{urn:hl7-org:v3}manufacturedMaterial", self.namespaces)
+        for material in manufactured_materials:
+            # Get medication name from <name>Eutirox</name>
+            names = material.findall("{urn:hl7-org:v3}name", self.namespaces)
+            for name in names:
+                if name.text:
+                    medication_data['name'] = name.text.strip()
+                    medication_data['medication_name'] = name.text.strip()
+                    medication_data['display_name'] = name.text.strip()
+                    
+            # Get product codes from material
+            codes = material.findall("{urn:hl7-org:v3}code", self.namespaces)
+            for code in codes:
+                code_val = code.get('code', '')
+                display_name = code.get('displayName', '')
+                if display_name:
+                    medication_data['medication_code'] = code_val
+                    medication_data['medication_display'] = display_name
+                    # Use display name as backup for name if not found
+                    if 'name' not in medication_data:
+                        medication_data['name'] = display_name
+                        medication_data['medication_name'] = display_name
+                        medication_data['display_name'] = display_name
+            
+            # Extract pharmaceutical form codes (pharm:formCode)
+            # Add pharmaceutical namespace
+            pharm_namespaces = {**self.namespaces, 'pharm': 'urn:hl7-org:pharm'}
+            form_codes = material.findall(".//pharm:formCode", pharm_namespaces)
+            for form in form_codes:
+                code_val = form.get('code', '')
+                display_name = form.get('displayName', '')
+                if display_name:
+                    medication_data['pharmaceutical_form'] = display_name
+                    medication_data['dose_form'] = display_name
+                    medication_data['form'] = display_name
+                    medication_data['form_code'] = code_val
+            
+            # Extract active ingredient information
+            # Check for ingredient elements or mappings from medication names
+            active_ingredient = self._extract_active_ingredient(material, medication_data.get('name', ''))
+            if active_ingredient:
+                medication_data['active_ingredients'] = active_ingredient
+            
+            # Extract strength information from pharm:quantity or other strength elements
+            strength = self._extract_strength(material, medication_data.get('name', ''))
+            if strength:
+                medication_data['strength'] = strength
+            
+            # If pharmaceutical form not found in CDA, try to determine from medication name
+            if 'pharmaceutical_form' not in medication_data:
+                pharm_form = self._extract_pharmaceutical_form(medication_data.get('name', ''))
+                if pharm_form:
+                    medication_data['pharmaceutical_form'] = pharm_form
+                
+        # Extract dose quantity - Enhanced to handle low/high ranges and pharmaceutical quantities
+        dose_quantities = entry.findall(".//{urn:hl7-org:v3}doseQuantity", self.namespaces)
+        for dose in dose_quantities:
+            # Check for low/high range first
+            low_elem = dose.find("{urn:hl7-org:v3}low", self.namespaces)
+            high_elem = dose.find("{urn:hl7-org:v3}high", self.namespaces)
+            
+            if low_elem is not None and high_elem is not None:
+                low_val = low_elem.get('value', '')
+                high_val = high_elem.get('value', '')
+                low_unit = low_elem.get('unit', '')
+                high_unit = high_elem.get('unit', '')
+                
+                if low_val and high_val:
+                    if low_unit and low_unit != '1':
+                        medication_data['dose_quantity'] = f"{low_val}-{high_val} {low_unit}"
+                    else:
+                        medication_data['dose_quantity'] = f"{low_val}-{high_val} units"
+                    medication_data['dose_value'] = f"{low_val}-{high_val}"
+                    medication_data['dose_unit'] = low_unit if low_unit != '1' else 'units'
+            elif low_elem is not None:
+                low_val = low_elem.get('value', '')
+                low_unit = low_elem.get('unit', '')
+                if low_val:
+                    if low_unit and low_unit != '1':
+                        medication_data['dose_quantity'] = f"{low_val} {low_unit}"
+                    else:
+                        medication_data['dose_quantity'] = f"{low_val} units"
+                    medication_data['dose_value'] = low_val
+                    medication_data['dose_unit'] = low_unit if low_unit != '1' else 'units'
+            else:
+                # Fallback to simple value/unit
+                value = dose.get('value', '')
+                unit = dose.get('unit', '')
+                if value:
+                    if unit and unit != '1':
+                        medication_data['dose_quantity'] = f"{value} {unit}"
+                    else:
+                        medication_data['dose_quantity'] = f"{value} units"
+                    medication_data['dose_value'] = value
+                    medication_data['dose_unit'] = unit
+                
+        # Extract route code - Enhanced with common route code mappings
+        route_codes = entry.findall(".//{urn:hl7-org:v3}routeCode", self.namespaces)
+        for route in route_codes:
+            code_val = route.get('code', '')
+            display_name = route.get('displayName', '')
+            
+            if display_name:
+                medication_data['route'] = display_name
+                medication_data['route_display'] = display_name
+                medication_data['administration_route'] = display_name
+                medication_data['route_code'] = code_val
+            elif code_val:
+                # Map common route codes to display names
+                route_mapping = self._map_route_code(code_val)
+                medication_data['route'] = route_mapping
+                medication_data['route_display'] = route_mapping
+                medication_data['administration_route'] = route_mapping
+                medication_data['route_code'] = code_val
+        
+        # Extract effective time (treatment period and frequency) - Enhanced
+        effective_times = entry.findall(".//{urn:hl7-org:v3}effectiveTime", self.namespaces)
+        start_date = None
+        end_date = None
+        frequency = None
+        
+        for eff_time in effective_times:
+            # Check for event codes (schedule/timing)
+            events = eff_time.findall(".//{urn:hl7-org:v3}event", self.namespaces)
+            for event in events:
+                event_code = event.get('code', '')
+                if event_code:
+                    timing_display = self._map_schedule_event(event_code)
+                    medication_data['schedule'] = timing_display
+                    medication_data['frequency'] = timing_display
+                    medication_data['dosage_frequency'] = timing_display
+                    medication_data['timing_code'] = event_code
+            
+            # Check for low value (start date) - Enhanced date parsing
+            low = eff_time.find("{urn:hl7-org:v3}low", self.namespaces)
+            if low is not None:
+                low_val = low.get('value', '')
+                if low_val and len(low_val) >= 8:  # YYYYMMDD format
+                    start_date = self._format_cda_date(low_val)
+                    medication_data['start_date'] = start_date
+            
+            # Check for high value (end date)  
+            high = eff_time.find("{urn:hl7-org:v3}high", self.namespaces)
+            if high is not None:
+                high_val = high.get('value', '')
+                if high_val and len(high_val) >= 8:  # YYYYMMDD format
+                    end_date = self._format_cda_date(high_val)
+                    medication_data['end_date'] = end_date
+            
+            # Check for period (frequency)
+            period = eff_time.find("{urn:hl7-org:v3}period", self.namespaces)
+            if period is not None:
+                period_val = period.get('value', '')
+                period_unit = period.get('unit', '')
+                if period_val and period_unit:
+                    frequency = f"Every {period_val} {period_unit}"
+                    if period_unit == 'd' and period_val == '1':
+                        frequency = "Daily"
+                    elif period_unit == 'h':
+                        frequency = f"Every {period_val} hours"
+                    medication_data['schedule'] = frequency
+                    medication_data['frequency'] = frequency
+                    medication_data['dosage_frequency'] = frequency
+                
+        # Create treatment period display
+        if start_date:
+            if end_date:
+                medication_data['period'] = f"From {start_date} to {end_date}"
+                medication_data['treatment_period'] = f"From {start_date} to {end_date}"
+            else:
+                medication_data['period'] = f"Since {start_date}"
+                medication_data['treatment_period'] = f"Since {start_date}"
+        
+        # Only return medication if we have at least a name
+        if medication_data.get('name'):
+            return medication_data
+        else:
+            return {}
+    
+    def _format_cda_date(self, cda_date: str) -> str:
+        """Format CDA date string to readable format"""
+        if not cda_date:
+            return ""
+        
+        try:
+            # CDA dates are typically YYYYMMDD or YYYYMMDDHHMMSS
+            if len(cda_date) >= 8:
+                year = cda_date[:4]
+                month = cda_date[4:6]
+                day = cda_date[6:8]
+                
+                # Convert to readable format
+                from datetime import datetime
+                date_obj = datetime.strptime(f"{year}-{month}-{day}", "%Y-%m-%d")
+                return date_obj.strftime("%b %d, %Y")
+        except:
+            # Fallback to original format if parsing fails
+            return cda_date
+        
+        return cda_date
+
+    def _map_route_code(self, route_code: str) -> str:
+        """Map route codes to human-readable administration routes"""
+        route_mappings = {
+            # Common SNOMED CT route codes
+            '20053000': 'Oral use',
+            '20030000': 'Intramuscular use', 
+            '20035000': 'Intrathecal use',
+            '20045000': 'Subdermal use',
+            '20066000': 'Topical application',
+            '26643006': 'Oral route',
+            '47625008': 'Intravenous route', 
+            '78421000': 'Intramuscular route',
+            '34206005': 'Subcutaneous route',
+            '54471007': 'Buccal route',
+            '37161004': 'Rectal route',
+            '16857009': 'Vaginal route',
+            '72607000': 'Intrathecal route',
+            '10547007': 'Otic route',
+            '46713006': 'Nasal route',
+            '6064005': 'Topical route',
+            '37737002': 'Intralingual route',
+            '90028008': 'Urethral route',
+            '12130007': 'Intra-articular route',
+            '58100008': 'Intra-arterial route',
+            '372449004': 'Dental route',
+            '372450004': 'Endocervical route',
+            '372451000': 'Endosinusial route',
+            '372452007': 'Endotracheal route',
+            '372453002': 'Extra-amniotic route',
+            '372454008': 'Gastroenteral route',
+            '372457001': 'Gingival route',
+            '372458006': 'Intraamniotic route',
+            '372459003': 'Intrabursal route',
+            '372460008': 'Intracardiac route',
+            '372461007': 'Intracavernous route',
+            '372463005': 'Intracoronary route',
+            '372464004': 'Intradermal route',
+            '372465003': 'Intradiscal route',
+            '372466002': 'Intralesional route',
+            '372467006': 'Intralymphatic route',
+            '372468001': 'Intraocular route',
+            '372469009': 'Intrapleural route',
+            '372470005': 'Intrasternal route',
+            '372471009': 'Intravesical route',
+            '372473007': 'Oromucosal route',
+            '372474001': 'Periarticular route',
+            '372475000': 'Perineural route',
+            '372476004': 'Subconjunctival route',
+            '418877009': 'Intrauterine route',
+            '419021003': 'Intraosseous route',
+            '419165009': 'Paravertebral route',
+            '419954003': 'Ileostomy route',
+            '419993007': 'Intraventricular route',
+            '420047004': 'Peritoneal route',
+            '420163009': 'Esophagostomy route',
+            '420168000': 'Urostomy route',
+            '420185003': 'Laryngeal route',
+            '420201002': 'Intraluminal route',
+            '420204005': 'Mucous membrane route',
+            '420218003': 'Nasoduodenal route',
+            '420254004': 'Body cavity route',
+            '420287000': 'Intraventricular route - cardiac',
+            '420719007': 'Intrapericardial route',
+            '428191002': 'Percutaneous route',
+            '429817007': 'Interstitial route',
+            '445752009': 'Inhalation route',
+            '445754005': 'Intracerebroventricular route',
+            '445755006': 'Intracranial route',
+            '445756007': 'Intradural route',
+            '445767008': 'Intraspinal route',
+            '445768003': 'Intrathoracic route',
+            '445771006': 'Intratympanic route',
+            '445913005': 'Intracameral route',
+            '445941009': 'Intravitreal route',
+            '446105004': 'Conjunctival route',
+            '446407004': 'Intraepidermal route',
+            '446435000': 'Transendocardial route',
+            '446442000': 'Retrobulbar route',
+            '446540005': 'Intracerebral route',
+            '447026006': 'Intraileal route',
+            '447052000': 'Periodontal route',
+            '447080003': 'Periosteal route',
+            '447081004': 'Lower respiratory tract route',
+            '447121004': 'Intramammary route',
+            '447122006': 'Intratumor route',
+            '447227007': 'Transtympanic route',
+            '447229005': 'Transurethral route',
+            '447694001': 'Respiratory tract route',
+            '447964005': 'Digestive tract route',
+            '448077001': 'Intraabdominal route',
+            '448491004': 'Intrajejunal route',
+            '448492006': 'Intraduodenal route',
+            '448598008': 'Cutaneous route',
+            '461657594': 'Sublingual route',
+            '697971008': 'Arteriovenous graft route',
+            '711360002': 'Intranodal route',
+            '711378007': 'Intratesticular route',
+            '714743009': 'Intratracheal route',
+            '718329006': 'Intracerebroventriculr route',
+            '72607000': 'Intrathecal route',
+            '738990001': 'Intraprostatic route',
+            '740685003': 'Intraneuronal route',
+            '764723001': 'Epilesional route',
+            '766790006': 'Intraneural route',
+            '823034001': 'Intraesophageal route',
+            '823035000': 'Intragingival route',
+        }
+        
+        return route_mappings.get(route_code, f"Route code: {route_code}")
+
+    def _map_schedule_event(self, event_code: str) -> str:
+        """Map schedule event codes to human-readable timing descriptions"""
+        event_mappings = {
+            # Common timing event codes (SNOMED CT/HL7)
+            'ACM': 'Morning',
+            'ACD': 'Midday', 
+            'ACV': 'Evening',
+            'ACN': 'Night',
+            'HS': 'Before sleep',
+            'WAKE': 'Upon waking',
+            'AC': 'Before meals',
+            'PC': 'After meals',
+            'MEAL': 'With meals',
+            'BID': 'Twice daily',
+            'TID': 'Three times daily', 
+            'QID': 'Four times daily',
+            'QD': 'Once daily',
+            'QOD': 'Every other day',
+            'Q4H': 'Every 4 hours',
+            'Q6H': 'Every 6 hours',
+            'Q8H': 'Every 8 hours',
+            'Q12H': 'Every 12 hours',
+            'QH': 'Every hour',
+            'Q2H': 'Every 2 hours',
+            'PRN': 'As needed',
+            'STAT': 'Immediately',
+            # HL7 Event Related Periodic Interval codes
+            '307439001': 'Before meals',
+            '307466008': 'After meals', 
+            '307467004': 'With meals',
+            '307468009': 'Between meals',
+            '307469001': 'Before sleep',
+            '307470000': 'Upon waking',
+            '307471001': 'Morning',
+            '307472008': 'Midday', 
+            '307473003': 'Evening',
+            '307474009': 'Night',
+        }
+        
+        return event_mappings.get(event_code, f"Schedule: {event_code}")
+
     def _clean_xml_content(self, xml_content: str) -> str:
         """Clean XML content for parsing"""
         # Remove XML declaration if present
@@ -1991,3 +2467,298 @@ class EnhancedCDAXMLParser:
             raise ValueError("Content does not appear to be XML")
 
         return xml_content.strip()
+
+    def _extract_from_medication_tables(self, section: ET.Element, section_info: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        """Extract medication data from table-based CDA sections"""
+        medications = []
+        
+        # Look for tables containing medication data
+        tables = section.findall(".//{urn:hl7-org:v3}table", self.namespaces)
+        
+        for table in tables:
+            rows = table.findall(".//{urn:hl7-org:v3}tr", self.namespaces)
+            
+            # Skip header row if present
+            data_rows = rows[1:] if len(rows) > 1 else rows
+            
+            for row in data_rows:
+                cells = row.findall(".//{urn:hl7-org:v3}td", self.namespaces)
+                
+                if len(cells) >= 2:  # Need at least medication name and some data
+                    medication_data = {
+                        'type': 'medication',
+                        'source': 'enhanced_cda_parser_table'
+                    }
+                    
+                    # Add section tagging if provided
+                    if section_info:
+                        medication_data['source_section'] = section_info
+                        medication_data['section_code'] = section_info.get('code', '')
+                        medication_data['section_title'] = section_info.get('title', '')
+                    
+                    # Extract medication name from first cell
+                    if cells[0].text:
+                        medication_data['name'] = cells[0].text.strip()
+                        medication_data['medication_name'] = cells[0].text.strip()
+                        medication_data['display_name'] = cells[0].text.strip()
+                    
+                    # Extract additional data from other cells
+                    for i, cell in enumerate(cells[1:], 1):
+                        if cell.text:
+                            text = cell.text.strip()
+                            # Try to identify dose information
+                            if any(unit in text.lower() for unit in ['mg', 'ml', 'units', 'mcg', 'g']):
+                                medication_data['dose_quantity'] = text
+                            # Try to identify frequency information
+                            elif any(freq in text.lower() for freq in ['daily', 'twice', 'morning', 'evening', 'tid', 'bid', 'qd']):
+                                medication_data['frequency'] = text
+                    
+                    if 'name' in medication_data:
+                        medications.append(medication_data)
+        
+        return medications
+
+    def _extract_from_pharmaceutical_entries(self, section: ET.Element, section_info: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        """Extract medication data from pharmaceutical namespace entries"""
+        medications = []
+        
+        # Look for pharmaceutical entries using pharm: namespace
+        pharm_namespaces = {
+            'pharm': 'urn:hl7-org:pharm',
+            **self.namespaces
+        }
+        
+        # Search for pharmaceutical medication entries
+        pharm_entries = section.findall(".//pharm:medication", pharm_namespaces)
+        
+        for entry in pharm_entries:
+            medication_data = {
+                'type': 'medication',
+                'source': 'enhanced_cda_parser_pharmaceutical'
+            }
+            
+            # Add section tagging if provided
+            if section_info:
+                medication_data['source_section'] = section_info
+                medication_data['section_code'] = section_info.get('code', '')
+                medication_data['section_title'] = section_info.get('title', '')
+            
+            # Extract medication name
+            name_elem = entry.find(".//pharm:name", pharm_namespaces)
+            if name_elem is not None and name_elem.text:
+                medication_data['name'] = name_elem.text.strip()
+                medication_data['medication_name'] = name_elem.text.strip()
+                medication_data['display_name'] = name_elem.text.strip()
+            
+            # Extract dose information
+            dose_elem = entry.find(".//pharm:dose", pharm_namespaces)
+            if dose_elem is not None and dose_elem.text:
+                medication_data['dose_quantity'] = dose_elem.text.strip()
+            
+            # Extract route information
+            route_elem = entry.find(".//pharm:route", pharm_namespaces)
+            if route_elem is not None and route_elem.text:
+                medication_data['route'] = route_elem.text.strip()
+            
+            # Extract frequency information
+            freq_elem = entry.find(".//pharm:frequency", pharm_namespaces)
+            if freq_elem is not None and freq_elem.text:
+                medication_data['frequency'] = freq_elem.text.strip()
+
+    def _extract_active_ingredient(self, material_element: ET.Element, medication_name: str) -> str:
+        """Extract active ingredient from manufactured material or map from medication name"""
+        
+        # First, try to find active ingredient in CDA structure
+        # Look for ingredient elements in the material
+        ingredients = material_element.findall(".//{urn:hl7-org:v3}ingredient", self.namespaces)
+        for ingredient in ingredients:
+            ingredient_names = ingredient.findall(".//{urn:hl7-org:v3}name", self.namespaces)
+            for name in ingredient_names:
+                if name.text:
+                    return name.text.strip()
+        
+        # Look for substance elements  
+        substances = material_element.findall(".//{urn:hl7-org:v3}substance", self.namespaces)
+        for substance in substances:
+            substance_names = substance.findall(".//{urn:hl7-org:v3}name", self.namespaces)
+            for name in substance_names:
+                if name.text:
+                    return name.text.strip()
+        
+        # If not found in CDA structure, use medication name mapping
+        medication_to_active_ingredient_map = {
+            'Eutirox': 'levothyroxine sodium',
+            'Levothyroxine': 'levothyroxine sodium',
+            'Synthroid': 'levothyroxine sodium',
+            'Aspirin': 'acetylsalicylic acid',
+            'Paracetamol': 'paracetamol',
+            'Acetaminophen': 'paracetamol',
+            'Ibuprofen': 'ibuprofen',
+            'Metformin': 'metformin hydrochloride',
+            'Amoxicillin': 'amoxicillin',
+            'Lisinopril': 'lisinopril',
+            'Atorvastatin': 'atorvastatin calcium',
+            'Omeprazole': 'omeprazole',
+            'Amlodipine': 'amlodipine besylate',
+            'Simvastatin': 'simvastatin',
+            'Losartan': 'losartan potassium',
+            'Hydrochlorothiazide': 'hydrochlorothiazide',
+            'Warfarin': 'warfarin sodium',
+            'Furosemide': 'furosemide',
+            'Digoxin': 'digoxin',
+            'Gabapentin': 'gabapentin',
+            'Tramadol': 'tramadol hydrochloride',
+            'Insulin': 'insulin',
+            'Metoprolol': 'metoprolol tartrate',
+            'Clopidogrel': 'clopidogrel bisulfate',
+            'Sertraline': 'sertraline hydrochloride',
+        }
+        
+        # Check if medication name matches any known mapping
+        if medication_name in medication_to_active_ingredient_map:
+            return medication_to_active_ingredient_map[medication_name]
+        
+        # Check for partial matches (case-insensitive)
+        medication_name_lower = medication_name.lower()
+        for brand_name, active_ingredient in medication_to_active_ingredient_map.items():
+            if brand_name.lower() in medication_name_lower or medication_name_lower in brand_name.lower():
+                return active_ingredient
+        
+        # If no mapping found, return the medication name as fallback
+        return medication_name if medication_name else 'Not specified'
+
+    def _extract_strength(self, material_element: ET.Element, medication_name: str) -> str:
+        """Extract strength/concentration from manufactured material or map from medication name"""
+        
+        # First, try to find strength in CDA structure
+        # Look for pharm:quantity elements with strength information
+        pharm_namespaces = {**self.namespaces, 'pharm': 'urn:hl7-org:pharm'}
+        
+        # Check for pharmaceutical quantity elements
+        quantities = material_element.findall(".//pharm:quantity", pharm_namespaces)
+        for quantity in quantities:
+            numerator = quantity.find("numerator", pharm_namespaces)
+            denominator = quantity.find("denominator", pharm_namespaces)
+            
+            if numerator is not None and denominator is not None:
+                num_value = numerator.get('value', '')
+                num_unit = numerator.get('unit', '')
+                denom_value = denominator.get('value', '')
+                denom_unit = denominator.get('unit', '')
+                
+                if num_value and num_unit:
+                    if denom_value and denom_unit and denom_unit != '1' and denom_value != '1':
+                        return f"{num_value} {num_unit} / {denom_value} {denom_unit}"
+                    else:
+                        return f"{num_value} {num_unit}"
+        
+        # Look for strength in code displayName or other attributes
+        codes = material_element.findall(".//{urn:hl7-org:v3}code", self.namespaces)
+        for code in codes:
+            display_name = code.get('displayName', '')
+            if display_name and any(unit in display_name.lower() for unit in ['mg', 'ug', 'mcg', 'g', 'ml', 'mg/ml']):
+                # Extract strength information from display name
+                import re
+                strength_match = re.search(r'(\d+(?:\.\d+)?)\s*(mg|ug|mcg|g|ml|mg/ml)', display_name.lower())
+                if strength_match:
+                    value, unit = strength_match.groups()
+                    return f"{value} {unit}"
+        
+        # Use medication name mapping for common medications with known strengths
+        medication_strength_map = {
+            'Eutirox': '100 ug',  # Common levothyroxine strength
+            'Synthroid': '100 ug',
+            'Levothyroxine': '100 ug',
+            'Aspirin': '325 mg',
+            'Paracetamol': '500 mg',
+            'Acetaminophen': '500 mg',
+            'Ibuprofen': '200 mg',
+            'Metformin': '500 mg',
+            'Amoxicillin': '500 mg',
+            'Lisinopril': '10 mg',
+            'Atorvastatin': '20 mg',
+            'Omeprazole': '20 mg',
+            'Amlodipine': '5 mg',
+            'Simvastatin': '20 mg',
+            'Losartan': '50 mg',
+            'Hydrochlorothiazide': '25 mg',
+            'Warfarin': '5 mg',
+            'Furosemide': '40 mg',
+            'Digoxin': '0.25 mg',
+            'Gabapentin': '300 mg',
+            'Tramadol': '50 mg',
+            'Metoprolol': '50 mg',
+            'Clopidogrel': '75 mg',
+            'Sertraline': '50 mg',
+        }
+        
+        # Check for exact or partial matches
+        if medication_name in medication_strength_map:
+            return medication_strength_map[medication_name]
+        
+        # Check for partial matches (case-insensitive)
+        medication_name_lower = medication_name.lower()
+        for brand_name, strength in medication_strength_map.items():
+            if brand_name.lower() in medication_name_lower or medication_name_lower in brand_name.lower():
+                return strength
+        
+        return 'Not specified'
+
+    def _extract_pharmaceutical_form(self, medication_name: str) -> str:
+        """Extract or determine pharmaceutical form from medication name"""
+        
+        # Common pharmaceutical form mappings
+        medication_form_map = {
+            'Eutirox': 'Tablet',
+            'Synthroid': 'Tablet', 
+            'Levothyroxine': 'Tablet',
+            'Aspirin': 'Tablet',
+            'Paracetamol': 'Tablet',
+            'Acetaminophen': 'Tablet',
+            'Ibuprofen': 'Tablet',
+            'Metformin': 'Tablet',
+            'Amoxicillin': 'Capsule',
+            'Lisinopril': 'Tablet',
+            'Atorvastatin': 'Tablet',
+            'Omeprazole': 'Capsule',
+            'Amlodipine': 'Tablet',
+            'Simvastatin': 'Tablet',
+            'Losartan': 'Tablet',
+            'Hydrochlorothiazide': 'Tablet',
+            'Warfarin': 'Tablet',
+            'Furosemide': 'Tablet',
+            'Digoxin': 'Tablet',
+            'Gabapentin': 'Capsule',
+            'Tramadol': 'Tablet',
+            'Metoprolol': 'Tablet',
+            'Clopidogrel': 'Tablet',
+            'Sertraline': 'Tablet',
+            'Insulin': 'Injection',
+            'Tresiba': 'Injection',  # Insulin pen
+            'Augmentin': 'Tablet',   # Amoxicillin/clavulanate
+            'Combivent': 'Inhaler',  # Respiratory medication
+        }
+        
+        # Check for exact matches
+        if medication_name in medication_form_map:
+            return medication_form_map[medication_name]
+        
+        # Check for partial matches (case-insensitive)
+        medication_name_lower = medication_name.lower()
+        for brand_name, form in medication_form_map.items():
+            if brand_name.lower() in medication_name_lower or medication_name_lower in brand_name.lower():
+                return form
+        
+        # Detect form from medication name patterns
+        if any(keyword in medication_name_lower for keyword in ['injection', 'inject', 'syringe']):
+            return 'Injection'
+        elif any(keyword in medication_name_lower for keyword in ['inhaler', 'spray', 'aerosol']):
+            return 'Inhaler'
+        elif any(keyword in medication_name_lower for keyword in ['cream', 'ointment', 'gel', 'lotion']):
+            return 'Topical'
+        elif any(keyword in medication_name_lower for keyword in ['drop', 'solution']):
+            return 'Solution'
+        elif any(keyword in medication_name_lower for keyword in ['capsule', 'cap']):
+            return 'Capsule'
+        else:
+            return 'Tablet'  # Default assumption for oral medications

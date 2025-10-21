@@ -5,7 +5,7 @@ Integrates the CTS-compliant Enhanced CDA Processor with the main CDA display sy
 
 import json
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from django.contrib.sessions.models import Session
 from django.http import JsonResponse
@@ -144,6 +144,22 @@ class EnhancedCDADisplayView(View):
             # Get session metadata for CDA type flags
             session_metadata = self._get_session_metadata(patient_id)
             
+            # Check for enhanced medications in session and override if found
+            logger.info(f"*** ENHANCED MEDICATIONS CHECK: Starting check for patient {patient_id} ***")
+            enhanced_medications = self._get_enhanced_medications(patient_id)
+            if enhanced_medications:
+                logger.info(f"Found {len(enhanced_medications)} enhanced medications for patient {patient_id}")
+                # Override the medications section with enhanced data
+                enhanced_sections["medications"] = {
+                    "title": "Medications",
+                    "section_name": "medications",
+                    "table_data": enhanced_medications,
+                    "success": True,
+                    "enhanced": True
+                }
+            else:
+                logger.info(f"*** ENHANCED MEDICATIONS CHECK: No enhanced medications found for patient {patient_id} ***")
+            
             # Prepare context for template
             context = {
                 "patient_id": patient_id,
@@ -269,6 +285,39 @@ class EnhancedCDADisplayView(View):
         except Exception as e:
             logger.error(f"Error fetching session metadata for patient {patient_id}: {e}")
             return {}
+
+    def _get_enhanced_medications(self, patient_id: str) -> Optional[List[Dict[str, Any]]]:
+        """Get enhanced medications from session if available"""
+        if not patient_id:
+            return None
+
+        try:
+            # Search across all Django sessions for enhanced medications data
+            all_sessions = Session.objects.all()
+            logger.info(f"Searching {len(all_sessions)} sessions for enhanced medications")
+            
+            for db_session in all_sessions:
+                try:
+                    db_session_data = db_session.get_decoded()
+                    enhanced_medications = db_session_data.get("enhanced_medications")
+                    
+                    if enhanced_medications and isinstance(enhanced_medications, list):
+                        logger.info(f"Found enhanced medications in session {db_session.session_key}: {len(enhanced_medications)} medications")
+                        if enhanced_medications:
+                            first_med = enhanced_medications[0]
+                            logger.info(f"First medication: {first_med.get('name', 'Unknown')} - dose: {first_med.get('dose_quantity', 'Not found')} - route: {first_med.get('route', 'Not found')}")
+                        return enhanced_medications
+                        
+                except Exception as e:
+                    logger.debug(f"Error decoding session {db_session.session_key}: {e}")
+                    continue  # Skip corrupted sessions
+
+            logger.info(f"No enhanced medications found for patient {patient_id}")
+            return None
+
+        except Exception as e:
+            logger.error(f"Error retrieving enhanced medications for patient {patient_id}: {e}")
+            return None
 
 
 @method_decorator(csrf_exempt, name="dispatch")

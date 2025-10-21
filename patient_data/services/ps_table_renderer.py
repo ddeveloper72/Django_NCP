@@ -1805,13 +1805,111 @@ class PSTableRenderer:
         if not text:
             return medications
 
-        # Clean up the text
-        text = text.strip()
+        try:
+            # Parse XML content to extract medication paragraphs
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(text, 'html.parser')
+            
+            # Find all paragraph elements with medication data
+            paragraphs = soup.find_all('paragraph') or soup.find_all('ns0:paragraph')
+            
+            for para in paragraphs:
+                para_text = para.get_text(strip=True) if hasattr(para, 'get_text') else str(para).strip()
+                if not para_text:
+                    continue
+                    
+                # Parse medication format: "Name : ingredients : dosage since date (route)"
+                # Example: "Eutirox : levothyroxine sodium 100 ug Tablet : 1 ACM since 1997-10-06 (Oral use)"
+                
+                if ' : ' in para_text and ' since ' in para_text:
+                    parts = para_text.split(' : ')
+                    if len(parts) >= 2:
+                        name = parts[0].strip()
+                        
+                        # Extract ingredients and dosage (everything after first : and before " since")
+                        remaining = ' : '.join(parts[1:])
+                        if ' since ' in remaining:
+                            ingredients_dosage, date_route = remaining.split(' since ', 1)
+                            ingredients_dosage = ingredients_dosage.strip()
+                            
+                            # Extract date and route
+                            date_part = date_route.strip()
+                            route = ""
+                            if '(' in date_part and ')' in date_part:
+                                date_part, route_part = date_part.rsplit('(', 1)
+                                route = route_part.rstrip(')').strip()
+                                date_part = date_part.strip()
+                            
+                            # Split ingredients_dosage to extract active ingredient and dosage
+                            active_ingredient = ""
+                            dosage = ""
+                            frequency = ""
+                            
+                            if ingredients_dosage:
+                                # Try to extract active ingredient and dosage
+                                # Format: "levothyroxine sodium 100 ug Tablet"
+                                parts = ingredients_dosage.split()
+                                if len(parts) >= 2:
+                                    # Look for dosage patterns (numbers with units)
+                                    dosage_found = False
+                                    for i, part in enumerate(parts):
+                                        if any(char.isdigit() for char in part):
+                                            # Found dosage, everything before is active ingredient
+                                            active_ingredient = ' '.join(parts[:i])
+                                            dosage = ' '.join(parts[i:])
+                                            dosage_found = True
+                                            break
+                                    
+                                    if not dosage_found:
+                                        # No clear dosage pattern, treat as active ingredient
+                                        active_ingredient = ingredients_dosage
+                                else:
+                                    active_ingredient = ingredients_dosage
+                            
+                            # Extract frequency from date_part if it contains dosage info
+                            # Format: "1 ACM since 1997-10-06" -> frequency="1 ACM", date="1997-10-06"
+                            start_date = date_part
+                            if ' ' in date_part:
+                                parts = date_part.split()
+                                # Look for frequency pattern before date
+                                if len(parts) >= 2:
+                                    potential_freq = ' '.join(parts[:-1])
+                                    potential_date = parts[-1]
+                                    # Check if last part looks like a date
+                                    if '-' in potential_date and len(potential_date) >= 8:
+                                        frequency = potential_freq
+                                        start_date = potential_date
+                            
+                            medications.append([
+                                name,                    # Medication
+                                active_ingredient,       # Active Ingredient  
+                                dosage,                  # Dosage
+                                route,                   # Route
+                                frequency,               # Frequency
+                                start_date,              # Start Date
+                                "",                      # End Date
+                                ""                       # Notes
+                            ])
+                        else:
+                            # Fallback if no date found
+                            medications.append([name, remaining, "", "", "", "", "", ""])
+                elif para_text and not para_text.startswith('<'):
+                    # Simple text without complex structure
+                    medications.append([para_text, "", "", "", "", "", "", ""])
+                    
+        except Exception as e:
+            logger.warning(f"Error parsing medication text: {e}")
+            # Fallback: split by lines and extract basic info
+            lines = [line.strip() for line in text.split('\n') if line.strip()]
+            for line in lines:
+                if line and not line.startswith('<'):
+                    # Clean up XML tags if any
+                    import re
+                    clean_line = re.sub(r'<[^>]+>', '', line).strip()
+                    if clean_line:
+                        medications.append([clean_line, "", "", "", "", "", "", ""])
 
-        # For now, return empty list since we don't have a clear medication text example
-        # This can be enhanced when we see the actual medication text format
-        # The allergy parsing shows the pattern, but medications might be different
-
+        logger.info(f"Parsed {len(medications)} medications from text")
         return medications
 
     def _extract_problems_from_content(self, content_html: str) -> List[Dict]:

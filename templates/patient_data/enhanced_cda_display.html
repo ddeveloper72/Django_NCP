@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cda-tool-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .form-section {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .language-select {
+        min-width: 200px;
+    }
+    
+    .cda-textarea {
+        min-height: 200px;
+        font-family: monospace;
+        font-size: 12px;
+    }
+    
+    .results-section {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        display: none;
+    }
+    
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .error-alert {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block page_context %}
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'home' %}" class="breadcrumb-link">
+                <i class="fa fa-home" aria-hidden="true"></i> Home
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'patient_data:patient_data_form' %}" class="breadcrumb-link">
+                <i class="fa fa-search" aria-hidden="true"></i> Patient Search
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fa fa-file-medical" aria-hidden="true"></i> {{ page_title }}
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="cda-tool-container">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header Section -->
+            <div class="mb-4">
+                <h1 class="display-4">{{ page_title }}</h1>
+                <p class="lead">{{ description }}</p>
+            </div>
+
+            <!-- CDA Input Form -->
+            <form id="cda-form" method="post">
+                {% csrf_token %}
+                
+                <div class="form-section">
+                    <h3>CDA Document Input</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="source_language" class="form-label">Source Language</label>
+                                <select class="form-select language-select" id="source_language" name="source_language">
+                                    <option value="">Auto-detect</option>
+                                    {% for code, name in supported_languages.items %}
+                                        <option value="{{ code }}">{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Leave empty for automatic language detection</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="target_language" class="form-label">Target Language</label>
+                                <select class="form-select language-select" id="target_language" name="target_language">
+                                    {% for code, name in supported_languages.items %}
+                                        <option value="{{ code }}" {% if code == default_target_language %}selected{% endif %}>{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="country_code" class="form-label">Country Code (Optional)</label>
+                        <input type="text" class="form-control" id="country_code" name="country_code" placeholder="e.g., IE, DE, FR">
+                        <div class="form-text">Two-letter country code for enhanced language detection</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="cda_content" class="form-label">CDA Document Content</label>
+                        <textarea class="form-control cda-textarea" id="cda_content" name="cda_content" 
+                                  placeholder="Paste your CDA XML document content here..." required></textarea>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fa fa-cogs" aria-hidden="true"></i> Process CDA Document
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Processing...</span>
+                </div>
+                <p class="mt-2">Processing CDA document...</p>
+            </div>
+
+            <!-- Error Alert -->
+            <div class="alert alert-danger error-alert" id="error-alert" role="alert">
+                <h4 class="alert-heading">Processing Error</h4>
+                <p id="error-message"></p>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="results-section">
+                <h3>Processing Results</h3>
+                <div id="results-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('cda-form');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const errorAlert = document.getElementById('error-alert');
+    const resultsSection = document.getElementById('results-section');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show loading, hide previous results/errors
+        loadingSpinner.style.display = 'block';
+        errorAlert.style.display = 'none';
+        resultsSection.style.display = 'none';
+        
+        // Get form data
+        const formData = new FormData(form);
+        
+        // Submit AJAX request
+        fetch('{% url "patient_data:enhanced_cda_display" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            loadingSpinner.style.display = 'none';
+            
+            if (data.success) {
+                displayResults(data);
+                resultsSection.style.display = 'block';
+            } else {
+                showError(data.error || 'Unknown error occurred');
+            }
+        })
+        .catch(error => {
+            loadingSpinner.style.display = 'none';
+            showError('Network error: ' + error.message);
+        });
+    });
+    
+    function displayResults(data) {
+        const resultsContent = document.getElementById('results-content');
+        
+        let html = '<div class="row">';
+        
+        // Language detection info
+        if (data.detected_source_language) {
+            html += '<div class="col-12 mb-3">';
+            html += '<div class="alert alert-info">';
+            html += '<h5>Language Detection</h5>';
+            html += '<p><strong>Detected Source Language:</strong> ' + data.detected_source_language + '</p>';
+            html += '<p><strong>Detection Method:</strong> ' + data.language_detection_method + '</p>';
+            html += '</div>';
+            html += '</div>';
+        }
+        
+        // Processing results
+        if (data.sections && data.sections.length > 0) {
+            html += '<div class="col-12">';
+            html += '<h4>Processed Sections (' + data.sections.length + ')</h4>';
+            
+            data.sections.forEach(function(section, index) {
+                html += '<div class="card mb-3">';
+                html += '<div class="card-header">';
+                html += '<h5 class="card-title">' + (section.title || 'Section ' + (index + 1)) + '</h5>';
+                html += '</div>';
+                html += '<div class="card-body">';
+                html += '<pre class="bg-light p-2 border rounded" style="max-height: 300px; overflow-y: auto;">';
+                html += JSON.stringify(section, null, 2);
+                html += '</pre>';
+                html += '</div>';
+                html += '</div>';
+            });
+            
+            html += '</div>';
+        }
+        
+        // Malta enhancement info
+        if (data.malta_enhanced) {
+            html += '<div class="col-12 mb-3">';
+            html += '<div class="alert alert-success">';
+            html += '<h5>Malta CDA Enhancement Applied</h5>';
+            html += '<p>Document has been enhanced with Malta-specific processing.</p>';
+            html += '</div>';
+            html += '</div>';
+        }
+        
+        html += '</div>';
+        
+        resultsContent.innerHTML = html;
+    }
+    
+    function showError(message) {
+        document.getElementById('error-message').textContent = message;
+        errorAlert.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

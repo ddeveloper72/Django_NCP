@@ -1,0 +1,218 @@
+{% load patient_filters %}
+{% load medication_filters %}
+{# FRESH Enhanced Medication Template - No Cache #}
+
+<!-- Medication Summary Section -->
+<div class="medical-section" id="medications-section">
+    {# Medications Section using Professional Medical Display Pattern #}
+    {% if section_data and section_data|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-medications" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-medications" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-pills me-2"></i>
+                        <span>Medications (FRESH TEMPLATE)</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ section_data|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">Medications: {{ section_data|length }} items found</p>
+                    {% for med in section_data %}
+                    {# Enhanced Medication Card - Professional Medical Display #}
+                    <div class="medication-card mb-4 p-4 border rounded shadow-sm bg-white">
+                        
+                        {# Header Section - Medication Name & Class #}
+                        <div class="medication-header mb-3 pb-3 border-bottom">
+                            <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                <div class="medication-name-section flex-grow-1 me-3">
+                                    <h5 class="medication-name text-primary mb-1 fw-bold">
+                                        {% if med.medication_name %}
+                                            {{ med.medication_name }}
+                                        {% elif med.name %}
+                                            {{ med.name }}
+                                        {% elif med.display_name %}
+                                            {{ med.display_name }}
+                                        {% else %}
+                                            Medication Information
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                                <div class="medication-status-section">
+                                    <span class="badge bg-secondary fs-6">Status</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Clinical Information Grid #}
+                        <div class="row g-3">
+                            
+                            {# Active Ingredient #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-flask me-2 text-primary"></i>
+                                        <span class="field-label">Active Ingredient</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if med.active_ingredients and "Not specified" not in med.active_ingredients %}
+                                            <div class="field-value fw-bold text-primary">{{ med.active_ingredients }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Strength #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-balance-scale me-2 text-primary"></i>
+                                        <span class="field-label">Strength</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if med.strength and "Not specified" not in med.strength %}
+                                            <div class="field-value fw-bold text-primary">{{ med.strength }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row g-3">
+
+                            {# Pharmaceutical Form #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-capsules me-2 text-primary"></i>
+                                        <span class="field-label">Pharmaceutical Form</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if med.pharmaceutical_form and "Not specified" not in med.pharmaceutical_form %}
+                                            <div class="field-value">{{ med.pharmaceutical_form }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Dosage Information #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-prescription-bottle-medical me-2 text-primary"></i>
+                                        <span class="field-label">Dosage</span>
+                                    </div>
+                                    <div class="field-content">
+                                        <!-- FRESH: Direct enhanced data access -->
+                                        <!-- DEBUG: dose_quantity='{{ med.dose_quantity }}' -->
+                                        <!-- ENHANCED DEBUG: enhanced_path={{ debug_enhanced_path_taken }}, enhanced_dose={{ debug_first_med_dose }}, compat_count={{ debug_compatibility_meds_count }}, compat_dose={{ debug_compatibility_first_dose }} -->
+                                        {% if med.dose_quantity and "Dose not specified" not in med.dose_quantity %}
+                                            <div class="field-value fw-bold text-success">{{ med.dose_quantity }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Route of Administration #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-route me-2 text-primary"></i>
+                                        <span class="field-label">Route</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if med.route and "Administration route not specified" not in med.route %}
+                                            <div class="field-value fw-bold text-success">{{ med.route }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Schedule/Frequency #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-clock me-2 text-primary"></i>
+                                        <span class="field-label">Schedule</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if med.schedule and "Schedule not specified" not in med.schedule %}
+                                            <div class="field-value fw-bold text-success">{{ med.schedule }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Treatment Period #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-calendar-days me-2 text-primary"></i>
+                                        <span class="field-label">Treatment Period</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if med.treatment_period and "Treatment timing not specified" not in med.treatment_period %}
+                                            <div class="field-value">{{ med.treatment_period }}</div>
+                                        {% elif med.period and "Treatment timing not specified" not in med.period %}
+                                            <div class="field-value">{{ med.period }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    {# No medications found - Professional display #}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-medications" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-medications" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-pills me-2"></i>
+                        <span>Medications (FRESH TEMPLATE)</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge empty">0 Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <div class="no-content-message p-4 text-center">
+                        <i class="fa-solid fa-info-circle fa-2x mb-3 text-muted"></i>
+                        <h6 class="text-muted">No Medication Data Available</h6>
+                        <p class="text-muted mb-0">No medications found in this patient summary.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>

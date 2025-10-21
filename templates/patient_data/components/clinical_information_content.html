@@ -277,8 +277,12 @@
                                                         <td class="medication-name-cell">
                                                             <div class="medication-name-container">
                                                                 <div class="medication-title fw-bold text-primary mb-1">
-                                                                    {% if med.medication_name %}
+                                                                    {% if med.data.medication_name %}
+                                                                        {{ med.data.medication_name }}
+                                                                    {% elif med.medication_name %}
                                                                         {{ med.medication_name }}
+                                                                    {% elif med.data.name %}
+                                                                        {{ med.data.name }}
                                                                     {% elif med.name %}
                                                                         {{ med.name }}
                                                                     {% elif med.medication.name %}

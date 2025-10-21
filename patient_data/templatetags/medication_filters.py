@@ -170,9 +170,23 @@ def extract_active_ingredient(medication):
                     medication_name = "CLARITHROMYCIN 250mg Tablet"
                     
     elif hasattr(medication, 'name'):
-        medication_name = getattr(medication, 'name', '') or ''
+        name_attr = getattr(medication, 'name', '')
+        if callable(name_attr):
+            try:
+                medication_name = str(name_attr()) or ''
+            except:
+                medication_name = ''
+        else:
+            medication_name = str(name_attr) or ''
     elif hasattr(medication, 'title'):
-        medication_name = getattr(medication, 'title', '') or ''
+        title_attr = getattr(medication, 'title', '')
+        if callable(title_attr):
+            try:
+                medication_name = str(title_attr()) or ''
+            except:
+                medication_name = ''
+        else:
+            medication_name = str(title_attr) or ''
     elif isinstance(medication, str):
         medication_name = medication
     else:
@@ -180,6 +194,11 @@ def extract_active_ingredient(medication):
         for attr in ['name', 'title', 'medication_name', 'drug_name']:
             if hasattr(medication, attr):
                 val = getattr(medication, attr, '')
+                if callable(val):
+                    try:
+                        val = val()
+                    except:
+                        continue
                 if val:
                     medication_name = str(val)
                     break
@@ -206,6 +225,16 @@ def extract_active_ingredient(medication):
     
     if hasattr(medication, 'ingredient_display'):
         return medication.ingredient_display
+    
+    # Ensure medication_name is a string before proceeding
+    if not isinstance(medication_name, str):
+        if callable(medication_name):
+            try:
+                medication_name = str(medication_name())
+            except:
+                return ""
+        else:
+            medication_name = str(medication_name)
     
     name_lower = medication_name.lower().strip()
     

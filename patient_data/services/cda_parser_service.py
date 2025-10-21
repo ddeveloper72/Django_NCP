@@ -1092,6 +1092,16 @@ class CDAParserService:
                 # Also store raw consumable structure for enhanced processing
                 medication["consumable"] = self._extract_consumable_structure(consumable_elem)
 
+            # Medical reason extraction from entryRelationship RSON
+            medical_reason = self._extract_medical_reason(subst_elem)
+            if medical_reason:
+                medication["medical_reason"] = medical_reason
+                # Add to data structure for template compatibility
+                if "data" not in medication:
+                    medication["data"] = {}
+                medication["data"]["indication"] = medical_reason.get("display_text", "")
+                medication["data"]["indication_code"] = medical_reason.get("code", "")
+
         except Exception as e:
             logger.warning(f"Error parsing substance administration: {e}")
 
@@ -1291,6 +1301,77 @@ class CDAParserService:
             logger.warning(f"Error extracting consumable structure: {e}")
         
         return consumable_data
+
+    def _extract_medical_reason(self, subst_elem) -> Dict[str, Any]:
+        """Extract medical reason/indication from entryRelationship RSON elements"""
+        medical_reason = {}
+        
+        try:
+            # Find entryRelationship with typeCode="RSON" (medical reason)
+            entry_relations = subst_elem.findall(".//cda:entryRelationship[@typeCode='RSON']", self.NAMESPACES)
+            
+            for entry_relation in entry_relations:
+                observation = entry_relation.find("cda:observation", self.NAMESPACES)
+                if observation is not None:
+                    # Extract observation code (SNOMED-CT code for medical reason type)
+                    code_elem = observation.find("cda:code", self.NAMESPACES)
+                    if code_elem is not None:
+                        medical_reason["observation_code"] = code_elem.get("code", "")
+                        medical_reason["observation_code_system"] = code_elem.get("codeSystem", "")
+                        medical_reason["observation_display"] = code_elem.get("displayName", "")
+                        
+                        # Try to resolve observation code
+                        obs_code = medical_reason["observation_code"]
+                        if obs_code and not medical_reason["observation_display"]:
+                            try:
+                                from patient_data.services.terminology_translator import TerminologyTranslator
+                                translator = TerminologyTranslator()
+                                resolved_display = translator.resolve_code(obs_code, medical_reason["observation_code_system"])
+                                if resolved_display:
+                                    medical_reason["observation_display"] = resolved_display
+                                    logger.info(f"CTS resolved observation code {obs_code} to '{resolved_display}'")
+                            except Exception as e:
+                                logger.warning(f"Failed to resolve observation code {obs_code}: {e}")
+                    
+                    # Extract value element (ICD-10 code for the actual medical condition)
+                    value_elem = observation.find("cda:value", self.NAMESPACES)
+                    if value_elem is not None:
+                        medical_reason["code"] = value_elem.get("code", "")
+                        medical_reason["code_system"] = value_elem.get("codeSystem", "")
+                        medical_reason["display_name"] = value_elem.get("displayName", "")
+                        
+                        # Try to resolve medical reason code
+                        reason_code = medical_reason["code"]
+                        if reason_code and not medical_reason["display_name"]:
+                            try:
+                                from patient_data.services.terminology_translator import TerminologyTranslator
+                                translator = TerminologyTranslator()
+                                resolved_display = translator.resolve_code(reason_code, medical_reason["code_system"])
+                                if resolved_display:
+                                    medical_reason["display_name"] = resolved_display
+                                    logger.info(f"CTS resolved medical reason code {reason_code} to '{resolved_display}'")
+                            except Exception as e:
+                                logger.warning(f"Failed to resolve medical reason code {reason_code}: {e}")
+                    
+                    # Create display text for templates
+                    if medical_reason.get("display_name"):
+                        medical_reason["display_text"] = medical_reason["display_name"]
+                    elif medical_reason.get("code"):
+                        medical_reason["display_text"] = f"Medical condition ({medical_reason['code']})"
+                    else:
+                        medical_reason["display_text"] = "Medical indication"
+                    
+                    # Stop after finding the first valid medical reason
+                    if medical_reason.get("code") or medical_reason.get("observation_code"):
+                        break
+            
+            if medical_reason:
+                logger.info(f"Extracted medical reason: {medical_reason}")
+                
+        except Exception as e:
+            logger.warning(f"Error extracting medical reason: {e}")
+        
+        return medical_reason
 
     def _parse_supply(self, supply_elem) -> Dict[str, Any]:
         """Parse supply entry"""

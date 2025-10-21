@@ -42,9 +42,9 @@ class CTSAPIClient:
         self.base_url = self.environments.get(
             environment, self.environments["training"]
         )
-        self.session = self._create_session()
         self.country_code = getattr(settings, "CTS_COUNTRY_CODE", "IE")
         self.timeout = getattr(settings, "CTS_REQUEST_TIMEOUT", 30)
+        self.session = self._create_session()
 
         # API endpoints
         self.endpoints = {

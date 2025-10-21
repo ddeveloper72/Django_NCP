@@ -290,6 +290,22 @@ class ClinicalDataExtractor:
         if "administrative_data" in data:
             analysis["administrative_data"] = data["administrative_data"]
 
+        # Process enhanced detailed medications from our improved parser
+        if "detailed_medications" in data:
+            detailed_meds = data["detailed_medications"]
+            logger.info(f"[ENHANCED_MEDICATIONS] Found {len(detailed_meds)} detailed medications from enhanced parser")
+            
+            analysis["detailed_medications"] = detailed_meds
+            
+            # Log sample medication data for debugging
+            if detailed_meds:
+                sample_med = detailed_meds[0]
+                logger.info(f"[ENHANCED_MEDICATIONS] Sample medication keys: {list(sample_med.keys())}")
+                logger.info(f"[ENHANCED_MEDICATIONS] Sample dose_quantity: {sample_med.get('dose_quantity', 'Not found')}")
+                logger.info(f"[ENHANCED_MEDICATIONS] Sample route: {sample_med.get('route', 'Not found')}")
+                logger.info(f"[ENHANCED_MEDICATIONS] Sample schedule: {sample_med.get('schedule', 'Not found')}")
+                logger.info(f"[ENHANCED_MEDICATIONS] Sample treatment_period: {sample_med.get('treatment_period', 'Not found')}")
+
         return analysis
 
     def _analyze_ps_table_data(self, data) -> Dict[str, Any]:

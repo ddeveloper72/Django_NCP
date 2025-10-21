@@ -1,200 +1,635 @@
 {% load patient_filters %}
-{# Medication Summary Section Template #}
+{% load medication_filters %}
+{# Medication Summary Section Template - Professional Medical Display from Main Branch #}
 
 <!-- Medication Summary Section -->
 <div class="medical-section" id="medications-section">
-    <!-- Remove card wrapper - content goes directly in accordion body -->
-
-        <!-- Clinical Section Content with Tabs -->
-        {% if section.has_entries and section.clinical_table %}
-        <!-- Clinical Table Section -->
-        <div class="section-content-area p-3">
-            <!-- Section Tabs -->
-            <div class="section-tabs mb-3">
-                <button class="tab-button active"
-                    onclick="showClinicalTab('medications_{{ section_index }}', 'structured')">
-                    📊 Structured Medication Data
-                </button>
-                <button class="tab-button" onclick="showClinicalTab('medications_{{ section_index }}', 'original')">
-                    📄 Original Content
-                </button>
-            </div>
-
-            <!-- Structured View Tab Content -->
-            <div id="medications_{{ section_index }}_structured" class="clinical-tab-content active">
-                <div class="clinical-table">
-                    <!-- Mobile Card Layout (hidden on desktop) -->
-                    <div class="d-block d-md-none">
-                        <div class="clinical-cards-container">
-                            {% for row in section.clinical_table.rows %}
-                            <div class="card clinical-card mb-3 {% if row.has_medical_codes %}border-success{% endif %}">
-                                <div class="card-body">
-                                    {% for header in section.clinical_table.headers %}
-                                    {% with row.data|get_item:header.key as cell_data %}
-                                    <div class="clinical-field mb-2 {% if header.primary %}primary-field-mobile{% endif %}">
-                                        <div class="field-label d-flex align-items-center mb-1">
-                                            <strong class="text-muted small">{{ header.label }}</strong>
-                                            {% if header.type == 'medication' %}
-                                            <i class="fa-solid fa-pills ms-1 terminology-indicator text-muted" title="Medication"></i>
-                                            {% elif header.type == 'dosage' %}
-                                            <i class="fa-solid fa-balance-scale ms-1 terminology-indicator text-muted" title="Dosage"></i>
-                                            {% elif header.type == 'frequency' %}
-                                            <i class="fa-solid fa-clock ms-1 terminology-indicator text-muted" title="Frequency"></i>
-                                            {% elif header.type == 'route' %}
-                                            <i class="fa-solid fa-syringe ms-1 terminology-indicator text-muted" title="Route of Administration"></i>
-                                            {% elif header.type == 'status' %}
-                                            <i class="fa-solid fa-heartbeat ms-1 terminology-indicator text-muted" title="Medication Status"></i>
-                                            {% elif header.type == 'date' %}
-                                            <i class="fa-solid fa-calendar ms-1 terminology-indicator text-muted" title="Date"></i>
-                                            {% endif %}
-                                        </div>
-                                        <div class="field-value">
-                                            {% if header.primary %}
-                                            <div class="primary-field-content">
-                                                <strong class="text-dark">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</strong>
-                                                {% if cell_data|safe_get:"has_terminology" %}
-                                                <div class="medical-terminology mt-1">
-                                                    {% for term in cell_data|safe_get:"terminology" %}
-                                                    <span class="badge bg-primary me-1 mb-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
-                                                        {{ term.display_name|default:term.code }}
-                                                    </span>
-                                                    {% endfor %}
-                                                </div>
-                                                {% endif %}
-                                            </div>
-                                            {% else %}
-                                            <div class="field-content">
-                                                {% if cell_data|safe_get:"has_codes" %}
-                                                <div class="medical-codes-container-mobile">
-                                                    <div class="medical-code-item d-flex flex-wrap">
-                                                        {% for code in cell_data|safe_get:"codes" %}
-                                                        <span class="badge bg-primary me-1 mb-1" title="{{ code.system|default:'Unknown' }}: {{ code.code }}">
-                                                            {{ code.display_name|default:code.code }}
-                                                        </span>
-                                                        {% endfor %}
-                                                    </div>
-                                                </div>
-                                                {% else %}
-                                                <span class="text-dark">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</span>
-                                                {% endif %}
-
-                                                {% if cell_data|safe_get:"has_terminology" %}
-                                                <div class="medical-terminology mt-1">
-                                                    {% for term in cell_data|safe_get:"terminology" %}
-                                                    <span class="badge bg-info me-1 mb-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
-                                                        <i class="fa-solid fa-tag me-1"></i>{{ term.display_name|default:term.code }}
-                                                    </span>
-                                                    {% endfor %}
-                                                </div>
-                                                {% endif %}
-                                            </div>
-                                            {% endif %}
-                                        </div>
+    {# FIXED: Use section_data directly since medications are passed as section_data from parent template #}
+    {% with section_data as med_list %}
+    
+    {# For now, let's see what we get without safety limits to debug the data structure #}
+    
+    {# Medications Section using Professional Medical Display Pattern #}
+    {% if med_list and med_list|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-medications" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-medications" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-pills me-2"></i>
+                        <span>Medications</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ med_list|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">Medications: {{ med_list|length }} items found</p>
+                    {% for med in med_list %}
+                    {# Enhanced Medication Card - Professional Medical Display #}
+                    <div class="medication-card mb-4 p-4 border rounded shadow-sm bg-white">
+                        
+                        {# DEBUG: Show available data structure #}
+                        {% if debug %}
+                        <div class="alert alert-info">
+                            <strong>DEBUG - Medication Data Structure:</strong>
+                            <pre>{{ med|pprint }}</pre>
+                        </div>
+                        {% endif %}
+                        
+                        {# Header Section - Medication Name & Class Codes #}
+                        <div class="medication-header mb-3 pb-3 border-bottom">
+                            <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                <div class="medication-name-section flex-grow-1 me-3">
+                                    <h5 class="medication-name text-primary mb-1 fw-bold">
+                                        {% if med.name %}
+                                            {{ med.name }}
+                                        {% elif med.display_name %}
+                                            {{ med.display_name }}
+                                        {% elif med.medication_name %}
+                                            {{ med.medication_name }}
+                                        {% elif med.data.medication_name %}
+                                            {{ med.data.medication_name }}
+                                        {% elif med.medication.name %}
+                                            {{ med.medication.name }}
+                                        {% elif med.medication.code.displayName %}
+                                            {{ med.medication.code.displayName }}
+                                        {% else %}
+                                            Medication Information
+                                        {% endif %}
+                                    </h5>
+                                    {# Class Codes Display #}
+                                    {% if med.medication.code.code or med.data.medication_code or med.medication_code %}
+                                    <div class="medication-code text-muted small">
+                                        <strong>Class Code:</strong> 
+                                        {% if med.data.medication_code %}
+                                            {{ med.data.medication_code }}
+                                        {% elif med.medication_code %}
+                                            {{ med.medication_code }}
+                                        {% elif med.medication.code.code %}
+                                            {{ med.medication.code.code }}
+                                        {% endif %}
+                                        {% if med.medication.code.codeSystem %}
+                                            <span class="text-muted">{% if med.medication.code.codeSystem == "2.16.840.1.113883.6.96" %}(SNOMED CT){% elif med.medication.code.codeSystem == "2.16.840.1.113883.6.73" %}(ATC){% else %}({{ med.medication.code.codeSystem }}){% endif %}</span>
+                                        {% endif %}
                                     </div>
-                                    {% endwith %}
-                                    {% endfor %}
-                                </div> <!-- End card-body -->
+                                    {% endif %}
+                                </div>
+                                <div class="medication-status-section">
+                                    {% if med.statusCode.code %}
+                                        {% if med.statusCode.code == "active" %}
+                                            <span class="badge bg-success fs-6">Active</span>
+                                        {% elif med.statusCode.code == "completed" %}
+                                            <span class="badge bg-info fs-6">Completed</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary fs-6">{{ med.statusCode.code|title }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-secondary fs-6">Unknown Status</span>
+                                    {% endif %}
+                                </div>
                             </div>
-                            {% endfor %}
                         </div>
-                    </div>
 
-                    <!-- Desktop Table Layout (hidden on mobile) -->
-                    <div class="d-none d-md-block">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover clinical-table">
-                                <thead class="table-primary">
-                                    <tr>
-                                        {% for header in section.clinical_table.headers %}
-                                        <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
-                                            <div class="th-content">
-                                                <span class="th-label">{{ header.label }}</span>
-                                                {% if header.type == 'medication' %}
-                                                <i class="fa-solid fa-pills ms-1 terminology-indicator" title="Medication"></i>
-                                                {% elif header.type == 'dosage' %}
-                                                <i class="fa-solid fa-balance-scale ms-1 terminology-indicator" title="Dosage"></i>
-                                                {% elif header.type == 'frequency' %}
-                                                <i class="fa-solid fa-clock ms-1 terminology-indicator" title="Frequency"></i>
-                                                {% elif header.type == 'route' %}
-                                                <i class="fa-solid fa-syringe ms-1 terminology-indicator" title="Route of Administration"></i>
-                                                {% elif header.type == 'status' %}
-                                                <i class="fa-solid fa-heartbeat ms-1 terminology-indicator" title="Medication Status"></i>
+                        {# Clinical Information Grid #}
+                        <div class="row g-3">
+                            
+                            {# Active Ingredients with Strength #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-flask me-2 text-primary"></i>
+                                        <span class="field-label">Active Ingredients [Strength]</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% comment %} Enhanced CDA parser data - check enhanced data first {% endcomment %}
+                                        {% if med.active_ingredients and med.active_ingredients != "Not specified" %}
+                                            <div class="field-value fw-bold text-primary">{{ med.active_ingredients }}</div>
+                                        {% elif med.ingredient_display %}
+                                            <div class="field-value fw-bold text-primary">{{ med.ingredient_display }}</div>
+                                        {% elif med.active_ingredients and med.active_ingredients.0.name != "UNKNOWN" %}
+                                            <div class="field-value fw-bold text-primary">
+                                                {% for ingredient in med.active_ingredients %}
+                                                    {{ ingredient.name }}{% if ingredient.strength %} ({{ ingredient.strength }}){% endif %}{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% elif med.data.ingredient_display %}
+                                            <div class="medication-field">
+                                                <div class="field-value">
+                                                    {{ med.data.ingredient_display }}
+                                                    {% if med.data.strength %} [{{ med.data.strength }}]
+                                                    {% elif med.data.dose_strength %} [{{ med.data.dose_strength }}]
+                                                    {% elif med.data.active_ingredient_strength %} [{{ med.data.active_ingredient_strength }}]
+                                                    {% endif %}
+                                                </div>
+                                                {% if med.data.ingredient_code %}
+                                                    <div class="field-detail text-muted">
+                                                        <small>Code: {{ med.data.ingredient_code }}</small>
+                                                    </div>
                                                 {% endif %}
                                             </div>
-                                        </th>
-                                        {% endfor %}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for row in section.clinical_table.rows %}
-                                    <tr>
-                                        {% for header in section.clinical_table.headers %}
-                                        {% with cell_data=row.data|lookup:header.key %}
-                                        <td>
-                                            {% if header.primary %}
-                                            <div class="primary-field">
-                                                <strong class="text-primary">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</strong>
-                                                {% if cell_data|safe_get:"has_terminology" %}
-                                                <div class="medical-terminology mt-1">
-                                                    {% for term in cell_data|safe_get:"terminology" %}
-                                                    <span class="badge bg-primary me-1" title="{{ term.system|default:'Unknown' }}: {{ term.code }}">
-                                                        {{ term.display_name|default:term.code }}
-                                                    </span>
-                                                    {% endfor %}
+                                        {% elif med.active_ingredient %}
+                                            <div class="medication-field">
+                                                <div class="field-value">
+                                                    {% if med.active_ingredient.display_name and med.active_ingredient.display_name != med.active_ingredient.code %}
+                                                        {{ med.active_ingredient.display_name }}
+                                                    {% else %}
+                                                        {{ med.active_ingredient.code }}
+                                                    {% endif %}
+                                                    {% if med.strength %} [{{ med.strength }}]
+                                                    {% elif med.dose_strength %} [{{ med.dose_strength }}]
+                                                    {% endif %}
                                                 </div>
+                                                {% if med.active_ingredient.display_name and med.active_ingredient.display_name != med.active_ingredient.code %}
+                                                    <div class="field-detail text-muted">
+                                                        <small>Code: {{ med.active_ingredient.code }}</small>
+                                                    </div>
                                                 {% endif %}
                                             </div>
-                                            {% else %}
-                                            <div class="cell-content">
-                                                {% if cell_data|safe_get:"has_codes" %}
-                                                <div class="medical-codes-container">
-                                                    {% for code in cell_data|safe_get:"codes" %}
-                                                    <span class="badge bg-primary me-1 mb-1" title="{{ code.system|default:'Unknown' }}: {{ code.code }}">
-                                                        {{ code.display_name|default:code.code }}
-                                                    </span>
-                                                    {% endfor %}
+                                        {% elif med.ingredient_display or med.active_ingredient_display %}
+                                            <div class="field-value">
+                                                {{ med.ingredient_display|default:med.active_ingredient_display }}
+                                                {% if med.strength %} [{{ med.strength }}]
+                                                {% elif med.dose_strength %} [{{ med.dose_strength }}]
+                                                {% endif %}
+                                            </div>
+                                        {% elif med.substance_display_name %}
+                                            <div class="field-value">
+                                                {{ med.substance_display_name }}
+                                                {% if med.strength %} [{{ med.strength }}]{% endif %}
+                                            </div>
+                                        {% elif med.manufactured_material and med.manufactured_material.ingredient %}
+                                            {% comment %} CDA manufacturedMaterial/ingredient data {% endcomment %}
+                                            <div class="medication-field">
+                                                <div class="field-value">
+                                                    {% if med.manufactured_material.ingredient.substance_name %}
+                                                        {{ med.manufactured_material.ingredient.substance_name }}
+                                                    {% elif med.manufactured_material.ingredient.code.displayName %}
+                                                        {{ med.manufactured_material.ingredient.code.displayName }}
+                                                    {% elif med.manufactured_material.ingredient.code.code %}
+                                                        {{ med.manufactured_material.ingredient.code.code }}
+                                                    {% endif %}
+                                                    {% if med.manufactured_material.ingredient.quantity %}
+                                                        [{{ med.manufactured_material.ingredient.quantity.numerator.value }} {{ med.manufactured_material.ingredient.quantity.numerator.unit }}]
+                                                    {% endif %}
                                                 </div>
+                                                {% if med.manufactured_material.ingredient.code.code %}
+                                                    <div class="field-detail text-muted">
+                                                        <small>Code: {{ med.manufactured_material.ingredient.code.code }}</small>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Dose Form with Package #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-capsules me-2 text-primary"></i>
+                                        <span class="field-label">Dose Form [Package]</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if med.pharmaceutical_form.coded %}
+                                            <div class="medication-field">
+                                                <div class="field-value">{{ med.pharmaceutical_form.coded }}</div>
+                                                {% if med.pharmaceutical_form_code %}
+                                                    <div class="field-detail text-muted">
+                                                        <small>Code: {{ med.pharmaceutical_form_code }}</small>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% elif med.pharmaceutical_form %}
+                                            <div class="field-value">{{ med.pharmaceutical_form }}</div>
+                                        {% elif med.data.pharmaceutical_form %}
+                                            <div class="medication-field">
+                                                <div class="field-value">
+                                                    {% if med.data.pharmaceutical_form.display_value %}
+                                                        {{ med.data.pharmaceutical_form.display_value }}
+                                                    {% elif med.data.pharmaceutical_form.value %}
+                                                        {{ med.data.pharmaceutical_form.value }}
+                                                    {% else %}
+                                                        {{ med.data.pharmaceutical_form }}
+                                                    {% endif %}
+                                                    {% if med.data.package_size %}
+                                                        {% if med.data.package_size.display_value %} [{{ med.data.package_size.display_value }}]
+                                                        {% elif med.data.package_size.value %} [{{ med.data.package_size.value }}]
+                                                        {% else %} [{{ med.data.package_size }}]
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </div>
+                                                {% if med.data.pharmaceutical_form_code %}
+                                                    <div class="field-detail text-muted">
+                                                        <small>Code: {{ med.data.pharmaceutical_form_code }}</small>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% elif med.pharmaceutical_form %}
+                                            <div class="medication-field">
+                                                <div class="field-value">
+                                                    {% if med.pharmaceutical_form.displayName and med.pharmaceutical_form.displayName != med.pharmaceutical_form.code %}
+                                                        {{ med.pharmaceutical_form.displayName }}
+                                                    {% else %}
+                                                        {{ med.pharmaceutical_form.code }}
+                                                    {% endif %}
+                                                    {% if med.package_size %} [{{ med.package_size }}]{% endif %}
+                                                </div>
+                                            </div>
+                                        {% elif med.form %}
+                                            <div class="field-value">
+                                                {{ med.form }}
+                                                {% if med.package_size %} [{{ med.package_size }}]{% endif %}
+                                            </div>
+                                        {% elif med.dose_form %}
+                                            <div class="field-value">{{ med.dose_form }}</div>
+                                        {% elif med.pharmaceutical_form_display %}
+                                            <div class="field-value">{{ med.pharmaceutical_form_display }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Dose Quantity #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-weight-scale me-2 text-primary"></i>
+                                        <span class="field-label">Dose Quantity</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% comment %} Enhanced CDA parser data - check enhanced data first {% endcomment %}
+                                        {% if med.dose_value and med.dose_unit %}
+                                            <div class="field-value fw-bold text-success">{{ med.dose_value }} {{ med.dose_unit }}</div>
+                                        {% elif med.dose_quantity and med.dose_quantity != "Dose not specified" %}
+                                            <div class="field-value fw-bold text-success">{{ med.dose_quantity }}</div>
+                                        {% elif med.data.dose_quantity and med.data.dose_quantity != "Dose not specified" %}
+                                            <div class="field-value fw-bold text-success">{{ med.data.dose_quantity }}</div>
+                                        {% elif med.dose_quantity.display_value %}
+                                            <div class="field-value fw-bold text-success">{{ med.dose_quantity.display_value }}</div>
+                                        {% elif med.dose_quantity.value %}
+                                            <div class="field-value fw-bold text-success">{{ med.dose_quantity.value }} {{ med.dose_quantity.unit|default:"" }}</div>
+                                        {% elif med.dose.doseQuantity.low and med.dose.doseQuantity.high %}
+                                            {% comment %} CDA doseQuantity with low/high range {% endcomment %}
+                                            <div class="field-value fw-bold text-success">
+                                                {{ med.dose.doseQuantity.low.value }}-{{ med.dose.doseQuantity.high.value }} {{ med.dose.doseQuantity.low.unit|default:"units" }}
+                                            </div>
+                                        {% elif med.dose.doseQuantity.value %}
+                                            <div class="field-value fw-bold text-success">{{ med.dose.doseQuantity.value }} {{ med.dose.doseQuantity.unit|default:"units" }}</div>
+                                        {% elif med.dose.doseQuantity %}
+                                            <div class="field-value fw-bold text-success">{{ med.dose.doseQuantity }}</div>
+                                        {% elif med.doseQuantity.low and med.doseQuantity.high %}
+                                            {% comment %} Direct CDA doseQuantity access {% endcomment %}
+                                            <div class="field-value fw-bold text-success">
+                                                {{ med.doseQuantity.low.value }}-{{ med.doseQuantity.high.value }} {{ med.doseQuantity.low.unit|default:"units" }}
+                                            </div>
+                                        {% elif med.doseQuantity.value %}
+                                            <div class="field-value fw-bold text-success">{{ med.doseQuantity.value }} {{ med.doseQuantity.unit|default:"units" }}</div>
+                                        {% elif med.dose.value %}
+                                            <div class="field-value fw-bold text-success">{{ med.dose.value }} {{ med.dose.unit|default:"" }}</div>
+                                        {% elif med.dose_amount %}
+                                            <div class="field-value fw-bold text-success">{{ med.dose_amount }}</div>
+                                        {% elif med.units_per_intake %}
+                                            <div class="field-value fw-bold text-success">{{ med.units_per_intake }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Dose not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Dosage (Frequency/Schedule) #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-clock me-2 text-primary"></i>
+                                        <span class="field-label">Dosage Frequency</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% comment %} Enhanced CDA parser data - check enhanced data first {% endcomment %}
+                                        {% if med.schedule and med.schedule != "Schedule not specified" %}
+                                            <div class="field-value">{{ med.schedule }}</div>
+                                        {% elif med.frequency and med.frequency != "Schedule not specified" %}
+                                            <div class="field-value">{{ med.frequency }}</div>
+                                        {% elif med.dosage_frequency and med.dosage_frequency != "Schedule not specified" %}
+                                            <div class="field-value">{{ med.dosage_frequency }}</div>
+                                        {% elif med.schedule.coded %}
+                                            <div class="field-value">{{ med.schedule.coded }}</div>
+                                        {% elif med.data.dosage_instructions %}
+                                            <div class="field-value">
+                                                {% if med.data.dosage_instructions.display_value %}
+                                                    {{ med.data.dosage_instructions.display_value }}
+                                                {% elif med.data.dosage_instructions.value %}
+                                                    {{ med.data.dosage_instructions.value }}
                                                 {% else %}
-                                                {% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}
+                                                    {{ med.data.dosage_instructions }}
                                                 {% endif %}
                                             </div>
-                                            {% endif %}
-                                        </td>
-                                        {% endwith %}
-                                        {% endfor %}
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div> <!-- End card-body for main clinical table -->
-            </div>
+                                        {% elif med.data.frequency_display %}
+                                            <div class="field-value">
+                                                {% if med.data.frequency_display.display_value %}
+                                                    {{ med.data.frequency_display.display_value }}
+                                                {% elif med.data.frequency_display.value %}
+                                                    {{ med.data.frequency_display.value }}
+                                                {% else %}
+                                                    {{ med.data.frequency_display }}
+                                                {% endif %}
+                                            </div>
+                                        {% elif med.dosage %}
+                                            <div class="field-value">{{ med.dosage }}</div>
+                                        {% elif med.frequency_display %}
+                                            <div class="field-value">{{ med.frequency_display }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
 
-            <!-- Original Content Tab -->
-            <div id="medications_{{ section_index }}_original" class="clinical-tab-content">
-                <div class="section-content-area">
-                    {% if section.original_content %}
-                    <div class="original-content-display">
-                        {{ section.original_content|safe }}
+                            {# Time (Start/Finish) #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-calendar-alt me-2 text-primary"></i>
+                                        <span class="field-label">Treatment Period</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% comment %} Enhanced CDA parser data - check enhanced data first {% endcomment %}
+                                        {% if med.period and med.period != "Treatment timing not specified" %}
+                                            <div class="time-range">
+                                                <span class="start-date">
+                                                    <i class="fa-solid fa-calendar text-success me-1"></i>
+                                                    <strong>{{ med.period }}</strong>
+                                                </span>
+                                            </div>
+                                        {% elif med.treatment_period and med.treatment_period != "Treatment timing not specified" %}
+                                            <div class="time-range">
+                                                <span class="start-date">
+                                                    <i class="fa-solid fa-calendar text-success me-1"></i>
+                                                    <strong>{{ med.treatment_period }}</strong>
+                                                </span>
+                                            </div>
+                                        {% elif med.start_date %}
+                                            <div class="time-range">
+                                                <span class="start-date">
+                                                    <i class="fa-solid fa-play text-success me-1"></i>
+                                                    <strong>Start:</strong> {{ med.start_date }}
+                                                </span>
+                                                {% if med.end_date %}
+                                                    <br>
+                                                    <span class="end-date mt-1 d-inline-block">
+                                                        <i class="fa-solid fa-stop text-warning me-1"></i>
+                                                        <strong>End:</strong> {{ med.end_date }}
+                                                    </span>
+                                                {% else %}
+                                                    <br>
+                                                    <span class="ongoing-treatment text-success mt-1 d-inline-block">
+                                                        <i class="fa-solid fa-infinity me-1"></i>
+                                                        <em>Ongoing treatment</em>
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        {% elif med.effective_time.low_formatted %}
+                                            <div class="time-range">
+                                                <span class="start-date">
+                                                    <i class="fa-solid fa-play text-success me-1"></i>
+                                                    <strong>Start:</strong> {{ med.effective_time.low_formatted }}
+                                                </span>
+                                                {% if med.effective_time.high_formatted %}
+                                                    <br>
+                                                    <span class="end-date mt-1 d-inline-block">
+                                                        <i class="fa-solid fa-stop text-warning me-1"></i>
+                                                        <strong>End:</strong> {{ med.effective_time.high_formatted }}
+                                                    </span>
+                                                {% else %}
+                                                    <br>
+                                                    <span class="ongoing-treatment text-success mt-1 d-inline-block">
+                                                        <i class="fa-solid fa-infinity me-1"></i>
+                                                        <em>Ongoing treatment</em>
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="time-range">
+                                                <span class="start-date">
+                                                    <i class="fa-solid fa-play text-success me-1"></i>
+                                                    <strong>Start:</strong> {{ med.start_date }}
+                                                </span>
+                                                {% if med.end_date %}
+                                                    <br>
+                                                    <span class="end-date mt-1 d-inline-block">
+                                                        <i class="fa-solid fa-stop text-warning me-1"></i>
+                                                        <strong>End:</strong> {{ med.end_date }}
+                                                    </span>
+                                                {% else %}
+                                                    <br>
+                                                    <span class="ongoing-treatment text-success mt-1 d-inline-block">
+                                                        <i class="fa-solid fa-infinity me-1"></i>
+                                                        <em>Ongoing treatment</em>
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        {% elif med.data.start_date or med.data.end_date %}
+                                            <div class="time-range">
+                                                {% if med.data.start_date %}
+                                                    <span class="start-date">
+                                                        <i class="fa-solid fa-play text-success me-1"></i>
+                                                        <strong>Start:</strong> {{ med.data.start_date }}
+                                                    </span>
+                                                {% endif %}
+                                                {% if med.data.end_date %}
+                                                    <br>
+                                                    <span class="end-date mt-1 d-inline-block">
+                                                        <i class="fa-solid fa-stop text-warning me-1"></i>
+                                                        <strong>End:</strong> {{ med.data.end_date }}
+                                                    </span>
+                                                {% elif med.data.start_date %}
+                                                    <br>
+                                                    <span class="ongoing-treatment text-success mt-1 d-inline-block">
+                                                        <i class="fa-solid fa-infinity me-1"></i>
+                                                        <em>Ongoing treatment</em>
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        {% elif med.effective_time.low_formatted %}
+                                            <div class="time-range">
+                                                <span class="start-date">
+                                                    <i class="fa-solid fa-play text-success me-1"></i>
+                                                    <strong>Start:</strong> {{ med.effective_time.low_formatted }}
+                                                </span>
+                                                {% if med.effective_time.high_formatted %}
+                                                    <br>
+                                                    <span class="end-date mt-1 d-inline-block">
+                                                        <i class="fa-solid fa-stop text-warning me-1"></i>
+                                                        <strong>End:</strong> {{ med.effective_time.high_formatted }}
+                                                    </span>
+                                                {% else %}
+                                                    <br>
+                                                    <span class="ongoing-treatment text-success mt-1 d-inline-block">
+                                                        <i class="fa-solid fa-infinity me-1"></i>
+                                                        <em>Ongoing treatment</em>
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Treatment period not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Route of Administration #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-route me-2 text-primary"></i>
+                                        <span class="field-label">Route of Administration</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% comment %} Enhanced CDA parser data - check enhanced data first {% endcomment %}
+                                        {% if med.route_display and med.route_display != "Administration route not specified" %}
+                                            <div class="field-value">
+                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route_display }}</span>
+                                            </div>
+                                        {% elif med.administration_route and med.administration_route != "Administration route not specified" %}
+                                            <div class="field-value">
+                                                <span class="badge bg-warning text-dark fw-normal">{{ med.administration_route }}</span>
+                                            </div>
+                                        {% elif med.route and med.route != "Administration route not specified" %}
+                                            <div class="field-value">
+                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route }}</span>
+                                            </div>
+                                        {% elif med.route.coded %}
+                                            <div class="field-value">
+                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route.coded }}</span>
+                                            </div>
+                                        {% elif med.data.route_display %}
+                                            <div class="field-value">
+                                                <span class="badge bg-warning text-dark fw-normal">{{ med.data.route_display }}</span>
+                                            </div>
+                                        {% elif med.routeCode.displayName %}
+                                            {% comment %} CDA routeCode data {% endcomment %}
+                                            <div class="field-value">
+                                                <span class="badge bg-warning text-dark fw-normal">{{ med.routeCode.displayName }}</span>
+                                                <div class="field-detail text-muted mt-1">
+                                                    <small>Code: {{ med.routeCode.code }}</small>
+                                                </div>
+                                            </div>
+                                        {% elif med.routeCode.code %}
+                                            <div class="field-value">
+                                                <span class="badge bg-warning text-dark fw-normal">{{ med.routeCode.code }}</span>
+                                            </div>
+                                        {% elif med.routeCode %}
+                                            <div class="field-value">
+                                                <span class="badge bg-warning text-dark fw-normal">{{ med.routeCode }}</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Administration route not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Medical Reason #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-stethoscope me-2 text-primary"></i>
+                                        <span class="field-label">Medical Reason</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% comment %} Enhanced CDA Data Mapping for Medical Reason {% endcomment %}
+                                        {% if med.data.medical_reason %}
+                                            <div class="field-value">{{ med.data.medical_reason }}</div>
+                                        {% elif med.medical_reason %}
+                                            <div class="field-value">{{ med.medical_reason }}</div>
+                                        {% elif med.indication %}
+                                            <div class="field-value">{{ med.indication }}</div>
+                                        {% elif med.reason %}
+                                            <div class="field-value">{{ med.reason }}</div>
+                                        {% elif med.entryRelationship.observation.value.displayName %}
+                                            {% comment %} CDA entryRelationship/observation data {% endcomment %}
+                                            <div class="field-value">{{ med.entryRelationship.observation.value.displayName }}</div>
+                                            <div class="field-detail text-muted mt-1">
+                                                <small>Code: {{ med.entryRelationship.observation.value.code }}</small>
+                                            </div>
+                                        {% elif med.entryRelationship.observation.value.code %}
+                                            <div class="field-value">{{ med.entryRelationship.observation.value.code }}</div>
+                                        {% elif med.entryRelationship %}
+                                            <div class="field-value">{{ med.entryRelationship }}</div>
+                                        {% elif med.notes or med.note_text %}
+                                            <div class="field-value">
+                                                {{ med.note_text|default:med.notes }}
+                                            </div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Medical indication not specified in available data</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Additional Information & Summary #}
+                        {% if med.data.medication_summary or med.medication_summary or med.notes or med.note_text %}
+                        <div class="medication-summary mt-3 pt-3 border-top">
+                            <div class="field-header mb-2">
+                                <i class="fa-solid fa-info-circle me-2 text-info"></i>
+                                <span class="field-label">Additional Information</span>
+                            </div>
+                            <div class="field-content">
+                                {% if med.data.medication_summary %}
+                                    <div class="field-value">{{ med.data.medication_summary }}</div>
+                                {% elif med.medication_summary %}
+                                    <div class="field-value">{{ med.medication_summary }}</div>
+                                {% elif med.note_text %}
+                                    <div class="field-value">{{ med.note_text }}</div>
+                                {% elif med.notes %}
+                                    <div class="field-value">{{ med.notes }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
-                    {% else %}
-                    <div class="no-content-message">
-                        <i class="fa-solid fa-info-circle me-2"></i>
-                        <span>No original content available for this section.</span>
-                    </div>
-                    {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
-        {% else %}
-        <!-- No Entries State -->
-        <div class="section-content-area p-3">
-            <div class="no-entries-message text-center py-4">
-                <i class="fa-solid fa-pills fa-3x text-muted mb-3"></i>
-                <h6 class="text-muted">No Medication Data Available</h6>
-                <p class="text-muted small">This section does not contain any medication information.</p>
+    </div>
+    {% else %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-medications" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-medications" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-pills me-2"></i>
+                        <span>Medications</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge empty">0 Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <div class="no-content-message p-4 text-center">
+                        <i class="fa-solid fa-info-circle fa-2x mb-3 text-muted"></i>
+                        <h6 class="text-muted">No Medication Data Available</h6>
+                        <p class="text-muted mb-0">No medications found in this patient summary.</p>
+                    </div>
+                </div>
             </div>
         </div>
-        {% endif %}
+    </div>
+    {% endif %}
+    {% endwith %}
 </div>
