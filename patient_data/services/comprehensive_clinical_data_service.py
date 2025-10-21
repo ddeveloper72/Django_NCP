@@ -1881,6 +1881,61 @@ class ComprehensiveClinicalDataService:
             logger.warning(f"[TEMPLATE_COMPAT] Error fixing {attribute_name}: {e}")
             pass
 
+    def _calculate_medication_completeness_score(self, med: Dict) -> int:
+        """Calculate a completeness score for a medication record to prioritize better data"""
+        score = 0
+        
+        if isinstance(med, dict):
+            # Base score for having a name
+            if med.get('name') or med.get('medication_name') or med.get('display_name'):
+                score += 10
+            
+            # Points for strength information
+            strength = med.get('strength', '')
+            if strength and strength not in ['Not specified', 'Not found', '']:
+                score += 20
+                
+            # Points for route information  
+            route = med.get('route')
+            if route:
+                if isinstance(route, dict) and route.get('coded'):
+                    score += 15
+                elif isinstance(route, str) and route not in ['Not found', 'NO_ROUTE', '']:
+                    score += 15
+                    
+            # Points for dose information
+            dose_quantity = med.get('dose_quantity', '')
+            if dose_quantity and dose_quantity not in ['Not found', '']:
+                score += 10
+                
+            # Points for pharmaceutical form
+            pharm_form = med.get('pharmaceutical_form')
+            if pharm_form:
+                if isinstance(pharm_form, dict) and pharm_form.get('coded'):
+                    score += 10
+                elif isinstance(pharm_form, str) and pharm_form:
+                    score += 10
+                    
+            # Points for active ingredients
+            ingredients = med.get('active_ingredients')
+            if ingredients and ingredients not in ['Not found', 'Not specified']:
+                score += 15
+                
+            # Points for start date
+            start_date = med.get('start_date', '')
+            if start_date and start_date not in ['Not found', '']:
+                score += 5
+                
+            # Points for section information (Enhanced parser provides this)
+            if med.get('section_code') or med.get('section_title'):
+                score += 5
+                
+            # Bonus points for Enhanced parser (indicated by type field)
+            if med.get('type') == 'enhanced_medication' or med.get('source') == 'enhanced_cda_parser':
+                score += 25
+                
+        return score
+
     def _remove_duplicate_and_placeholder_data(self, clinical_arrays: Dict[str, List]) -> None:
         """Remove duplicate entries and placeholder data from clinical arrays"""
         
@@ -1930,9 +1985,8 @@ class ComprehensiveClinicalDataService:
             logger.info(f"[DATA_CLEANUP] Deduplicated problems: {len(clinical_arrays['problems'])} -> {len(unique_problems)}")
             clinical_arrays["problems"] = unique_problems
 
-        # CRITICAL FIX: Deduplicate medications by name/substance to prevent massive duplication
-        seen_medications = set()
-        unique_medications = []
+        # CRITICAL FIX: Deduplicate medications by name/substance, prioritizing most complete records
+        medication_groups = {}  # Group medications by name
         
         for med in clinical_arrays["medications"]:
             # Create a unique key from medication name/substance
@@ -1951,12 +2005,31 @@ class ComprehensiveClinicalDataService:
                               med.get('display_name') or 
                               med.get('name', '')).strip().lower()
             
-            # Only add if we have a meaningful name and haven't seen this medication before
-            if med_key and med_key not in seen_medications:
-                seen_medications.add(med_key)
-                unique_medications.append(med)
-            elif not med_key:
+            if med_key:
+                if med_key not in medication_groups:
+                    medication_groups[med_key] = []
+                medication_groups[med_key].append(med)
+            else:
                 logger.info(f"[DATA_CLEANUP] Removed medication entry with no name: {med}")
+        
+        # Select the most complete medication from each group
+        unique_medications = []
+        for med_key, med_list in medication_groups.items():
+            if len(med_list) == 1:
+                unique_medications.append(med_list[0])
+            else:
+                # Score each medication by completeness and select the best one
+                best_med = None
+                best_score = -1
+                
+                for med in med_list:
+                    score = self._calculate_medication_completeness_score(med)
+                    if score > best_score:
+                        best_score = score
+                        best_med = med
+                
+                unique_medications.append(best_med)
+                logger.info(f"[DATA_CLEANUP] Deduplicated {len(med_list)} entries for '{med_key}', kept most complete (score: {best_score})")
                 
         if len(unique_medications) != len(clinical_arrays["medications"]):
             logger.info(f"[DATA_CLEANUP] CRITICAL: Deduplicated medications: {len(clinical_arrays['medications'])} -> {len(unique_medications)}")

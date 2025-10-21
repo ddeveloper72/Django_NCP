@@ -187,13 +187,13 @@ class EnhancedCDAXMLParser:
 
     def __init__(self):
         # Default namespaces - will be dynamically enhanced per document
-        self.namespaces = {"cda": "urn:hl7-org:v3", "pharm": "urn:ihe:pharm:medication"}
+        self.namespaces = {"cda": "urn:hl7-org:v3", "pharm": "urn:hl7-org:pharm"}
 
         # Common EU namespace variations for better compatibility
         self.common_namespaces = {
             "hl7": "urn:hl7-org:v3",
             "cda": "urn:hl7-org:v3",
-            "pharm": "urn:ihe:pharm:medication",
+            "pharm": "urn:hl7-org:pharm",
             "xsi": "http://www.w3.org/2001/XMLSchema-instance",
             "voc": "urn:hl7-org:v3/voc",
             "sdtc": "urn:hl7-org:sdtc",
