@@ -1407,11 +1407,11 @@ class CDAViewProcessor:
         }
     
     def _parse_medication_xml(self, root) -> Dict[str, Any]:
-        """Parse medication XML into structured data using Enhanced CDA Parser logic"""
+        """Parse medication XML into structured data with enhanced compound medication support and full CDA structure extraction"""
         medications = []
         namespaces = {'hl7': 'urn:hl7-org:v3', 'pharm': 'urn:ihe:pharm:medication'}
         
-        logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Starting enhanced medication extraction ***")
+        logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Starting comprehensive CDA medication extraction ***")
         
         # Strategy 1: Enhanced table extraction with compound medication support
         text_section = root.find('.//hl7:text', namespaces) or root.find('.//text')
@@ -1462,79 +1462,161 @@ class CDAViewProcessor:
                         
                         logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted {med_name} with strength: {strength} ***")
         
-        # Strategy 2: Extract from structured entry/substanceAdministration elements (enhanced for real CDA parsing)
-        if not medications:
-            entries = root.findall('.//hl7:entry', namespaces)
-            for entry in entries:
-                sub_admin = entry.find('.//hl7:substanceAdministration', namespaces)
-                if sub_admin is not None:
-                    # Extract medication data
-                    med_name = "Medication"  # Default fallback
-                    active_ingredient = ""
-                    pharm_form = "Tablet"
-                    strength = ""
+        # Strategy 2: Extract from structured entry/substanceAdministration elements with full CDA structure extraction
+        entries = root.findall('.//hl7:entry', namespaces)
+        for entry_idx, entry in enumerate(entries):
+            sub_admin = entry.find('.//hl7:substanceAdministration', namespaces)
+            if sub_admin is not None:
+                logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Processing substanceAdministration entry {entry_idx} ***")
+                
+                # Extract medication data
+                med_name = "Medication"  # Default fallback
+                active_ingredient = ""
+                pharm_form = "Tablet"
+                strength = "Not specified"
+                
+                # Initialize CDA structure dictionaries for dose, route, schedule
+                dose_quantity_struct = {}
+                route_struct = {}
+                schedule_struct = {}
+                period_struct = {}
+                
+                # Get medication name from consumable/manufacturedProduct
+                consumable = sub_admin.find('.//hl7:consumable/hl7:manufacturedProduct', namespaces)
+                if consumable is not None:
+                    # Try to get medication name
+                    name_elem = consumable.find('.//hl7:name', namespaces)
+                    if name_elem is not None:
+                        med_name = name_elem.text or med_name
                     
-                    # Get medication name from consumable/manufacturedProduct
-                    consumable = sub_admin.find('.//hl7:consumable/hl7:manufacturedProduct', namespaces)
-                    if consumable is not None:
-                        # Try to get medication name
-                        name_elem = consumable.find('.//hl7:name', namespaces)
-                        if name_elem is not None:
-                            med_name = name_elem.text or med_name
-                        
-                        # Get manufactured material for details
-                        material = consumable.find('.//hl7:manufacturedMaterial', namespaces)
-                        if material is not None:
-                            # Get active ingredient from code displayName
-                            code_elem = material.find('hl7:code', namespaces)
-                            if code_elem is not None:
-                                display_name = code_elem.get('displayName', '').strip()
-                                if display_name:
-                                    active_ingredient = display_name
-                                    
-                            # Get pharmaceutical form
-                            form_elem = material.find('hl7:formCode', namespaces)
-                            if form_elem is not None:
-                                form_display = form_elem.get('displayName', '').strip()
-                                if form_display:
-                                    pharm_form = form_display
+                    # Get manufactured material for details
+                    material = consumable.find('.//hl7:manufacturedMaterial', namespaces)
+                    if material is not None:
+                        # Get active ingredient from code displayName
+                        code_elem = material.find('hl7:code', namespaces)
+                        if code_elem is not None:
+                            display_name = code_elem.get('displayName', '').strip()
+                            if display_name:
+                                active_ingredient = display_name
+                                
+                        # Get pharmaceutical form
+                        form_elem = material.find('hl7:formCode', namespaces)
+                        if form_elem is not None:
+                            form_display = form_elem.get('displayName', '').strip()
+                            if form_display:
+                                pharm_form = form_display
+                
+                # Extract dose quantity from doseQuantity element
+                dose_elem = sub_admin.find('.//hl7:doseQuantity', namespaces)
+                if dose_elem is not None:
+                    logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found doseQuantity element ***")
+                    # Extract low value
+                    low_elem = dose_elem.find('hl7:low', namespaces)
+                    if low_elem is not None:
+                        low_val = low_elem.get('value')
+                        low_unit = low_elem.get('unit', '')
+                        if low_val:
+                            dose_quantity_struct['low'] = {'value': low_val, 'unit': low_unit}
                     
-                    # Extract from paragraph content as fallback (like Mario's Eutirox example)
-                    if not active_ingredient and text_section is not None:
-                        paragraphs = text_section.findall('.//hl7:paragraph', namespaces) or text_section.findall('.//paragraph')
-                        for para in paragraphs:
-                            para_text = self._extract_text_from_element(para)
-                            if 'eutirox' in para_text.lower():
-                                # Parse "Eutirox : EUTIROX*100MCG 50CPR : levothyroxine sodium : 17/03/2021 (Uso Orale)"
-                                parts = para_text.split(':')
-                                if len(parts) >= 3:
-                                    med_name = parts[0].strip() if parts[0].strip() else med_name
-                                    active_ingredient = parts[2].strip() if len(parts) > 2 and parts[2].strip() else active_ingredient
-                                    # Extract strength from second part (EUTIROX*100MCG 50CPR)
-                                    if len(parts) > 1:
-                                        strength_part = parts[1].strip()
-                                        if 'mcg' in strength_part.lower():
-                                            # Extract "100MCG" from "EUTIROX*100MCG 50CPR"
-                                            import re
-                                            mcg_match = re.search(r'(\d+)\s*mcg', strength_part, re.IGNORECASE)
-                                            if mcg_match:
-                                                strength = f"{mcg_match.group(1)} mcg"
+                    # Extract high value
+                    high_elem = dose_elem.find('hl7:high', namespaces)
+                    if high_elem is not None:
+                        high_val = high_elem.get('value')
+                        high_unit = high_elem.get('unit', '')
+                        if high_val:
+                            dose_quantity_struct['high'] = {'value': high_val, 'unit': high_unit}
                     
-                    # Only add if we have meaningful data
-                    if med_name and med_name != "Medication":
-                        medications.append({
-                            'data': {
-                                'medication_name': {'value': med_name, 'display_value': med_name},
-                                'active_ingredients': {'value': active_ingredient or 'Inferred from medication name', 'display_value': active_ingredient or 'Inferred from medication name'},
-                                'pharmaceutical_form': {'value': pharm_form, 'display_value': pharm_form + " (Inferred from medication name)" if pharm_form == "Tablet" else pharm_form},
-                                'strength': {'value': strength or 'Not specified', 'display_value': strength or 'Not specified'},
-                                'dose_quantity': {'value': 'Dose not specified', 'display_value': 'Dose not specified'},
-                                'route': {'value': 'Administration route not specified', 'display_value': 'Administration route not specified'},
-                                'schedule': {'value': 'Schedule not specified', 'display_value': 'Schedule not specified'},
-                                'period': {'value': 'Treatment timing not specified', 'display_value': 'Treatment timing not specified'},
-                                'indication': {'value': 'Medical indication not specified in available data', 'display_value': 'Medical indication not specified in available data'}
+                    # Extract direct value if no low/high
+                    if not dose_quantity_struct and dose_elem.get('value'):
+                        dose_quantity_struct['value'] = dose_elem.get('value')
+                        dose_quantity_struct['unit'] = dose_elem.get('unit', '')
+                
+                # Extract route from routeCode element
+                route_elem = sub_admin.find('.//hl7:routeCode', namespaces)
+                if route_elem is not None:
+                    logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found routeCode element ***")
+                    route_struct = {
+                        'code': route_elem.get('code', ''),
+                        'display_name': route_elem.get('displayName', ''),
+                        'code_system': route_elem.get('codeSystem', '')
+                    }
+                
+                # Extract schedule from effectiveTime element
+                effective_time_elem = sub_admin.find('.//hl7:effectiveTime', namespaces)
+                if effective_time_elem is not None:
+                    logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Found effectiveTime element ***")
+                    # Extract schedule code if present
+                    schedule_code = effective_time_elem.get('institutionSpecified')
+                    if schedule_code:
+                        schedule_struct = {
+                            'code': schedule_code,
+                            'display_name': self._map_schedule_code_to_display(schedule_code)
+                        }
+                    
+                    # Extract period information
+                    period_elem = effective_time_elem.find('hl7:period', namespaces)
+                    if period_elem is not None:
+                        period_value = period_elem.get('value')
+                        period_unit = period_elem.get('unit')
+                        if period_value:
+                            period_struct = {
+                                'value': period_value,
+                                'unit': period_unit or 'h',
+                                'display_name': f"Every {period_value} {period_unit or 'hours'}"
                             }
-                        })
+                
+                # Extract from paragraph content as fallback (like Mario's Eutirox example)
+                if not active_ingredient and text_section is not None:
+                    paragraphs = text_section.findall('.//hl7:paragraph', namespaces) or text_section.findall('.//paragraph')
+                    for para in paragraphs:
+                        para_text = self._extract_text_from_element(para)
+                        if 'eutirox' in para_text.lower():
+                            # Parse "Eutirox : EUTIROX*100MCG 50CPR : levothyroxine sodium : 17/03/2021 (Uso Orale)"
+                            parts = para_text.split(':')
+                            if len(parts) >= 3:
+                                med_name = parts[0].strip() if parts[0].strip() else med_name
+                                active_ingredient = parts[2].strip() if len(parts) > 2 and parts[2].strip() else active_ingredient
+                                # Extract strength from second part (EUTIROX*100MCG 50CPR)
+                                if len(parts) > 1:
+                                    strength_part = parts[1].strip()
+                                    if 'mcg' in strength_part.lower():
+                                        # Extract "100MCG" from "EUTIROX*100MCG 50CPR"
+                                        import re
+                                        mcg_match = re.search(r'(\d+)\s*mcg', strength_part, re.IGNORECASE)
+                                        if mcg_match:
+                                            strength = f"{mcg_match.group(1)} mcg"
+                                # Extract route if present
+                                if len(parts) > 3 and 'uso orale' in parts[3].lower():
+                                    route_struct = {
+                                        'code': '20053000',
+                                        'display_name': 'Oral use',
+                                        'translated': 'Oral'
+                                    }
+                
+                # Apply compound medication strength extraction for all cell text
+                if text_section is not None:
+                    all_text = self._extract_text_from_element(text_section)
+                    enhanced_strength = self._extract_enhanced_medication_strength(med_name, all_text, [])
+                    if enhanced_strength and enhanced_strength != "Not specified":
+                        strength = enhanced_strength
+                
+                # Only add if we have meaningful data
+                if med_name and med_name != "Medication":
+                    medications.append({
+                        'data': {
+                            'medication_name': {'value': med_name, 'display_value': med_name},
+                            'active_ingredients': {'value': active_ingredient or 'Inferred from medication name', 'display_value': active_ingredient or 'Inferred from medication name'},
+                            'pharmaceutical_form': {'value': pharm_form, 'display_value': pharm_form + " (Inferred from medication name)" if pharm_form == "Tablet" else pharm_form},
+                            'strength': {'value': strength, 'display_value': strength},
+                            'dose_quantity': dose_quantity_struct if dose_quantity_struct else {'value': 'Dose not specified', 'display_value': 'Dose not specified'},
+                            'route': route_struct if route_struct else {'value': 'Administration route not specified', 'display_value': 'Administration route not specified'},
+                            'schedule': schedule_struct if schedule_struct else {'value': 'Schedule not specified', 'display_value': 'Schedule not specified'},
+                            'period': period_struct if period_struct else {'value': 'Treatment timing not specified', 'display_value': 'Treatment timing not specified'},
+                            'indication': {'value': 'Medical indication not specified in available data', 'display_value': 'Medical indication not specified in available data'}
+                        }
+                    })
+                    
+                    logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted {med_name} with structures - dose: {bool(dose_quantity_struct)}, route: {bool(route_struct)}, schedule: {bool(schedule_struct)} ***")
         
         return {
             'success': True,
@@ -1544,6 +1626,22 @@ class CDAViewProcessor:
             },
             'found_count': len(medications)
         }
+    
+    def _map_schedule_code_to_display(self, code: str) -> str:
+        """Map schedule codes to display names"""
+        schedule_mapping = {
+            'ACM': 'Morning',
+            'ACD': 'Lunch',
+            'ACV': 'Evening',
+            'HS': 'Bedtime',
+            'PC': 'After meals',
+            'AC': 'Before meals',
+            'BID': 'Twice daily',
+            'TID': 'Three times daily',
+            'QID': 'Four times daily',
+            'QD': 'Once daily'
+        }
+        return schedule_mapping.get(code, code)
     
     def _extract_enhanced_medication_strength(self, med_name: str, all_cell_text: str, tds: list) -> str:
         """
