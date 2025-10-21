@@ -69,19 +69,58 @@ def create_test_session():
     # Create session ID for testing
     test_session_id = "9999999999"  # Easy to remember test ID
     
+    # Create sample CDA XML content containing Triapin - This is what CDAViewProcessor will parse
+    sample_cda_xml = """<?xml version="1.0" encoding="UTF-8"?>
+<ClinicalDocument xmlns="urn:hl7-org:v3">
+    <component>
+        <structuredBody>
+            <component>
+                <section>
+                    <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" displayName="Medications"/>
+                    <title>Medications</title>
+                    <text>
+                        <table>
+                            <tr>
+                                <td>Triapin</td>
+                                <td>ramipril 5 mg, felodipine 5 mg</td>
+                                <td>Prolonged-release tablet</td>
+                                <td>5 mg</td>
+                            </tr>
+                            <tr>
+                                <td>Eutirox</td>
+                                <td>levothyroxine sodium</td>
+                                <td>Tablet</td>
+                                <td>100 ug</td>
+                            </tr>
+                            <tr>
+                                <td>Tresiba</td>
+                                <td>insulin degludec</td>
+                                <td>Solution for injection</td>
+                                <td>100 IU/mL</td>
+                            </tr>
+                        </table>
+                    </text>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>"""
+    
     # Create session store
     session = SessionStore()
     
-    # Add patient data to session
+    # Add patient data to session - CRITICAL: Include cda_document for CDAViewProcessor
     session_data = {
         f'patient_match_{test_session_id}': {
             'patient_id': test_session_id,
             'patient_name': 'Diana Ferreira (TEST)',
             'patient_country': 'PT',
             'patient_dob': '1969-01-02',
-            'has_enhanced_data': True
+            'has_enhanced_data': True,
+            'cda_document': sample_cda_xml,  # ✅ CRITICAL: CDAViewProcessor needs this
+            'cda_l3_document': sample_cda_xml,  # ✅ May be needed for L3 view
+            'enhanced_medications': enhanced_medications  # ✅ Pre-enhanced data for comparison
         },
-        'enhanced_medications': enhanced_medications,
         'medication_data_source': 'enhanced_parser_test',
         'parser_version': 'compound_strength_fix',
         'ui_test_session': True
