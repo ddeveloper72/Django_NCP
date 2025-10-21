@@ -2506,8 +2506,26 @@ class EnhancedCDAXMLParser:
                     for i, cell in enumerate(cells[1:], 1):
                         if cell.text:
                             text = cell.text.strip()
-                            # Try to identify dose information
-                            if any(unit in text.lower() for unit in ['mg', 'ml', 'units', 'mcg', 'g']):
+                            
+                            # Extract strength information using regex patterns
+                            import re
+                            strength_patterns = [
+                                r'(\d+(?:\.\d+)?)\s*(mg|ug|mcg|μg|g|ml|iu|units?)',
+                                r'(\d+(?:\.\d+)?)\s*(mg|ug|mcg|μg|g|ml|iu|units?)[^,]*(?:,|$)',
+                            ]
+                            
+                            strength_found = False
+                            for pattern in strength_patterns:
+                                matches = re.findall(pattern, text.lower())
+                                if matches:
+                                    # Get the first strength found
+                                    value, unit = matches[0]
+                                    medication_data['strength'] = f"{value} {unit}"
+                                    strength_found = True
+                                    break
+                            
+                            # Try to identify dose information (if not already used for strength)
+                            if not strength_found and any(unit in text.lower() for unit in ['mg', 'ml', 'units', 'mcg', 'g']):
                                 medication_data['dose_quantity'] = text
                             # Try to identify frequency information
                             elif any(freq in text.lower() for freq in ['daily', 'twice', 'morning', 'evening', 'tid', 'bid', 'qd']):
@@ -2664,6 +2682,31 @@ class EnhancedCDAXMLParser:
                     value, unit = strength_match.groups()
                     return f"{value} {unit}"
         
+        # NEW: Parse strength from text content (for medications like Triapin)
+        # Try to find the broader context (paragraph or section text)
+        text_strength = self._extract_strength_from_text(material_element, medication_name)
+        if text_strength != 'Not specified':
+            return text_strength
+        
+        # Also try to extract from the broader substanceAdministration context
+        try:
+            # Find the substanceAdministration parent that contains this material
+            current_element = material_element
+            while current_element is not None:
+                if current_element.tag.endswith('substanceAdministration'):
+                    substance_admin = current_element
+                    # Look for text content in the substance administration or its parent section
+                    text_strength = self._extract_strength_from_text(substance_admin, medication_name)
+                    if text_strength != 'Not specified':
+                        return text_strength
+                    break
+                # Move up to parent (if available)
+                current_element = None  # ElementTree doesn't have getparent()
+                break
+        except Exception as e:
+            logger.debug(f"Could not search parent context for strength: {e}")
+            pass
+        
         # Use medication name mapping for common medications with known strengths
         medication_strength_map = {
             'Eutirox': '100 ug',  # Common levothyroxine strength
@@ -2701,6 +2744,87 @@ class EnhancedCDAXMLParser:
         for brand_name, strength in medication_strength_map.items():
             if brand_name.lower() in medication_name_lower or medication_name_lower in brand_name.lower():
                 return strength
+        
+        return 'Not specified'
+
+    def _extract_strength_from_text(self, element: ET.Element, medication_name: str) -> str:
+        """Extract strength information from text content of the element and its children"""
+        import re
+        
+        # Collect all text content from the element and its children
+        all_text = ""
+        
+        # Get text from the element itself
+        if element.text:
+            all_text += element.text + " "
+            
+        # Get text from all child elements recursively
+        for child in element.iter():
+            if child.text:
+                all_text += child.text + " "
+            if child.tail:
+                all_text += child.tail + " "
+        
+        # Clean up the text
+        all_text = all_text.strip().lower()
+        
+        # DEBUG: Log what we're working with
+        if medication_name and 'triapin' in medication_name.lower():
+            logger.info(f"TRIAPIN DEBUG: medication_name='{medication_name}'")
+            logger.info(f"TRIAPIN DEBUG: all_text='{all_text}'")
+            logger.info(f"TRIAPIN DEBUG: all_text length={len(all_text)}")
+        
+        if not all_text:
+            return 'Not specified'
+        
+        # Extract strength patterns for specific medication
+        if medication_name and medication_name.lower() in all_text:
+            # Pattern 1: "ramipril 5 mg" or "felodipine 5 mg" 
+            # Look for active ingredient followed by strength
+            strength_patterns = [
+                rf'{re.escape(medication_name.lower())}\s*:?\s*(\w+\s+)?(\d+(?:\.\d+)?)\s*(mg|ug|mcg|μg|g|ml|iu|units?)',
+                rf'(\w+\s+)?(\d+(?:\.\d+)?)\s*(mg|ug|mcg|μg|g|ml|iu|units?)[^,]*{re.escape(medication_name.lower())}',
+                rf'{re.escape(medication_name.lower())}[^:]*:\s*\w+\s+(\d+(?:\.\d+)?)\s*(mg|ug|mcg|μg|g|ml|iu|units?)',
+            ]
+            
+            for pattern in strength_patterns:
+                matches = re.findall(pattern, all_text)
+                if matches:
+                    # Get the last match which is usually the most relevant
+                    match = matches[-1]
+                    if len(match) >= 2:
+                        # Extract value and unit from the match
+                        value = match[-2]  # Second to last is the value
+                        unit = match[-1]   # Last is the unit
+                        return f"{value} {unit}"
+        
+        # General strength extraction patterns
+        general_patterns = [
+            # Pattern for "5 mg, felodipine 5 mg" - extract multiple strengths
+            r'(\d+(?:\.\d+)?)\s*(mg|ug|mcg|μg|g|ml|iu|units?)',
+            # Pattern for "100 ug Tablet"
+            r'(\d+(?:\.\d+)?)\s*(mg|ug|mcg|μg|g|ml|iu|units?)\s+\w+',
+        ]
+        
+        strengths = []
+        for pattern in general_patterns:
+            matches = re.findall(pattern, all_text)
+            for match in matches:
+                value, unit = match
+                strengths.append(f"{value} {unit}")
+        
+        if strengths:
+            # For medications like Triapin with multiple active ingredients, 
+            # return the first strength found or combine them
+            if len(strengths) == 1:
+                return strengths[0]
+            elif len(strengths) > 1:
+                # Return the first significant strength (not "1" units)
+                for strength in strengths:
+                    if not strength.startswith('1 '):
+                        return strength
+                # Fallback to first strength
+                return strengths[0]
         
         return 'Not specified'
 

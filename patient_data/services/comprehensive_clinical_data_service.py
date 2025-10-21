@@ -1890,10 +1890,10 @@ class ComprehensiveClinicalDataService:
             if med.get('name') or med.get('medication_name') or med.get('display_name'):
                 score += 10
             
-            # Points for strength information
+            # Points for strength information (HIGH PRIORITY)
             strength = med.get('strength', '')
             if strength and strength not in ['Not specified', 'Not found', '']:
-                score += 20
+                score += 30  # Increased from 20 to prioritize actual strength data
                 
             # Points for route information  
             route = med.get('route')
@@ -1930,9 +1930,13 @@ class ComprehensiveClinicalDataService:
             if med.get('section_code') or med.get('section_title'):
                 score += 5
                 
-            # Bonus points for Enhanced parser (indicated by type field)
+            # Modest bonus for Enhanced parser (but not if data quality is poor)
             if med.get('type') == 'enhanced_medication' or med.get('source') == 'enhanced_cda_parser':
-                score += 25
+                # Only give Enhanced parser bonus if it actually has strength data
+                if strength and strength not in ['Not specified', 'Not found', '']:
+                    score += 15  # Reduced from 25 and only if has actual strength
+                else:
+                    score += 5   # Small bonus for structure even without strength
                 
         return score
 
@@ -2022,11 +2026,20 @@ class ComprehensiveClinicalDataService:
                 best_med = None
                 best_score = -1
                 
-                for med in med_list:
+                # Debug logging for Triapin specifically
+                is_triapin = 'triapin' in med_key.lower()
+                
+                for i, med in enumerate(med_list):
                     score = self._calculate_medication_completeness_score(med)
+                    if is_triapin:
+                        logger.info(f"TRIAPIN DEDUP DEBUG: Entry {i+1}: score={score}, strength='{med.get('strength', 'None')}', source='{med.get('source', 'None')}', type='{med.get('type', 'None')}'")
+                    
                     if score > best_score:
                         best_score = score
                         best_med = med
+                
+                if is_triapin:
+                    logger.info(f"TRIAPIN DEDUP RESULT: Kept entry with score {best_score}")
                 
                 unique_medications.append(best_med)
                 logger.info(f"[DATA_CLEANUP] Deduplicated {len(med_list)} entries for '{med_key}', kept most complete (score: {best_score})")
