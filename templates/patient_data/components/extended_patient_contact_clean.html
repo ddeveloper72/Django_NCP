@@ -35,11 +35,65 @@ This is not data duplication but necessary clinical context preservation.
 
 
 
-{% if contact_data or patient_identity %}
+{% if contact_data or patient_identity or extended_patient_info.has_data %}
 
 {% comment %} RESPONSIVE CONTACT GRID: Mobile-first card layout {% endcomment %}
 <div class="contact-info-grid">
     <div class="row g-3">
+        
+        {% comment %} HEALTHCARE TEAM CARD: Display healthcare providers from extended patient info {% endcomment %}
+        {% if extended_patient_info.practitioners %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card service-card border-primary h-100">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="fa-solid fa-user-doctor me-2"></i>Healthcare Team
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for practitioner in extended_patient_info.practitioners %}
+                    <div class="contact-entry {% if not forloop.last %}mb-3 pb-3 border-bottom{% endif %}">
+                        <div class="contact-name mb-2">
+                            <strong class="text-primary">{{ practitioner.name|default:"Unknown Provider" }}</strong>
+                            {% if practitioner.role %}
+                            <div class="text-muted small">{{ practitioner.role }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if practitioner.organization %}
+                        <div class="contact-detail mb-2">
+                            <i class="fa-solid fa-building me-2 text-muted"></i>
+                            <span>{{ practitioner.organization }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% for telecom in practitioner.telecoms %}
+                        <div class="contact-detail">
+                            {% if telecom.system == 'phone' %}
+                            <i class="fa-solid fa-phone me-2 text-success"></i>
+                            {% elif telecom.system == 'email' %}
+                            <i class="fa-solid fa-envelope me-2 text-info"></i>
+                            {% else %}
+                            <i class="fa-solid fa-link me-2 text-secondary"></i>
+                            {% endif %}
+                            <span>{{ telecom.value }}</span>
+                        </div>
+                        {% endfor %}
+                        
+                        {% if practitioner.roles %}
+                        <div class="mt-2">
+                            {% for role in practitioner.roles %}
+                            <span class="badge bg-secondary me-1">{{ role }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
         {% comment %} PATIENT DEMOGRAPHICS CARD: Basic personal information {% endcomment %}
         {% if patient_identity or patient_extended_data %}
         <div class="col-12 col-md-6 col-lg-4">

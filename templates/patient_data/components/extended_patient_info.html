@@ -1,6 +1,6 @@
 {# Extended Patient Information Main Component #}
 {% load patient_filters %}
-{% if patient_extended_data or administrative_data or contact_data or healthcare_data %}
+{% if extended_patient_info.has_data or patient_extended_data or administrative_data or contact_data or healthcare_data %}
 
 {# Simplified Extended Patient Information - Focus on Personal Information Only #}
 <div class="extended-patient-section" id="extendedPatientSection" data-patient-id="{{ patient_id|default:'' }}">

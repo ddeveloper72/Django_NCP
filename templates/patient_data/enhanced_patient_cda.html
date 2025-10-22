@@ -338,7 +338,7 @@
                     <!-- PHASE 3B: Healthcare Team & Contacts Tab Content -->
                     <div class="tab-pane fade" id="healthcare-team-content" role="tabpanel" aria-labelledby="healthcare-team-tab">
                         <div class="p-4">
-                            {% if administrative_data or healthcare_data %}
+                            {% if healthcare_team or healthcare_data or administrative_data %}
                                 {% include 'patient_data/components/healthcare_team_content.html' %}
                             {% else %}
                                 <div class="alert alert-info">

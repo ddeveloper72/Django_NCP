@@ -2,8 +2,8 @@
 {% load patient_filters %}
 
 <div class="healthcare-team-container">
-    {# Check if we have any administrative or healthcare data #}
-    {% if administrative_data or healthcare_data %}
+    {# Check if we have any administrative, healthcare data, or healthcare team data #}
+    {% if healthcare_team or administrative_data or healthcare_data %}
         
         {# Emergency Contacts & Next of Kin Section #}
         {% if administrative_data.emergency_contacts or administrative_data.guardians or administrative_data.other_contacts %}
@@ -144,7 +144,122 @@
         </div>
         {% endif %}
 
-        {# Healthcare Team Section #}
+        {# Healthcare Team Section - Direct from CDA Processing #}
+        {% if healthcare_team %}
+        <div class="healthcare-team-section mb-4">
+            <div class="collapsible-wrapper">
+                <input id="toggle-healthcare-team-direct" class="toggle-input" type="checkbox" checked>
+                <label for="toggle-healthcare-team-direct" class="collapsible-label-title">
+                    <div class="clinical-section-title-row">
+                        <div class="clinical-section-title">
+                            <i class="fa-solid fa-user-doctor me-2 text-primary"></i>
+                            <span>Healthcare Team</span>
+                        </div>
+                        <div class="clinical-badge-container">
+                            <span class="clinical-badge populated">
+                                {{ healthcare_team|length }} Provider{{ healthcare_team|length|pluralize }}
+                            </span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                </label>
+                <div class="collapsible-content-title">
+                    <div class="content-inner-title">
+                        
+                        {# Healthcare Team Members #}
+                        <div class="practitioners-table-container bg-white border rounded-3 shadow-sm overflow-hidden mb-4">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mb-0">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th scope="col" class="fw-bold">
+                                                <i class="fa-solid fa-user-doctor me-2"></i>Healthcare Professional
+                                            </th>
+                                            <th scope="col" class="fw-bold">
+                                                <i class="fa-solid fa-briefcase me-2"></i>Role & Organization
+                                            </th>
+                                            <th scope="col" class="fw-bold">
+                                                <i class="fa-solid fa-phone me-2"></i>Contact Information
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for member in healthcare_team %}
+                                        <tr>
+                                            <td class="practitioner-name-cell">
+                                                <div class="practitioner-name-container">
+                                                    <h6 class="practitioner-name mb-1">
+                                                        <i class="fa-solid fa-user-md me-2 text-primary"></i>
+                                                        {{ member.name|default:"Unknown Provider" }}
+                                                    </h6>
+                                                    {% if member.roles %}
+                                                    <div class="practitioner-roles">
+                                                        {% for role in member.roles %}
+                                                        <span class="badge bg-secondary me-1">{{ role }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td class="role-organization-cell">
+                                                <div class="role-info mb-2">
+                                                    <strong>{{ member.role|default:"Healthcare Provider" }}</strong>
+                                                </div>
+                                                {% if member.organization %}
+                                                <div class="organization-info">
+                                                    <i class="fa-solid fa-building me-1 text-muted"></i>
+                                                    {{ member.organization }}
+                                                </div>
+                                                {% endif %}
+                                            </td>
+                                            <td class="contact-cell">
+                                                {% if member.telecoms %}
+                                                <div class="contact-methods">
+                                                    {% for telecom in member.telecoms %}
+                                                    <div class="contact-item mb-1">
+                                                        {% if telecom.system == 'phone' %}
+                                                        <i class="fa-solid fa-phone me-1 text-success"></i>
+                                                        {% elif telecom.system == 'email' %}
+                                                        <i class="fa-solid fa-envelope me-1 text-info"></i>
+                                                        {% else %}
+                                                        <i class="fa-solid fa-link me-1 text-secondary"></i>
+                                                        {% endif %}
+                                                        <span class="contact-value">{{ telecom.value }}</span>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {% if member.addresses %}
+                                                <div class="address-info mt-2">
+                                                    {% for address in member.addresses %}
+                                                    <div class="address-item">
+                                                        <i class="fa-solid fa-map-marker-alt me-1 text-warning"></i>
+                                                        <small>
+                                                            {% for line in address.line %}{{ line }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                                            {% if address.city %}, {{ address.city }}{% endif %}
+                                                            {% if address.postal_code %} {{ address.postal_code }}{% endif %}
+                                                            {% if address.country %}, {{ address.country }}{% endif %}
+                                                        </small>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# Healthcare Team Section - Legacy Format #}
         {% if healthcare_data.practitioners or administrative_data.healthcare_providers %}
         <div class="healthcare-team-section mb-4">
             <div class="collapsible-wrapper">
