@@ -769,3 +769,46 @@ def format_treatment_period(medication):
             return f"{start_formatted} to {end_formatted}"
         else:
             return f"Started {start_formatted} (Ongoing)"
+
+
+@register.filter
+def clean_medication_text(text):
+    """
+    Clean up medication text by removing translation artifacts and formatting issues
+    Handles strings, lists, and dictionaries (for FHIR data compatibility)
+    """
+    if not text:
+        return text
+    
+    # Handle dictionaries (FHIR active_ingredients structure)
+    if isinstance(text, dict):
+        # Try to extract meaningful text from dictionary
+        # Priority: name > display_name > description > coded
+        for key in ['name', 'display_name', 'description', 'text', 'coded']:
+            if key in text and text[key] and text[key] != 'UNKNOWN':
+                return clean_medication_text(text[key])  # Recursively clean the extracted value
+        # Fallback to string representation if no good field found
+        return "Not specified"
+    
+    # Handle lists (common in FHIR data)
+    if isinstance(text, list):
+        if not text:  # Empty list
+            return ""
+        # Join list items with comma separator and recursively clean each item
+        cleaned_items = [clean_medication_text(item) for item in text if item]
+        return ", ".join(cleaned_items)
+    
+    # Handle non-string types by converting to string
+    if not isinstance(text, str):
+        text = str(text)
+    
+    # Remove translation artifacts
+    text = re.sub(r'\s*Translation\s*:\s*', ' + ', text)
+    text = re.sub(r'\s*\{CAS:\s*[^}]+\}\s*', '', text)
+    text = re.sub(r'\s*\(Ingredient name\s*:\s*([^)]+)\)', r' + \1', text)
+    
+    # Clean up multiple spaces and line breaks
+    text = re.sub(r'\s+', ' ', text)
+    text = text.strip()
+    
+    return text
