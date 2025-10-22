@@ -73,6 +73,32 @@ class ComprehensiveClinicalDataService:
             # Method 1: Enhanced CDA XML Parser
             try:
                 enhanced_data = self.enhanced_parser.parse_cda_content(cda_content)
+                
+                # DEBUG: Check what enhanced_data contains
+                logger.info(f"[ENHANCED PARSER DEBUG] Enhanced data keys: {list(enhanced_data.keys())}")
+                print(f"*** ENHANCED_PARSER_RESULT DEBUG: keys={list(enhanced_data.keys())} ***")
+                if "detailed_medications" in enhanced_data:
+                    detailed_meds = enhanced_data["detailed_medications"]
+                    logger.info(f"[ENHANCED PARSER DEBUG] Found detailed_medications: {len(detailed_meds) if detailed_meds else 0}")
+                    print(f"*** ENHANCED_PARSER_RESULT DEBUG: detailed_medications count={len(detailed_meds) if detailed_meds else 0} ***")
+                else:
+                    logger.info(f"[ENHANCED PARSER DEBUG] No detailed_medications in parser result")
+                    print(f"*** ENHANCED_PARSER_RESULT DEBUG: No detailed_medications key ***")
+                
+                # CRITICAL FIX: If this enhanced_data doesn't have detailed_medications, try again
+                if "detailed_medications" not in enhanced_data or not enhanced_data["detailed_medications"]:
+                    logger.info(f"[ENHANCED PARSER FIX] First call failed to get detailed_medications, retrying...")
+                    print(f"*** ENHANCED_PARSER_FIX: Retrying to get detailed_medications ***")
+                    # Try again - sometimes the first call doesn't work properly
+                    try:
+                        enhanced_data_retry = self.enhanced_parser.parse_cda_content(cda_content)
+                        if "detailed_medications" in enhanced_data_retry and enhanced_data_retry["detailed_medications"]:
+                            logger.info(f"[ENHANCED PARSER FIX] Retry succeeded with {len(enhanced_data_retry['detailed_medications'])} medications")
+                            print(f"*** ENHANCED_PARSER_FIX: Retry succeeded with {len(enhanced_data_retry['detailed_medications'])} medications ***")
+                            enhanced_data = enhanced_data_retry  # Use the successful result
+                    except Exception as e:
+                        logger.warning(f"[ENHANCED PARSER FIX] Retry failed: {e}")
+                
                 extraction_results["extraction_methods"].append(
                     "enhanced_cda_xml_parser"
                 )
@@ -218,6 +244,17 @@ class ComprehensiveClinicalDataService:
                 "enhanced_parser", {}
             )
             
+            # DEBUG: Log what's in enhanced_data
+            logger.info(f"[DETAILED MEDICATIONS DEBUG] enhanced_data keys: {list(enhanced_data.keys())}")
+            print(f"*** ENHANCED_DATA DEBUG: keys={list(enhanced_data.keys())} ***")
+            if "detailed_medications" in enhanced_data:
+                detailed_meds = enhanced_data["detailed_medications"]
+                logger.info(f"[DETAILED MEDICATIONS DEBUG] Found detailed_medications: {len(detailed_meds) if detailed_meds else 0}")
+                print(f"*** ENHANCED_DATA DEBUG: detailed_medications count={len(detailed_meds) if detailed_meds else 0} ***")
+            else:
+                logger.info(f"[DETAILED MEDICATIONS DEBUG] No detailed_medications key found")
+                print(f"*** ENHANCED_DATA DEBUG: No detailed_medications key found ***")
+            
             # If we have detailed medications from the enhanced parser, use them directly
             if "detailed_medications" in enhanced_data:
                 detailed_meds = enhanced_data["detailed_medications"]
@@ -229,6 +266,8 @@ class ComprehensiveClinicalDataService:
                         dose = med.get('dose_quantity', 'NO_DOSE')
                         route = med.get('route', 'NO_ROUTE')
                         logger.info(f"[DETAILED MEDICATIONS] {name}: dose={dose}, route={route}")
+                else:
+                    logger.info(f"[DETAILED MEDICATIONS DEBUG] detailed_medications exists but is empty")
             
             sections_found = enhanced_data.get("sections_found", [])
             
@@ -305,6 +344,10 @@ class ComprehensiveClinicalDataService:
             # CRITICAL: Fix template compatibility for medication objects
             # Template expects .coded/.translated structure but comprehensive service creates .code/.displayName structure
             self._fix_medication_template_compatibility(clinical_arrays["medications"])
+
+            # CRITICAL ARCHITECTURAL FIX: Flatten nested data structure for template compatibility
+            # Template expects med.medication_name, but we have med.data.medication_name
+            self._flatten_medication_data_structure(clinical_arrays["medications"])
 
             # CRITICAL: Clean up data quality issues
             self._remove_duplicate_and_placeholder_data(clinical_arrays)            # If we have fewer items from both CDA parser and enhanced parser but sections exist, use section count as fallback
@@ -542,6 +585,10 @@ class ComprehensiveClinicalDataService:
         if "detailed_medications" in data:
             analysis["detailed_medications"] = data["detailed_medications"]
             logger.info(f"[ENHANCED_ANALYSIS] Preserved {len(data['detailed_medications'])} detailed medications from Enhanced parser")
+            print(f"*** ENHANCED_ANALYSIS DEBUG: Preserved {len(data['detailed_medications'])} detailed medications ***")
+        else:
+            logger.info(f"[ENHANCED_ANALYSIS] No detailed_medications in input data, keys: {list(data.keys())}")
+            print(f"*** ENHANCED_ANALYSIS DEBUG: No detailed_medications in input data, keys: {list(data.keys())} ***")
 
         # Extract administrative data if available
         if "administrative_data" in data:
@@ -1767,6 +1814,49 @@ class ComprehensiveClinicalDataService:
             self._fix_schedule_field_compatibility(medication)
             
             logger.info(f"[TEMPLATE_COMPAT] Fixed medication template compatibility for: {getattr(medication, 'name', getattr(medication, 'medication_name', 'Unknown'))}")
+    
+    def _flatten_medication_data_structure(self, medications: List) -> None:
+        """
+        ARCHITECTURAL FIX: Flatten nested medication data structure for template compatibility
+        
+        Problem: Template expects med.medication_name but we have med.data.medication_name
+        Solution: Lift all fields from med.data to med top level
+        
+        This makes clinical sections work like demographics (direct field access)
+        """
+        for medication in medications:
+            if not medication or not isinstance(medication, dict):
+                continue
+                
+            # If medication has nested 'data' structure, flatten it
+            if 'data' in medication and isinstance(medication['data'], dict):
+                med_data = medication['data']
+                
+                # List of fields to lift from data to top level
+                fields_to_flatten = [
+                    'medication_name', 'name', 'display_name',
+                    'active_ingredients', 'strength', 
+                    'pharmaceutical_form', 'dose_quantity', 'dose_value', 'dose_unit',
+                    'route', 'route_display', 'administration_route', 'route_code',
+                    'schedule', 'frequency', 'dosage_frequency', 'timing_code',
+                    'start_date', 'end_date', 'period', 'treatment_period',
+                    'ingredient_display', 'form_display'
+                ]
+                
+                # Flatten each field
+                for field in fields_to_flatten:
+                    if field in med_data:
+                        # Only flatten if not already at top level (avoid overwriting)
+                        if field not in medication:
+                            medication[field] = med_data[field]
+                            logger.info(f"[FLATTEN] Lifted {field} from data to top level: {med_data[field]}")
+                        else:
+                            logger.info(f"[FLATTEN] Field {field} already exists at top level, keeping original")
+                
+                # Keep the original data structure for backwards compatibility
+                logger.info(f"[FLATTEN] Flattened medication: {medication.get('medication_name', medication.get('name', 'Unknown'))}")
+            else:
+                logger.info(f"[FLATTEN] Medication already has flat structure: {medication.get('medication_name', medication.get('name', 'Unknown'))}")
     
     def _fix_medication_attribute_compatibility(self, medication, attribute_name: str) -> None:
         """Fix individual medication attribute for template compatibility"""
