@@ -192,12 +192,51 @@ class CDAViewProcessor:
                 # Process CDA content using specialized service agents
                 unified_data = clinical_pipeline_manager.process_cda_content(request, session_id, cda_content)
                 
+                # CRITICAL FIX: Extract patient identity using Enhanced CDA XML Parser since unified pipeline doesn't handle it
+                logger.info("[CDA PROCESSOR] Extracting patient identity via Enhanced CDA XML Parser")
+                parsed_data = self._parse_cda_document(cda_content, session_id)
+                
                 # Get template context from pipeline manager
                 pipeline_context = clinical_pipeline_manager.get_template_context(request, session_id)
                 
                 # Build base context and merge with pipeline context
                 context = self.context_builder.build_base_context(session_id, 'CDA')
                 context.update(pipeline_context)
+                
+                # CRITICAL FIX: Map unified pipeline data to template variables
+                # Templates expect 'clinical_arrays' to determine if clinical data exists
+                clinical_sections = {}
+                has_clinical_data = False
+                
+                # Map section data from unified pipeline to template variables
+                pipeline_sections = ['medications', 'allergies', 'problems', 'vital_signs', 'procedures', 'immunizations', 'results', 'medical_devices']
+                for section in pipeline_sections:
+                    section_data = pipeline_context.get(section, [])
+                    if section_data and len(section_data) > 0:
+                        has_clinical_data = True
+                        clinical_sections[section] = section_data
+                        # Also add direct template variables (needed by some templates)
+                        context[section] = section_data
+                        
+                # Add clinical_arrays for template compatibility
+                if has_clinical_data:
+                    context['clinical_arrays'] = clinical_sections
+                
+                # TODO: Add administrative/extended patient data mapping here
+                # For now, set empty defaults to prevent template errors
+                context.update({
+                    'patient_extended_data': {},
+                    'administrative_data': {},
+                    'contact_data': {},
+                    'healthcare_data': {}
+                })
+                
+                logger.info(f"[CDA PROCESSOR] Mapped unified pipeline data to template context - clinical sections: {len(clinical_sections)}")
+                
+                # Add patient identity from Enhanced CDA XML Parser if available
+                if parsed_data and 'patient_identity' in parsed_data:
+                    context['patient_identity'] = parsed_data['patient_identity']
+                    logger.info(f"[CDA PROCESSOR] Added patient identity to context from Enhanced CDA XML Parser")
                 
                 # Add CDA-specific metadata
                 self._add_cda_metadata(context, match_data, cda_content, actual_cda_type)
@@ -1933,6 +1972,105 @@ class CDAViewProcessor:
                     
                     medications.append(medication_entry)
                     logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Extracted {med_name} with enhanced structures - dose: {bool(dose_quantity_struct)}, route: {bool(route_struct)}, schedule: {bool(schedule_struct)}, period: {bool(period_struct)} ***")
+
+        # Strategy 3: Enhanced paragraph-based medication extraction for comprehensive clinical data
+        # This runs regardless of whether medications were found to enhance existing data with rich text content
+        if text_section is not None:
+            logger.info("[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Strategy 3 - Paragraph-based enhancement with rich text parsing ***")
+            paragraphs = text_section.findall('.//hl7:paragraph', namespaces) or text_section.findall('.//paragraph')
+            
+            paragraph_medications = []
+            for para in paragraphs:
+                para_text = self._extract_text_from_element(para)
+                if para_text and len(para_text.strip()) > 10:  # Filter out empty/short paragraphs
+                    logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Processing paragraph: '{para_text}' ***")
+                    
+                    # Only process if this looks like a medication entry
+                    if any(keyword in para_text.lower() for keyword in ['tablet', 'injection', 'mg', 'ug', 'mcg', 'ml', 'use', 'since']):
+                        
+                        # Use rich text parsing to extract clinical details
+                        rich_data = self._parse_rich_medication_text(para_text)
+                        
+                        # Extract medication name from paragraph
+                        colon_parts = para_text.split(':')
+                        med_name = colon_parts[0].strip() if colon_parts else "Unknown Medication"
+                        
+                        # Build enhanced medication entry using rich parsing results
+                        medication_entry = {
+                            'data': {
+                                'medication_name': {'value': med_name, 'display_value': med_name},
+                                'active_ingredients': {
+                                    'value': rich_data.get('active_ingredient') or 'Inferred from medication name',
+                                    'display_value': rich_data.get('active_ingredient') or 'Inferred from medication name'
+                                },
+                                'pharmaceutical_form': {
+                                    'value': rich_data.get('pharmaceutical_form') or 'Tablet',
+                                    'display_value': rich_data.get('pharmaceutical_form') or 'Tablet'
+                                },
+                                'strength': {
+                                    'value': rich_data.get('strength') or 'Not specified',
+                                    'display_value': rich_data.get('strength') or 'Not specified'
+                                },
+                                'dose_quantity': self._format_dose_for_display(rich_data.get('dose_quantity', {})),
+                                'route': self._format_route_for_display(rich_data.get('route', {})),
+                                'schedule': self._format_schedule_for_display(rich_data.get('schedule', {})),
+                                'period': self._format_period_for_display(rich_data.get('period', {})),
+                                'indication': {
+                                    'value': rich_data.get('indication') or 'Medical indication not specified in available data',
+                                    'display_value': rich_data.get('indication') or 'Medical indication not specified in available data'
+                                }
+                            }
+                        }
+                        
+                        paragraph_medications.append(medication_entry)
+                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATION PARSING: Strategy 3 extracted {med_name} with rich parsing ***")
+            
+            # Enhance existing medications with paragraph data or add new ones
+            if paragraph_medications:
+                if medications:
+                    # Enhance existing medications with paragraph data where names match
+                    for para_med in paragraph_medications:
+                        para_name = para_med['data']['medication_name']['value'].lower()
+                        enhanced_existing = False
+                        
+                        for existing_med in medications:
+                            existing_name = existing_med['data']['medication_name']['value'].lower()
+                            if para_name in existing_name or existing_name in para_name:
+                                # Enhance existing medication with paragraph data
+                                logger.info(f"[CDA PROCESSOR] *** ENHANCING EXISTING MEDICATION: {existing_name} with paragraph data ***")
+                                
+                                # Update with non-default values from paragraph parsing
+                                para_route = para_med['data']['route']['value']
+                                if para_route not in ['Not specified', 'Administration route not specified']:
+                                    existing_med['data']['route'] = para_med['data']['route']
+                                    logger.info(f"[CDA PROCESSOR] *** UPDATED ROUTE: {existing_name} -> {para_route} ***")
+                                
+                                para_schedule = para_med['data']['schedule']['value']
+                                if para_schedule not in ['Not specified', 'Schedule not specified']:
+                                    existing_med['data']['schedule'] = para_med['data']['schedule']
+                                    logger.info(f"[CDA PROCESSOR] *** UPDATED SCHEDULE: {existing_name} -> {para_schedule} ***")
+                                
+                                para_dose = para_med['data']['dose_quantity']['value']
+                                if para_dose not in ['Not specified', 'Dose not specified']:
+                                    existing_med['data']['dose_quantity'] = para_med['data']['dose_quantity']
+                                    logger.info(f"[CDA PROCESSOR] *** UPDATED DOSE: {existing_name} -> {para_dose} ***")
+                                
+                                para_period = para_med['data']['period']['value']
+                                if para_period not in ['Not specified', 'Treatment timing not specified']:
+                                    existing_med['data']['period'] = para_med['data']['period']
+                                    logger.info(f"[CDA PROCESSOR] *** UPDATED PERIOD: {existing_name} -> {para_period} ***")
+                                
+                                enhanced_existing = True
+                                break
+                        
+                        # If no existing medication matched, add as new
+                        if not enhanced_existing:
+                            medications.append(para_med)
+                            logger.info(f"[CDA PROCESSOR] *** ADDING NEW MEDICATION: {para_name} from paragraph ***")
+                else:
+                    # No medications found in structured data, use paragraph medications
+                    medications = paragraph_medications
+                    logger.info(f"[CDA PROCESSOR] *** USING PARAGRAPH MEDICATIONS: {len(medications)} total ***")
         
         return {
             'success': True,
@@ -1959,6 +2097,140 @@ class CDAViewProcessor:
         }
         return schedule_mapping.get(code, code)
     
+    def _parse_rich_medication_text(self, medication_text: str) -> Dict[str, Any]:
+        """
+        Parse rich medication text to extract clinical details like route, schedule, dose, indication.
+        
+        Handles patterns like:
+        - 'Eutirox : levothyroxine sodium 100 ug Tablet : 1 ACM since 1997-10-06 (Oral use)'
+        - 'Tresiba : insulin degludec [100 [IU] / mL] Solution for injection in pre-filled pen : 10 [IU] per day since 2012-04-30 (Subcutaneous use)'
+        """
+        import re
+        
+        extracted_data = {
+            'route': None,
+            'schedule': None,
+            'dose_quantity': None,
+            'period': None,
+            'indication': None,
+            'strength': None,
+            'active_ingredient': None,
+            'pharmaceutical_form': None
+        }
+        
+        logger.info(f"[CDA PROCESSOR] *** RICH TEXT PARSING: Processing '{medication_text}' ***")
+        
+        # Extract route from parentheses - (Oral use), (Subcutaneous use), etc.
+        route_pattern = r'\(([^)]*(?:use|route|administration))\)'
+        route_match = re.search(route_pattern, medication_text, re.IGNORECASE)
+        if route_match:
+            route_text = route_match.group(1).strip()
+            extracted_data['route'] = {
+                'code': '',
+                'display_name': route_text,
+                'translated': route_text
+            }
+            logger.info(f"[CDA PROCESSOR] *** RICH TEXT PARSING: Extracted route: {route_text} ***")
+        
+        # Extract dose and frequency - patterns like "10 [IU] per day", "1 ACM"
+        dose_frequency_patterns = [
+            r'(\d+(?:\.\d+)?)\s*\[?([^\]]+)\]?\s*per\s+(\w+)',  # "10 [IU] per day"
+            r'(\d+(?:\.\d+)?)\s+([A-Z]+)',  # "1 ACM"
+            r'(\d+(?:\.\d+)?)\s*([A-Za-z/]+)\s*(?:per|every)\s+(\w+)'  # Alternative patterns
+        ]
+        
+        for pattern in dose_frequency_patterns:
+            dose_match = re.search(pattern, medication_text, re.IGNORECASE)
+            if dose_match:
+                if len(dose_match.groups()) >= 3:
+                    dose_val, dose_unit, frequency = dose_match.groups()
+                    extracted_data['dose_quantity'] = {
+                        'value': dose_val,
+                        'unit': dose_unit,
+                        'display_name': f"{dose_val} {dose_unit}"
+                    }
+                    extracted_data['schedule'] = {
+                        'code': frequency.lower(),
+                        'display_name': f"Per {frequency}",
+                        'source': 'text_parsing'
+                    }
+                    logger.info(f"[CDA PROCESSOR] *** RICH TEXT PARSING: Extracted dose: {dose_val} {dose_unit}, schedule: Per {frequency} ***")
+                elif len(dose_match.groups()) >= 2:
+                    dose_val, dose_unit = dose_match.groups()
+                    extracted_data['dose_quantity'] = {
+                        'value': dose_val,
+                        'unit': dose_unit,
+                        'display_name': f"{dose_val} {dose_unit}"
+                    }
+                    logger.info(f"[CDA PROCESSOR] *** RICH TEXT PARSING: Extracted dose: {dose_val} {dose_unit} ***")
+                break
+        
+        # Extract strength - patterns like "100 ug", "[100 [IU] / mL]"
+        strength_patterns = [
+            r'(\d+(?:\.\d+)?)\s*(ug|mcg|μg|mg|g|IU|mL|mg/mL)',  # "100 ug"
+            r'\[(\d+(?:\.\d+)?)\s*\[([^\]]+)\]\s*/\s*([^\]]+)\]',  # "[100 [IU] / mL]"
+            r'(\d+(?:\.\d+)?)\s*([A-Za-z/]+)(?:\s+[A-Za-z]+)?'  # General pattern
+        ]
+        
+        for pattern in strength_patterns:
+            strength_match = re.search(pattern, medication_text, re.IGNORECASE)
+            if strength_match:
+                if len(strength_match.groups()) >= 3:
+                    val, unit1, unit2 = strength_match.groups()
+                    extracted_data['strength'] = f"{val} {unit1}/{unit2}"
+                    logger.info(f"[CDA PROCESSOR] *** RICH TEXT PARSING: Extracted complex strength: {val} {unit1}/{unit2} ***")
+                elif len(strength_match.groups()) >= 2:
+                    val, unit = strength_match.groups()
+                    extracted_data['strength'] = f"{val} {unit}"
+                    logger.info(f"[CDA PROCESSOR] *** RICH TEXT PARSING: Extracted strength: {val} {unit} ***")
+                break
+        
+        # Extract treatment period - "since YYYY-MM-DD"
+        period_pattern = r'since\s+(\d{4}-\d{2}-\d{2})'
+        period_match = re.search(period_pattern, medication_text, re.IGNORECASE)
+        if period_match:
+            period_date = period_match.group(1)
+            extracted_data['period'] = {
+                'value': period_date,
+                'display_name': f"Since {period_date}",
+                'formatted_date': period_date  # Use simple date format for now
+            }
+            logger.info(f"[CDA PROCESSOR] *** RICH TEXT PARSING: Extracted period: Since {period_date} ***")
+        
+        # Extract active ingredient from colon-separated pattern
+        colon_parts = medication_text.split(':')
+        if len(colon_parts) >= 3:
+            # Pattern: "Medication : Product : Active Ingredient : ..."
+            active_ingredient = colon_parts[2].strip()
+            # Clean up common artifacts
+            active_ingredient = re.sub(r'\s*\[.*?\].*', '', active_ingredient)
+            active_ingredient = re.sub(r'\s*\d+.*', '', active_ingredient)
+            if active_ingredient and len(active_ingredient) > 3:
+                extracted_data['active_ingredient'] = active_ingredient
+                logger.info(f"[CDA PROCESSOR] *** RICH TEXT PARSING: Extracted active ingredient: {active_ingredient} ***")
+        
+        # Extract pharmaceutical form - common forms
+        form_patterns = [
+            r'(tablet|capsule|injection|solution|cream|ointment|drops|syrup)s?',
+            r'(CPR|Sol(?:ution)?|Inj(?:ection)?|Tab(?:let)?)'
+        ]
+        
+        for pattern in form_patterns:
+            form_match = re.search(pattern, medication_text, re.IGNORECASE)
+            if form_match:
+                form = form_match.group(1).lower()
+                form_mapping = {
+                    'cpr': 'Tablet',
+                    'sol': 'Solution',
+                    'inj': 'Injection',
+                    'tab': 'Tablet'
+                }
+                extracted_data['pharmaceutical_form'] = form_mapping.get(form, form.title())
+                logger.info(f"[CDA PROCESSOR] *** RICH TEXT PARSING: Extracted pharmaceutical form: {extracted_data['pharmaceutical_form']} ***")
+                break
+        
+        return extracted_data
+
     def _translate_route_code(self, route_code: str, route_display: str) -> str:
         """
         Translate route codes to user-friendly display names.

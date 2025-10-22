@@ -491,7 +491,10 @@ class MedicationSectionService(ClinicalSectionServiceInterface):
         match_data = request.session.get(session_key, {})
         match_data['enhanced_medications'] = enhanced_medications
         request.session[session_key] = match_data
-        request.session.modified = True
+        
+        # Only set modified if it's a real session, not a test dict
+        if hasattr(request.session, 'modified'):
+            request.session.modified = True
         
         logger.info(f"[MEDICATION SERVICE] Enhanced and stored {len(enhanced_medications)} medications")
         return enhanced_medications

@@ -29,17 +29,17 @@
 {# Mobile Card Content #}
 {% block mobile_card_content %}
 <div class="result-name fw-bold text-secondary mb-2">
-    {{ item.display_name|default:item.name|default:item.test_name|default:'Laboratory Test' }}
+    {{ item.display_name|default:item.name|default:'Laboratory Test' }}
 </div>
 <div class="small text-muted">
-    {% if item.result %}Result: {{ item.result }} {{ item.unit|default:'' }}{% endif %}
+    {% if item.value %}Result: {{ item.value }} {{ item.unit|default:'' }}{% endif %}
     {% if item.date %} | Date: {{ item.date }}{% endif %}
 </div>
 {% endblock mobile_card_content %}
 
 {# Desktop Table Row Content #}
 {% block table_row_content %}
-<td class="fw-medium">{{ item.display_name|default:item.name|default:item.test_name|default:'Laboratory Test' }}</td>
-<td class="d-none d-lg-table-cell text-muted">{{ item.result|default:'Not specified' }} {{ item.unit|default:'' }}</td>
+<td class="fw-medium">{{ item.display_name|default:item.name|default:'Laboratory Test' }}</td>
+<td class="d-none d-lg-table-cell text-muted">{{ item.value|default:'Not specified' }} {{ item.unit|default:'' }}</td>
 <td class="d-none d-xl-table-cell text-muted">{{ item.date|default:'Not specified' }}</td>
 {% endblock table_row_content %}
