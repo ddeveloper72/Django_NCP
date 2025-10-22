@@ -369,6 +369,19 @@ class CDAViewProcessor:
             if cda_content and cda_content.strip():
                 return cda_content, 'L3'
         
+        # CRITICAL FIX: Check session field names for Diana's data
+        # Diana's session stores CDA content in 'cda_l3_document' and 'cda_document'
+        session_field_mappings = [
+            ('cda_l3_document', 'L3_Session'),
+            ('cda_document', 'Generic_Session')
+        ]
+        
+        for session_field, type_name in session_field_mappings:
+            cda_content = match_data.get(session_field)
+            if cda_content and cda_content.strip() and '<!-- No CDA content available -->' not in cda_content:
+                logger.info(f"[CDA PROCESSOR] Using {type_name} CDA content from session field: {session_field}")
+                return cda_content, type_name
+        
         # Fallback to any available content
         for content_key, type_name in [
             ('l3_cda_content', 'L3'),
@@ -672,13 +685,32 @@ class CDAViewProcessor:
                         # Format healthcare data for template
                         healthcare_data = self._format_healthcare_provider_data(healthcare_provider_data)
                         self.context_builder.add_healthcare_data(context, healthcare_data)
+                        
+                        # CRITICAL FIX: Map healthcare data to expected template variables
+                        context['healthcare_team'] = healthcare_data.get('healthcare_team', [])
+                        context['extended_patient_info'] = {
+                            'practitioners': healthcare_data.get('practitioners', []),
+                            'organizations': healthcare_data.get('organizations', []),
+                            'has_data': len(healthcare_data.get('practitioners', [])) > 0 or len(healthcare_data.get('organizations', [])) > 0
+                        }
+                        
                         logger.info(f"[CDA PROCESSOR] Added healthcare provider data with {len(healthcare_data.get('practitioners', []))} practitioners and {len(healthcare_data.get('organizations', []))} organizations")
+                        logger.info(f"[CDA PROCESSOR] Mapped to template variables - healthcare_team: {len(context['healthcare_team'])} members, extended_patient_info has_data: {context['extended_patient_info']['has_data']}")
                     else:
                         logger.info("[CDA PROCESSOR] No healthcare provider data found in administrative data")
+                        # Set empty data for template consistency
+                        context['healthcare_team'] = []
+                        context['extended_patient_info'] = {'practitioners': [], 'organizations': [], 'has_data': False}
                 else:
                     logger.warning("[CDA PROCESSOR] No administrative data returned from comprehensive service")
+                    # Set empty data for template consistency
+                    context['healthcare_team'] = []
+                    context['extended_patient_info'] = {'practitioners': [], 'organizations': [], 'has_data': False}
             else:
                 logger.warning("[CDA PROCESSOR] No CDA content stored for healthcare provider extraction")
+                # Set empty data for template consistency
+                context['healthcare_team'] = []
+                context['extended_patient_info'] = {'practitioners': [], 'organizations': [], 'has_data': False}
             
             # Add hide flags from parsed_data if available (Enhanced CDA XML Parser path)
             if parsed_data:
