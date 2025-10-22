@@ -1,15 +1,12 @@
 {% load patient_filters %}
 {% load medication_filters %}
-{# Medication Summary Section Template - Professional Medical Display from Main Branch #}
+{# Medication Summary Section Template - Enhanced lxml Parser Only #}
 
 <!-- Medication Summary Section -->
 <div class="medical-section" id="medications-section">
-    {# FIXED: Use section_data directly since medications are passed as section_data from parent template #}
     {% with section_data as med_list %}
     
-    {# For now, let's see what we get without safety limits to debug the data structure #}
-    
-    {# Medications Section using Professional Medical Display Pattern #}
+    {# Medications Section using Enhanced lxml Parser Data Only #}
     {% if med_list and med_list|length > 0 %}
     <div class="clinical-section">
         <div class="collapsible-wrapper">
@@ -30,63 +27,37 @@
                 <div class="content-inner-title">
                     <p class="mb-3 text-muted">Medications: {{ med_list|length }} items found</p>
                     {% for med in med_list %}
-                    {# Enhanced Medication Card - Professional Medical Display #}
+                    {# Enhanced Medication Card - Enhanced lxml Parser Data Only #}
                     <div class="medication-card mb-4 p-4 border rounded shadow-sm bg-white">
                         
-                        {# DEBUG: Show available data structure #}
-                        {% if debug %}
-                        <div class="alert alert-info">
-                            <strong>DEBUG - Medication Data Structure:</strong>
-                            <pre>{{ med|pprint }}</pre>
-                        </div>
-                        {% endif %}
-                        
-                        {# Header Section - Medication Name & Class Codes #}
+                        {# Header Section - Medication Name #}
                         <div class="medication-header mb-3 pb-3 border-bottom">
                             <div class="d-flex flex-wrap align-items-start justify-content-between">
                                 <div class="medication-name-section flex-grow-1 me-3">
                                     <h5 class="medication-name text-primary mb-1 fw-bold">
                                         {% if med.name %}
                                             {{ med.name }}
-                                        {% elif med.display_name %}
-                                            {{ med.display_name }}
                                         {% elif med.medication_name %}
                                             {{ med.medication_name }}
+                                        {% elif med.display_name %}
+                                            {{ med.display_name }}
                                         {% elif med.data.medication_name %}
                                             {{ med.data.medication_name }}
-                                        {% elif med.medication.name %}
-                                            {{ med.medication.name }}
-                                        {% elif med.medication.code.displayName %}
-                                            {{ med.medication.code.displayName }}
                                         {% else %}
                                             Medication Information
                                         {% endif %}
                                     </h5>
-                                    {# Class Codes Display #}
-                                    {% if med.medication.code.code or med.data.medication_code or med.medication_code %}
-                                    <div class="medication-code text-muted small">
-                                        <strong>Class Code:</strong> 
-                                        {% if med.data.medication_code %}
-                                            {{ med.data.medication_code }}
-                                        {% elif med.medication_code %}
-                                            {{ med.medication_code }}
-                                        {% elif med.medication.code.code %}
-                                            {{ med.medication.code.code }}
-                                        {% endif %}
-                                        {% if med.medication.code.codeSystem %}
-                                            <span class="text-muted">{% if med.medication.code.codeSystem == "2.16.840.1.113883.6.96" %}(SNOMED CT){% elif med.medication.code.codeSystem == "2.16.840.1.113883.6.73" %}(ATC){% else %}({{ med.medication.code.codeSystem }}){% endif %}</span>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
                                 </div>
                                 <div class="medication-status-section">
-                                    {% if med.statusCode.code %}
-                                        {% if med.statusCode.code == "active" %}
-                                            <span class="badge bg-success fs-6">Active</span>
-                                        {% elif med.statusCode.code == "completed" %}
-                                            <span class="badge bg-info fs-6">Completed</span>
+                                    {% if med.status %}
+                                        {% if med.status == "Active" %}
+                                            <span class="badge bg-success fs-6">{{ med.status }}</span>
+                                        {% elif med.status == "Completed" %}
+                                            <span class="badge bg-primary fs-6">{{ med.status }}</span>
+                                        {% elif med.status == "Discontinued" %}
+                                            <span class="badge bg-warning fs-6">{{ med.status }}</span>
                                         {% else %}
-                                            <span class="badge bg-secondary fs-6">{{ med.statusCode.code|title }}</span>
+                                            <span class="badge bg-secondary fs-6">{{ med.status }}</span>
                                         {% endif %}
                                     {% else %}
                                         <span class="badge bg-secondary fs-6">Unknown Status</span>
@@ -98,7 +69,7 @@
                         {# Clinical Information Grid #}
                         <div class="row g-3">
                             
-                            {# Active Ingredients with Strength #}
+                            {# Active Ingredients with Strength - Enhanced lxml Parser Only #}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
@@ -106,83 +77,30 @@
                                         <span class="field-label">Active Ingredients [Strength]</span>
                                     </div>
                                     <div class="field-content">
-                                        {% comment %} Enhanced CDA parser data - check enhanced data first {% endcomment %}
-                                        {% if med.active_ingredients and med.active_ingredients != "Not specified" %}
-                                            <div class="field-value fw-bold text-primary">{{ med.active_ingredients }}</div>
-                                        {% elif med.ingredient_display %}
-                                            <div class="field-value fw-bold text-primary">{{ med.ingredient_display }}</div>
-                                        {% elif med.active_ingredients and med.active_ingredients.0.name != "UNKNOWN" %}
+                                        <!-- DEBUG: Show all active ingredient data -->
+                                        <!-- Debug: med.active_ingredient = {{ med.active_ingredient|default:"NULL" }} -->
+                                        <!-- Debug: med.active_ingredients = {{ med.active_ingredients|default:"NULL" }} -->
+                                        <!-- Debug: med.compound_ingredients = {{ med.compound_ingredients|default:"NULL" }} -->
+                                        
+                                        {% if med.compound_ingredients %}
+                                            {# Compound medication with multiple ingredients (e.g., Triapin = ramipril + felodipine) #}
                                             <div class="field-value fw-bold text-primary">
-                                                {% for ingredient in med.active_ingredients %}
-                                                    {{ ingredient.name }}{% if ingredient.strength %} ({{ ingredient.strength }}){% endif %}{% if not forloop.last %}, {% endif %}
+                                                {% for ingredient in med.compound_ingredients %}
+                                                    {{ ingredient.name }}{% if ingredient.strength %} ({{ ingredient.strength }}){% endif %}{% if not forloop.last %} + {% endif %}
                                                 {% endfor %}
                                             </div>
-                                        {% elif med.data.ingredient_display %}
-                                            <div class="medication-field">
-                                                <div class="field-value">
-                                                    {{ med.data.ingredient_display }}
-                                                    {% if med.data.strength %} [{{ med.data.strength }}]
-                                                    {% elif med.data.dose_strength %} [{{ med.data.dose_strength }}]
-                                                    {% elif med.data.active_ingredient_strength %} [{{ med.data.active_ingredient_strength }}]
-                                                    {% endif %}
-                                                </div>
-                                                {% if med.data.ingredient_code %}
-                                                    <div class="field-detail text-muted">
-                                                        <small>Code: {{ med.data.ingredient_code }}</small>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
                                         {% elif med.active_ingredient %}
-                                            <div class="medication-field">
-                                                <div class="field-value">
-                                                    {% if med.active_ingredient.display_name and med.active_ingredient.display_name != med.active_ingredient.code %}
-                                                        {{ med.active_ingredient.display_name }}
-                                                    {% else %}
-                                                        {{ med.active_ingredient.code }}
-                                                    {% endif %}
-                                                    {% if med.strength %} [{{ med.strength }}]
-                                                    {% elif med.dose_strength %} [{{ med.dose_strength }}]
-                                                    {% endif %}
-                                                </div>
-                                                {% if med.active_ingredient.display_name and med.active_ingredient.display_name != med.active_ingredient.code %}
-                                                    <div class="field-detail text-muted">
-                                                        <small>Code: {{ med.active_ingredient.code }}</small>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        {% elif med.ingredient_display or med.active_ingredient_display %}
-                                            <div class="field-value">
-                                                {{ med.ingredient_display|default:med.active_ingredient_display }}
-                                                {% if med.strength %} [{{ med.strength }}]
-                                                {% elif med.dose_strength %} [{{ med.dose_strength }}]
-                                                {% endif %}
-                                            </div>
-                                        {% elif med.substance_display_name %}
-                                            <div class="field-value">
-                                                {{ med.substance_display_name }}
-                                                {% if med.strength %} [{{ med.strength }}]{% endif %}
-                                            </div>
-                                        {% elif med.manufactured_material and med.manufactured_material.ingredient %}
-                                            {% comment %} CDA manufacturedMaterial/ingredient data {% endcomment %}
-                                            <div class="medication-field">
-                                                <div class="field-value">
-                                                    {% if med.manufactured_material.ingredient.substance_name %}
-                                                        {{ med.manufactured_material.ingredient.substance_name }}
-                                                    {% elif med.manufactured_material.ingredient.code.displayName %}
-                                                        {{ med.manufactured_material.ingredient.code.displayName }}
-                                                    {% elif med.manufactured_material.ingredient.code.code %}
-                                                        {{ med.manufactured_material.ingredient.code.code }}
-                                                    {% endif %}
-                                                    {% if med.manufactured_material.ingredient.quantity %}
-                                                        [{{ med.manufactured_material.ingredient.quantity.numerator.value }} {{ med.manufactured_material.ingredient.quantity.numerator.unit }}]
-                                                    {% endif %}
-                                                </div>
-                                                {% if med.manufactured_material.ingredient.code.code %}
-                                                    <div class="field-detail text-muted">
-                                                        <small>Code: {{ med.manufactured_material.ingredient.code.code }}</small>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
+                                            {# Single active ingredient (most common case) #}
+                                            <div class="field-value fw-bold text-primary">{{ med.active_ingredient }}</div>
+                                        {% elif med.active_ingredients.coded %}
+                                            {# Fallback to DotDict structure if present #}
+                                            <div class="field-value fw-bold text-primary">{{ med.active_ingredients.coded }}</div>
+                                        {% elif med.active_ingredients.translated %}
+                                            <div class="field-value fw-bold text-primary">{{ med.active_ingredients.translated }}</div>
+                                        {% elif med.active_ingredients and med.active_ingredients != "Not specified" %}
+                                            <div class="field-value fw-bold text-primary">{{ med.active_ingredients|clean_medication_text }}</div>
+                                        {% elif med.data.active_ingredients %}
+                                            <div class="field-value fw-bold text-primary">{{ med.data.active_ingredients|clean_medication_text }}</div>
                                         {% else %}
                                             <div class="field-value text-muted">Not specified</div>
                                         {% endif %}
@@ -190,68 +108,22 @@
                                 </div>
                             </div>
 
-                            {# Dose Form with Package #}
+                            {# Pharmaceutical Form - Enhanced lxml Parser Only #}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
                                         <i class="fa-solid fa-capsules me-2 text-primary"></i>
-                                        <span class="field-label">Dose Form [Package]</span>
+                                        <span class="field-label">Pharmaceutical Form</span>
                                     </div>
                                     <div class="field-content">
-                                        {% if med.pharmaceutical_form.coded %}
-                                            <div class="medication-field">
-                                                <div class="field-value">{{ med.pharmaceutical_form.coded }}</div>
-                                                {% if med.pharmaceutical_form_code %}
-                                                    <div class="field-detail text-muted">
-                                                        <small>Code: {{ med.pharmaceutical_form_code }}</small>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        {% elif med.pharmaceutical_form %}
+                                        {% if med.pharmaceutical_form and med.pharmaceutical_form != "Not specified" %}
                                             <div class="field-value">{{ med.pharmaceutical_form }}</div>
+                                        {% elif med.pharmaceutical_form.coded %}
+                                            <div class="field-value">{{ med.pharmaceutical_form.coded }}</div>
+                                        {% elif med.pharmaceutical_form.translated %}
+                                            <div class="field-value">{{ med.pharmaceutical_form.translated }}</div>
                                         {% elif med.data.pharmaceutical_form %}
-                                            <div class="medication-field">
-                                                <div class="field-value">
-                                                    {% if med.data.pharmaceutical_form.display_value %}
-                                                        {{ med.data.pharmaceutical_form.display_value }}
-                                                    {% elif med.data.pharmaceutical_form.value %}
-                                                        {{ med.data.pharmaceutical_form.value }}
-                                                    {% else %}
-                                                        {{ med.data.pharmaceutical_form }}
-                                                    {% endif %}
-                                                    {% if med.data.package_size %}
-                                                        {% if med.data.package_size.display_value %} [{{ med.data.package_size.display_value }}]
-                                                        {% elif med.data.package_size.value %} [{{ med.data.package_size.value }}]
-                                                        {% else %} [{{ med.data.package_size }}]
-                                                        {% endif %}
-                                                    {% endif %}
-                                                </div>
-                                                {% if med.data.pharmaceutical_form_code %}
-                                                    <div class="field-detail text-muted">
-                                                        <small>Code: {{ med.data.pharmaceutical_form_code }}</small>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        {% elif med.pharmaceutical_form %}
-                                            <div class="medication-field">
-                                                <div class="field-value">
-                                                    {% if med.pharmaceutical_form.displayName and med.pharmaceutical_form.displayName != med.pharmaceutical_form.code %}
-                                                        {{ med.pharmaceutical_form.displayName }}
-                                                    {% else %}
-                                                        {{ med.pharmaceutical_form.code }}
-                                                    {% endif %}
-                                                    {% if med.package_size %} [{{ med.package_size }}]{% endif %}
-                                                </div>
-                                            </div>
-                                        {% elif med.form %}
-                                            <div class="field-value">
-                                                {{ med.form }}
-                                                {% if med.package_size %} [{{ med.package_size }}]{% endif %}
-                                            </div>
-                                        {% elif med.dose_form %}
-                                            <div class="field-value">{{ med.dose_form }}</div>
-                                        {% elif med.pharmaceutical_form_display %}
-                                            <div class="field-value">{{ med.pharmaceutical_form_display }}</div>
+                                            <div class="field-value">{{ med.data.pharmaceutical_form }}</div>
                                         {% else %}
                                             <div class="field-value text-muted">Not specified</div>
                                         {% endif %}
@@ -259,95 +131,18 @@
                                 </div>
                             </div>
 
-                            {# Dose Quantity #}
+                            {# Strength - Enhanced lxml Parser Only #}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
                                         <i class="fa-solid fa-weight-scale me-2 text-primary"></i>
-                                        <span class="field-label">Dose Quantity</span>
+                                        <span class="field-label">Strength</span>
                                     </div>
                                     <div class="field-content">
-                                        {% comment %} Enhanced CDA parser data - check enhanced data first {% endcomment %}
-                                        {% if med.dose_value and med.dose_unit %}
-                                            <div class="field-value fw-bold text-success">{{ med.dose_value }} {{ med.dose_unit }}</div>
-                                        {% elif med.dose_quantity and med.dose_quantity != "Dose not specified" %}
-                                            <div class="field-value fw-bold text-success">{{ med.dose_quantity }}</div>
-                                        {% elif med.data.dose_quantity and med.data.dose_quantity != "Dose not specified" %}
-                                            <div class="field-value fw-bold text-success">{{ med.data.dose_quantity }}</div>
-                                        {% elif med.dose_quantity.display_value %}
-                                            <div class="field-value fw-bold text-success">{{ med.dose_quantity.display_value }}</div>
-                                        {% elif med.dose_quantity.value %}
-                                            <div class="field-value fw-bold text-success">{{ med.dose_quantity.value }} {{ med.dose_quantity.unit|default:"" }}</div>
-                                        {% elif med.dose.doseQuantity.low and med.dose.doseQuantity.high %}
-                                            {% comment %} CDA doseQuantity with low/high range {% endcomment %}
-                                            <div class="field-value fw-bold text-success">
-                                                {{ med.dose.doseQuantity.low.value }}-{{ med.dose.doseQuantity.high.value }} {{ med.dose.doseQuantity.low.unit|default:"units" }}
-                                            </div>
-                                        {% elif med.dose.doseQuantity.value %}
-                                            <div class="field-value fw-bold text-success">{{ med.dose.doseQuantity.value }} {{ med.dose.doseQuantity.unit|default:"units" }}</div>
-                                        {% elif med.dose.doseQuantity %}
-                                            <div class="field-value fw-bold text-success">{{ med.dose.doseQuantity }}</div>
-                                        {% elif med.doseQuantity.low and med.doseQuantity.high %}
-                                            {% comment %} Direct CDA doseQuantity access {% endcomment %}
-                                            <div class="field-value fw-bold text-success">
-                                                {{ med.doseQuantity.low.value }}-{{ med.doseQuantity.high.value }} {{ med.doseQuantity.low.unit|default:"units" }}
-                                            </div>
-                                        {% elif med.doseQuantity.value %}
-                                            <div class="field-value fw-bold text-success">{{ med.doseQuantity.value }} {{ med.doseQuantity.unit|default:"units" }}</div>
-                                        {% elif med.dose.value %}
-                                            <div class="field-value fw-bold text-success">{{ med.dose.value }} {{ med.dose.unit|default:"" }}</div>
-                                        {% elif med.dose_amount %}
-                                            <div class="field-value fw-bold text-success">{{ med.dose_amount }}</div>
-                                        {% elif med.units_per_intake %}
-                                            <div class="field-value fw-bold text-success">{{ med.units_per_intake }}</div>
-                                        {% else %}
-                                            <div class="field-value text-muted">Dose not specified</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {# Dosage (Frequency/Schedule) #}
-                            <div class="col-lg-6">
-                                <div class="field-group">
-                                    <div class="field-header">
-                                        <i class="fa-solid fa-clock me-2 text-primary"></i>
-                                        <span class="field-label">Dosage Frequency</span>
-                                    </div>
-                                    <div class="field-content">
-                                        {% comment %} Enhanced CDA parser data - check enhanced data first {% endcomment %}
-                                        {% if med.schedule and med.schedule != "Schedule not specified" %}
-                                            <div class="field-value">{{ med.schedule }}</div>
-                                        {% elif med.frequency and med.frequency != "Schedule not specified" %}
-                                            <div class="field-value">{{ med.frequency }}</div>
-                                        {% elif med.dosage_frequency and med.dosage_frequency != "Schedule not specified" %}
-                                            <div class="field-value">{{ med.dosage_frequency }}</div>
-                                        {% elif med.schedule.coded %}
-                                            <div class="field-value">{{ med.schedule.coded }}</div>
-                                        {% elif med.data.dosage_instructions %}
-                                            <div class="field-value">
-                                                {% if med.data.dosage_instructions.display_value %}
-                                                    {{ med.data.dosage_instructions.display_value }}
-                                                {% elif med.data.dosage_instructions.value %}
-                                                    {{ med.data.dosage_instructions.value }}
-                                                {% else %}
-                                                    {{ med.data.dosage_instructions }}
-                                                {% endif %}
-                                            </div>
-                                        {% elif med.data.frequency_display %}
-                                            <div class="field-value">
-                                                {% if med.data.frequency_display.display_value %}
-                                                    {{ med.data.frequency_display.display_value }}
-                                                {% elif med.data.frequency_display.value %}
-                                                    {{ med.data.frequency_display.value }}
-                                                {% else %}
-                                                    {{ med.data.frequency_display }}
-                                                {% endif %}
-                                            </div>
-                                        {% elif med.dosage %}
-                                            <div class="field-value">{{ med.dosage }}</div>
-                                        {% elif med.frequency_display %}
-                                            <div class="field-value">{{ med.frequency_display }}</div>
+                                        {% if med.strength and med.strength != "-" %}
+                                            <div class="field-value fw-bold text-success">{{ med.strength }}</div>
+                                        {% elif med.data.strength and med.data.strength != "-" %}
+                                            <div class="field-value fw-bold text-success">{{ med.data.strength }}</div>
                                         {% else %}
                                             <div class="field-value text-muted">Not specified</div>
                                         {% endif %}
@@ -355,138 +150,7 @@
                                 </div>
                             </div>
 
-                            {# Time (Start/Finish) #}
-                            <div class="col-lg-6">
-                                <div class="field-group">
-                                    <div class="field-header">
-                                        <i class="fa-solid fa-calendar-alt me-2 text-primary"></i>
-                                        <span class="field-label">Treatment Period</span>
-                                    </div>
-                                    <div class="field-content">
-                                        {% comment %} Enhanced CDA parser data - check enhanced data first {% endcomment %}
-                                        {% if med.period and med.period != "Treatment timing not specified" %}
-                                            <div class="time-range">
-                                                <span class="start-date">
-                                                    <i class="fa-solid fa-calendar text-success me-1"></i>
-                                                    <strong>{{ med.period }}</strong>
-                                                </span>
-                                            </div>
-                                        {% elif med.treatment_period and med.treatment_period != "Treatment timing not specified" %}
-                                            <div class="time-range">
-                                                <span class="start-date">
-                                                    <i class="fa-solid fa-calendar text-success me-1"></i>
-                                                    <strong>{{ med.treatment_period }}</strong>
-                                                </span>
-                                            </div>
-                                        {% elif med.start_date %}
-                                            <div class="time-range">
-                                                <span class="start-date">
-                                                    <i class="fa-solid fa-play text-success me-1"></i>
-                                                    <strong>Start:</strong> {{ med.start_date }}
-                                                </span>
-                                                {% if med.end_date %}
-                                                    <br>
-                                                    <span class="end-date mt-1 d-inline-block">
-                                                        <i class="fa-solid fa-stop text-warning me-1"></i>
-                                                        <strong>End:</strong> {{ med.end_date }}
-                                                    </span>
-                                                {% else %}
-                                                    <br>
-                                                    <span class="ongoing-treatment text-success mt-1 d-inline-block">
-                                                        <i class="fa-solid fa-infinity me-1"></i>
-                                                        <em>Ongoing treatment</em>
-                                                    </span>
-                                                {% endif %}
-                                            </div>
-                                        {% elif med.effective_time.low_formatted %}
-                                            <div class="time-range">
-                                                <span class="start-date">
-                                                    <i class="fa-solid fa-play text-success me-1"></i>
-                                                    <strong>Start:</strong> {{ med.effective_time.low_formatted }}
-                                                </span>
-                                                {% if med.effective_time.high_formatted %}
-                                                    <br>
-                                                    <span class="end-date mt-1 d-inline-block">
-                                                        <i class="fa-solid fa-stop text-warning me-1"></i>
-                                                        <strong>End:</strong> {{ med.effective_time.high_formatted }}
-                                                    </span>
-                                                {% else %}
-                                                    <br>
-                                                    <span class="ongoing-treatment text-success mt-1 d-inline-block">
-                                                        <i class="fa-solid fa-infinity me-1"></i>
-                                                        <em>Ongoing treatment</em>
-                                                    </span>
-                                                {% endif %}
-                                            </div>
-                                            <div class="time-range">
-                                                <span class="start-date">
-                                                    <i class="fa-solid fa-play text-success me-1"></i>
-                                                    <strong>Start:</strong> {{ med.start_date }}
-                                                </span>
-                                                {% if med.end_date %}
-                                                    <br>
-                                                    <span class="end-date mt-1 d-inline-block">
-                                                        <i class="fa-solid fa-stop text-warning me-1"></i>
-                                                        <strong>End:</strong> {{ med.end_date }}
-                                                    </span>
-                                                {% else %}
-                                                    <br>
-                                                    <span class="ongoing-treatment text-success mt-1 d-inline-block">
-                                                        <i class="fa-solid fa-infinity me-1"></i>
-                                                        <em>Ongoing treatment</em>
-                                                    </span>
-                                                {% endif %}
-                                            </div>
-                                        {% elif med.data.start_date or med.data.end_date %}
-                                            <div class="time-range">
-                                                {% if med.data.start_date %}
-                                                    <span class="start-date">
-                                                        <i class="fa-solid fa-play text-success me-1"></i>
-                                                        <strong>Start:</strong> {{ med.data.start_date }}
-                                                    </span>
-                                                {% endif %}
-                                                {% if med.data.end_date %}
-                                                    <br>
-                                                    <span class="end-date mt-1 d-inline-block">
-                                                        <i class="fa-solid fa-stop text-warning me-1"></i>
-                                                        <strong>End:</strong> {{ med.data.end_date }}
-                                                    </span>
-                                                {% elif med.data.start_date %}
-                                                    <br>
-                                                    <span class="ongoing-treatment text-success mt-1 d-inline-block">
-                                                        <i class="fa-solid fa-infinity me-1"></i>
-                                                        <em>Ongoing treatment</em>
-                                                    </span>
-                                                {% endif %}
-                                            </div>
-                                        {% elif med.effective_time.low_formatted %}
-                                            <div class="time-range">
-                                                <span class="start-date">
-                                                    <i class="fa-solid fa-play text-success me-1"></i>
-                                                    <strong>Start:</strong> {{ med.effective_time.low_formatted }}
-                                                </span>
-                                                {% if med.effective_time.high_formatted %}
-                                                    <br>
-                                                    <span class="end-date mt-1 d-inline-block">
-                                                        <i class="fa-solid fa-stop text-warning me-1"></i>
-                                                        <strong>End:</strong> {{ med.effective_time.high_formatted }}
-                                                    </span>
-                                                {% else %}
-                                                    <br>
-                                                    <span class="ongoing-treatment text-success mt-1 d-inline-block">
-                                                        <i class="fa-solid fa-infinity me-1"></i>
-                                                        <em>Ongoing treatment</em>
-                                                    </span>
-                                                {% endif %}
-                                            </div>
-                                        {% else %}
-                                            <div class="field-value text-muted">Treatment period not specified</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {# Route of Administration #}
+                            {# Route - Enhanced lxml Parser Only #}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
@@ -494,109 +158,102 @@
                                         <span class="field-label">Route of Administration</span>
                                     </div>
                                     <div class="field-content">
-                                        {% comment %} Enhanced CDA parser data - check enhanced data first {% endcomment %}
-                                        {% if med.route_display and med.route_display != "Administration route not specified" %}
-                                            <div class="field-value">
-                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route_display }}</span>
-                                            </div>
-                                        {% elif med.administration_route and med.administration_route != "Administration route not specified" %}
-                                            <div class="field-value">
-                                                <span class="badge bg-warning text-dark fw-normal">{{ med.administration_route }}</span>
-                                            </div>
-                                        {% elif med.route and med.route != "Administration route not specified" %}
-                                            <div class="field-value">
-                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route }}</span>
-                                            </div>
-                                        {% elif med.route.coded %}
-                                            <div class="field-value">
-                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route.coded }}</span>
-                                            </div>
-                                        {% elif med.data.route_display %}
-                                            <div class="field-value">
-                                                <span class="badge bg-warning text-dark fw-normal">{{ med.data.route_display }}</span>
-                                            </div>
-                                        {% elif med.routeCode.displayName %}
-                                            {% comment %} CDA routeCode data {% endcomment %}
-                                            <div class="field-value">
-                                                <span class="badge bg-warning text-dark fw-normal">{{ med.routeCode.displayName }}</span>
-                                                <div class="field-detail text-muted mt-1">
-                                                    <small>Code: {{ med.routeCode.code }}</small>
-                                                </div>
-                                            </div>
-                                        {% elif med.routeCode.code %}
-                                            <div class="field-value">
-                                                <span class="badge bg-warning text-dark fw-normal">{{ med.routeCode.code }}</span>
-                                            </div>
-                                        {% elif med.routeCode %}
-                                            <div class="field-value">
-                                                <span class="badge bg-warning text-dark fw-normal">{{ med.routeCode }}</span>
-                                            </div>
+                                        {% if med.route and med.route != "Administration route not specified" and med.route != "Not specified" %}
+                                            <div class="field-value">{{ med.route }}</div>
+                                        {% elif med.route.coded and med.route.coded != "Administration route not specified" and med.route.coded != "Not specified" %}
+                                            <div class="field-value">{{ med.route.coded }}</div>
+                                        {% elif med.route.translated and med.route.translated != "Administration route not specified" and med.route.translated != "Not specified" %}
+                                            <div class="field-value">{{ med.route.translated }}</div>
+                                        {% elif med.data.route and med.data.route != "Administration route not specified" and med.data.route != "Not specified" %}
+                                            <div class="field-value">{{ med.data.route }}</div>
                                         {% else %}
-                                            <div class="field-value text-muted">Administration route not specified</div>
+                                            <div class="field-value text-muted">Not available in source document</div>
                                         {% endif %}
                                     </div>
                                 </div>
                             </div>
 
-                            {# Medical Reason #}
+                            {# Dosage Schedule - Enhanced lxml Parser Only #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-clock me-2 text-primary"></i>
+                                        <span class="field-label">Schedule</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if med.schedule and med.schedule != "Schedule not specified" and med.schedule != "Not specified" %}
+                                            <div class="field-value">{{ med.schedule }}</div>
+                                        {% elif med.schedule.coded and med.schedule.coded != "Schedule not specified" and med.schedule.coded != "Not specified" %}
+                                            <div class="field-value">{{ med.schedule.coded }}</div>
+                                        {% elif med.schedule.translated and med.schedule.translated != "Schedule not specified" and med.schedule.translated != "Not specified" %}
+                                            <div class="field-value">{{ med.schedule.translated }}</div>
+                                        {% elif med.data.schedule and med.data.schedule != "Schedule not specified" and med.data.schedule != "Not specified" %}
+                                            <div class="field-value">{{ med.data.schedule }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not available in source document</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Medical Indication - Enhanced lxml Parser Only #}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
                                         <i class="fa-solid fa-stethoscope me-2 text-primary"></i>
-                                        <span class="field-label">Medical Reason</span>
+                                        <span class="field-label">Medical Indication</span>
                                     </div>
                                     <div class="field-content">
-                                        {% comment %} Enhanced CDA Data Mapping for Medical Reason {% endcomment %}
-                                        {% if med.data.medical_reason %}
-                                            <div class="field-value">{{ med.data.medical_reason }}</div>
-                                        {% elif med.medical_reason %}
-                                            <div class="field-value">{{ med.medical_reason }}</div>
-                                        {% elif med.indication %}
+                                        {% if med.indication and med.indication != "Indication not specified" and med.indication != "Medical indication not specified in available data" and med.indication != "Not specified" %}
                                             <div class="field-value">{{ med.indication }}</div>
-                                        {% elif med.reason %}
-                                            <div class="field-value">{{ med.reason }}</div>
-                                        {% elif med.entryRelationship.observation.value.displayName %}
-                                            {% comment %} CDA entryRelationship/observation data {% endcomment %}
-                                            <div class="field-value">{{ med.entryRelationship.observation.value.displayName }}</div>
-                                            <div class="field-detail text-muted mt-1">
-                                                <small>Code: {{ med.entryRelationship.observation.value.code }}</small>
-                                            </div>
-                                        {% elif med.entryRelationship.observation.value.code %}
-                                            <div class="field-value">{{ med.entryRelationship.observation.value.code }}</div>
-                                        {% elif med.entryRelationship %}
-                                            <div class="field-value">{{ med.entryRelationship }}</div>
-                                        {% elif med.notes or med.note_text %}
-                                            <div class="field-value">
-                                                {{ med.note_text|default:med.notes }}
-                                            </div>
+                                        {% elif med.data.indication and med.data.indication != "Medical indication not specified in available data" and med.data.indication != "Not specified" %}
+                                            <div class="field-value">{{ med.data.indication }}</div>
                                         {% else %}
-                                            <div class="field-value text-muted">Medical indication not specified in available data</div>
+                                            <div class="field-value text-muted">Not available in source document</div>
                                         {% endif %}
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {# Additional Information & Summary #}
-                        {% if med.data.medication_summary or med.medication_summary or med.notes or med.note_text %}
-                        <div class="medication-summary mt-3 pt-3 border-top">
-                            <div class="field-header mb-2">
-                                <i class="fa-solid fa-info-circle me-2 text-info"></i>
-                                <span class="field-label">Additional Information</span>
+                            {# Treatment Period - Enhanced lxml Parser Only #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-calendar me-2 text-primary"></i>
+                                        <span class="field-label">Treatment Period</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if med.start_date %}
+                                            <div class="field-value">Started: {{ med.start_date }}</div>
+                                        {% elif med.data.period and med.data.period != "Treatment timing not specified" and med.data.period != "Not specified" %}
+                                            <div class="field-value">{{ med.data.period }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not available in source document</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="field-content">
-                                {% if med.data.medication_summary %}
-                                    <div class="field-value">{{ med.data.medication_summary }}</div>
-                                {% elif med.medication_summary %}
-                                    <div class="field-value">{{ med.medication_summary }}</div>
-                                {% elif med.note_text %}
-                                    <div class="field-value">{{ med.note_text }}</div>
-                                {% elif med.notes %}
-                                    <div class="field-value">{{ med.notes }}</div>
-                                {% endif %}
+
+                            {# Dose Quantity - Enhanced lxml Parser Only #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-pills me-2 text-primary"></i>
+                                        <span class="field-label">Dose Quantity</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if med.dose_quantity and med.dose_quantity != "Dose not specified" and med.dose_quantity != "Not specified" %}
+                                            <div class="field-value fw-bold text-success">{{ med.dose_quantity }}</div>
+                                        {% elif med.data.dose_quantity and med.data.dose_quantity != "Dose not specified" and med.data.dose_quantity != "Not specified" %}
+                                            <div class="field-value fw-bold text-success">{{ med.data.dose_quantity }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not available in source document</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
+
                         </div>
-                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
