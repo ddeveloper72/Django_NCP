@@ -1,0 +1,73 @@
+{% load patient_filters %}
+{# Base Clinical Section Template - Inherited by all clinical sections #}
+{# 
+   Variables expected:
+   - section_data: List of clinical items from pipeline services
+   - section_title: Display title (e.g., "Medications", "Allergies")
+   - section_icon: FontAwesome icon class (e.g., "fa-pills", "fa-triangle-exclamation")
+   - section_id: HTML ID for the section (e.g., "medications", "allergies")
+   - badge_color: CSS class for badge color (e.g., "populated", "warning", "info")
+#}
+
+<!-- {{ section_title }} Section -->
+<div class="medical-section" id="{{ section_id }}-section">
+    {% if section_data and section_data|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-{{ section_id }}" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-{{ section_id }}" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="{{ section_icon }} me-2"></i>
+                        <span>{{ section_title }}</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge {{ badge_color }}">{{ section_data|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">{{ section_title }}: {{ section_data|length }} items found</p>
+                    
+                    {# Block for section-specific item rendering #}
+                    {% block section_items %}
+                    {# This block should be overridden by child templates #}
+                    {% endblock %}
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    {# Empty state #}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-{{ section_id }}" class="toggle-input" type="checkbox">
+            <label for="toggle-{{ section_id }}" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="{{ section_icon }} me-2"></i>
+                        <span>{{ section_title }}</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge empty">No Data</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">No {{ section_title|lower }} data available</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{# Block for section-specific field rendering helpers #}
+{% block field_helpers %}
+{# Field group helper - can be overridden or used as-is #}
+{% endblock %}
