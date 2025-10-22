@@ -5,8 +5,7 @@
     
     {# Medications Section #}
     {% if medications and medications|length > 0 %}
-                        <!-- Use enhanced card-based template with working data access patterns -->
-                {% include 'patient_data/sections/medication_section_fresh.html' with section_data=medications %}
+        {% include 'patient_data/sections/medication_section.html' with section_data=medications section_count=medications|length section_type='medications' section_title='Medications' %}
     {% endif %}
     
     {# Medical Problems/Conditions Section #}

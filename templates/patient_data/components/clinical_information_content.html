@@ -302,14 +302,14 @@
                                                         
                                                         {# Active Ingredient Column #}
                                                         <td class="ingredient-cell">
-                                                            {% if med.data.ingredient_display %}
-                                                                <span class="badge bg-success text-wrap fw-normal">{{ med.data.ingredient_display }}</span>
-                                                            {% elif med.active_ingredients.translated %}
+                                                            {% if med.active_ingredients.translated %}
                                                                 <span class="badge bg-success text-wrap fw-normal">{{ med.active_ingredients.translated }}</span>
                                                             {% elif med.active_ingredients.coded %}
                                                                 <span class="badge bg-success text-wrap fw-normal">{{ med.active_ingredients.coded }}</span>
                                                             {% elif med.active_ingredients %}
                                                                 <span class="badge bg-success text-wrap fw-normal">{{ med.active_ingredients }}</span>
+                                                            {% elif med.data.ingredient_display %}
+                                                                <span class="badge bg-success text-wrap fw-normal">{{ med.data.ingredient_display }}</span>
                                                             {% else %}
                                                                 <span class="text-muted">Not specified</span>
                                                             {% endif %}
@@ -317,18 +317,18 @@
                                                         
                                                         {# Pharmaceutical Form Column #}
                                                         <td class="form-cell">
-                                                            {% if med.data.pharmaceutical_form %}
-                                                                <span class="badge bg-info text-wrap fw-normal">{{ med.data.pharmaceutical_form }}</span>
-                                                            {% elif med.pharmaceutical_form.display_value %}
-                                                                <span class="badge bg-info text-wrap fw-normal">{{ med.pharmaceutical_form.display_value }}</span>
-                                                            {% elif med.pharmaceutical_form.value %}
-                                                                <span class="badge bg-info text-wrap fw-normal">{{ med.pharmaceutical_form.value }}</span>
-                                                            {% elif med.pharmaceutical_form.translated %}
+                                                            {% if med.pharmaceutical_form.translated %}
                                                                 <span class="badge bg-info text-wrap fw-normal">{{ med.pharmaceutical_form.translated }}</span>
                                                             {% elif med.pharmaceutical_form.coded %}
                                                                 <span class="badge bg-info text-wrap fw-normal">{{ med.pharmaceutical_form.coded }}</span>
                                                             {% elif med.pharmaceutical_form %}
                                                                 <span class="badge bg-info text-wrap fw-normal">{{ med.pharmaceutical_form }}</span>
+                                                            {% elif med.data.pharmaceutical_form %}
+                                                                <span class="badge bg-info text-wrap fw-normal">{{ med.data.pharmaceutical_form }}</span>
+                                                            {% elif med.pharmaceutical_form.display_value %}
+                                                                <span class="badge bg-info text-wrap fw-normal">{{ med.pharmaceutical_form.display_value }}</span>
+                                                            {% elif med.pharmaceutical_form.value %}
+                                                                <span class="badge bg-info text-wrap fw-normal">{{ med.pharmaceutical_form.value }}</span>
                                                             {% else %}
                                                                 <span class="text-muted">Not specified</span>
                                                             {% endif %}
@@ -336,14 +336,16 @@
                                                         
                                                         {# Dosage Column #}
                                                         <td class="dosage-cell">
-                                                            {% if med.data.dose_quantity %}
+                                                            {% if med.dose_quantity %}
+                                                                <span class="fw-bold text-success">{{ med.dose_quantity }}</span>
+                                                            {% elif med.strength %}
+                                                                <span class="fw-bold text-success">{{ med.strength }}</span>
+                                                            {% elif med.data.dose_quantity %}
                                                                 <span class="fw-bold text-success">{{ med.data.dose_quantity }}</span>
                                                             {% elif med.dose_quantity.display_value %}
                                                                 <span class="fw-bold text-success">{{ med.dose_quantity.display_value }}</span>
                                                             {% elif med.dose_quantity.value %}
                                                                 <span class="fw-bold text-success">{{ med.dose_quantity.value }}</span>
-                                                            {% elif med.dose_quantity %}
-                                                                <span class="fw-bold text-success">{{ med.dose_quantity }}</span>
                                                             {% elif med.dose.value %}
                                                                 <span class="fw-bold text-success">{{ med.dose.value }} {{ med.dose.unit|default:"" }}</span>
                                                             {% else %}
@@ -353,7 +355,13 @@
                                                         
                                                         {# Administration Route Column #}
                                                         <td class="route-cell">
-                                                            {% if med.data.route_display %}
+                                                            {% if med.route.translated %}
+                                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route.translated }}</span>
+                                                            {% elif med.route.coded %}
+                                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route.coded }}</span>
+                                                            {% elif med.route %}
+                                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route }}</span>
+                                                            {% elif med.data.route_display %}
                                                                 <span class="badge bg-warning text-dark fw-normal">{{ med.data.route_display }}</span>
                                                             {% elif med.route.display_value %}
                                                                 <span class="badge bg-warning text-dark fw-normal">{{ med.route.display_value }}</span>
@@ -361,12 +369,6 @@
                                                                 <span class="badge bg-warning text-dark fw-normal">{{ med.route.value }}</span>
                                                             {% elif med.route.displayName %}
                                                                 <span class="badge bg-warning text-dark fw-normal">{{ med.route.displayName }}</span>
-                                                            {% elif med.route.translated %}
-                                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route.translated }}</span>
-                                                            {% elif med.route.coded %}
-                                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route.coded }}</span>
-                                                            {% elif med.route %}
-                                                                <span class="badge bg-warning text-dark fw-normal">{{ med.route }}</span>
                                                             {% else %}
                                                                 <span class="badge bg-warning text-dark fw-normal">Administration route not specified</span>
                                                             {% endif %}
@@ -374,18 +376,18 @@
                                                         
                                                         {# Frequency Column #}
                                                         <td class="frequency-cell">
-                                                            {% if med.data.frequency_display %}
-                                                                <span class="badge bg-secondary text-wrap fw-normal">{{ med.data.frequency_display }}</span>
-                                                            {% elif med.schedule.display_value %}
-                                                                <span class="badge bg-secondary text-wrap fw-normal">{{ med.schedule.display_value }}</span>
-                                                            {% elif med.schedule.value %}
-                                                                <span class="badge bg-secondary text-wrap fw-normal">{{ med.schedule.value }}</span>
-                                                            {% elif med.schedule.translated %}
+                                                            {% if med.schedule.translated %}
                                                                 <span class="badge bg-secondary text-wrap fw-normal">{{ med.schedule.translated }}</span>
                                                             {% elif med.schedule.coded %}
                                                                 <span class="badge bg-secondary text-wrap fw-normal">{{ med.schedule.coded }}</span>
                                                             {% elif med.schedule %}
                                                                 <span class="badge bg-secondary text-wrap fw-normal">{{ med.schedule }}</span>
+                                                            {% elif med.data.frequency_display %}
+                                                                <span class="badge bg-secondary text-wrap fw-normal">{{ med.data.frequency_display }}</span>
+                                                            {% elif med.schedule.display_value %}
+                                                                <span class="badge bg-secondary text-wrap fw-normal">{{ med.schedule.display_value }}</span>
+                                                            {% elif med.schedule.value %}
+                                                                <span class="badge bg-secondary text-wrap fw-normal">{{ med.schedule.value }}</span>
                                                             {% else %}
                                                                 <span class="badge bg-secondary text-wrap fw-normal">Schedule not specified</span>
                                                             {% endif %}
