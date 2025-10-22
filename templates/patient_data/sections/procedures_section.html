@@ -1,53 +1,89 @@
+{% extends 'patient_data/sections/base_clinical_section.html' %}
 {% load patient_filters %}
-{# Procedures Section Template #}
 
-<div class="medical-section" id="procedures-section">
-    {# Check if we have procedures data passed directly #}
-    {% if section_entries and section_entries|length > 0 %}
-        {# Procedures Display - Direct Data #}
-        <div class="clinical-table">
-            {# Mobile Card Layout for Procedures #}
-            <div class="d-block d-md-none">
-                <div class="clinical-cards-container">
-                    {% for procedure in section_entries %}
-                    <div class="card clinical-card mb-3 border-info">
-                        <div class="card-body">
-                            <div class="clinical-field mb-2 primary-field-mobile">
-                                <div class="field-label d-flex align-items-center mb-1">
-                                    <strong class="text-muted small">Procedure</strong>
-                                    <i class="fa-solid fa-user-md ms-1 terminology-indicator text-muted" title="Procedure"></i>
-                                </div>
-                                <div class="field-value">
-                                    <strong class="text-info">{{ procedure.name|default:procedure.display_name|default:procedure.procedure_name|default:"Procedure" }}</strong>
-                                    {% if procedure.code %}
-                                    <div class="medical-terminology">
-                                        <span class="terminology-display">
-                                            <span class="terminology-code">{{ procedure.code }}</span>
-                                            <span class="terminology-system text-muted">{{ procedure.coding_system|default:"" }}</span>
-                                        </span>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            
-                            {% if procedure.status %}
-                            <div class="clinical-field mb-2">
-                                <div class="field-label">
-                                    <strong class="text-muted small">Status</strong>
-                                    <i class="fa-solid fa-check-circle ms-1 terminology-indicator text-muted" title="Status"></i>
-                                </div>
-                                <div class="field-value">
-                                    <span class="status-badge status-{{ procedure.status|lower }}">{{ procedure.status|title }}</span>
-                                </div>
-                            </div>
-                            {% endif %}
-                            
-                            {% if procedure.date or procedure.effective_time %}
-                            <div class="clinical-field mb-2">
-                                <div class="field-label">
-                                    <strong class="text-muted small">Date</strong>
-                                    <i class="fa-solid fa-calendar ms-1 terminology-indicator text-muted" title="Procedure Date"></i>
-                                </div>
+{% block section_content %}
+{# Procedures Section Template - Enhanced Pipeline Data #}
+
+{% if section_data %}
+    {% for procedure in section_data %}
+    <div class="field-group">
+        <div class="field-group-header">
+            <div class="field-primary">
+                <i class="fas fa-user-md me-2" style="color: var(--primary-color);"></i>
+                <span class="field-title">{{ procedure.display_name|default:procedure.name|default:"Procedure" }}</span>
+                {% if procedure.status %}
+                <span class="clinical-badge status-{{ procedure.status|slugify }}">{{ procedure.status }}</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="field-group-content">
+            {% if procedure.description %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Description
+                </div>
+                <div class="field-value">{{ procedure.description }}</div>
+            </div>
+            {% endif %}
+            
+            {% if procedure.date or procedure.effective_time %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-calendar me-1"></i>
+                    Date
+                </div>
+                <div class="field-value">{{ procedure.date|default:procedure.effective_time|date:"M d, Y" }}</div>
+            </div>
+            {% endif %}
+            
+            {% if procedure.site %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-location-dot me-1"></i>
+                    Site
+                </div>
+                <div class="field-value">{{ procedure.site }}</div>
+            </div>
+            {% endif %}
+            
+            {% if procedure.performer %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-user-doctor me-1"></i>
+                    Performer
+                </div>
+                <div class="field-value">{{ procedure.performer }}</div>
+            </div>
+            {% endif %}
+            
+            {% if procedure.code or procedure.coding_system %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-code me-1"></i>
+                    Code
+                </div>
+                <div class="field-value">
+                    {% if procedure.code %}
+                    <span class="medical-code">{{ procedure.code }}</span>
+                    {% if procedure.coding_system %}
+                    <span class="text-muted ms-1">({{ procedure.coding_system }})</span>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="no-data-message">
+        <i class="fas fa-user-md me-2"></i>
+        No procedure information available
+    </div>
+{% endif %}
+{% endblock %}
                                 <div class="field-value">
                                     <span class="text-secondary">{{ procedure.date|default:procedure.effective_time|date:"M d, Y" }}</span>
                                 </div>
