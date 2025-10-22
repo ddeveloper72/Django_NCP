@@ -3558,50 +3558,6 @@ def cda_translation_toggle(request, patient_id):
         show_translation = data.get("show_translation", True)
         target_language = data.get("target_language", "en")
 
-        # Placeholder implementation
-        return JsonResponse(
-            {
-                "success": True,
-                "message": "Function temporarily disabled during refactoring",
-            }
-        )
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
-
-
-@login_required
-@require_http_methods(["POST"])
-def cda_translation_toggle(request, patient_id):
-    """AJAX endpoint for toggling CDA translation sections"""
-    try:
-        data = json.loads(request.body)
-        section_id = data.get("section_id")
-        show_translation = data.get("show_translation", True)
-        target_language = data.get("target_language", "en")
-
-        # Placeholder implementation
-        return JsonResponse(
-            {
-                "success": True,
-                "message": "Function temporarily disabled during refactoring",
-            }
-        )
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
-
-
-@login_required
-@require_http_methods(["POST"])
-def cda_translation_toggle(request, patient_id):
-    """AJAX endpoint for toggling CDA translation sections"""
-    try:
-        data = json.loads(request.body)
-        section_id = data.get("section_id")
-        show_translation = data.get("show_translation", True)
-        target_language = data.get("target_language", "en")
-
         # Get patient data and CDA content
         patient_data = PatientData.objects.get(id=patient_id)
         match_data = request.session.get(f"patient_match_{patient_id}")
