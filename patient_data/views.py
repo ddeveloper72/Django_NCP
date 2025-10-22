@@ -3072,14 +3072,31 @@ def patient_details_view(request, patient_id):
                 }
             )
             
-            # ENHANCED MEDICATIONS: Check for enhanced medications in session and override if available
-            enhanced_medications = request.session.get('enhanced_medications')
-            if enhanced_medications:
-                logger.info(f"[ENHANCED_MEDICATIONS] Found {len(enhanced_medications)} enhanced medications in session, overriding clinical arrays")
-                context["medications"] = enhanced_medications
-                logger.info(f"[ENHANCED_MEDICATIONS] First medication: {enhanced_medications[0].get('medication_name', 'Unknown')} - Dose: {enhanced_medications[0].get('dose_quantity', 'N/A')}")
+            # ENHANCED MEDICATIONS: Check if enhanced medications already in context (from CDA processor), 
+            # otherwise check session for enhanced medications and override if available
+            if 'medications' in context and len(context['medications']) > 0:
+                # Check if first medication has enhanced data structure (from CDA processor)
+                first_med = context['medications'][0]
+                if 'data' in first_med and isinstance(first_med['data'], dict):
+                    logger.info(f"[ENHANCED_MEDICATIONS] Using {len(context['medications'])} enhanced medications already in context from CDA processor")
+                    logger.info(f"[ENHANCED_MEDICATIONS] First medication: {first_med.get('data', {}).get('medication_name', {}).get('value', 'Unknown')}")
+                else:
+                    # Fallback to session-based enhanced medications
+                    enhanced_medications = request.session.get('enhanced_medications')
+                    if enhanced_medications:
+                        logger.info(f"[ENHANCED_MEDICATIONS] Found {len(enhanced_medications)} enhanced medications in session, overriding clinical arrays")
+                        context["medications"] = enhanced_medications
+                        logger.info(f"[ENHANCED_MEDICATIONS] First medication: {enhanced_medications[0].get('medication_name', 'Unknown')} - Dose: {enhanced_medications[0].get('dose_quantity', 'N/A')}")
+                    else:
+                        logger.info("[ENHANCED_MEDICATIONS] No enhanced medications found in session, using clinical arrays")
             else:
-                logger.info("[ENHANCED_MEDICATIONS] No enhanced medications found in session, using clinical arrays")
+                # No medications in context, check session
+                enhanced_medications = request.session.get('enhanced_medications')
+                if enhanced_medications:
+                    logger.info(f"[ENHANCED_MEDICATIONS] Found {len(enhanced_medications)} enhanced medications in session")
+                    context["medications"] = enhanced_medications
+                else:
+                    logger.info("[ENHANCED_MEDICATIONS] No enhanced medications found in context or session")
             
             # PHASE 3B: Add administrative and healthcare data to context for Healthcare Team & Contacts tab
             context.update({
