@@ -2657,43 +2657,23 @@ class CDAViewProcessor:
                                     logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Row {i} FIXED active_ingredients.translated: '{old_translated}' -> '{medication_name}' ***")
                                     
                                     # CRITICAL FIX: Properly map CDA data structure instead of looking for .value
-                                    # Extract dose quantity from CDA structure: {'low': {'value': '1'}, 'high': {'value': '2'}}
-                                    dose_quantity_str = 'Dose not specified'
-                                    dose_data = med_data.get('dose_quantity', {})
-                                    if isinstance(dose_data, dict):
-                                        low_val = dose_data.get('low', {}).get('value') if isinstance(dose_data.get('low'), dict) else None
-                                        high_val = dose_data.get('high', {}).get('value') if isinstance(dose_data.get('high'), dict) else None
-                                        if low_val and high_val:
-                                            dose_quantity_str = f"{low_val}-{high_val}"
-                                        elif low_val:
-                                            dose_quantity_str = str(low_val)
-                                        elif dose_data.get('value'):  # Fallback to direct value
-                                            dose_quantity_str = str(dose_data['value'])
-                                    
-                                    # Extract route from CDA structure: {'code': '20053000', 'display_name': 'Oral use'}
-                                    route_str = 'Administration route not specified'
-                                    route_data = med_data.get('route', {})
-                                    if isinstance(route_data, dict):
-                                        route_str = route_data.get('display_name') or route_data.get('translated') or route_data.get('value', route_str)
-                                    
-                                    # Extract schedule from CDA structure: {'code': 'ACM', 'display_name': 'Morning'}  
-                                    schedule_str = 'Schedule not specified'
-                                    schedule_data = med_data.get('schedule', {})
-                                    if isinstance(schedule_data, dict):
-                                        schedule_str = schedule_data.get('display_name') or schedule_data.get('translated') or schedule_data.get('value', schedule_str)
+                                    # Use helper method to handle both flat and nested data structures
+                                    dose_quantity_str = self._extract_field_value(med_data, 'dose_quantity', 'Dose not specified')
+                                    route_str = self._extract_field_value(med_data, 'route', 'Administration route not specified')
+                                    schedule_str = self._extract_field_value(med_data, 'schedule', 'Schedule not specified')
 
                                     # Also ensure medication.name field exists for template compatibility
                                     enhanced_medication = {
                                         'display_name': medication_name,
                                         'name': medication_name,
                                         'active_ingredients': med_data.get('active_ingredients', {}).get('value', 'Not specified'),
-                                        'pharmaceutical_form': med_data.get('pharmaceutical_form', {}).get('value', 'Tablet'),
-                                        'strength': med_data.get('strength', {}).get('value', 'Not specified'),
+                                        'pharmaceutical_form': self._extract_field_value(med_data, 'pharmaceutical_form', 'Tablet'),
+                                        'strength': self._extract_field_value(med_data, 'strength', 'Not specified'),
                                         'dose_quantity': dose_quantity_str,  # FIXED: Use properly extracted dose
                                         'route': route_str,  # FIXED: Use properly extracted route
                                         'schedule': schedule_str,  # FIXED: Use properly extracted schedule
-                                        'period': med_data.get('period', {}).get('value', 'Treatment timing not specified'),
-                                        'indication': med_data.get('indication', {}).get('value', 'Medical indication not specified in available data'),
+                                        'period': self._extract_field_value(med_data, 'period', 'Treatment timing not specified'),
+                                        'indication': self._extract_field_value(med_data, 'indication', 'Medical indication not specified in available data'),
                                         'source': 'enhanced_parsing',
                                         'medication': {'name': medication_name},  # Add medication.name for template compatibility
                                         'data': med_data  # Include full data structure for template compatibility
@@ -3349,6 +3329,42 @@ class CDAViewProcessor:
         # If it's a dict but no recognized keys, convert to string
         return str(value)
     
+    def _extract_field_value(self, med_data: Dict[str, Any], field_name: str, default_value: str) -> str:
+        """
+        Extract field value from medication data handling both flat and nested structures
+        
+        Args:
+            med_data: Medication data dictionary
+            field_name: Field name to extract
+            default_value: Default value if not found
+            
+        Returns:
+            Extracted field value or default
+        """
+        field_data = med_data.get(field_name, {})
+        
+        # Special handling for dose_quantity with complex structures
+        if field_name == 'dose_quantity' and isinstance(field_data, dict):
+            # Handle CDA structure: {'low': {'value': '1'}, 'high': {'value': '2'}}
+            low_val = field_data.get('low', {}).get('value') if isinstance(field_data.get('low'), dict) else None
+            high_val = field_data.get('high', {}).get('value') if isinstance(field_data.get('high'), dict) else None
+            if low_val and high_val:
+                return f"{low_val}-{high_val}"
+            elif low_val:
+                return str(low_val)
+            elif field_data.get('value'):  # Fallback to direct value
+                return str(field_data['value'])
+        
+        # Handle nested dictionary structure (from some CDA parsers)
+        if isinstance(field_data, dict):
+            return field_data.get('display_name') or field_data.get('translated') or field_data.get('value', default_value)
+        # Handle flat string structure (from Enhanced CDA Parser)
+        elif isinstance(field_data, str) and field_data.strip():
+            return field_data.strip()
+        # Default fallback
+        else:
+            return default_value
+
     def _get_enhanced_medications_from_session(self) -> Optional[List[Dict[str, Any]]]:
         """Get enhanced medications from session if available"""
         try:
@@ -3361,14 +3377,37 @@ class CDAViewProcessor:
             for db_session in all_sessions:
                 try:
                     db_session_data = db_session.get_decoded()
+                    
+                    # Check for enhanced medications directly in session
                     enhanced_medications = db_session_data.get("enhanced_medications")
                     
+                    # If not found directly, check patient match data
+                    if not enhanced_medications:
+                        for key, value in db_session_data.items():
+                            if key.startswith('patient_match_') and isinstance(value, dict):
+                                enhanced_medications = value.get('enhanced_medications')
+                                if enhanced_medications and isinstance(enhanced_medications, list):
+                                    logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: Found enhanced medications in patient match data {key}: {len(enhanced_medications)} medications ***")
+                                    break
+                    
                     if enhanced_medications and isinstance(enhanced_medications, list):
-                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: Found enhanced medications in session {db_session.session_key}: {len(enhanced_medications)} medications ***")
-                        if enhanced_medications:
-                            first_med = enhanced_medications[0]
+                        # Normalize the data structure to match expected format
+                        normalized_medications = []
+                        for med in enhanced_medications:
+                            normalized_med = med.copy()
+                            # Map 'dosage' to 'dose_quantity' for compatibility
+                            if 'dosage' in normalized_med and 'dose_quantity' not in normalized_med:
+                                normalized_med['dose_quantity'] = normalized_med.get('dosage', 'Not specified')
+                            # Ensure all expected fields exist
+                            if 'indication' not in normalized_med:
+                                normalized_med['indication'] = 'Indication not specified'
+                            normalized_medications.append(normalized_med)
+                        
+                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: Found enhanced medications in session {db_session.session_key}: {len(normalized_medications)} medications ***")
+                        if normalized_medications:
+                            first_med = normalized_medications[0]
                             logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: First medication: {first_med.get('name', 'Unknown')} - dose: {first_med.get('dose_quantity', 'Not found')} - route: {first_med.get('route', 'Not found')} ***")
-                        return enhanced_medications
+                        return normalized_medications
                         
                 except Exception as e:
                     logger.debug(f"[CDA PROCESSOR] Error decoding session {db_session.session_key}: {e}")
