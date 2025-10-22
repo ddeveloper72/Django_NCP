@@ -58,6 +58,7 @@ class PatientSessionMiddleware(MiddlewareMixin):
         "/patients/cda/enhanced_display/",  # Allow direct access to enhanced clinical view
         "/patients/cda/simplified/",  # Allow direct access to simplified clinical view
         "/patients/cda/",  # Allow access to session-based CDA views for testing
+        "/patient_data/cda/",  # Allow access to patient_data CDA views for testing
         "/patient_data/api/clinical/",  # Allow access to clinical API for testing
         "/patient_data/debug/clinical/",  # Allow access to clinical debugger for testing
     ]
@@ -190,7 +191,7 @@ class PatientSessionMiddleware(MiddlewareMixin):
     def _extract_session_id(self, request: HttpRequest) -> Optional[str]:
         """Extract session ID from URL path or headers."""
 
-        # Try to extract from URL path (e.g., /patients/cda/session_id/L3/)
+        # Try to extract from URL path (e.g., /patients/cda/session_id/L3/ or /patient_data/cda/session_id/)
         path_parts = request.path.strip("/").split("/")
         for i, part in enumerate(path_parts):
             if part == "cda" and i + 1 < len(path_parts):
