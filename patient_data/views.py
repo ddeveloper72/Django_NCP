@@ -3416,7 +3416,7 @@ def patient_cda_view(request, session_id, cda_type=None):
         logger.info(f"[ROUTER] Detected data source: {data_source}")
         
         # Route to appropriate processor based on document type (country agnostic)
-        if data_source.startswith("FHIR"):
+        if data_source == "FHIR":
             logger.info(f"[ROUTER] Routing to FHIR processor for session {session_id}")
             response = fhir_processor.process_fhir_document(request, session_id, cda_type)
         else:

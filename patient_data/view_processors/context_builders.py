@@ -184,6 +184,38 @@ class ContextBuilder:
         context['administrative_data'] = admin_data
         context['has_administrative_data'] = bool(admin_data)
         
+        # CRITICAL FIX: Add individual administrative data attributes as separate template variables
+        # This allows templates to access author_hcp, custodian_organization, guardians, etc. directly
+        if isinstance(admin_data, dict):
+            # Extract individual attributes from the administrative data dictionary
+            context['author_hcp'] = admin_data.get('author_hcp')
+            context['custodian_organization'] = admin_data.get('custodian_organization')
+            context['guardians'] = admin_data.get('guardians', [])
+            context['participants'] = admin_data.get('participants', [])
+            context['legal_authenticator'] = admin_data.get('legal_authenticator')
+            context['document_creation_date'] = admin_data.get('document_creation_date')
+            context['document_title'] = admin_data.get('document_title')
+            
+            # Log successful extraction of individual attributes
+            author_info = admin_data.get('author_hcp')
+            if author_info:
+                author_name = getattr(author_info, 'person', {})
+                if hasattr(author_name, 'full_name'):
+                    logger.info(f"[TEMPLATE CONTEXT] Added author_hcp: {author_name.full_name}")
+                else:
+                    logger.info(f"[TEMPLATE CONTEXT] Added author_hcp: {type(author_info)}")
+            
+            custodian_org = admin_data.get('custodian_organization')
+            if custodian_org:
+                if hasattr(custodian_org, 'name'):
+                    logger.info(f"[TEMPLATE CONTEXT] Added custodian_organization: {custodian_org.name}")
+                else:
+                    logger.info(f"[TEMPLATE CONTEXT] Added custodian_organization: {type(custodian_org)}")
+            
+            guardians = admin_data.get('guardians', [])
+            participants = admin_data.get('participants', [])
+            logger.info(f"[TEMPLATE CONTEXT] Added {len(guardians)} guardians and {len(participants)} participants")
+        
         # Validate custodian organization (critical for organization display)
         # Handle both dictionary and object attribute access
         custodian_org = None

@@ -244,6 +244,18 @@ class CDAViewProcessor:
                 # Finalize context
                 context = self.context_builder.finalize_context(context)
                 
+                # CRITICAL FIX: Add administrative data processing even for unified pipeline
+                # The unified pipeline focuses on clinical data but doesn't handle administrative data
+                logger.info(f"[CDA PROCESSOR] Adding administrative data to unified pipeline context")
+                try:
+                    # Parse CDA content to get administrative data
+                    parsed_data = self._parse_cda_document(cda_content, session_id)
+                    if parsed_data:
+                        self._build_cda_context(context, parsed_data, match_data)
+                        logger.info(f"[CDA PROCESSOR] Successfully added administrative data to unified pipeline context")
+                except Exception as admin_error:
+                    logger.warning(f"[CDA PROCESSOR] Failed to add administrative data: {admin_error}")
+                
                 logger.info(f"[CDA PROCESSOR] Successfully processed via unified pipeline: {len(pipeline_context.get('sections_processed', []))} sections")
                 
             else:
@@ -329,6 +341,10 @@ class CDAViewProcessor:
             context['medications'] = deduplicated_medications
             print(f"*** DEDUPLICATION COMPLETE: Reduced from {len(medications_in_context)} to {len(deduplicated_medications)} unique medications ***")
         
+        # Continue with the rest of processing - don't return early!
+        logger.info("✅ CDA processor completed successfully")
+        
+        # Render the final template with complete context including administrative data
         return render(request, 'patient_data/enhanced_patient_cda.html', context)
     
     def _get_cda_content(self, match_data: Dict[str, Any], cda_type: Optional[str]) -> tuple:
@@ -411,9 +427,11 @@ class CDAViewProcessor:
             logger.info(f"[CDA PROCESSOR] Parsing CDA document for session {session_id} using specialized extractors")
             
             # Strategy 1: Use specialized extractors for actual clinical data (from working branch)
+            logger.info("[CDA PROCESSOR DEBUG] Trying Strategy 1: specialized extractors")
             clinical_data = self._extract_with_specialized_extractors(cda_content)
             if clinical_data and clinical_data.get('sections'):
-                logger.info(f"[CDA PROCESSOR] Specialized extractors parsed successfully - {len(clinical_data['sections'])} sections")
+                logger.info(f"[CDA PROCESSOR DEBUG] Strategy 1 SUCCEEDED - {len(clinical_data['sections'])} sections")
+                logger.info(f"[CDA PROCESSOR DEBUG] Strategy 1 admin data: {bool(clinical_data.get('administrative_data'))}")
                 
                 # ENHANCEMENT: Apply our updated problems parsing to Enhanced CDA sections
                 logger.info("[CDA PROCESSOR] Applying enhanced sections parsing for problems...")
@@ -428,19 +446,22 @@ class CDAViewProcessor:
                 else:
                     logger.warning("[CDA PROCESSOR] Enhanced parsing did not create clinical_arrays")
                 
+                logger.info(f"[CDA PROCESSOR DEBUG] Strategy 1 FINAL - returning enhanced_clinical_data with admin_data: {bool(enhanced_clinical_data.get('administrative_data'))}")
                 return enhanced_clinical_data
             
             # Strategy 2: Use CDA display service for enhanced parsing
+            logger.info("[CDA PROCESSOR DEBUG] Strategy 1 failed, trying Strategy 2: CDA display service")
             try:
                 clinical_data = self.cda_display_service.extract_patient_clinical_data(session_id)
                 if clinical_data and clinical_data.get('sections'):
-                    logger.info(f"[CDA PROCESSOR] CDA display service parsed successfully - {len(clinical_data['sections'])} sections")
+                    logger.info(f"[CDA PROCESSOR DEBUG] Strategy 2 SUCCEEDED - {len(clinical_data['sections'])} sections")
+                    logger.info(f"[CDA PROCESSOR DEBUG] Strategy 2 admin data: {bool(clinical_data.get('administrative_data'))}")
                     return clinical_data
             except Exception as e:
                 logger.warning(f"[CDA PROCESSOR] CDA display service failed: {e}")
             
             # Strategy 3: Use comprehensive service for clinical arrays extraction (fallback)
-            logger.info("[CDA PROCESSOR] Using comprehensive service for clinical arrays extraction")
+            logger.info("[CDA PROCESSOR DEBUG] Strategy 2 failed, trying Strategy 3: comprehensive service")
             try:
                 # Get clinical arrays directly (this method works from our test)
                 clinical_arrays = self.comprehensive_service.get_clinical_arrays_for_display(cda_content)
@@ -663,7 +684,9 @@ class CDAViewProcessor:
                 
                 # CDA administrative data (if available)
                 admin_data = parsed_data.get('administrative_data')
+                logger.info(f"[CDA PROCESSOR DEBUG] admin_data type: {type(admin_data)}, has data: {bool(admin_data)}")
                 if admin_data:
+                    logger.info(f"[CDA PROCESSOR DEBUG] admin_data keys: {list(admin_data.keys()) if isinstance(admin_data, dict) else 'not dict'}")
                     # Convert administrative data object to dictionary if needed
                     if hasattr(admin_data, '__dict__'):
                         admin_dict = admin_data.__dict__
@@ -673,7 +696,13 @@ class CDAViewProcessor:
                         admin_dict = admin_data if isinstance(admin_data, dict) else {}
                     
                     if admin_dict:
+                        logger.info(f"[CDA PROCESSOR DEBUG] Calling add_administrative_data with {len(admin_dict)} fields")
                         self.context_builder.add_administrative_data(context, admin_dict)
+                        logger.info(f"[CDA PROCESSOR DEBUG] After add_administrative_data - author_hcp: {bool(context.get('author_hcp'))}")
+                    else:
+                        logger.warning("[CDA PROCESSOR DEBUG] admin_dict is empty after conversion")
+                else:
+                    logger.warning("[CDA PROCESSOR DEBUG] No administrative_data found in parsed_data")
                 
             # Extract healthcare provider data using comprehensive service
             if hasattr(self, '_cda_content'):
@@ -800,8 +829,12 @@ class CDAViewProcessor:
                 if admin_data:
                     logger.info(f"[CDA PROCESSOR] Found {len(admin_data)} administrative data fields")
                 
-                # Transform administrative data for Healthcare Team & Contacts template compatibility
-                transformed_admin_data = self._transform_administrative_data(admin_data) if admin_data else {}
+                # CRITICAL FIX: Don't transform the administrative data - use it as-is from CDAHeaderExtractor
+                # The CDAHeaderExtractor already provides the correct structure that templates expect
+                # transformed_admin_data = self._transform_administrative_data(admin_data) if admin_data else {}
+                # USE THE ORIGINAL ADMINISTRATIVE DATA DIRECTLY
+                original_admin_data = admin_data
+                logger.info(f"[CDA PROCESSOR DEBUG] Preserving original CDAHeaderExtractor administrative data with fields: {list(original_admin_data.keys()) if original_admin_data else []}")
                 
                 # Check for overlapping sections to avoid duplication in UI
                 sections = enhanced_result.get('sections', [])
@@ -846,15 +879,15 @@ class CDAViewProcessor:
                 
                 logger.info(f"[CDA PROCESSOR] Hide flags - allergies: {hide_mandatory_allergies}, procedures: {hide_mandatory_procedures}, devices: {hide_mandatory_devices}")
                 
-                # Return enhanced result with transformed administrative data for Healthcare Team & Contacts tab
+                # Return enhanced result with ORIGINAL administrative data for Healthcare Team & Contacts tab
                 return {
                     'success': True,
                     'sections': sections,
                     'clinical_data': {},
-                    'administrative_data': transformed_admin_data,
+                    'administrative_data': original_admin_data,
                     'patient_identity': enhanced_result.get('patient_identity', {}),
                     'has_clinical_data': len(sections) > 0,
-                    'has_administrative_data': bool(transformed_admin_data),
+                    'has_administrative_data': bool(original_admin_data),
                     'source': 'enhanced_cda_xml_parser_phase3a',
                     # Add hide flags to the return context
                     'hide_mandatory_allergies': hide_mandatory_allergies,

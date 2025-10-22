@@ -69,6 +69,14 @@ except ImportError:
     # Fallback if administrative extractor not available
     CDAAdministrativeExtractor = None
 
+# Import our new CDA header extractor using lxml
+try:
+    from patient_data.services.cda_header_extractor import CDAHeaderExtractor
+    CDA_HEADER_EXTRACTOR_AVAILABLE = True
+except ImportError:
+    CDAHeaderExtractor = None
+    CDA_HEADER_EXTRACTOR_AVAILABLE = False
+
 # Import unified patient demographics service
 try:
     from patient_data.services.patient_demographics_service import PatientDemographicsService
@@ -203,10 +211,17 @@ class EnhancedCDAXMLParser:
         }
 
         # Initialize administrative extractor with date formatter
-        if CDAAdministrativeExtractor:
+        # Prefer the new CDAHeaderExtractor for enhanced guardian/participant extraction
+        if CDA_HEADER_EXTRACTOR_AVAILABLE:
+            self.admin_extractor = CDAHeaderExtractor()
+            logger.info("*** 🎉 USING CDAHeaderExtractor for enhanced administrative data extraction! 🎉 ***")
+        elif CDAAdministrativeExtractor:
+            # Fallback to legacy extractor
             self.admin_extractor = CDAAdministrativeExtractor()
+            logger.info("*** USING CDAAdministrativeExtractor for administrative data extraction ***")
         else:
             self.admin_extractor = None
+            logger.warning("*** ❌ NO ADMINISTRATIVE EXTRACTOR AVAILABLE ❌ ***")
 
         # Initialize unified patient demographics service
         if PatientDemographicsService:
@@ -952,6 +967,12 @@ class EnhancedCDAXMLParser:
             ET.tostring(root, encoding="unicode")
         )
         
+        logger.info(f"*** CDA HEADER EXTRACTION DEBUG: admin_data type: {type(admin_data)}, has data: {admin_data is not None} ***")
+        if admin_data:
+            logger.info(f"*** CDA HEADER EXTRACTION DEBUG: admin_data attributes: {[attr for attr in dir(admin_data) if not attr.startswith('_')]} ***")
+            logger.info(f"*** CDA HEADER EXTRACTION DEBUG: author_hcp: {getattr(admin_data, 'author_hcp', 'Not found')} ***")
+            logger.info(f"*** CDA HEADER EXTRACTION DEBUG: custodian_organization: {getattr(admin_data, 'custodian_organization', 'Not found')} ***")
+        
         logger.info(f"[PHASE 3A] Administrative extraction - Country: {source_country}, Type: {document_type}, Fields: {len(admin_data.__dict__) if admin_data else 0}")
 
         # Extract document creation date with fallback
@@ -998,52 +1019,172 @@ class EnhancedCDAXMLParser:
             )
         )
 
-        # Convert enhanced administrative data to expected format with template compatibility
-        # Patient contact information
+        # Handle differences between CDAHeaderExtractor and CDAAdministrativeExtractor
+        if hasattr(admin_data, 'guardians') and hasattr(admin_data, 'participants'):
+            # New CDAHeaderExtractor structure
+            return {
+                # Basic document information
+                "document_creation_date": creation_date,
+                "document_creation_date_raw": creation_date_raw,
+                "document_title": document_title,
+                "document_type": "Patient Summary",  # Default type
+                "document_id": admin_data.document_set_id,
+                
+                # Author information for healthcare team
+                "author_information": [
+                    DotDict({
+                        "person": DotDict({
+                            "family_name": admin_data.author_hcp.person.family_name if admin_data.author_hcp else "",
+                            "given_name": admin_data.author_hcp.person.given_name if admin_data.author_hcp else "",
+                            "full_name": admin_data.author_hcp.person.full_name if admin_data.author_hcp else "",
+                            "title": admin_data.author_hcp.person.title if admin_data.author_hcp else "",
+                            "role": admin_data.author_hcp.person.role if admin_data.author_hcp else "Author",
+                        }),
+                        "organization": DotDict({
+                            "name": admin_data.author_hcp.organization.name if admin_data.author_hcp and admin_data.author_hcp.organization else "",
+                        }),
+                        "contact_info": DotDict({
+                            "addresses": admin_data.author_hcp.contact_info.addresses if admin_data.author_hcp and admin_data.author_hcp.contact_info else [],
+                            "telecoms": admin_data.author_hcp.contact_info.telecoms if admin_data.author_hcp and admin_data.author_hcp.contact_info else [],
+                        }),
+                        "timestamp": admin_data.author_hcp.timestamp if admin_data.author_hcp else "",
+                    })
+                ] if admin_data.author_hcp else [],
+                
+                # Custodian organization for healthcare team
+                "custodian_organization": DotDict({
+                    "name": admin_data.custodian_organization.name if admin_data.custodian_organization else "",
+                    "contact_info": DotDict({
+                        "addresses": admin_data.custodian_organization.contact_info.addresses if admin_data.custodian_organization and admin_data.custodian_organization.contact_info else [],
+                        "telecoms": admin_data.custodian_organization.contact_info.telecoms if admin_data.custodian_organization and admin_data.custodian_organization.contact_info else [],
+                    }),
+                    "identifiers": admin_data.custodian_organization.identifiers if admin_data.custodian_organization else [],
+                }),
+                "custodian_name": admin_data.custodian_organization.name if admin_data.custodian_organization else "",
+                
+                # Guardian and participant information for extended patient info
+                "guardians": (
+                    [DotDict(guardian) for guardian in admin_data.guardians]
+                    if admin_data.guardians
+                    else []
+                ),
+                "participants": (
+                    [DotDict(participant) for participant in admin_data.participants]
+                    if admin_data.participants
+                    else []
+                ),
+                
+                # Backward compatibility - first guardian as singular guardian
+                "guardian": (
+                    DotDict(admin_data.guardians[0])
+                    if admin_data.guardians
+                    else DotDict({
+                        "family_name": None,
+                        "given_name": None,
+                        "full_name": None,
+                        "role": None,
+                        "relationship": None,
+                        "contact_info": DotDict({"addresses": [], "telecoms": []}),
+                    })
+                ),
+                
+                # Legal authenticator
+                "legal_authenticator": DotDict({
+                    "family_name": admin_data.legal_authenticator.person.family_name if admin_data.legal_authenticator else "",
+                    "given_name": admin_data.legal_authenticator.person.given_name if admin_data.legal_authenticator else "",
+                    "full_name": admin_data.legal_authenticator.person.full_name if admin_data.legal_authenticator else "",
+                    "title": admin_data.legal_authenticator.person.title if admin_data.legal_authenticator else "",
+                    "role": admin_data.legal_authenticator.person.role if admin_data.legal_authenticator else "Legal Authenticator",
+                    "organization": DotDict({
+                        "name": admin_data.legal_authenticator.organization.name if admin_data.legal_authenticator and admin_data.legal_authenticator.organization else "",
+                    }),
+                    "contact_info": DotDict({
+                        "addresses": admin_data.legal_authenticator.contact_info.addresses if admin_data.legal_authenticator and admin_data.legal_authenticator.contact_info else [],
+                        "telecoms": admin_data.legal_authenticator.contact_info.telecoms if admin_data.legal_authenticator and admin_data.legal_authenticator.contact_info else [],
+                    }),
+                }),
+                
+                # Backward compatibility fields with primary author
+                "author_hcp": DotDict({
+                    "family_name": admin_data.author_hcp.person.family_name if admin_data.author_hcp else "",
+                    "given_name": admin_data.author_hcp.person.given_name if admin_data.author_hcp else "",
+                    "full_name": admin_data.author_hcp.person.full_name if admin_data.author_hcp else "",
+                    "title": admin_data.author_hcp.person.title if admin_data.author_hcp else "",
+                    "role": admin_data.author_hcp.person.role if admin_data.author_hcp else "",
+                    "organization": DotDict({
+                        "name": admin_data.author_hcp.organization.name if admin_data.author_hcp and admin_data.author_hcp.organization else "",
+                    }),
+                    "organization_name": admin_data.author_hcp.organization.name if admin_data.author_hcp and admin_data.author_hcp.organization else "",
+                    "contact_info": DotDict({
+                        "addresses": admin_data.author_hcp.contact_info.addresses if admin_data.author_hcp and admin_data.author_hcp.contact_info else [],
+                        "telecoms": admin_data.author_hcp.contact_info.telecoms if admin_data.author_hcp and admin_data.author_hcp.contact_info else [],
+                    }),
+                    "contact_details": DotDict({
+                        "addresses": admin_data.author_hcp.contact_info.addresses if admin_data.author_hcp and admin_data.author_hcp.contact_info else [],
+                        "telecoms": admin_data.author_hcp.contact_info.telecoms if admin_data.author_hcp and admin_data.author_hcp.contact_info else [],
+                    }),
+                }),
+                
+                # Empty fields for compatibility
+                "patient_contact_info": DotDict({"addresses": [], "telecoms": []}),
+                "other_contacts": [],
+                "preferred_hcp": DotDict({"name": None}),
+                "document_last_update_date": "",
+                "document_version_number": "",
+            }
+        else:
+            # Legacy CDAAdministrativeExtractor structure
+            return self._extract_legacy_administrative_data_mapping(admin_data, creation_date, creation_date_raw, document_title)
+            
+    def _extract_legacy_administrative_data_mapping(self, admin_data, creation_date, creation_date_raw, document_title):
+        """Handle legacy CDAAdministrativeExtractor data structure mapping"""
+        
+        # Patient contact information (addresses and telecoms)
         patient_contact_info = DotDict(
             {
                 "addresses": (
-                    admin_data.patient_contact_info.addresses
+                    [DotDict(addr) for addr in admin_data.patient_contact_info.addresses]
                     if admin_data.patient_contact_info
+                    and admin_data.patient_contact_info.addresses
                     else []
                 ),
                 "telecoms": (
-                    admin_data.patient_contact_info.telecoms
+                    [DotDict(telecom) for telecom in admin_data.patient_contact_info.telecoms]
                     if admin_data.patient_contact_info
+                    and admin_data.patient_contact_info.telecoms
                     else []
                 ),
             }
         )
 
-        # Author information with organization details
-        author_information = []
-        if admin_data.author_hcp:
-            # Get organization from author or look for related organizations
-            author_org = DotDict({"name": "", "addresses": [], "telecoms": []})
+        # Custodian organization information
+        custodian_organization = DotDict(
+            {
+                "name": (
+                    admin_data.custodian_organization.name
+                    if admin_data.custodian_organization
+                    else ""
+                ),
+                "contact_info": DotDict(
+                    {
+                        "addresses": (
+                            admin_data.custodian_organization.addresses
+                            if admin_data.custodian_organization
+                            else []
+                        ),
+                        "telecoms": (
+                            admin_data.custodian_organization.telecoms
+                            if admin_data.custodian_organization
+                            else []
+                        ),
+                    }
+                ),
+            }
+        )
 
-            # If the author has organization info embedded or look for first organization
-            if (
-                hasattr(admin_data.author_hcp, "organization")
-                and admin_data.author_hcp.organization
-            ):
-                author_org["name"] = admin_data.author_hcp.organization.name or ""
-                author_org["addresses"] = getattr(
-                    admin_data.author_hcp.organization, "addresses", []
-                )
-                author_org["telecoms"] = getattr(
-                    admin_data.author_hcp.organization, "telecoms", []
-                )
-            elif admin_data.custodian_organization:
-                # Fallback to custodian organization for authors
-                author_org["name"] = admin_data.custodian_organization.name or ""
-                author_org["addresses"] = (
-                    admin_data.custodian_organization.addresses or []
-                )
-                author_org["telecoms"] = (
-                    admin_data.custodian_organization.telecoms or []
-                )
-
-            author_info = DotDict(
+        # Author information (healthcare professionals who authored the document)
+        author_information = [
+            DotDict(
                 {
                     "person": DotDict(
                         {
@@ -1054,7 +1195,15 @@ class EnhancedCDAXMLParser:
                             "role": admin_data.author_hcp.role,
                         }
                     ),
-                    "organization": author_org,
+                    "organization": DotDict(
+                        {
+                            "name": (
+                                admin_data.author_hcp.organization.name
+                                if admin_data.author_hcp.organization
+                                else ""
+                            )
+                        }
+                    ),
                     "contact_info": DotDict(
                         {
                             "addresses": (
@@ -1069,58 +1218,22 @@ class EnhancedCDAXMLParser:
                             ),
                         }
                     ),
+                    "timestamp": "",  # May not be available in legacy structure
                 }
             )
-            author_information.append(author_info)
+        ] if admin_data.author_hcp else []
 
-        # Custodian organization
-        custodian_organization = DotDict(
+        # Legal authenticator with enhanced organization data
+        legal_auth_org = DotDict(
             {
                 "name": (
-                    admin_data.custodian_organization.name
-                    if admin_data.custodian_organization
+                    admin_data.legal_authenticator.organization.name
+                    if admin_data.legal_authenticator
+                    and admin_data.legal_authenticator.organization
                     else ""
-                ),
-                "addresses": (
-                    admin_data.custodian_organization.addresses
-                    if admin_data.custodian_organization
-                    else []
-                ),
-                "telecoms": (
-                    admin_data.custodian_organization.telecoms
-                    if admin_data.custodian_organization
-                    else []
-                ),
+                )
             }
         )
-
-        # Legal authenticator with organization details
-        legal_auth_org = DotDict({"name": "", "addresses": [], "telecoms": []})
-
-        if admin_data.legal_authenticator:
-            # Look for organization associated with legal authenticator
-            if (
-                hasattr(admin_data.legal_authenticator, "organization")
-                and admin_data.legal_authenticator.organization
-            ):
-                legal_auth_org["name"] = (
-                    admin_data.legal_authenticator.organization.name or ""
-                )
-                legal_auth_org["addresses"] = getattr(
-                    admin_data.legal_authenticator.organization, "addresses", []
-                )
-                legal_auth_org["telecoms"] = getattr(
-                    admin_data.legal_authenticator.organization, "telecoms", []
-                )
-            elif admin_data.custodian_organization:
-                # Fallback to custodian organization for legal authenticator
-                legal_auth_org["name"] = admin_data.custodian_organization.name or ""
-                legal_auth_org["addresses"] = (
-                    admin_data.custodian_organization.addresses or []
-                )
-                legal_auth_org["telecoms"] = (
-                    admin_data.custodian_organization.telecoms or []
-                )
 
         legal_authenticator = DotDict(
             {
@@ -1201,7 +1314,7 @@ class EnhancedCDAXMLParser:
         )
 
         logger.info(
-            f"Enhanced admin data: {document_title}, created: {creation_date}, "
+            f"Legacy admin data: {document_title}, created: {creation_date}, "
             f"patient addresses: {len(patient_contact_info.get('addresses', []))}, "
             f"authors: {len(author_information)}"
         )
@@ -1211,8 +1324,8 @@ class EnhancedCDAXMLParser:
             "document_creation_date": creation_date,
             "document_creation_date_raw": creation_date_raw,
             "document_title": document_title,
-            "document_type": document_type,
-            "document_id": document_id,
+            "document_type": "Patient Summary",
+            "document_id": getattr(admin_data, 'document_set_id', ''),
             # Legacy custodian name for backward compatibility
             "custodian_name": custodian_organization["name"],
             # Enhanced contact and organizational information
@@ -1255,13 +1368,13 @@ class EnhancedCDAXMLParser:
                 }
             ),
             # Additional fields from enhanced extractor
-            "document_last_update_date": admin_data.document_last_update_date,
-            "document_version_number": admin_data.document_version_number,
+            "document_last_update_date": getattr(admin_data, 'document_last_update_date', ''),
+            "document_version_number": getattr(admin_data, 'document_version_number', ''),
             "preferred_hcp": DotDict(
                 {
                     "name": (
                         admin_data.preferred_hcp.name
-                        if admin_data.preferred_hcp
+                        if hasattr(admin_data, 'preferred_hcp') and admin_data.preferred_hcp
                         else None
                     )
                 }
@@ -1269,15 +1382,15 @@ class EnhancedCDAXMLParser:
             "guardian": DotDict(
                 {
                     "family_name": (
-                        admin_data.guardian.family_name if admin_data.guardian else None
+                        admin_data.guardian.family_name if hasattr(admin_data, 'guardian') and admin_data.guardian else None
                     ),
                     "given_name": (
-                        admin_data.guardian.given_name if admin_data.guardian else None
+                        admin_data.guardian.given_name if hasattr(admin_data, 'guardian') and admin_data.guardian else None
                     ),
-                    "role": (admin_data.guardian.role if admin_data.guardian else None),
+                    "role": (admin_data.guardian.role if hasattr(admin_data, 'guardian') and admin_data.guardian else None),
                     "relationship": (
                         admin_data.guardian.relationship
-                        if admin_data.guardian
+                        if hasattr(admin_data, 'guardian') and admin_data.guardian
                         else None
                     ),
                     "contact_info": DotDict(
@@ -1287,7 +1400,7 @@ class EnhancedCDAXMLParser:
                                     DotDict(addr)
                                     for addr in admin_data.guardian.contact_info.addresses
                                 ]
-                                if admin_data.guardian
+                                if hasattr(admin_data, 'guardian') and admin_data.guardian
                                 and admin_data.guardian.contact_info
                                 else []
                             ),
@@ -1296,7 +1409,7 @@ class EnhancedCDAXMLParser:
                                     DotDict(telecom)
                                     for telecom in admin_data.guardian.contact_info.telecoms
                                 ]
-                                if admin_data.guardian
+                                if hasattr(admin_data, 'guardian') and admin_data.guardian
                                 and admin_data.guardian.contact_info
                                 else []
                             ),
@@ -1304,6 +1417,8 @@ class EnhancedCDAXMLParser:
                     ),
                 }
             ),
+            "guardians": [],  # Empty for legacy compatibility
+            "participants": [],  # Empty for legacy compatibility
             "other_contacts": (
                 [
                     DotDict(
@@ -1312,22 +1427,22 @@ class EnhancedCDAXMLParser:
                             "given_name": contact.given_name,
                             "full_name": f"{contact.given_name} {contact.family_name}".strip(),
                             "role": contact.role,
-                            "specialty": contact.specialty,
+                            "specialty": getattr(contact, 'specialty', ''),
                             "organization": DotDict(
                                 {
                                     "name": (
                                         contact.organization.name
-                                        if contact.organization
+                                        if hasattr(contact, 'organization') and contact.organization
                                         else ""
                                     ),
                                     "addresses": (
                                         contact.organization.addresses
-                                        if contact.organization
+                                        if hasattr(contact, 'organization') and contact.organization
                                         else []
                                     ),
                                     "telecoms": (
                                         contact.organization.telecoms
-                                        if contact.organization
+                                        if hasattr(contact, 'organization') and contact.organization
                                         else []
                                     ),
                                 }
@@ -1336,12 +1451,12 @@ class EnhancedCDAXMLParser:
                                 {
                                     "addresses": (
                                         contact.contact_info.addresses
-                                        if contact.contact_info
+                                        if hasattr(contact, 'contact_info') and contact.contact_info
                                         else []
                                     ),
                                     "telecoms": (
                                         contact.contact_info.telecoms
-                                        if contact.contact_info
+                                        if hasattr(contact, 'contact_info') and contact.contact_info
                                         else []
                                     ),
                                 }
@@ -1350,7 +1465,7 @@ class EnhancedCDAXMLParser:
                     )
                     for contact in admin_data.other_contacts
                 ]
-                if admin_data.other_contacts
+                if hasattr(admin_data, 'other_contacts') and admin_data.other_contacts
                 else []
             ),
         }
