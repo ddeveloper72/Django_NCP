@@ -1,53 +1,125 @@
+{% extends 'patient_data/sections/base_clinical_section.html' %}
 {% load patient_filters %}
-{# Laboratory Results / Coded Results Section Template #}
 
-{# Laboratory Results / Coded Results Section #}
-<div class="medical-section" id="lab-results-section">
-    {# Remove card wrapper - content goes directly in accordion body #}
+{% block section_content %}
+{# Laboratory Results Section Template - Enhanced Pipeline Data #}
 
-        {# Clinical Section Content with Tabs #}
-        {% if section.has_entries and section.clinical_table %}
-        {# Clinical Table Section #}
-        <div class="section-content-area p-3">
-            {# Section Tabs #}
-            <div class="section-tabs mb-3">
-                <button class="tab-button active"
-                    onclick="showClinicalTab('lab_results_{{ section_index }}', 'structured')">
-                    📊 Structured Lab Data
-                </button>
-                <button class="tab-button" onclick="showClinicalTab('lab_results_{{ section_index }}', 'original')">
-                    📄 Original Content
-                </button>
+{% if section_data %}
+    {% for result in section_data %}
+    <div class="field-group">
+        <div class="field-group-header">
+            <div class="field-primary">
+                <i class="fas fa-vial me-2" style="color: var(--info-color);"></i>
+                <span class="field-title">{{ result.test_name|default:result.name|default:"Lab Test" }}</span>
+                {% if result.status %}
+                <span class="clinical-badge status-{{ result.status|slugify }}">{{ result.status }}</span>
+                {% endif %}
             </div>
-
-            {# Structured View Tab Content #}
-            <div id="lab_results_{{ section_index }}_structured" class="clinical-tab-content active">
-                <div class="clinical-table">
-                    {# Mobile Card Layout (hidden on desktop) #}
-                    <div class="d-block d-md-none">
-                        <div class="clinical-cards-container">
-                            {% for row in section.clinical_table.rows %}
-                            <div class="card clinical-card mb-3 {% if row.has_medical_codes %}border-success{% endif %}">
-                                <div class="card-body">
-                                    {% for header in section.clinical_table.headers %}
-                                    {% with row.data|get_item:header.key as cell_data %}
-                                    <div class="clinical-field mb-2 {% if header.primary %}primary-field-mobile{% endif %}">
-                                        <div class="field-label d-flex align-items-center mb-1">
-                                            <strong class="text-muted small">{{ header.label }}</strong>
-                                            {% if header.type == 'test' %}
-                                            <i class="fa-solid fa-vial ms-1 terminology-indicator text-muted" title="Laboratory Test"></i>
-                                            {% elif header.type == 'result' %}
-                                            <i class="fa-solid fa-chart-line ms-1 terminology-indicator text-muted" title="Test Result"></i>
-                                            {% elif header.type == 'reference' %}
-                                            <i class="fa-solid fa-ruler ms-1 terminology-indicator text-muted" title="Reference Range"></i>
-                                            {% elif header.type == 'status' %}
-                                            <i class="fa-solid fa-check-circle ms-1 terminology-indicator text-muted" title="Result Status"></i>
-                                            {% elif header.type == 'date' %}
-                                            <i class="fa-solid fa-calendar-alt ms-1 terminology-indicator text-muted" title="Test Date"></i>
-                                            {% endif %}
-                                        </div>
-                                        <div class="field-value">
-                                            {% if header.primary %}
+        </div>
+        
+        <div class="field-group-content">
+            {% if result.value or result.result_value %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-chart-line me-1"></i>
+                    Result
+                </div>
+                <div class="field-value">
+                    <strong>{{ result.value|default:result.result_value }}</strong>
+                    {% if result.unit %}
+                    <span class="text-muted ms-1">{{ result.unit }}</span>
+                    {% endif %}
+                    {% if result.interpretation %}
+                    <span class="clinical-badge interpretation-{{ result.interpretation|slugify }} ms-2">{{ result.interpretation }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if result.reference_range %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-ruler me-1"></i>
+                    Reference Range
+                </div>
+                <div class="field-value">{{ result.reference_range }}</div>
+            </div>
+            {% endif %}
+            
+            {% if result.date or result.observation_date %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-calendar-check me-1"></i>
+                    Test Date
+                </div>
+                <div class="field-value">{{ result.date|default:result.observation_date|date:"M d, Y" }}</div>
+            </div>
+            {% endif %}
+            
+            {% if result.specimen_type %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-flask me-1"></i>
+                    Specimen
+                </div>
+                <div class="field-value">{{ result.specimen_type }}</div>
+            </div>
+            {% endif %}
+            
+            {% if result.method %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-microscope me-1"></i>
+                    Method
+                </div>
+                <div class="field-value">{{ result.method }}</div>
+            </div>
+            {% endif %}
+            
+            {% if result.performer %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-user-doctor me-1"></i>
+                    Performer
+                </div>
+                <div class="field-value">{{ result.performer }}</div>
+            </div>
+            {% endif %}
+            
+            {% if result.code or result.test_code %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-code me-1"></i>
+                    Code
+                </div>
+                <div class="field-value">
+                    <span class="medical-code">{{ result.code|default:result.test_code }}</span>
+                    {% if result.coding_system %}
+                    <span class="text-muted ms-1">({{ result.coding_system }})</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if result.comments %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-comment me-1"></i>
+                    Comments
+                </div>
+                <div class="field-value">{{ result.comments }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="no-data-message">
+        <i class="fas fa-vial me-2"></i>
+        No laboratory results available
+    </div>
+{% endif %}
+{% endblock %}
                                             <div class="primary-field-content">
                                                 <strong class="text-dark">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</strong>
                                                 {% if cell_data|safe_get:"has_terminology" %}
