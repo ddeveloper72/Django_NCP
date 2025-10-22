@@ -1,53 +1,234 @@
 {% load patient_filters %}
-{# Vital Signs Section Template #}
+{# Vital Signs Section Template - Enhanced Pipeline Data Support #}
 
 <!-- Vital Signs Section -->
 <div class="medical-section" id="vital-signs-section">
-    <!-- Remove card wrapper - content goes directly in accordion body -->
+    {% with section_data as vitals_list %}
+    
+    {# Vital Signs Section using Enhanced Pipeline Data #}
+    {% if vitals_list and vitals_list|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-vital-signs" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-vital-signs" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-heartbeat me-2"></i>
+                        <span>Vital Signs</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ vitals_list|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">Vital Signs: {{ vitals_list|length }} measurements found</p>
+                    {% for vital in vitals_list %}
+                    {# Enhanced Vital Sign Card - Following Medications UX Pattern #}
+                    <div class="vital-card mb-4 p-4 border rounded shadow-sm bg-white border-info">
+                        
+                        {# Header Section - Vital Sign Name #}
+                        <div class="vital-header mb-3 pb-3 border-bottom">
+                            <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                <div class="vital-name-section flex-grow-1 me-3">
+                                    <h5 class="vital-name text-info mb-1 fw-bold">
+                                        {% if vital.name %}
+                                            {{ vital.name }}
+                                        {% elif vital.display_name %}
+                                            {{ vital.display_name }}
+                                        {% elif vital.measurement %}
+                                            {{ vital.measurement }}
+                                        {% else %}
+                                            Vital Sign
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                                <div class="vital-status-section">
+                                    {% if vital.status %}
+                                        {% if vital.status == "Final" %}
+                                            <span class="badge bg-success fs-6">{{ vital.status }}</span>
+                                        {% elif vital.status == "Preliminary" %}
+                                            <span class="badge bg-warning fs-6">{{ vital.status }}</span>
+                                        {% elif vital.status == "Corrected" %}
+                                            <span class="badge bg-info fs-6">{{ vital.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary fs-6">{{ vital.status }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-secondary fs-6">Final</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
 
-        <!-- Clinical Section Content with Tabs -->
-        {% if section.has_entries and section.clinical_table %}
-        <!-- Clinical Table Section -->
-        <div class="card-body p-0">
-            <!-- Section Tabs -->
-            <div class="section-tabs">
-                <button class="tab-button active"
-                    onclick="showClinicalTab('vital_signs_{{ section_index }}', 'structured')">
-                    📊 Structured Vital Signs Data
-                </button>
-                <button class="tab-button" onclick="showClinicalTab('vital_signs_{{ section_index }}', 'original')">
-                    📄 Original Content
-                </button>
+                        {# Clinical Information Grid - Following Medications Pattern #}
+                        <div class="row g-3">
+                            
+                            {# Measurement Value #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-tachometer-alt me-2 text-info"></i>
+                                        <span class="field-label">Value</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if vital.value and vital.value != "Not specified" %}
+                                            <div class="field-value fw-bold text-success">
+                                                {{ vital.value }}{% if vital.unit %} {{ vital.unit }}{% endif %}
+                                            </div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Unit of Measurement #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-ruler me-2 text-info"></i>
+                                        <span class="field-label">Unit</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if vital.unit and vital.unit != "Not specified" %}
+                                            <div class="field-value">{{ vital.unit }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Measurement Date #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-calendar me-2 text-info"></i>
+                                        <span class="field-label">Date Measured</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if vital.date and vital.date != "Not specified" %}
+                                            <div class="field-value">{{ vital.date }}</div>
+                                        {% elif vital.measurement_date and vital.measurement_date != "Not specified" %}
+                                            <div class="field-value">{{ vital.measurement_date }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not available in source document</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Reference Range #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-arrows-alt-h me-2 text-info"></i>
+                                        <span class="field-label">Reference Range</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if vital.reference_range and vital.reference_range != "Not specified" %}
+                                            <div class="field-value">{{ vital.reference_range }}</div>
+                                        {% elif vital.normal_range and vital.normal_range != "Not specified" %}
+                                            <div class="field-value">{{ vital.normal_range }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not available</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Status #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-check-circle me-2 text-info"></i>
+                                        <span class="field-label">Status</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if vital.status and vital.status != "Not specified" %}
+                                            <div class="field-value">{{ vital.status }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Final</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Interpretation #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-notes-medical me-2 text-info"></i>
+                                        <span class="field-label">Interpretation</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if vital.interpretation and vital.interpretation != "Not specified" %}
+                                            <div class="field-value">{{ vital.interpretation }}</div>
+                                        {% elif vital.result_interpretation and vital.result_interpretation != "Not specified" %}
+                                            <div class="field-value">{{ vital.result_interpretation }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not available in source document</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        
+                        {# Source Information - Pipeline Enhanced #}
+                        {% if vital.source %}
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-database me-2 text-muted"></i>
+                                        <span class="field-label text-muted">Source</span>
+                                    </div>
+                                    <div class="field-content">
+                                        <div class="field-value text-muted small">{{ vital.source }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-
-            <!-- Structured View Tab Content -->
-            <div id="vital_signs_{{ section_index }}_structured" class="clinical-tab-content active">
-                <div class="clinical-table">
-                    <!-- Mobile Card Layout (hidden on desktop) -->
-                    <div class="d-block d-md-none">
-                        <div class="clinical-cards-container">
-                            {% for row in section.clinical_table.rows %}
-                            <div class="card clinical-card mb-3 {% if row.has_medical_codes %}border-success{% endif %}">
-                                <div class="card-body">
-                                    {% for header in section.clinical_table.headers %}
-                                    {% with row.data|get_item:header.key as cell_data %}
-                                    <div class="clinical-field mb-2 {% if header.primary %}primary-field-mobile{% endif %}">
-                                        <div class="field-label d-flex align-items-center mb-1">
-                                            <strong class="text-muted small">{{ header.label }}</strong>
-                                            {% if header.type == 'vital' %}
-                                            <i class="fa-solid fa-heartbeat ms-1 terminology-indicator text-muted" title="Vital Sign"></i>
-                                            {% elif header.type == 'value' %}
-                                            <i class="fa-solid fa-tachometer-alt ms-1 terminology-indicator text-muted" title="Measurement Value"></i>
-                                            {% elif header.type == 'unit' %}
-                                            <i class="fa-solid fa-ruler ms-1 terminology-indicator text-muted" title="Unit of Measure"></i>
-                                            {% elif header.type == 'date' %}
-                                            <i class="fa-solid fa-calendar-alt ms-1 terminology-indicator text-muted" title="Measurement Date"></i>
-                                            {% elif header.type == 'range' %}
-                                            <i class="fa-solid fa-arrows-alt-h ms-1 terminology-indicator text-muted" title="Normal Range"></i>
-                                            {% endif %}
-                                        </div>
-                                        <div class="field-value">
-                                            {% if header.primary %}
+        </div>
+    </div>
+    {% else %}
+    {# Empty State - Following Medications Pattern #}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-vital-signs" class="toggle-input" type="checkbox">
+            <label for="toggle-vital-signs" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-heartbeat me-2"></i>
+                        <span>Vital Signs</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge empty">No Data</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">No vital signs data available</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% endwith %}
+</div>
                                             <div class="primary-field-content">
                                                 <strong class="text-dark">{% firstof cell_data|safe_get:"display_value" cell_data|safe_get:"value" "N/A" %}</strong>
                                                 {% if cell_data|safe_get:"has_terminology" %}
