@@ -51,9 +51,9 @@
     {% elif section.section_id == 'psImmunizations' or section.section_id == 'immunizations' or section.section_id == 'vaccinations' %}
         {% with section_index=forloop.counter0 %}
             {% if enhanced_immunizations %}
-                {% include 'patient_data/sections/immunizations_section_cards.html' with section_data=enhanced_immunizations %}
+                {% include 'patient_data/sections/immunizations_section.html' with section_data=enhanced_immunizations %}
             {% else %}
-                {% include 'patient_data/sections/immunizations_section_cards.html' %}
+                {% include 'patient_data/sections/immunizations_section.html' %}
             {% endif %}
         {% endwith %}
 
@@ -68,17 +68,20 @@
 
     {% elif section.section_id == 'psListOfSurgeries' or section.section_id == 'list_of_surgeries' or section.section_id == 'surgeries' or section.section_id == 'surgical_procedures' or section.section_id == 'procedures' or section.section_id == 'history_of_procedures' or 'procedures' in section.title|safe_title_text|lower or 'surgery' in section.title|safe_title_text|lower %}
         {% with section_index=forloop.counter0 %}
-            {% include 'patient_data/sections/procedures_section_cards.html' %}
-        {% endwith %}
-
-    {% elif section.section_id == 'psVitalSigns' or section.section_id == 'vital_signs' or section.section_id == 'vitals' %}
-        {% with section_index=forloop.counter0 %}
-            {% include 'patient_data/sections/vitals_section_cards.html' %}
+            {% if enhanced_procedures %}
+                {% include 'patient_data/sections/procedures_section.html' with section_data=enhanced_procedures %}
+            {% else %}
+                {% include 'patient_data/sections/procedures_section.html' %}
+            {% endif %}
         {% endwith %}
 
     {% elif section.section_id == 'psMedicalDevices' or section.section_id == 'medical_devices' or section.section_id == 'devices' %}
         {% with section_index=forloop.counter0 %}
-            {% include 'patient_data/sections/medical_devices_section.html' %}
+            {% if enhanced_medical_devices %}
+                {% include 'patient_data/sections/medical_devices_section.html' with section_data=enhanced_medical_devices %}
+            {% else %}
+                {% include 'patient_data/sections/medical_devices_section.html' %}
+            {% endif %}
         {% endwith %}
 
     {# Generic sections with predefined configurations #}
@@ -102,9 +105,13 @@
             {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='social_history' section_icon='fa-solid fa-users' header_class='bg-secondary' table_header_class='table-secondary' text_class='text-secondary' badge_class='bg-secondary' border_class='border-secondary' entries_label='social history items' empty_title='No Social History' empty_message='No social history information available for this patient' %}
         {% endwith %}
 
-    {% elif section.section_id == 'psPregnancies' %}
+    {% elif section.section_id == 'psPregnancies' or section.section_id == 'pregnancies' or section.section_id == 'pregnancy_history' %}
         {% with section_index=forloop.counter0 %}
-            {% include 'patient_data/sections/generic_clinical_section.html' with section_config_id='pregnancies' section_icon='fa-solid fa-baby' header_class='bg-pink' table_header_class='table-pink' text_class='text-pink' badge_class='bg-pink' border_class='border-pink' entries_label='pregnancy records' empty_title='No Pregnancy History' empty_message='No pregnancy history available for this patient' %}
+            {% if enhanced_pregnancy_history %}
+                {% include 'patient_data/sections/pregnancy_history_section.html' with section_data=enhanced_pregnancy_history %}
+            {% else %}
+                {% include 'patient_data/sections/pregnancy_history_section.html' %}
+            {% endif %}
         {% endwith %}
 
         {% else %}

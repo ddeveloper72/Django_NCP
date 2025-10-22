@@ -1,0 +1,124 @@
+{% extends 'patient_data/sections/base_clinical_section.html' %}
+{% load patient_filters %}
+
+{% block section_content %}
+{# Pregnancy History Section Template - Enhanced Pipeline Data #}
+
+{% if section_data %}
+    {% for pregnancy in section_data %}
+    <div class="field-group">
+        <div class="field-group-header">
+            <div class="field-primary">
+                <i class="fas fa-baby me-2" style="color: var(--pink-color, #e91e63);"></i>
+                <span class="field-title">Pregnancy {{ pregnancy.pregnancy_number|default:forloop.counter }}</span>
+                {% if pregnancy.status %}
+                <span class="clinical-badge status-{{ pregnancy.status|slugify }}">{{ pregnancy.status }}</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="field-group-content">
+            {% if pregnancy.outcome %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-heart me-1"></i>
+                    Outcome
+                </div>
+                <div class="field-value">{{ pregnancy.outcome }}</div>
+            </div>
+            {% endif %}
+            
+            {% if pregnancy.delivery_date or pregnancy.date %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-calendar-check me-1"></i>
+                    Delivery Date
+                </div>
+                <div class="field-value">{{ pregnancy.delivery_date|default:pregnancy.date|date:"M d, Y" }}</div>
+            </div>
+            {% endif %}
+            
+            {% if pregnancy.gestational_age %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-clock me-1"></i>
+                    Gestational Age
+                </div>
+                <div class="field-value">{{ pregnancy.gestational_age }}</div>
+            </div>
+            {% endif %}
+            
+            {% if pregnancy.birth_weight %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-weight me-1"></i>
+                    Birth Weight
+                </div>
+                <div class="field-value">{{ pregnancy.birth_weight }}</div>
+            </div>
+            {% endif %}
+            
+            {% if pregnancy.delivery_method %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-hospital me-1"></i>
+                    Delivery Method
+                </div>
+                <div class="field-value">{{ pregnancy.delivery_method }}</div>
+            </div>
+            {% endif %}
+            
+            {% if pregnancy.complications %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Complications
+                </div>
+                <div class="field-value">{{ pregnancy.complications }}</div>
+            </div>
+            {% endif %}
+            
+            {% if pregnancy.prenatal_care %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-user-md me-1"></i>
+                    Prenatal Care
+                </div>
+                <div class="field-value">{{ pregnancy.prenatal_care }}</div>
+            </div>
+            {% endif %}
+            
+            {% if pregnancy.number_of_births %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-users me-1"></i>
+                    Number of Births
+                </div>
+                <div class="field-value">{{ pregnancy.number_of_births }}</div>
+            </div>
+            {% endif %}
+            
+            {% if pregnancy.code or pregnancy.pregnancy_code %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-code me-1"></i>
+                    Code
+                </div>
+                <div class="field-value">
+                    <span class="medical-code">{{ pregnancy.code|default:pregnancy.pregnancy_code }}</span>
+                    {% if pregnancy.coding_system %}
+                    <span class="text-muted ms-1">({{ pregnancy.coding_system }})</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="no-data-message">
+        <i class="fas fa-baby me-2"></i>
+        No pregnancy history information available
+    </div>
+{% endif %}
+{% endblock %}
