@@ -180,8 +180,41 @@ class CDAViewProcessor:
         """
         logger.info(f"[CDA PROCESSOR] Processing CDA patient view for session {session_id}")
         
-        # Build context using the new shared method
-        context = self.build_cda_context(request, session_id, match_data, cda_type)
+        # ENTERPRISE ARCHITECTURE: Use unified clinical data pipeline manager
+        try:
+            from ..services.clinical_data_pipeline_manager import clinical_pipeline_manager
+            logger.info("[CDA PROCESSOR] Using unified clinical data pipeline manager")
+            
+            # Extract CDA content from match data
+            cda_content, actual_cda_type = self._get_cda_content(match_data, cda_type)
+            
+            if cda_content:
+                # Process CDA content using specialized service agents
+                unified_data = clinical_pipeline_manager.process_cda_content(request, session_id, cda_content)
+                
+                # Get template context from pipeline manager
+                pipeline_context = clinical_pipeline_manager.get_template_context(request, session_id)
+                
+                # Build base context and merge with pipeline context
+                context = self.context_builder.build_base_context(session_id, 'CDA')
+                context.update(pipeline_context)
+                
+                # Add CDA-specific metadata
+                self._add_cda_metadata(context, match_data, cda_content, actual_cda_type)
+                
+                # Finalize context
+                context = self.context_builder.finalize_context(context)
+                
+                logger.info(f"[CDA PROCESSOR] Successfully processed via unified pipeline: {len(pipeline_context.get('sections_processed', []))} sections")
+                
+            else:
+                # Fallback to original processing if no CDA content
+                context = self.build_cda_context(request, session_id, match_data, cda_type)
+                
+        except Exception as e:
+            logger.warning(f"[CDA PROCESSOR] Unified pipeline failed, falling back to original processing: {e}")
+            # Fallback to original processing
+            context = self.build_cda_context(request, session_id, match_data, cda_type)
         
         # Check if there were processing errors
         if context.get('processing_failed', False):
@@ -194,12 +227,39 @@ class CDAViewProcessor:
         
         logger.info(f"[CDA PROCESSOR] Successfully processed CDA patient view for session {session_id}")
         
-        # FINAL FIX: Ensure enhanced medications override any previous processing
-        enhanced_medications = self._get_enhanced_medications_from_session()
-        if enhanced_medications:
-            context['medications'] = enhanced_medications
-            context['debug_final_enhanced_override'] = True
-            print(f"*** FINAL ENHANCED OVERRIDE: Set {len(enhanced_medications)} enhanced medications before render ***")
+        # FINAL FIX: Use unified clinical pipeline for all enhanced data
+        try:
+            from patient_data.services.clinical_data_pipeline_manager import clinical_pipeline_manager
+            
+            # Process all clinical sections through unified pipeline
+            unified_results = clinical_pipeline_manager.process_all_sections(self.request, session_id, match_data.get('cda_content'))
+            
+            # Add all enhanced clinical data to context
+            context.update({
+                'enhanced_medications': unified_results.get('10160-0', {}).get('items', []),
+                'enhanced_allergies': unified_results.get('48765-2', {}).get('items', []),
+                'enhanced_problems': unified_results.get('11450-4', {}).get('items', []),
+                'enhanced_vital_signs': unified_results.get('8716-3', {}).get('items', []),
+                'enhanced_procedures': unified_results.get('47519-4', {}).get('items', []),
+                'enhanced_immunizations': unified_results.get('11369-6', {}).get('items', []),
+                'enhanced_results': unified_results.get('30954-2', {}).get('items', []),
+                'enhanced_medical_devices': unified_results.get('46264-8', {}).get('items', []),
+                'enhanced_pregnancy_history': unified_results.get('10162-6', {}).get('items', []),
+                'unified_pipeline_processed': True,
+                'unified_sections_count': len(unified_results)
+            })
+            
+            logger.info(f"[CDA PROCESSOR] Unified pipeline provided enhanced data for {len(unified_results)} clinical sections")
+            
+        except Exception as e:
+            logger.warning(f"[CDA PROCESSOR] Unified pipeline failed, using fallback enhanced medications: {e}")
+            # Fallback to original enhanced medications processing
+            enhanced_medications = self._get_enhanced_medications_from_session()
+            if enhanced_medications:
+                context['enhanced_medications'] = enhanced_medications
+                context['medications'] = enhanced_medications
+                context['debug_fallback_enhanced_override'] = True
+                print(f"*** FALLBACK ENHANCED OVERRIDE: Set {len(enhanced_medications)} enhanced medications ***")
         
         # CRITICAL DEDUPLICATION FIX: Remove duplicate medications regardless of source
         medications_in_context = context.get('medications', [])
