@@ -2,15 +2,20 @@
 {% load patient_filters %}
 
 {% block section_content %}
-{# Medical Devices Section Template - Enhanced Pipeline Data #}
+{# =============================================== #}
+{# MEDICAL DEVICES SECTION - Enhanced Pipeline Data #}
+{# =============================================== #}
 
+{# Check if medical devices data exists #}
 {% if section_data %}
+    {# Loop through each medical device entry #}
     {% for device in section_data %}
     <div class="field-group">
         <div class="field-group-header">
             <div class="field-primary">
                 <i class="fas fa-microchip me-2" style="color: var(--secondary-color);"></i>
                 <span class="field-title">{{ device.device_name|default:device.name|default:"Medical Device" }}</span>
+                {# Display device status badge if available #}
                 {% if device.status %}
                 <span class="clinical-badge status-{{ device.status|slugify }}">{{ device.status }}</span>
                 {% endif %}
@@ -18,6 +23,7 @@
         </div>
         
         <div class="field-group-content">
+            {# Device type information #}
             {% if device.device_type %}
             <div class="field-row">
                 <div class="field-label">
@@ -28,6 +34,7 @@
             </div>
             {% endif %}
             
+            {# Device manufacturer information #}
             {% if device.manufacturer %}
             <div class="field-row">
                 <div class="field-label">

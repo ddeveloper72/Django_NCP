@@ -1,12 +1,15 @@
+{# =============================================== #}
 {# MEDICATIONS SECTION - Customizable Template #}
-{# Easy to modify layout, styling, and data presentation #}
+{# =============================================== #}
 
+{# Check if medications data exists and render card layout #}
 {% if entries %}
-    <!-- Layout Option 1: Card-based (default) -->
+    {# Medications container with card-based layout #}
     <div class="medications-entries">
+        {# Loop through each medication entry #}
         {% for entry in entries %}
         <div class="clinical-entry" data-entry-type="medication">
-            <!-- Primary Information Row -->
+            {# Primary medication information row #}
             <div class="row">
                 <div class="col-md-7">
                     <div class="primary-info">
@@ -15,9 +18,11 @@
                     </div>
                 </div>
                 <div class="col-md-5 text-end">
+                    {# Display dosage badge if available #}
                     {% if entry.dosage %}
                     <span class="badge bg-info">{{ entry.dosage }}</span>
                     {% endif %}
+                    {# Display status badge with contextual coloring #}
                     {% if entry.status %}
                     <span class="status-badge bg-{{ entry.status|lower|default:'secondary' }}">
                         {{ entry.status|default:"Active" }}
@@ -26,7 +31,7 @@
                 </div>
             </div>
 
-            <!-- Secondary Information Row -->
+            {# Secondary medication information row #}
             <div class="row mt-2">
                 <div class="col-md-6">
                     <span class="field-label">Medication Code:</span>

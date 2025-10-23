@@ -1,5 +1,7 @@
 {% load patient_filters %}
-{# Base Clinical Section Template - Inherited by all clinical sections #}
+{# =============================================== #}
+{# BASE CLINICAL SECTION - Template Inheritance #}
+{# =============================================== #}
 {# 
    Variables expected:
    - section_data: List of clinical items from pipeline services
@@ -9,7 +11,7 @@
    - badge_color: CSS class for badge color (e.g., "populated", "warning", "info")
 #}
 
-<!-- {{ section_title }} Section -->
+{# Base template structure for clinical sections #}
 <div class="medical-section" id="{{ section_id }}-section">
     {% if section_data and section_data|length > 0 %}
     <div class="clinical-section">

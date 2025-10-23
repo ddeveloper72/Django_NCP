@@ -1,11 +1,14 @@
 {% load patient_filters %}
-{# Vital Signs Section Template - Mobile-First Card Design #}
+{# =============================================== #}
+{# VITAL SIGNS SECTION - Mobile-First Card Design #}
+{# =============================================== #}
 
-<!-- Vital Signs Section -->
+{# Medical section wrapper for vital signs data display #}
 <div class="medical-section" id="vital-signs-section">
+    {# Create local context variable for vital signs list #}
     {% with section_data as vital_sign_list %}
     
-    {# Vital Signs Section using Modern Card Layout #}
+    {# Check if vital signs data exists and render modern card layout #}
     {% if vital_sign_list and vital_sign_list|length > 0 %}
     <div class="clinical-section">
         <div class="collapsible-wrapper">
@@ -25,16 +28,20 @@
             <div class="collapsible-content-title">
                 <div class="content-inner-title">
                     <p class="mb-3 text-muted">Vital Signs: {{ vital_sign_list|length }} items found</p>
+                    
+                    {# Loop through each vital sign entry to display in card format #}
                     {% for vital_sign in vital_sign_list %}
-                    {# Enhanced Vital Sign Card - Mobile-First Design #}
+                    
+                    {# Individual vital sign card with success theme styling #}
                     <div class="vital-sign-card mb-4 p-4 border rounded shadow-sm bg-white border-success">
                         
-                        {# Header Section - Vital Sign Name #}
+                        {# Card header containing vital sign name and values #}
                         <div class="vital-sign-header mb-3 pb-3 border-bottom border-success">
                             <div class="d-flex flex-wrap align-items-start justify-content-between">
                                 <div class="vital-sign-name-section flex-grow-1 me-3">
                                     <h5 class="vital-sign-name text-success mb-1 fw-bold">
                                         <i class="fa-solid fa-heartbeat me-2"></i>
+                                        {# Display vital sign name with enhanced data structure fallbacks #}
                                         {% if vital_sign.title.translated %}
                                             {{ vital_sign.title.translated|safe }}
                                         {% elif vital_sign.title.original %}

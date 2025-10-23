@@ -1,11 +1,14 @@
 {% load patient_filters %}
-{# Immunizations Section Template - Mobile-First Card Design #}
+{# =============================================== #}
+{# IMMUNIZATIONS SECTION - Mobile-First Card Design #}
+{# =============================================== #}
 
-<!-- Immunizations Section -->
+{# Medical section wrapper for immunizations data display #}
 <div class="medical-section" id="immunizations-section">
+    {# Create local context variable for immunizations list #}
     {% with section_data as immunization_list %}
     
-    {# Immunizations Section using Modern Card Layout #}
+    {# Check if immunizations data exists and render modern card layout #}
     {% if immunization_list and immunization_list|length > 0 %}
     <div class="clinical-section">
         <div class="collapsible-wrapper">
@@ -25,22 +28,26 @@
             <div class="collapsible-content-title">
                 <div class="content-inner-title">
                     <p class="mb-3 text-muted">Immunizations: {{ immunization_list|length }} items found</p>
+                    
+                    {# Loop through each immunization entry to display in card format #}
                     {% for immunization in immunization_list %}
-                    {# Enhanced Immunization Card - Mobile-First Design #}
+                    
+                    {# Individual immunization card with primary theme styling #}
                     <div class="immunization-card mb-4 p-4 border rounded shadow-sm bg-white border-primary">
                         
-                        {# Header Section - Vaccine Name #}
+                        {# Card header containing vaccine name and status badge #}
                         <div class="immunization-header mb-3 pb-3 border-bottom border-primary">
                             <div class="d-flex flex-wrap align-items-start justify-content-between">
                                 <div class="vaccine-name-section flex-grow-1 me-3">
                                     <h5 class="vaccine-name text-primary mb-1 fw-bold">
                                         <i class="fa-solid fa-syringe me-2"></i>
+                                        {# Display vaccine name with enhanced data structure fallbacks #}
                                         {% if immunization.data.vaccine.display_value %}
                                             {{ immunization.data.vaccine.display_value }}
                                         {% elif immunization.vaccine_name %}
-                                            {{ immunization.vaccine_name }}
+                                            {{ immunization.vaccine_name %}
                                         {% elif immunization.data.vaccine.value %}
-                                            {{ immunization.data.vaccine.value }}
+                                            {{ immunization.data.vaccine.value %}
                                         {% elif immunization.display_name %}
                                             {{ immunization.display_name }}
                                         {% elif immunization.name %}
