@@ -1,0 +1,670 @@
+"""
+Clinical Field Mapper
+Transforms raw clinical data into template-compatible structures.
+
+This service addresses the critical gap where templates expect items with:
+1. A `data` object with structured fields like `allergen.display_value`, `severity.display_value`, etc.
+2. Fallback flat fields like `allergen`, `name`, etc.
+
+Currently only medications have proper template compatibility - this mapper extends that to all clinical sections.
+"""
+
+import logging
+from typing import Any, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
+
+
+class ClinicalFieldMapper:
+    """Maps raw clinical data to template-compatible structures"""
+
+    def __init__(self):
+        self.mapping_stats = {
+            "sections_processed": 0,
+            "items_mapped": 0,
+            "data_structures_added": 0,
+            "fallback_fields_added": 0
+        }
+
+    def map_clinical_arrays(self, clinical_arrays: Dict[str, List]) -> Dict[str, List]:
+        """Apply field mapping to all clinical sections for template compatibility"""
+        try:
+            logger.info("[FIELD_MAPPER] Starting clinical data mapping for template compatibility")
+            
+            # Apply section-specific mapping
+            clinical_arrays["allergies"] = self._map_allergy_fields(clinical_arrays.get("allergies", []))
+            clinical_arrays["problems"] = self._map_problem_fields(clinical_arrays.get("problems", []))
+            clinical_arrays["procedures"] = self._map_procedure_fields(clinical_arrays.get("procedures", []))
+            clinical_arrays["immunizations"] = self._map_immunization_fields(clinical_arrays.get("immunizations", []))
+            clinical_arrays["vital_signs"] = self._map_vital_signs_fields(clinical_arrays.get("vital_signs", []))
+            clinical_arrays["results"] = self._map_results_fields(clinical_arrays.get("results", []))
+            
+            # Medications already have template compatibility fixes, just count them
+            self.mapping_stats["sections_processed"] += 1
+            self.mapping_stats["items_mapped"] += len(clinical_arrays.get("medications", []))
+            
+            logger.info(f"[FIELD_MAPPER] Clinical mapping complete: {self.mapping_stats}")
+            return clinical_arrays
+            
+        except Exception as e:
+            logger.error(f"[FIELD_MAPPER] Clinical mapping failed: {e}")
+            return clinical_arrays
+
+    def _map_allergy_fields(self, allergies: List[Dict]) -> List[Dict]:
+        """Map allergy data for template compatibility
+        
+        Template expects:
+        - allergy.data.allergen.display_value
+        - allergy.data.allergen.value  
+        - allergy.data.severity.display_value
+        - allergy.data.reaction.display_value
+        - allergy.allergen (fallback)
+        - allergy.reaction (fallback)
+        """
+        mapped_allergies = []
+        
+        for allergy in allergies:
+            if not allergy:
+                continue
+                
+            mapped_allergy = dict(allergy)  # Create a copy
+            
+            # Extract core allergy information
+            allergen_name = self._extract_allergen_name(allergy)
+            reaction_info = self._extract_reaction_info(allergy)
+            severity_info = self._extract_severity_info(allergy)
+            
+            # Create data structure for template compatibility
+            mapped_allergy["data"] = {
+                "allergen": {
+                    "display_value": allergen_name,
+                    "value": allergen_name
+                },
+                "reaction": {
+                    "display_value": reaction_info,
+                    "value": reaction_info
+                },
+                "severity": {
+                    "display_value": severity_info,
+                    "value": severity_info
+                }
+            }
+            
+            # Add fallback flat fields
+            mapped_allergy["allergen"] = allergen_name
+            mapped_allergy["reaction"] = reaction_info
+            mapped_allergy["severity"] = severity_info
+            mapped_allergy["display_name"] = allergen_name
+            mapped_allergy["name"] = allergen_name
+            
+            mapped_allergies.append(mapped_allergy)
+            
+            self.mapping_stats["items_mapped"] += 1
+            self.mapping_stats["data_structures_added"] += 1
+            logger.info(f"[FIELD_MAPPER] Mapped allergy: {allergen_name} with severity {severity_info}")
+        
+        self.mapping_stats["sections_processed"] += 1
+        return mapped_allergies
+
+    def _map_problem_fields(self, problems: List[Dict]) -> List[Dict]:
+        """Map problem data for template compatibility
+        
+        Template expects:
+        - problem.data.problem.display_value
+        - problem.data.problem.value
+        - problem.data.status.display_value
+        - problem.data.type.display_value
+        - problem.data.clinical_status.display_value
+        - problem.name (fallback)
+        """
+        mapped_problems = []
+        
+        for problem in problems:
+            if not problem:
+                continue
+                
+            mapped_problem = dict(problem)  # Create a copy
+            
+            # Extract core problem information
+            problem_name = self._extract_problem_name(problem)
+            status_info = self._extract_problem_status(problem)
+            problem_type = self._extract_problem_type(problem)
+            clinical_status = self._extract_clinical_status(problem)
+            
+            # Create data structure for template compatibility
+            mapped_problem["data"] = {
+                "problem": {
+                    "display_value": problem_name,
+                    "value": problem_name
+                },
+                "status": {
+                    "display_value": status_info,
+                    "value": status_info
+                },
+                "type": {
+                    "display_value": problem_type,
+                    "value": problem_type
+                },
+                "clinical_status": {
+                    "display_value": clinical_status,
+                    "value": clinical_status
+                },
+                "onset_date": {
+                    "display_value": problem.get("onset_date", ""),
+                    "value": problem.get("onset_date", "")
+                }
+            }
+            
+            # Add fallback flat fields
+            mapped_problem["name"] = problem_name
+            mapped_problem["display_name"] = problem_name
+            mapped_problem["status"] = status_info
+            mapped_problem["problem_type"] = problem_type
+            
+            mapped_problems.append(mapped_problem)
+            
+            self.mapping_stats["items_mapped"] += 1
+            self.mapping_stats["data_structures_added"] += 1
+            logger.info(f"[FIELD_MAPPER] Mapped problem: {problem_name} with status {status_info}")
+        
+        self.mapping_stats["sections_processed"] += 1
+        return mapped_problems
+
+    def _map_procedure_fields(self, procedures: List[Dict]) -> List[Dict]:
+        """Map procedure data for template compatibility
+        
+        Template expects:
+        - procedure.data.procedure.display_value
+        - procedure.data.procedure.value
+        - procedure.procedure_name (fallback)
+        - procedure.name (fallback)
+        - procedure.display_name (fallback)
+        """
+        mapped_procedures = []
+        
+        for procedure in procedures:
+            if not procedure:
+                continue
+                
+            mapped_procedure = dict(procedure)  # Create a copy
+            
+            # Extract core procedure information
+            procedure_name = self._extract_procedure_name(procedure)
+            procedure_date = procedure.get("procedure_date", procedure.get("date", ""))
+            
+            # Create data structure for template compatibility
+            mapped_procedure["data"] = {
+                "procedure": {
+                    "display_value": procedure_name,
+                    "value": procedure_name
+                },
+                "date": {
+                    "display_value": procedure_date,
+                    "value": procedure_date
+                }
+            }
+            
+            # Add fallback flat fields
+            mapped_procedure["procedure_name"] = procedure_name
+            mapped_procedure["name"] = procedure_name
+            mapped_procedure["display_name"] = procedure_name
+            mapped_procedure["date"] = procedure_date
+            
+            mapped_procedures.append(mapped_procedure)
+            
+            self.mapping_stats["items_mapped"] += 1
+            self.mapping_stats["data_structures_added"] += 1
+            logger.info(f"[FIELD_MAPPER] Mapped procedure: {procedure_name}")
+        
+        self.mapping_stats["sections_processed"] += 1
+        return mapped_procedures
+
+    def _map_immunization_fields(self, immunizations: List[Dict]) -> List[Dict]:
+        """Map immunization data for template compatibility
+        
+        Template expects:
+        - immunization.data.vaccine.display_value
+        - immunization.data.vaccine.value
+        - immunization.vaccine_name (fallback)
+        - immunization.name (fallback)
+        - immunization.display_name (fallback)
+        """
+        mapped_immunizations = []
+        
+        for immunization in immunizations:
+            if not immunization:
+                continue
+                
+            mapped_immunization = dict(immunization)  # Create a copy
+            
+            # Extract core immunization information
+            vaccine_name = self._extract_vaccine_name(immunization)
+            immunization_date = immunization.get("immunization_date", immunization.get("date", ""))
+            
+            # Create data structure for template compatibility
+            mapped_immunization["data"] = {
+                "vaccine": {
+                    "display_value": vaccine_name,
+                    "value": vaccine_name
+                },
+                "date": {
+                    "display_value": immunization_date,
+                    "value": immunization_date
+                }
+            }
+            
+            # Add fallback flat fields
+            mapped_immunization["vaccine_name"] = vaccine_name
+            mapped_immunization["name"] = vaccine_name
+            mapped_immunization["display_name"] = vaccine_name
+            mapped_immunization["date"] = immunization_date
+            
+            mapped_immunizations.append(mapped_immunization)
+            
+            self.mapping_stats["items_mapped"] += 1
+            self.mapping_stats["data_structures_added"] += 1
+            logger.info(f"[FIELD_MAPPER] Mapped immunization: {vaccine_name}")
+        
+        self.mapping_stats["sections_processed"] += 1
+        return mapped_immunizations
+
+    def _map_vital_signs_fields(self, vital_signs: List[Dict]) -> List[Dict]:
+        """Map vital signs data for template compatibility"""
+        mapped_vital_signs = []
+        
+        for vital_sign in vital_signs:
+            if not vital_sign:
+                continue
+                
+            mapped_vital_sign = dict(vital_sign)
+            
+            # Extract vital sign information
+            vital_name = self._extract_vital_sign_name(vital_sign)
+            vital_value = vital_sign.get("value", vital_sign.get("observation_value", ""))
+            vital_unit = vital_sign.get("unit", "")
+            
+            # Create data structure for template compatibility
+            mapped_vital_sign["data"] = {
+                "vital_sign": {
+                    "display_value": vital_name,
+                    "value": vital_name
+                },
+                "value": {
+                    "display_value": f"{vital_value} {vital_unit}".strip(),
+                    "value": vital_value
+                },
+                "unit": {
+                    "display_value": vital_unit,
+                    "value": vital_unit
+                }
+            }
+            
+            # Add fallback flat fields
+            mapped_vital_sign["name"] = vital_name
+            mapped_vital_sign["display_name"] = vital_name
+            mapped_vital_sign["value"] = vital_value
+            mapped_vital_sign["unit"] = vital_unit
+            
+            mapped_vital_signs.append(mapped_vital_sign)
+            
+            self.mapping_stats["items_mapped"] += 1
+            self.mapping_stats["data_structures_added"] += 1
+            logger.info(f"[FIELD_MAPPER] Mapped vital sign: {vital_name} = {vital_value} {vital_unit}")
+        
+        self.mapping_stats["sections_processed"] += 1
+        return mapped_vital_signs
+
+    def _map_results_fields(self, results: List[Dict]) -> List[Dict]:
+        """Map results data for template compatibility"""
+        mapped_results = []
+        
+        for result in results:
+            if not result:
+                continue
+                
+            mapped_result = dict(result)
+            
+            # Extract result information
+            result_name = self._extract_result_name(result)
+            result_value = result.get("value", result.get("observation_value", ""))
+            result_unit = result.get("unit", "")
+            
+            # Create data structure for template compatibility
+            mapped_result["data"] = {
+                "result": {
+                    "display_value": result_name,
+                    "value": result_name
+                },
+                "value": {
+                    "display_value": f"{result_value} {result_unit}".strip(),
+                    "value": result_value
+                },
+                "unit": {
+                    "display_value": result_unit,
+                    "value": result_unit
+                }
+            }
+            
+            # Add fallback flat fields
+            mapped_result["name"] = result_name
+            mapped_result["display_name"] = result_name
+            mapped_result["value"] = result_value
+            mapped_result["unit"] = result_unit
+            
+            mapped_results.append(mapped_result)
+            
+            self.mapping_stats["items_mapped"] += 1
+            self.mapping_stats["data_structures_added"] += 1
+            logger.info(f"[FIELD_MAPPER] Mapped result: {result_name} = {result_value} {result_unit}")
+        
+        self.mapping_stats["sections_processed"] += 1
+        return mapped_results
+
+    # Extraction helper methods
+    
+    def _extract_allergen_name(self, allergy: Dict) -> str:
+        """Extract allergen name from various possible field structures"""
+        candidates = [
+            allergy.get("allergen_name"),
+            allergy.get("allergen"),
+            allergy.get("substance_name"),
+            allergy.get("display_name"),
+            allergy.get("name"),
+            allergy.get("observation_name"),
+            allergy.get("observation_display"),
+            allergy.get("problem_name"),  # Sometimes allergies are stored as problems
+            allergy.get("code_display"),
+            allergy.get("display_value"),
+        ]
+        
+        # Try extracting from nested structures
+        if "data" in allergy and isinstance(allergy["data"], dict):
+            data = allergy["data"]
+            candidates.extend([
+                data.get("allergen_name"),
+                data.get("allergen"),
+                data.get("substance_name"),
+                data.get("display_name"),
+                data.get("name"),
+                data.get("observation_name"),
+                data.get("observation_display"),
+            ])
+        
+        # Try extracting from the first field that contains substance info
+        for field_name, field_value in allergy.items():
+            if isinstance(field_value, str) and field_value.strip():
+                if any(term in field_name.lower() for term in ["allergen", "substance", "agent", "trigger"]):
+                    candidates.insert(0, field_value)  # Priority for allergy-specific fields
+                elif any(term in field_name.lower() for term in ["name", "display"]) and "reaction" not in field_name.lower():
+                    candidates.append(field_value)
+        
+        for candidate in candidates:
+            if candidate and isinstance(candidate, str) and candidate.strip():
+                clean_name = candidate.strip()
+                # Skip generic values
+                if clean_name.lower() not in ["unknown", "not specified", "n/a", "none"]:
+                    return clean_name
+        
+        return "Unknown Allergen"
+
+    def _extract_reaction_info(self, allergy: Dict) -> str:
+        """Extract reaction information from allergy data"""
+        candidates = [
+            allergy.get("reaction"),
+            allergy.get("reaction_display"),
+            allergy.get("clinical_effect"),
+            allergy.get("manifestation"),
+            allergy.get("reaction_name"),
+            allergy.get("adverse_reaction"),
+        ]
+        
+        # Try extracting from nested structures
+        if "data" in allergy and isinstance(allergy["data"], dict):
+            data = allergy["data"]
+            candidates.extend([
+                data.get("reaction"),
+                data.get("reaction_display"),
+                data.get("clinical_effect"),
+                data.get("manifestation"),
+            ])
+        
+        # Try extracting from any field that contains reaction info
+        for field_name, field_value in allergy.items():
+            if isinstance(field_value, str) and field_value.strip():
+                if any(term in field_name.lower() for term in ["reaction", "effect", "manifestation", "symptom"]):
+                    candidates.insert(0, field_value)  # Priority for reaction-specific fields
+        
+        for candidate in candidates:
+            if candidate and isinstance(candidate, str) and candidate.strip():
+                clean_reaction = candidate.strip()
+                # Skip generic values
+                if clean_reaction.lower() not in ["unknown", "not specified", "n/a", "none"]:
+                    return clean_reaction
+        
+        return "Not specified"
+
+    def _extract_severity_info(self, allergy: Dict) -> str:
+        """Extract severity information from allergy data"""
+        candidates = [
+            allergy.get("severity"),
+            allergy.get("severity_display"),
+            allergy.get("criticality"),
+            "Moderate"  # Default severity
+        ]
+        
+        for candidate in candidates:
+            if candidate and isinstance(candidate, str) and candidate.strip():
+                return candidate.strip()
+        
+        return "Moderate"
+
+    def _extract_problem_name(self, problem: Dict) -> str:
+        """Extract problem name from various possible field structures"""
+        candidates = [
+            problem.get("problem_name"),
+            problem.get("display_name"),
+            problem.get("name"),
+            problem.get("observation_name"),
+            problem.get("observation_display"),
+            problem.get("diagnosis"),
+            problem.get("condition"),
+            problem.get("code_display"),
+            problem.get("display_value"),
+        ]
+        
+        # Try extracting from nested structures
+        if "data" in problem and isinstance(problem["data"], dict):
+            data = problem["data"]
+            candidates.extend([
+                data.get("problem_name"),
+                data.get("display_name"),
+                data.get("name"),
+                data.get("observation_name"),
+                data.get("observation_display"),
+            ])
+        
+        # Try extracting from any field that contains meaningful problem info
+        for field_name, field_value in problem.items():
+            if isinstance(field_value, str) and field_value.strip():
+                if any(term in field_name.lower() for term in ["problem", "diagnosis", "condition", "disease"]):
+                    candidates.insert(0, field_value)  # Priority for problem-specific fields
+                elif any(term in field_name.lower() for term in ["name", "display"]) and "status" not in field_name.lower():
+                    candidates.append(field_value)
+        
+        for candidate in candidates:
+            if candidate and isinstance(candidate, str) and candidate.strip():
+                clean_name = candidate.strip()
+                # Skip generic values
+                if clean_name.lower() not in ["unknown", "not specified", "n/a", "none", "problem"]:
+                    return clean_name
+        
+        return "Unknown Problem"
+
+    def _extract_problem_status(self, problem: Dict) -> str:
+        """Extract problem status information"""
+        candidates = [
+            problem.get("status"),
+            problem.get("problem_status"),
+            problem.get("clinical_status"),
+            "Active"  # Default status
+        ]
+        
+        for candidate in candidates:
+            if candidate and isinstance(candidate, str) and candidate.strip():
+                return candidate.strip()
+        
+        return "Active"
+
+    def _extract_problem_type(self, problem: Dict) -> str:
+        """Extract problem type information"""
+        candidates = [
+            problem.get("problem_type"),
+            problem.get("type"),
+            problem.get("category"),
+            "Clinical finding"  # Default type
+        ]
+        
+        for candidate in candidates:
+            if candidate and isinstance(candidate, str) and candidate.strip():
+                return candidate.strip()
+        
+        return "Clinical finding"
+
+    def _extract_clinical_status(self, problem: Dict) -> str:
+        """Extract clinical status information"""
+        candidates = [
+            problem.get("clinical_status"),
+            problem.get("verification_status"),
+            problem.get("status"),
+            ""  # Empty if not found
+        ]
+        
+        for candidate in candidates:
+            if candidate and isinstance(candidate, str) and candidate.strip():
+                return candidate.strip()
+        
+        return ""
+
+    def _extract_procedure_name(self, procedure: Dict) -> str:
+        """Extract procedure name from various possible field structures"""
+        candidates = [
+            procedure.get("procedure_name"),
+            procedure.get("display_name"),
+            procedure.get("name"),
+            procedure.get("observation_name"),
+            procedure.get("observation_display"),
+            procedure.get("code_display"),
+            procedure.get("display_value"),
+            procedure.get("intervention"),
+            procedure.get("operation"),
+        ]
+        
+        # Try extracting from nested structures
+        if "data" in procedure and isinstance(procedure["data"], dict):
+            data = procedure["data"]
+            candidates.extend([
+                data.get("procedure_name"),
+                data.get("display_name"),
+                data.get("name"),
+                data.get("observation_name"),
+                data.get("observation_display"),
+            ])
+        
+        # Try extracting from any field that contains meaningful procedure info
+        for field_name, field_value in procedure.items():
+            if isinstance(field_value, str) and field_value.strip():
+                if any(term in field_name.lower() for term in ["procedure", "intervention", "operation", "surgery", "treatment"]):
+                    candidates.insert(0, field_value)  # Priority for procedure-specific fields
+                elif any(term in field_name.lower() for term in ["name", "display"]) and "date" not in field_name.lower():
+                    candidates.append(field_value)
+        
+        for candidate in candidates:
+            if candidate and isinstance(candidate, str) and candidate.strip():
+                clean_name = candidate.strip()
+                # Skip generic values
+                if clean_name.lower() not in ["unknown", "not specified", "n/a", "none", "procedure"]:
+                    return clean_name
+        
+        return "Unknown Procedure"
+
+    def _extract_vaccine_name(self, immunization: Dict) -> str:
+        """Extract vaccine name from various possible field structures"""
+        candidates = [
+            immunization.get("vaccine_name"),
+            immunization.get("display_name"),
+            immunization.get("name"),
+            immunization.get("observation_name"),
+            immunization.get("observation_display"),
+            immunization.get("substance_name"),
+            immunization.get("code_display"),
+            immunization.get("display_value"),
+            immunization.get("immunization_name"),
+        ]
+        
+        # Try extracting from nested structures
+        if "data" in immunization and isinstance(immunization["data"], dict):
+            data = immunization["data"]
+            candidates.extend([
+                data.get("vaccine_name"),
+                data.get("display_name"),
+                data.get("name"),
+                data.get("observation_name"),
+                data.get("observation_display"),
+                data.get("substance_name"),
+            ])
+        
+        # Try extracting from any field that contains meaningful vaccine info
+        for field_name, field_value in immunization.items():
+            if isinstance(field_value, str) and field_value.strip():
+                if any(term in field_name.lower() for term in ["vaccine", "immunization", "vaccination", "substance"]):
+                    candidates.insert(0, field_value)  # Priority for vaccine-specific fields
+                elif any(term in field_name.lower() for term in ["name", "display"]) and "date" not in field_name.lower():
+                    candidates.append(field_value)
+        
+        for candidate in candidates:
+            if candidate and isinstance(candidate, str) and candidate.strip():
+                clean_name = candidate.strip()
+                # Skip generic values
+                if clean_name.lower() not in ["unknown", "not specified", "n/a", "none", "vaccine", "immunization"]:
+                    return clean_name
+        
+        return "Unknown Vaccine"
+
+    def _extract_vital_sign_name(self, vital_sign: Dict) -> str:
+        """Extract vital sign name from various possible field structures"""
+        candidates = [
+            vital_sign.get("vital_sign_name"),
+            vital_sign.get("display_name"),
+            vital_sign.get("name"),
+            vital_sign.get("observation_name"),
+            vital_sign.get("observation_display"),
+            "Unknown Vital Sign"
+        ]
+        
+        for candidate in candidates:
+            if candidate and isinstance(candidate, str) and candidate.strip():
+                return candidate.strip()
+        
+        return "Unknown Vital Sign"
+
+    def _extract_result_name(self, result: Dict) -> str:
+        """Extract result name from various possible field structures"""
+        candidates = [
+            result.get("result_name"),
+            result.get("display_name"),
+            result.get("name"),
+            result.get("observation_name"),
+            result.get("observation_display"),
+            result.get("test_name"),
+            "Unknown Result"
+        ]
+        
+        for candidate in candidates:
+            if candidate and isinstance(candidate, str) and candidate.strip():
+                return candidate.strip()
+        
+        return "Unknown Result"
+
+    def get_mapping_statistics(self) -> Dict[str, int]:
+        """Get mapping statistics for debugging and monitoring"""
+        return self.mapping_stats.copy()
