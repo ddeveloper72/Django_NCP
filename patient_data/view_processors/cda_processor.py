@@ -1196,9 +1196,13 @@ class CDAViewProcessor:
             context['debug_compatibility_first_dose'] = clinical_arrays['medications'][0].get('dose_quantity', 'NOT_FOUND')
         if clinical_arrays:
             # Map clinical arrays to individual variables for template compatibility
-            if clinical_arrays.get('problems'):
+            # CRITICAL FIX: Don't add problems if they were already added from sections to prevent duplication
+            existing_problems_count = len(compatibility_vars['problems'])
+            if clinical_arrays.get('problems') and existing_problems_count == 0:
                 compatibility_vars['problems'].extend(clinical_arrays['problems'])
-                logger.info(f"[COMPATIBILITY] Enhanced clinical_arrays: Adding {len(clinical_arrays['problems'])} problems")
+                logger.info(f"[COMPATIBILITY] Enhanced clinical_arrays: Adding {len(clinical_arrays['problems'])} problems (no section problems found)")
+            elif clinical_arrays.get('problems') and existing_problems_count > 0:
+                logger.info(f"[COMPATIBILITY] DUPLICATION PREVENTION: Skipping {len(clinical_arrays['problems'])} clinical_arrays problems - already have {existing_problems_count} problems from sections")
             if clinical_arrays.get('immunizations'):
                 compatibility_vars['immunizations'].extend(clinical_arrays['immunizations'])
             if clinical_arrays.get('vital_signs'):
