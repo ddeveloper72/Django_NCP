@@ -207,7 +207,7 @@
 {# =============================================== #}
 
 {# Alternative Layout Option 2: Simple Table (commented out - easy to switch) #}
-<!--
+{% comment %}
 <div class="table-responsive">
     <table class="table table-striped">
         <thead class="table-warning">
@@ -266,11 +266,4 @@
         </tbody>
     </table>
     </div>
-    -->
-
-{% else %}
-    <div class="text-muted text-center py-4">
-        <i class="fa-solid fa-shield-alt me-2"></i>
-        No known allergies recorded for this patient.
-    </div>
-{% endif %}
+    {% endcomment %}
