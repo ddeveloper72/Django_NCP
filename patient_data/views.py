@@ -3226,57 +3226,6 @@ def patient_cda_view(request, session_id, cda_type=None):
         logger.error(f"[ROUTER] Full traceback: {traceback.format_exc()}")
         # Re-raise the exception to see the full Django debug page
         raise e
-    
-    # OLD LOGIC BELOW - TO BE REMOVED IN CLEANUP
-    
-    from django.http import HttpResponse
-
-    from .ui_labels import get_ui_labels
-
-    def make_serializable(obj):
-        """Recursively convert objects to JSON-serializable format"""
-        if hasattr(obj, "__dict__"):
-            # Convert custom objects to dictionaries
-            return {key: make_serializable(value) for key, value in vars(obj).items()}
-        elif isinstance(obj, dict):
-            return {key: make_serializable(value) for key, value in obj.items()}
-        elif isinstance(obj, (list, tuple)):
-            return [make_serializable(item) for item in obj]
-        else:
-            return obj
-
-    logger.info(f"PATIENT_CDA_VIEW CALLED for session_id: {session_id}")
-
-    # PHASE 2: FHIR-CDA ARCHITECTURE SEPARATION
-    # Clean router implementation that detects document type and delegates to appropriate processor
-    logger.info(f"[ROUTER] Starting document type detection for session {session_id}")
-    
-    from .view_processors.context_builders import ContextBuilder
-    from .view_processors.fhir_processor import FHIRViewProcessor  
-    from .view_processors.cda_processor import CDAViewProcessor
-    
-    # Initialize context builder and processors
-    context_builder = ContextBuilder()
-    fhir_processor = FHIRViewProcessor()
-    cda_processor = CDAViewProcessor()
-    
-    # Detect document type from session data
-    data_source = context_builder.detect_data_source(request, session_id)
-    logger.info(f"[ROUTER] Detected data source: {data_source}")
-    
-    # Route to appropriate processor based on document type (country agnostic)
-    if data_source == "FHIR":
-        logger.info(f"[ROUTER] Routing to FHIR processor for session {session_id}")
-        response = fhir_processor.process_fhir_document(request, session_id, cda_type)
-    else:
-        logger.info(f"[ROUTER] Routing to CDA processor for session {session_id}")
-        response = cda_processor.process_cda_document(request, session_id, cda_type)
-    
-    # Return response directly from processor (already rendered)
-    logger.info(f"[ROUTER] Returning {data_source} response for session {session_id}")
-    return response
-
-
 def download_cda_xml(request, patient_id):
     """Download CDA document as XML file - prefers L1 for better PDF structure"""
 
@@ -3764,29 +3713,29 @@ def generate_structured_cda_html(
 
             # Handle different section types based on title
             if "medication" in section_title.lower():
-                sections_html += generate_medication_table_html_interactive(
+                sections_html += generate_medication_table_html(
                     transformed_entries
                 )
             elif (
                 "allergi" in section_title.lower() or "adverse" in section_title.lower()
             ):
-                sections_html += generate_allergy_table_html_interactive(
+                sections_html += generate_allergy_table_html(
                     transformed_entries
                 )
             elif "procedure" in section_title.lower():
-                sections_html += generate_procedure_table_html_interactive(
+                sections_html += generate_procedure_table_html(
                     transformed_entries
                 )
             elif (
                 "problem" in section_title.lower()
                 or "diagnosis" in section_title.lower()
             ):
-                sections_html += generate_problem_table_html_interactive(
+                sections_html += generate_problem_table_html(
                     transformed_entries
                 )
             else:
                 # Generic table for other sections
-                sections_html += generate_generic_table_html_interactive(
+                sections_html += generate_generic_table_html(
                     transformed_entries
                 )
 
@@ -6657,296 +6606,6 @@ def view_uploaded_document(request, doc_index):
         logger.error(f"Error viewing uploaded document: {str(e)}")
         messages.error(request, f"Error loading document: {str(e)}")
         return redirect("patient_data:uploaded_documents")
-
-
-def generate_medication_table_html_interactive(entries):
-    """Generate interactive HTML table for medications with collapsible details"""
-    if not entries:
-        return "<p>No medication data available.</p>"
-
-    html_content = """
-    <table class="clinical-table">
-        <thead>
-            <tr>
-                <th>[MEDICINE] Medication</th>
-                <th>📏 Dosage & Strength</th>
-                <th>⏰ Frequency</th>
-                <th>[DATA] Status</th>
-                <th>📅 Start Date</th>
-                <th>🔬 Codes</th>
-            </tr>
-        </thead>
-        <tbody>
-    """
-
-    for entry in entries:
-        medication = entry.get("Medication", "Not specified")
-        dosage = entry.get("Dosage & Strength", "Not specified")
-        frequency = entry.get("Frequency", "Not specified")
-        status = entry.get("Status", "Unknown")
-        start_date = entry.get("Start Date", "Not recorded")
-        codes = entry.get("Codes", "")
-
-        status_class = (
-            "status-active" if status.lower() == "active" else "status-inactive"
-        )
-
-        codes_html = ""
-        if codes:
-            code_list = codes.split(", ") if isinstance(codes, str) else [str(codes)]
-            for code in code_list:
-                if code.strip():
-                    codes_html += f'<span class="medical-code" title="Medical Code: {code.strip()}">{code.strip()}</span>'
-
-        html_content += f"""
-        <tr>
-            <td><strong>{medication}</strong></td>
-            <td>{dosage}</td>
-            <td>{frequency}</td>
-            <td><span class="status-badge {status_class}">{status}</span></td>
-            <td>{start_date}</td>
-            <td>{codes_html or "N/A"}</td>
-        </tr>
-        """
-
-    html_content += """
-        </tbody>
-    </table>
-    """
-
-    return html_content
-
-
-def generate_allergy_table_html_interactive(entries):
-    """Generate interactive HTML table for allergies with collapsible details"""
-    if not entries:
-        return "<p>No allergy data available.</p>"
-
-    html_content = """
-    <table class="clinical-table">
-        <thead>
-            <tr>
-                <th>[WARNING] Allergen</th>
-                <th>🔥 Reaction</th>
-                <th>[DATA] Severity</th>
-                <th>[LIST] Status</th>
-                <th>📅 First Noted</th>
-                <th>🔬 Codes</th>
-            </tr>
-        </thead>
-        <tbody>
-    """
-
-    for entry in entries:
-        allergen = entry.get("Allergen", "Not specified")
-        reaction = entry.get("Reaction", "Not specified")
-        severity = entry.get("Severity", "Not specified")
-        status = entry.get("Status", "Unknown")
-        first_noted = entry.get("First Noted", "Not recorded")
-        codes = entry.get("Codes", "")
-
-        status_class = (
-            "status-active" if status.lower() == "active" else "status-inactive"
-        )
-
-        codes_html = ""
-        if codes:
-            code_list = codes.split(", ") if isinstance(codes, str) else [str(codes)]
-            for code in code_list:
-                if code.strip():
-                    codes_html += f'<span class="medical-code" title="Medical Code: {code.strip()}">{code.strip()}</span>'
-
-        html_content += f"""
-        <tr>
-            <td><strong>{allergen}</strong></td>
-            <td>{reaction}</td>
-            <td>{severity}</td>
-            <td><span class="status-badge {status_class}">{status}</span></td>
-            <td>{first_noted}</td>
-            <td>{codes_html or "N/A"}</td>
-        </tr>
-        """
-
-    html_content += """
-        </tbody>
-    </table>
-    """
-
-    return html_content
-
-
-def generate_procedure_table_html_interactive(entries):
-    """Generate interactive HTML table for procedures with collapsible details"""
-    if not entries:
-        return "<p>No procedure data available.</p>"
-
-    html_content = """
-    <table class="clinical-table">
-        <thead>
-            <tr>
-                <th>[HOSPITAL] Procedure</th>
-                <th>📅 Date Performed</th>
-                <th>[DATA] Status</th>
-                <th>👨‍⚕️ Healthcare Provider</th>
-                <th>🔬 Medical Codes</th>
-            </tr>
-        </thead>
-        <tbody>
-    """
-
-    for entry in entries:
-        procedure = entry.get("Procedure", "Not specified")
-        date_performed = entry.get("Date Performed", "Not recorded")
-        status = entry.get("Status", "Unknown")
-        provider = entry.get("Healthcare Provider", "Not specified")
-        codes = entry.get("Medical Codes", "")
-
-        status_class = (
-            "status-completed" if status.lower() == "completed" else "status-active"
-        )
-
-        codes_html = ""
-        if codes:
-            code_list = codes.split(", ") if isinstance(codes, str) else [str(codes)]
-            for code in code_list:
-                if code.strip():
-                    codes_html += f'<span class="medical-code" title="Medical Code: {code.strip()}">{code.strip()}</span>'
-
-        html_content += f"""
-        <tr>
-            <td><strong>{procedure}</strong></td>
-            <td>{date_performed}</td>
-            <td><span class="status-badge {status_class}">{status}</span></td>
-            <td>{provider}</td>
-            <td>{codes_html or "N/A"}</td>
-        </tr>
-        """
-
-    html_content += """
-        </tbody>
-    </table>
-    """
-
-    return html_content
-
-
-def generate_problem_table_html_interactive(entries):
-    """Generate interactive HTML table for problems/diagnoses with collapsible details"""
-    if not entries:
-        return "<p>No problem data available.</p>"
-
-    html_content = """
-    <table class="clinical-table">
-        <thead>
-            <tr>
-                <th>[STETHOSCOPE] Problem/Diagnosis</th>
-                <th>[DATA] Status</th>
-                <th>📅 Onset Date</th>
-                <th>[NOTE] Notes</th>
-                <th>🔬 Medical Codes</th>
-            </tr>
-        </thead>
-        <tbody>
-    """
-
-    for entry in entries:
-        problem = entry.get("Problem", entry.get("Diagnosis", "Not specified"))
-        status = entry.get("Status", "Unknown")
-        onset_date = entry.get("Onset Date", "Not recorded")
-        notes = entry.get("Notes", "")
-        codes = entry.get("Codes", "")
-
-        status_class = (
-            "status-active" if status.lower() == "active" else "status-inactive"
-        )
-
-        codes_html = ""
-        if codes:
-            code_list = codes.split(", ") if isinstance(codes, str) else [str(codes)]
-            for code in code_list:
-                if code.strip():
-                    codes_html += f'<span class="medical-code" title="Medical Code: {code.strip()}">{code.strip()}</span>'
-
-        html_content += f"""
-        <tr>
-            <td><strong>{problem}</strong></td>
-            <td><span class="status-badge {status_class}">{status}</span></td>
-            <td>{onset_date}</td>
-            <td>{notes[:100] + '...' if len(notes) > 100 else notes}</td>
-            <td>{codes_html or "N/A"}</td>
-        </tr>
-        """
-
-    html_content += """
-        </tbody>
-    </table>
-    """
-
-    return html_content
-
-
-def generate_generic_table_html_interactive(entries):
-    """Generate interactive HTML table for generic clinical data"""
-    if not entries:
-        return "<p>No data available.</p>"
-
-    # Get all unique keys from entries to create dynamic headers
-    all_keys = set()
-    for entry in entries:
-        all_keys.update(entry.keys())
-
-    headers = list(all_keys)
-
-    html_content = """
-    <table class="clinical-table">
-        <thead>
-            <tr>
-    """
-
-    for header in headers:
-        html_content += f"<th>{header}</th>"
-
-    html_content += """
-            </tr>
-        </thead>
-        <tbody>
-    """
-
-    for entry in entries:
-        html_content += "<tr>"
-        for header in headers:
-            value = entry.get(header, "")
-            if "code" in header.lower() and value:
-                # Handle medical codes
-                codes_html = ""
-                code_list = (
-                    value.split(", ") if isinstance(value, str) else [str(value)]
-                )
-                for code in code_list:
-                    if code.strip():
-                        codes_html += f'<span class="medical-code" title="Medical Code: {code.strip()}">{code.strip()}</span>'
-                html_content += f"<td>{codes_html}</td>"
-            elif "status" in header.lower():
-                # Handle status with badges
-                status_class = (
-                    "status-active" if value.lower() == "active" else "status-inactive"
-                )
-                html_content += (
-                    f'<td><span class="status-badge {status_class}">{value}</span></td>'
-                )
-            else:
-                # Regular content
-                display_value = (
-                    str(value)[:100] + "..." if len(str(value)) > 100 else str(value)
-                )
-                html_content += f"<td>{display_value}</td>"
-    html_content += """
-        </tbody>
-    </table>
-    """
-
-    return html_content
-
 
 def select_document_view(request, patient_id):
     """Handle document selection for patients with multiple CDA documents"""
