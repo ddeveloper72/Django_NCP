@@ -49,11 +49,12 @@
             </div>
             {% endif %}
         </div>
+        {# End problem entry loop #}
         {% endfor %}
     </div>
 
-    <!-- Alternative Layout Option 2: Table (commented out - easy to switch) -->
-    <!--
+    {# Alternative Layout Option 2: Table (commented out - easy to switch) #}
+    {% comment %}
     <div class="table-responsive">
         <table class="table table-hover">
             <thead class="table-dark">
@@ -76,8 +77,9 @@
             </tbody>
         </table>
     </div>
-    -->
+    {% endcomment %}
 
+{# End problems data exists condition #}
 {% else %}
     <div class="text-muted text-center py-4">
         <i class="fa-solid fa-info-circle me-2"></i>

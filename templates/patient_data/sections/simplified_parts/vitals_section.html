@@ -2,19 +2,19 @@
 {# Easy to modify layout, styling, and data presentation #}
 
 {% if entries %}
-    <!-- Layout Option 1: Metric Cards (default) -->
+    {# Layout Option 1: Metric Cards (default) #}
     <div class="vitals-entries">
         <div class="row">
             {% for entry in entries %}
             <div class="col-md-4 mb-3">
                 <div class="clinical-entry vitals-card h-100" data-entry-type="vital">
                     <div class="text-center">
-                        <!-- Vital Sign Icon and Name -->
+                        {# Vital Sign Icon and Name #}
                         <div class="vital-icon mb-2">
                             <i class="fa-solid fa-{{ entry.vital_type|default:'heartbeat' }} fa-2x text-info"></i>
                         </div>
 
-                        <!-- Value and Unit -->
+                        {# Value and Unit #}
                         <div class="vital-value">
                             <h4 class="mb-1 text-primary">
                                 {{ entry.value|default:"--" }}
@@ -23,7 +23,7 @@
                             <p class="mb-1 fw-bold">{{ entry.vital_name|default:"Vital Sign" }}</p>
                         </div>
 
-                        <!-- Status and Timestamp -->
+                        {# Status and Timestamp #}
                         {% if entry.status %}
                         <span class="status-badge bg-{{ entry.status|lower|default:'info' }}">
                             {{ entry.status }}
@@ -39,7 +39,7 @@
                         </div>
                         {% endif %}
 
-                        <!-- Code (if needed) -->
+                        {# Code (if needed) #}
                         {% if entry.vital_code %}
                         <div class="mt-2">
                             <code class="code-value small">{{ entry.vital_code }}</code>
@@ -49,7 +49,7 @@
                 </div>
             </div>
 
-            <!-- Add row break every 3 items for better responsive layout -->
+            {# Add row break every 3 items for better responsive layout #}
             {% if forloop.counter|divisibleby:3 %}
                 </div><div class="row">
             {% endif %}
@@ -58,8 +58,8 @@
         </div>
     </div>
 
-    <!-- Alternative Layout Option 2: Horizontal List (commented out - easy to switch) -->
-    <!--
+    {# Alternative Layout Option 2: Horizontal List (commented out - easy to switch) #}
+    {% comment %}
     <div class="vitals-horizontal">
         {% for entry in entries %}
         <div class="d-flex justify-content-between align-items-center clinical-entry">
@@ -86,10 +86,10 @@
         </div>
         {% endfor %}
     </div>
-    -->
+{% endcomment %}
 
-    <!-- Alternative Layout Option 3: Compact Table (commented out - easy to switch) -->
-    <!--
+    {# Alternative Layout Option 3: Compact Table (commented out - easy to switch) #}
+    {% comment %}
     <div class="table-responsive">
         <table class="table table-hover">
             <thead class="table-info">
@@ -121,7 +121,7 @@
             </tbody>
         </table>
     </div>
-    -->
+{% endcomment %}
 
 {% else %}
     <div class="text-muted text-center py-4">

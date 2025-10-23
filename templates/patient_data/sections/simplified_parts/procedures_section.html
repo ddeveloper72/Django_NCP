@@ -2,12 +2,12 @@
 {# Easy to modify layout, styling, and data presentation #}
 
 {% if entries %}
-    <!-- Layout Option 1: Timeline-style cards (default) -->
+    {# Layout Option 1: Timeline-style cards (default) #}
     <div class="procedures-entries">
         {% for entry in entries %}
         <div class="clinical-entry timeline-entry" data-entry-type="procedure">
             <div class="row">
-                <!-- Procedure Information -->
+                {# Procedure Information #}
                 <div class="col-md-8">
                     <div class="primary-info">
                         <span class="field-label">Procedure Name:</span>
@@ -29,7 +29,7 @@
                     </div>
                 </div>
 
-                <!-- Status and Date -->
+                {# Status and Date #}
                 <div class="col-md-4 text-end">
                     <div class="procedure-meta">
                         {% if entry.status %}
@@ -51,7 +51,7 @@
                 </div>
             </div>
 
-            <!-- Additional Information -->
+            {# Additional Information #}
             {% if entry.performer or entry.location %}
             <div class="row mt-3">
                 {% if entry.performer %}
@@ -69,7 +69,7 @@
             </div>
             {% endif %}
 
-            <!-- Outcome/Results -->
+            {# Outcome/Results #}
             {% if entry.outcome or entry.complications %}
             <div class="row mt-3">
                 {% if entry.outcome %}
@@ -92,8 +92,8 @@
         {% endfor %}
     </div>
 
-    <!-- Alternative Layout Option 2: Simple List (commented out - easy to switch) -->
-    <!--
+    {# Alternative Layout Option 2: Simple List (commented out - easy to switch) #}
+    {% comment %}
     <div class="procedures-list">
         {% for entry in entries %}
         <div class="clinical-entry d-flex justify-content-between align-items-start">
@@ -113,10 +113,10 @@
         </div>
         {% endfor %}
     </div>
-    -->
+{% endcomment %}
 
-    <!-- Alternative Layout Option 3: Table View (commented out - easy to switch) -->
-    <!--
+    {# Alternative Layout Option 3: Table View (commented out - easy to switch) #}
+    {% comment %}
     <div class="table-responsive">
         <table class="table table-hover">
             <thead class="table-primary">
@@ -148,7 +148,7 @@
             </tbody>
         </table>
     </div>
-    -->
+{% endcomment %}
 
 {% else %}
     <div class="text-muted text-center py-4">

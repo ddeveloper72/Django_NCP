@@ -3,12 +3,12 @@
 {# Easy to modify layout, styling, and data presentation #}
 
 {% if entries %}
-    <!-- Layout Option 1: Flexible card layout (default) -->
+    {# Layout Option 1: Flexible card layout (default) #}
     <div class="generic-entries">
         {% for entry in entries %}
         <div class="clinical-entry" data-entry-type="{{ section_type|default:'generic' }}">
             <div class="row">
-                <!-- Primary Display Name/Title -->
+                {# Primary Display Name/Title #}
                 <div class="col-md-8">
                     <div class="primary-info">
                         <span class="field-label">{{ section_type|title }} Entry:</span>
@@ -18,7 +18,7 @@
                     </div>
                 </div>
 
-                <!-- Status/Type Badge -->
+                {# Status/Type Badge #}
                 <div class="col-md-4 text-end">
                     {% if entry.status %}
                     <span class="status-badge bg-info">{{ entry.status }}</span>
@@ -29,7 +29,7 @@
                 </div>
             </div>
 
-            <!-- Code Information -->
+            {# Code Information #}
             {% if entry.code %}
             <div class="row mt-2">
                 <div class="col-md-6">
@@ -47,7 +47,7 @@
             </div>
             {% endif %}
 
-            <!-- Description/Content -->
+            {# Description/Content #}
             {% if entry.description or entry.content %}
             <div class="row mt-2">
                 <div class="col-12">
@@ -57,7 +57,7 @@
             </div>
             {% endif %}
 
-            <!-- Date Information -->
+            {# Date Information #}
             {% if entry.date or entry.effective_time or entry.start_date %}
             <div class="row mt-2">
                 {% if entry.date %}
@@ -86,7 +86,7 @@
             </div>
             {% endif %}
 
-            <!-- Additional Flexible Fields -->
+            {# Additional Flexible Fields #}
             {% if entry.value %}
             <div class="row mt-2">
                 <div class="col-md-6">
@@ -99,7 +99,7 @@
             </div>
             {% endif %}
 
-            <!-- Raw data debug (for development - easy to remove) -->
+            {# Raw data debug (for development - easy to remove) #}
             {% if entry.debug_info %}
             <div class="row mt-2">
                 <div class="col-12">
@@ -114,8 +114,8 @@
         {% endfor %}
     </div>
 
-    <!-- Alternative Layout Option 2: Simple List (commented out - easy to switch) -->
-    <!--
+    {# Alternative Layout Option 2: Simple List (commented out - easy to switch) #}
+    {% comment %}
     <div class="generic-list">
         {% for entry in entries %}
         <div class="clinical-entry border-start border-4 border-info ps-3">
@@ -132,10 +132,10 @@
         </div>
         {% endfor %}
     </div>
-    -->
+{% endcomment %}
 
-    <!-- Alternative Layout Option 3: Key-Value Pairs (commented out - easy to switch) -->
-    <!--
+    {# Alternative Layout Option 3: Key-Value Pairs (commented out - easy to switch) #}
+    {% comment %}
     {% for entry in entries %}
     <div class="clinical-entry">
         <h6 class="border-bottom pb-2">{{ section_type|title }} Entry {{ forloop.counter }}</h6>
@@ -151,7 +151,7 @@
         </div>
     </div>
     {% endfor %}
-    -->
+{% endcomment %}
 
 {% else %}
     <div class="text-muted text-center py-4">
