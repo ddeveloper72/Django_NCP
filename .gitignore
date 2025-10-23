@@ -257,3 +257,7 @@ test_data/ps/psPregnancyHistory.xsl
 test_data/ps/psSocialHistory.xsl
 test_data/ps/psVitalSigns.xsl
 django_ncp.code-workspace
+
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md
