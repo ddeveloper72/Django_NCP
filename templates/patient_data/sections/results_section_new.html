@@ -1,45 +1,212 @@
-{# Results Section Template - Inherits from clinical_section_base.html #}
-{% extends 'patient_data/base/clinical_section_base.html' %}
 {% load patient_filters %}
+{# Laboratory Results Section Template - Mobile-First Card Design #}
 
-{# Section Configuration #}
-{% block section_icon %}fa-solid fa-vial{% endblock %}
-{% block header_class %}bg-secondary{% endblock %}
-{% block section_title %}Laboratory Results{% endblock %}
-{% block table_header_class %}table-secondary{% endblock %}
+<!-- Laboratory Results Section -->
+<div class="medical-section" id="results-section">
+    {% with section_data as result_list %}
+    
+    {# Laboratory Results Section using Modern Card Layout #}
+    {% if result_list and result_list|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-results" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-results" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-vial me-2 text-secondary"></i>
+                        <span>Laboratory Results</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ result_list|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">Laboratory Results: {{ result_list|length }} items found</p>
+                    {% for result in result_list %}
+                    {# Enhanced Lab Result Card - Mobile-First Design #}
+                    <div class="result-card mb-4 p-4 border rounded shadow-sm bg-white border-secondary">
+                        
+                        {# Header Section - Test Name #}
+                        <div class="result-header mb-3 pb-3 border-bottom border-secondary">
+                            <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                <div class="result-name-section flex-grow-1 me-3">
+                                    <h5 class="result-name text-secondary mb-1 fw-bold">
+                                        <i class="fa-solid fa-vial me-2"></i>
+                                        {% if result.data.test.display_value %}
+                                            {{ result.data.test.display_value }}
+                                        {% elif result.data.test.value %}
+                                            {{ result.data.test.value }}
+                                        {% elif result.display_name %}
+                                            {{ result.display_name }}
+                                        {% elif result.name %}
+                                            {{ result.name }}
+                                        {% else %}
+                                            Laboratory Test
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                                <div class="result-status-section">
+                                    {% if result.data.interpretation.display_value %}
+                                        {% if "High" in result.data.interpretation.display_value or "Abnormal" in result.data.interpretation.display_value %}
+                                            <span class="badge bg-warning fs-6">{{ result.data.interpretation.display_value }}</span>
+                                        {% elif "Low" in result.data.interpretation.display_value %}
+                                            <span class="badge bg-info fs-6">{{ result.data.interpretation.display_value }}</span>
+                                        {% elif "Normal" in result.data.interpretation.display_value %}
+                                            <span class="badge bg-success fs-6">{{ result.data.interpretation.display_value }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary fs-6">{{ result.data.interpretation.display_value }}</span>
+                                        {% endif %}
+                                    {% elif result.interpretation %}
+                                        <span class="badge bg-secondary fs-6">{{ result.interpretation }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary fs-6">Result</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
 
-{# Empty State Configuration #}
-{% block empty_icon %}fa-solid fa-vial{% endblock %}
-{% block empty_title %}No Lab Results{% endblock %}
-{% block empty_message %}No laboratory results available for this patient.{% endblock %}
+                        {# Clinical Information Grid #}
+                        <div class="row g-3">
+                            
+                            {# Test Result Value #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-chart-line me-2 text-primary"></i>
+                                        <span class="field-label">Result Value</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if result.value and result.unit %}
+                                            <div class="field-value fw-bold text-primary">{{ result.value }} {{ result.unit }}</div>
+                                        {% elif result.data.value.display_value %}
+                                            <div class="field-value fw-bold text-primary">{{ result.data.value.display_value }}</div>
+                                        {% elif result.value %}
+                                            <div class="field-value fw-bold text-primary">{{ result.value }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not available</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {# Reference Range #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-ruler me-2 text-primary"></i>
+                                        <span class="field-label">Reference Range</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if result.data.reference_range.display_value %}
+                                            <div class="field-value">{{ result.data.reference_range.display_value }}</div>
+                                        {% elif result.reference_range %}
+                                            <div class="field-value">{{ result.reference_range }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {# Test Date #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-calendar me-2 text-primary"></i>
+                                        <span class="field-label">Test Date</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if result.data.date.display_value %}
+                                            <div class="field-value">{{ result.data.date.display_value }}</div>
+                                        {% elif result.date %}
+                                            <div class="field-value">{{ result.date }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not recorded</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {# Test Status #}
+                            {% if result.status or result.data.status %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-info-circle me-2 text-primary"></i>
+                                        <span class="field-label">Status</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if result.data.status.display_value %}
+                                            <div class="field-value">{{ result.data.status.display_value }}</div>
+                                        {% elif result.status %}
+                                            <div class="field-value">{{ result.status }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Final</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
 
-{# Desktop Table Headers #}
-{% block table_headers %}
-<th scope="col" class="fw-bold">
-    <i class="fa-solid fa-vial me-2"></i>Test
-</th>
-<th scope="col" class="fw-bold d-none d-lg-table-cell">
-    <i class="fa-solid fa-chart-line me-2"></i>Result
-</th>
-<th scope="col" class="fw-bold d-none d-xl-table-cell">
-    <i class="fa-solid fa-calendar me-2"></i>Date
-</th>
-{% endblock table_headers %}
+                        {# Medical Codes Section #}
+                        {% if result.codes or result.medical_codes %}
+                        <div class="medical-codes-section mt-3 pt-3 border-top">
+                            <div class="field-header mb-2">
+                                <i class="fa-solid fa-code me-2 text-primary"></i>
+                                <span class="field-label">Medical Codes</span>
+                            </div>
+                            <div class="medical-codes-container">
+                                {% if result.codes %}
+                                    {% for code in result.codes %}
+                                        <span class="medical-code me-2 mb-1" title="Medical Code: {{ code }}">{{ code }}</span>
+                                    {% endfor %}
+                                {% elif result.medical_codes %}
+                                    {% for code in result.medical_codes %}
+                                        <span class="medical-code me-2 mb-1" title="Medical Code: {{ code }}">{{ code }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
 
-{# Mobile Card Content #}
-{% block mobile_card_content %}
-<div class="result-name fw-bold text-secondary mb-2">
-    {{ item.display_name|default:item.name|default:'Laboratory Test' }}
+                        {# Comments Section #}
+                        {% if result.comments or result.notes or result.data.comments %}
+                        <div class="comments-section mt-3 pt-3 border-top">
+                            <div class="field-header mb-2">
+                                <i class="fa-solid fa-sticky-note me-2 text-primary"></i>
+                                <span class="field-label">Comments</span>
+                            </div>
+                            <div class="comments-content">
+                                {% if result.data.comments.display_value %}
+                                    <div class="field-value text-muted">{{ result.data.comments.display_value }}</div>
+                                {% elif result.comments %}
+                                    <div class="field-value text-muted">{{ result.comments }}</div>
+                                {% elif result.notes %}
+                                    <div class="field-value text-muted">{{ result.notes }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    {# Empty State - No Lab Results #}
+    <div class="clinical-section">
+        <div class="empty-clinical-state text-center p-5">
+            <i class="fa-solid fa-vial fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted mb-3">No Laboratory Results</h4>
+            <p class="text-muted mb-0">No laboratory test results are available for this patient.</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% endwith %}
 </div>
-<div class="small text-muted">
-    {% if item.value %}Result: {{ item.value }} {{ item.unit|default:'' }}{% endif %}
-    {% if item.date %} | Date: {{ item.date }}{% endif %}
-</div>
-{% endblock mobile_card_content %}
-
-{# Desktop Table Row Content #}
-{% block table_row_content %}
-<td class="fw-medium">{{ item.display_name|default:item.name|default:'Laboratory Test' }}</td>
-<td class="d-none d-lg-table-cell text-muted">{{ item.value|default:'Not specified' }} {{ item.unit|default:'' }}</td>
-<td class="d-none d-xl-table-cell text-muted">{{ item.date|default:'Not specified' }}</td>
-{% endblock table_row_content %}

@@ -41,6 +41,7 @@ class ComprehensiveClinicalDataService:
         self.structured_extractor = StructuredCDAExtractor()
         self.terminology_service = TerminologyTranslator()
         self.enhanced_cts_service = EnhancedCTSResponseService()
+        # Field mapper will be loaded dynamically to avoid import issues
 
     def extract_comprehensive_clinical_data(
         self, cda_content: str, session_data: dict = None
@@ -440,9 +441,32 @@ class ComprehensiveClinicalDataService:
                         # Advance directives map to results for completeness
                         clinical_arrays["results"].append(placeholder_entry)
 
-                logger.info(
-                    f"[CLINICAL ARRAYS] Section fallback added: med={len(clinical_arrays['medications'])}, all={len(clinical_arrays['allergies'])}, prob={len(clinical_arrays['problems'])}, proc={len(clinical_arrays['procedures'])}, vs={len(clinical_arrays['vital_signs'])}"
-                )
+            logger.info(
+                f"[CLINICAL ARRAYS] Section fallback added: med={len(clinical_arrays['medications'])}, all={len(clinical_arrays['allergies'])}, prob={len(clinical_arrays['problems'])}, proc={len(clinical_arrays['procedures'])}, vs={len(clinical_arrays['vital_signs'])}"
+            )
+
+            # Apply field mapping for template compatibility
+            logger.info("[CLINICAL ARRAYS] Applying field mapping for template compatibility...")
+            
+            try:
+                # Import field mapper dynamically to avoid module loading issues
+                import sys
+                import os
+                field_mapper_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'clinical_field_mapper.py')
+                
+                if os.path.exists(field_mapper_path):
+                    sys.path.insert(0, os.path.dirname(field_mapper_path))
+                    from clinical_field_mapper import ClinicalFieldMapper
+                    
+                    field_mapper = ClinicalFieldMapper()
+                    clinical_arrays = field_mapper.map_clinical_arrays(clinical_arrays)
+                    mapping_stats = field_mapper.get_mapping_statistics()
+                    logger.info(f"[CLINICAL ARRAYS] Field mapping complete: {mapping_stats}")
+                else:
+                    logger.warning("[CLINICAL ARRAYS] Field mapper not found, using raw data")
+                    
+            except Exception as mapper_error:
+                logger.warning(f"[CLINICAL ARRAYS] Field mapping failed: {mapper_error}, using raw data")
 
             return clinical_arrays
 

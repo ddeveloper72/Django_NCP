@@ -1,50 +1,210 @@
-{# Vital Signs Section Template - Inherits from clinical_section_base.html #}
-{% extends 'patient_data/base/clinical_section_base.html' %}
 {% load patient_filters %}
+{# Vital Signs Section Template - Mobile-First Card Design #}
 
-{# Section Configuration #}
-{% block section_icon %}fa-solid fa-heartbeat{% endblock %}
-{% block header_class %}bg-success{% endblock %}
-{% block section_title %}Vital Signs{% endblock %}
-{% block table_header_class %}table-success{% endblock %}
+<!-- Vital Signs Section -->
+<div class="medical-section" id="vital-signs-section">
+    {% with section_data as vital_sign_list %}
+    
+    {# Vital Signs Section using Modern Card Layout #}
+    {% if vital_sign_list and vital_sign_list|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-vital-signs" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-vital-signs" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-heartbeat me-2 text-success"></i>
+                        <span>Vital Signs</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ vital_sign_list|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">Vital Signs: {{ vital_sign_list|length }} items found</p>
+                    {% for vital_sign in vital_sign_list %}
+                    {# Enhanced Vital Sign Card - Mobile-First Design #}
+                    <div class="vital-sign-card mb-4 p-4 border rounded shadow-sm bg-white border-success">
+                        
+                        {# Header Section - Vital Sign Name #}
+                        <div class="vital-sign-header mb-3 pb-3 border-bottom border-success">
+                            <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                <div class="vital-sign-name-section flex-grow-1 me-3">
+                                    <h5 class="vital-sign-name text-success mb-1 fw-bold">
+                                        <i class="fa-solid fa-heartbeat me-2"></i>
+                                        {% if vital_sign.title.translated %}
+                                            {{ vital_sign.title.translated|safe }}
+                                        {% elif vital_sign.title.original %}
+                                            {{ vital_sign.title.original }}
+                                        {% elif vital_sign.data.vital_sign.display_value %}
+                                            {{ vital_sign.data.vital_sign.display_value }}
+                                        {% elif vital_sign.observation_name %}
+                                            {{ vital_sign.observation_name }}
+                                        {% elif vital_sign.name %}
+                                            {{ vital_sign.name }}
+                                        {% else %}
+                                            Vital Sign
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                                <div class="vital-sign-value-section">
+                                    {% if vital_sign.value %}
+                                        <span class="badge bg-success fs-6">{{ vital_sign.value }} {{ vital_sign.unit|default:'' }}</span>
+                                    {% elif vital_sign.data.value.display_value %}
+                                        <span class="badge bg-success fs-6">{{ vital_sign.data.value.display_value }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary fs-6">No Value</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
 
-{# Empty State Configuration #}
-{% block empty_icon %}fa-solid fa-heartbeat{% endblock %}
-{% block empty_title %}No Vital Signs{% endblock %}
-{% block empty_message %}No vital signs data available for this patient.{% endblock %}
+                        {# Clinical Information Grid #}
+                        <div class="row g-3">
+                            
+                            {# Measurement Value #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-thermometer-half me-2 text-primary"></i>
+                                        <span class="field-label">Measurement</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if vital_sign.value and vital_sign.unit %}
+                                            <div class="field-value fw-bold text-success">{{ vital_sign.value }} {{ vital_sign.unit }}</div>
+                                        {% elif vital_sign.data.value.display_value %}
+                                            <div class="field-value fw-bold text-success">{{ vital_sign.data.value.display_value }}</div>
+                                        {% elif vital_sign.content %}
+                                            <div class="field-value">{{ vital_sign.content }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not recorded</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {# Date Measured #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-calendar me-2 text-primary"></i>
+                                        <span class="field-label">Date Measured</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if vital_sign.data.date.display_value %}
+                                            <div class="field-value">{{ vital_sign.data.date.display_value }}</div>
+                                        {% elif vital_sign.date %}
+                                            <div class="field-value">{{ vital_sign.date }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not recorded</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {# Reference Range #}
+                            {% if vital_sign.reference_range or vital_sign.data.reference_range %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-chart-line me-2 text-primary"></i>
+                                        <span class="field-label">Reference Range</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if vital_sign.data.reference_range.display_value %}
+                                            <div class="field-value">{{ vital_sign.data.reference_range.display_value }}</div>
+                                        {% elif vital_sign.reference_range %}
+                                            <div class="field-value">{{ vital_sign.reference_range }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {# Status/Interpretation #}
+                            {% if vital_sign.status or vital_sign.interpretation or vital_sign.data.status %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-info-circle me-2 text-primary"></i>
+                                        <span class="field-label">Status</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if vital_sign.data.status.display_value %}
+                                            <div class="field-value">{{ vital_sign.data.status.display_value }}</div>
+                                        {% elif vital_sign.interpretation %}
+                                            <div class="field-value">{{ vital_sign.interpretation }}</div>
+                                        {% elif vital_sign.status %}
+                                            <div class="field-value">{{ vital_sign.status }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Normal</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
 
-{# Desktop Table Headers #}
-{% block table_headers %}
-<th scope="col" class="fw-bold">
-    <i class="fa-solid fa-heartbeat me-2"></i>Vital Sign
-</th>
-<th scope="col" class="fw-bold d-none d-lg-table-cell">
-    <i class="fa-solid fa-thermometer-half me-2"></i>Value
-</th>
-<th scope="col" class="fw-bold d-none d-xl-table-cell">
-    <i class="fa-solid fa-calendar me-2"></i>Date
-</th>
-{% endblock table_headers %}
+                        {# Medical Codes Section #}
+                        {% if vital_sign.codes or vital_sign.medical_codes %}
+                        <div class="medical-codes-section mt-3 pt-3 border-top">
+                            <div class="field-header mb-2">
+                                <i class="fa-solid fa-code me-2 text-primary"></i>
+                                <span class="field-label">Medical Codes</span>
+                            </div>
+                            <div class="medical-codes-container">
+                                {% if vital_sign.codes %}
+                                    {% for code in vital_sign.codes %}
+                                        <span class="medical-code me-2 mb-1" title="Medical Code: {{ code }}">{{ code }}</span>
+                                    {% endfor %}
+                                {% elif vital_sign.medical_codes %}
+                                    {% for code in vital_sign.medical_codes %}
+                                        <span class="medical-code me-2 mb-1" title="Medical Code: {{ code }}">{{ code }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
 
-{# Mobile Card Content #}
-{% block mobile_card_content %}
-<div class="vital-sign-name fw-bold text-success mb-2">
-    {% if item.title.translated %}{{ item.title.translated|safe }}{% elif item.title.original %}{{ item.title.original }}{% elif item.observation_name %}{{ item.observation_name }}{% else %}Vital Sign{% endif %}
+                        {# Notes Section #}
+                        {% if vital_sign.notes or vital_sign.comments or vital_sign.data.notes %}
+                        <div class="notes-section mt-3 pt-3 border-top">
+                            <div class="field-header mb-2">
+                                <i class="fa-solid fa-sticky-note me-2 text-primary"></i>
+                                <span class="field-label">Notes</span>
+                            </div>
+                            <div class="notes-content">
+                                {% if vital_sign.data.notes.display_value %}
+                                    <div class="field-value text-muted">{{ vital_sign.data.notes.display_value }}</div>
+                                {% elif vital_sign.notes %}
+                                    <div class="field-value text-muted">{{ vital_sign.notes }}</div>
+                                {% elif vital_sign.comments %}
+                                    <div class="field-value text-muted">{{ vital_sign.comments }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    {# Empty State - No Vital Signs #}
+    <div class="clinical-section">
+        <div class="empty-clinical-state text-center p-5">
+            <i class="fa-solid fa-heartbeat fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted mb-3">No Vital Signs Recorded</h4>
+            <p class="text-muted mb-0">No vital signs data is available for this patient.</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% endwith %}
 </div>
-<div class="small text-muted">
-    {% if item.content %}{{ item.content|truncatewords:10 }}{% endif %}
-    {% if item.value %}Value: {{ item.value }} {{ item.unit|default:'' }}{% endif %}
-    {% if item.date %} | Date: {{ item.date }}{% endif %}
-</div>
-{% endblock mobile_card_content %}
-
-{# Desktop Table Row Content #}
-{% block table_row_content %}
-<td class="fw-medium">
-    {% if item.title.translated %}{{ item.title.translated|safe }}{% elif item.title.original %}{{ item.title.original }}{% elif item.observation_name %}{{ item.observation_name }}{% else %}Vital Sign{% endif %}
-</td>
-<td class="d-none d-lg-table-cell text-muted">
-    {% if item.value %}{{ item.value }} {{ item.unit|default:'' }}{% elif item.content %}{{ item.content|truncatewords:8 }}{% else %}Not specified{% endif %}
-</td>
-<td class="d-none d-xl-table-cell text-muted">{{ item.date|default:'Not specified' }}</td>
-{% endblock table_row_content %}

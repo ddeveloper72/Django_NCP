@@ -123,11 +123,12 @@ urlpatterns = [
         main_views.patient_cda_view,
         name="patient_cda_view_typed",
     ),
-    path(
-        "cda/translation-toggle/<str:patient_id>/",
-        main_views.cda_translation_toggle,
-        name="cda_translation_toggle",
-    ),
+    # Commented out temporarily - missing view function
+    # path(
+    #     "cda/translation-toggle/<str:patient_id>/",
+    #     main_views.cda_translation_toggle,
+    #     name="cda_translation_toggle",
+    # ),
     path(
         "download/<str:patient_id>/",
         main_views.download_cda_pdf,

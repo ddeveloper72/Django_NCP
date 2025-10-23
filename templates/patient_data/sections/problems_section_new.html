@@ -1,45 +1,218 @@
-{# Problems Section Template - Inherits from clinical_section_base.html #}
-{% extends 'patient_data/base/clinical_section_base.html' %}
 {% load patient_filters %}
+{# Medical Problems Section Template - Mobile-First Card Design #}
 
-{# Section Configuration #}
-{% block section_icon %}fa-solid fa-triangle-exclamation{% endblock %}
-{% block header_class %}bg-warning{% endblock %}
-{% block section_title %}Medical Problems{% endblock %}
-{% block table_header_class %}table-warning{% endblock %}
+<!-- Medical Problems Section -->
+<div class="medical-section" id="problems-section">
+    {% with section_data as problem_list %}
+    
+    {# Medical Problems Section using Modern Card Layout #}
+    {% if problem_list and problem_list|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-problems" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-problems" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-triangle-exclamation me-2 text-warning"></i>
+                        <span>Medical Problems</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ problem_list|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">Medical Problems: {{ problem_list|length }} items found</p>
+                    {% for problem in problem_list %}
+                    {# Enhanced Problem Card - Mobile-First Design #}
+                    <div class="problem-card mb-4 p-4 border rounded shadow-sm bg-white border-warning">
+                        
+                        {# Header Section - Problem Name #}
+                        <div class="problem-header mb-3 pb-3 border-bottom border-warning">
+                            <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                <div class="problem-name-section flex-grow-1 me-3">
+                                    <h5 class="problem-name text-warning mb-1 fw-bold">
+                                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                        {% if problem.data.problem.display_value %}
+                                            {{ problem.data.problem.display_value }}
+                                        {% elif problem.data.problem.value %}
+                                            {{ problem.data.problem.value }}
+                                        {% elif problem.name %}
+                                            {{ problem.name }}
+                                        {% elif problem.problem %}
+                                            {{ problem.problem }}
+                                        {% else %}
+                                            Medical Problem
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                                <div class="problem-status-section">
+                                    {% if problem.data.status.display_value %}
+                                        {% if problem.data.status.display_value == "Active" %}
+                                            <span class="badge bg-danger fs-6">{{ problem.data.status.display_value }}</span>
+                                        {% elif problem.data.status.display_value == "Resolved" %}
+                                            <span class="badge bg-success fs-6">{{ problem.data.status.display_value }}</span>
+                                        {% elif problem.data.status.display_value == "Inactive" %}
+                                            <span class="badge bg-secondary fs-6">{{ problem.data.status.display_value }}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning fs-6">{{ problem.data.status.display_value }}</span>
+                                        {% endif %}
+                                    {% elif problem.status %}
+                                        {% if problem.status == "Active" %}
+                                            <span class="badge bg-danger fs-6">{{ problem.status }}</span>
+                                        {% elif problem.status == "Resolved" %}
+                                            <span class="badge bg-success fs-6">{{ problem.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning fs-6">{{ problem.status }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-warning fs-6">Active</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
 
-{# Empty State Configuration #}
-{% block empty_icon %}fa-solid fa-triangle-exclamation{% endblock %}
-{% block empty_title %}No Medical Problems{% endblock %}
-{% block empty_message %}No active medical problems reported for this patient.{% endblock %}
+                        {# Clinical Information Grid #}
+                        <div class="row g-3">
+                            
+                            {# Problem Type #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-tags me-2 text-primary"></i>
+                                        <span class="field-label">Problem Type</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if problem.data.type.display_value and problem.data.type.display_value != "Not specified" %}
+                                            <div class="field-value">{{ problem.data.type.display_value }}</div>
+                                        {% elif problem.type %}
+                                            <div class="field-value">{{ problem.type }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {# Clinical Status #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-info-circle me-2 text-primary"></i>
+                                        <span class="field-label">Clinical Status</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if problem.data.clinical_status.display_value %}
+                                            <div class="field-value">{{ problem.data.clinical_status.display_value }}</div>
+                                        {% elif problem.clinical_status %}
+                                            <div class="field-value">{{ problem.clinical_status }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Active</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {# Onset Date #}
+                            {% if problem.onset_date or problem.data.onset_date %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-calendar me-2 text-primary"></i>
+                                        <span class="field-label">Onset Date</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if problem.data.onset_date.display_value %}
+                                            <div class="field-value">{{ problem.data.onset_date.display_value }}</div>
+                                        {% elif problem.onset_date %}
+                                            <div class="field-value">{{ problem.onset_date }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not recorded</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {# Severity #}
+                            {% if problem.severity or problem.data.severity %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-thermometer-half me-2 text-primary"></i>
+                                        <span class="field-label">Severity</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if problem.data.severity.display_value %}
+                                            <div class="field-value">{{ problem.data.severity.display_value }}</div>
+                                        {% elif problem.severity %}
+                                            <div class="field-value">{{ problem.severity }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
 
-{# Desktop Table Headers #}
-{% block table_headers %}
-<th scope="col" class="fw-bold">
-    <i class="fa-solid fa-triangle-exclamation me-2"></i>Problem
-</th>
-<th scope="col" class="fw-bold d-none d-lg-table-cell">
-    <i class="fa-solid fa-tags me-2"></i>Type
-</th>
-<th scope="col" class="fw-bold d-none d-xl-table-cell">
-    <i class="fa-solid fa-clock me-2"></i>Status
-</th>
-{% endblock table_headers %}
+                        {# Medical Codes Section #}
+                        {% if problem.codes or problem.medical_codes %}
+                        <div class="medical-codes-section mt-3 pt-3 border-top">
+                            <div class="field-header mb-2">
+                                <i class="fa-solid fa-code me-2 text-primary"></i>
+                                <span class="field-label">Medical Codes</span>
+                            </div>
+                            <div class="medical-codes-container">
+                                {% if problem.codes %}
+                                    {% for code in problem.codes %}
+                                        <span class="medical-code me-2 mb-1" title="Medical Code: {{ code }}">{{ code }}</span>
+                                    {% endfor %}
+                                {% elif problem.medical_codes %}
+                                    {% for code in problem.medical_codes %}
+                                        <span class="medical-code me-2 mb-1" title="Medical Code: {{ code }}">{{ code }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
 
-{# Mobile Card Content #}
-{% block mobile_card_content %}
-<div class="problem-name fw-bold text-warning mb-2">
-    {{ item.name|default:'Medical Problem' }}
+                        {# Description Section #}
+                        {% if problem.description or problem.notes or problem.data.description %}
+                        <div class="description-section mt-3 pt-3 border-top">
+                            <div class="field-header mb-2">
+                                <i class="fa-solid fa-sticky-note me-2 text-primary"></i>
+                                <span class="field-label">Description</span>
+                            </div>
+                            <div class="description-content">
+                                {% if problem.data.description.display_value %}
+                                    <div class="field-value text-muted">{{ problem.data.description.display_value }}</div>
+                                {% elif problem.description %}
+                                    <div class="field-value text-muted">{{ problem.description }}</div>
+                                {% elif problem.notes %}
+                                    <div class="field-value text-muted">{{ problem.notes }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    {# Empty State - No Problems #}
+    <div class="clinical-section">
+        <div class="empty-clinical-state text-center p-5">
+            <i class="fa-solid fa-triangle-exclamation fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted mb-3">No Medical Problems Recorded</h4>
+            <p class="text-muted mb-0">No active medical problems have been reported for this patient.</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% endwith %}
 </div>
-<div class="small text-muted">
-    {% if item.status %}Status: {{ item.status }}{% endif %}
-    {% if item.type %} | Type: {{ item.type }}{% endif %}
-</div>
-{% endblock mobile_card_content %}
-
-{# Desktop Table Row Content #}
-{% block table_row_content %}
-<td class="fw-medium">{{ item.name|default:'Medical Problem' }}</td>
-<td class="d-none d-lg-table-cell text-muted">{{ item.type|default:'Not specified' }}</td>
-<td class="d-none d-xl-table-cell text-muted">{{ item.status|default:'Active' }}</td>
-{% endblock table_row_content %}

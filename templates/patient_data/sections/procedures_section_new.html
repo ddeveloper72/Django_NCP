@@ -1,68 +1,220 @@
-{# Procedures Section Template - Inherits from clinical_section_base.html #}
-{% extends 'patient_data/base/clinical_section_base.html' %}
 {% load patient_filters %}
+{# Medical Procedures Section Template - Mobile-First Card Design #}
 
-{# Section Configuration #}
-{% block section_icon %}fa-solid fa-user-md{% endblock %}
-{% block header_class %}bg-info{% endblock %}
-{% block section_title %}Medical Procedures{% endblock %}
-{% block table_header_class %}table-info{% endblock %}
+<!-- Medical Procedures Section -->
+<div class="medical-section" id="procedures-section">
+    {% with section_data as procedure_list %}
+    
+    {# Medical Procedures Section using Modern Card Layout #}
+    {% if procedure_list and procedure_list|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-procedures" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-procedures" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-user-md me-2 text-info"></i>
+                        <span>Medical Procedures</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ procedure_list|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">Medical Procedures: {{ procedure_list|length }} items found</p>
+                    {% for procedure in procedure_list %}
+                    {# Enhanced Procedure Card - Mobile-First Design #}
+                    <div class="procedure-card mb-4 p-4 border rounded shadow-sm bg-white border-info">
+                        
+                        {# Header Section - Procedure Name #}
+                        <div class="procedure-header mb-3 pb-3 border-bottom border-info">
+                            <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                <div class="procedure-name-section flex-grow-1 me-3">
+                                    <h5 class="procedure-name text-info mb-1 fw-bold">
+                                        <i class="fa-solid fa-user-md me-2"></i>
+                                        {% if procedure.title.translated %}
+                                            {{ procedure.title.translated|safe }}
+                                        {% elif procedure.title.original %}
+                                            {{ procedure.title.original }}
+                                        {% elif procedure.data.procedure.display_value %}
+                                            {{ procedure.data.procedure.display_value }}
+                                        {% elif procedure.procedure_name %}
+                                            {{ procedure.procedure_name }}
+                                        {% elif procedure.display_name %}
+                                            {{ procedure.display_name }}
+                                        {% else %}
+                                            Medical Procedure
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                                <div class="procedure-status-section">
+                                    {% if procedure.data.status.display_value %}
+                                        {% if procedure.data.status.display_value == "Completed" %}
+                                            <span class="badge bg-success fs-6">{{ procedure.data.status.display_value }}</span>
+                                        {% elif procedure.data.status.display_value == "In Progress" %}
+                                            <span class="badge bg-primary fs-6">{{ procedure.data.status.display_value }}</span>
+                                        {% elif procedure.data.status.display_value == "Cancelled" %}
+                                            <span class="badge bg-danger fs-6">{{ procedure.data.status.display_value }}</span>
+                                        {% else %}
+                                            <span class="badge bg-info fs-6">{{ procedure.data.status.display_value }}</span>
+                                        {% endif %}
+                                    {% elif procedure.status %}
+                                        {% if procedure.status == "Completed" %}
+                                            <span class="badge bg-success fs-6">{{ procedure.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-info fs-6">{{ procedure.status }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-info fs-6">Completed</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
 
-{# Empty State Configuration #}
-{% block empty_icon %}fa-solid fa-user-md{% endblock %}
-{% block empty_title %}No Procedures{% endblock %}
-{% block empty_message %}No medical procedures documented for this patient.{% endblock %}
+                        {# Clinical Information Grid #}
+                        <div class="row g-3">
+                            
+                            {# Procedure Date #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-calendar me-2 text-primary"></i>
+                                        <span class="field-label">Procedure Date</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if procedure.data.date.display_value %}
+                                            <div class="field-value">{{ procedure.data.date.display_value }}</div>
+                                        {% elif procedure.date %}
+                                            <div class="field-value">{{ procedure.date }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not recorded</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {# Procedure Type #}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-tags me-2 text-primary"></i>
+                                        <span class="field-label">Procedure Type</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if procedure.data.type.display_value %}
+                                            <div class="field-value">{{ procedure.data.type.display_value }}</div>
+                                        {% elif procedure.section_type %}
+                                            <div class="field-value">{{ procedure.section_type|title }}</div>
+                                        {% elif procedure.type %}
+                                            <div class="field-value">{{ procedure.type }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {# Performer #}
+                            {% if procedure.performer or procedure.data.performer %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-user-doctor me-2 text-primary"></i>
+                                        <span class="field-label">Performed By</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if procedure.data.performer.display_value %}
+                                            <div class="field-value">{{ procedure.data.performer.display_value }}</div>
+                                        {% elif procedure.performer %}
+                                            <div class="field-value">{{ procedure.performer }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {# Outcome #}
+                            {% if procedure.outcome or procedure.data.outcome %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-chart-line me-2 text-primary"></i>
+                                        <span class="field-label">Outcome</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if procedure.data.outcome.display_value %}
+                                            <div class="field-value">{{ procedure.data.outcome.display_value }}</div>
+                                        {% elif procedure.outcome %}
+                                            <div class="field-value">{{ procedure.outcome }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not recorded</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
 
-{# Desktop Table Headers #}
-{% block table_headers %}
-<th scope="col" class="fw-bold">
-    <i class="fa-solid fa-user-md me-2"></i>Procedure
-</th>
-<th scope="col" class="fw-bold d-none d-lg-table-cell">
-    <i class="fa-solid fa-calendar me-2"></i>Date
-</th>
-<th scope="col" class="fw-bold d-none d-xl-table-cell">
-    <i class="fa-solid fa-info-circle me-2"></i>Status
-</th>
-{% endblock table_headers %}
+                        {# Medical Codes Section #}
+                        {% if procedure.codes or procedure.medical_codes %}
+                        <div class="medical-codes-section mt-3 pt-3 border-top">
+                            <div class="field-header mb-2">
+                                <i class="fa-solid fa-code me-2 text-primary"></i>
+                                <span class="field-label">Medical Codes</span>
+                            </div>
+                            <div class="medical-codes-container">
+                                {% if procedure.codes %}
+                                    {% for code in procedure.codes %}
+                                        <span class="medical-code me-2 mb-1" title="Medical Code: {{ code }}">{{ code }}</span>
+                                    {% endfor %}
+                                {% elif procedure.medical_codes %}
+                                    {% for code in procedure.medical_codes %}
+                                        <span class="medical-code me-2 mb-1" title="Medical Code: {{ code }}">{{ code }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
 
-{# Mobile Card Content #}
-{% block mobile_card_content %}
-<div class="procedure-name fw-bold text-info mb-2">
-    {% if item.title.translated %}
-        {{ item.title.translated|safe }}
-    {% elif item.title.original %}
-        {{ item.title.original }}
-    {% elif item.procedure_name %}
-        {{ item.procedure_name }}
-    {% elif item.display_name %}
-        {{ item.display_name }}
+                        {# Description Section #}
+                        {% if procedure.description or procedure.notes or procedure.data.description %}
+                        <div class="description-section mt-3 pt-3 border-top">
+                            <div class="field-header mb-2">
+                                <i class="fa-solid fa-sticky-note me-2 text-primary"></i>
+                                <span class="field-label">Description</span>
+                            </div>
+                            <div class="description-content">
+                                {% if procedure.data.description.display_value %}
+                                    <div class="field-value text-muted">{{ procedure.data.description.display_value }}</div>
+                                {% elif procedure.description %}
+                                    <div class="field-value text-muted">{{ procedure.description }}</div>
+                                {% elif procedure.notes %}
+                                    <div class="field-value text-muted">{{ procedure.notes }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
     {% else %}
-        Medical Procedure
+    {# Empty State - No Procedures #}
+    <div class="clinical-section">
+        <div class="empty-clinical-state text-center p-5">
+            <i class="fa-solid fa-user-md fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted mb-3">No Medical Procedures Recorded</h4>
+            <p class="text-muted mb-0">No medical procedures have been documented for this patient.</p>
+        </div>
+    </div>
     {% endif %}
+    
+    {% endwith %}
 </div>
-<div class="small text-muted">
-    {% if item.date %}Date: {{ item.date }}{% endif %}
-    {% if item.status %} | Status: {{ item.status }}{% endif %}
-    {% if item.section_type %} | Type: {{ item.section_type|title }}{% endif %}
-</div>
-{% endblock mobile_card_content %}
-
-{# Desktop Table Row Content #}
-{% block table_row_content %}
-<td class="fw-medium">
-    {% if item.title.translated %}
-        {{ item.title.translated|safe }}
-    {% elif item.title.original %}
-        {{ item.title.original }}
-    {% elif item.procedure_name %}
-        {{ item.procedure_name }}
-    {% elif item.display_name %}
-        {{ item.display_name }}
-    {% else %}
-        Medical Procedure
-    {% endif %}
-</td>
-<td class="d-none d-lg-table-cell text-muted">{{ item.date|default:'Not specified' }}</td>
-<td class="d-none d-xl-table-cell text-muted">{{ item.status|default:'Completed' }}</td>
-{% endblock table_row_content %}
