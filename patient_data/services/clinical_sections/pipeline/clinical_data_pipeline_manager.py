@@ -18,10 +18,22 @@ logger = logging.getLogger(__name__)
 class ClinicalDataPipelineManager:
     """Pipeline manager for coordinating clinical section services."""
     
+    _instance = None
+    _initialized = False
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(ClinicalDataPipelineManager, cls).__new__(cls)
+        return cls._instance
+    
     def __init__(self):
-        """Initialize the pipeline manager."""
-        self._service_registry: Dict[str, ClinicalSectionServiceInterface] = {}
-        logger.info("[PIPELINE MANAGER] Initialized")
+        """Initialize the pipeline manager (singleton pattern)."""
+        if not self._initialized:
+            self._service_registry: Dict[str, ClinicalSectionServiceInterface] = {}
+            logger.info("[PIPELINE MANAGER] Initialized (Singleton)")
+            ClinicalDataPipelineManager._initialized = True
+        else:
+            logger.debug("[PIPELINE MANAGER] Using existing singleton instance")
     
     def register_service(self, service: ClinicalSectionServiceInterface) -> None:
         """Register a clinical section service."""
@@ -31,7 +43,7 @@ class ClinicalDataPipelineManager:
         self._service_registry[section_code] = service
         self._service_registry[section_name] = service
         
-        logger.info(f"[PIPELINE MANAGER] Registered: {service.get_section_name()}")
+        logger.info(f"[PIPELINE MANAGER] Registered: {service.get_section_name()} (Total: {len(self.get_all_services())})")
     
     def get_service(self, section_identifier: str) -> Optional[ClinicalSectionServiceInterface]:
         """Get a registered service."""
@@ -46,5 +58,5 @@ class ClinicalDataPipelineManager:
         return unique_services
 
 
-# Global pipeline manager instance
+# Global singleton pipeline manager instance
 clinical_pipeline_manager = ClinicalDataPipelineManager()

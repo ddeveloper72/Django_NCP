@@ -136,7 +136,7 @@ class CDAViewProcessor:
             self._store_cda_content_for_service(cda_content)
 
             # Build context from parsed CDA data
-            self._build_cda_context(context, parsed_data, match_data)
+            self._build_cda_context(context, parsed_data, match_data, cda_content)
             
             # Add CDA-specific metadata
             self._add_cda_metadata(context, match_data, cda_content, actual_cda_type)
@@ -256,7 +256,7 @@ class CDAViewProcessor:
                     # Parse CDA content to get administrative data
                     parsed_data = self._parse_cda_document(cda_content, session_id)
                     if parsed_data:
-                        self._build_cda_context(context, parsed_data, match_data)
+                        self._build_cda_context(context, parsed_data, match_data, cda_content)
                         logger.info(f"[CDA PROCESSOR] Successfully added administrative data to unified pipeline context")
                 except Exception as admin_error:
                     logger.warning(f"[CDA PROCESSOR] Failed to add administrative data: {admin_error}")
@@ -516,7 +516,8 @@ class CDAViewProcessor:
         self,
         context: Dict[str, Any],
         parsed_data: Dict[str, Any],
-        match_data: Dict[str, Any]
+        match_data: Dict[str, Any],
+        cda_content: str
     ) -> None:
         """
         Build template context from parsed CDA data
@@ -525,6 +526,7 @@ class CDAViewProcessor:
             context: Base context to update
             parsed_data: Parsed CDA data
             match_data: Original session match data
+            cda_content: Original CDA XML content for comprehensive service
         """
         logger.info("[CDA PROCESSOR] *** DEBUG: _build_cda_context method called ***")
         try:
@@ -564,7 +566,13 @@ class CDAViewProcessor:
                 # Extract clinical arrays using the comprehensive service method
                 if not clinical_data and sections:
                     logger.info("[CDA PROCESSOR] Extracting clinical arrays from sections")
-                    clinical_arrays = self.comprehensive_service.get_clinical_arrays_for_display(parsed_data)
+                    # CRITICAL FIX: Use original cda_content to preserve allergies data
+                    clinical_arrays = self.comprehensive_service.get_clinical_arrays_for_display(cda_content)
+                    logger.info(f"[CDA PROCESSOR] *** ALLERGIES FIX: clinical_arrays keys: {list(clinical_arrays.keys()) if clinical_arrays else 'None'} ***")
+                    if clinical_arrays and clinical_arrays.get('allergies'):
+                        logger.info(f"[CDA PROCESSOR] *** ALLERGIES FIX: Found {len(clinical_arrays['allergies'])} allergies in clinical_arrays ***")
+                    else:
+                        logger.warning("[CDA PROCESSOR] *** ALLERGIES FIX: NO allergies found in clinical_arrays ***")
                 
                 # Override medications with enhanced data if available
                 if enhanced_medications:
