@@ -209,7 +209,12 @@ class CDAViewProcessor:
                 has_clinical_data = False
                 
                 # Map section data from unified pipeline to template variables
-                pipeline_sections = ['medications', 'allergies', 'problems', 'vital_signs', 'procedures', 'immunizations', 'results', 'medical_devices']
+                # CRITICAL FIX: Include ALL 12 clinical sections from comprehensive service
+                pipeline_sections = [
+                    'medications', 'allergies', 'problems', 'vital_signs', 'procedures', 
+                    'immunizations', 'results', 'medical_devices', 'past_illness', 
+                    'pregnancy_history', 'social_history', 'advance_directives', 'functional_status'
+                ]
                 for section in pipeline_sections:
                     section_data = pipeline_context.get(section, [])
                     if section_data and len(section_data) > 0:

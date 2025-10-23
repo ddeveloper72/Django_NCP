@@ -12,7 +12,7 @@ Version: 1.0.0
 import logging
 from typing import Dict, List, Any
 from django.http import HttpRequest
-from .clinical_data_pipeline_manager import ClinicalSectionServiceInterface
+from .clinical_sections.pipeline.clinical_data_pipeline_manager import ClinicalSectionServiceInterface
 
 logger = logging.getLogger(__name__)
 
@@ -61,26 +61,46 @@ class AllergiesSectionService(ClinicalSectionServiceInterface):
     def extract_from_cda(self, cda_content: str) -> List[Dict[str, Any]]:
         """Extract allergies from CDA content using specialized parsing."""
         try:
-            import xml.etree.ElementTree as ET
-            root = ET.fromstring(cda_content)
+            # Use lxml for better XPath support like other successful services
+            try:
+                from lxml import etree
+                parser = etree.XMLParser(recover=True)
+                root = etree.fromstring(cda_content.encode('utf-8'), parser)
+                logger.info("[ALLERGIES SERVICE] Using lxml for XML parsing")
+            except ImportError:
+                import xml.etree.ElementTree as ET
+                root = ET.fromstring(cda_content)
+                logger.info("[ALLERGIES SERVICE] Using xml.etree for XML parsing")
             
             # Find allergies section
             namespaces = {'hl7': 'urn:hl7-org:v3'}
-            sections = root.findall('.//hl7:section', namespaces)
+            
+            # Find allergies sections by code
+            sections = root.xpath('.//hl7:section[hl7:code[@code="48765-2"]]', namespaces=namespaces) if hasattr(root, 'xpath') else root.findall('.//hl7:section', namespaces)
+            
+            if not sections and hasattr(root, 'xpath'):
+                # Try broader search
+                sections = root.xpath('.//hl7:section', namespaces=namespaces)
+                sections = [s for s in sections if s.find('hl7:code', namespaces) is not None and s.find('hl7:code', namespaces).get('code') == '48765-2']
+            
+            if not sections:
+                # Fallback to element tree approach
+                sections = root.findall('.//hl7:section', namespaces)
+                sections = [s for s in sections if s.find('hl7:code', namespaces) is not None and s.find('hl7:code', namespaces).get('code') == '48765-2']
             
             for section in sections:
-                code_elem = section.find('hl7:code', namespaces)
-                if code_elem is not None and code_elem.get('code') == '48765-2':
-                    # Parse allergies section
-                    allergies = self._parse_allergies_xml(section)
-                    logger.info(f"[ALLERGIES SERVICE] Extracted {len(allergies)} allergies from CDA")
-                    return allergies
+                # Parse allergies section
+                allergies = self._parse_allergies_xml(section)
+                logger.info(f"[ALLERGIES SERVICE] Extracted {len(allergies)} allergies from CDA")
+                return allergies
             
             logger.info("[ALLERGIES SERVICE] No allergies section found in CDA")
             return []
             
         except Exception as e:
             logger.error(f"[ALLERGIES SERVICE] Error extracting allergies from CDA: {e}")
+            import traceback
+            logger.error(f"[ALLERGIES SERVICE] Traceback: {traceback.format_exc()}")
             return []
     
     def enhance_and_store(self, request: HttpRequest, session_id: str, raw_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -214,13 +234,16 @@ class AllergiesSectionService(ClinicalSectionServiceInterface):
         if value_elem is not None:
             reaction = value_elem.get('displayName', value_elem.get('code', 'Unknown'))
         
-        # Extract severity
+        # Extract severity - fix XPath syntax for lxml
         severity = "Not specified"
-        severity_obs = observation.find('.//hl7:observation[hl7:code/@code="SEV"]', namespaces)
-        if severity_obs is not None:
-            severity_value = severity_obs.find('hl7:value', namespaces)
-            if severity_value is not None:
-                severity = severity_value.get('displayName', severity_value.get('code', 'Not specified'))
+        # Find observation with code="SEV" using proper lxml syntax
+        for sev_obs in observation.findall('.//hl7:observation', namespaces):
+            code_elem = sev_obs.find('hl7:code', namespaces)
+            if code_elem is not None and code_elem.get('code') == 'SEV':
+                severity_value = sev_obs.find('hl7:value', namespaces)
+                if severity_value is not None:
+                    severity = severity_value.get('displayName', severity_value.get('code', 'Not specified'))
+                break
         
         return {
             'allergen': allergen,
@@ -264,5 +287,5 @@ class AllergiesSectionService(ClinicalSectionServiceInterface):
 
 
 # Register the allergies service with the global pipeline manager
-from .clinical_data_pipeline_manager import clinical_pipeline_manager
+from .clinical_sections.pipeline.clinical_data_pipeline_manager import clinical_pipeline_manager
 clinical_pipeline_manager.register_service(AllergiesSectionService())

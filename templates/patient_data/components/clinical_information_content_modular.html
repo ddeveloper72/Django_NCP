@@ -38,8 +38,38 @@
         {% include 'patient_data/sections/immunizations_section_new.html' with section_data=immunizations section_count=immunizations|length section_type='immunizations' section_title='Immunizations' %}
     {% endif %}
     
+    {# Medical Devices Section #}
+    {% if medical_devices and medical_devices|length > 0 %}
+        {% include 'patient_data/sections/medical_devices_section.html' with section_data=medical_devices section_count=medical_devices|length section_type='medical_devices' section_title='Medical Devices' %}
+    {% endif %}
+    
+    {# Past Illness Section #}
+    {% if past_illness and past_illness|length > 0 %}
+        {% include 'patient_data/sections/generic_clinical_section.html' with section_data=past_illness section_count=past_illness|length section_type='past_illness' section_title='Past Illness History' %}
+    {% endif %}
+    
+    {# Pregnancy History Section #}
+    {% if pregnancy_history and pregnancy_history|length > 0 %}
+        {% include 'patient_data/sections/pregnancy_history_section.html' with section_data=pregnancy_history section_count=pregnancy_history|length section_type='pregnancy_history' section_title='Pregnancy History' %}
+    {% endif %}
+    
+    {# Social History Section #}
+    {% if social_history and social_history|length > 0 %}
+        {% include 'patient_data/sections/generic_clinical_section.html' with section_data=social_history section_count=social_history|length section_type='social_history' section_title='Social History' %}
+    {% endif %}
+    
+    {# Advance Directives Section #}
+    {% if advance_directives and advance_directives|length > 0 %}
+        {% include 'patient_data/sections/generic_clinical_section.html' with section_data=advance_directives section_count=advance_directives|length section_type='advance_directives' section_title='Advance Directives' %}
+    {% endif %}
+    
+    {# Functional Status Section #}
+    {% if functional_status and functional_status|length > 0 %}
+        {% include 'patient_data/sections/generic_clinical_section.html' with section_data=functional_status section_count=functional_status|length section_type='functional_status' section_title='Functional Status' %}
+    {% endif %}
+    
     {# Empty State - No Clinical Data #}
-    {% if not medications and not problems and not allergies and not procedures and not vital_signs and not results and not immunizations %}
+    {% if not medications and not problems and not allergies and not procedures and not vital_signs and not results and not immunizations and not medical_devices and not past_illness and not pregnancy_history and not social_history and not advance_directives and not functional_status %}
     <div class="empty-clinical-state text-center p-5">
         <i class="fa-solid fa-file-medical fa-4x text-muted mb-4"></i>
         <h4 class="text-muted mb-3">No Clinical Information Available</h4>

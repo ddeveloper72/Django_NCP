@@ -44,3 +44,7 @@ class ClinicalDataPipelineManager:
             if service.get_section_code() not in unique_services:
                 unique_services[service.get_section_code()] = service
         return unique_services
+
+
+# Global pipeline manager instance
+clinical_pipeline_manager = ClinicalDataPipelineManager()

@@ -1,28 +1,30 @@
 """
 Problems Section Service
 
-Specialized service for problems/conditions section data processing.
+Specialized service for problems/conditions section data processing with CTS agent integration.
 
 Handles:
 - Problem lists and medical conditions  
 - History of past illness
 - Problem status and severity
 - Clinical findings
+- SNOMED CT code resolution via CTS agent
 
 Author: Django_NCP Development Team
 Date: October 2025
-Version: 1.0.0
+Version: 2.0.0 - Enhanced with CTS Integration
 """
 
 import logging
 from typing import Dict, List, Any
 from django.http import HttpRequest
 from ..base.clinical_service_base import ClinicalServiceBase
+from ..cts_integration_mixin import CTSIntegrationMixin
 
 logger = logging.getLogger(__name__)
 
 
-class ProblemsSectionService(ClinicalServiceBase):
+class ProblemsSectionService(CTSIntegrationMixin, ClinicalServiceBase):
     """
     Specialized service for problems/conditions section data processing.
     
@@ -159,8 +161,8 @@ class ProblemsSectionService(ClinicalServiceBase):
         return problems
     
     def _parse_problem_observation(self, observation) -> Dict[str, Any]:
-        """Parse problem information from structured observation element with enhanced temporal data."""
-        # Extract problem name from value element with enhanced code-based extraction
+        """Parse problem information from structured observation element with CTS agent integration."""
+        # Extract problem name with enhanced text reference resolution
         value_elem = observation.find('hl7:value', self.namespaces)
         problem_name = "Unknown problem"
         code = ""
@@ -169,28 +171,51 @@ class ProblemsSectionService(ClinicalServiceBase):
         if value_elem is not None:
             code = value_elem.get('code', '')
             code_system = value_elem.get('codeSystem', '')
+            display_name = value_elem.get('displayName', '')
             
-            # First try displayName
-            problem_name = value_elem.get('displayName')
+            # Check for text reference first (most reliable)
+            original_text = value_elem.find('hl7:originalText', self.namespaces)
+            text_reference = ""
+            if original_text is not None:
+                ref_elem = original_text.find('hl7:reference', self.namespaces)
+                if ref_elem is not None:
+                    ref_value = ref_elem.get('value', '')
+                    text_reference = self._resolve_text_reference(observation, ref_value)
             
-            # If no displayName, use medical code mapping instead of ID references
-            if not problem_name:
-                # Map medical codes to standard descriptions
-                problem_name = self._map_medical_code_to_description(code, code_system)
-            
-            # Check for translation elements (like ICD codes with display names)
-            if not problem_name or problem_name == code:
-                translation = value_elem.find('hl7:translation', self.namespaces)
-                if translation is not None:
-                    problem_name = translation.get('displayName', problem_name)
-                    # If translation has a better code/system, use that too
-                    if not code or not code_system:
-                        code = translation.get('code', code)
-                        code_system = translation.get('codeSystem', code_system)
-            
-            # Fallback to code if still no readable name
-            if not problem_name or problem_name == code:
-                problem_name = self._get_code_description(code, code_system) or code or 'Unknown problem'
+            # Use CTS resolution for SNOMED CT codes, otherwise use standard fallback
+            if code_system == '2.16.840.1.113883.6.96':  # SNOMED CT
+                try:
+                    from patient_data.services.cts_integration.cts_service import CTSService
+                    cts_service = CTSService()
+                    cts_result = cts_service.get_term_display(code, code_system)
+                    if cts_result and cts_result != code:
+                        problem_name = cts_result
+                    else:
+                        problem_name = text_reference or display_name or code
+                except Exception as cts_error:
+                    self.logger.warning(f"CTS resolution failed for {code}: {cts_error}")
+                    problem_name = text_reference or display_name or code
+            else:
+                # For non-SNOMED codes, use text reference, then displayName, then code mapping
+                problem_name = text_reference or display_name
+                
+                if not problem_name:
+                    # Map medical codes to standard descriptions
+                    problem_name = self._map_medical_code_to_description(code, code_system)
+                
+                # Check for translation elements (like ICD codes with display names)
+                if not problem_name or problem_name == code:
+                    translation = value_elem.find('hl7:translation', self.namespaces)
+                    if translation is not None:
+                        problem_name = translation.get('displayName', problem_name)
+                        # If translation has a better code/system, use that too
+                        if not code or not code_system:
+                            code = translation.get('code', code)
+                            code_system = translation.get('codeSystem', code_system)
+                
+                # Final fallback to code description or code itself
+                if not problem_name or problem_name == code or problem_name.startswith('#'):
+                    problem_name = self._get_code_description(code, code_system) or code or 'Unknown problem'
         
         # Extract effective time with enhanced parsing for onset/resolution
         onset_date = "Not specified"
@@ -213,8 +238,9 @@ class ProblemsSectionService(ClinicalServiceBase):
                 if single_value:
                     onset_date = single_value
         
-        # Extract severity with enhanced XPath and value extraction
-        severity = "Not specified"
+        # Extract severity using simpler approach with CTS integration
+        severity = "Not specified"  # Default severity
+        
         severity_relations = observation.findall('.//hl7:entryRelationship', self.namespaces)
         for rel in severity_relations:
             if rel.get('typeCode') == 'SUBJ' and rel.get('inversionInd') == 'true':
@@ -224,21 +250,34 @@ class ProblemsSectionService(ClinicalServiceBase):
                     if code_elem is not None and code_elem.get('code') == 'SEV':
                         severity_value = severity_obs.find('hl7:value', self.namespaces)
                         if severity_value is not None:
-                            # Try displayName first, then check originalText
-                            severity = severity_value.get('displayName')
-                            if not severity:
-                                severity_code = severity_value.get('code', 'Not specified')
-                                # Map common severity codes
-                                severity_map = {
+                            sev_code = severity_value.get('code', '')
+                            sev_display = severity_value.get('displayName', '')
+                            code_system = severity_value.get('codeSystem', '')
+                            
+                            # Use CTS resolution for SNOMED CT severity codes
+                            severity = self._resolve_clinical_code_with_cts(
+                                code=sev_code,
+                                code_system=code_system,
+                                display_name=sev_display,
+                                text_reference="",
+                                fallback_mappings={
+                                    # SNOMED CT severity codes
                                     '24484000': 'Severe',
                                     '371924009': 'Moderate to severe', 
                                     '6736007': 'Moderate',
-                                    '255604002': 'Mild'
+                                    '255604002': 'Mild',
+                                    # Common displayName values
+                                    'severe': 'Severe',
+                                    'moderate': 'Moderate',
+                                    'mild': 'Mild'
                                 }
-                                severity = severity_map.get(severity_code, severity_code)
+                            )
+                            break
         
-        # Extract clinical status (code="33999-4") - Active/Inactive/Resolved
-        clinical_status = "Active"
+        # Extract clinical status using CTS agent for FHIR status codes
+        clinical_status = "Active"  # Default status
+        
+        # Try to find status with simpler XPath
         status_relations = observation.findall('.//hl7:entryRelationship', self.namespaces)
         for rel in status_relations:
             if rel.get('typeCode') == 'REFR':
@@ -248,10 +287,28 @@ class ProblemsSectionService(ClinicalServiceBase):
                     if code_elem is not None and code_elem.get('code') == '33999-4':
                         status_value = status_obs.find('hl7:value', self.namespaces)
                         if status_value is not None:
-                            clinical_status = status_value.get('displayName', status_value.get('code', 'Active'))
+                            status_code = status_value.get('code', '').lower()
+                            status_display = status_value.get('displayName', '')
+                            code_system = status_value.get('codeSystem', '')
+                            
+                            # Use CTS resolution with fallback mappings
+                            clinical_status = self._resolve_clinical_code_with_cts(
+                                code=status_code,
+                                code_system=code_system,
+                                display_name=status_display,
+                                text_reference="",
+                                fallback_mappings={
+                                    'active': 'Active',
+                                    'inactive': 'Inactive', 
+                                    'resolved': 'Resolved',
+                                    'entered-in-error': 'Entered in Error'
+                                }
+                            )
+                            break
         
-        # Extract verification status/certainty (code="66455-7")
-        verification_status = "Confirmed"
+        # Extract verification status/certainty using simpler approach
+        verification_status = "Confirmed"  # Default verification
+        
         certainty_relations = observation.findall('.//hl7:entryRelationship', self.namespaces)
         for rel in certainty_relations:
             if rel.get('typeCode') == 'SUBJ':
@@ -261,10 +318,27 @@ class ProblemsSectionService(ClinicalServiceBase):
                     if code_elem is not None and code_elem.get('code') == '66455-7':
                         certainty_value = certainty_obs.find('hl7:value', self.namespaces)
                         if certainty_value is not None:
-                            verification_status = certainty_value.get('displayName', certainty_value.get('code', 'Confirmed'))
+                            cert_code = certainty_value.get('code', '').lower()
+                            cert_display = certainty_value.get('displayName', '')
+                            code_system = certainty_value.get('codeSystem', '')
+                            
+                            verification_status = self._resolve_clinical_code_with_cts(
+                                code=cert_code,
+                                code_system=code_system,
+                                display_name=cert_display,
+                                text_reference="",
+                                fallback_mappings={
+                                    'confirmed': 'Confirmed',
+                                    'unconfirmed': 'Unconfirmed', 
+                                    'provisional': 'Provisional',
+                                    'differential': 'Differential'
+                                }
+                            )
+                            break
         
-        # Extract criticality if present (for problem-related criticality assessment)
-        criticality = "Not specified"
+        # Extract criticality using simpler approach
+        criticality = "Not specified"  # Default criticality
+        
         criticality_relations = observation.findall('.//hl7:entryRelationship', self.namespaces)
         for rel in criticality_relations:
             if rel.get('typeCode') == 'SUBJ':
@@ -274,7 +348,22 @@ class ProblemsSectionService(ClinicalServiceBase):
                     if code_elem is not None and code_elem.get('code') == '82606-5':
                         criticality_value = criticality_obs.find('hl7:value', self.namespaces)
                         if criticality_value is not None:
-                            criticality = criticality_value.get('displayName', criticality_value.get('code', 'Not specified'))
+                            crit_code = criticality_value.get('code', '').lower()
+                            crit_display = criticality_value.get('displayName', '')
+                            code_system = criticality_value.get('codeSystem', '')
+                            
+                            criticality = self._resolve_clinical_code_with_cts(
+                                code=crit_code,
+                                code_system=code_system,
+                                display_name=crit_display,
+                                text_reference="",
+                                fallback_mappings={
+                                    'low': 'Low risk',
+                                    'high': 'High risk',
+                                    'unable-to-assess': 'Unable to assess'
+                                }
+                            )
+                            break
         
         # Determine problem type based on templateId or code
         problem_type = "Clinical finding"

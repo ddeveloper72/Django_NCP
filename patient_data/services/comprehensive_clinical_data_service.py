@@ -25,6 +25,7 @@ from patient_data.services.enhanced_cda_xml_parser import EnhancedCDAXMLParser
 from patient_data.services.ps_table_renderer import PSTableRenderer
 from patient_data.services.structured_cda_extractor import StructuredCDAExtractor
 from patient_data.services.enhanced_cts_response_service import EnhancedCTSResponseService
+from patient_data.services.clinical_sections.pipeline.clinical_data_pipeline_manager import clinical_pipeline_manager
 from translation_services.terminology_translator import TerminologyTranslator
 from translation_services.enhanced_cts_service import enhanced_cts_service
 
@@ -41,6 +42,7 @@ class ComprehensiveClinicalDataService:
         self.structured_extractor = StructuredCDAExtractor()
         self.terminology_service = TerminologyTranslator()
         self.enhanced_cts_service = EnhancedCTSResponseService()
+        self.clinical_pipeline = clinical_pipeline_manager
         # Field mapper will be loaded dynamically to avoid import issues
 
     def extract_comprehensive_clinical_data(
@@ -174,6 +176,19 @@ class ComprehensiveClinicalDataService:
                     "error": str(e)
                 }
 
+            # Method 5: Specialized Clinical Section Services (NEW)
+            try:
+                logger.info("Using specialized clinical section services via pipeline manager")
+                specialized_data = self._extract_with_specialized_services(cda_content)
+                extraction_results["clinical_sections"]["specialized_services"] = specialized_data
+                extraction_results["extraction_methods"].append("specialized_clinical_services")
+                logger.info(f"Successfully extracted data using {len(specialized_data)} specialized services")
+            except Exception as e:
+                logger.error(f"Specialized clinical services failed: {e}")
+                extraction_results["clinical_sections"]["specialized_services"] = {
+                    "error": str(e)
+                }
+
             # Generate comprehensive analysis
             extraction_results["extraction_statistics"] = (
                 self._generate_extraction_statistics(extraction_results)
@@ -238,12 +253,157 @@ class ComprehensiveClinicalDataService:
                 "vital_signs": [],
                 "results": [],
                 "immunizations": [],
+                "medical_devices": [],
+                "past_illness": [],
+                "pregnancy_history": [],
+                "social_history": [],
+                "advance_directives": [],
+                "functional_status": []
             }
 
             # PRIORITY: Check for detailed medications from Enhanced CDA XML Parser
             enhanced_data = comprehensive_data.get("clinical_sections", {}).get(
                 "enhanced_parser", {}
             )
+            
+            # PRIORITY: Check for specialized services data (NEW ENHANCED SERVICES)
+            specialized_data = comprehensive_data.get("clinical_sections", {}).get(
+                "specialized_services", {}
+            )
+            
+            # Process enhanced allergies from AllergiesSectionService
+            if "48765-2" in specialized_data:  # Allergies section code
+                allergies_service_data = specialized_data["48765-2"]
+                if "data" in allergies_service_data and allergies_service_data["data"]:
+                    allergies_count = len(allergies_service_data["data"])
+                    logger.info(f"[SPECIALIZED SERVICES] Using {allergies_count} allergies from AllergiesSectionService")
+                    
+                    # Convert specialized service data to clinical arrays format
+                    for allergy in allergies_service_data["data"]:
+                        allergy_data = {
+                            "name": allergy.get("allergen", allergy.get("agent", allergy.get("substance", "Unknown Allergen"))),
+                            "substance": allergy.get("allergen", allergy.get("agent", allergy.get("substance", "Unknown Allergen"))),
+                            "reaction": allergy.get("reaction", allergy.get("clinical_manifestation", "Not specified")),
+                            "severity": allergy.get("severity", "Not specified"),
+                            "status": allergy.get("status", "Active"),
+                            "source": "AllergiesSectionService",
+                            "snomed_code": allergy.get("snomed_code"),
+                            "snomed_display": allergy.get("snomed_display"),
+                            "enhanced_data": True
+                        }
+                        clinical_arrays["allergies"].append(allergy_data)
+                    
+                    logger.info(f"[SPECIALIZED SERVICES] Added {allergies_count} enhanced allergies with CTS integration")
+            
+            # Process other specialized services (comprehensive integration)
+            specialized_service_mapping = {
+                "11450-4": ("problems", "Problems"),
+                "8716-3": ("vital_signs", "Vital Signs"), 
+                "47519-4": ("procedures", "Procedures"),
+                "11369-6": ("immunizations", "Immunizations"),
+                "30954-2": ("results", "Results"),
+                "46264-8": ("medical_devices", "Medical Devices"),
+                "11348-0": ("past_illness", "Past Illness"),
+                "10162-6": ("pregnancy_history", "Pregnancy History"),
+                "29762-2": ("social_history", "Social History"),
+                "42348-3": ("advance_directives", "Advance Directives"),
+                "47420-5": ("functional_status", "Functional Status")
+            }
+            
+            for section_code, service_info in specialized_data.items():
+                if section_code == "48765-2":  # Already processed allergies above
+                    continue
+                    
+                if section_code in specialized_service_mapping:
+                    array_key, section_name = specialized_service_mapping[section_code]
+                    data = service_info.get("data", [])
+                    
+                    if data:
+                        # Handle specialized field mapping for each section
+                        if section_code == "11450-4":  # Problems
+                            enhanced_problems = []
+                            for problem in data:
+                                problem_data = {
+                                    "name": problem.get("name", problem.get("problem_name", problem.get("display_name", "Unknown Problem"))),
+                                    "display_name": problem.get("display_name", problem.get("name", "Unknown Problem")),
+                                    "onset_date": problem.get("onset_date", problem.get("effective_time", "Not specified")),
+                                    "status": problem.get("status", "Active"),
+                                    "severity": problem.get("severity", "Not specified"),
+                                    "snomed_code": problem.get("snomed_code"),
+                                    "snomed_display": problem.get("snomed_display"),
+                                    "source": "ProblemsSectionService",
+                                    "enhanced_data": True
+                                }
+                                enhanced_problems.append(problem_data)
+                            clinical_arrays[array_key].extend(enhanced_problems)
+                            
+                        elif section_code == "8716-3":  # Vital Signs
+                            enhanced_vitals = []
+                            for vital in data:
+                                vital_data = {
+                                    "name": vital.get("name", vital.get("vital_name", "Unknown Vital")),
+                                    "value": vital.get("value", "Not specified"),
+                                    "unit": vital.get("unit", ""),
+                                    "date": vital.get("date", vital.get("effective_time", "Not specified")),
+                                    "status": vital.get("status", "Final"),
+                                    "source": "VitalSignsSectionService",
+                                    "enhanced_data": True
+                                }
+                                enhanced_vitals.append(vital_data)
+                            clinical_arrays[array_key].extend(enhanced_vitals)
+                            
+                        elif section_code == "47519-4":  # Procedures
+                            enhanced_procedures = []
+                            for procedure in data:
+                                procedure_data = {
+                                    "name": procedure.get("name", procedure.get("procedure_name", "Unknown Procedure")),
+                                    "display_name": procedure.get("display_name", procedure.get("name", "Unknown Procedure")),
+                                    "date": procedure.get("date", procedure.get("effective_time", "Not specified")),
+                                    "status": procedure.get("status", "Completed"),
+                                    "performer": procedure.get("performer", "Not specified"),
+                                    "source": "ProceduresSectionService",
+                                    "enhanced_data": True
+                                }
+                                enhanced_procedures.append(procedure_data)
+                            clinical_arrays[array_key].extend(enhanced_procedures)
+                            
+                        else:
+                            # Generic handling for other sections
+                            for item in data:
+                                item_data = {
+                                    "name": item.get("name", item.get("display_name", f"Unknown {section_name}")),
+                                    "status": item.get("status", "Active"),
+                                    "date": item.get("date", item.get("effective_time", "Not specified")),
+                                    "source": f"{section_name.replace(' ', '')}SectionService",
+                                    "enhanced_data": True,
+                                    "raw_data": item  # Preserve original data
+                                }
+                                
+                                # Add to appropriate array, creating if needed
+                                if array_key not in clinical_arrays:
+                                    clinical_arrays[array_key] = []
+                                clinical_arrays[array_key].append(item_data)
+                        
+                        logger.info(f"[SPECIALIZED SERVICES] Added {len(data)} {section_name.lower()} from specialized service")
+            
+            # Legacy handling for unrecognized sections (backward compatibility)
+            for section_code, service_info in specialized_data.items():
+                if section_code not in ["48765-2"] + list(specialized_service_mapping.keys()):
+                    service_name = service_info.get("service_name", "")
+                    section_name = service_info.get("section_name", "")
+                    data = service_info.get("data", [])
+                    
+                    if data:
+                        # Use service name pattern matching as fallback
+                        if "Problems" in service_name:
+                            logger.info(f"[SPECIALIZED SERVICES] Legacy: Using {len(data)} problems from {service_name}")
+                            clinical_arrays["problems"].extend(data)
+                        elif "Procedures" in service_name:
+                            logger.info(f"[SPECIALIZED SERVICES] Legacy: Using {len(data)} procedures from {service_name}")
+                            clinical_arrays["procedures"].extend(data)
+                        elif "VitalSigns" in service_name:
+                            logger.info(f"[SPECIALIZED SERVICES] Legacy: Using {len(data)} vital signs from {service_name}")
+                            clinical_arrays["vital_signs"].extend(data)
             
             # DEBUG: Log what's in enhanced_data
             logger.info(f"[DETAILED MEDICATIONS DEBUG] enhanced_data keys: {list(enhanced_data.keys())}")
@@ -323,8 +483,13 @@ class ComprehensiveClinicalDataService:
                         enhanced_med = self._convert_cda_medication_to_enhanced_format(med)
                         clinical_arrays["medications"].append(enhanced_med)
                 
-                # Use CDA parser for other data types where enhanced parser might not have coverage
-                clinical_arrays["allergies"].extend(structured.get("allergies", []))
+                # Use CDA parser for allergies only if no specialized services data
+                existing_allergies_count = len(clinical_arrays["allergies"])
+                if existing_allergies_count == 0:
+                    clinical_arrays["allergies"].extend(structured.get("allergies", []))
+                    logger.info(f"[ALLERGIES] Added {len(structured.get('allergies', []))} allergies from CDA parser (no specialized services)")
+                else:
+                    logger.info(f"[ALLERGIES] Skipping CDA parser allergies - using {existing_allergies_count} from specialized services")
                 
                 # Enhanced problem processing with rich clinical data - PREVENT DUPLICATES
                 existing_problems_count = len(clinical_arrays["problems"])
@@ -458,7 +623,7 @@ class ComprehensiveClinicalDataService:
                         clinical_arrays["results"].append(placeholder_entry)
 
             logger.info(
-                f"[CLINICAL ARRAYS] Section fallback added: med={len(clinical_arrays['medications'])}, all={len(clinical_arrays['allergies'])}, prob={len(clinical_arrays['problems'])}, proc={len(clinical_arrays['procedures'])}, vs={len(clinical_arrays['vital_signs'])}"
+                f"[CLINICAL ARRAYS] Section fallback added: med={len(clinical_arrays['medications'])}, all={len(clinical_arrays['allergies'])}, prob={len(clinical_arrays['problems'])}, proc={len(clinical_arrays['procedures'])}, vs={len(clinical_arrays['vital_signs'])}, res={len(clinical_arrays['results'])}, imm={len(clinical_arrays['immunizations'])}, dev={len(clinical_arrays['medical_devices'])}, past={len(clinical_arrays['past_illness'])}, preg={len(clinical_arrays['pregnancy_history'])}, social={len(clinical_arrays['social_history'])}, adv={len(clinical_arrays['advance_directives'])}, func={len(clinical_arrays['functional_status'])}"
             )
 
             # Apply field mapping for template compatibility
@@ -2600,3 +2765,50 @@ class ComprehensiveClinicalDataService:
             return str(onset).strip()
         except Exception:
             return 'not specified'
+
+    def _extract_with_specialized_services(self, cda_content: str) -> Dict[str, Any]:
+        """
+        Extract clinical data using specialized section services via pipeline manager.
+        
+        This integrates our enhanced services like AllergiesSectionService with CTS integration.
+        """
+        try:
+            logger.info("[SPECIALIZED SERVICES] Starting extraction with enhanced clinical services")
+            
+            specialized_results = {}
+            all_services = self.clinical_pipeline.get_all_services()
+            
+            logger.info(f"[SPECIALIZED SERVICES] Found {len(all_services)} registered services")
+            
+            for section_code, service in all_services.items():
+                try:
+                    section_name = service.get_section_name()
+                    logger.info(f"[SPECIALIZED SERVICES] Extracting {section_name} with {service.__class__.__name__}")
+                    
+                    # Extract data using the specialized service
+                    section_data = service.extract_from_cda(cda_content)
+                    
+                    if section_data:
+                        specialized_results[section_code] = {
+                            'service_name': service.__class__.__name__,
+                            'section_name': section_name,
+                            'data': section_data,
+                            'count': len(section_data) if isinstance(section_data, list) else 1
+                        }
+                        logger.info(f"[SPECIALIZED SERVICES] {section_name}: extracted {len(section_data) if isinstance(section_data, list) else 1} items")
+                    else:
+                        logger.info(f"[SPECIALIZED SERVICES] {section_name}: no data found")
+                        
+                except Exception as e:
+                    logger.error(f"[SPECIALIZED SERVICES] {section_name} extraction failed: {e}")
+                    specialized_results[section_code] = {
+                        'service_name': service.__class__.__name__,
+                        'section_name': section_name,
+                        'error': str(e)
+                    }
+            
+            return specialized_results
+            
+        except Exception as e:
+            logger.error(f"[SPECIALIZED SERVICES] Pipeline extraction failed: {e}")
+            return {"error": str(e)}
