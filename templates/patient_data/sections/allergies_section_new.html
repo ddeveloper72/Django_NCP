@@ -1,213 +1,172 @@
-{# Enhanced Allergies Section Template with Fallback Support #}
-{# Handles both enhanced (allergy.data.allergen.display_value) and legacy (allergy.allergen) data structures #}
+{# ALLERGIES SECTION - Customizable Template #}
+{# Easy to modify layout, styling, and data presentation #}
 
-<div class="clinical-section allergies-section" id="allergies">
-    {% with allergies_list=section_data %}
-    
-    {% if allergies_list %}
-    <div class="section-header">
-        <h3 class="section-title">
-            <i class="fa-solid fa-exclamation-triangle me-2 text-warning"></i>
-            Allergies & Intolerances
-            <span class="badge bg-primary ms-2">{{ allergies_list|length }} Found</span>
-        </h3>
-    </div>
-
-    <div class="allergies-content">
-        <div class="allergies-list">
-            {% for allergy in allergies_list %}
-            <div class="allergy-card card mb-3">
-                <div class="card-body">
-                    
-                    {# Main Allergy Header #}
-                    <div class="allergy-header d-flex justify-content-between align-items-center mb-3">
-                        <div class="allergen-info">
-                            <h5 class="allergen-name mb-1">
-                                <i class="fa-solid fa-triangle-exclamation me-2 text-warning"></i>
-                                {# Enhanced allergen name with fallback #}
-                                {% if allergy.data.allergen.display_value and allergy.data.allergen.display_value != "Unknown" %}
-                                    {{ allergy.data.allergen.display_value }}
-                                {% elif allergy.allergen %}
-                                    {{ allergy.allergen }}
-                                {% else %}
-                                    Unknown Allergen
-                                {% endif %}
-                            </h5>
-                            
-                            {# Allergy Type/Category #}
-                            {% if allergy.data.category.display_value or allergy.category %}
-                            <div class="allergen-category">
-                                <small class="text-muted">
-                                    Category: 
-                                    {% if allergy.data.category.display_value %}
-                                        {{ allergy.data.category.display_value }}
-                                    {% elif allergy.category %}
-                                        {{ allergy.category }}
-                                    {% endif %}
-                                </small>
-                            </div>
-                            {% endif %}
-                        </div>
-                        
-                        {# Severity Badge #}
-                        <div class="severity-badge">
-                            {% if allergy.data.severity.display_value and allergy.data.severity.display_value != "Unknown" %}
-                                {% if "High" in allergy.data.severity.display_value or "Severe" in allergy.data.severity.display_value %}
-                                    <span class="badge bg-danger fs-6">{{ allergy.data.severity.display_value }}</span>
-                                {% elif "Moderate" in allergy.data.severity.display_value %}
-                                    <span class="badge bg-warning fs-6">{{ allergy.data.severity.display_value }}</span>
-                                {% elif "Low" in allergy.data.severity.display_value or "Mild" in allergy.data.severity.display_value %}
-                                    <span class="badge bg-success fs-6">{{ allergy.data.severity.display_value }}</span>
-                                {% else %}
-                                    <span class="badge bg-secondary fs-6">{{ allergy.data.severity.display_value }}</span>
-                                {% endif %}
-                            {% elif allergy.severity %}
-                                <span class="badge bg-secondary fs-6">{{ allergy.severity }}</span>
+{% if section_data %}
+    <!-- Layout Option 1: Alert-style cards (default) -->
+    <div class="allergies-entries">
+        {% for entry in section_data %}
+        <div class="clinical-entry alert-style" data-entry-type="allergy">
+            <div class="d-flex align-items-start">
+                <div class="flex-grow-1">
+                    <!-- Primary Information -->
+                    <div class="primary-info">
+                        <span class="field-label">Allergen:</span>
+                        <div class="field-value fw-bold text-danger">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                            {% if entry.data.allergen.display_value and entry.data.allergen.display_value != "Unknown" %}
+                                {{ entry.data.allergen.display_value }}
+                            {% elif entry.allergen %}
+                                {{ entry.allergen }}
                             {% else %}
-                                <span class="badge bg-secondary fs-6">Unknown Severity</span>
+                                Not specified
                             {% endif %}
                         </div>
                     </div>
 
-                    {# Clinical Information Grid #}
-                    <div class="row g-3">
-                        
-                        {# Reaction Information #}
-                        <div class="col-lg-6">
-                            <div class="field-group">
-                                <div class="field-header">
-                                    <i class="fa-solid fa-stethoscope me-2 text-primary"></i>
-                                    <span class="field-label">Reaction</span>
-                                </div>
-                                <div class="field-content">
-                                    {% if allergy.data.reaction.display_value and allergy.data.reaction.display_value != "Not specified" %}
-                                        <div class="field-value">{{ allergy.data.reaction.display_value }}</div>
-                                    {% elif allergy.reaction %}
-                                        <div class="field-value">{{ allergy.reaction }}</div>
-                                    {% else %}
-                                        <div class="field-value text-muted">Not specified</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {# Severity Details #}
-                        <div class="col-lg-6">
-                            <div class="field-group">
-                                <div class="field-header">
-                                    <i class="fa-solid fa-thermometer-half me-2 text-primary"></i>
-                                    <span class="field-label">Severity Level</span>
-                                </div>
-                                <div class="field-content">
-                                    {% if allergy.data.severity.display_value and allergy.data.severity.display_value != "Not specified" %}
-                                        <div class="field-value">{{ allergy.data.severity.display_value }}</div>
-                                    {% elif allergy.severity %}
-                                        <div class="field-value">{{ allergy.severity }}</div>
-                                    {% else %}
-                                        <div class="field-value text-muted">Not specified</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {# Status Information #}
-                        {% if allergy.status or allergy.data.status %}
-                        <div class="col-lg-6">
-                            <div class="field-group">
-                                <div class="field-header">
-                                    <i class="fa-solid fa-info-circle me-2 text-primary"></i>
-                                    <span class="field-label">Status</span>
-                                </div>
-                                <div class="field-content">
-                                    {% if allergy.data.status.display_value %}
-                                        <div class="field-value">{{ allergy.data.status.display_value }}</div>
-                                    {% elif allergy.status %}
-                                        <div class="field-value">{{ allergy.status }}</div>
-                                    {% else %}
-                                        <div class="field-value text-muted">Active</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        {# Date Information #}
-                        {% if allergy.onset_date or allergy.data.onset_date %}
-                        <div class="col-lg-6">
-                            <div class="field-group">
-                                <div class="field-header">
-                                    <i class="fa-solid fa-calendar me-2 text-primary"></i>
-                                    <span class="field-label">First Observed</span>
-                                </div>
-                                <div class="field-content">
-                                    {% if allergy.data.onset_date.display_value %}
-                                        <div class="field-value">{{ allergy.data.onset_date.display_value }}</div>
-                                    {% elif allergy.onset_date %}
-                                        <div class="field-value">{{ allergy.onset_date }}</div>
-                                    {% else %}
-                                        <div class="field-value text-muted">Not recorded</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    {# Medical Codes Section #}
-                    {% if allergy.codes or allergy.medical_codes %}
-                    <div class="medical-codes-section mt-3 pt-3 border-top">
-                        <div class="field-header mb-2">
-                            <i class="fa-solid fa-code me-2 text-primary"></i>
-                            <span class="field-label">Medical Codes</span>
-                        </div>
-                        <div class="medical-codes-container">
-                            {% if allergy.codes %}
-                                {% for code in allergy.codes %}
-                                    <span class="medical-code me-2 mb-1" title="Medical Code: {{ code }}">{{ code }}</span>
-                                {% endfor %}
-                            {% elif allergy.medical_codes %}
-                                {% for code in allergy.medical_codes %}
-                                    <span class="medical-code me-2 mb-1" title="Medical Code: {{ code }}">{{ code }}</span>
-                                {% endfor %}
+                    <!-- Secondary Information -->
+                    {% if entry.data.reaction.display_value or entry.reaction %}
+                    <div class="mt-2">
+                        <span class="field-label">Reaction:</span>
+                        <div class="field-value">
+                            {% if entry.data.reaction.display_value %}
+                                {{ entry.data.reaction.display_value }}
+                            {% elif entry.reaction %}
+                                {{ entry.reaction }}
                             {% endif %}
                         </div>
                     </div>
                     {% endif %}
 
-                    {# Notes Section #}
-                    {% if allergy.notes or allergy.comments or allergy.data.notes %}
-                    <div class="notes-section mt-3 pt-3 border-top">
-                        <div class="field-header mb-2">
-                            <i class="fa-solid fa-sticky-note me-2 text-primary"></i>
-                            <span class="field-label">Notes</span>
-                        </div>
-                        <div class="notes-content">
-                            {% if allergy.data.notes.display_value %}
-                                <div class="field-value text-muted">{{ allergy.data.notes.display_value }}</div>
-                            {% elif allergy.notes %}
-                                <div class="field-value text-muted">{{ allergy.notes }}</div>
-                            {% elif allergy.comments %}
-                                <div class="field-value text-muted">{{ allergy.comments }}</div>
-                            {% endif %}
+                    {% if entry.data.allergen.code or entry.allergy_code %}
+                    <div class="mt-2">
+                        <span class="field-label">Allergy Code:</span>
+                        <div class="field-value">
+                            <code class="code-value">
+                                {% if entry.data.allergen.code %}
+                                    {{ entry.data.allergen.code }}
+                                {% elif entry.allergy_code %}
+                                    {{ entry.allergy_code }}
+                                {% endif %}
+                            </code>
                         </div>
                     </div>
                     {% endif %}
                 </div>
+
+                <!-- Severity Badge -->
+                <div class="ms-3">
+                    {% if entry.data.severity.display_value %}
+                        <span class="status-badge bg-danger">{{ entry.data.severity.display_value }}</span>
+                    {% elif entry.severity %}
+                        <span class="status-badge bg-danger">{{ entry.severity }}</span>
+                    {% else %}
+                        <span class="status-badge bg-warning">Unknown Severity</span>
+                    {% endif %}
+                </div>
             </div>
-            {% endfor %}
+
+            <!-- Additional Information -->
+            {% if entry.data.onset_date or entry.data.status.display_value or entry.onset_date or entry.status %}
+            <div class="row mt-3">
+                {% if entry.data.onset_date or entry.onset_date %}
+                <div class="col-md-6">
+                    <span class="field-label">First Observed:</span>
+                    <div class="field-value">
+                        {% if entry.data.onset_date %}
+                            {{ entry.data.onset_date }}
+                        {% elif entry.onset_date %}
+                            {{ entry.onset_date }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                {% if entry.data.status.display_value or entry.status %}
+                <div class="col-md-6">
+                    <span class="field-label">Status:</span>
+                    <div class="field-value">
+                        <span class="badge bg-{{ entry.status|lower|default:'secondary' }}">
+                            {% if entry.data.status.display_value %}
+                                {{ entry.data.status.display_value }}
+                            {% elif entry.status %}
+                                {{ entry.status }}
+                            {% else %}
+                                Active
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
+        {% endfor %}
     </div>
-    
-    {% else %}
-    {# Empty State - No Allergies #}
-    <div class="clinical-section">
-        <div class="empty-clinical-state text-center p-5">
-            <i class="fa-solid fa-exclamation-triangle fa-4x text-muted mb-4"></i>
-            <h4 class="text-muted mb-3">No Allergies Recorded</h4>
-            <p class="text-muted mb-0">No allergies or intolerances have been reported for this patient.</p>
-        </div>
+
+    <!-- Alternative Layout Option 2: Simple Table (commented out - easy to switch) -->
+    <!--
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="table-warning">
+                <tr>
+                    <th><i class="fa-solid fa-triangle-exclamation me-1"></i>Allergen</th>
+                    <th>Reaction</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in section_data %}
+                <tr>
+                    <td class="fw-bold text-danger">
+                        {% if entry.data.allergen.display_value and entry.data.allergen.display_value != "Unknown" %}
+                            {{ entry.data.allergen.display_value }}
+                        {% elif entry.allergen %}
+                            {{ entry.allergen }}
+                        {% else %}
+                            Not specified
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if entry.data.reaction.display_value %}
+                            {{ entry.data.reaction.display_value }}
+                        {% elif entry.reaction %}
+                            {{ entry.reaction }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-danger">
+                            {% if entry.data.severity.display_value %}
+                                {{ entry.data.severity.display_value }}
+                            {% elif entry.severity %}
+                                {{ entry.severity }}
+                            {% else %}
+                                Unknown
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-warning">
+                            {% if entry.data.status.display_value %}
+                                {{ entry.data.status.display_value }}
+                            {% elif entry.status %}
+                                {{ entry.status }}
+                            {% else %}
+                                Active
+                            {% endif %}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-    {% endif %}
-    
-    {% endwith %}
-</div>
+    -->
+
+{% else %}
+    <div class="text-muted text-center py-4">
+        <i class="fa-solid fa-shield-alt me-2"></i>
+        No known allergies recorded for this patient.
+    </div>
+{% endif %}
