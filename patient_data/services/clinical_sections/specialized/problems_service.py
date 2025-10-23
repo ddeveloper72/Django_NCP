@@ -435,8 +435,19 @@ class ProblemsSectionService(ClinicalServiceBase):
     
     def _get_code_description(self, code: str, code_system: str) -> str:
         """Get code description, potentially using CTS integration."""
-        # For now, use our local mapping
-        # TODO: Integrate with CTS (Common Terminology Services) for real-time code resolution
+        # Try CTS integration first for real-time resolution
+        try:
+            from ..cts_integration import cts_service
+            cts_description = cts_service.resolve_code(code, code_system)
+            if cts_description:
+                self.logger.debug(f"[PROBLEMS SERVICE] CTS resolved {code} -> {cts_description}")
+                return cts_description
+        except ImportError:
+            self.logger.debug("[PROBLEMS SERVICE] CTS integration not available")
+        except Exception as e:
+            self.logger.warning(f"[PROBLEMS SERVICE] CTS resolution failed for {code}: {e}")
+        
+        # Fallback to local mapping
         description = self._map_medical_code_to_description(code, code_system)
         
         if description:

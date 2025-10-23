@@ -179,7 +179,12 @@ class AllergiesSectionService(ClinicalServiceBase):
             if mfst_obs is not None:
                 mfst_value = mfst_obs.find('hl7:value', self.namespaces)
                 if mfst_value is not None:
-                    reaction = mfst_value.get('displayName', mfst_value.get('code', reaction))
+                    reaction = mfst_value.get('displayName')
+                    if not reaction:
+                        # Map reaction codes to descriptions
+                        reaction_code = mfst_value.get('code', '')
+                        reaction_system = mfst_value.get('codeSystem', '')
+                        reaction = self._map_reaction_code_to_description(reaction_code, reaction_system) or reaction_code or "Not specified"
         
         # Extract severity with enhanced XPath
         severity = "Not specified"
@@ -356,7 +361,16 @@ class AllergiesSectionService(ClinicalServiceBase):
             '162290004': 'Dry mouth',
             '25064002': 'Headache',
             '404640003': 'Dizziness',
-            '426000000': 'Fever'
+            '426000000': 'Fever',
+            '195967001': 'Asthma',
+            '126485001': 'Urticaria (hives)',
+            '39579001': 'Anaphylactic shock',
+            '49727002': 'Cough',
+            '91175000': 'Seizure',
+            '386661006': 'Fever',
+            '418290006': 'Itching',
+            '271757001': 'Papular rash',
+            '271759003': 'Bullous rash'
         }
         
         if code_system == '2.16.840.1.113883.6.96':
@@ -368,8 +382,19 @@ class AllergiesSectionService(ClinicalServiceBase):
     
     def _get_substance_description(self, code: str, code_system: str) -> str:
         """Get substance description, potentially using CTS integration."""
-        # For now, use our local mapping
-        # TODO: Integrate with CTS (Common Terminology Services) for real-time code resolution
+        # Try CTS integration first for real-time resolution
+        try:
+            from ..cts_integration import cts_service
+            cts_description = cts_service.resolve_code(code, code_system)
+            if cts_description:
+                self.logger.debug(f"[ALLERGIES SERVICE] CTS resolved {code} -> {cts_description}")
+                return cts_description
+        except ImportError:
+            self.logger.debug("[ALLERGIES SERVICE] CTS integration not available")
+        except Exception as e:
+            self.logger.warning(f"[ALLERGIES SERVICE] CTS resolution failed for {code}: {e}")
+        
+        # Fallback to local mapping
         description = self._map_substance_code_to_description(code, code_system)
         
         if description:

@@ -451,3 +451,34 @@ CACHES = {
 # Session Management API Configuration
 SESSION_API_ENABLED = os.getenv("SESSION_API_ENABLED", "True") == "True"
 SESSION_MONITORING_ENABLED = os.getenv("SESSION_MONITORING_ENABLED", "True") == "True"
+
+# ==============================================================================
+# Common Terminology Services (CTS) Configuration
+# ==============================================================================
+
+# CTS Integration Settings
+CTS_ENABLED = os.getenv("CTS_ENABLED", "False") == "True"
+CTS_BASE_URL = os.getenv("CTS_BASE_URL", "")  # e.g., "https://cts.healthcare.gov/api/v1"
+CTS_API_KEY = os.getenv("CTS_API_KEY", "")
+CTS_CACHE_TIMEOUT = int(os.getenv("CTS_CACHE_TIMEOUT", "3600"))  # 1 hour default
+
+# Medical Code System Configuration
+SUPPORTED_CODE_SYSTEMS = {
+    'icd10': '2.16.840.1.113883.6.3',
+    'icd9': '2.16.840.1.113883.6.103',
+    'snomed': '2.16.840.1.113883.6.96',
+    'atc': '2.16.840.1.113883.6.73',
+    'loinc': '2.16.840.1.113883.6.1',
+    'orpha': '1.3.6.1.4.1.12559.11.10.1.3.1.44.5'
+}
+
+# Clinical Data Enhancement Settings
+CLINICAL_DATA_ENHANCEMENT_ENABLED = os.getenv("CLINICAL_DATA_ENHANCEMENT_ENABLED", "True") == "True"
+TEMPORAL_DATA_EXTRACTION_ENABLED = os.getenv("TEMPORAL_DATA_EXTRACTION_ENABLED", "True") == "True"
+SEVERITY_EXTRACTION_ENABLED = os.getenv("SEVERITY_EXTRACTION_ENABLED", "True") == "True"
+CRITICALITY_EXTRACTION_ENABLED = os.getenv("CRITICALITY_EXTRACTION_ENABLED", "True") == "True"
+
+# Medical Terminology Cache Configuration
+TERMINOLOGY_CACHE_ENABLED = os.getenv("TERMINOLOGY_CACHE_ENABLED", "True") == "True"
+TERMINOLOGY_CACHE_TTL = int(os.getenv("TERMINOLOGY_CACHE_TTL", "86400"))  # 24 hours
+TERMINOLOGY_NEGATIVE_CACHE_TTL = int(os.getenv("TERMINOLOGY_NEGATIVE_CACHE_TTL", "300"))  # 5 minutes
