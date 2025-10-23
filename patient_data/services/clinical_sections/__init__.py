@@ -35,6 +35,12 @@ from .specialized.procedures_service import ProceduresSectionService
 from .specialized.immunizations_service import ImmunizationsSectionService
 from .specialized.results_service import ResultsSectionService
 from .specialized.medical_devices_service import MedicalDevicesSectionService
+from .specialized.allergies_service import AllergiesSectionService
+from .specialized.past_illness_service import PastIllnessSectionService
+from .specialized.pregnancy_history_service import PregnancyHistorySectionService
+from .specialized.social_history_service import SocialHistorySectionService
+from .specialized.advance_directives_service import AdvanceDirectivesSectionService
+from .specialized.functional_status_service import FunctionalStatusSectionService
 
 # Create global pipeline manager instance
 clinical_pipeline_manager = ClinicalDataPipelineManager()
@@ -53,7 +59,13 @@ def register_clinical_services():
         ProceduresSectionService(),
         ImmunizationsSectionService(),
         ResultsSectionService(),
-        MedicalDevicesSectionService()
+        MedicalDevicesSectionService(),
+        AllergiesSectionService(),
+        PastIllnessSectionService(),
+        PregnancyHistorySectionService(),
+        SocialHistorySectionService(),
+        AdvanceDirectivesSectionService(),
+        FunctionalStatusSectionService()
     ]
     
     for service in services:
@@ -79,6 +91,12 @@ __all__ = [
     'ImmunizationsSectionService',
     'ResultsSectionService',
     'MedicalDevicesSectionService',
+    'AllergiesSectionService',
+    'PastIllnessSectionService',
+    'PregnancyHistorySectionService',
+    'SocialHistorySectionService',
+    'AdvanceDirectivesSectionService',
+    'FunctionalStatusSectionService',
     
     # Registry functions
     'register_clinical_services'
