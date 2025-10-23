@@ -326,10 +326,26 @@ class ComprehensiveClinicalDataService:
                 # Use CDA parser for other data types where enhanced parser might not have coverage
                 clinical_arrays["allergies"].extend(structured.get("allergies", []))
                 
-                # Enhanced problem processing with rich clinical data
-                raw_problems = structured.get("problems", [])
-                enhanced_problems = self._extract_enhanced_problems(raw_problems)
-                clinical_arrays["problems"].extend(enhanced_problems)
+                # Enhanced problem processing with rich clinical data - PREVENT DUPLICATES
+                existing_problems_count = len(clinical_arrays["problems"])
+                if existing_problems_count == 0:
+                    # Only add CDA parser problems if no problems from enhanced parser
+                    raw_problems = structured.get("problems", [])
+                    enhanced_problems = self._extract_enhanced_problems(raw_problems)
+                    clinical_arrays["problems"].extend(enhanced_problems)
+                    logger.info(f"[PROBLEMS DEDUP] Added {len(enhanced_problems)} problems from CDA parser (no enhanced parser problems)")
+                else:
+                    # Check for unique problems not already in enhanced parser results
+                    raw_problems = structured.get("problems", [])
+                    enhanced_problems = self._extract_enhanced_problems(raw_problems)
+                    
+                    # Deduplicate based on problem name and onset date
+                    unique_problems = self._deduplicate_problems(clinical_arrays["problems"], enhanced_problems)
+                    if unique_problems:
+                        clinical_arrays["problems"].extend(unique_problems)
+                        logger.info(f"[PROBLEMS DEDUP] Added {len(unique_problems)} unique problems from CDA parser ({len(enhanced_problems)} total, {existing_problems_count} existing)")
+                    else:
+                        logger.info(f"[PROBLEMS DEDUP] No unique problems to add from CDA parser ({existing_problems_count} existing problems)")
                 
                 clinical_arrays["procedures"].extend(structured.get("procedures", []))
                 clinical_arrays["vital_signs"].extend(structured.get("vital_signs", []))
@@ -2511,3 +2527,76 @@ class ComprehensiveClinicalDataService:
                         
         except Exception as e:
             logger.warning(f"Error fixing schedule field compatibility: {e}")
+
+    def _deduplicate_problems(self, existing_problems: List[Dict], new_problems: List[Dict]) -> List[Dict]:
+        """
+        Deduplicate problems based on name and onset date to prevent duplicates
+        from enhanced parser and CDA parser being combined.
+        
+        Args:
+            existing_problems: Problems already in the array (from enhanced parser)
+            new_problems: Problems to potentially add (from CDA parser)
+            
+        Returns:
+            List of unique problems not already in existing_problems
+        """
+        try:
+            # Create set of existing problem signatures
+            existing_signatures = set()
+            for problem in existing_problems:
+                name = self._normalize_problem_name(problem)
+                onset = self._normalize_problem_date(problem)
+                signature = f"{name}|{onset}"
+                existing_signatures.add(signature)
+            
+            # Filter new problems to only include unique ones
+            unique_problems = []
+            for problem in new_problems:
+                name = self._normalize_problem_name(problem)
+                onset = self._normalize_problem_date(problem)
+                signature = f"{name}|{onset}"
+                
+                if signature not in existing_signatures:
+                    unique_problems.append(problem)
+                    existing_signatures.add(signature)  # Prevent duplicates within new_problems too
+                else:
+                    logger.debug(f"[PROBLEMS DEDUP] Skipping duplicate: {name} ({onset})")
+            
+            return unique_problems
+            
+        except Exception as e:
+            logger.error(f"[PROBLEMS DEDUP] Error deduplicating problems: {e}")
+            # On error, return empty list to prevent duplicates
+            return []
+    
+    def _normalize_problem_name(self, problem: Dict) -> str:
+        """Extract and normalize problem name for deduplication comparison."""
+        try:
+            # Try multiple possible field names for problem name
+            name = (
+                problem.get('name') or 
+                problem.get('display_name') or
+                problem.get('problem_name') or
+                problem.get('title') or
+                'Unknown'
+            )
+            # Normalize for comparison (lowercase, strip whitespace)
+            return str(name).lower().strip()
+        except Exception:
+            return 'unknown'
+    
+    def _normalize_problem_date(self, problem: Dict) -> str:
+        """Extract and normalize problem onset date for deduplication comparison."""
+        try:
+            # Try multiple possible field names for onset date
+            onset = (
+                problem.get('onset_date') or
+                problem.get('onset') or
+                problem.get('effective_time') or
+                problem.get('start_date') or
+                'Not specified'
+            )
+            # Normalize date format for comparison
+            return str(onset).strip()
+        except Exception:
+            return 'not specified'
