@@ -3763,13 +3763,16 @@ class CDAViewProcessor:
             return default_value
 
     def _get_enhanced_medications_from_session(self) -> Optional[List[Dict[str, Any]]]:
-        """Get enhanced medications from session if available"""
+        """Get enhanced medications from session if available - prefer most complete data"""
         try:
             from django.contrib.sessions.models import Session
             
             # Search across all Django sessions for enhanced medications data
-            all_sessions = Session.objects.all()
+            all_sessions = Session.objects.all().order_by('-expire_date')  # Most recent first
             logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: Searching {len(all_sessions)} sessions for enhanced medications ***")
+            
+            # Collect all sessions with enhanced medications, then choose the best one
+            sessions_with_medications = []
             
             for db_session in all_sessions:
                 try:
@@ -3800,18 +3803,33 @@ class CDAViewProcessor:
                                 normalized_med['indication'] = 'Indication not specified'
                             normalized_medications.append(normalized_med)
                         
-                        logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: Found enhanced medications in session {db_session.session_key}: {len(normalized_medications)} medications ***")
-                        if normalized_medications:
-                            first_med = normalized_medications[0]
-                            logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: First medication: {first_med.get('name', 'Unknown')} - dose: {first_med.get('dose_quantity', 'Not found')} - route: {first_med.get('route', 'Not found')} ***")
-                        return normalized_medications
+                        sessions_with_medications.append({
+                            'session_key': db_session.session_key,
+                            'expire_date': db_session.expire_date,
+                            'medications': normalized_medications,
+                            'count': len(normalized_medications)
+                        })
                         
                 except Exception as e:
                     logger.debug(f"[CDA PROCESSOR] Error decoding session {db_session.session_key}: {e}")
                     continue  # Skip corrupted sessions
 
-            logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: No enhanced medications found in any session ***")
-            return None
+            if not sessions_with_medications:
+                logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: No enhanced medications found in any session ***")
+                return None
+                
+            # Choose the best session: prefer more complete data (more medications) and most recent
+            best_session = max(sessions_with_medications, key=lambda x: (x['count'], x['expire_date']))
+            
+            logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: Selected session {best_session['session_key']} with {best_session['count']} medications (most complete) ***")
+            
+            if best_session['medications']:
+                first_med = best_session['medications'][0]
+                medication_names = [med.get('name', med.get('medication_name', 'Unknown')) for med in best_session['medications']]
+                logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: First medication: {first_med.get('name', first_med.get('medication_name', 'Unknown'))} - dose: {first_med.get('dose_quantity', 'Not found')} - route: {first_med.get('route', 'Not found')} ***")
+                logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: All medications: {medication_names} ***")
+                
+            return best_session['medications']
 
         except Exception as e:
             logger.error(f"[CDA PROCESSOR] Error retrieving enhanced medications: {e}")
