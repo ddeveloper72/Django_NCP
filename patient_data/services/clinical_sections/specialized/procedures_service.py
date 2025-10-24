@@ -88,13 +88,23 @@ class ProceduresSectionService(ClinicalServiceBase):
         for procedure_data in raw_data:
             enhanced_procedure = {
                 'name': self._extract_field_value(procedure_data, 'name', 'Unknown procedure'),
-                'display_name': self._extract_field_value(procedure_data, 'name', 'Unknown procedure'),
+                'display_name': self._extract_field_value(procedure_data, 'display_name', 
+                                                        self._extract_field_value(procedure_data, 'name', 'Unknown procedure')),
                 'date': self._format_procedure_date(self._extract_field_value(procedure_data, 'date', 'Not specified')),
                 'provider': self._extract_field_value(procedure_data, 'provider', 'Not specified'),
                 'location': self._extract_field_value(procedure_data, 'location', 'Not specified'),
-                'status': self._extract_field_value(procedure_data, 'status', 'Completed'),
+                'status': self._extract_field_value(procedure_data, 'status', 'completed'),
                 'indication': self._extract_field_value(procedure_data, 'indication', 'Not specified'),
-                'source': 'cda_extraction_enhanced'
+                'source': 'cda_extraction_enhanced',
+                
+                # Enhanced structured data
+                'procedure_code': self._extract_field_value(procedure_data, 'procedure_code', None),
+                'code_system': self._extract_field_value(procedure_data, 'code_system', None),
+                'target_site': self._extract_field_value(procedure_data, 'target_site', None),
+                'laterality': self._extract_field_value(procedure_data, 'laterality', None),
+                'template_id': self._extract_field_value(procedure_data, 'template_id', None),
+                'procedure_id': self._extract_field_value(procedure_data, 'procedure_id', None),
+                'text_reference': self._extract_field_value(procedure_data, 'text_reference', None)
             }
             enhanced_procedures.append(enhanced_procedure)
         
@@ -122,26 +132,100 @@ class ProceduresSectionService(ClinicalServiceBase):
         }
     
     def _parse_procedures_xml(self, section) -> List[Dict[str, Any]]:
-        """Parse procedures section XML into structured data."""
+        """Parse procedures section XML into structured data with narrative enhancement."""
         procedures = []
+        
+        # First, extract narrative text mapping for resolving references
+        narrative_mapping = self._extract_narrative_mapping(section)
         
         entries = section.findall('.//hl7:entry', self.namespaces)
         for entry in entries:
             procedure_elem = entry.find('.//hl7:procedure', self.namespaces)
             if procedure_elem is not None:
                 procedure = self._parse_procedure_element(procedure_elem)
+                
+                # Enhance with narrative text if available
+                if procedure and narrative_mapping:
+                    procedure = self._enhance_with_narrative(procedure, narrative_mapping)
+                
                 if procedure:
                     procedures.append(procedure)
         
         return procedures
     
+    def _extract_narrative_mapping(self, section) -> Dict[str, str]:
+        """Extract narrative text mapping from section for reference resolution."""
+        narrative_mapping = {}
+        
+        # Look for text elements with IDs and content references
+        text_section = section.find('hl7:text', self.namespaces)
+        if text_section is not None:
+            # Extract paragraph mappings
+            paragraphs = text_section.findall('.//hl7:paragraph', self.namespaces)
+            for para in paragraphs:
+                para_id = para.get('ID')
+                if para_id:
+                    para_text = ''.join(para.itertext()).strip()
+                    narrative_mapping[para_id] = para_text
+            
+            # Extract content mappings from table cells
+            content_elements = text_section.findall('.//hl7:content', self.namespaces)
+            for content in content_elements:
+                content_id = content.get('ID')
+                if content_id:
+                    content_text = ''.join(content.itertext()).strip()
+                    narrative_mapping[content_id] = content_text
+        
+        return narrative_mapping
+    
+    def _enhance_with_narrative(self, procedure: Dict[str, Any], narrative_mapping: Dict[str, str]) -> Dict[str, Any]:
+        """Enhance procedure data with narrative text content."""
+        # Try to resolve text reference for procedure name
+        text_ref = procedure.get('text_reference')
+        if text_ref and text_ref in narrative_mapping:
+            narrative_text = narrative_mapping[text_ref]
+            # Extract procedure name and date from narrative
+            if ',' in narrative_text:
+                parts = narrative_text.split(',')
+                if len(parts) >= 2:
+                    procedure_name = parts[0].strip()
+                    if procedure_name and procedure_name != 'Unknown procedure':
+                        procedure['name'] = procedure_name
+                        procedure['display_name'] = procedure_name
+        
+        # Try to resolve originalText reference for procedure name if still unknown
+        if procedure.get('name', '').startswith('Procedure (ref:'):
+            ref_match = procedure['name'].replace('Procedure (ref: ', '').replace(')', '')
+            if ref_match in narrative_mapping:
+                resolved_name = narrative_mapping[ref_match]
+                if resolved_name:
+                    procedure['name'] = resolved_name
+                    procedure['display_name'] = resolved_name
+        
+        return procedure
+    
     def _parse_procedure_element(self, procedure_elem) -> Dict[str, Any]:
-        """Parse procedure element into structured data."""
-        # Extract procedure name
+        """Parse procedure element into structured data with comprehensive extraction."""
+        # Extract procedure code and name
         code_elem = procedure_elem.find('hl7:code', self.namespaces)
         name = "Unknown procedure"
+        procedure_code = None
+        code_system = None
+        
         if code_elem is not None:
-            name = code_elem.get('displayName', code_elem.get('code', 'Unknown procedure'))
+            procedure_code = code_elem.get('code')
+            code_system = code_elem.get('codeSystem')
+            name = code_elem.get('displayName', 'Unknown procedure')
+            
+            # Try to get name from originalText reference if displayName not available
+            if name == 'Unknown procedure':
+                original_text = code_elem.find('hl7:originalText', self.namespaces)
+                if original_text is not None:
+                    ref_elem = original_text.find('hl7:reference', self.namespaces)
+                    if ref_elem is not None:
+                        ref_value = ref_elem.get('value', '').replace('#', '')
+                        # Store reference for potential narrative lookup
+                        name = f"Procedure (ref: {ref_value})"
         
         # Extract date
         time_elem = procedure_elem.find('hl7:effectiveTime', self.namespaces)
@@ -151,17 +235,91 @@ class ProceduresSectionService(ClinicalServiceBase):
         
         # Extract status
         status_elem = procedure_elem.find('hl7:statusCode', self.namespaces)
-        status = "Completed"
+        status = "completed"
         if status_elem is not None:
-            status = status_elem.get('code', 'Completed')
+            status = status_elem.get('code', 'completed')
         
-        return {
+        # Extract target site information
+        target_site_info = self._extract_target_site(procedure_elem)
+        
+        # Extract template ID for CDA compliance
+        template_elem = procedure_elem.find('hl7:templateId', self.namespaces)
+        template_id = None
+        if template_elem is not None:
+            template_id = template_elem.get('root')
+        
+        # Extract procedure ID
+        id_elem = procedure_elem.find('hl7:id', self.namespaces)
+        procedure_id = None
+        if id_elem is not None:
+            procedure_id = id_elem.get('root')
+        
+        # Extract narrative text reference
+        text_elem = procedure_elem.find('hl7:text', self.namespaces)
+        text_reference = None
+        if text_elem is not None:
+            ref_elem = text_elem.find('hl7:reference', self.namespaces)
+            if ref_elem is not None:
+                text_reference = ref_elem.get('value', '').replace('#', '')
+        
+        procedure_data = {
             'name': name,
             'date': date,
             'provider': 'Not specified',
-            'location': 'Not specified',
+            'location': target_site_info.get('location', 'Not specified'),
             'status': status,
-            'indication': 'Not specified'
+            'indication': 'Not specified',
+            'procedure_code': procedure_code,
+            'code_system': code_system,
+            'target_site': target_site_info.get('site_description'),
+            'laterality': target_site_info.get('laterality'),
+            'template_id': template_id,
+            'procedure_id': procedure_id,
+            'text_reference': text_reference
+        }
+        
+        return procedure_data
+    
+    def _extract_target_site(self, procedure_elem) -> Dict[str, Any]:
+        """Extract target site information including anatomical location and laterality."""
+        target_site_elem = procedure_elem.find('hl7:targetSiteCode', self.namespaces)
+        
+        if target_site_elem is None:
+            return {
+                'site_description': None,
+                'laterality': None,
+                'location': 'Not specified'
+            }
+        
+        # Get site description
+        site_description = target_site_elem.get('displayName', 'Unknown site')
+        site_code = target_site_elem.get('code')
+        
+        # Extract laterality from qualifier
+        laterality = None
+        qualifier_elem = target_site_elem.find('hl7:qualifier', self.namespaces)
+        if qualifier_elem is not None:
+            name_elem = qualifier_elem.find('hl7:name', self.namespaces)
+            value_elem = qualifier_elem.find('hl7:value', self.namespaces)
+            
+            if (name_elem is not None and value_elem is not None and 
+                name_elem.get('displayName') == 'Laterality'):
+                laterality = value_elem.get('displayName')
+        
+        # Construct comprehensive location description
+        location_parts = []
+        if site_description and site_description != 'Unknown site':
+            location_parts.append(site_description)
+        if laterality:
+            location_parts.append(f"({laterality})")
+        
+        location = ' '.join(location_parts) if location_parts else 'Not specified'
+        
+        return {
+            'site_description': site_description,
+            'site_code': site_code,
+            'laterality': laterality,
+            'location': location
         }
     
     def _format_procedure_date(self, cda_date: str) -> str:
