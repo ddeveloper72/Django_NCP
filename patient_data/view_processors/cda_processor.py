@@ -1141,9 +1141,20 @@ class CDAViewProcessor:
                     else:
                         logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Skipped medication section - using enhanced clinical arrays instead ***")
                 elif clean_code in ['48765-2', '48766-0']:  # Allergy sections
-                    enhanced_section = self._enhance_section_with_clinical_codes(section)
-                    compatibility_vars['allergies'].append(enhanced_section)
-                    logger.debug(f"[COMPATIBILITY] Added allergy section: {section.get('title', 'Unknown')}")
+                    logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: Processing allergy section with code {clean_code} ***")
+                    logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: enhanced_clinical_arrays is None: {enhanced_clinical_arrays is None} ***")
+                    if enhanced_clinical_arrays:
+                        logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: enhanced_clinical_arrays.get('allergies') count: {len(enhanced_clinical_arrays.get('allergies', []))} ***")
+                    
+                    # CRITICAL FIX: Only add allergy section if we don't have enhanced clinical arrays
+                    # This prevents duplicate allergies from appearing
+                    if not enhanced_clinical_arrays or not enhanced_clinical_arrays.get('allergies'):
+                        enhanced_section = self._enhance_section_with_clinical_codes(section)
+                        compatibility_vars['allergies'].append(enhanced_section)
+                        logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: Added allergy section to compatibility_vars (no enhanced arrays) ***")
+                        logger.debug(f"[COMPATIBILITY] Added allergy section: {section.get('title', 'Unknown')}")
+                    else:
+                        logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: Skipped allergy section - using enhanced clinical arrays instead ***")
                 elif clean_code in ['11450-4', '11348-0']:  # Problem lists & History of Past Illness
                     enhanced_section = self._enhance_section_with_clinical_codes(section)
                     # Extract template-compatible data for problems
@@ -1194,6 +1205,12 @@ class CDAViewProcessor:
         # Also populate compatibility variables from clinical_arrays if available
         # Use enhanced_clinical_arrays if provided, otherwise fall back to context
         clinical_arrays = enhanced_clinical_arrays or context.get('clinical_arrays', {})
+        logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: enhanced_clinical_arrays parameter passed: {enhanced_clinical_arrays is not None} ***")
+        logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: clinical_arrays source: {'enhanced_clinical_arrays' if enhanced_clinical_arrays else 'context.clinical_arrays'} ***")
+        if clinical_arrays and clinical_arrays.get('allergies'):
+            logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: clinical_arrays has {len(clinical_arrays['allergies'])} allergies ***")
+        else:
+            logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: clinical_arrays has no allergies ***")
         print(f"*** COMPATIBILITY DEBUG: enhanced_clinical_arrays provided: {enhanced_clinical_arrays is not None} ***")
         if enhanced_clinical_arrays:
             print(f"*** COMPATIBILITY DEBUG: enhanced_clinical_arrays meds count: {len(enhanced_clinical_arrays.get('medications', []))} ***")
@@ -1275,6 +1292,14 @@ class CDAViewProcessor:
             logger.info("[COMPATIBILITY] No clinical_arrays available for template compatibility")
         # Add all compatibility variables to context
         context.update(compatibility_vars)
+        
+        # DEBUG: Log final allergy count after all compatibility processing
+        final_allergy_count = len(context.get('allergies', []))
+        logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: Final context allergies count after compatibility processing: {final_allergy_count} ***")
+        if context.get('allergies'):
+            first_allergy = context['allergies'][0]
+            logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: First allergy type: {type(first_allergy)} ***")
+            logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: First allergy has name: {'name' in first_allergy if isinstance(first_allergy, dict) else 'NOT_DICT'} ***")
         
         # DEBUG: Log final medication count
         final_med_count = len(context.get('medications', []))

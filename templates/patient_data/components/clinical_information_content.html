@@ -405,7 +405,11 @@
                     {% endif %}
                     
                     {# Allergies Section - MANDATORY (always displayed) #}
-                    {% if allergies and allergies|length > 0 %}
+                    
+                    {# CRITICAL FIX: Use the better data source for allergies #}
+                    {% with clinical_arrays.allergies|default:allergies as allergies_data %}
+                    
+                    {% if allergies_data and allergies_data|length > 0 %}
                     <div class="clinical-section">
                         <div class="collapsible-wrapper">
                             <input id="toggle-allergies" class="toggle-input" type="checkbox">
@@ -416,8 +420,8 @@
                                         <span>Allergies & Intolerances</span>
                                     </div>
                                     <div class="clinical-badge-container">
-                                        {% if allergies and allergies|length > 0 %}
-                                            <span class="clinical-badge populated">{{ allergies|count_allergy_observations }} Found</span>
+                                        {% if allergies_data and allergies_data|length > 0 %}
+                                            <span class="clinical-badge populated">{{ allergies_data|count_allergy_observations }} Found</span>
                                         {% else %}
                                             <span class="clinical-badge mandatory">Mandatory</span>
                                         {% endif %}
@@ -427,11 +431,11 @@
                             </label>
                             <div class="collapsible-content-title">
                                 <div class="content-inner-title">
-                                    {% if allergies and allergies|length > 0 %}
-                                        <p class="mb-3 text-muted">Allergies: {{ allergies|count_allergy_observations }} items found</p>
+                                    {% if allergies_data and allergies_data|length > 0 %}
+                                        <p class="mb-3 text-muted">Allergies: {{ allergies_data|count_allergy_observations }} items found</p>
                                         
                                         {# PRIORITY 1: Check if allergies data has clinical_table structure (NEW 9-COLUMN FORMAT) #}
-                                        {% if allergies.0.clinical_table %}
+                                        {% if allergies_data.0.clinical_table %}
                                         {# NEW 9-COLUMN CLINICAL TABLE STRUCTURE from Enhanced CDA Processor #}
                                         <div class="clinical-table">
                                             {# Desktop Table Layout #}
@@ -463,7 +467,7 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {% for allergy in allergies %}
+                                                            {% for allergy in allergies_data %}
                                                             {% if allergy.clinical_table %}
                                                             {% for row in allergy.clinical_table.rows %}
                                                             <tr class="clinical-row">
@@ -511,7 +515,7 @@
                                             {# Mobile Card Layout #}
                                             <div class="d-block d-md-none">
                                                 <div class="clinical-cards-container">
-                                                    {% for allergy in allergies %}
+                                                    {% for allergy in allergies_data %}
                                                     {% if allergy.clinical_table %}
                                                     {% for row in allergy.clinical_table.rows %}
                                                     <div class="card clinical-card mb-3 border-warning">
@@ -572,7 +576,7 @@
                                         </div>
                                     {% else %}
                                         {# FALLBACK: Original card format for backward compatibility #}
-                                        {% for allergy in allergies %}
+                                        {% for allergy in allergies_data %}
                                         <div class="allergy-card mb-3 p-3 border rounded bg-white">
                                             <div class="d-flex align-items-start">
                                                 <div class="allergy-icon me-3">
@@ -580,24 +584,25 @@
                                                 </div>
                                                 <div class="allergy-details flex-grow-1">
                                                     <h6 class="allergy-name text-dark mb-1">
-                                                        {% if allergy.allergen.name %}
-                                                            {{ allergy.allergen.name }}
-                                                        {% elif allergy.allergen.code.displayName %}
-                                                            {{ allergy.allergen.code.displayName }}
-                                                        {% else %}
-                                                            Allergen (Code: {{ allergy.allergen.code.code|default:"Unknown" }})
-                                                        {% endif %}
+                                                        {# Use direct fields from comprehensive service #}
+                                                        {% firstof allergy.name allergy.substance allergy.data.allergen.display_value allergy.allergen.name allergy.allergen.code.displayName "Unknown Allergen" %}
                                                     </h6>
                                                     {% if allergy.reaction %}
                                                     <div class="text-muted mb-1">
                                                         <i class="fa-solid fa-exclamation-circle me-1"></i>
-                                                        <strong>Reaction:</strong> {{ allergy.reaction.name|default:allergy.reaction.code.displayName|default:"Not specified" }}
+                                                        <strong>Reaction:</strong> {% firstof allergy.reaction allergy.data.reaction.display_value allergy.reaction.name allergy.reaction.code.displayName "Not specified" %}
                                                     </div>
                                                     {% endif %}
                                                     {% if allergy.severity %}
                                                     <div class="text-muted">
                                                         <i class="fa-solid fa-thermometer-half me-1"></i>
-                                                        <strong>Severity:</strong> {{ allergy.severity.name|default:allergy.severity.code.displayName|default:"Not specified" }}
+                                                        <strong>Severity:</strong> {% firstof allergy.severity allergy.data.severity.display_value allergy.severity.name allergy.severity.code.displayName "Not specified" %}
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if allergy.status %}
+                                                    <div class="text-muted">
+                                                        <i class="fa-solid fa-info-circle me-1"></i>
+                                                        <strong>Status:</strong> {% firstof allergy.status allergy.data.status.display_value allergy.status.name allergy.status.code.displayName "Unknown" %}
                                                     </div>
                                                     {% endif %}
                                                 </div>
@@ -610,6 +615,7 @@
                         </div>
                     </div>
                     {% endif %}
+                    
                     {% else %}
                     {# Only show empty mandatory allergies section if no related extended section exists #}
                     {% if not hide_mandatory_allergies %}
@@ -640,6 +646,8 @@
                     </div>
                     {% endif %}
                     {% endif %}
+                    
+                    {% endwith %}
                     
                     {# Procedures Section - MANDATORY #}
                     {% if procedures and procedures|length > 0 %}

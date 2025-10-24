@@ -13,10 +13,12 @@
         {% include 'patient_data/sections/problems_section_new.html' with section_data=problems section_count=problems|length section_type='problems' section_title='Medical Problems' %}
     {% endif %}
     
-    {# Allergies Section #}
-    {% if allergies and allergies|length > 0 %}
-        {% include 'patient_data/sections/allergies_section_new.html' with section_data=allergies section_count=allergies|length section_type='allergies' section_title='Allergies & Intolerances' %}
-    {% endif %}
+    {# Allergies Section - Use enhanced clinical_arrays data #}
+    {% with clinical_arrays.allergies|default:allergies as allergies_data %}
+        {% if allergies_data and allergies_data|length > 0 %}
+            {% include 'patient_data/sections/allergies_section_new.html' with section_data=allergies_data section_count=allergies_data|length section_type='allergies' section_title='Allergies & Intolerances' %}
+        {% endif %}
+    {% endwith %}
     
     {# Procedures Section #}
     {% if procedures and procedures|length > 0 %}
