@@ -35,14 +35,8 @@
                                 <div class="procedure-name-section flex-grow-1 me-3">
                                     <h5 class="procedure-name text-info mb-1 fw-bold">
                                         <i class="fa-solid fa-user-md me-2"></i>
-                                        {% if procedure.title.translated %}
-                                            {{ procedure.title.translated|safe }}
-                                        {% elif procedure.title.original %}
-                                            {{ procedure.title.original }}
-                                        {% elif procedure.data.procedure.display_value %}
-                                            {{ procedure.data.procedure.display_value }}
-                                        {% elif procedure.procedure_name %}
-                                            {{ procedure.procedure_name }}
+                                        {% if procedure.name %}
+                                            {{ procedure.name }}
                                         {% elif procedure.display_name %}
                                             {{ procedure.display_name }}
                                         {% else %}
@@ -51,24 +45,18 @@
                                     </h5>
                                 </div>
                                 <div class="procedure-status-section">
-                                    {% if procedure.data.status.display_value %}
-                                        {% if procedure.data.status.display_value == "Completed" %}
-                                            <span class="badge bg-success fs-6">{{ procedure.data.status.display_value }}</span>
-                                        {% elif procedure.data.status.display_value == "In Progress" %}
-                                            <span class="badge bg-primary fs-6">{{ procedure.data.status.display_value }}</span>
-                                        {% elif procedure.data.status.display_value == "Cancelled" %}
-                                            <span class="badge bg-danger fs-6">{{ procedure.data.status.display_value }}</span>
+                                    {% if procedure.status %}
+                                        {% if procedure.status|lower == "completed" %}
+                                            <span class="badge bg-success fs-6">{{ procedure.status|title }}</span>
+                                        {% elif procedure.status|lower == "active" or procedure.status|lower == "in-progress" %}
+                                            <span class="badge bg-primary fs-6">{{ procedure.status|title }}</span>
+                                        {% elif procedure.status|lower == "cancelled" %}
+                                            <span class="badge bg-danger fs-6">{{ procedure.status|title }}</span>
                                         {% else %}
-                                            <span class="badge bg-info fs-6">{{ procedure.data.status.display_value }}</span>
-                                        {% endif %}
-                                    {% elif procedure.status %}
-                                        {% if procedure.status == "Completed" %}
-                                            <span class="badge bg-success fs-6">{{ procedure.status }}</span>
-                                        {% else %}
-                                            <span class="badge bg-info fs-6">{{ procedure.status }}</span>
+                                            <span class="badge bg-info fs-6">{{ procedure.status|title }}</span>
                                         {% endif %}
                                     {% else %}
-                                        <span class="badge bg-info fs-6">Completed</span>
+                                        <span class="badge bg-success fs-6">Completed</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -85,9 +73,7 @@
                                         <span class="field-label">Procedure Date</span>
                                     </div>
                                     <div class="field-content">
-                                        {% if procedure.data.date.display_value %}
-                                            <div class="field-value">{{ procedure.data.date.display_value }}</div>
-                                        {% elif procedure.date %}
+                                        {% if procedure.date %}
                                             <div class="field-value">{{ procedure.date }}</div>
                                         {% else %}
                                             <div class="field-value text-muted">Not recorded</div>
@@ -96,20 +82,21 @@
                                 </div>
                             </div>
                             
-                            {# Procedure Type #}
+                            {# Procedure Code #}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
-                                        <i class="fa-solid fa-tags me-2 text-primary"></i>
-                                        <span class="field-label">Procedure Type</span>
+                                        <i class="fa-solid fa-code me-2 text-primary"></i>
+                                        <span class="field-label">Procedure Code</span>
                                     </div>
                                     <div class="field-content">
-                                        {% if procedure.data.type.display_value %}
-                                            <div class="field-value">{{ procedure.data.type.display_value }}</div>
-                                        {% elif procedure.section_type %}
-                                            <div class="field-value">{{ procedure.section_type|title }}</div>
-                                        {% elif procedure.type %}
-                                            <div class="field-value">{{ procedure.type }}</div>
+                                        {% if procedure.procedure_code %}
+                                            <div class="field-value">
+                                                <code>{{ procedure.procedure_code }}</code>
+                                                {% if procedure.code_system %}
+                                                <small class="text-muted ms-2">({{ procedure.code_system }})</small>
+                                                {% endif %}
+                                            </div>
                                         {% else %}
                                             <div class="field-value text-muted">Not specified</div>
                                         {% endif %}
@@ -117,8 +104,28 @@
                                 </div>
                             </div>
                             
+                            {# Target Site #}
+                            {% if procedure.target_site or procedure.location %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-bullseye me-2 text-warning"></i>
+                                        <span class="field-label">Target Site</span>
+                                    </div>
+                                    <div class="field-content">
+                                        <div class="field-value">
+                                            {{ procedure.target_site|default:procedure.location }}
+                                            {% if procedure.laterality %}
+                                            <span class="badge bg-info ms-2">{{ procedure.laterality }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
                             {# Performer #}
-                            {% if procedure.performer or procedure.data.performer %}
+                            {% if procedure.provider and procedure.provider != "Not specified" %}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
@@ -126,76 +133,43 @@
                                         <span class="field-label">Performed By</span>
                                     </div>
                                     <div class="field-content">
-                                        {% if procedure.data.performer.display_value %}
-                                            <div class="field-value">{{ procedure.data.performer.display_value }}</div>
-                                        {% elif procedure.performer %}
-                                            <div class="field-value">{{ procedure.performer }}</div>
-                                        {% else %}
-                                            <div class="field-value text-muted">Not specified</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
-                            
-                            {# Outcome #}
-                            {% if procedure.outcome or procedure.data.outcome %}
-                            <div class="col-lg-6">
-                                <div class="field-group">
-                                    <div class="field-header">
-                                        <i class="fa-solid fa-chart-line me-2 text-primary"></i>
-                                        <span class="field-label">Outcome</span>
-                                    </div>
-                                    <div class="field-content">
-                                        {% if procedure.data.outcome.display_value %}
-                                            <div class="field-value">{{ procedure.data.outcome.display_value }}</div>
-                                        {% elif procedure.outcome %}
-                                            <div class="field-value">{{ procedure.outcome }}</div>
-                                        {% else %}
-                                            <div class="field-value text-muted">Not recorded</div>
-                                        {% endif %}
+                                        <div class="field-value">{{ procedure.provider }}</div>
                                     </div>
                                 </div>
                             </div>
                             {% endif %}
                         </div>
 
-                        {# Medical Codes Section #}
-                        {% if procedure.codes or procedure.medical_codes %}
-                        <div class="medical-codes-section mt-3 pt-3 border-top">
+                        {# Technical Information Section #}
+                        {% if procedure.template_id or procedure.procedure_id %}
+                        <div class="technical-info-section mt-3 pt-3 border-top">
                             <div class="field-header mb-2">
-                                <i class="fa-solid fa-code me-2 text-primary"></i>
-                                <span class="field-label">Medical Codes</span>
+                                <i class="fa-solid fa-id-card me-2 text-primary"></i>
+                                <span class="field-label">Technical Information</span>
                             </div>
-                            <div class="medical-codes-container">
-                                {% if procedure.codes %}
-                                    {% for code in procedure.codes %}
-                                        <span class="medical-code me-2 mb-1" title="Medical Code: {{ code }}">{{ code }}</span>
-                                    {% endfor %}
-                                {% elif procedure.medical_codes %}
-                                    {% for code in procedure.medical_codes %}
-                                        <span class="medical-code me-2 mb-1" title="Medical Code: {{ code }}">{{ code }}</span>
-                                    {% endfor %}
+                            <div class="technical-info-container">
+                                {% if procedure.template_id %}
+                                <div class="small text-muted">Template ID: <code>{{ procedure.template_id }}</code></div>
+                                {% endif %}
+                                {% if procedure.procedure_id %}
+                                <div class="small text-muted">Procedure ID: <code>{{ procedure.procedure_id }}</code></div>
+                                {% endif %}
+                                {% if procedure.text_reference %}
+                                <div class="small text-muted">Text Reference: <code>#{{ procedure.text_reference }}</code></div>
                                 {% endif %}
                             </div>
                         </div>
                         {% endif %}
 
-                        {# Description Section #}
-                        {% if procedure.description or procedure.notes or procedure.data.description %}
-                        <div class="description-section mt-3 pt-3 border-top">
+                        {# Additional Information Section #}
+                        {% if procedure.indication and procedure.indication != "Not specified" %}
+                        <div class="additional-info-section mt-3 pt-3 border-top">
                             <div class="field-header mb-2">
                                 <i class="fa-solid fa-sticky-note me-2 text-primary"></i>
-                                <span class="field-label">Description</span>
+                                <span class="field-label">Additional Information</span>
                             </div>
-                            <div class="description-content">
-                                {% if procedure.data.description.display_value %}
-                                    <div class="field-value text-muted">{{ procedure.data.description.display_value }}</div>
-                                {% elif procedure.description %}
-                                    <div class="field-value text-muted">{{ procedure.description }}</div>
-                                {% elif procedure.notes %}
-                                    <div class="field-value text-muted">{{ procedure.notes }}</div>
-                                {% endif %}
+                            <div class="additional-info-content">
+                                <div class="field-value text-muted">{{ procedure.indication }}</div>
                             </div>
                         </div>
                         {% endif %}

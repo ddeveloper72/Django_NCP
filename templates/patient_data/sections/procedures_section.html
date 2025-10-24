@@ -28,48 +28,70 @@
             </div>
             {% endif %}
             
-            {% if procedure.date or procedure.effective_time %}
+            {% if procedure.date %}
             <div class="field-row">
                 <div class="field-label">
                     <i class="fas fa-calendar me-1"></i>
                     Date
                 </div>
-                <div class="field-value">{{ procedure.date|default:procedure.effective_time|date:"M d, Y" }}</div>
+                <div class="field-value">{{ procedure.date }}</div>
             </div>
             {% endif %}
             
-            {% if procedure.site %}
+            {% if procedure.target_site or procedure.location %}
             <div class="field-row">
                 <div class="field-label">
                     <i class="fas fa-location-dot me-1"></i>
-                    Site
+                    {% if procedure.target_site %}Target Site{% else %}Location{% endif %}
                 </div>
-                <div class="field-value">{{ procedure.site }}</div>
+                <div class="field-value">
+                    {{ procedure.target_site|default:procedure.location }}
+                    {% if procedure.laterality %}
+                    <span class="badge bg-info ms-2">{{ procedure.laterality }}</span>
+                    {% endif %}
+                </div>
             </div>
             {% endif %}
             
-            {% if procedure.performer %}
+            {% if procedure.provider and procedure.provider != "Not specified" %}
             <div class="field-row">
                 <div class="field-label">
                     <i class="fas fa-user-doctor me-1"></i>
                     Performer
                 </div>
-                <div class="field-value">{{ procedure.performer }}</div>
+                <div class="field-value">{{ procedure.provider }}</div>
             </div>
             {% endif %}
             
-            {% if procedure.code or procedure.coding_system %}
+            {% if procedure.procedure_code or procedure.code_system %}
             <div class="field-row">
                 <div class="field-label">
                     <i class="fas fa-code me-1"></i>
                     Code
                 </div>
                 <div class="field-value">
-                    {% if procedure.code %}
-                    <span class="medical-code">{{ procedure.code }}</span>
-                    {% if procedure.coding_system %}
-                    <span class="text-muted ms-1">({{ procedure.coding_system }})</span>
+                    {% if procedure.procedure_code %}
+                    <span class="medical-code">{{ procedure.procedure_code }}</span>
+                    {% if procedure.code_system %}
+                    <span class="text-muted ms-1">({{ procedure.code_system }})</span>
                     {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if procedure.template_id or procedure.procedure_id %}
+            <div class="field-row">
+                <div class="field-label">
+                    <i class="fas fa-id-card me-1"></i>
+                    Technical Info
+                </div>
+                <div class="field-value">
+                    {% if procedure.template_id %}
+                    <div class="small text-muted">Template: <code>{{ procedure.template_id }}</code></div>
+                    {% endif %}
+                    {% if procedure.procedure_id %}
+                    <div class="small text-muted">ID: <code>{{ procedure.procedure_id }}</code></div>
                     {% endif %}
                 </div>
             </div>
