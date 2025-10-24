@@ -67,24 +67,51 @@
                         </div>
                         
                         {# =============================================== #}
-                        {# ALLERGY DETAILS BODY - Clinical Information #}
+                        {# COMPREHENSIVE ALLERGY DETAILS - Clinical Information #}
                         {# =============================================== #}
                         <div class="allergy-body">
                             <div class="row g-3">
                                 
-                                {# Primary clinical information row #}
+                                {# Row 1: Reaction Type and Clinical Manifestation #}
+                                <div class="col-lg-6">
+                                    <div class="field-group">
+                                        <div class="field-label text-muted small">
+                                            <i class="fas fa-heartbeat me-1"></i>
+                                            Reaction Type
+                                        </div>
+                                        <div class="field-value">
+                                            {# Display reaction type with enhanced data fallbacks #}
+                                            {% if entry.data.reaction_type.display_value %}
+                                                {{ entry.data.reaction_type.display_value }}
+                                            {% elif entry.reaction_type %}
+                                                {{ entry.reaction_type }}
+                                            {% elif entry.data.type.display_value %}
+                                                {{ entry.data.type.display_value }}
+                                            {% elif entry.type %}
+                                                {{ entry.type }}
+                                            {% else %}
+                                                <span class="text-muted">Propensity to adverse reaction</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <div class="col-lg-6">
                                     <div class="field-group">
                                         <div class="field-label text-muted small">
                                             <i class="fas fa-exclamation-circle me-1"></i>
-                                            Reaction
+                                            Clinical Manifestation
                                         </div>
                                         <div class="field-value">
-                                            {# Display reaction with enhanced data fallbacks #}
+                                            {# Display clinical manifestation/reaction #}
                                             {% if entry.data.reaction.display_value %}
                                                 {{ entry.data.reaction.display_value }}
                                             {% elif entry.reaction %}
                                                 {{ entry.reaction }}
+                                            {% elif entry.data.manifestation.display_value %}
+                                                {{ entry.data.manifestation.display_value }}
+                                            {% elif entry.manifestation %}
+                                                {{ entry.manifestation }}
                                             {% else %}
                                                 <span class="text-muted">Not specified</span>
                                             {% endif %}
@@ -92,19 +119,23 @@
                                     </div>
                                 </div>
                                 
-                                {# Allergy code information column #}
+                                {# Row 2: Agent and Time/Onset #}
                                 <div class="col-lg-6">
                                     <div class="field-group">
                                         <div class="field-label text-muted small">
-                                            <i class="fas fa-barcode me-1"></i>
-                                            Allergy Code
+                                            <i class="fas fa-flask me-1"></i>
+                                            Agent
                                         </div>
-                                        <div class="field-value">
-                                            {# Display allergy code with enhanced data fallbacks #}
-                                            {% if entry.data.allergen.code %}
-                                                <code class="code-value bg-light px-2 py-1 rounded">{{ entry.data.allergen.code }}</code>
-                                            {% elif entry.allergy_code %}
-                                                <code class="code-value bg-light px-2 py-1 rounded">{{ entry.allergy_code }}</code>
+                                        <div class="field-value fw-bold text-danger">
+                                            {# Display allergen/agent name #}
+                                            {% if entry.data.allergen.display_value and entry.data.allergen.display_value != "Unknown" %}
+                                                {{ entry.data.allergen.display_value }}
+                                            {% elif entry.allergen %}
+                                                {{ entry.allergen }}
+                                            {% elif entry.data.agent.display_value %}
+                                                {{ entry.data.agent.display_value }}
+                                            {% elif entry.agent %}
+                                                {{ entry.agent }}
                                             {% else %}
                                                 <span class="text-muted">Not specified</span>
                                             {% endif %}
@@ -112,55 +143,184 @@
                                     </div>
                                 </div>
                                 
-                                {# Secondary clinical information row - dates and status #}
-                                {% if entry.data.onset_date or entry.onset_date or entry.data.status.display_value or entry.status %}
                                 <div class="col-lg-6">
-                                    {# First observed date field #}
-                                    {% if entry.data.onset_date or entry.onset_date %}
                                     <div class="field-group">
                                         <div class="field-label text-muted small">
                                             <i class="fas fa-calendar-alt me-1"></i>
-                                            First Observed
+                                            Time
                                         </div>
                                         <div class="field-value">
-                                            {# Display onset date with enhanced data fallbacks #}
-                                            {% if entry.data.onset_date %}
-                                                {{ entry.data.onset_date }}
+                                            {# Display time period with enhanced data fallbacks #}
+                                            {% if entry.data.onset_date and entry.data.end_date %}
+                                                from {{ entry.data.onset_date }} until {{ entry.data.end_date }}
+                                            {% elif entry.onset_date and entry.end_date %}
+                                                from {{ entry.onset_date }} until {{ entry.end_date }}
+                                            {% elif entry.data.onset_date %}
+                                                since {{ entry.data.onset_date }}
                                             {% elif entry.onset_date %}
-                                                {{ entry.onset_date }}
+                                                since {{ entry.onset_date }}
+                                            {% elif entry.data.time_period %}
+                                                {{ entry.data.time_period }}
+                                            {% elif entry.time_period %}
+                                                {{ entry.time_period }}
+                                            {% else %}
+                                                <span class="text-muted">Not specified</span>
                                             {% endif %}
                                         </div>
                                     </div>
-                                    {# End first observed date conditional #}
-                                    {% endif %}
                                 </div>
                                 
-                                {# Allergy status information column #}
+                                {# Row 3: Severity and Criticality #}
                                 <div class="col-lg-6">
-                                    {# Allergy status field #}
-                                    {% if entry.data.status.display_value or entry.status %}
+                                    <div class="field-group">
+                                        <div class="field-label text-muted small">
+                                            <i class="fas fa-thermometer-half me-1"></i>
+                                            Severity
+                                        </div>
+                                        <div class="field-value">
+                                            {# Display severity level #}
+                                            {% if entry.data.severity.display_value %}
+                                                <span class="badge bg-danger">{{ entry.data.severity.display_value }}</span>
+                                            {% elif entry.severity %}
+                                                <span class="badge bg-danger">{{ entry.severity }}</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Unknown Severity</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-lg-6">
+                                    <div class="field-group">
+                                        <div class="field-label text-muted small">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Criticality
+                                        </div>
+                                        <div class="field-value">
+                                            {# Display criticality level #}
+                                            {% if entry.data.criticality.display_value %}
+                                                <span class="badge {% if 'high' in entry.data.criticality.display_value|lower %}bg-danger{% elif 'low' in entry.data.criticality.display_value|lower %}bg-success{% else %}bg-warning{% endif %}">
+                                                    {{ entry.data.criticality.display_value }}
+                                                </span>
+                                            {% elif entry.criticality %}
+                                                <span class="badge {% if 'high' in entry.criticality|lower %}bg-danger{% elif 'low' in entry.criticality|lower %}bg-success{% else %}bg-warning{% endif %}">
+                                                    {{ entry.criticality }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Unknown risk</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {# Row 4: Status and Certainty #}
+                                <div class="col-lg-6">
                                     <div class="field-group">
                                         <div class="field-label text-muted small">
                                             <i class="fas fa-info-circle me-1"></i>
                                             Status
                                         </div>
                                         <div class="field-value">
-                                            <span class="badge bg-{{ entry.status|lower|default:'secondary' }}">
-                                                {# Display status with enhanced data fallbacks #}
-                                                {% if entry.data.status.display_value %}
+                                            {# Display clinical status #}
+                                            {% if entry.data.status.display_value %}
+                                                <span class="badge {% if 'active' in entry.data.status.display_value|lower %}bg-success{% elif 'resolved' in entry.data.status.display_value|lower %}bg-info{% elif 'suspended' in entry.data.status.display_value|lower %}bg-warning{% else %}bg-secondary{% endif %}">
                                                     {{ entry.data.status.display_value }}
-                                                {% elif entry.status %}
+                                                </span>
+                                            {% elif entry.status %}
+                                                <span class="badge {% if 'active' in entry.status|lower %}bg-success{% elif 'resolved' in entry.status|lower %}bg-info{% elif 'suspended' in entry.status|lower %}bg-warning{% else %}bg-secondary{% endif %}">
                                                     {{ entry.status }}
-                                                {% else %}
-                                                    Active
-                                                {% endif %}
-                                            </span>
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-success">active</span>
+                                            {% endif %}
                                         </div>
                                     </div>
-                                    {# End status conditional #}
-                                    {% endif %}
                                 </div>
-                                {# End secondary information row conditional #}
+                                
+                                <div class="col-lg-6">
+                                    <div class="field-group">
+                                        <div class="field-label text-muted small">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Certainty
+                                        </div>
+                                        <div class="field-value">
+                                            {# Display verification certainty #}
+                                            {% if entry.data.certainty.display_value %}
+                                                <span class="badge {% if 'confirmed' in entry.data.certainty.display_value|lower %}bg-success{% elif 'suspected' in entry.data.certainty.display_value|lower %}bg-warning{% else %}bg-secondary{% endif %}">
+                                                    {{ entry.data.certainty.display_value }}
+                                                </span>
+                                            {% elif entry.certainty %}
+                                                <span class="badge {% if 'confirmed' in entry.certainty|lower %}bg-success{% elif 'suspected' in entry.certainty|lower %}bg-warning{% else %}bg-secondary{% endif %}">
+                                                    {{ entry.certainty }}
+                                                </span>
+                                            {% elif entry.data.verification_status.display_value %}
+                                                <span class="badge {% if 'confirmed' in entry.data.verification_status.display_value|lower %}bg-success{% elif 'suspected' in entry.data.verification_status.display_value|lower %}bg-warning{% else %}bg-secondary{% endif %}">
+                                                    {{ entry.data.verification_status.display_value }}
+                                                </span>
+                                            {% elif entry.verification_status %}
+                                                <span class="badge {% if 'confirmed' in entry.verification_status|lower %}bg-success{% elif 'suspected' in entry.verification_status|lower %}bg-warning{% else %}bg-secondary{% endif %}">
+                                                    {{ entry.verification_status }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Unknown</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {# Row 5: Process of establishing and Additional Clinical Information #}
+                                <div class="col-12">
+                                    <div class="field-group">
+                                        <div class="field-label text-muted small">
+                                            <i class="fas fa-clipboard-list me-1"></i>
+                                            Process of establishing a problem
+                                        </div>
+                                        <div class="field-value">
+                                            {# Display how the allergy was established #}
+                                            {% if entry.data.process.display_value %}
+                                                {{ entry.data.process.display_value }}
+                                            {% elif entry.process %}
+                                                {{ entry.process }}
+                                            {% elif entry.data.assessment_method.display_value %}
+                                                {{ entry.data.assessment_method.display_value }}
+                                            {% elif entry.assessment_method %}
+                                                {{ entry.assessment_method }}
+                                            {% elif entry.data.source.display_value %}
+                                                {{ entry.data.source.display_value }}
+                                            {% elif entry.source %}
+                                                {{ entry.source }}
+                                            {% else %}
+                                                <span class="text-muted">Finding reported by subject or history provider</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {# Additional Clinical Codes and References if available #}
+                                {% if entry.data.allergen.code or entry.allergy_code or entry.data.reference %}
+                                <div class="col-12">
+                                    <div class="field-group">
+                                        <div class="field-label text-muted small">
+                                            <i class="fas fa-barcode me-1"></i>
+                                            Clinical Codes & References
+                                        </div>
+                                        <div class="field-value">
+                                            {# Display codes and references #}
+                                            {% if entry.data.allergen.code %}
+                                                <code class="code-value bg-light px-2 py-1 rounded me-2">{{ entry.data.allergen.code }}</code>
+                                            {% endif %}
+                                            {% if entry.allergy_code %}
+                                                <code class="code-value bg-light px-2 py-1 rounded me-2">{{ entry.allergy_code }}</code>
+                                            {% endif %}
+                                            {% if entry.data.reference %}
+                                                <small class="text-muted">Ref: {{ entry.data.reference }}</small>
+                                            {% endif %}
+                                            {% if not entry.data.allergen.code and not entry.allergy_code and not entry.data.reference %}
+                                                <span class="text-muted">Not specified</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
                                 {% endif %}
                             </div>
                         </div>

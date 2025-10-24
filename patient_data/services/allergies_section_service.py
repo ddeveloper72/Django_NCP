@@ -162,7 +162,12 @@ class AllergiesSectionService(ClinicalSectionServiceInterface):
                     if allergy:
                         allergies.append(allergy)
         
-        # Strategy 2: Extract from structured entries
+        # Strategy 2: Extract from table-based data (NEW - COMPREHENSIVE TABLE EXTRACTION)
+        if text_section is not None:
+            table_allergies = self._extract_table_allergies(text_section)
+            allergies.extend(table_allergies)
+        
+        # Strategy 3: Extract from structured entries
         entries = section.findall('.//hl7:entry', namespaces)
         for entry in entries:
             observation = entry.find('.//hl7:observation', namespaces)
@@ -172,6 +177,116 @@ class AllergiesSectionService(ClinicalSectionServiceInterface):
                     allergies.append(allergy)
         
         return allergies
+    
+    def _extract_table_allergies(self, text_section) -> List[Dict[str, Any]]:
+        """Extract allergies from table-based structures in CDA narrative text."""
+        allergies = []
+        namespaces = {'hl7': 'urn:hl7-org:v3'}
+        
+        # Find all tables in the text section
+        tables = text_section.findall('.//hl7:table', namespaces) or text_section.findall('.//table')
+        
+        for table in tables:
+            table_allergies = self._parse_allergy_table(table)
+            allergies.extend(table_allergies)
+        
+        logger.info(f"[ALLERGIES SERVICE] Extracted {len(allergies)} allergies from table structures")
+        return allergies
+    
+    def _parse_allergy_table(self, table) -> List[Dict[str, Any]]:
+        """Parse individual allergy table to extract allergy data."""
+        allergies = []
+        namespaces = {'hl7': 'urn:hl7-org:v3'}
+        
+        # Get all table rows
+        rows = table.findall('.//hl7:tr', namespaces) or table.findall('.//tr')
+        
+        # Skip header row (usually first row)
+        data_rows = rows[1:] if len(rows) > 1 else rows
+        
+        for row in data_rows:
+            # Get all cells in the row
+            cells = row.findall('.//hl7:td', namespaces) or row.findall('.//td')
+            
+            if len(cells) >= 2:
+                # Extract text from cells
+                cell_texts = []
+                for cell in cells:
+                    cell_text = self._extract_text_from_element(cell)
+                    cell_texts.append(cell_text.strip() if cell_text else "")
+                
+                # Filter out empty or header-like rows
+                if cell_texts and not any(header in cell_texts[0].lower() for header in ['allergen', 'substance', 'agent', 'type']):
+                    # First cell typically contains allergen/agent
+                    # Second cell typically contains reaction/manifestation
+                    allergen = cell_texts[0] if cell_texts[0] else "Unknown Allergen"
+                    reaction = cell_texts[1] if len(cell_texts) > 1 and cell_texts[1] else "Not specified"
+                    
+                    # Additional fields if more columns exist
+                    severity = cell_texts[2] if len(cell_texts) > 2 and cell_texts[2] else "Not specified"
+                    status = cell_texts[3] if len(cell_texts) > 3 and cell_texts[3] else "Active"
+                    
+                    # Create comprehensive allergy data with all clinical fields
+                    allergy_data = {
+                        'allergen': allergen,
+                        'agent': allergen,  # Alias for template compatibility
+                        'substance': allergen,  # Another alias
+                        'name': allergen,  # Template expects this field
+                        'display_name': allergen,
+                        'type': self._determine_allergy_type(allergen),
+                        'reaction': reaction,
+                        'clinical_manifestation': reaction,  # Alias for template
+                        'severity': severity,
+                        'status': status,
+                        'date': 'Not specified',
+                        'date_identified': 'Not specified',
+                        'time': 'Not specified',
+                        'criticality': self._determine_criticality(severity),
+                        'certainty': 'Unknown',
+                        'process': 'Finding reported by subject or history provider',
+                        'reaction_type': 'Propensity to adverse reaction',
+                        'source': 'table_extraction_enhanced',
+                        'enhanced_data': True
+                    }
+                    
+                    allergies.append(allergy_data)
+                    logger.info(f"[ALLERGIES SERVICE] Table extraction found: {allergen} -> {reaction}")
+        
+        return allergies
+    
+    def _determine_allergy_type(self, allergen: str) -> str:
+        """Determine allergy type based on allergen name."""
+        allergen_lower = allergen.lower()
+        
+        # Food allergies
+        food_terms = ['kiwi', 'nut', 'milk', 'egg', 'soy', 'wheat', 'shellfish', 'fish', 'lactose', 'gluten']
+        if any(term in allergen_lower for term in food_terms):
+            return 'Food allergy'
+        
+        # Medication allergies
+        medication_terms = ['penicillin', 'aspirin', 'ibuprofen', 'antibiotic', 'medication', 'drug']
+        if any(term in allergen_lower for term in medication_terms):
+            return 'Medication allergy'
+        
+        # Environmental allergies
+        environmental_terms = ['pollen', 'dust', 'mold', 'pet', 'latex', 'insect']
+        if any(term in allergen_lower for term in environmental_terms):
+            return 'Environmental allergy'
+        
+        return 'Allergy'
+    
+    def _determine_criticality(self, severity: str) -> str:
+        """Map severity to criticality level."""
+        severity_lower = severity.lower()
+        
+        if 'severe' in severity_lower or 'high' in severity_lower:
+            return 'High risk'
+        elif 'moderate' in severity_lower or 'medium' in severity_lower:
+            return 'Medium risk'
+        elif 'mild' in severity_lower or 'low' in severity_lower:
+            return 'Low risk'
+        else:
+            return 'Unknown risk'
     
     def _parse_allergy_narrative(self, text: str) -> Dict[str, Any]:
         """Parse allergy information from narrative text."""
