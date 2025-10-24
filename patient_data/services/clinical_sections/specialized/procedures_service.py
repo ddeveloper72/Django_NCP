@@ -63,7 +63,7 @@ class ProceduresSectionService(ClinicalServiceBase):
     def extract_from_cda(self, cda_content: str) -> List[Dict[str, Any]]:
         """Extract procedures from CDA content using specialized parsing."""
         try:
-            import xml.etree.ElementTree as ET
+            from defusedxml import ElementTree as ET
             root = ET.fromstring(cda_content)
             
             # Find procedures section using base method
@@ -89,7 +89,7 @@ class ProceduresSectionService(ClinicalServiceBase):
             enhanced_procedure = {
                 'name': self._extract_field_value(procedure_data, 'name', 'Unknown procedure'),
                 'display_name': self._extract_field_value(procedure_data, 'name', 'Unknown procedure'),
-                'date': self._format_cda_date(self._extract_field_value(procedure_data, 'date', 'Not specified')),
+                'date': self._format_procedure_date(self._extract_field_value(procedure_data, 'date', 'Not specified')),
                 'provider': self._extract_field_value(procedure_data, 'provider', 'Not specified'),
                 'location': self._extract_field_value(procedure_data, 'location', 'Not specified'),
                 'status': self._extract_field_value(procedure_data, 'status', 'Completed'),
@@ -163,3 +163,47 @@ class ProceduresSectionService(ClinicalServiceBase):
             'status': status,
             'indication': 'Not specified'
         }
+    
+    def _format_procedure_date(self, cda_date: str) -> str:
+        """
+        Format CDA date string to ISO format (YYYY-MM-DD)
+        
+        Args:
+            cda_date: CDA date string (e.g., "20141020" or "2014-10-20")
+            
+        Returns:
+            str: Formatted date string in YYYY-MM-DD format
+        """
+        from datetime import datetime
+        import re
+        
+        if not cda_date or cda_date == 'Not specified':
+            return 'Not specified'
+        
+        try:
+            # Remove any timezone info and clean up
+            date_clean = re.sub(r'[T\+\-].*$', '', cda_date)
+            
+            # Handle different date formats
+            if len(date_clean) == 8 and date_clean.isdigit():
+                # Format: YYYYMMDD
+                date_obj = datetime.strptime(date_clean, '%Y%m%d')
+            elif '-' in date_clean:
+                # Format: YYYY-MM-DD (already correct)
+                return date_clean
+            elif '/' in date_clean:
+                # Format: MM/DD/YYYY or DD/MM/YYYY
+                parts = date_clean.split('/')
+                if len(parts[2]) == 4:  # YYYY is 4 digits
+                    date_obj = datetime.strptime(date_clean, '%m/%d/%Y')
+                else:
+                    date_obj = datetime.strptime(date_clean, '%d/%m/%Y')
+            else:
+                return cda_date  # Return original if format unknown
+            
+            # Format as "YYYY-MM-DD"
+            return date_obj.strftime("%Y-%m-%d")
+            
+        except (ValueError, IndexError) as e:
+            self.logger.warning(f"Could not parse procedure date '{cda_date}': {e}")
+            return cda_date  # Return original if parsing fails
