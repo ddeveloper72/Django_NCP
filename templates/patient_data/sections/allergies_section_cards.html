@@ -3,11 +3,8 @@
 {# ALLERGIES SECTION CARDS - Enhanced Data Display #}
 {# =============================================== #}
 
-{# Use enhanced allergies data from clinical_arrays #}
-{% with section_data as enhanced_allergies %}
-
-{# Check if enhanced allergies data exists and render modern card layout #}
-{% if enhanced_allergies and enhanced_allergies|length > 0 %}
+{# Check if allergies data exists and render modern card layout #}
+{% if allergies and allergies|length > 0 %}
 <div class="medical-section" id="allergies-section">
     <div class="clinical-section">
         <div class="collapsible-wrapper">
@@ -19,56 +16,74 @@
                         <span>Allergies</span>
                     </div>
                     <div class="clinical-badge-container">
-                        <span class="clinical-badge populated">{{ enhanced_allergies|length }} Found</span>
+                        <span class="clinical-badge populated">{{ allergies|length }} Found</span>
                     </div>
                 </div>
                 <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
             </label>
             <div class="collapsible-content-title">
                 <div class="content-inner-title">
-                    <p class="mb-3 text-muted">Enhanced Allergies: {{ enhanced_allergies|length }} items found</p>
+                    <p class="mb-3 text-muted">Enhanced Allergies: {{ allergies|length }} items found</p>
                     
                     {# Loop through each enhanced allergy entry #}
-                    {% for allergy in enhanced_allergies %}
+                    {% for allergy in allergies %}
                     
-                    {# Individual allergy card with enhanced data structure #}
+                    {# Individual allergy card #}
                     <div class="allergy-card mb-4 p-4 border rounded shadow-sm bg-white border-danger">
                         
-                        {# Card header containing allergen name and severity badge #}
+                        {# Card header containing allergen name #}
                         <div class="allergy-header mb-3 pb-3 border-bottom border-danger">
                             <div class="d-flex flex-wrap align-items-start justify-content-between">
                                 <div class="allergen-name-section flex-grow-1 me-3">
                                     <h5 class="allergen-name text-danger mb-1 fw-bold">
                                         <i class="fa-solid fa-triangle-exclamation me-2"></i>
-                                        {# Display allergen name using the enhanced data structure #}
-                                        {% if allergy.allergen %}
-                                            {{ allergy.allergen }}
-                                        {% elif allergy.name %}
-                                            {{ allergy.name }}
+                                        {# Display allergen name from either format #}
+                                        {% if allergy.clinical_table and allergy.clinical_table.rows %}
+                                            {# Django session storage format #}
+                                            {% for row in allergy.clinical_table.rows %}
+                                                {% if row.data.allergen %}
+                                                    {% firstof row.data.allergen.display_value row.data.allergen.value "Unknown Allergen" %}
+                                                {% else %}
+                                                    Unknown Allergen
+                                                {% endif %}
+                                            {% endfor %}
                                         {% else %}
-                                            Unknown Allergen
+                                            {# Legacy Enhanced CDA Helper format #}
+                                            {% firstof allergy.allergen allergy.name "Unknown Allergen" %}
                                         {% endif %}
                                     </h5>
                                 </div>
                                 
-                                {# Severity badge section with enhanced data #}
+                                {# Severity badge #}
                                 <div class="status-badges-section">
-                                    {% if allergy.severity %}
-                                        <span class="clinical-badge severity-high bg-danger text-white">{{ allergy.severity }}</span>
+                                    {% if allergy.clinical_table and allergy.clinical_table.rows %}
+                                        {# Django session storage format #}
+                                        {% for row in allergy.clinical_table.rows %}
+                                            {% if row.data.severity %}
+                                                <span class="clinical-badge severity-high bg-danger text-white">
+                                                    {% firstof row.data.severity.display_value row.data.severity.value "Unknown Severity" %}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">Unknown Severity</span>
+                                            {% endif %}
+                                        {% endfor %}
                                     {% else %}
-                                        <span class="clinical-badge severity-unknown bg-warning text-dark">Unknown Severity</span>
+                                        {# Legacy Enhanced CDA Helper format #}
+                                        {% if allergy.severity %}
+                                            <span class="clinical-badge severity-high bg-danger text-white">{{ allergy.severity }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Unknown Severity</span>
+                                        {% endif %}
                                     {% endif %}
                                 </div>
                             </div>
                         </div>
                         
-                        {# =============================================== #}
-                        {# ENHANCED ALLERGY DETAILS - Clinical Information #}
-                        {# =============================================== #}
+                        {# Allergy details #}
                         <div class="allergy-body">
                             <div class="row g-3">
                                 
-                                {# Row 1: Reaction and Type #}
+                                {# Reaction #}
                                 <div class="col-lg-6">
                                     <div class="field-group">
                                         <div class="field-label text-muted small">
@@ -76,34 +91,22 @@
                                             Reaction
                                         </div>
                                         <div class="field-value">
-                                            {% if allergy.reaction %}
-                                                {{ allergy.reaction }}
+                                            {% if allergy.clinical_table and allergy.clinical_table.rows %}
+                                                {% for row in allergy.clinical_table.rows %}
+                                                    {% if row.data.manifestation %}
+                                                        {% firstof row.data.manifestation.display_value row.data.manifestation.value "Not specified" %}
+                                                    {% else %}
+                                                        Not specified
+                                                    {% endif %}
+                                                {% endfor %}
                                             {% else %}
-                                                <span class="text-muted">Not specified</span>
+                                                {% firstof allergy.reaction "Not specified" %}
                                             {% endif %}
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <div class="col-lg-6">
-                                    <div class="field-group">
-                                        <div class="field-label text-muted small">
-                                            <i class="fas fa-tag me-1"></i>
-                                            Type
-                                        </div>
-                                        <div class="field-value">
-                                            {% if allergy.type %}
-                                                {{ allergy.type }}
-                                            {% else %}
-                                                <span class="text-muted">Allergy</span>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            {# Row 2: Status and Date Information #}
-                            <div class="row g-3 mt-2">
+                                {# Status #}
                                 <div class="col-lg-6">
                                     <div class="field-group">
                                         <div class="field-label text-muted small">
@@ -111,34 +114,68 @@
                                             Status
                                         </div>
                                         <div class="field-value">
-                                            {% if allergy.status %}
-                                                <span class="badge bg-{{ allergy.status|lower|default:'secondary' }}">
-                                                    {{ allergy.status }}
-                                                </span>
+                                            {% if allergy.clinical_table and allergy.clinical_table.rows %}
+                                                {% for row in allergy.clinical_table.rows %}
+                                                    {% if row.data.status %}
+                                                        {% firstof row.data.status.display_value row.data.status.value "Not specified" %}
+                                                    {% else %}
+                                                        Not specified
+                                                    {% endif %}
+                                                {% endfor %}
                                             {% else %}
-                                                <span class="badge bg-warning">Active</span>
+                                                {% firstof allergy.status "Active" %}
                                             {% endif %}
                                         </div>
                                     </div>
                                 </div>
                                 
-                                {% if allergy.onset_date %}
+                                {# Type #}
+                                <div class="col-lg-6">
+                                    <div class="field-group">
+                                        <div class="field-label text-muted small">
+                                            <i class="fas fa-tag me-1"></i>
+                                            Type
+                                        </div>
+                                        <div class="field-value">
+                                            {% if allergy.clinical_table and allergy.clinical_table.rows %}
+                                                {% for row in allergy.clinical_table.rows %}
+                                                    {% if row.data.type %}
+                                                        {% firstof row.data.type.display_value row.data.type.value "Not specified" %}
+                                                    {% else %}
+                                                        Not specified
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                {% firstof allergy.type "Not specified" %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {# Onset Date #}
                                 <div class="col-lg-6">
                                     <div class="field-group">
                                         <div class="field-label text-muted small">
                                             <i class="fas fa-calendar me-1"></i>
                                             First Observed
                                         </div>
-                                        <div class="field-value">{{ allergy.onset_date }}</div>
+                                        <div class="field-value">
+                                            {% if allergy.clinical_table and allergy.clinical_table.rows %}
+                                                {% for row in allergy.clinical_table.rows %}
+                                                    {% if row.data.onset_date %}
+                                                        {% firstof row.data.onset_date.display_value row.data.onset_date.value "Not recorded" %}
+                                                    {% else %}
+                                                        Not recorded
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                {% firstof allergy.onset_date "Not recorded" %}
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
-                                {% endif %}
-                            </div>
-                            
-                            {# Row 3: Additional metadata if available #}
-                            {% if allergy.criticality or allergy.category %}
-                            <div class="row g-3 mt-2">
-                                {% if allergy.criticality %}
+                                
+                                {# Criticality #}
                                 <div class="col-lg-6">
                                     <div class="field-group">
                                         <div class="field-label text-muted small">
@@ -146,31 +183,119 @@
                                             Criticality
                                         </div>
                                         <div class="field-value">
-                                            <span class="badge bg-{{ allergy.criticality|lower|default:'secondary' }}">
-                                                {{ allergy.criticality }}
-                                            </span>
+                                            {% if allergy.clinical_table and allergy.clinical_table.rows %}
+                                                {% for row in allergy.clinical_table.rows %}
+                                                    {% if row.data.criticality %}
+                                                        {% firstof row.data.criticality.display_value row.data.criticality.value "Not specified" %}
+                                                    {% else %}
+                                                        Not specified
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                {% firstof allergy.criticality "Not specified" %}
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
-                                {% endif %}
                                 
-                                {% if allergy.category %}
+                                {# Category #}
                                 <div class="col-lg-6">
                                     <div class="field-group">
                                         <div class="field-label text-muted small">
                                             <i class="fas fa-layer-group me-1"></i>
                                             Category
                                         </div>
-                                        <div class="field-value">{{ allergy.category }}</div>
+                                        <div class="field-value">
+                                            {% if allergy.clinical_table and allergy.clinical_table.rows %}
+                                                {% for row in allergy.clinical_table.rows %}
+                                                    {% if row.data.category %}
+                                                        {% firstof row.data.category.display_value row.data.category.value "Not specified" %}
+                                                    {% else %}
+                                                        Not specified
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                {% firstof allergy.category "Not specified" %}
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
-                                {% endif %}
+                                
                             </div>
+                            
+                            {# Clinical Codes Section - Show SNOMED CT codes #}
+                            {% if allergy.clinical_table and allergy.clinical_table.rows %}
+                                {% for row in allergy.clinical_table.rows %}
+                                    {% if row.has_medical_codes %}
+                                    <div class="row g-3 mt-3 pt-3 border-top">
+                                        <div class="col-12">
+                                            <div class="field-group">
+                                                <div class="field-label text-muted small">
+                                                    <i class="fas fa-code me-1"></i>
+                                                    Clinical Codes
+                                                </div>
+                                                <div class="field-value">
+                                                    {# Show allergen codes #}
+                                                    {% if row.data.allergen.code %}
+                                                        <div class="mb-2">
+                                                            <strong>Allergen:</strong>
+                                                            <code class="text-primary">{{ row.data.allergen.code }}</code>
+                                                            {% if row.data.allergen.code_system %}
+                                                                <small class="text-muted">({{ row.data.allergen.code_system }})</small>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endif %}
+                                                    
+                                                    {# Show manifestation codes #}
+                                                    {% if row.data.manifestation.code %}
+                                                        <div class="mb-2">
+                                                            <strong>Manifestation:</strong>
+                                                            <code class="text-success">{{ row.data.manifestation.code }}</code>
+                                                            {% if row.data.manifestation.code_system %}
+                                                                <small class="text-muted">({{ row.data.manifestation.code_system }})</small>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% elif allergy.allergy_code or allergy.reaction_code %}
+                                {# Legacy Enhanced CDA Helper format - show codes if available #}
+                                <div class="row g-3 mt-3 pt-3 border-top">
+                                    <div class="col-12">
+                                        <div class="field-group">
+                                            <div class="field-label text-muted small">
+                                                <i class="fas fa-code me-1"></i>
+                                                Clinical Codes
+                                            </div>
+                                            <div class="field-value">
+                                                {% if allergy.allergy_code %}
+                                                    <div class="mb-2">
+                                                        <strong>Allergy Code:</strong>
+                                                        <code class="text-primary">{{ allergy.allergy_code }}</code>
+                                                    </div>
+                                                {% endif %}
+                                                {% if allergy.reaction_code %}
+                                                    <div class="mb-2">
+                                                        <strong>Reaction Code:</strong>
+                                                        <code class="text-success">{{ allergy.reaction_code }}</code>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
-                    {# End enhanced allergy entry loop #}
+                    {# End allergy card #}
+                    
                     {% endfor %}
+                    {# End allergy loop #}
+                    
                 </div>
             </div>
         </div>
@@ -209,4 +334,3 @@
 {% endif %}
 
 {# End allergies section #}
-{% endwith %}
