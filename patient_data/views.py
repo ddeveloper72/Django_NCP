@@ -2756,45 +2756,30 @@ def patient_details_view(request, patient_id):
                     logger.info(f"[PHASE_3B] Administrative data extracted: {len(administrative_data)} keys")
                     logger.info(f"[PHASE_3B] Healthcare data extracted: {len(healthcare_data)} keys")
                     
-                    # ENHANCED: Integrate Enhanced CDA Helper for 9-column allergies format
-                    try:
-                        from .cda_display_data_helper import CDADisplayDataHelper
-                        
-                        logger.info("[ENHANCED ALLERGIES] Starting Enhanced CDA Helper integration")
-                        display_helper = CDADisplayDataHelper()
-                        clinical_sections = display_helper.extract_clinical_sections(cda_content)
-                        logger.info(f"[ENHANCED ALLERGIES] Extracted {len(clinical_sections)} clinical sections")
-                        
-                        # Find allergies section with clinical_table structure
-                        allergies_with_clinical_table = []
-                        for section in clinical_sections:
-                            section_name = section.get("display_name", "").lower()
-                            logger.info(f"[ENHANCED ALLERGIES] Processing section: {section.get('display_name', 'Unknown')}")
-                            if any(keyword in section_name for keyword in ["allerg", "adverse", "reaction", "intolerance"]):
-                                logger.info(f"[ENHANCED ALLERGIES] Found allergies section: {section.get('display_name')}")
-                                if section.get("clinical_table"):
-                                    logger.info(f"[ENHANCED ALLERGIES] Found enhanced allergies section: {section.get('display_name')}")
-                                    # Convert clinical_table structure to allergy objects with clinical_table
-                                    enhanced_allergy = {
-                                        "clinical_table": section["clinical_table"],
-                                        "allergen": {"name": "Enhanced Allergies", "code": {"code": "Enhanced"}},
-                                        "section_name": section.get("display_name", ""),
-                                        "is_enhanced": True
-                                    }
-                                    allergies_with_clinical_table.append(enhanced_allergy)
-                                    logger.info(f"[ENHANCED ALLERGIES] Clinical table has {len(section['clinical_table'].get('headers', []))} headers and {len(section['clinical_table'].get('rows', []))} rows")
-                                else:
-                                    logger.info(f"[ENHANCED ALLERGIES] Section {section.get('display_name')} has no clinical_table")
-                        
-                        # Replace allergies with enhanced version if available
-                        if allergies_with_clinical_table:
-                            logger.info(f"[ENHANCED ALLERGIES] Replacing {len(clinical_arrays['allergies'])} standard allergies with {len(allergies_with_clinical_table)} enhanced allergies")
-                            clinical_arrays["allergies"] = allergies_with_clinical_table
+                    # ENHANCED ALLERGIES: Follow medications pattern with Django session storage
+                    # Check if enhanced allergies already in context (from CDA processor), 
+                    # otherwise check session for enhanced allergies and override if available
+                    if 'allergies' in clinical_arrays and len(clinical_arrays['allergies']) > 0:
+                        # Check if first allergy has enhanced data structure (from CDA processor)
+                        first_allergy = clinical_arrays['allergies'][0]
+                        if 'data' in first_allergy and isinstance(first_allergy['data'], dict):
+                            logger.info(f"[ENHANCED_ALLERGIES] Using {len(clinical_arrays['allergies'])} enhanced allergies already in context from CDA processor")
                         else:
-                            logger.info("[ENHANCED ALLERGIES] No enhanced allergies found, keeping standard format")
-                            
-                    except Exception as e:
-                        logger.warning(f"[ENHANCED ALLERGIES] Enhanced CDA Helper integration failed: {e}")
+                            # Fallback to session-based enhanced allergies
+                            enhanced_allergies = request.session.get('enhanced_allergies')
+                            if enhanced_allergies:
+                                logger.info(f"[ENHANCED_ALLERGIES] Found {len(enhanced_allergies)} enhanced allergies in session, overriding clinical arrays")
+                                clinical_arrays["allergies"] = enhanced_allergies
+                            else:
+                                logger.info("[ENHANCED_ALLERGIES] No enhanced allergies found in session, using clinical arrays")
+                    else:
+                        # No allergies in context, check session
+                        enhanced_allergies = request.session.get('enhanced_allergies')
+                        if enhanced_allergies:
+                            logger.info(f"[ENHANCED_ALLERGIES] Found {len(enhanced_allergies)} enhanced allergies in session")
+                            clinical_arrays["allergies"] = enhanced_allergies
+                        else:
+                            logger.info("[ENHANCED_ALLERGIES] No enhanced allergies found in context or session")
                         import traceback
                         logger.warning(f"[ENHANCED ALLERGIES] Full traceback: {traceback.format_exc()}")
                         # Keep standard allergies on error
@@ -3010,6 +2995,24 @@ def patient_details_view(request, patient_id):
             logger.info(f"[ENHANCED_PROCEDURES_FALLBACK] First procedure: {enhanced_procedures[0].get('procedure_name', enhanced_procedures[0].get('name', 'Unknown'))} - Code: {enhanced_procedures[0].get('procedure_code', 'N/A')}")
         else:
             logger.info("[ENHANCED_PROCEDURES_FALLBACK] No enhanced procedures found in session")
+
+        # ENHANCED ALLERGIES FALLBACK: Check session for enhanced allergies even with expired match_data
+        enhanced_allergies = request.session.get('enhanced_allergies')
+        if enhanced_allergies:
+            logger.info(f"[ENHANCED_ALLERGIES_FALLBACK] Found {len(enhanced_allergies)} enhanced allergies in session despite match_data expiry")
+            context["allergies"] = enhanced_allergies
+            logger.info(f"[ENHANCED_ALLERGIES_FALLBACK] First allergy: {enhanced_allergies[0].get('allergen', enhanced_allergies[0].get('name', 'Unknown'))} - Severity: {enhanced_allergies[0].get('severity', 'N/A')}")
+        else:
+            logger.info("[ENHANCED_ALLERGIES_FALLBACK] No enhanced allergies found in session")
+
+        # ENHANCED MEDICATIONS FALLBACK: Check session for enhanced medications even with expired match_data
+        enhanced_medications = request.session.get('enhanced_medications')
+        if enhanced_medications:
+            logger.info(f"[ENHANCED_MEDICATIONS_FALLBACK] Found {len(enhanced_medications)} enhanced medications in session despite match_data expiry")
+            context["medications"] = enhanced_medications
+            logger.info(f"[ENHANCED_MEDICATIONS_FALLBACK] First medication: {enhanced_medications[0].get('medication_name', enhanced_medications[0].get('name', 'Unknown'))} - Dose: {enhanced_medications[0].get('dose_quantity', 'N/A')}")
+        else:
+            logger.info("[ENHANCED_MEDICATIONS_FALLBACK] No enhanced medications found in session")
 
         return render(request, "patient_data/patient_details.html", context)
 

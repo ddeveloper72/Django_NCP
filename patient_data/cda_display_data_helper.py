@@ -469,6 +469,7 @@ class CDADisplayDataHelper:
                                         {"key": "procedure", "label": "Procedure", "type": "procedure"},
                                         {"key": "target_site", "label": "Target Site", "type": "target_site"},  
                                         {"key": "procedure_date", "label": "Procedure Date", "type": "date"},
+                                        {"key": "status", "label": "Status", "type": "status"},
                                     ],
                                     "rows": [],
                                     "total_count": len(enhanced_procedures),
@@ -482,6 +483,7 @@ class CDADisplayDataHelper:
                                             "procedure": {"value": procedure.get("procedure_display", "Unknown"), "display_value": procedure.get("procedure_display", "Unknown"), "code": procedure.get("procedure_code"), "code_system": procedure.get("procedure_code_system", "SNOMED CT")},
                                             "target_site": {"value": procedure.get("target_site_display", "Not specified"), "display_value": procedure.get("target_site_display", "Not specified"), "code": procedure.get("target_site_code"), "code_system": procedure.get("target_site_code_system", "SNOMED CT")},
                                             "procedure_date": {"value": procedure.get("formatted_date", "Not specified"), "display_value": procedure.get("formatted_date", "Not specified")},
+                                            "status": {"value": procedure.get("status", "completed"), "display_value": procedure.get("status", "completed").title()},
                                         },
                                         "has_medical_codes": bool(procedure.get("procedure_code")),
                                         # Add the procedure object for template access to codes
