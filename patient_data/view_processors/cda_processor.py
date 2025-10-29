@@ -182,7 +182,8 @@ class CDAViewProcessor:
         
         # ENTERPRISE ARCHITECTURE: Use unified clinical data pipeline manager
         try:
-            from ..services.clinical_data_pipeline_manager import clinical_pipeline_manager
+            from ..services.clinical_sections.pipeline.clinical_data_pipeline_manager import ClinicalDataPipelineManager
+            clinical_pipeline_manager = ClinicalDataPipelineManager()
             logger.info("[CDA PROCESSOR] Using unified clinical data pipeline manager")
             
             # Extract CDA content from match data
@@ -190,42 +191,32 @@ class CDAViewProcessor:
             
             if cda_content:
                 # Process CDA content using specialized service agents
-                unified_data = clinical_pipeline_manager.process_cda_content(request, session_id, cda_content)
+                unified_clinical_arrays = clinical_pipeline_manager.process_cda_content(cda_content)
                 
                 # CRITICAL FIX: Extract patient identity using Enhanced CDA XML Parser since unified pipeline doesn't handle it
                 logger.info("[CDA PROCESSOR] Extracting patient identity via Enhanced CDA XML Parser")
                 parsed_data = self._parse_cda_document(cda_content, session_id)
                 
                 # Get template context from pipeline manager
-                pipeline_context = clinical_pipeline_manager.get_template_context(request, session_id)
+                pipeline_context = clinical_pipeline_manager.get_template_context()
                 
                 # Build base context and merge with pipeline context
                 context = self.context_builder.build_base_context(session_id, 'CDA')
-                context.update(pipeline_context)
                 
                 # CRITICAL FIX: Map unified pipeline data to template variables
                 # Templates expect 'clinical_arrays' to determine if clinical data exists
-                clinical_sections = {}
                 has_clinical_data = False
                 
-                # Map section data from unified pipeline to template variables
-                # CRITICAL FIX: Include ALL 12 clinical sections from comprehensive service
-                pipeline_sections = [
-                    'medications', 'allergies', 'problems', 'vital_signs', 'procedures', 
-                    'immunizations', 'results', 'medical_devices', 'past_illness', 
-                    'pregnancy_history', 'social_history', 'advance_directives', 'functional_status'
-                ]
-                for section in pipeline_sections:
-                    section_data = pipeline_context.get(section, [])
-                    if section_data and len(section_data) > 0:
-                        has_clinical_data = True
-                        clinical_sections[section] = section_data
-                        # Also add direct template variables (needed by some templates)
-                        context[section] = section_data
-                        
-                # Add clinical_arrays for template compatibility
-                if has_clinical_data:
-                    context['clinical_arrays'] = clinical_sections
+                # Use pipeline context directly for clinical_arrays
+                if pipeline_context:
+                    context['clinical_arrays'] = pipeline_context
+                    has_clinical_data = True
+                    
+                    # Also add direct template variables for each section (needed by some templates)
+                    for section_name, section_data in pipeline_context.items():
+                        if section_data and len(section_data) > 0:
+                            context[section_name] = section_data
+                            has_clinical_data = True
                 
                 # TODO: Add administrative/extended patient data mapping here
                 # For now, set empty defaults to prevent template errors
@@ -285,27 +276,56 @@ class CDAViewProcessor:
         
         # FINAL FIX: Use unified clinical pipeline for all enhanced data
         try:
-            from patient_data.services.clinical_data_pipeline_manager import clinical_pipeline_manager
+            from patient_data.services.clinical_sections.pipeline.clinical_data_pipeline_manager import ClinicalDataPipelineManager
+            clinical_pipeline_manager = ClinicalDataPipelineManager()
             
             # Process all clinical sections through unified pipeline
             unified_results = clinical_pipeline_manager.process_all_sections(self.request, session_id, match_data.get('cda_content'))
             
+            # Extract enhanced clinical arrays from unified results
+            enhanced_medications = unified_results.get('10160-0', {}).get('items', [])
+            enhanced_allergies = unified_results.get('48765-2', {}).get('items', [])
+            enhanced_problems = unified_results.get('11450-4', {}).get('items', [])
+            enhanced_vital_signs = unified_results.get('8716-3', {}).get('items', [])
+            enhanced_procedures = unified_results.get('47519-4', {}).get('items', [])
+            enhanced_immunizations = unified_results.get('11369-6', {}).get('items', [])
+            enhanced_results = unified_results.get('30954-2', {}).get('items', [])
+            enhanced_medical_devices = unified_results.get('46264-8', {}).get('items', [])
+            enhanced_pregnancy_history = unified_results.get('10162-6', {}).get('items', [])
+            
             # Add all enhanced clinical data to context
             context.update({
-                'enhanced_medications': unified_results.get('10160-0', {}).get('items', []),
-                'enhanced_allergies': unified_results.get('48765-2', {}).get('items', []),
-                'enhanced_problems': unified_results.get('11450-4', {}).get('items', []),
-                'enhanced_vital_signs': unified_results.get('8716-3', {}).get('items', []),
-                'enhanced_procedures': unified_results.get('47519-4', {}).get('items', []),
-                'enhanced_immunizations': unified_results.get('11369-6', {}).get('items', []),
-                'enhanced_results': unified_results.get('30954-2', {}).get('items', []),
-                'enhanced_medical_devices': unified_results.get('46264-8', {}).get('items', []),
-                'enhanced_pregnancy_history': unified_results.get('10162-6', {}).get('items', []),
+                'enhanced_medications': enhanced_medications,
+                'enhanced_allergies': enhanced_allergies,
+                'enhanced_problems': enhanced_problems,
+                'enhanced_vital_signs': enhanced_vital_signs,
+                'enhanced_procedures': enhanced_procedures,
+                'enhanced_immunizations': enhanced_immunizations,
+                'enhanced_results': enhanced_results,
+                'enhanced_medical_devices': enhanced_medical_devices,
+                'enhanced_pregnancy_history': enhanced_pregnancy_history,
                 'unified_pipeline_processed': True,
                 'unified_sections_count': len(unified_results)
             })
             
+            # CRITICAL FIX: Build clinical_arrays from unified pipeline results for template compatibility
+            unified_clinical_arrays = {
+                'medications': enhanced_medications,
+                'allergies': enhanced_allergies,
+                'problems': enhanced_problems,
+                'vital_signs': enhanced_vital_signs,
+                'procedures': enhanced_procedures,  # THIS IS THE KEY FIX!
+                'immunizations': enhanced_immunizations,
+                'results': enhanced_results,
+                'medical_devices': enhanced_medical_devices,
+                'pregnancy_history': enhanced_pregnancy_history
+            }
+            
+            # Use ContextBuilder to add clinical data properly
+            self.context_builder.add_clinical_data(context, unified_clinical_arrays)
+            
             logger.info(f"[CDA PROCESSOR] Unified pipeline provided enhanced data for {len(unified_results)} clinical sections")
+            logger.info(f"[CDA PROCESSOR] *** PROCEDURES FIX: Added {len(enhanced_procedures)} procedures to clinical_arrays ***")
             
         except Exception as e:
             logger.warning(f"[CDA PROCESSOR] Unified pipeline failed, using fallback enhanced medications: {e}")

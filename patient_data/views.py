@@ -2865,6 +2865,32 @@ def patient_details_view(request, patient_id):
                 }
             )
             
+            # ENHANCED PROCEDURES: Check if enhanced procedures already in context (from CDA processor), 
+            # otherwise check session for enhanced procedures and override if available
+            if 'procedures' in context and len(context['procedures']) > 0:
+                # Check if first procedure has enhanced data structure (from CDA processor)
+                first_proc = context['procedures'][0]
+                if 'data' in first_proc and isinstance(first_proc['data'], dict):
+                    logger.info(f"[ENHANCED_PROCEDURES] Using {len(context['procedures'])} enhanced procedures already in context from CDA processor")
+                    logger.info(f"[ENHANCED_PROCEDURES] First procedure: {first_proc.get('data', {}).get('procedure_name', {}).get('value', 'Unknown')}")
+                else:
+                    # Fallback to session-based enhanced procedures
+                    enhanced_procedures = request.session.get('enhanced_procedures')
+                    if enhanced_procedures:
+                        logger.info(f"[ENHANCED_PROCEDURES] Found {len(enhanced_procedures)} enhanced procedures in session, overriding clinical arrays")
+                        context["procedures"] = enhanced_procedures
+                        logger.info(f"[ENHANCED_PROCEDURES] First procedure: {enhanced_procedures[0].get('procedure_name', enhanced_procedures[0].get('name', 'Unknown'))} - Code: {enhanced_procedures[0].get('procedure_code', 'N/A')}")
+                    else:
+                        logger.info("[ENHANCED_PROCEDURES] No enhanced procedures found in session, using clinical arrays")
+            else:
+                # No procedures in context, check session
+                enhanced_procedures = request.session.get('enhanced_procedures')
+                if enhanced_procedures:
+                    logger.info(f"[ENHANCED_PROCEDURES] Found {len(enhanced_procedures)} enhanced procedures in session")
+                    context["procedures"] = enhanced_procedures
+                else:
+                    logger.info("[ENHANCED_PROCEDURES] No enhanced procedures found in context or session")
+            
             # ENHANCED MEDICATIONS: Check if enhanced medications already in context (from CDA processor), 
             # otherwise check session for enhanced medications and override if available
             if 'medications' in context and len(context['medications']) > 0:
@@ -2965,8 +2991,25 @@ def patient_details_view(request, patient_id):
                 "show_search_again_message": True,
                 "session_error": "Patient search data has expired. Please search again to view CDA documents and detailed information.",
                 "coded_results": {"blood_group": [], "diagnostic_results": []},  # Initialize for template compatibility
+                # Initialize empty clinical arrays for template compatibility
+                "medications": [],
+                "allergies": [],
+                "problems": [],
+                "procedures": [],
+                "vital_signs": [],
+                "results": [],
+                "immunizations": [],
             }
         )
+        
+        # ENHANCED PROCEDURES FALLBACK: Check session for enhanced procedures even with expired match_data
+        enhanced_procedures = request.session.get('enhanced_procedures')
+        if enhanced_procedures:
+            logger.info(f"[ENHANCED_PROCEDURES_FALLBACK] Found {len(enhanced_procedures)} enhanced procedures in session despite match_data expiry")
+            context["procedures"] = enhanced_procedures
+            logger.info(f"[ENHANCED_PROCEDURES_FALLBACK] First procedure: {enhanced_procedures[0].get('procedure_name', enhanced_procedures[0].get('name', 'Unknown'))} - Code: {enhanced_procedures[0].get('procedure_code', 'N/A')}")
+        else:
+            logger.info("[ENHANCED_PROCEDURES_FALLBACK] No enhanced procedures found in session")
 
         return render(request, "patient_data/patient_details.html", context)
 

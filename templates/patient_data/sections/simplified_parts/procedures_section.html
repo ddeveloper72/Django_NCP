@@ -11,13 +11,13 @@
                 <div class="col-md-8">
                     <div class="primary-info">
                         <span class="field-label">Procedure Name:</span>
-                        <div class="field-value fw-bold">{{ entry.procedure_name|default:"Not specified" }}</div>
+                        <div class="field-value fw-bold">{{ entry.name|default:"Not specified" }}</div>
                     </div>
 
-                    {% if entry.procedure_description %}
+                    {% if entry.display_name and entry.display_name != entry.name %}
                     <div class="mt-2">
-                        <span class="field-label">Description:</span>
-                        <div class="field-value">{{ entry.procedure_description }}</div>
+                        <span class="field-label">Display Name:</span>
+                        <div class="field-value">{{ entry.display_name }}</div>
                     </div>
                     {% endif %}
 
@@ -25,8 +25,23 @@
                         <span class="field-label">Procedure Code:</span>
                         <div class="field-value">
                             <code class="code-value">{{ entry.procedure_code|default:"Not specified" }}</code>
+                            {% if entry.code_system %}
+                            <small class="text-muted ms-2">({{ entry.code_system }})</small>
+                            {% endif %}
                         </div>
                     </div>
+
+                    {% if entry.target_site %}
+                    <div class="mt-2">
+                        <span class="field-label">Target Site:</span>
+                        <div class="field-value">
+                            {{ entry.target_site }}
+                            {% if entry.laterality %}
+                            <span class="badge bg-info ms-2">{{ entry.laterality }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
 
                 {# Status and Date #}
@@ -34,16 +49,16 @@
                     <div class="procedure-meta">
                         {% if entry.status %}
                         <span class="status-badge bg-{{ entry.status|lower|default:'secondary' }}">
-                            {{ entry.status|default:"Completed" }}
+                            {{ entry.status|default:"completed" }}
                         </span>
                         {% endif %}
 
-                        {% if entry.procedure_date %}
+                        {% if entry.date %}
                         <div class="mt-2">
                             <span class="field-label">Date:</span>
                             <div class="field-value">
                                 <i class="fa-solid fa-calendar me-1"></i>
-                                {{ entry.procedure_date }}
+                                {{ entry.date }}
                             </div>
                         </div>
                         {% endif %}
@@ -52,15 +67,15 @@
             </div>
 
             {# Additional Information #}
-            {% if entry.performer or entry.location %}
+            {% if entry.provider or entry.location %}
             <div class="row mt-3">
-                {% if entry.performer %}
+                {% if entry.provider and entry.provider != "Not specified" %}
                 <div class="col-md-6">
                     <span class="field-label">Performed by:</span>
-                    <div class="field-value">{{ entry.performer }}</div>
+                    <div class="field-value">{{ entry.provider }}</div>
                 </div>
                 {% endif %}
-                {% if entry.location %}
+                {% if entry.location and entry.location != "Not specified" %}
                 <div class="col-md-6">
                     <span class="field-label">Location:</span>
                     <div class="field-value">{{ entry.location }}</div>
@@ -69,7 +84,29 @@
             </div>
             {% endif %}
 
-            {# Outcome/Results #}
+            {# Technical/Administrative Information #}
+            {% if entry.template_id or entry.procedure_id %}
+            <div class="row mt-3">
+                <div class="col-12">
+                    <details class="clinical-details">
+                        <summary class="small text-muted">Technical Details</summary>
+                        <div class="mt-2 small">
+                            {% if entry.template_id %}
+                            <div><strong>Template ID:</strong> <code>{{ entry.template_id }}</code></div>
+                            {% endif %}
+                            {% if entry.procedure_id %}
+                            <div><strong>Procedure ID:</strong> <code>{{ entry.procedure_id }}</code></div>
+                            {% endif %}
+                            {% if entry.text_reference %}
+                            <div><strong>Text Reference:</strong> <code>#{{ entry.text_reference }}</code></div>
+                            {% endif %}
+                        </div>
+                    </details>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Outcome/Results - keeping for future extension #}
             {% if entry.outcome or entry.complications %}
             <div class="row mt-3">
                 {% if entry.outcome %}
@@ -98,17 +135,17 @@
         {% for entry in entries %}
         <div class="clinical-entry d-flex justify-content-between align-items-start">
             <div class="flex-grow-1">
-                <h6 class="mb-1">{{ entry.procedure_name|default:"Unknown Procedure" }}</h6>
+                <h6 class="mb-1">{{ entry.name|default:"Unknown Procedure" }}</h6>
                 <small class="text-muted">
                     <code>{{ entry.procedure_code|default:"No code" }}</code>
-                    {% if entry.procedure_date %} | {{ entry.procedure_date }}{% endif %}
+                    {% if entry.date %} | {{ entry.date }}{% endif %}
                 </small>
-                {% if entry.procedure_description %}
-                <p class="mb-0 mt-1 small">{{ entry.procedure_description }}</p>
+                {% if entry.display_name and entry.display_name != entry.name %}
+                <p class="mb-0 mt-1 small">{{ entry.display_name }}</p>
                 {% endif %}
             </div>
             <div class="ms-3">
-                <span class="badge bg-primary">{{ entry.status|default:"Completed" }}</span>
+                <span class="badge bg-primary">{{ entry.status|default:"completed" }}</span>
             </div>
         </div>
         {% endfor %}
@@ -125,24 +162,26 @@
                     <th>Code</th>
                     <th>Date</th>
                     <th>Status</th>
-                    <th>Performer</th>
+                    <th>Location</th>
                 </tr>
             </thead>
             <tbody>
                 {% for entry in entries %}
                 <tr>
                     <td>
-                        <strong>{{ entry.procedure_name|default:"Unknown" }}</strong>
-                        {% if entry.procedure_description %}
-                        <br><small class="text-muted">{{ entry.procedure_description|truncatewords:10 }}</small>
+                        <strong>{{ entry.name|default:"Unknown" }}</strong>
+                        {% if entry.target_site %}
+                        <br><small class="text-muted">Site: {{ entry.target_site }}
+                            {% if entry.laterality %} ({{ entry.laterality }}){% endif %}
+                        </small>
                         {% endif %}
                     </td>
                     <td><code class="small">{{ entry.procedure_code|default:"N/A" }}</code></td>
-                    <td>{{ entry.procedure_date|default:"N/A" }}</td>
+                    <td>{{ entry.date|default:"N/A" }}</td>
                     <td>
-                        <span class="badge bg-primary">{{ entry.status|default:"Completed" }}</span>
+                        <span class="badge bg-primary">{{ entry.status|default:"completed" }}</span>
                     </td>
-                    <td><small>{{ entry.performer|default:"N/A" }}</small></td>
+                    <td><small>{{ entry.location|default:"N/A" }}</small></td>
                 </tr>
                 {% endfor %}
             </tbody>
