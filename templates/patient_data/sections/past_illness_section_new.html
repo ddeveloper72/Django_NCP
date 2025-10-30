@@ -1,0 +1,196 @@
+{# Past illness wrapper #}
+<div class="past-illness-section" id="past-illness-section">
+    {# Create local context variable for past illness list #}
+    {% with section_data as illness_list %}
+    
+    {# Check if past illness data exists and render modern card layout #}
+    {% if illness_list and illness_list|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-past-illness" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-past-illness" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-history me-2 text-primary"></i>
+                        <span>Past Illness</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ illness_list|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">Past Illness: {{ illness_list|length }} items found</p>
+                    
+                    {# Loop through each past illness entry to display in card format #}
+                    {% for illness in illness_list %}
+                    
+                    {# Individual illness card #}
+                    <div class="illness-card mb-4 p-4 border rounded shadow-sm bg-white border-primary">
+                        
+                        {# Card header containing problem name and status badge #}
+                        <div class="illness-header mb-3 pb-3 border-bottom border-primary">
+                            <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                <div class="illness-name-section flex-grow-1 me-3">
+                                    <h5 class="illness-name text-primary mb-1 fw-bold">
+                                        <i class="fa-solid fa-file-medical me-2"></i>
+                                        {# Display problem name with enhanced data structure fallbacks #}
+                                        {% if illness.data.problem_name.display_value %}
+                                            {{ illness.data.problem_name.display_value }}
+                                        {% elif illness.problem_name %}
+                                            {{ illness.problem_name }}
+                                        {% elif illness.name %}
+                                            {{ illness.name }}
+                                        {% else %}
+                                            Unknown Problem
+                                        {% endif %}
+                                    </h5>
+                                    {# Problem code display #}
+                                    {% if illness.data.problem_name.code %}
+                                    <div class="problem-code mt-1">
+                                        <small class="text-muted">
+                                            <i class="fa-solid fa-hashtag me-1"></i>Code: {{ illness.data.problem_name.code }}
+                                        </small>
+                                    </div>
+                                    {% elif illness.problem_code %}
+                                    <div class="problem-code mt-1">
+                                        <small class="text-muted">
+                                            <i class="fa-solid fa-hashtag me-1"></i>Code: {{ illness.problem_code }}
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="illness-status-section">
+                                    {% if illness.data.status.display_value %}
+                                        {% if "Closed" in illness.data.status.display_value or "Inactive" in illness.data.status.display_value %}
+                                            <span class="badge bg-secondary fs-6">{{ illness.data.status.display_value }}</span>
+                                        {% elif "Active" in illness.data.status.display_value %}
+                                            <span class="badge bg-warning fs-6">{{ illness.data.status.display_value }}</span>
+                                        {% else %}
+                                            <span class="badge bg-info fs-6">{{ illness.data.status.display_value }}</span>
+                                        {% endif %}
+                                    {% elif illness.status_display %}
+                                        {% if "Closed" in illness.status_display or "Inactive" in illness.status_display %}
+                                            <span class="badge bg-secondary fs-6">{{ illness.status_display }}</span>
+                                        {% elif "Active" in illness.status_display %}
+                                            <span class="badge bg-warning fs-6">{{ illness.status_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-info fs-6">{{ illness.status_display }}</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Illness Information Grid #}
+                        <div class="illness-info-grid">
+                            <div class="row g-3">
+                                {# Problem Type #}
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="info-label text-muted mb-1">
+                                            <i class="fa-solid fa-tag me-1"></i>Problem Type
+                                        </label>
+                                        <div class="info-value fw-semibold">
+                                            {% if illness.data.problem_type.display_value %}
+                                                {{ illness.data.problem_type.display_value }}
+                                            {% elif illness.problem_type %}
+                                                {{ illness.problem_type }}
+                                            {% else %}
+                                                Not specified
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {# Time Period #}
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="info-label text-muted mb-1">
+                                            <i class="fa-solid fa-calendar-alt me-1"></i>Time
+                                        </label>
+                                        <div class="info-value fw-semibold">
+                                            {% if illness.data.time_period.display_value %}
+                                                {{ illness.data.time_period.display_value }}
+                                            {% elif illness.time_period %}
+                                                {{ illness.time_period }}
+                                            {% else %}
+                                                Not recorded
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {# Problem Status #}
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="info-label text-muted mb-1">
+                                            <i class="fa-solid fa-info-circle me-1"></i>Problem Status
+                                        </label>
+                                        <div class="info-value fw-semibold">
+                                            {% if illness.data.problem_status.display_value %}
+                                                {{ illness.data.problem_status.display_value }}
+                                            {% elif illness.problem_status %}
+                                                {{ illness.problem_status }}
+                                            {% else %}
+                                                Not specified
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {# Health Status #}
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="info-label text-muted mb-1">
+                                            <i class="fa-solid fa-heartbeat me-1"></i>Health Status
+                                        </label>
+                                        <div class="info-value fw-semibold">
+                                            {% if illness.data.health_status.display_value %}
+                                                {{ illness.data.health_status.display_value }}
+                                            {% elif illness.health_status %}
+                                                {{ illness.health_status }}
+                                            {% else %}
+                                                Not specified
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        {# Empty state when no past illness data #}
+        <div class="clinical-section">
+            <div class="collapsible-wrapper">
+                <input id="toggle-past-illness-empty" class="toggle-input" type="checkbox">
+                <label for="toggle-past-illness-empty" class="collapsible-label-title">
+                    <div class="clinical-section-title-row">
+                        <div class="clinical-section-title">
+                            <i class="fa-solid fa-history me-2 text-muted"></i>
+                            <span>Past Illness</span>
+                        </div>
+                        <div class="clinical-badge-container">
+                            <span class="clinical-badge empty">0 Found</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                </label>
+                <div class="collapsible-content-title">
+                    <div class="content-inner-title">
+                        <p class="text-muted">No past illness history available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    {% endwith %}
+</div>

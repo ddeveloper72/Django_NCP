@@ -1181,6 +1181,7 @@ class CDAViewProcessor:
             'procedures': [],
             'immunizations': [],
             'medical_devices': [],
+            'past_illness': [],
             'results': [],  # Laboratory results
             'coded_results': {'blood_group': [], 'diagnostic_results': []},
             'laboratory_results': [],
@@ -1247,6 +1248,32 @@ class CDAViewProcessor:
                     # Fallback: use raw data
                     compatibility_vars['medical_devices'] = enhanced_clinical_arrays['medical_devices']
                     logger.warning(f"[COMPATIBILITY] Field mapping failed: {mapper_error}, using raw medical devices data")
+            
+            if enhanced_clinical_arrays.get('past_illness'):
+                # CRITICAL: Map past_illness through ClinicalFieldMapper to create nested data structure
+                # Template expects illness.data.problem_name.display_value, not illness.problem_name
+                try:
+                    import sys
+                    import os
+                    field_mapper_path = os.path.join(os.path.dirname(__file__), '..', 'clinical_field_mapper.py')
+                    if os.path.exists(field_mapper_path):
+                        sys.path.insert(0, os.path.dirname(field_mapper_path))
+                        from clinical_field_mapper import ClinicalFieldMapper
+                        field_mapper = ClinicalFieldMapper()
+                        
+                        # Map only past_illness
+                        temp_arrays = {'past_illness': enhanced_clinical_arrays['past_illness']}
+                        mapped_arrays = field_mapper.map_clinical_arrays(temp_arrays)
+                        compatibility_vars['past_illness'] = mapped_arrays['past_illness']
+                        logger.info(f"[COMPATIBILITY] Mapped {len(mapped_arrays['past_illness'])} past illnesses through ClinicalFieldMapper")
+                    else:
+                        # Fallback: use raw data
+                        compatibility_vars['past_illness'] = enhanced_clinical_arrays['past_illness']
+                        logger.warning(f"[COMPATIBILITY] Field mapper not found, using raw past illness data")
+                except Exception as mapper_error:
+                    # Fallback: use raw data
+                    compatibility_vars['past_illness'] = enhanced_clinical_arrays['past_illness']
+                    logger.warning(f"[COMPATIBILITY] Field mapping failed: {mapper_error}, using raw past illness data")
             
             if enhanced_clinical_arrays.get('medications'):
                 # Medications will be handled by section processing logic below (lines 1214-1226)

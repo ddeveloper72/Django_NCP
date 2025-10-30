@@ -47,7 +47,7 @@
     
     {# Past Illness Section #}
     {% if past_illness and past_illness|length > 0 %}
-        {% include 'patient_data/sections/generic_clinical_section.html' with section_data=past_illness section_count=past_illness|length section_type='past_illness' section_title='Past Illness History' %}
+        {% include 'patient_data/sections/past_illness_section_new.html' with section_data=past_illness section_count=past_illness|length section_type='past_illness' section_title='Past Illness' %}
     {% endif %}
     
     {# Pregnancy History Section #}

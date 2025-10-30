@@ -67,6 +67,7 @@ class ClinicalFieldMapper:
             clinical_arrays["vital_signs"] = self._map_vital_signs_fields(clinical_arrays.get("vital_signs", []))
             clinical_arrays["results"] = self._map_results_fields(clinical_arrays.get("results", []))
             clinical_arrays["medical_devices"] = self._map_medical_devices_fields(clinical_arrays.get("medical_devices", []))
+            clinical_arrays["past_illness"] = self._map_past_illness_fields(clinical_arrays.get("past_illness", []))
             
             # Medications already have template compatibility fixes, just count them
             self.mapping_stats["sections_processed"] += 1
@@ -950,6 +951,184 @@ class ClinicalFieldMapper:
             logger.info(f"[FIELD_MAPPER] Mapped {len(mapped_devices)} medical devices")
         
         return mapped_devices
+    
+    def _map_past_illness_fields(self, past_illnesses: List[Dict]) -> List[Dict]:
+        """Map past illness data for template compatibility
+        
+        Expected fields per user requirements:
+        1. Closed/Inactive Problem (problem_name)
+        2. Problem Type
+        3. Time (from-to timeline)
+        4. Problem Status
+        5. Health Status
+        
+        Template expects:
+        - illness.data.problem_name.display_value
+        - illness.data.problem_type.display_value
+        - illness.data.time_period.display_value
+        - illness.data.problem_status.display_value
+        - illness.data.health_status.display_value
+        """
+        mapped_illnesses = []
+        
+        for illness in past_illnesses:
+            if not illness:
+                continue
+            
+            mapped_illness = dict(illness)  # Preserve ALL fields from service
+            
+            # Extract illness information
+            problem_name = illness.get("problem_name", "Unknown Problem")
+            problem_type = illness.get("problem_type", "Problem")
+            problem_status_raw = illness.get("problem_status", "Not specified")
+            health_status_raw = illness.get("health_status", "Not specified")
+            problem_code = illness.get("problem_code", "")
+            problem_code_system = illness.get("problem_code_system", "")
+            
+            logger.info(f"[FIELD_MAPPER] Past Illness - Raw data: name='{problem_name}', code='{problem_code}', system='{problem_code_system}', problem_status='{problem_status_raw}', health_status='{health_status_raw}'")
+            
+            # Apply CTS translation if codes are not already translated
+            # Check if problem_name looks like a code (contains "ref:" or is same as problem_code)
+            if problem_name and ("ref:" in problem_name or problem_name == problem_code or len(problem_name) < 10):
+                logger.info(f"[FIELD_MAPPER] Problem name needs translation: '{problem_name}'")
+                if problem_code and problem_code_system:
+                    try:
+                        from patient_data.services.cts_integration.cts_service import CTSService
+                        cts_service = CTSService()
+                        logger.info(f"[FIELD_MAPPER] Calling CTS for code={problem_code}, system={problem_code_system}")
+                        cts_result = cts_service.get_term_display(problem_code, problem_code_system)
+                        logger.info(f"[FIELD_MAPPER] CTS returned: '{cts_result}'")
+                        if cts_result and cts_result != problem_code:
+                            problem_name = cts_result
+                            logger.info(f"[FIELD_MAPPER] CTS resolved problem code {problem_code} to: {problem_name}")
+                        else:
+                            logger.warning(f"[FIELD_MAPPER] CTS returned no useful result for {problem_code}")
+                    except Exception as cts_error:
+                        logger.error(f"[FIELD_MAPPER] CTS resolution failed for problem {problem_code}: {cts_error}", exc_info=True)
+                else:
+                    logger.warning(f"[FIELD_MAPPER] Cannot translate problem_name - missing code or system")
+            
+            # Translate problem_status if it looks like a code (numeric SNOMED code)
+            problem_status = problem_status_raw
+            if problem_status_raw and problem_status_raw.isdigit():
+                logger.info(f"[FIELD_MAPPER] Problem status needs translation: '{problem_status_raw}'")
+                try:
+                    from patient_data.services.cts_integration.cts_service import CTSService
+                    cts_service = CTSService()
+                    cts_result = cts_service.get_term_display(problem_status_raw, "2.16.840.1.113883.6.96")  # SNOMED CT
+                    logger.info(f"[FIELD_MAPPER] CTS returned for problem_status: '{cts_result}'")
+                    if cts_result and cts_result != problem_status_raw:
+                        problem_status = cts_result
+                        logger.info(f"[FIELD_MAPPER] CTS resolved problem_status code {problem_status_raw} to: {problem_status}")
+                    else:
+                        logger.warning(f"[FIELD_MAPPER] CTS returned no useful result for problem_status {problem_status_raw}")
+                except Exception as cts_error:
+                    logger.error(f"[FIELD_MAPPER] CTS resolution failed for problem_status {problem_status_raw}: {cts_error}", exc_info=True)
+            
+            # Translate health_status if it looks like a code (numeric SNOMED code)
+            health_status = health_status_raw
+            if health_status_raw and health_status_raw.isdigit():
+                logger.info(f"[FIELD_MAPPER] Health status needs translation: '{health_status_raw}'")
+                try:
+                    from patient_data.services.cts_integration.cts_service import CTSService
+                    cts_service = CTSService()
+                    cts_result = cts_service.get_term_display(health_status_raw, "2.16.840.1.113883.6.96")  # SNOMED CT
+                    logger.info(f"[FIELD_MAPPER] CTS returned for health_status: '{cts_result}'")
+                    if cts_result and cts_result != health_status_raw:
+                        health_status = cts_result
+                        logger.info(f"[FIELD_MAPPER] CTS resolved health_status code {health_status_raw} to: {health_status}")
+                    else:
+                        logger.warning(f"[FIELD_MAPPER] CTS returned no useful result for health_status {health_status_raw}")
+                except Exception as cts_error:
+                    logger.error(f"[FIELD_MAPPER] CTS resolution failed for health_status {health_status_raw}: {cts_error}", exc_info=True)
+            
+            # Format time period to European DD/MM/YYYY format
+            time_low_raw = illness.get("time_low", "")
+            time_high_raw = illness.get("time_high", "")
+            
+            from patient_data.services.comprehensive_clinical_data_service import ComprehensiveClinicalDataService
+            time_low = ComprehensiveClinicalDataService.format_cda_date(time_low_raw) if time_low_raw else ""
+            time_high = ComprehensiveClinicalDataService.format_cda_date(time_high_raw) if time_high_raw else ""
+            
+            # Create time period display (from-to or just from)
+            if time_low and time_high:
+                time_period = f"{time_low} to {time_high}"
+            elif time_low:
+                time_period = f"From {time_low}"
+            elif time_high:
+                time_period = f"Until {time_high}"
+            else:
+                time_period = "Not recorded"
+            
+            # Determine if problem is closed/inactive
+            act_status = illness.get("act_status", "completed")
+            is_closed = act_status.lower() == "completed" and time_high
+            status_display = "Closed/Inactive" if is_closed else "Active"
+            
+            # Create comprehensive data structure for template compatibility
+            mapped_illness["data"] = {
+                "problem_name": {
+                    "display_value": problem_name,
+                    "value": problem_name,
+                    "code": problem_code
+                },
+                "problem_type": {
+                    "display_value": problem_type,
+                    "value": problem_type
+                },
+                "time_period": {
+                    "display_value": time_period,
+                    "time_low": time_low,
+                    "time_high": time_high,
+                    "raw_low": time_low_raw,
+                    "raw_high": time_high_raw
+                },
+                "problem_status": {
+                    "display_value": problem_status,
+                    "value": problem_status
+                },
+                "health_status": {
+                    "display_value": health_status,
+                    "value": health_status
+                },
+                "status": {
+                    "display_value": status_display,
+                    "value": is_closed,
+                    "is_closed": is_closed
+                }
+            }
+            
+            # Add fallback flat fields for backward compatibility
+            mapped_illness["name"] = problem_name
+            mapped_illness["display_name"] = problem_name
+            mapped_illness["problem_name"] = problem_name
+            mapped_illness["problem_type"] = problem_type
+            mapped_illness["time_period"] = time_period
+            mapped_illness["time_low"] = time_low
+            mapped_illness["time_high"] = time_high
+            mapped_illness["problem_status"] = problem_status
+            mapped_illness["health_status"] = health_status
+            mapped_illness["is_closed"] = is_closed
+            mapped_illness["status_display"] = status_display
+            
+            mapped_illnesses.append(mapped_illness)
+            self.mapping_stats["items_mapped"] += 1
+            
+            # LOG FINAL MAPPED STRUCTURE (removed emojis for Windows console compatibility)
+            logger.info(f"[FIELD_MAPPER] Mapped illness #{len(mapped_illnesses)}:")
+            logger.info(f"  - data.problem_name.display_value: '{mapped_illness['data']['problem_name']['display_value']}'")
+            logger.info(f"  - data.problem_name.code: '{mapped_illness['data']['problem_name']['code']}'")
+            logger.info(f"  - data.problem_type.display_value: '{mapped_illness['data']['problem_type']['display_value']}'")
+            logger.info(f"  - data.time_period.display_value: '{mapped_illness['data']['time_period']['display_value']}'")
+            logger.info(f"  - data.problem_status.display_value: '{mapped_illness['data']['problem_status']['display_value']}'")
+            logger.info(f"  - data.health_status.display_value: '{mapped_illness['data']['health_status']['display_value']}'")
+            logger.info(f"  - data.status.display_value: '{mapped_illness['data']['status']['display_value']}'")
+        
+        if mapped_illnesses:
+            self.mapping_stats["sections_processed"] += 1
+            logger.info(f"[FIELD_MAPPER] FINAL: Returning {len(mapped_illnesses)} mapped past illnesses to context")
+        
+        return mapped_illnesses
 
     def get_mapping_statistics(self) -> Dict[str, int]:
         """Get mapping statistics for debugging and monitoring"""
