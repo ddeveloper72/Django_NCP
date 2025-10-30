@@ -189,9 +189,13 @@ class CDAViewProcessor:
             # Extract CDA content from match data
             cda_content, actual_cda_type = self._get_cda_content(match_data, cda_type)
             
+            logger.info(f"[CDA PROCESSOR] CDA content retrieved: {len(cda_content) if cda_content else 0} characters")
+            
             if cda_content:
+                logger.info("[CDA PROCESSOR] *** INVOKING UNIFIED PIPELINE ***")
                 # Process CDA content using specialized service agents
                 unified_clinical_arrays = clinical_pipeline_manager.process_cda_content(cda_content)
+                logger.info(f"[CDA PROCESSOR] Pipeline returned {len(unified_clinical_arrays)} sections")
                 
                 # CRITICAL FIX: Extract patient identity using Enhanced CDA XML Parser since unified pipeline doesn't handle it
                 logger.info("[CDA PROCESSOR] Extracting patient identity via Enhanced CDA XML Parser")
@@ -217,6 +221,14 @@ class CDAViewProcessor:
                         if section_data and len(section_data) > 0:
                             context[section_name] = section_data
                             has_clinical_data = True
+                            
+                            # DEBUG: Log procedures data structure
+                            if section_name == 'procedures':
+                                logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG ***")
+                                logger.info(f"[CDA PROCESSOR] Procedures count: {len(section_data)}")
+                                if len(section_data) > 0:
+                                    logger.info(f"[CDA PROCESSOR] First procedure keys: {list(section_data[0].keys())}")
+                                    logger.info(f"[CDA PROCESSOR] First procedure data: {section_data[0]}")
                 
                 # TODO: Add administrative/extended patient data mapping here
                 # For now, set empty defaults to prevent template errors
@@ -227,7 +239,7 @@ class CDAViewProcessor:
                     'healthcare_data': {}
                 })
                 
-                logger.info(f"[CDA PROCESSOR] Mapped unified pipeline data to template context - clinical sections: {len(clinical_sections)}")
+                logger.info(f"[CDA PROCESSOR] Mapped unified pipeline data to template context - clinical sections: {len(pipeline_context) if pipeline_context else 0}")
                 
                 # Add patient identity from Enhanced CDA XML Parser if available
                 if parsed_data and 'patient_identity' in parsed_data:
@@ -288,6 +300,7 @@ class CDAViewProcessor:
             enhanced_problems = unified_results.get('11450-4', {}).get('items', [])
             enhanced_vital_signs = unified_results.get('8716-3', {}).get('items', [])
             enhanced_procedures = unified_results.get('47519-4', {}).get('items', [])
+            # Procedures are already normalized by ProceduresSectionService - no additional processing needed
             enhanced_immunizations = unified_results.get('11369-6', {}).get('items', [])
             enhanced_results = unified_results.get('30954-2', {}).get('items', [])
             enhanced_medical_devices = unified_results.get('46264-8', {}).get('items', [])
@@ -367,7 +380,8 @@ class CDAViewProcessor:
             print(f"*** DEDUPLICATION COMPLETE: Reduced from {len(medications_in_context)} to {len(deduplicated_medications)} unique medications ***")
         
         # Continue with the rest of processing - don't return early!
-        logger.info("✅ CDA processor completed successfully")
+        # Avoid non-ASCII characters in logs to prevent UnicodeEncodeError on some consoles
+        logger.info("CDA processor completed successfully")
         
         # Render the final template with complete context including administrative data
         return render(request, 'patient_data/enhanced_patient_cda.html', context)
@@ -593,6 +607,14 @@ class CDAViewProcessor:
                         logger.info(f"[CDA PROCESSOR] *** ALLERGIES FIX: Found {len(clinical_arrays['allergies'])} allergies in clinical_arrays ***")
                     else:
                         logger.warning("[CDA PROCESSOR] *** ALLERGIES FIX: NO allergies found in clinical_arrays ***")
+                    
+                    # DEBUG: Log procedures in clinical_arrays
+                    if clinical_arrays:
+                        logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: clinical_arrays has procedures: {bool(clinical_arrays.get('procedures'))} ***")
+                        if clinical_arrays.get('procedures'):
+                            logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: Found {len(clinical_arrays['procedures'])} procedures in clinical_arrays ***")
+                        else:
+                            logger.warning(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: NO procedures found in clinical_arrays ***")
                 
                 # Override medications with enhanced data if available
                 if enhanced_medications:
@@ -632,6 +654,26 @@ class CDAViewProcessor:
                             for i, med in enumerate(enhanced_arrays['medications'][:3]):
                                 name = med.get('name') or med.get('medication_name') or med.get('display_name', 'NO_NAME')
                                 logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Enhanced med {i}: name='{name}' ***")
+                        
+                        # CRITICAL FIX: REPLACE procedures in enhanced_arrays with procedures from specialized ProceduresSectionService
+                        # EnhancedCDAXMLParser extracts procedures without proper name fields, creating "Unknown Procedure" entries
+                        # ProceduresSectionService provides fully normalized procedures with all required fields
+                        if clinical_arrays and clinical_arrays.get('procedures'):
+                            logger.info(f"[CDA PROCESSOR] *** PROCEDURES FIX: About to REPLACE enhanced_arrays procedures ***")
+                            logger.info(f"[CDA PROCESSOR] *** PROCEDURES FIX: enhanced_arrays before: {len(enhanced_arrays.get('procedures', []))} procedures ***")
+                            logger.info(f"[CDA PROCESSOR] *** PROCEDURES FIX: clinical_arrays has: {len(clinical_arrays['procedures'])} procedures ***")
+                            # REPLACE, not extend - discard any procedures from EnhancedCDAXMLParser
+                            enhanced_arrays['procedures'] = clinical_arrays['procedures']
+                            logger.info(f"[CDA PROCESSOR] *** PROCEDURES FIX: REPLACED! enhanced_arrays now has: {len(enhanced_arrays['procedures'])} procedures ***")
+                            
+                            # DEBUG: Log first procedure structure to verify data
+                            if clinical_arrays['procedures']:
+                                first_proc = clinical_arrays['procedures'][0]
+                                logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: First procedure keys: {list(first_proc.keys())} ***")
+                                logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: First procedure name: {first_proc.get('name')} ***")
+                                logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: First procedure date: {first_proc.get('date')} ***")
+                                logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: First procedure code: {first_proc.get('procedure_code')} ***")
+                        
                         # Use enhanced clinical arrays for template compatibility instead of extracted ones
                         logger.info("[CDA PROCESSOR] Using enhanced clinical_arrays from parsed_data for template compatibility")
                         # CRITICAL FIX: Only use enhanced medications, completely skip original sections if we have enhanced data
@@ -1117,6 +1159,14 @@ class CDAViewProcessor:
             sections: Clinical sections data
             enhanced_clinical_arrays: Enhanced clinical arrays to use instead of context clinical_arrays
         """
+        import traceback
+        call_stack = ''.join(traceback.format_stack()[-3:-1])  # Get calling location
+        logger.info(f"[CDA PROCESSOR] *** _add_template_compatibility_variables CALLED from:\n{call_stack} ***")
+        if enhanced_clinical_arrays and enhanced_clinical_arrays.get('procedures'):
+            logger.info(f"[CDA PROCESSOR] *** CALL: enhanced_clinical_arrays has {len(enhanced_clinical_arrays['procedures'])} procedures ***")
+            if enhanced_clinical_arrays['procedures']:
+                first_proc = enhanced_clinical_arrays['procedures'][0]
+                logger.info(f"[CDA PROCESSOR] *** CALL: First procedure name: {first_proc.get('name', first_proc.get('display_name', 'NO_NAME'))} ***")
         print("*** COMPATIBILITY METHOD CALLED ***")
         # Initialize empty variables for template compatibility
         compatibility_vars = {
@@ -1188,15 +1238,18 @@ class CDAViewProcessor:
                         logger.debug(f"[COMPATIBILITY] Added problem section (fallback): {section.get('title', 'Unknown')}")
                     logger.debug(f"[COMPATIBILITY] Added problem section: {section.get('title', 'Unknown')}")
                 elif clean_code in ['8716-3', '29545-1']:  # Vital signs / Physical findings
-                    # Extract clinical codes and enhance section data for template compatibility
+                    # CRITICAL: DO NOT add section wrapper - individual vital signs are already extracted by VitalSignsSectionService
+                    # The specialized service provides all vital sign data with proper field mapping
+                    # This legacy section wrapper causes "Physical findings" to display instead of actual vital signs
+                    # Physical findings section wrapper can still be added for other use cases
                     enhanced_section = self._enhance_section_with_clinical_codes(section)
-                    compatibility_vars['vital_signs'].append(enhanced_section)
                     compatibility_vars['physical_findings'].append(enhanced_section)
-                    logger.debug(f"[COMPATIBILITY] Added vital signs/physical findings section: {section.get('title', 'Unknown')}")
+                    logger.debug(f"[COMPATIBILITY] Skipping vital signs section wrapper - using VitalSignsSectionService results from clinical_arrays instead")
                 elif clean_code in ['47519-4']:  # Procedures
-                    enhanced_section = self._enhance_section_with_clinical_codes(section)
-                    compatibility_vars['procedures'].append(enhanced_section)
-                    logger.debug(f"[COMPATIBILITY] Added procedure section: {section.get('title', 'Unknown')}")
+                    # CRITICAL: DO NOT extract procedures here - they are already fully extracted by ProceduresSectionService
+                    # The specialized service provides all procedure data with proper field mapping
+                    # This legacy extraction method (_parse_procedure_xml) returns empty {} which creates duplicate "Unknown Procedure" entries
+                    logger.debug("[COMPATIBILITY] Skipping legacy procedure extraction - using ProceduresSectionService results from clinical_arrays instead")
                 elif clean_code in ['11369-6']:  # Immunization
                     enhanced_section = self._enhance_section_with_clinical_codes(section)
                     compatibility_vars['immunizations'].append(enhanced_section)
@@ -1223,10 +1276,22 @@ class CDAViewProcessor:
                     compatibility_vars['additional_sections'].append(enhanced_section)
         
         # Also populate compatibility variables from clinical_arrays if available
-        # Use enhanced_clinical_arrays if provided, otherwise fall back to context
-        clinical_arrays = enhanced_clinical_arrays or context.get('clinical_arrays', {})
+        # CRITICAL FIX: Merge enhanced_clinical_arrays with context clinical_arrays
+        # enhanced_clinical_arrays only has medications/problems/procedures from Enhanced Parser
+        # context.clinical_arrays has ALL sections from ComprehensiveService including vital_signs
+        base_clinical_arrays = context.get('clinical_arrays', {})
+        if enhanced_clinical_arrays:
+            # Merge enhanced arrays into base, preferring enhanced for meds/problems/procedures
+            clinical_arrays = dict(base_clinical_arrays)
+            for key in ['medications', 'problems', 'procedures']:
+                if key in enhanced_clinical_arrays and enhanced_clinical_arrays[key]:
+                    clinical_arrays[key] = enhanced_clinical_arrays[key]
+            logger.info(f"[CDA PROCESSOR] *** VITAL SIGNS FIX: Merged enhanced_clinical_arrays with base clinical_arrays ***")
+            logger.info(f"[CDA PROCESSOR] *** VITAL SIGNS FIX: Merged keys: {list(clinical_arrays.keys())} ***")
+        else:
+            clinical_arrays = base_clinical_arrays
         logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: enhanced_clinical_arrays parameter passed: {enhanced_clinical_arrays is not None} ***")
-        logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: clinical_arrays source: {'enhanced_clinical_arrays' if enhanced_clinical_arrays else 'context.clinical_arrays'} ***")
+        logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: clinical_arrays source: {'merged' if enhanced_clinical_arrays else 'context.clinical_arrays'} ***")
         if clinical_arrays and clinical_arrays.get('allergies'):
             logger.info(f"[CDA PROCESSOR] *** ALLERGY FIX DEBUG: clinical_arrays has {len(clinical_arrays['allergies'])} allergies ***")
         else:
@@ -1256,7 +1321,12 @@ class CDAViewProcessor:
             if clinical_arrays.get('immunizations'):
                 compatibility_vars['immunizations'].extend(clinical_arrays['immunizations'])
             if clinical_arrays.get('vital_signs'):
+                logger.info(f"[CDA PROCESSOR] *** VITAL SIGNS FIX: Adding {len(clinical_arrays['vital_signs'])} vital signs from clinical_arrays to compatibility_vars ***")
+                logger.info(f"[CDA PROCESSOR] *** VITAL SIGNS FIX: First vital sign: {clinical_arrays['vital_signs'][0] if clinical_arrays['vital_signs'] else 'NONE'} ***")
                 compatibility_vars['vital_signs'].extend(clinical_arrays['vital_signs'])
+                logger.info(f"[CDA PROCESSOR] *** VITAL SIGNS FIX: compatibility_vars now has {len(compatibility_vars['vital_signs'])} vital signs ***")
+            else:
+                logger.warning(f"[CDA PROCESSOR] *** VITAL SIGNS FIX: NO vital signs in clinical_arrays! Keys: {list(clinical_arrays.keys())} ***")
             if clinical_arrays.get('results'):
                 compatibility_vars['physical_findings'].extend(clinical_arrays['results'])
             if clinical_arrays.get('medications'):
@@ -1304,7 +1374,14 @@ class CDAViewProcessor:
             if clinical_arrays.get('allergies'):
                 compatibility_vars['allergies'].extend(clinical_arrays['allergies'])
             if clinical_arrays.get('procedures'):
+                logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: Before extend - compatibility_vars has {len(compatibility_vars['procedures'])} procedures ***")
+                logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: clinical_arrays has {len(clinical_arrays['procedures'])} procedures ***")
+                if compatibility_vars['procedures']:
+                    logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: First existing procedure: name={compatibility_vars['procedures'][0].get('name', 'NO_NAME')} ***")
+                if clinical_arrays['procedures']:
+                    logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: First clinical_arrays procedure: name={clinical_arrays['procedures'][0].get('name', 'NO_NAME')} ***")
                 compatibility_vars['procedures'].extend(clinical_arrays['procedures'])
+                logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: After extend - compatibility_vars has {len(compatibility_vars['procedures'])} procedures ***")
             
             source_info = "enhanced_clinical_arrays" if enhanced_clinical_arrays else "context clinical_arrays"
             logger.info(f"[COMPATIBILITY] Populated from {source_info}: problems={len(clinical_arrays.get('problems', []))}, immunizations={len(clinical_arrays.get('immunizations', []))}")
@@ -1312,6 +1389,13 @@ class CDAViewProcessor:
             logger.info("[COMPATIBILITY] No clinical_arrays available for template compatibility")
         # Add all compatibility variables to context
         context.update(compatibility_vars)
+        
+        # DEBUG: Log vital signs in context
+        vital_signs_count = len(context.get('vital_signs', []))
+        logger.info(f"[CDA PROCESSOR] *** VITAL SIGNS DEBUG: Final context vital_signs count: {vital_signs_count} ***")
+        if context.get('vital_signs'):
+            first_vital = context['vital_signs'][0]
+            logger.info(f"[CDA PROCESSOR] *** VITAL SIGNS DEBUG: First vital sign: {first_vital.get('name', 'NO_NAME')} = {first_vital.get('value', 'NO_VALUE')} {first_vital.get('unit', '')} ***")
         
         # DEBUG: Log final allergy count after all compatibility processing
         final_allergy_count = len(context.get('allergies', []))
@@ -2796,6 +2880,22 @@ class CDAViewProcessor:
         """Parse procedure XML into structured data"""
         # Implementation for procedure parsing
         return {}
+
+    def _dedupe_and_normalize_procedures(self, procedures: list) -> list:
+        """DEPRECATED: This method is no longer used.
+        
+        Procedures are now fully normalized by ProceduresSectionService during extraction.
+        All field mapping is handled by FieldMappingService.
+        Deduplication happens in ComprehensiveClinicalDataService.
+        
+        This method was losing correctly extracted fields (procedure_code, target_site, laterality)
+        by trying to "normalize" already-correct data from the specialized service.
+        
+        Kept for reference only - DO NOT USE.
+        """
+        # Return procedures as-is without modification
+        logger.warning("[DEPRECATED] _dedupe_and_normalize_procedures called - returning procedures unchanged")
+        return procedures
     
     def _parse_physical_findings_xml(self, root) -> Dict[str, Any]:
         """Parse physical findings XML into structured data"""

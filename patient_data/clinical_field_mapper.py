@@ -25,6 +25,34 @@ class ClinicalFieldMapper:
             "data_structures_added": 0,
             "fallback_fields_added": 0
         }
+    
+    def _format_cda_date(self, cda_date: str) -> str:
+        """Format CDA date string (YYYYMMDD) to display format (YYYY-MM-DD)"""
+        from datetime import datetime
+        import re
+        
+        if not cda_date or cda_date == "Not specified":
+            return "Not recorded"
+        
+        try:
+            # Remove any timezone info and clean up
+            date_clean = re.sub(r'[T\+\-].*$', '', str(cda_date))
+            
+            # Handle different date formats
+            if len(date_clean) == 8:  # YYYYMMDD
+                dt = datetime.strptime(date_clean, '%Y%m%d')
+                return dt.strftime('%Y-%m-%d')
+            elif len(date_clean) == 6:  # YYYYMM
+                dt = datetime.strptime(date_clean, '%Y%m')
+                return dt.strftime('%Y-%m')
+            elif len(date_clean) == 4:  # YYYY
+                return date_clean
+            elif '-' in date_clean:  # Already formatted
+                return date_clean
+            else:
+                return date_clean
+        except (ValueError, AttributeError):
+            return "Not recorded"
 
     def map_clinical_arrays(self, clinical_arrays: Dict[str, List]) -> Dict[str, List]:
         """Apply field mapping to all clinical sections for template compatibility"""
@@ -190,7 +218,34 @@ class ClinicalFieldMapper:
             
             # Extract core procedure information
             procedure_name = self._extract_procedure_name(procedure)
-            procedure_date = procedure.get("procedure_date", procedure.get("date", ""))
+            procedure_date_raw = procedure.get("procedure_date", procedure.get("date", ""))
+            
+            # CRITICAL FIX: Handle procedure_code as dict (from EnhancedCDAProcessor) or string (from ProceduresSectionService)
+            procedure_code_field = procedure.get("procedure_code", procedure.get("code", ""))
+            if isinstance(procedure_code_field, dict):
+                # Extract from dict structure: {"code": "64253000", "codeSystem": "...", "displayName": ""}
+                procedure_code = procedure_code_field.get("code", "")
+                code_system = procedure_code_field.get("codeSystem", "")
+            else:
+                procedure_code = procedure_code_field or ""
+                code_system = procedure.get("code_system", "") or ""
+            
+            # Handle target_site as dict or string
+            target_site_field = procedure.get("target_site", "")
+            if isinstance(target_site_field, dict):
+                target_site = target_site_field.get("displayName", target_site_field.get("code", ""))
+            else:
+                target_site = target_site_field or ""
+            
+            laterality = procedure.get("laterality", "") or ""
+            status = procedure.get("status", "") or ""
+            
+            # Format date for display
+            procedure_date = self._format_cda_date(procedure_date_raw)
+            
+            # Handle None values for display
+            procedure_code_display = procedure_code if procedure_code else "Not specified"
+            target_site_display = target_site if target_site else "Not specified"
             
             # Create data structure for template compatibility
             mapped_procedure["data"] = {
@@ -200,15 +255,40 @@ class ClinicalFieldMapper:
                 },
                 "date": {
                     "display_value": procedure_date,
-                    "value": procedure_date
+                    "value": procedure_date_raw
+                },
+                "procedure_code": {
+                    "display_value": procedure_code_display,
+                    "value": procedure_code
+                },
+                "code_system": {
+                    "display_value": code_system,
+                    "value": code_system
+                },
+                "target_site": {
+                    "display_value": target_site_display,
+                    "value": target_site
+                },
+                "laterality": {
+                    "display_value": laterality,
+                    "value": laterality
+                },
+                "status": {
+                    "display_value": status,
+                    "value": status
                 }
             }
             
-            # Add fallback flat fields
+            # Add fallback flat fields with formatted values
             mapped_procedure["procedure_name"] = procedure_name
             mapped_procedure["name"] = procedure_name
             mapped_procedure["display_name"] = procedure_name
-            mapped_procedure["date"] = procedure_date
+            mapped_procedure["date"] = procedure_date  # Formatted date
+            mapped_procedure["procedure_code"] = procedure_code_display  # With fallback
+            mapped_procedure["code_system"] = code_system
+            mapped_procedure["target_site"] = target_site_display  # With fallback
+            mapped_procedure["laterality"] = laterality
+            mapped_procedure["status"] = status
             
             mapped_procedures.append(mapped_procedure)
             
@@ -282,6 +362,15 @@ class ClinicalFieldMapper:
             vital_name = self._extract_vital_sign_name(vital_sign)
             vital_value = vital_sign.get("value", vital_sign.get("observation_value", ""))
             vital_unit = vital_sign.get("unit", "")
+            vital_date = vital_sign.get("date", "")
+            
+            # Format date if present (YYYYMMDD -> DD/MM/YYYY)
+            formatted_date = vital_date
+            if vital_date and len(vital_date) == 8:
+                try:
+                    formatted_date = f"{vital_date[6:8]}/{vital_date[4:6]}/{vital_date[:4]}"
+                except (IndexError, ValueError):
+                    formatted_date = vital_date
             
             # Create data structure for template compatibility
             mapped_vital_sign["data"] = {
@@ -296,6 +385,10 @@ class ClinicalFieldMapper:
                 "unit": {
                     "display_value": vital_unit,
                     "value": vital_unit
+                },
+                "date": {
+                    "display_value": formatted_date,
+                    "value": vital_date
                 }
             }
             
@@ -304,12 +397,13 @@ class ClinicalFieldMapper:
             mapped_vital_sign["display_name"] = vital_name
             mapped_vital_sign["value"] = vital_value
             mapped_vital_sign["unit"] = vital_unit
+            mapped_vital_sign["date"] = formatted_date
             
             mapped_vital_signs.append(mapped_vital_sign)
             
             self.mapping_stats["items_mapped"] += 1
             self.mapping_stats["data_structures_added"] += 1
-            logger.info(f"[FIELD_MAPPER] Mapped vital sign: {vital_name} = {vital_value} {vital_unit}")
+            logger.info(f"[FIELD_MAPPER] Mapped vital sign: {vital_name} = {vital_value} {vital_unit} on {formatted_date}")
         
         self.mapping_stats["sections_processed"] += 1
         return mapped_vital_signs
@@ -571,8 +665,12 @@ class ClinicalFieldMapper:
             ])
         
         # Try extracting from any field that contains meaningful procedure info
+        # CRITICAL FIX: Exclude code/id fields from name extraction
         for field_name, field_value in procedure.items():
             if isinstance(field_value, str) and field_value.strip():
+                # Skip fields that are clearly codes or IDs, not names
+                if any(skip_term in field_name.lower() for skip_term in ["code", "id", "oid", "system", "reference"]):
+                    continue
                 if any(term in field_name.lower() for term in ["procedure", "intervention", "operation", "surgery", "treatment"]):
                     candidates.insert(0, field_value)  # Priority for procedure-specific fields
                 elif any(term in field_name.lower() for term in ["name", "display"]) and "date" not in field_name.lower():

@@ -84,14 +84,34 @@
                                             <div class="field-value fw-bold text-success">{{ vital_sign.value }} {{ vital_sign.unit }}</div>
                                         {% elif vital_sign.data.value.display_value %}
                                             <div class="field-value fw-bold text-success">{{ vital_sign.data.value.display_value }}</div>
-                                        {% elif vital_sign.content %}
-                                            <div class="field-value">{{ vital_sign.content }}</div>
+                                        {% elif vital_sign.value %}
+                                            <div class="field-value fw-bold text-success">{{ vital_sign.value }}</div>
                                         {% else %}
                                             <div class="field-value text-muted">Not recorded</div>
                                         {% endif %}
                                     </div>
                                 </div>
                             </div>
+                            
+                            {# LOINC Code #}
+                            {% if vital_sign.vital_code %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-barcode me-2 text-primary"></i>
+                                        <span class="field-label">LOINC Code</span>
+                                    </div>
+                                    <div class="field-content">
+                                        <div class="field-value">
+                                            <span class="badge bg-info">{{ vital_sign.vital_code }}</span>
+                                            {% if vital_sign.code_system %}
+                                                <span class="text-muted ms-2 small">({{ vital_sign.code_system }})</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                             
                             {# Date Measured #}
                             <div class="col-lg-6">

@@ -340,15 +340,19 @@ class ComprehensiveClinicalDataService:
                         elif section_code == "8716-3":  # Vital Signs
                             enhanced_vitals = []
                             for vital in data:
-                                vital_data = {
-                                    "name": vital.get("name", vital.get("vital_name", "Unknown Vital")),
-                                    "value": vital.get("value", "Not specified"),
-                                    "unit": vital.get("unit", ""),
-                                    "date": vital.get("date", vital.get("effective_time", "Not specified")),
-                                    "status": vital.get("status", "Final"),
-                                    "source": "VitalSignsSectionService",
-                                    "enhanced_data": True
-                                }
+                                # CRITICAL FIX: Preserve ALL fields from VitalSignsSectionService
+                                vital_data = dict(vital)  # Start with all original fields
+                                
+                                # Add/normalize standard fields for compatibility
+                                vital_data.setdefault("name", vital.get("vital_name", "Unknown Vital"))
+                                vital_data.setdefault("display_name", vital.get("name", vital.get("vital_name", "Unknown Vital")))
+                                vital_data.setdefault("value", "Not specified")
+                                vital_data.setdefault("unit", "")
+                                vital_data.setdefault("date", vital.get("effective_time", "Not specified"))
+                                vital_data.setdefault("status", "Final")
+                                vital_data["source"] = "VitalSignsSectionService"
+                                vital_data["enhanced_data"] = True
+                                
                                 enhanced_vitals.append(vital_data)
                             clinical_arrays[array_key].extend(enhanced_vitals)
                             
