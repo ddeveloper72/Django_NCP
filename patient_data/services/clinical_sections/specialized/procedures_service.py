@@ -61,10 +61,15 @@ class ProceduresSectionService(ClinicalServiceBase):
         return []
     
     def extract_from_cda(self, cda_content: str) -> List[Dict[str, Any]]:
-        """Extract procedures from CDA content using specialized parsing."""
+        """Extract procedures from CDA content using specialized parsing with lxml if available."""
         try:
-            from defusedxml import ElementTree as ET
-            root = ET.fromstring(cda_content)
+            # Use lxml for robust parsing if available, otherwise fall back to ElementTree
+            if self.LXML_AVAILABLE:
+                from lxml import etree
+                root = etree.fromstring(cda_content.encode('utf-8'))
+            else:
+                from defusedxml import ElementTree as ET
+                root = ET.fromstring(cda_content)
             
             # Find procedures section using base method
             section = self._find_section_by_code(root, ['47519-4'])
@@ -79,32 +84,53 @@ class ProceduresSectionService(ClinicalServiceBase):
             
         except Exception as e:
             self.logger.error(f"[PROCEDURES SERVICE] Error extracting procedures from CDA: {e}")
+            import traceback
+            self.logger.error(f"[PROCEDURES SERVICE] Traceback: {traceback.format_exc()}")
             return []
     
     def enhance_and_store(self, request: HttpRequest, session_id: str, raw_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Enhance procedures data and store in session."""
+        self.logger.info(f"[PROCEDURES SERVICE] enhance_and_store received {len(raw_data)} procedures")
+        if raw_data:
+            first_proc = raw_data[0]
+            self.logger.info(f"[PROCEDURES SERVICE] First procedure keys: {list(first_proc.keys())}")
+            self.logger.info(f"[PROCEDURES SERVICE] First procedure procedure_code: {first_proc.get('procedure_code', 'NOT_FOUND')}")
+            self.logger.info(f"[PROCEDURES SERVICE] First procedure target_site: {first_proc.get('target_site', 'NOT_FOUND')}")
+        
         enhanced_procedures = []
         
         for procedure_data in raw_data:
+            # Helper to get value - handles both simple strings and nested dict structures
+            def get_value(data: dict, key: str, default=None):
+                val = data.get(key, default)
+                # If it's a dict with display_value/value, extract it
+                if isinstance(val, dict):
+                    return self._extract_field_value(data, key, default)
+                # Otherwise return the raw value
+                return val
+            
             enhanced_procedure = {
-                'name': self._extract_field_value(procedure_data, 'name', 'Unknown procedure'),
-                'display_name': self._extract_field_value(procedure_data, 'display_name', 
-                                                        self._extract_field_value(procedure_data, 'name', 'Unknown procedure')),
-                'date': self._format_procedure_date(self._extract_field_value(procedure_data, 'date', 'Not specified')),
-                'provider': self._extract_field_value(procedure_data, 'provider', 'Not specified'),
-                'location': self._extract_field_value(procedure_data, 'location', 'Not specified'),
-                'status': self._extract_field_value(procedure_data, 'status', 'completed'),
-                'indication': self._extract_field_value(procedure_data, 'indication', 'Not specified'),
+                'name': get_value(procedure_data, 'name', 'Unknown procedure'),
+                'display_name': get_value(procedure_data, 'display_name', 
+                                         get_value(procedure_data, 'name', 'Unknown procedure')),
+                'date': self._format_procedure_date(get_value(procedure_data, 'date', 'Not specified')),
+                'provider': get_value(procedure_data, 'provider', 'Not specified'),
+                'location': get_value(procedure_data, 'location', 'Not specified'),
+                'status': get_value(procedure_data, 'status', 'completed'),
+                'indication': get_value(procedure_data, 'indication', 'Not specified'),
                 'source': 'cda_extraction_enhanced',
                 
-                # Enhanced structured data
-                'procedure_code': self._extract_field_value(procedure_data, 'procedure_code', None),
-                'code_system': self._extract_field_value(procedure_data, 'code_system', None),
-                'target_site': self._extract_field_value(procedure_data, 'target_site', None),
-                'laterality': self._extract_field_value(procedure_data, 'laterality', None),
-                'template_id': self._extract_field_value(procedure_data, 'template_id', None),
-                'procedure_id': self._extract_field_value(procedure_data, 'procedure_id', None),
-                'text_reference': self._extract_field_value(procedure_data, 'text_reference', None)
+                # Enhanced structured data - preserve raw values from parser
+                'procedure_code': get_value(procedure_data, 'procedure_code'),
+                'code_system': get_value(procedure_data, 'code_system'),
+                'target_site': get_value(procedure_data, 'target_site'),
+                'laterality': get_value(procedure_data, 'laterality'),
+                'template_id': get_value(procedure_data, 'template_id'),
+                'procedure_id': get_value(procedure_data, 'procedure_id'),
+                'text_reference': get_value(procedure_data, 'text_reference'),
+                
+                # Keep original data for debugging
+                'data': procedure_data
             }
             enhanced_procedures.append(enhanced_procedure)
         
@@ -116,6 +142,13 @@ class ProceduresSectionService(ClinicalServiceBase):
         request.session.modified = True
         
         self.logger.info(f"[PROCEDURES SERVICE] Enhanced and stored {len(enhanced_procedures)} procedures")
+        if enhanced_procedures:
+            first_enhanced = enhanced_procedures[0]
+            self.logger.info(f"[PROCEDURES SERVICE] First enhanced procedure_code: {first_enhanced.get('procedure_code', 'NOT_FOUND')}")
+            self.logger.info(f"[PROCEDURES SERVICE] First enhanced target_site: {first_enhanced.get('target_site', 'NOT_FOUND')}")
+            self.logger.info(f"[PROCEDURES SERVICE] First enhanced procedure keys: {list(first_enhanced.keys())}")
+            self.logger.info(f"[PROCEDURES SERVICE] First enhanced procedure name: {first_enhanced.get('name', 'NOT_FOUND')}")
+            self.logger.info(f"[PROCEDURES SERVICE] First enhanced procedure date: {first_enhanced.get('date', 'NOT_FOUND')}")
         return enhanced_procedures
     
     def get_template_data(self, enhanced_data: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -154,27 +187,40 @@ class ProceduresSectionService(ClinicalServiceBase):
         return procedures
     
     def _extract_narrative_mapping(self, section) -> Dict[str, str]:
-        """Extract narrative text mapping from section for reference resolution."""
+        """Extract narrative text mapping from section for reference resolution using lxml XPath."""
         narrative_mapping = {}
         
         # Look for text elements with IDs and content references
-        text_section = section.find('hl7:text', self.namespaces)
-        if text_section is not None:
-            # Extract paragraph mappings
-            paragraphs = text_section.findall('.//hl7:paragraph', self.namespaces)
-            for para in paragraphs:
-                para_id = para.get('ID')
-                if para_id:
-                    para_text = ''.join(para.itertext()).strip()
-                    narrative_mapping[para_id] = para_text
-            
-            # Extract content mappings from table cells
-            content_elements = text_section.findall('.//hl7:content', self.namespaces)
-            for content in content_elements:
-                content_id = content.get('ID')
-                if content_id:
-                    content_text = ''.join(content.itertext()).strip()
-                    narrative_mapping[content_id] = content_text
+        if self.LXML_AVAILABLE:
+            # Use lxml's powerful XPath for more efficient extraction
+            text_section = section.find('hl7:text', self.namespaces)
+            if text_section is not None:
+                # Extract all elements with ID attribute in one XPath query
+                for elem in text_section.xpath('.//*[@ID]', namespaces=self.namespaces):
+                    elem_id = elem.get('ID')
+                    if elem_id:
+                        # Get all text content, properly handling nested elements
+                        elem_text = ''.join(elem.itertext()).strip()
+                        narrative_mapping[elem_id] = elem_text
+        else:
+            # Fallback to ElementTree for compatibility
+            text_section = section.find('hl7:text', self.namespaces)
+            if text_section is not None:
+                # Extract paragraph mappings
+                paragraphs = text_section.findall('.//hl7:paragraph', self.namespaces)
+                for para in paragraphs:
+                    para_id = para.get('ID')
+                    if para_id:
+                        para_text = ''.join(para.itertext()).strip()
+                        narrative_mapping[para_id] = para_text
+                
+                # Extract content mappings from table cells
+                content_elements = text_section.findall('.//hl7:content', self.namespaces)
+                for content in content_elements:
+                    content_id = content.get('ID')
+                    if content_id:
+                        content_text = ''.join(content.itertext()).strip()
+                        narrative_mapping[content_id] = content_text
         
         return narrative_mapping
     
@@ -205,7 +251,7 @@ class ProceduresSectionService(ClinicalServiceBase):
         return procedure
     
     def _parse_procedure_element(self, procedure_elem) -> Dict[str, Any]:
-        """Parse procedure element into structured data with comprehensive extraction."""
+        """Parse procedure element into structured data with comprehensive extraction using lxml XPath."""
         # Extract procedure code and name
         code_elem = procedure_elem.find('hl7:code', self.namespaces)
         name = "Unknown procedure"
@@ -219,13 +265,20 @@ class ProceduresSectionService(ClinicalServiceBase):
             
             # Try to get name from originalText reference if displayName not available
             if name == 'Unknown procedure':
-                original_text = code_elem.find('hl7:originalText', self.namespaces)
-                if original_text is not None:
-                    ref_elem = original_text.find('hl7:reference', self.namespaces)
-                    if ref_elem is not None:
-                        ref_value = ref_elem.get('value', '').replace('#', '')
-                        # Store reference for potential narrative lookup
+                if self.LXML_AVAILABLE:
+                    # Use XPath for more robust extraction
+                    ref_xpath = code_elem.xpath('hl7:originalText/hl7:reference/@value', namespaces=self.namespaces)
+                    if ref_xpath:
+                        ref_value = ref_xpath[0].replace('#', '')
                         name = f"Procedure (ref: {ref_value})"
+                else:
+                    # ElementTree fallback
+                    original_text = code_elem.find('hl7:originalText', self.namespaces)
+                    if original_text is not None:
+                        ref_elem = original_text.find('hl7:reference', self.namespaces)
+                        if ref_elem is not None:
+                            ref_value = ref_elem.get('value', '').replace('#', '')
+                            name = f"Procedure (ref: {ref_value})"
         
         # Extract date
         time_elem = procedure_elem.find('hl7:effectiveTime', self.namespaces)
@@ -281,7 +334,7 @@ class ProceduresSectionService(ClinicalServiceBase):
         return procedure_data
     
     def _extract_target_site(self, procedure_elem) -> Dict[str, Any]:
-        """Extract target site information including anatomical location and laterality."""
+        """Extract target site information including anatomical location and laterality using lxml XPath."""
         target_site_elem = procedure_elem.find('hl7:targetSiteCode', self.namespaces)
         
         if target_site_elem is None:
@@ -297,14 +350,25 @@ class ProceduresSectionService(ClinicalServiceBase):
         
         # Extract laterality from qualifier
         laterality = None
-        qualifier_elem = target_site_elem.find('hl7:qualifier', self.namespaces)
-        if qualifier_elem is not None:
-            name_elem = qualifier_elem.find('hl7:name', self.namespaces)
-            value_elem = qualifier_elem.find('hl7:value', self.namespaces)
-            
-            if (name_elem is not None and value_elem is not None and 
-                name_elem.get('displayName') == 'Laterality'):
-                laterality = value_elem.get('displayName')
+        
+        if self.LXML_AVAILABLE:
+            # Use XPath to directly find Laterality qualifier value
+            laterality_xpath = target_site_elem.xpath(
+                'hl7:qualifier[hl7:name/@displayName="Laterality"]/hl7:value/@displayName',
+                namespaces=self.namespaces
+            )
+            if laterality_xpath:
+                laterality = laterality_xpath[0]
+        else:
+            # ElementTree fallback
+            qualifier_elem = target_site_elem.find('hl7:qualifier', self.namespaces)
+            if qualifier_elem is not None:
+                name_elem = qualifier_elem.find('hl7:name', self.namespaces)
+                value_elem = qualifier_elem.find('hl7:value', self.namespaces)
+                
+                if (name_elem is not None and value_elem is not None and 
+                    name_elem.get('displayName') == 'Laterality'):
+                    laterality = value_elem.get('displayName')
         
         # Construct comprehensive location description
         location_parts = []

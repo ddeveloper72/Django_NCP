@@ -355,15 +355,19 @@ class ComprehensiveClinicalDataService:
                         elif section_code == "47519-4":  # Procedures
                             enhanced_procedures = []
                             for procedure in data:
-                                procedure_data = {
-                                    "name": procedure.get("name", procedure.get("procedure_name", "Unknown Procedure")),
-                                    "display_name": procedure.get("display_name", procedure.get("name", "Unknown Procedure")),
-                                    "date": procedure.get("date", procedure.get("effective_time", "Not specified")),
-                                    "status": procedure.get("status", "Completed"),
-                                    "performer": procedure.get("performer", "Not specified"),
-                                    "source": "ProceduresSectionService",
-                                    "enhanced_data": True
-                                }
+                                # CRITICAL FIX: Preserve ALL fields from ProceduresSectionService
+                                # including procedure_code, code_system, target_site, laterality
+                                procedure_data = dict(procedure)  # Start with all original fields
+                                
+                                # Add/normalize standard fields for compatibility
+                                procedure_data.setdefault("name", procedure.get("procedure_name", "Unknown Procedure"))
+                                procedure_data.setdefault("display_name", procedure.get("name", procedure.get("procedure_name", "Unknown Procedure")))
+                                procedure_data.setdefault("date", procedure.get("effective_time", "Not specified"))
+                                procedure_data.setdefault("status", "Completed")
+                                procedure_data.setdefault("performer", "Not specified")
+                                procedure_data["source"] = "ProceduresSectionService"
+                                procedure_data["enhanced_data"] = True
+                                
                                 enhanced_procedures.append(procedure_data)
                             clinical_arrays[array_key].extend(enhanced_procedures)
                             
@@ -2235,6 +2239,84 @@ class ComprehensiveClinicalDataService:
                 
         return score
 
+    def _merge_duplicate_procedures(self, proc_list: List[Dict], code_key: str) -> Dict:
+        """
+        Merge duplicate procedures from dual-layer CDA architecture.
+        
+        CDA documents contain:
+        1. Narrative text with procedure names (e.g., "Cesarean section")
+        2. Structured codes with SNOMED CT codes (e.g., "11466000")
+        
+        This method combines both sources into a unified procedure record with:
+        - name: From narrative text (for clinician-readable display)
+        - procedure_code: From structured codes (for CTS translation)
+        - date: Prefer narrative (usually more complete)
+        - All other fields: Take most complete values
+        
+        Args:
+            proc_list: List of procedure dicts with same procedure_code
+            code_key: The procedure_code they share
+            
+        Returns:
+            Merged procedure dict with complete information from both sources
+        """
+        try:
+            # Find the procedure with the best name (not "Unknown Procedure")
+            narrative_proc = None
+            structured_proc = None
+            
+            for proc in proc_list:
+                proc_name = proc.get("name") or proc.get("display_name") or ""
+                proc_date = proc.get("date") or ""
+                
+                # Narrative procedures have meaningful names and dates
+                if proc_name and proc_name not in ["Unknown Procedure", "Not specified"] and "Unknown" not in proc_name:
+                    if not narrative_proc or (proc_date and proc_date != "Not recorded"):
+                        narrative_proc = proc
+                        logger.info(f"[PROCEDURE MERGE] Found narrative: '{proc_name}' with date '{proc_date}'")
+                # Structured procedures have codes but generic names
+                elif proc.get("procedure_code"):
+                    structured_proc = proc
+                    logger.info(f"[PROCEDURE MERGE] Found structured: code='{proc.get('procedure_code')}'")
+            
+            # Start with narrative procedure if available, else structured
+            if narrative_proc:
+                merged = dict(narrative_proc)
+                logger.info(f"[PROCEDURE MERGE] Starting with narrative: '{merged.get('name')}'")
+            elif structured_proc:
+                merged = dict(structured_proc)
+                logger.info(f"[PROCEDURE MERGE] Starting with structured: code='{merged.get('procedure_code')}'")
+            else:
+                # Fallback: use first procedure
+                merged = dict(proc_list[0])
+                logger.warning(f"[PROCEDURE MERGE] No clear narrative/structured split, using first entry")
+            
+            # Merge in data from structured procedure (codes, target sites, etc.)
+            if structured_proc and narrative_proc:
+                # Preserve codes and technical fields from structured data
+                for field in ["procedure_code", "code_system", "target_site", "laterality", 
+                             "template_id", "procedure_id", "text_reference"]:
+                    if field in structured_proc and structured_proc[field]:
+                        # Only override if narrative doesn't have it or has placeholder value
+                        if field not in merged or merged[field] in [None, "", "Not specified", "Not recorded"]:
+                            old_val = merged.get(field, 'NONE')
+                            merged[field] = structured_proc[field]
+                            logger.info(f"[PROCEDURE MERGE] Enhanced field '{field}': '{old_val}' -> '{structured_proc[field]}'")
+                
+                # Add metadata about dual-layer source
+                merged["merged_from_dual_layer"] = True
+                merged["narrative_source"] = narrative_proc.get("source", "ProceduresSectionService")
+                merged["structured_source"] = structured_proc.get("source", "EnhancedCDAXMLParser")
+            
+            logger.info(f"[PROCEDURE MERGE] ✓ Combined '{merged.get('name', 'Unknown')}' with code '{code_key}' from {len(proc_list)} sources")
+            
+            return merged
+            
+        except Exception as e:
+            logger.error(f"[PROCEDURE MERGE] Error in _merge_duplicate_procedures for code '{code_key}': {e}", exc_info=True)
+            # Return first procedure as fallback
+            return proc_list[0]
+
     def _remove_duplicate_and_placeholder_data(self, clinical_arrays: Dict[str, List]) -> None:
         """Remove duplicate entries and placeholder data from clinical arrays"""
         
@@ -2362,6 +2444,72 @@ class ComprehensiveClinicalDataService:
                     logger.info(f"[DATA_CLEANUP] Removed invalid medication entry: {med}")
                     
             clinical_arrays["medications"] = valid_medications
+        
+        # CRITICAL FIX: Merge duplicate procedures by procedure_code (dual-layer CDA architecture)
+        # CDA documents have BOTH narrative text (with names) AND structured codes (SNOMED)
+        # We need to merge these into unified procedure records for dual-view UI and CTS translation
+        try:
+            original_count = len(clinical_arrays["procedures"])
+            logger.info(f"[PROCEDURE MERGE] Starting merge: {original_count} procedures")
+            
+            procedure_groups = {}  # Group procedures by code
+            
+            for proc in clinical_arrays["procedures"]:
+                if not isinstance(proc, dict):
+                    logger.warning(f"[PROCEDURE MERGE] Skipping non-dict procedure: {type(proc)}")
+                    continue
+                
+                # Extract procedure code - handle both dict and string formats
+                proc_code_field = proc.get("procedure_code") or proc.get("code")
+                if isinstance(proc_code_field, dict):
+                    # EnhancedCDAXMLParser format: {"code": "64253000", "codeSystem": "...", "displayName": ""}
+                    proc_code = proc_code_field.get("code", "")
+                elif isinstance(proc_code_field, str):
+                    # ProceduresSectionService format: "64253000"
+                    proc_code = proc_code_field
+                else:
+                    proc_code = ""
+                
+                proc_name = proc.get("name") or proc.get("display_name") or "Unknown"
+                
+                logger.info(f"[PROCEDURE MERGE] Processing: name='{proc_name}', code='{proc_code}'")
+                
+                if proc_code and proc_code not in ["", "Not specified"]:
+                    if proc_code not in procedure_groups:
+                        procedure_groups[proc_code] = []
+                    procedure_groups[proc_code].append(proc)
+                else:
+                    # Procedures without codes can't be merged - keep as-is
+                    unique_key = "_no_code_" + str(len(procedure_groups))
+                    procedure_groups[unique_key] = [proc]
+                    logger.info(f"[PROCEDURE MERGE] Procedure without code: '{proc_name}' -> {unique_key}")
+            
+            # Merge procedures with the same code
+            merged_procedures = []
+            for code_key, proc_list in procedure_groups.items():
+                if len(proc_list) == 1:
+                    merged_procedures.append(proc_list[0])
+                    logger.info(f"[PROCEDURE MERGE] Single procedure for code '{code_key}': {proc_list[0].get('name', 'Unknown')}")
+                else:
+                    # Merge multiple procedures with same code - combine narrative and structured data
+                    try:
+                        merged_proc = self._merge_duplicate_procedures(proc_list, code_key)
+                        merged_procedures.append(merged_proc)
+                        logger.info(f"[DATA_CLEANUP] Merged {len(proc_list)} duplicate procedures with code '{code_key}'")
+                    except Exception as merge_error:
+                        logger.error(f"[PROCEDURE MERGE] Error merging procedures with code '{code_key}': {merge_error}")
+                        # Fallback: keep first procedure if merge fails
+                        merged_procedures.append(proc_list[0])
+            
+            if len(merged_procedures) != original_count:
+                logger.info(f"[DATA_CLEANUP] CRITICAL: Merged duplicate procedures: {original_count} -> {len(merged_procedures)}")
+                clinical_arrays["procedures"] = merged_procedures
+            else:
+                logger.info(f"[PROCEDURE MERGE] No duplicates found: {original_count} procedures unchanged")
+                
+        except Exception as e:
+            logger.error(f"[PROCEDURE MERGE] Critical error during procedure merging: {e}", exc_info=True)
+            logger.info(f"[PROCEDURE MERGE] Keeping original {len(clinical_arrays['procedures'])} procedures due to error")
 
     def _extract_enhanced_problems(self, raw_problems: List[Dict]) -> List[Dict]:
         """Extract rich clinical problem data from CDA parser results"""
