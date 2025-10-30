@@ -26,7 +26,7 @@ Version: 1.0.0
 # Import core components
 from .base.clinical_service_base import ClinicalServiceBase
 from .base.section_service_interface import ClinicalSectionServiceInterface
-from .pipeline.clinical_data_pipeline_manager import ClinicalDataPipelineManager
+from .pipeline.clinical_data_pipeline_manager import ClinicalDataPipelineManager, clinical_pipeline_manager
 
 # Import all specialized services
 from .specialized.problems_service import ProblemsSectionService
@@ -42,8 +42,7 @@ from .specialized.social_history_service import SocialHistorySectionService
 from .specialized.advance_directives_service import AdvanceDirectivesSectionService
 from .specialized.functional_status_service import FunctionalStatusSectionService
 
-# Create global pipeline manager instance
-clinical_pipeline_manager = ClinicalDataPipelineManager()
+# Use the global singleton instance (don't create a new one!)
 
 # Register all specialized services
 def register_clinical_services():

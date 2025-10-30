@@ -1,0 +1,270 @@
+{# Pregnancy History Section - Enhanced Pipeline Data #}
+<div class="pregnancy-history-section" id="pregnancy-history-section">
+    {# Create local context variable for pregnancy list #}
+    {% with section_data as pregnancy_list %}
+    
+    {# Check if pregnancy history data exists and render modern card layout #}
+    {% if pregnancy_list and pregnancy_list|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-pregnancy-history" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-pregnancy-history" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-baby me-2" style="color: #e91e63;"></i>
+                        <span>Pregnancy History</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ pregnancy_list|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">Pregnancy History: {{ pregnancy_list|length }} items found</p>
+                    
+                    {# Separate current pregnancy from past pregnancies #}
+                    {% for pregnancy in pregnancy_list %}
+                        {% if pregnancy.pregnancy_type == 'current' %}
+                        {# Current Pregnancy Card #}
+                        <div class="pregnancy-card mb-4 p-4 border rounded shadow-sm bg-white" style="border-color: #e91e63 !important;">
+                            
+                            {# Card header for current pregnancy #}
+                            <div class="pregnancy-header mb-3 pb-3 border-bottom" style="border-color: #e91e63 !important;">
+                                <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                    <div class="pregnancy-status-section flex-grow-1 me-3">
+                                        <h5 class="pregnancy-title mb-1 fw-bold" style="color: #e91e63;">
+                                            <i class="fa-solid fa-heart me-2"></i>
+                                            {# Display pregnancy status #}
+                                            {% if pregnancy.data.status.display_value %}
+                                                {{ pregnancy.data.status.display_value }}
+                                            {% elif pregnancy.status %}
+                                                {{ pregnancy.status }}
+                                            {% else %}
+                                                Current Pregnancy
+                                            {% endif %}
+                                        </h5>
+                                        <div class="pregnancy-type mt-1">
+                                            <small class="text-muted">
+                                                <i class="fa-solid fa-calendar-check me-1"></i>Current Status
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="pregnancy-badge-section">
+                                        <span class="badge" style="background-color: #e91e63; font-size: 0.875rem;">In Progress</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Current Pregnancy Information Grid #}
+                            <div class="pregnancy-info-grid">
+                                <div class="row g-3">
+                                    {# Observation Date #}
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="info-label text-muted mb-1">
+                                                <i class="fa-solid fa-calendar-day me-1"></i>Observation Date
+                                            </label>
+                                            <div class="info-value fw-semibold">
+                                                {% if pregnancy.data.observation_date.display_value %}
+                                                    {{ pregnancy.data.observation_date.display_value }}
+                                                {% elif pregnancy.observation_date %}
+                                                    {{ pregnancy.observation_date }}
+                                                {% else %}
+                                                    Not recorded
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {# Estimated Delivery Date #}
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="info-label text-muted mb-1">
+                                                <i class="fa-solid fa-calendar-star me-1"></i>Estimated Delivery Date
+                                            </label>
+                                            <div class="info-value fw-semibold">
+                                                {% if pregnancy.data.delivery_date_estimated.display_value %}
+                                                    {{ pregnancy.data.delivery_date_estimated.display_value }}
+                                                {% elif pregnancy.delivery_date_estimated %}
+                                                    {{ pregnancy.delivery_date_estimated }}
+                                                {% else %}
+                                                    Not determined
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {# Past Pregnancies Cards #}
+                    {% for pregnancy in pregnancy_list %}
+                        {% if pregnancy.pregnancy_type == 'past' %}
+                        {# Individual Past Pregnancy Card #}
+                        <div class="pregnancy-card mb-4 p-4 border rounded shadow-sm bg-white border-primary">
+                            
+                            {# Card header containing pregnancy outcome #}
+                            <div class="pregnancy-header mb-3 pb-3 border-bottom border-primary">
+                                <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                    <div class="pregnancy-outcome-section flex-grow-1 me-3">
+                                        <h5 class="pregnancy-title text-primary mb-1 fw-bold">
+                                            <i class="fa-solid fa-baby me-2"></i>
+                                            {# Display pregnancy outcome with enhanced data structure fallbacks #}
+                                            {% if pregnancy.data.outcome.display_value %}
+                                                {{ pregnancy.data.outcome.display_value }}
+                                            {% elif pregnancy.outcome %}
+                                                {{ pregnancy.outcome }}
+                                            {% else %}
+                                                Previous Pregnancy
+                                            {% endif %}
+                                        </h5>
+                                        {# Outcome code display #}
+                                        {% if pregnancy.data.outcome.code %}
+                                        <div class="outcome-code mt-1">
+                                            <small class="text-muted">
+                                                <i class="fa-solid fa-hashtag me-1"></i>Code: {{ pregnancy.data.outcome.code }}
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="pregnancy-type-section">
+                                        <span class="badge bg-secondary fs-6">Past Pregnancy</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Past Pregnancy Information Grid #}
+                            <div class="pregnancy-info-grid">
+                                <div class="row g-3">
+                                    {# Delivery Date #}
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="info-label text-muted mb-1">
+                                                <i class="fa-solid fa-calendar-check me-1"></i>Delivery/Outcome Date
+                                            </label>
+                                            <div class="info-value fw-semibold">
+                                                {% if pregnancy.data.delivery_date.display_value %}
+                                                    {{ pregnancy.data.delivery_date.display_value }}
+                                                {% elif pregnancy.delivery_date %}
+                                                    {{ pregnancy.delivery_date }}
+                                                {% else %}
+                                                    Not recorded
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {# Gestational Age #}
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="info-label text-muted mb-1">
+                                                <i class="fa-solid fa-clock me-1"></i>Gestational Age
+                                            </label>
+                                            <div class="info-value fw-semibold">
+                                                {% if pregnancy.data.gestational_age.display_value %}
+                                                    {{ pregnancy.data.gestational_age.display_value }}
+                                                {% elif pregnancy.gestational_age %}
+                                                    {{ pregnancy.gestational_age }}
+                                                {% else %}
+                                                    Not specified
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {# Birth Weight #}
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="info-label text-muted mb-1">
+                                                <i class="fa-solid fa-weight me-1"></i>Birth Weight
+                                            </label>
+                                            <div class="info-value fw-semibold">
+                                                {% if pregnancy.data.birth_weight.display_value %}
+                                                    {{ pregnancy.data.birth_weight.display_value }}
+                                                {% elif pregnancy.birth_weight %}
+                                                    {{ pregnancy.birth_weight }}
+                                                {% else %}
+                                                    Not specified
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {# Delivery Method #}
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="info-label text-muted mb-1">
+                                                <i class="fa-solid fa-hospital me-1"></i>Delivery Method
+                                            </label>
+                                            <div class="info-value fw-semibold">
+                                                {% if pregnancy.data.delivery_method.display_value %}
+                                                    {{ pregnancy.data.delivery_method.display_value }}
+                                                {% elif pregnancy.delivery_method %}
+                                                    {{ pregnancy.delivery_method }}
+                                                {% else %}
+                                                    Not specified
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {# Complications #}
+                                    {% if pregnancy.data.complications.display_value != 'None reported' or pregnancy.complications != 'None reported' %}
+                                    <div class="col-md-12">
+                                        <div class="info-item">
+                                            <label class="info-label text-muted mb-1">
+                                                <i class="fa-solid fa-exclamation-triangle me-1"></i>Complications
+                                            </label>
+                                            <div class="info-value fw-semibold">
+                                                {% if pregnancy.data.complications.display_value %}
+                                                    {{ pregnancy.data.complications.display_value }}
+                                                {% elif pregnancy.complications %}
+                                                    {{ pregnancy.complications }}
+                                                {% else %}
+                                                    None reported
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        {# Empty state when no pregnancy history data #}
+        <div class="clinical-section">
+            <div class="collapsible-wrapper">
+                <input id="toggle-pregnancy-history-empty" class="toggle-input" type="checkbox">
+                <label for="toggle-pregnancy-history-empty" class="collapsible-label-title">
+                    <div class="clinical-section-title-row">
+                        <div class="clinical-section-title">
+                            <i class="fa-solid fa-baby me-2 text-muted"></i>
+                            <span>Pregnancy History</span>
+                        </div>
+                        <div class="clinical-badge-container">
+                            <span class="clinical-badge empty">0 Found</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                </label>
+                <div class="collapsible-content-title">
+                    <div class="content-inner-title">
+                        <p class="text-muted">No pregnancy history available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    {% endwith %}
+</div>

@@ -52,7 +52,7 @@
     
     {# Pregnancy History Section #}
     {% if pregnancy_history and pregnancy_history|length > 0 %}
-        {% include 'patient_data/sections/pregnancy_history_section.html' with section_data=pregnancy_history section_count=pregnancy_history|length section_type='pregnancy_history' section_title='Pregnancy History' %}
+        {% include 'patient_data/sections/pregnancy_history_section_new.html' with section_data=pregnancy_history section_count=pregnancy_history|length section_type='pregnancy_history' section_title='Pregnancy History' %}
     {% endif %}
     
     {# Social History Section #}

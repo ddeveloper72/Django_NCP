@@ -182,8 +182,8 @@ class CDAViewProcessor:
         
         # ENTERPRISE ARCHITECTURE: Use unified clinical data pipeline manager
         try:
-            from ..services.clinical_sections.pipeline.clinical_data_pipeline_manager import ClinicalDataPipelineManager
-            clinical_pipeline_manager = ClinicalDataPipelineManager()
+            # Import from __init__ to trigger service registration
+            from ..services.clinical_sections import clinical_pipeline_manager
             logger.info("[CDA PROCESSOR] Using unified clinical data pipeline manager")
             
             # Extract CDA content from match data
@@ -193,16 +193,16 @@ class CDAViewProcessor:
             
             if cda_content:
                 logger.info("[CDA PROCESSOR] *** INVOKING UNIFIED PIPELINE ***")
-                # Process CDA content using specialized service agents
-                unified_clinical_arrays = clinical_pipeline_manager.process_cda_content(cda_content)
+                # Process CDA content using specialized service agents (FULL API with session_id)
+                unified_clinical_arrays = clinical_pipeline_manager.process_cda_content(request, session_id, cda_content)
                 logger.info(f"[CDA PROCESSOR] Pipeline returned {len(unified_clinical_arrays)} sections")
                 
                 # CRITICAL FIX: Extract patient identity using Enhanced CDA XML Parser since unified pipeline doesn't handle it
                 logger.info("[CDA PROCESSOR] Extracting patient identity via Enhanced CDA XML Parser")
                 parsed_data = self._parse_cda_document(cda_content, session_id)
                 
-                # Get template context from pipeline manager
-                pipeline_context = clinical_pipeline_manager.get_template_context()
+                # Get template context from pipeline manager (FULL API with session_id)
+                pipeline_context = clinical_pipeline_manager.get_template_context(request, session_id)
                 
                 # Build base context and merge with pipeline context
                 context = self.context_builder.build_base_context(session_id, 'CDA')
@@ -288,11 +288,14 @@ class CDAViewProcessor:
         
         # FINAL FIX: Use unified clinical pipeline for all enhanced data
         try:
-            from patient_data.services.clinical_sections.pipeline.clinical_data_pipeline_manager import ClinicalDataPipelineManager
-            clinical_pipeline_manager = ClinicalDataPipelineManager()
+            # Import from __init__ to trigger service registration
+            from patient_data.services.clinical_sections import clinical_pipeline_manager
+            
+            # Extract CDA content from match_data
+            extraction_cda_content, _ = self._get_cda_content(match_data, cda_type)
             
             # Process all clinical sections through unified pipeline
-            unified_results = clinical_pipeline_manager.process_all_sections(self.request, session_id, match_data.get('cda_content'))
+            unified_results = clinical_pipeline_manager.process_cda_content(request, session_id, extraction_cda_content)
             
             # Extract enhanced clinical arrays from unified results
             enhanced_medications = unified_results.get('10160-0', {}).get('items', [])
@@ -304,7 +307,11 @@ class CDAViewProcessor:
             enhanced_immunizations = unified_results.get('11369-6', {}).get('items', [])
             enhanced_results = unified_results.get('30954-2', {}).get('items', [])
             enhanced_medical_devices = unified_results.get('46264-8', {}).get('items', [])
+            enhanced_past_illness = unified_results.get('11348-0', {}).get('items', [])
             enhanced_pregnancy_history = unified_results.get('10162-6', {}).get('items', [])
+            enhanced_social_history = unified_results.get('29762-2', {}).get('items', [])
+            enhanced_advance_directives = unified_results.get('42348-3', {}).get('items', [])
+            enhanced_functional_status = unified_results.get('47420-5', {}).get('items', [])
             
             # Add all enhanced clinical data to context
             context.update({
@@ -316,7 +323,11 @@ class CDAViewProcessor:
                 'enhanced_immunizations': enhanced_immunizations,
                 'enhanced_results': enhanced_results,
                 'enhanced_medical_devices': enhanced_medical_devices,
+                'enhanced_past_illness': enhanced_past_illness,
                 'enhanced_pregnancy_history': enhanced_pregnancy_history,
+                'enhanced_social_history': enhanced_social_history,
+                'enhanced_advance_directives': enhanced_advance_directives,
+                'enhanced_functional_status': enhanced_functional_status,
                 'unified_pipeline_processed': True,
                 'unified_sections_count': len(unified_results)
             })
@@ -331,8 +342,34 @@ class CDAViewProcessor:
                 'immunizations': enhanced_immunizations,
                 'results': enhanced_results,
                 'medical_devices': enhanced_medical_devices,
-                'pregnancy_history': enhanced_pregnancy_history
+                'past_illness': enhanced_past_illness,
+                'pregnancy_history': enhanced_pregnancy_history,
+                'social_history': enhanced_social_history,
+                'advance_directives': enhanced_advance_directives,
+                'functional_status': enhanced_functional_status
             }
+            
+            # CRITICAL: Apply field mapping to unified pipeline data for template compatibility
+            # Template expects nested data structure: item.data.field.display_value
+            try:
+                import sys
+                import os
+                field_mapper_path = os.path.join(os.path.dirname(__file__), '..', 'clinical_field_mapper.py')
+                if os.path.exists(field_mapper_path):
+                    sys.path.insert(0, os.path.dirname(field_mapper_path))
+                    from clinical_field_mapper import ClinicalFieldMapper
+                    field_mapper = ClinicalFieldMapper()
+                    
+                    # Map all sections from unified pipeline
+                    mapped_unified_arrays = field_mapper.map_clinical_arrays(unified_clinical_arrays)
+                    logger.info(f"[CDA PROCESSOR] Field-mapped unified pipeline data for template compatibility")
+                    
+                    # Use mapped data instead of raw data
+                    unified_clinical_arrays = mapped_unified_arrays
+                else:
+                    logger.warning(f"[CDA PROCESSOR] Field mapper not found, using raw unified pipeline data")
+            except Exception as mapper_error:
+                logger.warning(f"[CDA PROCESSOR] Field mapping failed: {mapper_error}, using raw unified pipeline data")
             
             # Use ContextBuilder to add clinical data properly
             self.context_builder.add_clinical_data(context, unified_clinical_arrays)
@@ -1274,6 +1311,32 @@ class CDAViewProcessor:
                     # Fallback: use raw data
                     compatibility_vars['past_illness'] = enhanced_clinical_arrays['past_illness']
                     logger.warning(f"[COMPATIBILITY] Field mapping failed: {mapper_error}, using raw past illness data")
+            
+            if enhanced_clinical_arrays.get('pregnancy_history'):
+                # CRITICAL: Map pregnancy_history through ClinicalFieldMapper to create nested data structure
+                # Template expects pregnancy.data.outcome.display_value, not pregnancy.outcome
+                try:
+                    import sys
+                    import os
+                    field_mapper_path = os.path.join(os.path.dirname(__file__), '..', 'clinical_field_mapper.py')
+                    if os.path.exists(field_mapper_path):
+                        sys.path.insert(0, os.path.dirname(field_mapper_path))
+                        from clinical_field_mapper import ClinicalFieldMapper
+                        field_mapper = ClinicalFieldMapper()
+                        
+                        # Map only pregnancy_history
+                        temp_arrays = {'pregnancy_history': enhanced_clinical_arrays['pregnancy_history']}
+                        mapped_arrays = field_mapper.map_clinical_arrays(temp_arrays)
+                        compatibility_vars['pregnancy_history'] = mapped_arrays['pregnancy_history']
+                        logger.info(f"[COMPATIBILITY] Mapped {len(mapped_arrays['pregnancy_history'])} pregnancy records through ClinicalFieldMapper")
+                    else:
+                        # Fallback: use raw data
+                        compatibility_vars['pregnancy_history'] = enhanced_clinical_arrays['pregnancy_history']
+                        logger.warning(f"[COMPATIBILITY] Field mapper not found, using raw pregnancy history data")
+                except Exception as mapper_error:
+                    # Fallback: use raw data
+                    compatibility_vars['pregnancy_history'] = enhanced_clinical_arrays['pregnancy_history']
+                    logger.warning(f"[COMPATIBILITY] Field mapping failed: {mapper_error}, using raw pregnancy history data")
             
             if enhanced_clinical_arrays.get('medications'):
                 # Medications will be handled by section processing logic below (lines 1214-1226)

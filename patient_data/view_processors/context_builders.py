@@ -278,6 +278,12 @@ class ContextBuilder:
                 'results': clinical_arrays.get('results', []),
                 'immunizations': clinical_arrays.get('immunizations', []),
                 'observations': clinical_arrays.get('observations', []),
+                'medical_devices': clinical_arrays.get('medical_devices', []),
+                'past_illness': clinical_arrays.get('past_illness', []),
+                'pregnancy_history': clinical_arrays.get('pregnancy_history', []),
+                'social_history': clinical_arrays.get('social_history', []),
+                'advance_directives': clinical_arrays.get('advance_directives', []),
+                'functional_status': clinical_arrays.get('functional_status', []),
             })
             
             # Calculate if we have any clinical data

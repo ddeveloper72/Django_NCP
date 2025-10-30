@@ -27,7 +27,7 @@ class ClinicalFieldMapper:
         }
     
     def _format_cda_date(self, cda_date: str) -> str:
-        """Format CDA date string (YYYYMMDD) to display format (YYYY-MM-DD)"""
+        """Format CDA date string (YYYYMMDD) to European display format (DD/MM/YYYY)"""
         from datetime import datetime
         import re
         
@@ -41,14 +41,20 @@ class ClinicalFieldMapper:
             # Handle different date formats
             if len(date_clean) == 8:  # YYYYMMDD
                 dt = datetime.strptime(date_clean, '%Y%m%d')
-                return dt.strftime('%Y-%m-%d')
+                return dt.strftime('%d/%m/%Y')  # European format: DD/MM/YYYY
             elif len(date_clean) == 6:  # YYYYMM
                 dt = datetime.strptime(date_clean, '%Y%m')
-                return dt.strftime('%Y-%m')
+                return dt.strftime('%m/%Y')  # Month/Year format
             elif len(date_clean) == 4:  # YYYY
                 return date_clean
-            elif '-' in date_clean:  # Already formatted
+            elif '/' in date_clean:  # Already formatted in European style
                 return date_clean
+            elif '-' in date_clean:  # ISO format - convert to European
+                try:
+                    dt = datetime.strptime(date_clean, '%Y-%m-%d')
+                    return dt.strftime('%d/%m/%Y')
+                except ValueError:
+                    return date_clean
             else:
                 return date_clean
         except (ValueError, AttributeError):
@@ -68,6 +74,7 @@ class ClinicalFieldMapper:
             clinical_arrays["results"] = self._map_results_fields(clinical_arrays.get("results", []))
             clinical_arrays["medical_devices"] = self._map_medical_devices_fields(clinical_arrays.get("medical_devices", []))
             clinical_arrays["past_illness"] = self._map_past_illness_fields(clinical_arrays.get("past_illness", []))
+            clinical_arrays["pregnancy_history"] = self._map_pregnancy_history_fields(clinical_arrays.get("pregnancy_history", []))
             
             # Medications already have template compatibility fixes, just count them
             self.mapping_stats["sections_processed"] += 1
@@ -1129,6 +1136,144 @@ class ClinicalFieldMapper:
             logger.info(f"[FIELD_MAPPER] FINAL: Returning {len(mapped_illnesses)} mapped past illnesses to context")
         
         return mapped_illnesses
+
+    def _map_pregnancy_history_fields(self, pregnancies: List[Dict]) -> List[Dict]:
+        """
+        Map pregnancy history data for template compatibility.
+        
+        Template expects nested structure:
+        - pregnancy.data.outcome.display_value
+        - pregnancy.data.status.display_value
+        - pregnancy.data.delivery_date.display_value
+        - pregnancy.data.gestational_age.display_value
+        - pregnancy.pregnancy_type ('current' or 'past')
+        
+        Applies CTS fallback for outcome codes if primary translation failed.
+        """
+        if not pregnancies:
+            return []
+        
+        logger.info(f"[FIELD_MAPPER] Pregnancy History - Mapping {len(pregnancies)} pregnancy records")
+        
+        mapped_pregnancies = []
+        
+        for pregnancy in pregnancies:
+            # Get raw values
+            pregnancy_type = pregnancy.get('pregnancy_type', 'past')
+            outcome = pregnancy.get('outcome', 'Not specified')
+            outcome_code = pregnancy.get('outcome_code')
+            outcome_system = pregnancy.get('outcome_system')
+            status = pregnancy.get('status', 'Not specified')
+            status_code = pregnancy.get('status_code')
+            delivery_date = pregnancy.get('delivery_date', 'Not specified')
+            delivery_date_estimated = pregnancy.get('delivery_date_estimated', 'Not specified')
+            observation_date = pregnancy.get('observation_date', 'Not specified')
+            gestational_age = pregnancy.get('gestational_age', 'Not specified')
+            birth_weight = pregnancy.get('birth_weight', 'Not specified')
+            complications = pregnancy.get('complications', 'None reported')
+            delivery_method = pregnancy.get('delivery_method', 'Not specified')
+            pregnancy_number = pregnancy.get('pregnancy_number', 'Not specified')
+            
+            logger.info(f"[FIELD_MAPPER] Pregnancy - Raw data: type='{pregnancy_type}', outcome='{outcome}', delivery_date='{delivery_date}'")
+            
+            # CTS fallback for outcome if still coded
+            if outcome_code and outcome_system and (len(outcome) < 10 or outcome == outcome_code):
+                logger.info(f"[FIELD_MAPPER] Pregnancy outcome needs translation: '{outcome}'")
+                logger.info(f"[FIELD_MAPPER] Calling CTS for code={outcome_code}, system={outcome_system}")
+                
+                from patient_data.services.cts_integration.cts_service import CTSService
+                cts_service = CTSService()
+                cts_result = cts_service.get_term_display(outcome_code, outcome_system)
+                
+                logger.info(f"[FIELD_MAPPER] CTS returned for outcome: '{cts_result}'")
+                
+                if cts_result and cts_result != outcome_code:
+                    outcome = cts_result
+                else:
+                    logger.warning(f"[FIELD_MAPPER] CTS returned no useful result for outcome {outcome_code}")
+            
+            # Format delivery date to DD/MM/YYYY
+            formatted_delivery_date = self._format_cda_date(delivery_date) if delivery_date != 'Not specified' else 'Not specified'
+            formatted_delivery_date_estimated = self._format_cda_date(delivery_date_estimated) if delivery_date_estimated != 'Not specified' else 'Not specified'
+            formatted_observation_date = self._format_cda_date(observation_date) if observation_date != 'Not specified' else 'Not specified'
+            
+            # Build nested data structure for template
+            mapped_pregnancy = {
+                # Original fields for fallback compatibility
+                'description': pregnancy.get('description', 'Pregnancy record'),
+                'pregnancy_type': pregnancy_type,
+                'pregnancy_number': pregnancy_number,
+                'outcome': outcome,
+                'status': status,
+                'delivery_date': formatted_delivery_date,
+                'delivery_date_estimated': formatted_delivery_date_estimated,
+                'observation_date': formatted_observation_date,
+                'gestational_age': gestational_age,
+                'birth_weight': birth_weight,
+                'complications': complications,
+                'delivery_method': delivery_method,
+                
+                # Enhanced nested data structure for modern template
+                'data': {
+                    'pregnancy_type': {
+                        'display_value': pregnancy_type.capitalize(),
+                        'code': pregnancy_type,
+                        'code_system': 'internal'
+                    },
+                    'outcome': {
+                        'display_value': outcome,
+                        'code': outcome_code,
+                        'code_system': outcome_system
+                    },
+                    'status': {
+                        'display_value': status,
+                        'code': status_code,
+                        'code_system': outcome_system
+                    },
+                    'delivery_date': {
+                        'display_value': formatted_delivery_date,
+                        'raw_value': delivery_date
+                    },
+                    'delivery_date_estimated': {
+                        'display_value': formatted_delivery_date_estimated,
+                        'raw_value': delivery_date_estimated
+                    },
+                    'observation_date': {
+                        'display_value': formatted_observation_date,
+                        'raw_value': observation_date
+                    },
+                    'gestational_age': {
+                        'display_value': gestational_age
+                    },
+                    'birth_weight': {
+                        'display_value': birth_weight
+                    },
+                    'complications': {
+                        'display_value': complications
+                    },
+                    'delivery_method': {
+                        'display_value': delivery_method
+                    },
+                    'pregnancy_number': {
+                        'display_value': pregnancy_number
+                    }
+                }
+            }
+            
+            mapped_pregnancies.append(mapped_pregnancy)
+            self.mapping_stats["items_mapped"] += 1
+            
+            # Log final mapped structure
+            logger.info(f"[FIELD_MAPPER] Mapped pregnancy #{len(mapped_pregnancies)}:")
+            logger.info(f"  - data.pregnancy_type.display_value: '{mapped_pregnancy['data']['pregnancy_type']['display_value']}'")
+            logger.info(f"  - data.outcome.display_value: '{mapped_pregnancy['data']['outcome']['display_value']}'")
+            logger.info(f"  - data.delivery_date.display_value: '{mapped_pregnancy['data']['delivery_date']['display_value']}'")
+        
+        if mapped_pregnancies:
+            self.mapping_stats["sections_processed"] += 1
+            logger.info(f"[FIELD_MAPPER] FINAL: Returning {len(mapped_pregnancies)} mapped pregnancy records to context")
+        
+        return mapped_pregnancies
 
     def get_mapping_statistics(self) -> Dict[str, int]:
         """Get mapping statistics for debugging and monitoring"""
