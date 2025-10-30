@@ -474,9 +474,7 @@ class CDAViewProcessor:
                 
                 # ENHANCEMENT: Apply our updated problems parsing to Enhanced CDA sections
                 logger.info("[CDA PROCESSOR] Applying enhanced sections parsing for problems...")
-                logger.info("[CDA PROCESSOR] *** MEDICATION FIX DEBUG: About to call _enhance_sections_with_updated_parsing ***")
                 enhanced_clinical_data = self._enhance_sections_with_updated_parsing(cda_content, clinical_data)
-                logger.info("[CDA PROCESSOR] *** MEDICATION FIX DEBUG: _enhance_sections_with_updated_parsing completed ***")
                 
                 # Log the results to verify enhancement
                 if 'clinical_arrays' in enhanced_clinical_data:
@@ -590,12 +588,8 @@ class CDAViewProcessor:
                     logger.info(f"[CDA PROCESSOR] Added {len(sections)} clinical sections")
                 
                 # *** ENHANCED MEDICATIONS CHECK: Always check for enhanced medications first ***
-                logger.info(f"[CDA PROCESSOR] *** DEBUGGING: About to call _get_enhanced_medications_from_session() ***")
                 enhanced_medications = self._get_enhanced_medications_from_session()
-                logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS CHECK: Searched for enhanced medications - Found: {len(enhanced_medications) if enhanced_medications else 0} ***")
-                if enhanced_medications:
-                    first_med = enhanced_medications[0]
-                    logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS DEBUG: First med name={first_med.get('name', 'Unknown')}, dose={first_med.get('dose_quantity', 'Not found')} ***")
+                logger.info(f"[CDA PROCESSOR] Enhanced medications check: Found {len(enhanced_medications) if enhanced_medications else 0} medications")
                 
                 # Extract clinical arrays using the comprehensive service method
                 if not clinical_data and sections:
@@ -622,11 +616,7 @@ class CDAViewProcessor:
                     if not clinical_arrays:
                         clinical_arrays = {}
                     clinical_arrays['medications'] = enhanced_medications
-                    logger.info(f"[CDA PROCESSOR] *** ENHANCED MEDICATIONS: Overrode medications with enhanced data ***")
-                    print(f"*** CDA DEBUG: Enhanced medications set in clinical_arrays: {len(enhanced_medications)} ***")
-                    if enhanced_medications:
-                        first_med = enhanced_medications[0]
-                        print(f"*** CDA DEBUG: First enhanced med - name: {first_med.get('name')}, dose: {first_med.get('dose_quantity')} ***")
+                    logger.info(f"[CDA PROCESSOR] Enhanced medications: Set {len(enhanced_medications)} medications with enhanced data")
                     
                     # CRITICAL FIX: Also set enhanced medications directly in context to ensure they reach template
                     context['medications'] = enhanced_medications
@@ -634,10 +624,8 @@ class CDAViewProcessor:
                     context['debug_enhanced_medications'] = True
                     context['debug_first_med_dose'] = enhanced_medications[0].get('dose_quantity', 'DEBUG_NOT_FOUND')
                     context['debug_enhanced_path_taken'] = True
-                    print(f"*** DIRECT CONTEXT FIX: Set enhanced medications directly in context ***")
                 else:
                     context['debug_enhanced_path_taken'] = False
-                    print("*** NO ENHANCED MEDICATIONS FOUND IN THIS PATH ***")
                 
                 if clinical_arrays:
                     # CRITICAL FIX: Don't overwrite unified pipeline data - merge intelligently
@@ -673,38 +661,23 @@ class CDAViewProcessor:
                         logger.info(f"[CDA PROCESSOR] *** Using clinical arrays from Enhanced CDA XML Parser with keys: {list(enhanced_arrays.keys())} ***")
                     
                     if enhanced_arrays:
-                        logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Found enhanced clinical arrays with keys: {list(enhanced_arrays.keys())} ***")
+                        logger.info(f"[CDA PROCESSOR] Enhanced clinical arrays with keys: {list(enhanced_arrays.keys())}")
                         if enhanced_arrays.get('medications'):
-                            logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Enhanced arrays have {len(enhanced_arrays['medications'])} medications ***")
-                            # DEBUG: Log first few medication details
-                            for i, med in enumerate(enhanced_arrays['medications'][:3]):
-                                name = med.get('name') or med.get('medication_name') or med.get('display_name', 'NO_NAME')
-                                logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Enhanced med {i}: name='{name}' ***")
+                            logger.info(f"[CDA PROCESSOR] Enhanced arrays have {len(enhanced_arrays['medications'])} medications")
                         
                         # CRITICAL FIX: REPLACE procedures in enhanced_arrays with procedures from specialized ProceduresSectionService
                         # EnhancedCDAXMLParser extracts procedures without proper name fields, creating "Unknown Procedure" entries
                         # ProceduresSectionService provides fully normalized procedures with all required fields
                         if clinical_arrays and clinical_arrays.get('procedures'):
-                            logger.info(f"[CDA PROCESSOR] *** PROCEDURES FIX: About to REPLACE enhanced_arrays procedures ***")
-                            logger.info(f"[CDA PROCESSOR] *** PROCEDURES FIX: enhanced_arrays before: {len(enhanced_arrays.get('procedures', []))} procedures ***")
-                            logger.info(f"[CDA PROCESSOR] *** PROCEDURES FIX: clinical_arrays has: {len(clinical_arrays['procedures'])} procedures ***")
+                            logger.info(f"[CDA PROCESSOR] Replacing enhanced_arrays procedures ({len(enhanced_arrays.get('procedures', []))}) with specialized service procedures ({len(clinical_arrays['procedures'])})")
                             # REPLACE, not extend - discard any procedures from EnhancedCDAXMLParser
                             enhanced_arrays['procedures'] = clinical_arrays['procedures']
-                            logger.info(f"[CDA PROCESSOR] *** PROCEDURES FIX: REPLACED! enhanced_arrays now has: {len(enhanced_arrays['procedures'])} procedures ***")
-                            
-                            # DEBUG: Log first procedure structure to verify data
-                            if clinical_arrays['procedures']:
-                                first_proc = clinical_arrays['procedures'][0]
-                                logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: First procedure keys: {list(first_proc.keys())} ***")
-                                logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: First procedure name: {first_proc.get('name')} ***")
-                                logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: First procedure date: {first_proc.get('date')} ***")
-                                logger.info(f"[CDA PROCESSOR] *** PROCEDURES DEBUG: First procedure code: {first_proc.get('procedure_code')} ***")
                         
                         # Use enhanced clinical arrays for template compatibility instead of extracted ones
                         logger.info("[CDA PROCESSOR] Using enhanced clinical_arrays from parsed_data for template compatibility")
                         # CRITICAL FIX: Only use enhanced medications, completely skip original sections if we have enhanced data
                         if enhanced_medications:
-                            logger.info("[CDA PROCESSOR] *** CRITICAL FIX: Using ONLY enhanced medications, skipping original CDA sections ***")
+                            logger.info("[CDA PROCESSOR] Using ONLY enhanced medications, filtering out medication sections")
                             # Create a filtered sections list without medication sections
                             filtered_sections = []
                             for section in sections:
@@ -713,8 +686,6 @@ class CDAViewProcessor:
                                 # Skip medication sections if we have enhanced medications
                                 if clean_code not in ['10160-0', '10164-2']:
                                     filtered_sections.append(section)
-                                else:
-                                    logger.info(f"[CDA PROCESSOR] *** FILTERED OUT medication section with code {clean_code} ***")
                             self._add_template_compatibility_variables(context, filtered_sections, enhanced_arrays)
                         else:
                             self._add_template_compatibility_variables(context, sections, enhanced_arrays)
@@ -1196,11 +1167,11 @@ class CDAViewProcessor:
         call_stack = ''.join(traceback.format_stack()[-3:-1])  # Get calling location
         logger.info(f"[CDA PROCESSOR] *** _add_template_compatibility_variables CALLED from:\n{call_stack} ***")
         if enhanced_clinical_arrays and enhanced_clinical_arrays.get('procedures'):
-            logger.info(f"[CDA PROCESSOR] *** CALL: enhanced_clinical_arrays has {len(enhanced_clinical_arrays['procedures'])} procedures ***")
+            logger.info(f"[CDA PROCESSOR] Enhanced clinical arrays has {len(enhanced_clinical_arrays['procedures'])} procedures")
             if enhanced_clinical_arrays['procedures']:
                 first_proc = enhanced_clinical_arrays['procedures'][0]
-                logger.info(f"[CDA PROCESSOR] *** CALL: First procedure name: {first_proc.get('name', first_proc.get('display_name', 'NO_NAME'))} ***")
-        print("*** COMPATIBILITY METHOD CALLED ***")
+                logger.info(f"[CDA PROCESSOR] First procedure name: {first_proc.get('name', first_proc.get('display_name', 'NO_NAME'))}")
+        
         # Initialize empty variables for template compatibility
         compatibility_vars = {
             'medications': [],
@@ -1209,6 +1180,7 @@ class CDAViewProcessor:
             'vital_signs': [],
             'procedures': [],
             'immunizations': [],
+            'medical_devices': [],
             'results': [],  # Laboratory results
             'coded_results': {'blood_group': [], 'diagnostic_results': []},
             'laboratory_results': [],
@@ -1249,6 +1221,33 @@ class CDAViewProcessor:
                     # Fallback: use raw data
                     compatibility_vars['immunizations'] = enhanced_clinical_arrays['immunizations']
                     logger.warning(f"[COMPATIBILITY] Field mapping failed: {mapper_error}, using raw immunizations data")
+            
+            if enhanced_clinical_arrays.get('medical_devices'):
+                # CRITICAL: Map medical_devices through ClinicalFieldMapper to create nested data structure
+                # Template expects device.data.device_type.display_value, not device.device_type
+                try:
+                    import sys
+                    import os
+                    field_mapper_path = os.path.join(os.path.dirname(__file__), '..', 'clinical_field_mapper.py')
+                    if os.path.exists(field_mapper_path):
+                        sys.path.insert(0, os.path.dirname(field_mapper_path))
+                        from clinical_field_mapper import ClinicalFieldMapper
+                        field_mapper = ClinicalFieldMapper()
+                        
+                        # Map only medical_devices
+                        temp_arrays = {'medical_devices': enhanced_clinical_arrays['medical_devices']}
+                        mapped_arrays = field_mapper.map_clinical_arrays(temp_arrays)
+                        compatibility_vars['medical_devices'] = mapped_arrays['medical_devices']
+                        logger.info(f"[COMPATIBILITY] Mapped {len(mapped_arrays['medical_devices'])} medical devices through ClinicalFieldMapper")
+                    else:
+                        # Fallback: use raw data
+                        compatibility_vars['medical_devices'] = enhanced_clinical_arrays['medical_devices']
+                        logger.warning(f"[COMPATIBILITY] Field mapper not found, using raw medical devices data")
+                except Exception as mapper_error:
+                    # Fallback: use raw data
+                    compatibility_vars['medical_devices'] = enhanced_clinical_arrays['medical_devices']
+                    logger.warning(f"[COMPATIBILITY] Field mapping failed: {mapper_error}, using raw medical devices data")
+            
             if enhanced_clinical_arrays.get('medications'):
                 # Medications will be handled by section processing logic below (lines 1214-1226)
                 logger.debug(f"[COMPATIBILITY] Enhanced clinical arrays has {len(enhanced_clinical_arrays['medications'])} medications - will be handled by section processing")

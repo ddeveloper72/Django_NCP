@@ -1,0 +1,175 @@
+{% load patient_filters %}
+{# =============================================== #}
+{# MEDICAL DEVICES SECTION - Modern Card Design #}
+{# =============================================== #}
+
+{# Medical devices wrapper #}
+<div class="medical-section" id="medical-devices-section">
+    {# Create local context variable for devices list #}
+    {% with section_data as devices_list %}
+    
+    {# Check if devices data exists and render modern card layout #}
+    {% if devices_list and devices_list|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-medical-devices" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-medical-devices" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-microchip me-2 text-primary"></i>
+                        <span>Medical Devices</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ devices_list|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">Medical Devices: {{ devices_list|length }} items found</p>
+                    
+                    {# Loop through each device entry to display in card format #}
+                    {% for device in devices_list %}
+                    
+                    {# Individual device card #}
+                    <div class="device-card mb-4 p-4 border rounded shadow-sm bg-white border-primary">
+                        
+                        {# Card header containing device type and status badge #}
+                        <div class="device-header mb-3 pb-3 border-bottom border-primary">
+                            <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                <div class="device-type-section flex-grow-1 me-3">
+                                    <h5 class="device-type text-primary mb-1 fw-bold">
+                                        <i class="fa-solid fa-microchip me-2"></i>
+                                        {# Display device type with enhanced data structure fallbacks #}
+                                        {% if device.data.device_type.display_value %}
+                                            {{ device.data.device_type.display_value }}
+                                        {% elif device.device_type %}
+                                            {{ device.device_type }}
+                                        {% elif device.name %}
+                                            {{ device.name }}
+                                        {% else %}
+                                            Unknown Device
+                                        {% endif %}
+                                    </h5>
+                                    {# Device code display #}
+                                    {% if device.data.device_type.code %}
+                                    <div class="device-code mt-1">
+                                        <small class="text-muted">
+                                            <i class="fa-solid fa-hashtag me-1"></i>Code: {{ device.data.device_type.code }}
+                                        </small>
+                                    </div>
+                                    {% elif device.device_code %}
+                                    <div class="device-code mt-1">
+                                        <small class="text-muted">
+                                            <i class="fa-solid fa-hashtag me-1"></i>Code: {{ device.device_code }}
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="device-status-section">
+                                    {% if device.data.status.display_value %}
+                                        {% if "Active" in device.data.status.display_value %}
+                                            <span class="badge bg-success fs-6">{{ device.data.status.display_value }}</span>
+                                        {% elif "Removed" in device.data.status.display_value %}
+                                            <span class="badge bg-secondary fs-6">{{ device.data.status.display_value }}</span>
+                                        {% else %}
+                                            <span class="badge bg-info fs-6">{{ device.data.status.display_value }}</span>
+                                        {% endif %}
+                                    {% elif device.status %}
+                                        {% if "Active" in device.status %}
+                                            <span class="badge bg-success fs-6">{{ device.status }}</span>
+                                        {% elif "Removed" in device.status %}
+                                            <span class="badge bg-secondary fs-6">{{ device.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-info fs-6">{{ device.status }}</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Device Information Grid #}
+                        <div class="device-info-grid">
+                            <div class="row g-3">
+                                {# Device ID #}
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="info-label text-muted mb-1">
+                                            <i class="fa-solid fa-id-card me-1"></i>Device ID
+                                        </label>
+                                        <div class="info-value">
+                                            {% if device.data.device_id.display_value %}
+                                                {{ device.data.device_id.display_value }}
+                                            {% elif device.device_id %}
+                                                {{ device.device_id }}
+                                            {% else %}
+                                                <span class="text-muted">Not specified</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {# Implant Date #}
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="info-label text-muted mb-1">
+                                            <i class="fa-solid fa-calendar-plus me-1"></i>Implant Date
+                                        </label>
+                                        <div class="info-value">
+                                            {% if device.data.implant_date.display_value %}
+                                                {{ device.data.implant_date.display_value }}
+                                            {% elif device.implant_date %}
+                                                {{ device.implant_date }}
+                                            {% else %}
+                                                <span class="text-muted">Not recorded</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {# Removal Date (if present) #}
+                                {% if device.data.removal_date.display_value or device.removal_date %}
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="info-label text-muted mb-1">
+                                            <i class="fa-solid fa-calendar-minus me-1"></i>Removal Date
+                                        </label>
+                                        <div class="info-value">
+                                            {% if device.data.removal_date.display_value %}
+                                                {{ device.data.removal_date.display_value }}
+                                            {% elif device.removal_date %}
+                                                {{ device.removal_date }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        {# Empty state when no devices #}
+        <div class="clinical-section">
+            <div class="clinical-section-header">
+                <h4 class="clinical-section-title">
+                    <i class="fa-solid fa-microchip me-2 text-muted"></i>Medical Devices
+                </h4>
+                <span class="clinical-badge empty">0 Found</span>
+            </div>
+            <div class="section-content text-center py-5">
+                <div class="text-success">
+                    <i class="fa-solid fa-check-circle fa-3x mb-3"></i>
+                    <h6 class="text-success">No Medical Devices</h6>
+                    <p class="text-muted">No medical devices reported for this patient</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% endwith %}
+</div>

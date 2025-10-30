@@ -86,16 +86,20 @@ class MedicalDevicesSectionService(ClinicalServiceBase):
         enhanced_devices = []
         
         for device_data in raw_data:
+            # Format dates using centralized formatter
+            implant_date_raw = self._extract_field_value(device_data, 'implant_date', '')
+            removal_date_raw = self._extract_field_value(device_data, 'removal_date', '')
+            
             enhanced_device = {
-                'name': self._extract_field_value(device_data, 'name', 'Unknown device'),
-                'display_name': self._extract_field_value(device_data, 'name', 'Unknown device'),
-                'type': self._extract_field_value(device_data, 'type', 'Medical device'),
-                'manufacturer': self._extract_field_value(device_data, 'manufacturer', 'Not specified'),
-                'model': self._extract_field_value(device_data, 'model', 'Not specified'),
-                'serial_number': self._extract_field_value(device_data, 'serial_number', 'Not specified'),
-                'implant_date': self._format_cda_date(self._extract_field_value(device_data, 'implant_date', 'Not specified')),
+                'name': self._extract_field_value(device_data, 'device_type', self._extract_field_value(device_data, 'name', 'Unknown device')),
+                'display_name': self._extract_field_value(device_data, 'device_type', self._extract_field_value(device_data, 'name', 'Unknown device')),
+                'device_type': self._extract_field_value(device_data, 'device_type', 'Unknown device'),
+                'device_id': self._extract_field_value(device_data, 'device_id', 'Not specified'),
+                'device_code': self._extract_field_value(device_data, 'device_code', ''),
+                'implant_date': implant_date_raw,  # Keep raw for field mapper
+                'removal_date': removal_date_raw,  # Keep raw for field mapper
                 'status': self._extract_field_value(device_data, 'status', 'Active'),
-                'source': 'cda_extraction_enhanced'
+                'source': 'MedicalDevicesSectionService'
             }
             enhanced_devices.append(enhanced_device)
         
@@ -137,39 +141,68 @@ class MedicalDevicesSectionService(ClinicalServiceBase):
         return devices
     
     def _parse_device_element(self, supply) -> Dict[str, Any]:
-        """Parse device element into structured data."""
-        # Extract device name
-        product = supply.find('.//hl7:product', self.namespaces)
-        name = "Unknown device"
-        manufacturer = "Not specified"
-        model = "Not specified"
+        """Parse device element into structured data.
         
-        if product is not None:
-            material = product.find('.//hl7:manufacturedMaterial', self.namespaces)
-            if material is not None:
-                code_elem = material.find('hl7:code', self.namespaces)
-                if code_elem is not None:
-                    name = code_elem.get('displayName', code_elem.get('code', 'Unknown device'))
+        XML Structure:
+        <supply>
+            <effectiveTime><low value="20141020"/></effectiveTime>
+            <participant typeCode="DEV">
+                <participantRole classCode="MANU">
+                    <id root="2.999" extension="ABC-Device-ID"/>
+                    <playingDevice>
+                        <code code="J0105" displayName="IMPLANTABLE DEFIBRILLATORS"/>
+                    </playingDevice>
+                </participantRole>
+            </participant>
+        </supply>
+        """
+        device_type = "Unknown device"
+        device_id = "Not specified"
+        device_code = ""
+        implant_date = ""
+        removal_date = ""
+        
+        # Extract device type and ID from participant element
+        participant = supply.find('.//hl7:participant[@typeCode="DEV"]', self.namespaces)
+        if participant is not None:
+            participant_role = participant.find('hl7:participantRole[@classCode="MANU"]', self.namespaces)
+            if participant_role is not None:
+                # Extract device ID
+                id_elem = participant_role.find('hl7:id', self.namespaces)
+                if id_elem is not None:
+                    device_id = id_elem.get('extension', 'Not specified')
+                    logger.info(f"[MEDICAL DEVICES] Found device ID: {device_id}")
                 
-                # Extract manufacturer
-                org = product.find('.//hl7:manufacturerOrganization', self.namespaces)
-                if org is not None:
-                    org_name = org.find('.//hl7:name', self.namespaces)
-                    if org_name is not None:
-                        manufacturer = org_name.text or "Not specified"
+                # Extract device type from playingDevice/code
+                playing_device = participant_role.find('hl7:playingDevice', self.namespaces)
+                if playing_device is not None:
+                    code_elem = playing_device.find('hl7:code', self.namespaces)
+                    if code_elem is not None:
+                        device_type = code_elem.get('displayName', code_elem.get('code', 'Unknown device'))
+                        device_code = code_elem.get('code', '')
+                        logger.info(f"[MEDICAL DEVICES] Found device type: {device_type} (code: {device_code})")
         
-        # Extract date
+        # Extract implant date from effectiveTime/low
         time_elem = supply.find('hl7:effectiveTime', self.namespaces)
-        date = "Not specified"
         if time_elem is not None:
-            date = time_elem.get('value', 'Not specified')
+            low_elem = time_elem.find('hl7:low', self.namespaces)
+            if low_elem is not None:
+                implant_date = low_elem.get('value', '')
+                logger.info(f"[MEDICAL DEVICES] Found implant date: {implant_date}")
+            
+            # Extract removal date from effectiveTime/high (if present)
+            high_elem = time_elem.find('hl7:high', self.namespaces)
+            if high_elem is not None:
+                removal_date = high_elem.get('value', '')
+                logger.info(f"[MEDICAL DEVICES] Found removal date: {removal_date}")
         
         return {
-            'name': name,
-            'type': 'Medical device',
-            'manufacturer': manufacturer,
-            'model': model,
-            'serial_number': 'Not specified',
-            'implant_date': date,
-            'status': 'Active'
+            'name': device_type,
+            'device_type': device_type,
+            'device_id': device_id,
+            'device_code': device_code,
+            'implant_date': implant_date,
+            'removal_date': removal_date,
+            'status': 'Removed' if removal_date else 'Active',
+            'source': 'MedicalDevicesSectionService'
         }

@@ -66,6 +66,7 @@ class ClinicalFieldMapper:
             clinical_arrays["immunizations"] = self._map_immunization_fields(clinical_arrays.get("immunizations", []))
             clinical_arrays["vital_signs"] = self._map_vital_signs_fields(clinical_arrays.get("vital_signs", []))
             clinical_arrays["results"] = self._map_results_fields(clinical_arrays.get("results", []))
+            clinical_arrays["medical_devices"] = self._map_medical_devices_fields(clinical_arrays.get("medical_devices", []))
             
             # Medications already have template compatibility fixes, just count them
             self.mapping_stats["sections_processed"] += 1
@@ -868,6 +869,87 @@ class ClinicalFieldMapper:
                 return candidate.strip()
         
         return "Unknown Result"
+
+    def _map_medical_devices_fields(self, medical_devices: List[Dict]) -> List[Dict]:
+        """Map medical devices data for template compatibility
+        
+        Expected fields:
+        - Device Type (device_type, name)
+        - Device ID (device_id)
+        - Implant Date (implant_date)
+        - Removal Date (removal_date) - optional
+        - Device Code (device_code)
+        - Status (Active/Removed)
+        
+        Template expects:
+        - device.data.device_type.display_value
+        - device.data.device_id.display_value
+        - device.data.implant_date.display_value
+        """
+        mapped_devices = []
+        
+        for device in medical_devices:
+            if not device:
+                continue
+            
+            mapped_device = dict(device)  # Preserve ALL fields from service
+            
+            # Extract device information
+            device_type = device.get("device_type", device.get("name", "Unknown device"))
+            device_id = device.get("device_id", "Not specified")
+            device_code = device.get("device_code", "")
+            status = device.get("status", "Active")
+            
+            # Format dates to European DD/MM/YYYY format
+            implant_date_raw = device.get("implant_date", "")
+            removal_date_raw = device.get("removal_date", "")
+            
+            from patient_data.services.comprehensive_clinical_data_service import ComprehensiveClinicalDataService
+            implant_date = ComprehensiveClinicalDataService.format_cda_date(implant_date_raw) if implant_date_raw else "Not recorded"
+            removal_date = ComprehensiveClinicalDataService.format_cda_date(removal_date_raw) if removal_date_raw else ""
+            
+            # Create comprehensive data structure for template compatibility
+            mapped_device["data"] = {
+                "device_type": {
+                    "display_value": device_type,
+                    "value": device_type,
+                    "code": device_code
+                },
+                "device_id": {
+                    "display_value": device_id,
+                    "value": device_id
+                },
+                "implant_date": {
+                    "display_value": implant_date,
+                    "value": implant_date_raw
+                },
+                "removal_date": {
+                    "display_value": removal_date,
+                    "value": removal_date_raw
+                },
+                "status": {
+                    "display_value": status,
+                    "value": status
+                }
+            }
+            
+            # Add fallback flat fields for backward compatibility
+            mapped_device["name"] = device_type
+            mapped_device["display_name"] = device_type
+            mapped_device["device_type"] = device_type
+            mapped_device["device_id"] = device_id
+            mapped_device["implant_date"] = implant_date
+            mapped_device["removal_date"] = removal_date
+            mapped_device["status"] = status
+            
+            mapped_devices.append(mapped_device)
+            self.mapping_stats["items_mapped"] += 1
+        
+        if mapped_devices:
+            self.mapping_stats["sections_processed"] += 1
+            logger.info(f"[FIELD_MAPPER] Mapped {len(mapped_devices)} medical devices")
+        
+        return mapped_devices
 
     def get_mapping_statistics(self) -> Dict[str, int]:
         """Get mapping statistics for debugging and monitoring"""

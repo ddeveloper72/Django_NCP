@@ -42,7 +42,7 @@
     
     {# Medical Devices Section #}
     {% if medical_devices and medical_devices|length > 0 %}
-        {% include 'patient_data/sections/medical_devices_section.html' with section_data=medical_devices section_count=medical_devices|length section_type='medical_devices' section_title='Medical Devices' %}
+        {% include 'patient_data/sections/medical_devices_section_new.html' with section_data=medical_devices section_count=medical_devices|length section_type='medical_devices' section_title='Medical Devices' %}
     {% endif %}
     
     {# Past Illness Section #}
