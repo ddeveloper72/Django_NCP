@@ -54,20 +54,6 @@
     {% if pregnancy_history and pregnancy_history|length > 0 %}
         {% include 'patient_data/sections/pregnancy_history_section_new.html' with section_data=pregnancy_history section_count=pregnancy_history|length section_type='pregnancy_history' section_title='Pregnancy History' %}
     {% endif %}
-    
-    {# Social History Section #}
-    {% if social_history and social_history|length > 0 %}
-        {% include 'patient_data/sections/generic_clinical_section.html' with section_data=social_history section_count=social_history|length section_type='social_history' section_title='Social History' %}
-    {% endif %}
-    
-    {# Advance Directives Section #}
-    {% if advance_directives and advance_directives|length > 0 %}
-        {% include 'patient_data/sections/generic_clinical_section.html' with section_data=advance_directives section_count=advance_directives|length section_type='advance_directives' section_title='Advance Directives' %}
-    {% endif %}
-    
-    {# Functional Status Section #}
-    {% if functional_status and functional_status|length > 0 %}
-        {% include 'patient_data/sections/generic_clinical_section.html' with section_data=functional_status section_count=functional_status|length section_type='functional_status' section_title='Functional Status' %}
     {% endif %}
     
     {# Empty State - No Clinical Data #}
