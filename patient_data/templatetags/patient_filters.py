@@ -7,6 +7,26 @@ from django import template
 register = template.Library()
 
 
+# Import extended filters implemented for Jinja-style rendering and expose them to Django templates
+try:
+    # normalize_display coerces dict/list values into readable strings
+    from patient_data.template_filters import normalize_display as _normalize_display
+except Exception:  # pragma: no cover - graceful fallback if module path changes
+    _normalize_display = None
+
+
+@register.filter(name="normalize_display")
+def normalize_display_filter(value):
+    """Normalize complex values (dict/list) into a human-friendly display string.
+
+    Delegates to patient_data.template_filters.normalize_display when available.
+    """
+    if _normalize_display is None:
+        # Fallback: basic stringify to avoid TemplateSyntaxError
+        return "" if value is None else (", ".join(map(str, value)) if isinstance(value, list) else str(value))
+    return _normalize_display(value)
+
+
 @register.filter
 def lookup(dictionary, key):
     """Template filter to look up dictionary values"""

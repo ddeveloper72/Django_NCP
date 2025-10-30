@@ -44,6 +44,34 @@ class ComprehensiveClinicalDataService:
         self.enhanced_cts_service = EnhancedCTSResponseService()
         self.clinical_pipeline = clinical_pipeline_manager
         # Field mapper will be loaded dynamically to avoid import issues
+    
+    @staticmethod
+    def format_cda_date(date_value: str) -> str:
+        """
+        Format CDA date to European DD/MM/YYYY format.
+        Handles YYYYMMDD and YYYYMMDDHHMMSS formats.
+        
+        Args:
+            date_value: Date string from CDA (e.g., "20191122" or "20191122143000")
+        
+        Returns:
+            Formatted date string (e.g., "22/11/2019") or original value if invalid
+        """
+        if not date_value or not isinstance(date_value, str):
+            return date_value or "Not specified"
+        
+        # Remove any time component (keep only first 8 characters for date)
+        date_only = date_value[:8] if len(date_value) >= 8 else date_value
+        
+        # Check if it's a valid YYYYMMDD format
+        if len(date_only) == 8 and date_only.isdigit():
+            try:
+                # Convert YYYYMMDD to DD/MM/YYYY (European format)
+                return f"{date_only[6:8]}/{date_only[4:6]}/{date_only[:4]}"
+            except (IndexError, ValueError):
+                return date_value
+        
+        return date_value
 
     def extract_comprehensive_clinical_data(
         self, cda_content: str, session_data: dict = None
@@ -343,12 +371,16 @@ class ComprehensiveClinicalDataService:
                                 # CRITICAL FIX: Preserve ALL fields from VitalSignsSectionService
                                 vital_data = dict(vital)  # Start with all original fields
                                 
+                                # Format date to European DD/MM/YYYY format
+                                raw_date = vital.get("date", vital.get("effective_time", ""))
+                                formatted_date = self.format_cda_date(raw_date)
+                                
                                 # Add/normalize standard fields for compatibility
                                 vital_data.setdefault("name", vital.get("vital_name", "Unknown Vital"))
                                 vital_data.setdefault("display_name", vital.get("name", vital.get("vital_name", "Unknown Vital")))
                                 vital_data.setdefault("value", "Not specified")
                                 vital_data.setdefault("unit", "")
-                                vital_data.setdefault("date", vital.get("effective_time", "Not specified"))
+                                vital_data["date"] = formatted_date  # Use formatted date (ISO 8601 European format)
                                 vital_data.setdefault("status", "Final")
                                 vital_data["source"] = "VitalSignsSectionService"
                                 vital_data["enhanced_data"] = True
@@ -363,10 +395,14 @@ class ComprehensiveClinicalDataService:
                                 # including procedure_code, code_system, target_site, laterality
                                 procedure_data = dict(procedure)  # Start with all original fields
                                 
+                                # Format date to European DD/MM/YYYY format
+                                raw_date = procedure.get("date", procedure.get("effective_time", ""))
+                                formatted_date = self.format_cda_date(raw_date)
+                                
                                 # Add/normalize standard fields for compatibility
                                 procedure_data.setdefault("name", procedure.get("procedure_name", "Unknown Procedure"))
                                 procedure_data.setdefault("display_name", procedure.get("name", procedure.get("procedure_name", "Unknown Procedure")))
-                                procedure_data.setdefault("date", procedure.get("effective_time", "Not specified"))
+                                procedure_data["date"] = formatted_date  # Use formatted date (ISO 8601 European format)
                                 procedure_data.setdefault("status", "Completed")
                                 procedure_data.setdefault("performer", "Not specified")
                                 procedure_data["source"] = "ProceduresSectionService"
@@ -375,13 +411,45 @@ class ComprehensiveClinicalDataService:
                                 enhanced_procedures.append(procedure_data)
                             clinical_arrays[array_key].extend(enhanced_procedures)
                             
+                        elif section_code == "30954-2":  # Laboratory Results
+                            enhanced_results = []
+                            for result in data:
+                                # CRITICAL FIX: Preserve ALL fields from ResultsSectionService
+                                # including test_code, code_system, value, unit, interpretation, reference_range
+                                result_data = dict(result)  # Start with all original fields
+                                
+                                # Format date to European DD/MM/YYYY format
+                                raw_date = result.get("date", result.get("effective_time", ""))
+                                formatted_date = self.format_cda_date(raw_date)
+                                logger.info(f"[RESULTS DATE] Raw: '{raw_date}' -> Formatted: '{formatted_date}'")
+                                
+                                # Add/normalize standard fields for compatibility
+                                result_data.setdefault("name", result.get("test_name", result.get("name", "Unknown Test")))
+                                result_data.setdefault("display_name", result.get("name", result.get("test_name", "Unknown Test")))
+                                result_data.setdefault("value", result.get("value", "Not available"))
+                                result_data.setdefault("unit", result.get("unit", ""))
+                                result_data["date"] = formatted_date  # Use formatted date (override raw date)
+                                logger.info(f"[RESULTS DATE] result_data['date'] set to: '{result_data['date']}'")
+                                result_data.setdefault("status", result.get("status", "Final"))
+                                result_data.setdefault("interpretation", result.get("interpretation", ""))
+                                result_data.setdefault("reference_range", result.get("reference_range", ""))
+                                result_data["source"] = "ResultsSectionService"
+                                result_data["enhanced_data"] = True
+                                
+                                enhanced_results.append(result_data)
+                            clinical_arrays[array_key].extend(enhanced_results)
+                            
                         else:
                             # Generic handling for other sections
                             for item in data:
+                                # Format date to European DD/MM/YYYY format
+                                raw_date = item.get("date", item.get("effective_time", ""))
+                                formatted_date = self.format_cda_date(raw_date)
+                                
                                 item_data = {
                                     "name": item.get("name", item.get("display_name", f"Unknown {section_name}")),
                                     "status": item.get("status", "Active"),
-                                    "date": item.get("date", item.get("effective_time", "Not specified")),
+                                    "date": formatted_date,  # Use formatted date (ISO 8601 European format)
                                     "source": f"{section_name.replace(' ', '')}SectionService",
                                     "enhanced_data": True,
                                     "raw_data": item  # Preserve original data

@@ -64,8 +64,8 @@
                                         {% if cell_data|safe_get:"has_terminology" %}
                                         <div class="medical-terminology mt-1">
                                             {% for term in cell_data|safe_get:"terminology" %}
-                                            <span class="badge bg-dark me-1" title="{% firstof term.system }}: {{ term.code }}">
-                                                {{ term.display_name term.code %}
+                                            <span class="badge bg-dark me-1" title="{% firstof term.system %}: {{ term.code }}">
+                                                {{ term.display_name }} ({{ term.code }})
                                             </span>
                                             {% endfor %}
                                         </div>

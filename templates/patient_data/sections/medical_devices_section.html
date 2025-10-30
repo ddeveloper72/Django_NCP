@@ -6,139 +6,31 @@
 {# MEDICAL DEVICES SECTION - Enhanced Pipeline Data #}
 {# =============================================== #}
 
-{# Check if medical devices data exists #}
-{% if section_data %}
-    {# Loop through each medical device entry #}
-    {% for device in section_data %}
-    <div class="field-group">
-        <div class="field-group-header">
-            <div class="field-primary">
-                <i class="fas fa-microchip me-2" style="color: var(--secondary-color);"></i>
-                <span class="field-title">{{ device.device_name|default:device.name|default:"Medical Device" }}</span>
-                {# Display device status badge if available #}
-                {% if device.status %}
-                <span class="clinical-badge status-{{ device.status|slugify }}">{{ device.status }}</span>
-                {% endif %}
-            </div>
-        </div>
-        
-        <div class="field-group-content">
-            {# Device type information #}
-            {% if device.device_type %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-tag me-1"></i>
-                    Type
-                </div>
-                <div class="field-value">{{ device.device_type }}</div>
-            </div>
-            {% endif %}
-            
-            {# Device manufacturer information #}
-            {% if device.manufacturer %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-building me-1"></i>
-                    Manufacturer
-                </div>
-                <div class="field-value">{{ device.manufacturer }}</div>
-            </div>
-            {% endif %}
-            
-            {% if device.model_number %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-hashtag me-1"></i>
-                    Model
-                </div>
-                <div class="field-value">{{ device.model_number }}</div>
-            </div>
-            {% endif %}
-            
-            {% if device.serial_number %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-barcode me-1"></i>
-                    Serial Number
-                </div>
-                <div class="field-value">{{ device.serial_number }}</div>
-            </div>
-            {% endif %}
-            
-            {% if device.implant_date or device.date %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-calendar-plus me-1"></i>
-                    Implant Date
-                </div>
-                <div class="field-value">{{ device.implant_date|default:device.date|date:"M d, Y" }}</div>
-            </div>
-            {% endif %}
-            
-            {% if device.expiry_date %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-calendar-xmark me-1"></i>
-                    Expiry Date
-                </div>
-                <div class="field-value">{{ device.expiry_date|date:"M d, Y" }}</div>
-            </div>
-            {% endif %}
-            
-            {% if device.location or device.body_site %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-location-dot me-1"></i>
-                    Location
-                </div>
-                <div class="field-value">{{ device.location|default:device.body_site }}</div>
-            </div>
-            {% endif %}
-            
-            {% if device.udi %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-qrcode me-1"></i>
-                    UDI
-                </div>
-                <div class="field-value">{{ device.udi }}</div>
-            </div>
-            {% endif %}
-            
-            {% if device.safety_characteristics %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-shield-halved me-1"></i>
-                    Safety
-                </div>
-                <div class="field-value">{{ device.safety_characteristics }}</div>
-            </div>
-            {% endif %}
-            
-            {% if device.code or device.device_code %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-code me-1"></i>
-                    Code
-                </div>
-                <div class="field-value">
-                    <span class="medical-code">{{ device.code|default:device.device_code }}</span>
-                    {% if device.coding_system %}
-                    <span class="text-muted ms-1">({{ device.coding_system }})</span>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-    {% endfor %}
-{% else %}
-    <div class="no-data-message">
-        <i class="fas fa-microchip me-2"></i>
-        No medical device information available
-    </div>
-{% endif %}
-{% endblock %}
+{# Check if clinical table data exists for structured display #}
+{% if section.clinical_table %}
+    <div class="clinical-section-tabs">
+        <!-- Tabs Navigation -->
+        <ul class="clinical-tab-list" role="tablist">
+            <li role="presentation">
+                <button class="clinical-tab active" role="tab" data-tab="medical_devices_{{ section_index }}_data">
+                    📊 Medical Devices Data
+                </button>
+            </li>
+            <li role="presentation">
+                <button class="clinical-tab" role="tab" data-tab="medical_devices_{{ section_index }}_original">
+                    📄 Original Content
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="clinical-tabs-content">
+            <!-- Data Tab -->
+            <div id="medical_devices_{{ section_index }}_data" class="clinical-tab-content active">
+                <div class="clinical-table-container">
+                    <table class="clinical-table">
+                        <thead>
+                            <tr>
                                 {% for header in section.clinical_table.headers %}
                                 <th scope="col" {% if header.primary %}class="primary-field" {% endif %}>
                                     {{ header.label }}
@@ -179,8 +71,8 @@
                                         {% if cell_data|safe_get:"has_terminology" %}
                                         <div class="medical-terminology mt-1">
                                             {% for term in cell_data|safe_get:"terminology" %}
-                                            <span class="badge bg-info me-1" title="{% firstof term.system }}: {{ term.code }}">
-                                                {{ term.display_name term.code }}
+                                            <span class="badge bg-info me-1" title="{% firstof term.system %}: {{ term.code }}">
+                                                {{ term.display_name }} ({{ term.code }})
                                             </span>
                                             {% endfor %}
                                         </div>
@@ -241,11 +133,11 @@
             </div>
         </div>
 
-        {% elif section.has_entries %}
+{% else %}
+    {% if section.has_entries %}
         <!-- Simple List Section for medical devices without clinical tables -->
         {% include 'patient_data/sections/simple_list_section.html' %}
-
-        {% else %}
+    {% else %}
         <!-- Empty Medical Devices Section -->
         <div class="section-content text-center py-5">
             <div class="text-success">
@@ -253,6 +145,7 @@
                 <h6 class="text-success">No Medical Devices</h6>
                 <p class="text-muted">No medical devices reported for this patient</p>
             </div>
-            </div>
-        {% endif %}
-</div>
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

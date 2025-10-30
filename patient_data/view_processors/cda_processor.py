@@ -1176,6 +1176,7 @@ class CDAViewProcessor:
             'vital_signs': [],
             'procedures': [],
             'immunizations': [],
+            'results': [],  # Laboratory results
             'coded_results': {'blood_group': [], 'diagnostic_results': []},
             'laboratory_results': [],
             'history_of_past_illness': [],
@@ -1328,7 +1329,9 @@ class CDAViewProcessor:
             else:
                 logger.warning(f"[CDA PROCESSOR] *** VITAL SIGNS FIX: NO vital signs in clinical_arrays! Keys: {list(clinical_arrays.keys())} ***")
             if clinical_arrays.get('results'):
-                compatibility_vars['physical_findings'].extend(clinical_arrays['results'])
+                logger.info(f"[CDA PROCESSOR] *** RESULTS FIX: Adding {len(clinical_arrays['results'])} results from clinical_arrays to compatibility_vars ***")
+                compatibility_vars['results'].extend(clinical_arrays['results'])
+                compatibility_vars['physical_findings'].extend(clinical_arrays['results'])  # Also add to physical_findings for backward compatibility
             if clinical_arrays.get('medications'):
                 logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Adding {len(clinical_arrays['medications'])} medications from clinical_arrays to compatibility_vars ***")
                 

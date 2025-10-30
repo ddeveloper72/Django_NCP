@@ -558,4 +558,3 @@ From restore point:
 **Total Estimated Time**: 7.5 hours
 
 **Ready to Start**: After verifying current code extraction status
-
