@@ -99,8 +99,61 @@
                                 </div>
                             </div>
                             
+                            {# Brand Name #}
+                            {% if immunization.brand_name or immunization.data.brand_name.display_value %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-trademark me-2 text-primary"></i>
+                                        <span class="field-label">Brand Name</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if immunization.data.brand_name.display_value %}
+                                            <div class="field-value">{{ immunization.data.brand_name.display_value }}</div>
+                                        {% elif immunization.brand_name %}
+                                            <div class="field-value">{{ immunization.brand_name }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {# Vaccine Agent (SNOMED/ATC Code) #}
+                            {% if immunization.agent_code or immunization.data.agent.display_value %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-flask me-2 text-primary"></i>
+                                        <span class="field-label">Agent</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if immunization.data.agent.display_value %}
+                                            <div class="field-value">{{ immunization.data.agent.display_value }}</div>
+                                            {% if immunization.data.agent.value %}
+                                                <div class="small text-muted mt-1">
+                                                    Code: {{ immunization.data.agent.value }}
+                                                    {% if immunization.data.agent.code_system %}
+                                                        ({{ immunization.data.agent.code_system }})
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        {% elif immunization.agent_display_name %}
+                                            <div class="field-value">{{ immunization.agent_display_name }}</div>
+                                            {% if immunization.agent_code %}
+                                                <div class="small text-muted mt-1">Code: {{ immunization.agent_code }}</div>
+                                            {% endif %}
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
                             {# Dose Number #}
-                            {% if immunization.dose_number or immunization.data.dose %}
+                            {% if immunization.dose_number or immunization.data.dose.display_value %}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
@@ -183,21 +236,115 @@
                             </div>
                             {% endif %}
                             
-                            {# Lot Number #}
-                            {% if immunization.lot_number or immunization.data.lot_number %}
+                            {# Batch/Lot Number #}
+                            {% if immunization.lot_number or immunization.batch_number or immunization.data.lot_number.display_value %}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
                                         <i class="fa-solid fa-barcode me-2 text-primary"></i>
-                                        <span class="field-label">Lot Number</span>
+                                        <span class="field-label">Batch/Lot Number</span>
                                     </div>
                                     <div class="field-content">
                                         {% if immunization.data.lot_number.display_value %}
                                             <div class="field-value">{{ immunization.data.lot_number.display_value }}</div>
                                         {% elif immunization.lot_number %}
                                             <div class="field-value">{{ immunization.lot_number }}</div>
+                                        {% elif immunization.batch_number %}
+                                            <div class="field-value">{{ immunization.batch_number }}</div>
                                         {% else %}
                                             <div class="field-value text-muted">Not recorded</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {# Marketing Authorization Holder #}
+                            {% if immunization.marketing_authorization_holder or immunization.data.marketing_holder.display_value %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-building me-2 text-primary"></i>
+                                        <span class="field-label">Marketing Authorization Holder</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if immunization.data.marketing_holder.display_value %}
+                                            <div class="field-value">{{ immunization.data.marketing_holder.display_value }}</div>
+                                        {% elif immunization.marketing_authorization_holder %}
+                                            <div class="field-value">{{ immunization.marketing_authorization_holder }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {# Administering Center #}
+                            {% if immunization.administering_center or immunization.data.administering_center.display_value %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-hospital me-2 text-primary"></i>
+                                        <span class="field-label">Administering Center</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if immunization.data.administering_center.display_value %}
+                                            <div class="field-value">{{ immunization.data.administering_center.display_value }}</div>
+                                        {% elif immunization.administering_center %}
+                                            <div class="field-value">{{ immunization.administering_center }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {# Health Professional Identification #}
+                            {% if immunization.health_professional_id or immunization.health_professional_name or immunization.data.health_professional.display_value %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-user-nurse me-2 text-primary"></i>
+                                        <span class="field-label">Health Professional</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if immunization.data.health_professional.display_value %}
+                                            <div class="field-value">{{ immunization.data.health_professional.display_value }}</div>
+                                            {% if immunization.data.health_professional.value and immunization.data.health_professional.name %}
+                                                <div class="small text-muted mt-1">ID: {{ immunization.data.health_professional.value }}</div>
+                                            {% endif %}
+                                        {% elif immunization.health_professional_name %}
+                                            <div class="field-value">{{ immunization.health_professional_name }}</div>
+                                            {% if immunization.health_professional_id %}
+                                                <div class="small text-muted mt-1">ID: {{ immunization.health_professional_id }}</div>
+                                            {% endif %}
+                                        {% elif immunization.health_professional_id %}
+                                            <div class="field-value">ID: {{ immunization.health_professional_id }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {# Country of Vaccination #}
+                            {% if immunization.country_of_vaccination or immunization.data.country.display_value %}
+                            <div class="col-lg-6">
+                                <div class="field-group">
+                                    <div class="field-header">
+                                        <i class="fa-solid fa-globe me-2 text-primary"></i>
+                                        <span class="field-label">Country of Vaccination</span>
+                                    </div>
+                                    <div class="field-content">
+                                        {% if immunization.data.country.display_value %}
+                                            <div class="field-value">{{ immunization.data.country.display_value }}</div>
+                                        {% elif immunization.country_of_vaccination %}
+                                            <div class="field-value">{{ immunization.country_of_vaccination }}</div>
+                                        {% else %}
+                                            <div class="field-value text-muted">Not specified</div>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -246,16 +393,18 @@
                         </div>
                         {% endif %}
 
-                        {# Comments Section #}
-                        {% if immunization.comments or immunization.notes or immunization.data.comments %}
+                        {# Annotations/Comments Section #}
+                        {% if immunization.annotations or immunization.comments or immunization.notes or immunization.data.annotations.display_value %}
                         <div class="comments-section mt-3 pt-3 border-top">
                             <div class="field-header mb-2">
                                 <i class="fa-solid fa-sticky-note me-2 text-primary"></i>
-                                <span class="field-label">Comments</span>
+                                <span class="field-label">Annotations</span>
                             </div>
                             <div class="comments-content">
-                                {% if immunization.data.comments.display_value %}
-                                    <div class="field-value text-muted">{{ immunization.data.comments.display_value }}</div>
+                                {% if immunization.data.annotations.display_value %}
+                                    <div class="field-value text-muted">{{ immunization.data.annotations.display_value }}</div>
+                                {% elif immunization.annotations %}
+                                    <div class="field-value text-muted">{{ immunization.annotations }}</div>
                                 {% elif immunization.comments %}
                                     <div class="field-value text-muted">{{ immunization.comments }}</div>
                                 {% elif immunization.notes %}

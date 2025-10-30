@@ -439,6 +439,13 @@ class ComprehensiveClinicalDataService:
                                 enhanced_results.append(result_data)
                             clinical_arrays[array_key].extend(enhanced_results)
                             
+                        elif section_code == "11369-6":  # Immunizations
+                            # DISABLED: Immunizations are now exclusively handled by ImmunizationsSectionService via unified pipeline
+                            # This legacy extraction created "Unknown Vaccine" duplicates with incomplete data
+                            # Unified pipeline provides comprehensive 12-field extraction with proper field mapping
+                            logger.debug(f"[COMPREHENSIVE SERVICE] Skipping immunizations - handled by unified pipeline")
+                            pass
+                            
                         else:
                             # Generic handling for other sections
                             for item in data:

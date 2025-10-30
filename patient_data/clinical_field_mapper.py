@@ -300,14 +300,26 @@ class ClinicalFieldMapper:
         return mapped_procedures
 
     def _map_immunization_fields(self, immunizations: List[Dict]) -> List[Dict]:
-        """Map immunization data for template compatibility
+        """Map immunization data for template compatibility with comprehensive field support
+        
+        Comprehensive fields:
+        - Vaccination (vaccine_name)
+        - Brand Name (brand_name)
+        - Vaccination Date (date_administered, date)
+        - Agent (agent_code, agent_code_system, agent_display_name)
+        - Marketing Authorization Holder (marketing_authorization_holder)
+        - Dose number in series (dose_number)
+        - Batch/lot number (lot_number, batch_number)
+        - Administering Center (administering_center)
+        - Health Professional Identification (health_professional_id, health_professional_name)
+        - Country of Vaccination (country_of_vaccination)
+        - Annotations (annotations)
         
         Template expects:
         - immunization.data.vaccine.display_value
-        - immunization.data.vaccine.value
-        - immunization.vaccine_name (fallback)
-        - immunization.name (fallback)
-        - immunization.display_name (fallback)
+        - immunization.data.date.display_value
+        - immunization.data.brand_name.display_value
+        - immunization.data.status.display_value
         """
         mapped_immunizations = []
         
@@ -315,13 +327,37 @@ class ClinicalFieldMapper:
             if not immunization:
                 continue
                 
-            mapped_immunization = dict(immunization)  # Create a copy
+            mapped_immunization = dict(immunization)  # Preserve ALL fields from service
             
             # Extract core immunization information
             vaccine_name = self._extract_vaccine_name(immunization)
-            immunization_date = immunization.get("immunization_date", immunization.get("date", ""))
+            immunization_date_raw = immunization.get("date", immunization.get("date_administered", ""))
             
-            # Create data structure for template compatibility
+            # Format date to European DD/MM/YYYY format (centralized formatter)
+            from patient_data.services.comprehensive_clinical_data_service import ComprehensiveClinicalDataService
+            immunization_date = ComprehensiveClinicalDataService.format_cda_date(immunization_date_raw)
+            
+            brand_name = immunization.get("brand_name", "")
+            status = immunization.get("status", "Completed")
+            dose_number = immunization.get("dose_number", "")
+            lot_number = immunization.get("lot_number", immunization.get("batch_number", ""))
+            route = immunization.get("route", "")
+            site = immunization.get("site", "")
+            
+            # Agent information
+            agent_code = immunization.get("agent_code", "")
+            agent_display_name = immunization.get("agent_display_name", "")
+            agent_code_system_name = immunization.get("agent_code_system_name", "")
+            
+            # Additional comprehensive fields
+            marketing_auth_holder = immunization.get("marketing_authorization_holder", "")
+            administering_center = immunization.get("administering_center", "")
+            health_prof_id = immunization.get("health_professional_id", "")
+            health_prof_name = immunization.get("health_professional_name", "")
+            country = immunization.get("country_of_vaccination", "")
+            annotations = immunization.get("annotations", "")
+            
+            # Create comprehensive data structure for template compatibility
             mapped_immunization["data"] = {
                 "vaccine": {
                     "display_value": vaccine_name,
@@ -330,10 +366,60 @@ class ClinicalFieldMapper:
                 "date": {
                     "display_value": immunization_date,
                     "value": immunization_date
+                },
+                "brand_name": {
+                    "display_value": brand_name,
+                    "value": brand_name
+                },
+                "status": {
+                    "display_value": status,
+                    "value": status
+                },
+                "dose": {
+                    "display_value": dose_number,
+                    "value": dose_number
+                },
+                "lot_number": {
+                    "display_value": lot_number,
+                    "value": lot_number
+                },
+                "route": {
+                    "display_value": route,
+                    "value": route
+                },
+                "site": {
+                    "display_value": site,
+                    "value": site
+                },
+                "agent": {
+                    "display_value": agent_display_name,
+                    "value": agent_code,
+                    "code_system": agent_code_system_name
+                },
+                "marketing_holder": {
+                    "display_value": marketing_auth_holder,
+                    "value": marketing_auth_holder
+                },
+                "administering_center": {
+                    "display_value": administering_center,
+                    "value": administering_center
+                },
+                "health_professional": {
+                    "display_value": health_prof_name or health_prof_id,
+                    "value": health_prof_id,
+                    "name": health_prof_name
+                },
+                "country": {
+                    "display_value": country,
+                    "value": country
+                },
+                "annotations": {
+                    "display_value": annotations,
+                    "value": annotations
                 }
             }
             
-            # Add fallback flat fields
+            # Add fallback flat fields for backward compatibility
             mapped_immunization["vaccine_name"] = vaccine_name
             mapped_immunization["name"] = vaccine_name
             mapped_immunization["display_name"] = vaccine_name
@@ -343,7 +429,7 @@ class ClinicalFieldMapper:
             
             self.mapping_stats["items_mapped"] += 1
             self.mapping_stats["data_structures_added"] += 1
-            logger.info(f"[FIELD_MAPPER] Mapped immunization: {vaccine_name}")
+            logger.info(f"[FIELD_MAPPER] Mapped immunization: {vaccine_name} on {immunization_date}")
         
         self.mapping_stats["sections_processed"] += 1
         return mapped_immunizations
@@ -728,11 +814,15 @@ class ClinicalFieldMapper:
             ])
         
         # Try extracting from any field that contains meaningful vaccine info
+        # CRITICAL: Exclude fields that are clearly not vaccine names (country, date, status, etc.)
         for field_name, field_value in immunization.items():
             if isinstance(field_value, str) and field_value.strip():
-                if any(term in field_name.lower() for term in ["vaccine", "immunization", "vaccination", "substance"]):
-                    candidates.insert(0, field_value)  # Priority for vaccine-specific fields
-                elif any(term in field_name.lower() for term in ["name", "display"]) and "date" not in field_name.lower():
+                # Skip fields that are not vaccine names
+                if any(skip in field_name.lower() for skip in ["country", "date", "status", "route", "site", "center", "holder", "professional", "annotation", "lot", "batch", "dose"]):
+                    continue
+                if any(term in field_name.lower() for term in ["vaccine_name", "immunization_name"]):
+                    candidates.insert(0, field_value)  # Highest priority for exact vaccine name fields
+                elif any(term in field_name.lower() for term in ["name", "display"]):
                     candidates.append(field_value)
         
         for candidate in candidates:

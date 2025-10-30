@@ -82,21 +82,21 @@ class ImmunizationsSectionService(ClinicalServiceBase):
             return []
     
     def enhance_and_store(self, request: HttpRequest, session_id: str, raw_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Enhance immunizations data and store in session."""
+        """Enhance immunizations data and store in session with comprehensive field preservation."""
         enhanced_immunizations = []
         
         for immunization_data in raw_data:
-            enhanced_immunization = {
-                'name': self._extract_field_value(immunization_data, 'name', 'Unknown vaccine'),
-                'display_name': self._extract_field_value(immunization_data, 'name', 'Unknown vaccine'),
-                'date_administered': self._format_cda_date(self._extract_field_value(immunization_data, 'date_administered', 'Not specified')),
-                'dose_number': self._extract_field_value(immunization_data, 'dose_number', 'Not specified'),
-                'manufacturer': self._extract_field_value(immunization_data, 'manufacturer', 'Not specified'),
-                'lot_number': self._extract_field_value(immunization_data, 'lot_number', 'Not specified'),
-                'route': self._extract_field_value(immunization_data, 'route', 'Not specified'),
-                'site': self._extract_field_value(immunization_data, 'site', 'Not specified'),
-                'source': 'cda_extraction_enhanced'
-            }
+            # Preserve all extracted fields using dict() pattern
+            enhanced_immunization = dict(immunization_data)
+            
+            # Ensure display_name is set
+            if 'display_name' not in enhanced_immunization:
+                enhanced_immunization['display_name'] = enhanced_immunization.get('name', 'Unknown vaccine')
+            
+            # Mark as enhanced
+            enhanced_immunization['source'] = 'cda_extraction_enhanced'
+            enhanced_immunization['enhanced_data'] = True
+            
             enhanced_immunizations.append(enhanced_immunization)
         
         # Store in session
@@ -106,7 +106,7 @@ class ImmunizationsSectionService(ClinicalServiceBase):
         request.session[session_key] = match_data
         request.session.modified = True
         
-        self.logger.info(f"[IMMUNIZATIONS SERVICE] Enhanced and stored {len(enhanced_immunizations)} immunizations")
+        self.logger.info(f"[IMMUNIZATIONS SERVICE] Enhanced and stored {len(enhanced_immunizations)} immunizations with comprehensive fields")
         return enhanced_immunizations
     
     def get_template_data(self, enhanced_data: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -137,35 +137,231 @@ class ImmunizationsSectionService(ClinicalServiceBase):
         return immunizations
     
     def _parse_immunization_element(self, substance_admin) -> Dict[str, Any]:
-        """Parse immunization element into structured data."""
-        # Extract vaccine name
+        """Parse immunization element into structured data with comprehensive field extraction."""
+        
+        # Extract vaccine name and brand name
         consumable = substance_admin.find('.//hl7:consumable', self.namespaces)
-        name = "Unknown vaccine"
+        vaccine_name = "Unknown vaccine"
+        brand_name = ""
+        # Agent info will be extracted from participant element later
+        agent_code = ""
+        agent_code_system = ""
+        agent_code_system_name = ""
+        agent_display_name = ""
+        
         if consumable is not None:
             material = consumable.find('.//hl7:manufacturedMaterial', self.namespaces)
             if material is not None:
+                # Get brand name from <name> element
+                name_elem = material.find('hl7:name', self.namespaces)
+                if name_elem is not None and name_elem.text:
+                    brand_name = name_elem.text.strip()
+                
+                # Get vaccine information from <code> element
                 code_elem = material.find('hl7:code', self.namespaces)
                 if code_elem is not None:
-                    name = code_elem.get('displayName', code_elem.get('code', 'Unknown vaccine'))
+                    code_display_name = code_elem.get('displayName', '')
+                    
+                    # PRIORITY: Use displayName if available
+                    if code_display_name:
+                        vaccine_name = code_display_name
+                    else:
+                        # Try to get text from originalText reference (e.g., #code-51)
+                        original_text = code_elem.find('hl7:originalText', self.namespaces)
+                        if original_text is not None:
+                            reference = original_text.find('hl7:reference', self.namespaces)
+                            if reference is not None:
+                                ref_value = reference.get('value', '')
+                                # Reference value points to content in the narrative text
+                                # We can't easily resolve it here, so we'll rely on brand name instead
+                                logger.debug(f"[IMMUNIZATIONS] Found originalText reference: {ref_value}, will use brand name instead")
         
-        # Extract date
+        # CRITICAL: Use brand name as vaccine name if code displayName is not available
+        # Brand name (<name> element) is more readable than code (e.g., "Engerix B (2294189)" vs "836374004")
+        if vaccine_name == "Unknown vaccine" and brand_name:
+            vaccine_name = brand_name
+            logger.info(f"[IMMUNIZATIONS] Using brand name as vaccine name: {vaccine_name}")
+        
+        # Extract vaccination date (effectiveTime)
         time_elem = substance_admin.find('hl7:effectiveTime', self.namespaces)
-        date = "Not specified"
+        date_administered = ""
         if time_elem is not None:
-            date = time_elem.get('value', 'Not specified')
+            date_administered = time_elem.get('value', '')
         
-        # Extract route
-        route_elem = substance_admin.find('.//hl7:routeCode', self.namespaces)
-        route = "Not specified"
+        # Extract status code
+        status_elem = substance_admin.find('hl7:statusCode', self.namespaces)
+        status = "Active"
+        if status_elem is not None:
+            status_code = status_elem.get('code', 'completed')
+            # Map status codes to display values
+            status_mapping = {
+                'completed': 'Completed',
+                'active': 'Active',
+                'aborted': 'Aborted',
+                'suspended': 'Suspended'
+            }
+            status = status_mapping.get(status_code.lower(), status_code.title())
+        
+        # Extract dose number from repeatNumber
+        dose_number = ""
+        repeat_elem = substance_admin.find('hl7:repeatNumber', self.namespaces)
+        if repeat_elem is not None:
+            dose_value = repeat_elem.get('value', '')
+            if dose_value:
+                dose_number = f"Dose {dose_value}"
+        
+        # Extract route of administration
+        route_elem = substance_admin.find('hl7:routeCode', self.namespaces)
+        route = ""
         if route_elem is not None:
-            route = route_elem.get('displayName', route_elem.get('code', 'Not specified'))
+            route = route_elem.get('displayName', route_elem.get('code', ''))
+        
+        # Extract administration site
+        site_elem = substance_admin.find('hl7:approachSiteCode', self.namespaces)
+        site = ""
+        if site_elem is not None:
+            site = site_elem.get('displayName', site_elem.get('code', ''))
+        
+        # Extract lot number from lotNumberText
+        lot_number = ""
+        if consumable is not None:
+            material = consumable.find('.//hl7:manufacturedMaterial', self.namespaces)
+            if material is not None:
+                lot_elem = material.find('hl7:lotNumberText', self.namespaces)
+                if lot_elem is not None and lot_elem.text:
+                    lot_number = lot_elem.text.strip()
+        
+        # Extract marketing authorization holder (manufacturer organization)
+        manufacturer = ""
+        if consumable is not None:
+            product = consumable.find('.//hl7:manufacturedProduct', self.namespaces)
+            if product is not None:
+                org = product.find('.//hl7:manufacturerOrganization', self.namespaces)
+                if org is not None:
+                    name_elem = org.find('hl7:name', self.namespaces)
+                    if name_elem is not None and name_elem.text:
+                        manufacturer = name_elem.text.strip()
+        
+        # Extract administering center (performer)
+        administering_center = ""
+        performer = substance_admin.find('.//hl7:performer', self.namespaces)
+        if performer is not None:
+            assigned_entity = performer.find('.//hl7:assignedEntity', self.namespaces)
+            if assigned_entity is not None:
+                # Get organization name
+                org = assigned_entity.find('.//hl7:representedOrganization', self.namespaces)
+                if org is not None:
+                    name_elem = org.find('hl7:name', self.namespaces)
+                    if name_elem is not None and name_elem.text:
+                        administering_center = name_elem.text.strip()
+        
+        # Extract health professional identification
+        health_professional_id = ""
+        health_professional_name = ""
+        if performer is not None:
+            assigned_entity = performer.find('.//hl7:assignedEntity', self.namespaces)
+            if assigned_entity is not None:
+                # Get professional ID
+                id_elem = assigned_entity.find('hl7:id', self.namespaces)
+                if id_elem is not None:
+                    extension = id_elem.get('extension', '')
+                    root = id_elem.get('root', '')
+                    if extension:
+                        health_professional_id = extension
+                    elif root:
+                        health_professional_id = root
+                
+                # Get professional name
+                person = assigned_entity.find('.//hl7:assignedPerson', self.namespaces)
+                if person is not None:
+                    name_elem = person.find('.//hl7:name', self.namespaces)
+                    if name_elem is not None:
+                        # Concatenate name parts
+                        given = name_elem.find('hl7:given', self.namespaces)
+                        family = name_elem.find('hl7:family', self.namespaces)
+                        name_parts = []
+                        if given is not None and given.text:
+                            name_parts.append(given.text.strip())
+                        if family is not None and family.text:
+                            name_parts.append(family.text.strip())
+                        health_professional_name = ' '.join(name_parts)
+        
+        # Extract country of vaccination
+        country = ""
+        if performer is not None:
+            assigned_entity = performer.find('.//hl7:assignedEntity', self.namespaces)
+            if assigned_entity is not None:
+                addr = assigned_entity.find('.//hl7:addr', self.namespaces)
+                if addr is not None:
+                    country_elem = addr.find('hl7:country', self.namespaces)
+                    if country_elem is not None and country_elem.text:
+                        country = country_elem.text.strip()
+        
+        # Extract annotations (text comments)
+        annotations = ""
+        text_elem = substance_admin.find('hl7:text', self.namespaces)
+        if text_elem is not None:
+            # Try to get direct text content
+            if text_elem.text and text_elem.text.strip():
+                annotations = text_elem.text.strip()
+        
+        # Extract agent from participant element (vaccine agent, not manufacturer)
+        agent_code = ""
+        agent_code_system = ""
+        agent_display_name = ""
+        participant = substance_admin.find('.//hl7:participant[@typeCode="IND"]', self.namespaces)
+        if participant is not None:
+            participant_role = participant.find('.//hl7:participantRole[@classCode="AGNT"]', self.namespaces)
+            if participant_role is not None:
+                agent_code_elem = participant_role.find('hl7:code', self.namespaces)
+                if agent_code_elem is not None:
+                    agent_display_name = agent_code_elem.get('displayName', '')
+                    agent_code = agent_code_elem.get('code', '')
+                    agent_code_system = agent_code_elem.get('codeSystem', '')
+                    agent_code_system_name = agent_code_elem.get('codeSystemName', '')
+                    
+                    # Override the earlier agent extraction from consumable
+                    if agent_display_name:
+                        logger.info(f"[IMMUNIZATIONS] Found agent from participant: {agent_display_name} ({agent_code})")
+        
+        # Extract dose number from entryRelationship observation (LOINC 30973-2)
+        dose_number_value = ""
+        entry_relationships = substance_admin.findall('.//hl7:entryRelationship', self.namespaces)
+        for entry_rel in entry_relationships:
+            observation = entry_rel.find('.//hl7:observation', self.namespaces)
+            if observation is not None:
+                obs_code = observation.find('hl7:code', self.namespaces)
+                if obs_code is not None and obs_code.get('code') == '30973-2':  # LOINC code for Dose Number
+                    value_elem = observation.find('hl7:value', self.namespaces)
+                    if value_elem is not None:
+                        dose_value = value_elem.get('value', '')
+                        if dose_value:
+                            dose_number_value = f"Dose {dose_value}"
+                            logger.info(f"[IMMUNIZATIONS] Found dose number from observation: {dose_number_value}")
+        
+        # Use dose_number_value if found, otherwise keep the repeatNumber value
+        if dose_number_value:
+            dose_number = dose_number_value
         
         return {
-            'name': name,
-            'date_administered': date,
-            'dose_number': 'Not specified',
-            'manufacturer': 'Not specified',
-            'lot_number': 'Not specified',
+            'name': vaccine_name,
+            'vaccine_name': vaccine_name,
+            'brand_name': brand_name,
+            'date_administered': date_administered,
+            'agent_code': agent_code,
+            'agent_code_system': agent_code_system,
+            'agent_code_system_name': agent_code_system_name,
+            'agent_display_name': agent_display_name,
+            'marketing_authorization_holder': manufacturer,
+            'dose_number': dose_number,
+            'lot_number': lot_number,
+            'batch_number': lot_number,  # Same as lot_number
             'route': route,
-            'site': 'Not specified'
+            'site': site,
+            'status': status,
+            'administering_center': administering_center,
+            'health_professional_id': health_professional_id,
+            'health_professional_name': health_professional_name,
+            'country_of_vaccination': country,
+            'annotations': annotations
         }

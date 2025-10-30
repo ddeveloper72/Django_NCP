@@ -640,14 +640,40 @@ class CDAViewProcessor:
                     print("*** NO ENHANCED MEDICATIONS FOUND IN THIS PATH ***")
                 
                 if clinical_arrays:
-                    context['clinical_arrays'] = clinical_arrays
-                    context['has_clinical_data'] = bool(clinical_arrays)
-                    logger.info(f"[CDA PROCESSOR] Added clinical arrays: {list(clinical_arrays.keys())}")
+                    # CRITICAL FIX: Don't overwrite unified pipeline data - merge intelligently
+                    # Check if context already has clinical_arrays from unified pipeline
+                    existing_clinical_arrays = context.get('clinical_arrays', {})
+                    if existing_clinical_arrays:
+                        # Unified pipeline already provided data - only add missing sections
+                        logger.info(f"[CDA PROCESSOR] Unified pipeline already provided clinical_arrays - merging with comprehensive service data")
+                        merged_arrays = dict(existing_clinical_arrays)
+                        for key, value in clinical_arrays.items():
+                            # Don't overwrite sections that unified pipeline already provided
+                            if key not in merged_arrays or not merged_arrays[key]:
+                                merged_arrays[key] = value
+                                logger.info(f"[CDA PROCESSOR] Added {key} from comprehensive service ({len(value) if value else 0} items)")
+                            else:
+                                logger.info(f"[CDA PROCESSOR] Skipping {key} - unified pipeline already provided {len(merged_arrays[key])} items")
+                        context['clinical_arrays'] = merged_arrays
+                    else:
+                        # No unified pipeline data - use comprehensive service data
+                        context['clinical_arrays'] = clinical_arrays
+                        logger.info(f"[CDA PROCESSOR] Using comprehensive service clinical_arrays")
+                    context['has_clinical_data'] = bool(context['clinical_arrays'])
+                    logger.info(f"[CDA PROCESSOR] Final clinical_arrays keys: {list(context['clinical_arrays'].keys())}")
                     
-                    # CRITICAL FIX: Check if parsed_data has enhanced clinical arrays and use those instead
-                    if parsed_data.get('clinical_arrays'):
+                    # CRITICAL FIX: Check for enhanced clinical arrays in multiple sources
+                    # Priority: 1. context (unified pipeline), 2. parsed_data (Enhanced CDA XML Parser)
+                    enhanced_arrays = None
+                    if context.get('clinical_arrays'):
+                        enhanced_arrays = context['clinical_arrays']
+                        logger.info(f"[CDA PROCESSOR] *** Using clinical arrays from unified pipeline context with keys: {list(enhanced_arrays.keys())} ***")
+                    elif parsed_data.get('clinical_arrays'):
                         enhanced_arrays = parsed_data['clinical_arrays']
-                        logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Found enhanced clinical arrays in parsed_data with keys: {list(enhanced_arrays.keys())} ***")
+                        logger.info(f"[CDA PROCESSOR] *** Using clinical arrays from Enhanced CDA XML Parser with keys: {list(enhanced_arrays.keys())} ***")
+                    
+                    if enhanced_arrays:
+                        logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Found enhanced clinical arrays with keys: {list(enhanced_arrays.keys())} ***")
                         if enhanced_arrays.get('medications'):
                             logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Enhanced arrays have {len(enhanced_arrays['medications'])} medications ***")
                             # DEBUG: Log first few medication details
@@ -985,9 +1011,9 @@ class CDAViewProcessor:
                 'medical_devices': [],
             }
             
-            # Import specialized extractors
+            # Import specialized extractors (fallback for legacy CDA files)
             from ..services.history_of_past_illness_extractor import HistoryOfPastIllnessExtractor
-            from ..services.immunizations_extractor import ImmunizationsExtractor
+            # from ..services.immunizations_extractor import ImmunizationsExtractor  # DISABLED - Replaced by ImmunizationsSectionService
             from ..services.pregnancy_history_extractor import PregnancyHistoryExtractor
             from ..services.social_history_extractor import SocialHistoryExtractor
             from ..services.physical_findings_extractor import PhysicalFindingsExtractor
@@ -1026,38 +1052,45 @@ class CDAViewProcessor:
             except Exception as e:
                 logger.warning(f"[CDA PROCESSOR] History of Past Illness extraction failed: {e}")
             
-            # Immunizations Extractor
-            try:
-                immunizations_extractor = ImmunizationsExtractor()
-                immunization_entries = immunizations_extractor.extract_immunizations(cda_content)
-                if immunization_entries:
-                    logger.info(f"[SPECIALIZED] Immunizations: {len(immunization_entries)} entries extracted")
-                    
-                    # Convert to clinical arrays format
-                    for entry in immunization_entries:
-                        clinical_arrays['immunizations'].append({
-                            'name': entry.vaccination_name,
-                            'brand_name': entry.brand_name,
-                            'date_administered': entry.vaccination_date,
-                            'dose_number': entry.dose_number,
-                            'agent': entry.agent,
-                            'manufacturer': entry.marketing_authorization_holder,
-                            'lot_number': entry.batch_lot_number,
-                            'code': getattr(entry, 'vaccination_code', ''),
-                            'code_system': getattr(entry, 'vaccination_code_system', ''),
-                            'source': 'specialized_extractor'
-                        })
-                    
-                    sections.append({
-                        'title': 'Immunizations',
-                        'code': '11369-6',
-                        'entries': immunization_entries,
-                        'entry_count': len(immunization_entries),
-                        'has_entries': True,
-                        'medical_terminology_count': sum(1 for e in immunization_entries if getattr(e, 'vaccination_code', ''))
-                    })
-            except Exception as e:
-                logger.warning(f"[CDA PROCESSOR] Immunizations extraction failed: {e}")
+            # LEGACY IMMUNIZATIONS EXTRACTOR - DISABLED
+            # REASON: Replaced by ImmunizationsSectionService with comprehensive 12-field extraction
+            # The new service provides: vaccine name, brand name, vaccination date, agent codes (SNOMED/ATC),
+            # marketing authorization holder, dose number, batch/lot number, administering center,
+            # health professional ID, country of vaccination, and annotations
+            # This legacy extractor is no longer needed and was creating competing/incomplete data
+            logger.debug("[CDA PROCESSOR] Skipping legacy ImmunizationsExtractor - using ImmunizationsSectionService instead")
+            
+            # try:
+            #     immunizations_extractor = ImmunizationsExtractor()
+            #     immunization_entries = immunizations_extractor.extract_immunizations(cda_content)
+            #     if immunization_entries:
+            #         logger.info(f"[SPECIALIZED] Immunizations: {len(immunization_entries)} entries extracted")
+            #         
+            #         # Convert to clinical arrays format
+            #         for entry in immunization_entries:
+            #             clinical_arrays['immunizations'].append({
+            #                 'name': entry.vaccination_name,
+            #                 'brand_name': entry.brand_name,
+            #                 'date_administered': entry.vaccination_date,
+            #                 'dose_number': entry.dose_number,
+            #                 'agent': entry.agent,
+            #                 'manufacturer': entry.marketing_authorization_holder,
+            #                 'lot_number': entry.batch_lot_number,
+            #                 'code': getattr(entry, 'vaccination_code', ''),
+            #                 'code_system': getattr(entry, 'vaccination_code_system', ''),
+            #                 'source': 'specialized_extractor'
+            #             })
+            #         
+            #         sections.append({
+            #             'title': 'Immunizations',
+            #             'code': '11369-6',
+            #             'entries': immunization_entries,
+            #             'entry_count': len(immunization_entries),
+            #             'has_entries': True,
+            #             'medical_terminology_count': sum(1 for e in immunization_entries if getattr(e, 'vaccination_code', ''))
+            #         })
+            # except Exception as e:
+            #     logger.warning(f"[CDA PROCESSOR] Immunizations extraction failed: {e}")
             
             # Physical Findings Extractor (for vital signs and results)
             try:
@@ -1187,6 +1220,39 @@ class CDAViewProcessor:
             'additional_sections': []
         }
         
+        # CRITICAL: Populate compatibility_vars from enhanced_clinical_arrays (unified pipeline) FIRST
+        # This ensures data from specialized services (like ImmunizationsSectionService) is available in templates
+        # Must happen BEFORE section-based extraction to prevent duplication
+        if enhanced_clinical_arrays:
+            if enhanced_clinical_arrays.get('immunizations'):
+                # CRITICAL: Map immunizations through ClinicalFieldMapper to create nested data structure
+                # Template expects immunization.data.vaccine.display_value, not immunization.vaccine_name
+                try:
+                    import sys
+                    import os
+                    field_mapper_path = os.path.join(os.path.dirname(__file__), '..', 'clinical_field_mapper.py')
+                    if os.path.exists(field_mapper_path):
+                        sys.path.insert(0, os.path.dirname(field_mapper_path))
+                        from clinical_field_mapper import ClinicalFieldMapper
+                        field_mapper = ClinicalFieldMapper()
+                        
+                        # Map only immunizations
+                        temp_arrays = {'immunizations': enhanced_clinical_arrays['immunizations']}
+                        mapped_arrays = field_mapper.map_clinical_arrays(temp_arrays)
+                        compatibility_vars['immunizations'] = mapped_arrays['immunizations']
+                        logger.info(f"[COMPATIBILITY] Mapped {len(mapped_arrays['immunizations'])} immunizations through ClinicalFieldMapper")
+                    else:
+                        # Fallback: use raw data
+                        compatibility_vars['immunizations'] = enhanced_clinical_arrays['immunizations']
+                        logger.warning(f"[COMPATIBILITY] Field mapper not found, using raw immunizations data")
+                except Exception as mapper_error:
+                    # Fallback: use raw data
+                    compatibility_vars['immunizations'] = enhanced_clinical_arrays['immunizations']
+                    logger.warning(f"[COMPATIBILITY] Field mapping failed: {mapper_error}, using raw immunizations data")
+            if enhanced_clinical_arrays.get('medications'):
+                # Medications will be handled by section processing logic below (lines 1214-1226)
+                logger.debug(f"[COMPATIBILITY] Enhanced clinical arrays has {len(enhanced_clinical_arrays['medications'])} medications - will be handled by section processing")
+        
         # Map sections to compatibility variables based on section codes
         if sections:
             for section in sections:
@@ -1252,9 +1318,10 @@ class CDAViewProcessor:
                     # This legacy extraction method (_parse_procedure_xml) returns empty {} which creates duplicate "Unknown Procedure" entries
                     logger.debug("[COMPATIBILITY] Skipping legacy procedure extraction - using ProceduresSectionService results from clinical_arrays instead")
                 elif clean_code in ['11369-6']:  # Immunization
-                    enhanced_section = self._enhance_section_with_clinical_codes(section)
-                    compatibility_vars['immunizations'].append(enhanced_section)
-                    logger.debug(f"[COMPATIBILITY] Added immunization section: {section.get('title', 'Unknown')}")
+                    # CRITICAL: DO NOT extract immunizations here - they are already fully extracted by ImmunizationsSectionService
+                    # The specialized service provides all immunization data with comprehensive field mapping (12 fields)
+                    # This legacy extraction method (_enhance_section_with_clinical_codes) creates duplicate "Unknown Vaccine" entries
+                    logger.debug("[COMPATIBILITY] Skipping legacy immunization extraction - using ImmunizationsSectionService results from clinical_arrays instead")
                 elif clean_code in ['30954-2', '18748-4', '34530-6']:  # Results sections
                     enhanced_section = self._enhance_section_with_clinical_codes(section)
                     compatibility_vars['coded_results']['diagnostic_results'].append(enhanced_section)
@@ -1319,8 +1386,12 @@ class CDAViewProcessor:
                 logger.info(f"[COMPATIBILITY] Enhanced clinical_arrays: Adding {len(clinical_arrays['problems'])} problems (no section problems found)")
             elif clinical_arrays.get('problems') and existing_problems_count > 0:
                 logger.info(f"[COMPATIBILITY] DUPLICATION PREVENTION: Skipping {len(clinical_arrays['problems'])} clinical_arrays problems - already have {existing_problems_count} problems from sections")
+            
+            # CRITICAL: DO NOT add immunizations from clinical_arrays - they are already fully extracted by ImmunizationsSectionService
+            # The unified pipeline provides all immunization data with comprehensive 12-field extraction
+            # clinical_arrays is a legacy fallback mechanism that creates incomplete "Unknown Vaccine" entries
             if clinical_arrays.get('immunizations'):
-                compatibility_vars['immunizations'].extend(clinical_arrays['immunizations'])
+                logger.info(f"[COMPATIBILITY] SKIPPING clinical_arrays immunizations: {len(clinical_arrays['immunizations'])} items - unified pipeline already provided {len(compatibility_vars['immunizations'])} complete immunizations via ImmunizationsSectionService")
             if clinical_arrays.get('vital_signs'):
                 logger.info(f"[CDA PROCESSOR] *** VITAL SIGNS FIX: Adding {len(clinical_arrays['vital_signs'])} vital signs from clinical_arrays to compatibility_vars ***")
                 logger.info(f"[CDA PROCESSOR] *** VITAL SIGNS FIX: First vital sign: {clinical_arrays['vital_signs'][0] if clinical_arrays['vital_signs'] else 'NONE'} ***")
@@ -1414,6 +1485,18 @@ class CDAViewProcessor:
         if context.get('medications'):
             final_med_names = [med.get('name', med.get('display_name', 'NO_NAME')) for med in context['medications'][:3]]
             logger.info(f"[CDA PROCESSOR] *** MEDICATION FIX DEBUG: Final context medication names (first 3): {final_med_names} ***")
+        
+        # DEBUG: Log final immunizations count after all compatibility processing
+        final_immunizations_count = len(context.get('immunizations', []))
+        logger.info(f"[CDA PROCESSOR] *** IMMUNIZATIONS DEBUG: Final context immunizations count: {final_immunizations_count} ***")
+        logger.info(f"[CDA PROCESSOR] *** IMMUNIZATIONS DEBUG: Context keys containing 'immun': {[k for k in context.keys() if 'immun' in k.lower()]} ***")
+        if context.get('immunizations'):
+            first_imm = context['immunizations'][0]
+            logger.info(f"[CDA PROCESSOR] *** IMMUNIZATIONS DEBUG: First immunization type: {type(first_imm)} ***")
+            logger.info(f"[CDA PROCESSOR] *** IMMUNIZATIONS DEBUG: First immunization keys: {list(first_imm.keys()) if isinstance(first_imm, dict) else 'NOT_DICT'} ***")
+            if isinstance(first_imm, dict):
+                vaccine_name = first_imm.get('vaccine_name') or first_imm.get('name') or (first_imm.get('data', {}).get('vaccine', {}).get('display_value'))
+                logger.info(f"[CDA PROCESSOR] *** IMMUNIZATIONS DEBUG: First immunization vaccine name: {vaccine_name} ***")
         
         # Add flags to hide mandatory sections when corresponding extended sections exist
         additional_sections = compatibility_vars.get('additional_sections', [])
