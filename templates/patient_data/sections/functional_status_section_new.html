@@ -1,0 +1,169 @@
+{# Functional Status wrapper #}
+<div class="functional-status-section" id="functional-status-section">
+    {# Create local context variable for functional status list #}
+    {% with section_data as status_list %}
+    
+    {# Check if functional status data exists and render modern card layout #}
+    {% if status_list and status_list|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-functional-status" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-functional-status" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-walking me-2" style="color: #6f42c1;"></i>
+                        <span>Functional Status</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ status_list|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">Functional Status: {{ status_list|length }} assessment{{ status_list|length|pluralize }} found</p>
+                    
+                    {# Loop through each functional status entry to display in card format #}
+                    {% for status in status_list %}
+                    
+                    {# Individual functional status card #}
+                    <div class="status-card mb-4 p-4 border rounded shadow-sm bg-white" style="border-color: #6f42c1 !important;">
+                        
+                        {# Card header containing observation code and result badge #}
+                        <div class="status-header mb-3 pb-3 border-bottom" style="border-color: #6f42c1 !important;">
+                            <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                <div class="observation-code-section flex-grow-1 me-3">
+                                    <h5 class="observation-code mb-1 fw-bold" style="color: #6f42c1;">
+                                        {# Icon based on category #}
+                                        {% if 'ADL' in status.data.observation_code.display_value %}
+                                            <i class="fa-solid fa-user-check me-2"></i>
+                                        {% elif 'IADL' in status.data.observation_code.display_value %}
+                                            <i class="fa-solid fa-house-user me-2"></i>
+                                        {% elif 'Mobility' in status.data.observation_code.display_value %}
+                                            <i class="fa-solid fa-walking me-2"></i>
+                                        {% elif 'Cognitive' in status.data.observation_code.display_value %}
+                                            <i class="fa-solid fa-brain me-2"></i>
+                                        {% else %}
+                                            <i class="fa-solid fa-heartbeat me-2"></i>
+                                        {% endif %}
+                                        {# Display observation code #}
+                                        {% if status.data.observation_code.display_value %}
+                                            {{ status.data.observation_code.display_value }}
+                                        {% elif status.observation_code %}
+                                            {{ status.observation_code }}
+                                        {% else %}
+                                            Unknown Assessment
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                                <div class="result-section">
+                                    {% if status.data.result.display_value %}
+                                        {% if "Independent" in status.data.result.display_value %}
+                                            <span class="badge bg-success fs-6">{{ status.data.result.display_value }}</span>
+                                        {% elif "assistance" in status.data.result.display_value or "Partial" in status.data.result.display_value %}
+                                            <span class="badge bg-warning fs-6">{{ status.data.result.display_value }}</span>
+                                        {% elif "Dependent" in status.data.result.display_value %}
+                                            <span class="badge bg-danger fs-6">{{ status.data.result.display_value }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary fs-6">{{ status.data.result.display_value }}</span>
+                                        {% endif %}
+                                    {% elif status.result %}
+                                        <span class="badge bg-info fs-6">{{ status.result }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Functional Status Information Grid #}
+                        <div class="status-info-grid">
+                            <div class="row g-3">
+                                {# Observation Time #}
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="info-label text-muted mb-1">
+                                            <i class="fa-solid fa-calendar-alt me-1"></i>Observation Time
+                                        </label>
+                                        <div class="info-value fw-semibold">
+                                            {% if status.data.observation_time.display_value %}
+                                                {{ status.data.observation_time.display_value }}
+                                            {% elif status.observation_time %}
+                                                {{ status.observation_time }}
+                                            {% else %}
+                                                Not recorded
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {# Onset Time #}
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="info-label text-muted mb-1">
+                                            <i class="fa-solid fa-clock me-1"></i>Onset Time
+                                        </label>
+                                        <div class="info-value fw-semibold">
+                                            {% if status.data.onset_time.display_value %}
+                                                {{ status.data.onset_time.display_value }}
+                                            {% elif status.onset_time %}
+                                                {{ status.onset_time }}
+                                            {% else %}
+                                                Not recorded
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {# Result (full display) #}
+                                <div class="col-md-12">
+                                    <div class="info-item">
+                                        <label class="info-label text-muted mb-1">
+                                            <i class="fa-solid fa-chart-line me-1"></i>Result
+                                        </label>
+                                        <div class="info-value fw-semibold">
+                                            {% if status.data.result.display_value %}
+                                                {{ status.data.result.display_value }}
+                                            {% elif status.result %}
+                                                {{ status.result }}
+                                            {% else %}
+                                                Not specified
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        {# Empty state when no functional status data #}
+        <div class="clinical-section">
+            <div class="collapsible-wrapper">
+                <input id="toggle-functional-status-empty" class="toggle-input" type="checkbox">
+                <label for="toggle-functional-status-empty" class="collapsible-label-title">
+                    <div class="clinical-section-title-row">
+                        <div class="clinical-section-title">
+                            <i class="fa-solid fa-walking me-2 text-muted"></i>
+                            <span>Functional Status</span>
+                        </div>
+                        <div class="clinical-badge-container">
+                            <span class="clinical-badge empty">0 Found</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                </label>
+                <div class="collapsible-content-title">
+                    <div class="content-inner-title">
+                        <p class="text-muted">No functional status assessments available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    {% endwith %}
+</div>

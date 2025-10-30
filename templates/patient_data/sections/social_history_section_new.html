@@ -1,0 +1,149 @@
+{# Social History wrapper #}
+<div class="social-history-section" id="social-history-section">
+    {# Create local context variable for social history list #}
+    {% with section_data as social_list %}
+    
+    {# Check if social history data exists and render modern card layout #}
+    {% if social_list and social_list|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-social-history" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-social-history" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-user-clock me-2 text-info"></i>
+                        <span>Social History</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ social_list|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="mb-3 text-muted">Social History: {{ social_list|length }} observation{{ social_list|length|pluralize }} found</p>
+                    
+                    {# Loop through each social history entry to display in card format #}
+                    {% for social in social_list %}
+                    
+                    {# Individual social history card #}
+                    <div class="social-card mb-4 p-4 border rounded shadow-sm bg-white border-info">
+                        
+                        {# Card header containing observation type and status badge #}
+                        <div class="social-header mb-3 pb-3 border-bottom border-info">
+                            <div class="d-flex flex-wrap align-items-start justify-content-between">
+                                <div class="observation-type-section flex-grow-1 me-3">
+                                    <h5 class="observation-type text-info mb-1 fw-bold">
+                                        {# Icon based on observation type #}
+                                        {% if 'Smoking' in social.data.observation_type.display_value %}
+                                            <i class="fa-solid fa-smoking me-2"></i>
+                                        {% elif 'Alcohol' in social.data.observation_type.display_value %}
+                                            <i class="fa-solid fa-wine-glass me-2"></i>
+                                        {% elif 'Substance' in social.data.observation_type.display_value %}
+                                            <i class="fa-solid fa-pills me-2"></i>
+                                        {% elif 'Occupation' in social.data.observation_type.display_value %}
+                                            <i class="fa-solid fa-briefcase me-2"></i>
+                                        {% else %}
+                                            <i class="fa-solid fa-heartbeat me-2"></i>
+                                        {% endif %}
+                                        {# Display observation type #}
+                                        {% if social.data.observation_type.display_value %}
+                                            {{ social.data.observation_type.display_value }}
+                                        {% elif social.observation_type %}
+                                            {{ social.observation_type }}
+                                        {% else %}
+                                            Unknown Observation
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                                <div class="observation-status-section">
+                                    {% if social.data.status.display_value %}
+                                        {% if "Active" in social.data.status.display_value %}
+                                            <span class="badge bg-success fs-6">{{ social.data.status.display_value }}</span>
+                                        {% elif "Inactive" in social.data.status.display_value or "Completed" in social.data.status.display_value %}
+                                            <span class="badge bg-secondary fs-6">{{ social.data.status.display_value }}</span>
+                                        {% else %}
+                                            <span class="badge bg-info fs-6">{{ social.data.status.display_value }}</span>
+                                        {% endif %}
+                                    {% elif social.status %}
+                                        <span class="badge bg-info fs-6">{{ social.status }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Social History Information Grid #}
+                        <div class="social-info-grid">
+                            <div class="row g-3">
+                                {# Observation Value #}
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="info-label text-muted mb-1">
+                                            <i class="fa-solid fa-stethoscope me-1"></i>Observation Value
+                                        </label>
+                                        <div class="info-value fw-semibold">
+                                            {% if social.data.observation_value.display_value %}
+                                                {{ social.data.observation_value.display_value }}
+                                            {% elif social.observation_value %}
+                                                {{ social.observation_value }}
+                                            {% else %}
+                                                Not specified
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {# Observation Time #}
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <label class="info-label text-muted mb-1">
+                                            <i class="fa-solid fa-calendar-alt me-1"></i>Observation Time
+                                        </label>
+                                        <div class="info-value fw-semibold">
+                                            {% if social.data.observation_time.display_value %}
+                                                {{ social.data.observation_time.display_value }}
+                                            {% elif social.observation_time %}
+                                                {{ social.observation_time }}
+                                            {% else %}
+                                                Not recorded
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        {# Empty state when no social history data #}
+        <div class="clinical-section">
+            <div class="collapsible-wrapper">
+                <input id="toggle-social-history-empty" class="toggle-input" type="checkbox">
+                <label for="toggle-social-history-empty" class="collapsible-label-title">
+                    <div class="clinical-section-title-row">
+                        <div class="clinical-section-title">
+                            <i class="fa-solid fa-user-clock me-2 text-muted"></i>
+                            <span>Social History</span>
+                        </div>
+                        <div class="clinical-badge-container">
+                            <span class="clinical-badge empty">0 Found</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+                </label>
+                <div class="collapsible-content-title">
+                    <div class="content-inner-title">
+                        <p class="text-muted">No social history observations available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    {% endwith %}
+</div>

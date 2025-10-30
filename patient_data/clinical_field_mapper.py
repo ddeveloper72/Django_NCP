@@ -75,6 +75,8 @@ class ClinicalFieldMapper:
             clinical_arrays["medical_devices"] = self._map_medical_devices_fields(clinical_arrays.get("medical_devices", []))
             clinical_arrays["past_illness"] = self._map_past_illness_fields(clinical_arrays.get("past_illness", []))
             clinical_arrays["pregnancy_history"] = self._map_pregnancy_history_fields(clinical_arrays.get("pregnancy_history", []))
+            clinical_arrays["social_history"] = self._map_social_history_fields(clinical_arrays.get("social_history", []))
+            clinical_arrays["functional_status"] = self._map_functional_status_fields(clinical_arrays.get("functional_status", []))
             
             # Medications already have template compatibility fixes, just count them
             self.mapping_stats["sections_processed"] += 1
@@ -1274,6 +1276,188 @@ class ClinicalFieldMapper:
             logger.info(f"[FIELD_MAPPER] FINAL: Returning {len(mapped_pregnancies)} mapped pregnancy records to context")
         
         return mapped_pregnancies
+
+    def _map_social_history_fields(self, social_history: List[Dict]) -> List[Dict]:
+        """Map social history data for template compatibility
+        
+        User Requirements:
+        1. Observation Type (category)
+        2. Observation Value (description)
+        3. Observation Time (start_date/end_date)
+        
+        Template expects:
+        - social.data.observation_type.display_value
+        - social.data.observation_value.display_value
+        - social.data.observation_time.display_value
+        """
+        mapped_social = []
+        
+        for social in social_history:
+            if not social:
+                continue
+            
+            mapped_item = dict(social)  # Preserve ALL fields from service
+            
+            # Extract social history information
+            observation_type = social.get("category", "Lifestyle")
+            observation_value = social.get("description", "Not specified")
+            start_date_raw = social.get("start_date", "")
+            end_date_raw = social.get("end_date", "")
+            status = social.get("status", "Active")
+            
+            # Format dates to European DD/MM/YYYY format
+            start_date = self._format_cda_date(start_date_raw) if start_date_raw and start_date_raw != "Not specified" else ""
+            end_date = self._format_cda_date(end_date_raw) if end_date_raw and end_date_raw != "Not specified" else ""
+            
+            # Create observation time display
+            if start_date and end_date:
+                observation_time = f"{start_date} to {end_date}"
+            elif start_date:
+                observation_time = f"From {start_date}"
+            elif end_date:
+                observation_time = f"Until {end_date}"
+            else:
+                observation_time = "Not recorded"
+            
+            # Create comprehensive data structure for template compatibility
+            mapped_item["data"] = {
+                "observation_type": {
+                    "display_value": observation_type,
+                    "value": observation_type
+                },
+                "observation_value": {
+                    "display_value": observation_value,
+                    "value": observation_value
+                },
+                "observation_time": {
+                    "display_value": observation_time,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "raw_start": start_date_raw,
+                    "raw_end": end_date_raw
+                },
+                "status": {
+                    "display_value": status,
+                    "value": status,
+                    "is_active": status.lower() == "active"
+                }
+            }
+            
+            # Add fallback flat fields for backward compatibility
+            mapped_item["name"] = f"{observation_type}: {observation_value}"
+            mapped_item["display_name"] = observation_type
+            mapped_item["observation_type"] = observation_type
+            mapped_item["observation_value"] = observation_value
+            mapped_item["observation_time"] = observation_time
+            mapped_item["status"] = status
+            
+            mapped_social.append(mapped_item)
+            self.mapping_stats["items_mapped"] += 1
+            
+            # LOG FINAL MAPPED STRUCTURE
+            logger.info(f"[FIELD_MAPPER] Mapped social history #{len(mapped_social)}:")
+            logger.info(f"  - data.observation_type.display_value: '{mapped_item['data']['observation_type']['display_value']}'")
+            logger.info(f"  - data.observation_value.display_value: '{mapped_item['data']['observation_value']['display_value']}'")
+            logger.info(f"  - data.observation_time.display_value: '{mapped_item['data']['observation_time']['display_value']}'")
+        
+        if mapped_social:
+            self.mapping_stats["sections_processed"] += 1
+            logger.info(f"[FIELD_MAPPER] FINAL: Returning {len(mapped_social)} mapped social history items to context")
+        
+        return mapped_social
+
+    def _map_functional_status_fields(self, functional_status: List[Dict]) -> List[Dict]:
+        """Map functional status data for template compatibility
+        
+        User Requirements:
+        1. Observation Time (assessment_date)
+        2. Observation Code (assessment + category)
+        3. Onset Time (not in current data - using assessment_date)
+        4. Result (level + score)
+        
+        Template expects:
+        - status.data.observation_time.display_value
+        - status.data.observation_code.display_value
+        - status.data.onset_time.display_value
+        - status.data.result.display_value
+        """
+        mapped_status = []
+        
+        for status in functional_status:
+            if not status:
+                continue
+            
+            mapped_item = dict(status)  # Preserve ALL fields from service
+            
+            # Extract functional status information
+            assessment = status.get("assessment", "General assessment")
+            category = status.get("category", "ADL")
+            score = status.get("score", "Not specified")
+            level = status.get("level", "Not specified")
+            assessment_date_raw = status.get("assessment_date", "")
+            
+            # Format assessment date to European DD/MM/YYYY format
+            observation_time = self._format_cda_date(assessment_date_raw) if assessment_date_raw and assessment_date_raw != "Not specified" else "Not recorded"
+            onset_time = observation_time  # Using same as observation time since onset not in data
+            
+            # Create observation code display (assessment type + category)
+            observation_code = f"{assessment} ({category})"
+            
+            # Create result display (level + score if available)
+            if level != "Not specified" and score != "Not specified":
+                result = f"{level} - Score: {score}"
+            elif level != "Not specified":
+                result = level
+            elif score != "Not specified":
+                result = f"Score: {score}"
+            else:
+                result = "Not specified"
+            
+            # Create comprehensive data structure for template compatibility
+            mapped_item["data"] = {
+                "observation_time": {
+                    "display_value": observation_time,
+                    "raw_date": assessment_date_raw
+                },
+                "observation_code": {
+                    "display_value": observation_code,
+                    "assessment": assessment,
+                    "category": category
+                },
+                "onset_time": {
+                    "display_value": onset_time,
+                    "raw_date": assessment_date_raw
+                },
+                "result": {
+                    "display_value": result,
+                    "level": level,
+                    "score": score
+                }
+            }
+            
+            # Add fallback flat fields for backward compatibility
+            mapped_item["name"] = assessment
+            mapped_item["display_name"] = assessment
+            mapped_item["observation_time"] = observation_time
+            mapped_item["observation_code"] = observation_code
+            mapped_item["onset_time"] = onset_time
+            mapped_item["result"] = result
+            
+            mapped_status.append(mapped_item)
+            self.mapping_stats["items_mapped"] += 1
+            
+            # LOG FINAL MAPPED STRUCTURE
+            logger.info(f"[FIELD_MAPPER] Mapped functional status #{len(mapped_status)}:")
+            logger.info(f"  - data.observation_time.display_value: '{mapped_item['data']['observation_time']['display_value']}'")
+            logger.info(f"  - data.observation_code.display_value: '{mapped_item['data']['observation_code']['display_value']}'")
+            logger.info(f"  - data.onset_time.display_value: '{mapped_item['data']['onset_time']['display_value']}'")
+            logger.info(f"  - data.result.display_value: '{mapped_item['data']['result']['display_value']}'")
+        
+        if mapped_status:
+            self.mapping_stats["sections_processed"] += 1
+            logger.info(f"[FIELD_MAPPER] FINAL: Returning {len(mapped_status)} mapped functional status assessments to context")
+        
+        return mapped_status
 
     def get_mapping_statistics(self) -> Dict[str, int]:
         """Get mapping statistics for debugging and monitoring"""
