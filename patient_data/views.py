@@ -2906,6 +2906,21 @@ def patient_details_view(request, patient_id):
                 "has_administrative_data": bool(administrative_data and any(administrative_data.values())),
                 "has_healthcare_data": bool(healthcare_data and any(healthcare_data.values())),
             })
+            
+            # Extract patient_contact_info from administrative_data for Extended Patient Information tab
+            # This follows the same pattern as context_builders.py
+            from dataclasses import is_dataclass, asdict
+            if administrative_data:
+                patient_contact = getattr(administrative_data, 'patient_contact_info', None)
+                if patient_contact and is_dataclass(patient_contact):
+                    context['patient_contact_info'] = asdict(patient_contact)
+                    logger.info(f"[PATIENT_DETAILS] Extracted patient_contact_info: {len(patient_contact.addresses)} addresses, {len(patient_contact.telecoms)} telecoms")
+                elif patient_contact:
+                    context['patient_contact_info'] = patient_contact
+                    logger.info(f"[PATIENT_DETAILS] Added patient_contact_info dict to context")
+                else:
+                    logger.info(f"[PATIENT_DETAILS] No patient_contact_info found in administrative_data")
+            
             total_clinical_items = sum(
                 len(arr) for arr in clinical_arrays.values()
             )
