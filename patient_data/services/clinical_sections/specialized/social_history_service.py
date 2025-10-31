@@ -74,7 +74,7 @@ class SocialHistorySectionService(CTSIntegrationMixin, ClinicalServiceBase):
             
             if section is not None:
                 social_history = self._parse_social_history_xml(section)
-                logger.info(f"[SOCIAL HISTORY SERVICE] 🎯 extract_from_cda returning {len(social_history)} items to pipeline:")
+                logger.info(f"[SOCIAL HISTORY SERVICE] extract_from_cda returning {len(social_history)} items to pipeline:")
                 for idx, item in enumerate(social_history, 1):
                     logger.info(f"  Item {idx}: category={item.get('category')}, description={item.get('description')}, quantity={item.get('quantity')}")
                 self._log_extraction_result('extract_from_cda', len(social_history), 'CDA')
@@ -291,7 +291,7 @@ class SocialHistorySectionService(CTSIntegrationMixin, ClinicalServiceBase):
             'end_date': end_date
         }
         
-        logger.info(f"[SOCIAL_HISTORY_PARSER] 📦 Extracted structured observation:")
+        logger.info(f"[SOCIAL_HISTORY_PARSER] Extracted structured observation:")
         logger.info(f"  category: {category}")
         logger.info(f"  description: {description}")
         logger.info(f"  quantity: {quantity}")

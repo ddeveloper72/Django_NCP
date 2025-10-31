@@ -256,7 +256,7 @@ class PastIllnessSectionService(CTSIntegrationMixin, ClinicalServiceBase):
                     
                     if cts_result and cts_result != problem_code:
                         problem_name = cts_result
-                        logger.info(f"[PAST ILLNESS SERVICE] ✅ CTS resolved {problem_code} to: {problem_name}")
+                        logger.info(f"[PAST ILLNESS SERVICE] CTS resolved {problem_code} to: {problem_name}")
                     else:
                         # CTS failed - use displayName only if it looks useful (not a reference)
                         if display_name and "ref:" not in display_name.lower() and len(display_name) > 10:
@@ -264,9 +264,9 @@ class PastIllnessSectionService(CTSIntegrationMixin, ClinicalServiceBase):
                             logger.info(f"[PAST ILLNESS SERVICE] Using displayName: {display_name}")
                         else:
                             problem_name = problem_code
-                            logger.warning(f"[PAST ILLNESS SERVICE] ❌ CTS failed and displayName unusable, using code: {problem_code}")
+                            logger.warning(f"[PAST ILLNESS SERVICE] CTS failed and displayName unusable, using code: {problem_code}")
                 except Exception as cts_error:
-                    logger.error(f"[PAST ILLNESS SERVICE] ❌ CTS exception for {problem_code}: {cts_error}", exc_info=True)
+                    logger.error(f"[PAST ILLNESS SERVICE] CTS exception for {problem_code}: {cts_error}", exc_info=True)
                     # CTS exception - use displayName only if it looks useful
                     if display_name and "ref:" not in display_name.lower() and len(display_name) > 10:
                         problem_name = display_name
@@ -327,7 +327,7 @@ class PastIllnessSectionService(CTSIntegrationMixin, ClinicalServiceBase):
         }
         
         # LOG SERVICE OUTPUT
-        logger.info(f"[PAST ILLNESS SERVICE] 📦 Returning illness data:")
+        logger.info(f"[PAST ILLNESS SERVICE] Returning illness data:")
         logger.info(f"  problem_name: '{problem_name}'")
         logger.info(f"  problem_code: '{problem_code}'")
         logger.info(f"  problem_code_system: '{problem_code_system}'")
@@ -370,7 +370,7 @@ class PastIllnessSectionService(CTSIntegrationMixin, ClinicalServiceBase):
                                 logger.info(f"[PAST ILLNESS SERVICE] CTS returned: '{cts_result}'")
                                 
                                 if cts_result and cts_result != value_code:
-                                    logger.info(f"[PAST ILLNESS SERVICE] ✅ CTS resolved {code_value} code {value_code} to: {cts_result}")
+                                    logger.info(f"[PAST ILLNESS SERVICE] CTS resolved {code_value} code {value_code} to: {cts_result}")
                                     return cts_result
                                 else:
                                     # CTS failed - use displayName only if useful, otherwise use code
@@ -378,10 +378,10 @@ class PastIllnessSectionService(CTSIntegrationMixin, ClinicalServiceBase):
                                         logger.warning(f"[PAST ILLNESS SERVICE] CTS failed, using displayName: {display_name}")
                                         return display_name
                                     else:
-                                        logger.warning(f"[PAST ILLNESS SERVICE] ❌ CTS failed, no displayName, using code: {value_code}")
+                                        logger.warning(f"[PAST ILLNESS SERVICE] CTS failed, no displayName, using code: {value_code}")
                                         return value_code if value_code else default
                             except Exception as cts_error:
-                                logger.error(f"[PAST ILLNESS SERVICE] ❌ CTS exception for {value_code}: {cts_error}", exc_info=True)
+                                logger.error(f"[PAST ILLNESS SERVICE] CTS exception for {value_code}: {cts_error}", exc_info=True)
                                 # CTS exception - use displayName if available
                                 return display_name if display_name else (value_code if value_code else default)
                         else:
