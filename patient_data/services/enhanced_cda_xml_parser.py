@@ -1125,8 +1125,13 @@ class EnhancedCDAXMLParser:
                     }),
                 }),
                 
+                # Patient contact information from patientRole
+                "patient_contact_info": DotDict({
+                    "addresses": admin_data.patient_contact_info.addresses if admin_data.patient_contact_info else [],
+                    "telecoms": admin_data.patient_contact_info.telecoms if admin_data.patient_contact_info else [],
+                }),
+                
                 # Empty fields for compatibility
-                "patient_contact_info": DotDict({"addresses": [], "telecoms": []}),
                 "other_contacts": [],
                 "preferred_hcp": DotDict({"name": None}),
                 "document_last_update_date": "",
