@@ -7,6 +7,7 @@ across both FHIR and CDA processors.
 
 import logging
 from typing import Dict, Any, Optional
+from dataclasses import asdict, is_dataclass
 from django.utils import timezone
 
 from ..services.patient_demographics_service import PatientDemographicsService
@@ -186,6 +187,7 @@ class ContextBuilder:
         
         # CRITICAL FIX: Add individual administrative data attributes as separate template variables
         # This allows templates to access author_hcp, custodian_organization, guardians, etc. directly
+        # Handle both dictionary and dataclass object access
         if isinstance(admin_data, dict):
             # Extract individual attributes from the administrative data dictionary
             context['author_hcp'] = admin_data.get('author_hcp')
@@ -195,26 +197,71 @@ class ContextBuilder:
             context['legal_authenticator'] = admin_data.get('legal_authenticator')
             context['document_creation_date'] = admin_data.get('document_creation_date')
             context['document_title'] = admin_data.get('document_title')
+        elif is_dataclass(admin_data):
+            # ARCHITECTURE ALIGNMENT: Convert dataclass to dict following clinical sections pattern
+            # Clinical sections return dict structures, so administrative data should match
             
-            # Log successful extraction of individual attributes
-            author_info = admin_data.get('author_hcp')
-            if author_info:
-                author_name = getattr(author_info, 'person', {})
-                if hasattr(author_name, 'full_name'):
-                    logger.info(f"[TEMPLATE CONTEXT] Added author_hcp: {author_name.full_name}")
-                else:
-                    logger.info(f"[TEMPLATE CONTEXT] Added author_hcp: {type(author_info)}")
+            # Extract and convert nested dataclass objects to dicts for template compatibility
+            author_hcp = getattr(admin_data, 'author_hcp', None)
+            if author_hcp and is_dataclass(author_hcp):
+                # Convert AuthorInfo dataclass to dict with nested Person, Organization, ContactInfo
+                context['author_hcp'] = asdict(author_hcp)
+            else:
+                context['author_hcp'] = author_hcp
             
-            custodian_org = admin_data.get('custodian_organization')
-            if custodian_org:
-                if hasattr(custodian_org, 'name'):
-                    logger.info(f"[TEMPLATE CONTEXT] Added custodian_organization: {custodian_org.name}")
-                else:
-                    logger.info(f"[TEMPLATE CONTEXT] Added custodian_organization: {type(custodian_org)}")
+            custodian_org = getattr(admin_data, 'custodian_organization', None)
+            if custodian_org and is_dataclass(custodian_org):
+                # Convert Organization dataclass to dict
+                context['custodian_organization'] = asdict(custodian_org)
+            else:
+                context['custodian_organization'] = custodian_org
             
-            guardians = admin_data.get('guardians', [])
-            participants = admin_data.get('participants', [])
-            logger.info(f"[TEMPLATE CONTEXT] Added {len(guardians)} guardians and {len(participants)} participants")
+            legal_auth = getattr(admin_data, 'legal_authenticator', None)
+            if legal_auth and is_dataclass(legal_auth):
+                context['legal_authenticator'] = asdict(legal_auth)
+            else:
+                context['legal_authenticator'] = legal_auth
+            
+            # Convert lists that may contain dataclass objects
+            guardians_list = getattr(admin_data, 'guardians', []) or []
+            context['guardians'] = [
+                asdict(g) if is_dataclass(g) else g for g in guardians_list
+            ]
+            
+            participants_list = getattr(admin_data, 'participants', []) or []
+            context['participants'] = [
+                asdict(p) if is_dataclass(p) else p for p in participants_list
+            ]
+            
+            # Documentation of service events (if present)
+            doc_of = getattr(admin_data, 'documentation_of', None)
+            if doc_of and is_dataclass(doc_of):
+                context['documentation_of'] = asdict(doc_of)
+            else:
+                context['documentation_of'] = doc_of
+            
+            context['document_creation_date'] = getattr(admin_data, 'document_creation_date', '')
+            context['document_title'] = getattr(admin_data, 'document_title', '')
+        
+        # Log successful extraction of individual attributes
+        author_info = context.get('author_hcp')
+        if author_info:
+            author_name = getattr(author_info, 'person', {})
+            if hasattr(author_name, 'full_name'):
+                logger.info(f"[TEMPLATE CONTEXT] Added author_hcp: {author_name.full_name}")
+            else:
+                logger.info(f"[TEMPLATE CONTEXT] Added author_hcp: {type(author_info)}")
+        
+        custodian_org = context.get('custodian_organization')
+        if custodian_org:
+            if hasattr(custodian_org, 'name'):
+                logger.info(f"[TEMPLATE CONTEXT] Added custodian_organization: {custodian_org.name}")
+            else:
+                logger.info(f"[TEMPLATE CONTEXT] Added custodian_organization: {type(custodian_org)}")
+        
+        guardians = context.get('guardians', [])
+        participants = context.get('participants', [])
+        logger.info(f"[TEMPLATE CONTEXT] Added {len(guardians)} guardians and {len(participants)} participants")
         
         # Validate custodian organization (critical for organization display)
         # Handle both dictionary and object attribute access
@@ -349,10 +396,12 @@ class ContextBuilder:
             context['processing_errors'].append(error_message)
             logger.error(f"Processing error: {error_message}")
     
-    @staticmethod
-    def finalize_context(context: Dict[str, Any]) -> Dict[str, Any]:
+    def finalize_context(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Finalize context with computed values and validation
+        
+        CRITICAL FIX: Extract individual fields from administrative_data dict/dataclass
+        so templates can access author_hcp, custodian_organization, guardians, etc. directly
         
         Args:
             context: Context dictionary to finalize
@@ -360,6 +409,13 @@ class ContextBuilder:
         Returns:
             Finalized context dictionary
         """
+        # CRITICAL: Extract individual administrative fields for template access
+        # If administrative_data exists in context, extract its individual fields
+        if 'administrative_data' in context and context['administrative_data']:
+            admin_data = context['administrative_data']
+            logger.info(f"[FINALIZE] Extracting individual fields from administrative_data (type: {type(admin_data).__name__})")
+            self.add_administrative_data(context, admin_data)
+        
         # Set overall extended data flag
         context['has_extended_data'] = any([
             context.get('has_administrative_data', False),

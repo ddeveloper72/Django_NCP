@@ -110,6 +110,159 @@ class PatientDemographicsService:
             logger.error(f"Error extracting patient demographics from CDA XML: {e}")
             return self._create_empty_demographics()
     
+    def extract_patient_contact_info(self, xml_root: ET.Element) -> Dict[str, Any]:
+        """
+        Extract patient contact information from CDA XML document
+        
+        Extracts contact details (address, phone, email) and language preferences
+        from patientRole element (not patient element which only has demographics).
+        
+        Args:
+            xml_root: Root element of CDA XML document
+            
+        Returns:
+            Dict containing:
+                - telecoms: List of telecom entries (phone, email)
+                - addresses: List of address entries
+                - languages: List of language codes
+        """
+        try:
+            # Find patient role element
+            patient_role = xml_root.find('.//hl7:patientRole', self.cda_namespaces)
+            if patient_role is None:
+                logger.warning("No patientRole element found for contact extraction")
+                return {'telecoms': [], 'addresses': [], 'languages': []}
+            
+            # Extract telecoms (phone, email)
+            telecoms = self._extract_telecoms(patient_role)
+            
+            # Extract addresses
+            addresses = self._extract_addresses(patient_role)
+            
+            # Extract languages from patient element
+            patient_element = patient_role.find('hl7:patient', self.cda_namespaces)
+            languages = []
+            if patient_element is not None:
+                languages = self._extract_languages(patient_element)
+            
+            contact_info = {
+                'telecoms': telecoms,
+                'addresses': addresses,
+                'languages': languages
+            }
+            
+            logger.info(f"Extracted patient contact info: {len(telecoms)} telecoms, {len(addresses)} addresses, {len(languages)} languages")
+            return contact_info
+            
+        except Exception as e:
+            logger.error(f"Error extracting patient contact info: {e}")
+            return {'telecoms': [], 'addresses': [], 'languages': []}
+    
+    def _extract_telecoms(self, element: ET.Element) -> List[Dict[str, str]]:
+        """Extract telecom information (phone, email) from element"""
+        telecoms = []
+        try:
+            telecom_elems = element.findall('.//hl7:telecom', self.cda_namespaces)
+            for telecom in telecom_elems:
+                value = telecom.get('value', '')
+                use = telecom.get('use', '')
+                
+                # Determine type from value prefix
+                telecom_type = 'other'
+                display_value = value
+                if value.startswith('tel:'):
+                    telecom_type = 'phone'
+                    display_value = value.replace('tel:', '')
+                elif value.startswith('mailto:'):
+                    telecom_type = 'email'
+                    display_value = value.replace('mailto:', '')
+                
+                if value:
+                    telecoms.append({
+                        'type': telecom_type,
+                        'value': display_value,
+                        'use': use or 'Home',  # Default to Home if not specified
+                        'raw_value': value
+                    })
+        except Exception as e:
+            logger.error(f"Error extracting telecoms: {e}")
+        
+        return telecoms
+    
+    def _extract_addresses(self, element: ET.Element) -> List[Dict[str, str]]:
+        """Extract address information from element"""
+        addresses = []
+        try:
+            addr_elems = element.findall('.//hl7:addr', self.cda_namespaces)
+            for addr in addr_elems:
+                address_info = {}
+                
+                # Extract street address
+                street_elems = addr.findall('.//hl7:streetAddressLine', self.cda_namespaces)
+                if street_elems:
+                    address_info['street'] = street_elems[0].text or ""
+                
+                # Extract city
+                city_elems = addr.findall('.//hl7:city', self.cda_namespaces)
+                if city_elems:
+                    address_info['city'] = city_elems[0].text or ""
+                
+                # Extract postal code
+                postal_elems = addr.findall('.//hl7:postalCode', self.cda_namespaces)
+                if postal_elems:
+                    address_info['postal_code'] = postal_elems[0].text or ""
+                
+                # Extract country
+                country_elems = addr.findall('.//hl7:country', self.cda_namespaces)
+                if country_elems:
+                    address_info['country'] = country_elems[0].text or ""
+                
+                # Build formatted address text
+                address_parts = []
+                if 'street' in address_info:
+                    address_parts.append(address_info['street'])
+                if 'postal_code' in address_info and 'city' in address_info:
+                    address_parts.append(f"{address_info['postal_code']} {address_info['city']}")
+                elif 'city' in address_info:
+                    address_parts.append(address_info['city'])
+                if 'country' in address_info:
+                    address_parts.append(address_info['country'])
+                
+                address_info['formatted'] = ', '.join(address_parts) if address_parts else "Address available"
+                
+                if address_info:
+                    addresses.append(address_info)
+        except Exception as e:
+            logger.error(f"Error extracting addresses: {e}")
+        
+        return addresses
+    
+    def _extract_languages(self, patient_element: ET.Element) -> List[Dict[str, str]]:
+        """Extract language communication preferences"""
+        languages = []
+        try:
+            lang_elems = patient_element.findall('.//hl7:languageCommunication', self.cda_namespaces)
+            for lang in lang_elems:
+                lang_code_elem = lang.find('.//hl7:languageCode', self.cda_namespaces)
+                if lang_code_elem is not None:
+                    lang_code = lang_code_elem.get('code', '')
+                    if lang_code:
+                        # Check for preference indicator
+                        pref_elem = lang.find('.//hl7:preferenceInd', self.cda_namespaces)
+                        is_preferred = False
+                        if pref_elem is not None:
+                            pref_value = pref_elem.get('value', 'false')
+                            is_preferred = pref_value.lower() == 'true'
+                        
+                        languages.append({
+                            'code': lang_code,
+                            'preferred': is_preferred
+                        })
+        except Exception as e:
+            logger.error(f"Error extracting languages: {e}")
+        
+        return languages
+    
     def extract_from_fhir_bundle(self, fhir_bundle: Dict[str, Any]) -> PatientDemographics:
         """
         Extract patient demographics from FHIR bundle

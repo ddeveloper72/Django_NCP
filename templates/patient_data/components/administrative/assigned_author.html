@@ -1,0 +1,84 @@
+{# CDA assignedAuthor - Primary Performer / Medical Doctor Component #}
+{# Expected context: author_hcp (DotDict with flattened person fields + nested organization) #}
+
+{% if author_hcp %}
+<div class="assigned-author-section mb-4">
+    <div class="card border-primary">
+        <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">
+                <i class="fa-solid fa-user-md me-2"></i>
+                Assigned Author - Medical Doctor
+            </h6>
+        </div>
+        <div class="card-body">
+            {# MEDICAL PRACTITIONER DETAILS #}
+            {% if author_hcp.full_name %}
+            <div class="practitioner-section mb-4 pb-3">
+                <h5 class="text-primary mb-2">
+                    <i class="fa-solid fa-user-doctor me-2"></i>
+                    {{ author_hcp.full_name }} - {{ author_hcp.organization.name }}
+                </h5>
+                
+                {# Doctor's Role/Function Code #}
+                {% if author_hcp.role %}
+                <div class="mb-3">
+                    <span class="badge bg-primary">{{ author_hcp.role }}</span>
+                </div>
+                {% endif %}
+                
+                {# Practitioner's Contact Information #}
+                <div class="mt-3">
+                    <strong class="d-block mb-2">
+                        <i class="fa-solid fa-address-card me-2 text-primary"></i>
+                        Personal Contact:
+                    </strong>
+                    
+                    {# Doctor's Address - Only show first address to avoid duplicates #}
+                    {% if author_hcp.contact_info.addresses %}
+                    {% with address=author_hcp.contact_info.addresses.0 %}
+                    <div class="ms-3 mb-2">
+                        <i class="fa-solid fa-location-dot me-2 text-muted"></i>
+                            {% if address.street %}{{ address.street }}<br>{% endif %}
+                            <span class="ms-4">
+                                {% if address.city %}{{ address.city }}{% endif %}
+                                {% if address.postal_code %} {{ address.postal_code }}{% endif %}
+                            </span>
+                            {% if address.country %}<br><span class="ms-4">{{ address.country }}</span>{% endif %}
+                        </div>
+                    {% endwith %}
+                    {% endif %}
+                    
+                    {# Doctor's Telecoms #}
+                    {% if author_hcp.contact_info.telecoms %}
+                        {% for telecom in author_hcp.contact_info.telecoms %}
+                            {% if 'tel:' in telecom.value %}
+                                <div class="ms-3 mb-1">
+                                    <i class="fa-solid fa-phone me-2 text-success"></i>
+                                    <strong>Phone:</strong> {{ telecom.value|slice:"4:" }}
+                                </div>
+                            {% elif 'mailto:' in telecom.value and 'medico@' in telecom.value %}
+                                <div class="ms-3 mb-1">
+                                    <i class="fa-solid fa-envelope me-2 text-info"></i>
+                                    <strong>Email:</strong> {{ telecom.value|slice:"7:" }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}            
+            
+            
+            {# Document Timestamp #}
+            {% if author_hcp.timestamp %}
+            <div class="mt-3 pt-3 border-top">
+                <small class="text-muted">
+                    <i class="fa-solid fa-clock me-2"></i>
+                    <strong>Document Created:</strong> {{ author_hcp.timestamp }}
+                </small>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}

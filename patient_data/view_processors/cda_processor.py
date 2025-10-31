@@ -252,14 +252,23 @@ class CDAViewProcessor:
                         context['patient_identity'] = administrative_result['patient_identity']
                         logger.info(f"[CDA PROCESSOR] Added patient identity to context")
                     
-                    # Add administrative data fields
+                    # Add administrative data fields including contact info and guardians
                     context.update({
                         'administrative_data': administrative_result.get('administrative_data', {}),
                         'patient_extended_data': administrative_result.get('patient_extended_data', {}),
                         'contact_data': administrative_result.get('contact_data', {}),
+                        'guardians': administrative_result.get('guardians', []),
                         'healthcare_data': administrative_result.get('healthcare_data', {})
                     })
-                    logger.info(f"[CDA PROCESSOR] Added {len(administrative_result.get('administrative_data', {}))} administrative fields to context")
+                    
+                    # Log extraction results
+                    contact_data = administrative_result.get('contact_data', {})
+                    guardians = administrative_result.get('guardians', [])
+                    logger.info(f"[CDA PROCESSOR] Added administrative fields to context: "
+                               f"{len(contact_data.get('telecoms', []))} telecoms, "
+                               f"{len(contact_data.get('addresses', []))} addresses, "
+                               f"{len(contact_data.get('languages', []))} languages, "
+                               f"{len(guardians)} guardians")
                 
                 # Add CDA-specific metadata
                 self._add_cda_metadata(context, match_data, cda_content, actual_cda_type)
@@ -422,6 +431,26 @@ class CDAViewProcessor:
         # Continue with the rest of processing - don't return early!
         # Avoid non-ASCII characters in logs to prevent UnicodeEncodeError on some consoles
         logger.info("CDA processor completed successfully")
+        
+        # DEBUG: Log template context variables before rendering
+        logger.info(f"[TEMPLATE DEBUG] Context keys before render: {list(context.keys())}")
+        logger.info(f"[TEMPLATE DEBUG] author_hcp in context: {bool(context.get('author_hcp'))}")
+        logger.info(f"[TEMPLATE DEBUG] custodian_organization in context: {bool(context.get('custodian_organization'))}")
+        logger.info(f"[TEMPLATE DEBUG] guardians in context: {bool(context.get('guardians'))}")
+        logger.info(f"[TEMPLATE DEBUG] administrative_data in context: {bool(context.get('administrative_data'))}")
+        
+        if context.get('author_hcp'):
+            author = context.get('author_hcp')
+            logger.info(f"[TEMPLATE DEBUG] author_hcp type: {type(author).__name__}")
+            if hasattr(author, 'person'):
+                logger.info(f"[TEMPLATE DEBUG] author_hcp.person.full_name: {getattr(author.person, 'full_name', 'N/A')}")
+        else:
+            logger.warning("[TEMPLATE DEBUG] author_hcp is NOT in context - checking administrative_data")
+            admin_data = context.get('administrative_data')
+            if admin_data:
+                logger.info(f"[TEMPLATE DEBUG] administrative_data type: {type(admin_data).__name__}")
+                if hasattr(admin_data, 'author_hcp'):
+                    logger.warning(f"[TEMPLATE DEBUG] FOUND author_hcp in administrative_data! It wasn't extracted to context!")
         
         # Render the final template with complete context including administrative data
         return render(request, 'patient_data/enhanced_patient_cda.html', context)
@@ -913,35 +942,64 @@ class CDAViewProcessor:
     def _extract_administrative_data(self, cda_content: str, session_id: str) -> Dict[str, Any]:
         """
         Extract administrative data (patient demographics, healthcare team, contacts) from CDA
-        Uses Enhanced CDA XML Parser for unified administrative data extraction
+        Uses Enhanced CDA XML Parser and PatientDemographicsService for comprehensive extraction
         
         Args:
             cda_content: CDA XML content
             session_id: Session identifier for caching
             
         Returns:
-            Dictionary containing administrative_data and patient_identity
+            Dictionary containing administrative_data, patient_identity, contact_data, and guardians
         """
         try:
             logger.info(f"[CDA PROCESSOR] Extracting administrative data for session {session_id}")
             
-            # Use Enhanced CDA XML Parser for unified administrative data extraction
+            # Parse XML with lxml for structured extraction
+            from lxml import etree
+            from ..services.patient_demographics_service import PatientDemographicsService
             from ..services.enhanced_cda_xml_parser import EnhancedCDAXMLParser
             
+            # Parse CDA content with lxml
+            try:
+                xml_root = etree.fromstring(cda_content.encode('utf-8'))
+            except Exception as parse_error:
+                logger.error(f"[CDA PROCESSOR] XML parsing error: {parse_error}")
+                xml_root = None
+            
+            # Extract administrative data using Enhanced CDA XML Parser
             parser = EnhancedCDAXMLParser()
             enhanced_result = parser.parse_cda_content(cda_content)
+            
+            # Extract patient contact information using PatientDemographicsService
+            contact_info = {}
+            if xml_root is not None:
+                demographics_service = PatientDemographicsService()
+                try:
+                    contact_info = demographics_service.extract_patient_contact_info(xml_root)
+                    logger.info(f"[CDA PROCESSOR] Extracted patient contact info: {len(contact_info.get('telecoms', []))} telecoms, "
+                               f"{len(contact_info.get('addresses', []))} addresses, {len(contact_info.get('languages', []))} languages")
+                except Exception as contact_error:
+                    logger.error(f"[CDA PROCESSOR] Contact extraction error: {contact_error}")
             
             if enhanced_result:
                 admin_data = enhanced_result.get('administrative_data', {})
                 patient_identity = enhanced_result.get('patient_identity', {})
                 
-                logger.info(f"[CDA PROCESSOR] Extracted administrative data: {len(admin_data)} fields, patient_identity: {bool(patient_identity)}")
+                # Extract guardians from administrative data
+                guardians = []
+                if hasattr(admin_data, 'guardians'):
+                    guardians = admin_data.guardians
+                    logger.info(f"[CDA PROCESSOR] Extracted {len(guardians)} guardians")
+                
+                logger.info(f"[CDA PROCESSOR] Extracted administrative data: {len(admin_data.__dict__ if hasattr(admin_data, '__dict__') else admin_data)} fields, "
+                           f"patient_identity: {bool(patient_identity)}")
                 
                 return {
                     'administrative_data': admin_data,
                     'patient_identity': patient_identity,
+                    'contact_data': contact_info,  # Patient contact info (telecoms, addresses, languages)
+                    'guardians': guardians,  # Guardian information with contact details
                     'patient_extended_data': {},  # Placeholder for future enhancement
-                    'contact_data': {},  # Placeholder for future enhancement
                     'healthcare_data': {}  # Placeholder for future enhancement
                 }
             
@@ -949,8 +1007,9 @@ class CDAViewProcessor:
             return {
                 'administrative_data': {},
                 'patient_identity': {},
+                'contact_data': contact_info,  # Still return contact info if extraction succeeded
+                'guardians': [],
                 'patient_extended_data': {},
-                'contact_data': {},
                 'healthcare_data': {}
             }
             
@@ -961,8 +1020,9 @@ class CDAViewProcessor:
             return {
                 'administrative_data': {},
                 'patient_identity': {},
-                'patient_extended_data': {},
                 'contact_data': {},
+                'guardians': [],
+                'patient_extended_data': {},
                 'healthcare_data': {}
             }
 

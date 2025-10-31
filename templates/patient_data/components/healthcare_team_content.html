@@ -5,6 +5,25 @@
     {# Check if we have any administrative, healthcare data, or healthcare team data #}
     {% if healthcare_team or administrative_data or healthcare_data or author_hcp or custodian_organization.name or guardians or participants %}
         
+        {# === CDA ADMINISTRATIVE SECTIONS === #}
+        {# Using modular component templates for each CDA administrative element #}
+        
+        {# 1. Assigned Author - Medical Doctor (from <author>) #}
+        {% include 'patient_data/components/administrative/assigned_author.html' %}
+        
+        {# 2. Custodian Organization (from <custodian>) #}
+        {% include 'patient_data/components/administrative/custodian.html' %}
+        
+        {# 3. Legal Authenticator - Document Signer (from <legalAuthenticator>) #}
+        {% include 'patient_data/components/administrative/legal_authenticator.html' %}
+        
+        {# 4. Contact Persons / Next of Kin (from <participant>) #}
+        {% include 'patient_data/components/administrative/participant.html' %}
+        
+        {# 5. Documentation Of - Service Event (from <documentationOf>) #}
+        {# NOTE: Requires CDAHeaderExtractor enhancement to extract documentation_of field #}
+        {% include 'patient_data/components/administrative/documentation_of.html' %}
+        
         {# Emergency Contacts & Next of Kin Section #}
         {% if administrative_data.emergency_contacts or administrative_data.guardians or administrative_data.other_contacts or guardians or participants %}
         <div class="emergency-contacts-section mb-4">

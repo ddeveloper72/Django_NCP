@@ -39,12 +39,9 @@ from .services.clinical_pdf_service import ClinicalDocumentPDFService
 from .services.fhir_agent_service import FHIRAgentService
 from .services.section_processors import PatientSectionProcessor
 from .services.terminology_service import CentralTerminologyService
-from .services.history_of_past_illness_extractor import HistoryOfPastIllnessExtractor
 from .services.immunizations_extractor import ImmunizationsExtractor
 from .services.pregnancy_history_extractor import PregnancyHistoryExtractor
 from .services.social_history_extractor import SocialHistoryExtractor
-from .services.physical_findings_extractor import PhysicalFindingsExtractor
-from .services.coded_results_extractor import CodedResultsExtractor
 
 logger = logging.getLogger(__name__)
 

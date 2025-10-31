@@ -9,7 +9,7 @@ django.setup()
 from django.contrib.sessions.backends.db import SessionStore
 
 print('='*80)
-print('CREATING BRAND NEW SESSION FOR DIANA FERREIRA')
+print('CREATING FRESH SESSION FOR DIANA FERREIRA')
 print('='*80)
 
 # Create a new session
@@ -30,24 +30,29 @@ match_data = {
 with open(match_data['file_path'], 'r', encoding='utf-8') as f:
     match_data['cda_content'] = f.read()
 
-# CRITICAL: Use the correct key format that the view expects
-session_key = session.session_key if session.session_key else session.create()
+# Set the data
+session['patient_match_data'] = match_data
 
-# Set BOTH keys to ensure compatibility
-session['patient_match_data'] = match_data  # Legacy key
-session[f'patient_match_{session_key}'] = match_data  # Expected key
+# Create the session (this generates the session_key)
+session.create()
 
+# Now get the session key
+session_key = session.session_key
+
+# Add the properly formatted key
+session[f'patient_match_{session_key}'] = match_data
 session.save()
 
-print(f'\n NEW SESSION CREATED!')
+print(f'\n FRESH SESSION CREATED!')
 print(f'   Session Key: {session_key}')
 print(f'   Patient: Diana Ferreira (Portugal)')
 print(f'   Level: {match_data["level"]}')
-print(f'   CDA Type: {match_data["cda_type"]}')
-print(f'\n USE THIS URL:')
-print(f'   http://127.0.0.1:8888/patients/cda/{session_key}/L3/')
-print(f'\n This session has:')
-print(f'   - Fixed context_builders.py with finalize_context() calling add_administrative_data()')
-print(f'   - Dr. António Pereira should now appear in Healthcare Team & Contacts tab!')
+print(f'\n NAVIGATE TO THIS URL:')
+print(f'\n   http://127.0.0.1:8888/patients/cda/{session_key}/L3/')
+print(f'\n With the finalize_context fix, you should now see:')
+print(f'    Diana Ferreira patient name')
+print(f'    Healthcare Team & Contacts tab')
+print(f'    Primary Performer - Medical Doctor section')
+print(f'    Dr. António Pereira with full contact details')
 
 print('\n' + '='*80)
