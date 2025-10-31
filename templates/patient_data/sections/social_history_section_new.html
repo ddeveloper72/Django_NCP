@@ -59,15 +59,15 @@
                                 </div>
                                 <div class="observation-status-section">
                                     {% if social.data.status.display_value %}
-                                        {% if "Active" in social.data.status.display_value %}
-                                            <span class="badge bg-success fs-6">{{ social.data.status.display_value }}</span>
-                                        {% elif "Inactive" in social.data.status.display_value or "Completed" in social.data.status.display_value %}
-                                            <span class="badge bg-secondary fs-6">{{ social.data.status.display_value }}</span>
+                                        {% if "active" in social.data.status.display_value|lower %}
+                                            <span class="badge bg-success fs-6">{{ social.data.status.display_value|title }}</span>
+                                        {% elif "inactive" in social.data.status.display_value|lower or "completed" in social.data.status.display_value|lower %}
+                                            <span class="badge bg-secondary fs-6">{{ social.data.status.display_value|title }}</span>
                                         {% else %}
-                                            <span class="badge bg-info fs-6">{{ social.data.status.display_value }}</span>
+                                            <span class="badge bg-info fs-6">{{ social.data.status.display_value|title }}</span>
                                         {% endif %}
                                     {% elif social.status %}
-                                        <span class="badge bg-info fs-6">{{ social.status }}</span>
+                                        <span class="badge bg-info fs-6">{{ social.status|title }}</span>
                                     {% endif %}
                                 </div>
                             </div>
