@@ -2914,10 +2914,10 @@ def patient_details_view(request, patient_id):
                 patient_contact = getattr(administrative_data, 'patient_contact_info', None)
                 if patient_contact and is_dataclass(patient_contact):
                     context['patient_contact_info'] = asdict(patient_contact)
-                    logger.info(f"[PATIENT_DETAILS] Extracted patient_contact_info: {len(patient_contact.addresses)} addresses, {len(patient_contact.telecoms)} telecoms")
+                    logger.debug(f"[PATIENT_DETAILS] Extracted patient_contact_info: {len(patient_contact.addresses)} addresses, {len(patient_contact.telecoms)} telecoms")
                 elif patient_contact:
                     context['patient_contact_info'] = patient_contact
-                    logger.info(f"[PATIENT_DETAILS] Added patient_contact_info dict to context")
+                    logger.debug(f"[PATIENT_DETAILS] Added patient_contact_info dict to context")
                 else:
                     logger.info(f"[PATIENT_DETAILS] No patient_contact_info found in administrative_data")
             

@@ -23,17 +23,6 @@ DEBUG INFO:
             </h6>
         </div>
         <div class="card-body">
-            {# TEMPORARY DEBUG OUTPUT - Remove after fixing #}
-            <div class="alert alert-info small mb-3">
-                <strong>DEBUG:</strong>
-                <br>patient_identity: {{ patient_identity|yesno:"EXISTS,MISSING" }}
-                <br>patient_contact_info: {{ patient_contact_info|yesno:"EXISTS,MISSING" }}
-                {% if patient_contact_info %}
-                    <br>Addresses count: {{ patient_contact_info.addresses|length }}
-                    <br>Telecoms count: {{ patient_contact_info.telecoms|length }}
-                    <br>Raw data: {{ patient_contact_info }}
-                {% endif %}
-            </div>
             {# Patient Name #}
             <h5 class="text-primary mb-2">
                 <i class="fa-solid fa-user me-2"></i>

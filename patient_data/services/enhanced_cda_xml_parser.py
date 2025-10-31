@@ -1021,11 +1021,8 @@ class EnhancedCDAXMLParser:
 
         # Handle differences between CDAHeaderExtractor and CDAAdministrativeExtractor
         if hasattr(admin_data, 'guardians') and hasattr(admin_data, 'participants'):
-            # New CDAHeaderExtractor structure - DEBUG LOGGING
-            logger.info(f"[ENHANCED_ADMIN_DATA] Using NEW CDAHeaderExtractor structure")
-            logger.info(f"[ENHANCED_ADMIN_DATA] patient_contact_info exists: {admin_data.patient_contact_info is not None}")
-            if admin_data.patient_contact_info:
-                logger.info(f"[ENHANCED_ADMIN_DATA] Addresses: {len(admin_data.patient_contact_info.addresses)}, Telecoms: {len(admin_data.patient_contact_info.telecoms)}")
+            # New CDAHeaderExtractor structure
+            logger.debug(f"[ENHANCED_ADMIN_DATA] Using CDAHeaderExtractor structure with patient_contact_info: {admin_data.patient_contact_info is not None}")
             
             result = {
                 # Basic document information
@@ -1146,9 +1143,6 @@ class EnhancedCDAXMLParser:
                 "document_last_update_date": "",
                 "document_version_number": "",
             }
-            
-            # DEBUG: Log what we're returning
-            logger.info(f"[ENHANCED_ADMIN_DATA] Returning result with patient_contact_info - Addresses: {len(result['patient_contact_info'].get('addresses', []))}, Telecoms: {len(result['patient_contact_info'].get('telecoms', []))}")
             
             return result
         else:
