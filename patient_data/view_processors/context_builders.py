@@ -244,6 +244,13 @@ class ContextBuilder:
             else:
                 context['documentation_of'] = doc_of
             
+            # Patient's own contact information (from patientRole)
+            patient_contact = getattr(admin_data, 'patient_contact_info', None)
+            if patient_contact and is_dataclass(patient_contact):
+                context['patient_contact_info'] = asdict(patient_contact)
+            else:
+                context['patient_contact_info'] = patient_contact
+            
             context['document_creation_date'] = getattr(admin_data, 'document_creation_date', '')
             context['document_title'] = getattr(admin_data, 'document_title', '')
         
