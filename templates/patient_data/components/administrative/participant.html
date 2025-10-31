@@ -1,5 +1,5 @@
-{# CDA participant - Contact Person / Next of Kin Component #}
-{# Expected context: participants (list of DotDict objects with contact person details) #}
+{# CDA participant/guardian - Emergency Contact Component #}
+{# Expected context: participants (list including guardians and emergency contacts) #}
 
 {% if participants %}
     {% for participant in participants %}
@@ -8,7 +8,11 @@
             <div class="card-header bg-warning text-dark">
                 <h6 class="mb-0">
                     <i class="fa-solid fa-user-group me-2"></i>
-                    Contact Person / Next of Kin
+                    {% if participant.relationship_code == 'Guardian' %}
+                        Guardian & Legal Representative
+                    {% else %}
+                        Contact Person / Next of Kin
+                    {% endif %}
                 </h6>
             </div>
             <div class="card-body">
@@ -20,18 +24,10 @@
                         {{ participant.full_name }}
                     </h5>
                     
-                    {# Relationship to Patient #}
+                    {# Role Badge #}
                     {% if participant.relationship_code %}
                     <div class="mb-3">
-                        <span class="badge bg-warning text-dark">
-                            <i class="fa-solid fa-link me-1"></i>
-                            Relationship: {{ participant.relationship_code }}
-                        </span>
-                        {% if participant.relationship_display %}
-                        <small class="d-block mt-1 ms-2 text-muted">
-                            {{ participant.relationship_display }}
-                        </small>
-                        {% endif %}
+                        <span class="badge bg-warning text-dark">{{ participant.relationship_code }}</span>
                     </div>
                     {% endif %}
                     

@@ -224,14 +224,18 @@ class ContextBuilder:
             
             # Convert lists that may contain dataclass objects
             guardians_list = getattr(admin_data, 'guardians', []) or []
-            context['guardians'] = [
+            guardians_converted = [
                 asdict(g) if is_dataclass(g) else g for g in guardians_list
             ]
             
             participants_list = getattr(admin_data, 'participants', []) or []
-            context['participants'] = [
+            participants_converted = [
                 asdict(p) if is_dataclass(p) else p for p in participants_list
             ]
+            
+            # Merge guardians and participants for unified display in Emergency Contacts section
+            context['participants'] = guardians_converted + participants_converted
+            context['guardians'] = guardians_converted  # Keep separate for backward compatibility
             
             # Documentation of service events (if present)
             doc_of = getattr(admin_data, 'documentation_of', None)
