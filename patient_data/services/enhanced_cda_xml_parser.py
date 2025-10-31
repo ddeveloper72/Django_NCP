@@ -1021,8 +1021,13 @@ class EnhancedCDAXMLParser:
 
         # Handle differences between CDAHeaderExtractor and CDAAdministrativeExtractor
         if hasattr(admin_data, 'guardians') and hasattr(admin_data, 'participants'):
-            # New CDAHeaderExtractor structure
-            return {
+            # New CDAHeaderExtractor structure - DEBUG LOGGING
+            logger.info(f"[ENHANCED_ADMIN_DATA] Using NEW CDAHeaderExtractor structure")
+            logger.info(f"[ENHANCED_ADMIN_DATA] patient_contact_info exists: {admin_data.patient_contact_info is not None}")
+            if admin_data.patient_contact_info:
+                logger.info(f"[ENHANCED_ADMIN_DATA] Addresses: {len(admin_data.patient_contact_info.addresses)}, Telecoms: {len(admin_data.patient_contact_info.telecoms)}")
+            
+            result = {
                 # Basic document information
                 "document_creation_date": creation_date,
                 "document_creation_date_raw": creation_date_raw,
@@ -1126,10 +1131,14 @@ class EnhancedCDAXMLParser:
                 }),
                 
                 # Patient contact information from patientRole
-                "patient_contact_info": DotDict({
-                    "addresses": admin_data.patient_contact_info.addresses if admin_data.patient_contact_info else [],
-                    "telecoms": admin_data.patient_contact_info.telecoms if admin_data.patient_contact_info else [],
-                }),
+                "patient_contact_info": (
+                    DotDict({
+                        "addresses": admin_data.patient_contact_info.addresses,
+                        "telecoms": admin_data.patient_contact_info.telecoms,
+                    })
+                    if admin_data.patient_contact_info
+                    else DotDict({"addresses": [], "telecoms": []})
+                ),
                 
                 # Empty fields for compatibility
                 "other_contacts": [],
@@ -1137,6 +1146,11 @@ class EnhancedCDAXMLParser:
                 "document_last_update_date": "",
                 "document_version_number": "",
             }
+            
+            # DEBUG: Log what we're returning
+            logger.info(f"[ENHANCED_ADMIN_DATA] Returning result with patient_contact_info - Addresses: {len(result['patient_contact_info'].get('addresses', []))}, Telecoms: {len(result['patient_contact_info'].get('telecoms', []))}")
+            
+            return result
         else:
             # Legacy CDAAdministrativeExtractor structure
             return self._extract_legacy_administrative_data_mapping(admin_data, creation_date, creation_date_raw, document_title)
