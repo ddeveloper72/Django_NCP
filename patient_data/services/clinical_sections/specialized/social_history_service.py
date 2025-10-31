@@ -74,6 +74,9 @@ class SocialHistorySectionService(CTSIntegrationMixin, ClinicalServiceBase):
             
             if section is not None:
                 social_history = self._parse_social_history_xml(section)
+                logger.info(f"[SOCIAL HISTORY SERVICE] 🎯 extract_from_cda returning {len(social_history)} items to pipeline:")
+                for idx, item in enumerate(social_history, 1):
+                    logger.info(f"  Item {idx}: category={item.get('category')}, description={item.get('description')}, quantity={item.get('quantity')}")
                 self._log_extraction_result('extract_from_cda', len(social_history), 'CDA')
                 return social_history
             
@@ -276,7 +279,7 @@ class SocialHistorySectionService(CTSIntegrationMixin, ClinicalServiceBase):
         if status_elem is not None:
             status = status_elem.get('code', 'Active')
         
-        return {
+        result = {
             'category': category,
             'description': description,
             'value_code': value_code,
@@ -287,3 +290,15 @@ class SocialHistorySectionService(CTSIntegrationMixin, ClinicalServiceBase):
             'start_date': start_date,
             'end_date': end_date
         }
+        
+        logger.info(f"[SOCIAL_HISTORY_PARSER] 📦 Extracted structured observation:")
+        logger.info(f"  category: {category}")
+        logger.info(f"  description: {description}")
+        logger.info(f"  quantity: {quantity}")
+        logger.info(f"  frequency: {frequency}")
+        logger.info(f"  value_code: {value_code}")
+        logger.info(f"  value_system: {value_system}")
+        logger.info(f"  status: {status}")
+        logger.info(f"  start_date: {start_date}, end_date: {end_date}")
+        
+        return result
