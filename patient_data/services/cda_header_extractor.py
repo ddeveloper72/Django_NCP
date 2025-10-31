@@ -644,12 +644,17 @@ class CDAHeaderExtractor:
             # Extract contact information
             contact_info = self._extract_contact_info(participant)
             
+            # Convert ContactInfo dataclass to dict for template compatibility
+            from dataclasses import asdict
+            contact_info_dict = asdict(contact_info) if contact_info else {'addresses': [], 'telecoms': []}
+            
             return {
                 'given_name': given_name,
                 'family_name': family_name,
                 'full_name': f"{given_name} {family_name}".strip(),
                 'role': role,
-                'contact_info': contact_info
+                'relationship_code': role,  # Add for template compatibility
+                'contact_info': contact_info_dict
             }
             
         except Exception as e:
