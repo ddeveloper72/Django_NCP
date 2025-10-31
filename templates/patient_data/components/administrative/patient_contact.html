@@ -11,64 +11,62 @@
             </h6>
         </div>
         <div class="card-body">
-            {# PATIENT DETAILS #}
-            <div class="patient-info-section mb-3">
-                <h5 class="text-primary mb-2">
-                    <i class="fa-solid fa-user me-2"></i>
-                    {% if patient_identity.given_name %}{{ patient_identity.given_name }}{% endif %}
-                    {% if patient_identity.family_name %} {{ patient_identity.family_name }}{% endif %}
-                </h5>
+            {# Patient Name #}
+            <h5 class="text-primary mb-2">
+                <i class="fa-solid fa-user me-2"></i>
+                {% if patient_identity.given_name %}{{ patient_identity.given_name }}{% endif %}
+                {% if patient_identity.family_name %} {{ patient_identity.family_name }}{% endif %}
+            </h5>
+            
+            {# Patient Badge #}
+            <div class="mb-3">
+                <span class="badge bg-primary">Patient</span>
+            </div>
+            
+            {# Contact Information #}
+            {% if patient_contact_info %}
+            <div class="mt-3">
+                <strong class="d-block mb-2">
+                    <i class="fa-solid fa-address-book me-2 text-primary"></i>
+                    Contact Details:
+                </strong>
                 
-                {# Patient Badge #}
-                <div class="mb-3">
-                    <span class="badge bg-primary">Patient</span>
-                </div>
+                {# Address - Show only first address to avoid CDA duplicates #}
+                {% if patient_contact_info.addresses %}
+                    {% with address=patient_contact_info.addresses.0 %}
+                    <div class="ms-3 mb-2">
+                        <i class="fa-solid fa-location-dot me-2 text-muted"></i>
+                        {% if address.street %}{{ address.street }}<br>{% endif %}
+                        <span class="ms-4">
+                            {% if address.city %}{{ address.city }}{% endif %}
+                            {% if address.postal_code %} {{ address.postal_code }}{% endif %}
+                        </span>
+                        {% if address.country %}<br><span class="ms-4">{{ address.country }}</span>{% endif %}
+                    </div>
+                    {% endwith %}
+                {% endif %}
                 
-                {# Contact Information #}
-                {% if patient_contact_info %}
-                <div class="mt-3">
-                    <strong class="d-block mb-2">
-                        <i class="fa-solid fa-address-book me-2 text-primary"></i>
-                        Contact Details:
-                    </strong>
-                    
-                    {# Address - Show only first address to avoid CDA duplicates #}
-                    {% if patient_contact_info.addresses %}
-                        {% with address=patient_contact_info.addresses.0 %}
-                        <div class="ms-3 mb-2">
-                            <i class="fa-solid fa-location-dot me-2 text-muted"></i>
-                            {% if address.street %}{{ address.street }}<br>{% endif %}
-                            <span class="ms-4">
-                                {% if address.city %}{{ address.city }}{% endif %}
-                                {% if address.postal_code %} {{ address.postal_code }}{% endif %}
-                            </span>
-                            {% if address.country %}<br><span class="ms-4">{{ address.country }}</span>{% endif %}
-                        </div>
-                        {% endwith %}
-                    {% endif %}
-                    
-                    {# Telecoms (phone/email) #}
-                    {% if patient_contact_info.telecoms %}
-                        {% for telecom in patient_contact_info.telecoms %}
-                            {% if 'tel:' in telecom.value %}
-                                <div class="ms-3 mb-1">
-                                    <i class="fa-solid fa-phone me-2 text-success"></i>
-                                    <strong>Phone:</strong> {{ telecom.value|slice:"4:" }}
-                                    {% if telecom.use %}
-                                        <span class="badge bg-light text-dark ms-2">{{ telecom.use }}</span>
-                                    {% endif %}
-                                </div>
-                            {% elif 'mailto:' in telecom.value %}
-                                <div class="ms-3 mb-1">
-                                    <i class="fa-solid fa-envelope me-2 text-info"></i>
-                                    <strong>Email:</strong> {{ telecom.value|slice:"7:" }}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                </div>
+                {# Telecoms (phone/email) #}
+                {% if patient_contact_info.telecoms %}
+                    {% for telecom in patient_contact_info.telecoms %}
+                        {% if 'tel:' in telecom.value %}
+                            <div class="ms-3 mb-1">
+                                <i class="fa-solid fa-phone me-2 text-success"></i>
+                                <strong>Phone:</strong> {{ telecom.value|slice:"4:" }}
+                                {% if telecom.use %}
+                                    <span class="badge bg-light text-dark ms-2">{{ telecom.use }}</span>
+                                {% endif %}
+                            </div>
+                        {% elif 'mailto:' in telecom.value %}
+                            <div class="ms-3 mb-1">
+                                <i class="fa-solid fa-envelope me-2 text-info"></i>
+                                <strong>Email:</strong> {{ telecom.value|slice:"7:" }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
             </div>
+            {% endif %}
         </div>
     </div>
 </div>
