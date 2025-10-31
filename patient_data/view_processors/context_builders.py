@@ -428,10 +428,11 @@ class ContextBuilder:
             self.add_administrative_data(context, admin_data)
         
         # Set overall extended data flag
+        # NOTE: patient_contact_info is now part of administrative_data
         context['has_extended_data'] = any([
             context.get('has_administrative_data', False),
             context.get('has_healthcare_data', False),
-            len(context.get('contact_data', {})) > 0
+            bool(context.get('patient_contact_info'))  # From administrative_data.patient_contact_info
         ])
         
         # Add summary information for debugging
