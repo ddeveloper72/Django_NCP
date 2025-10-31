@@ -1,6 +1,18 @@
 {# Patient's Own Contact Information Component #}
 {# Expected context: patient_identity (name), patient_contact_info (addresses/telecoms from patientRole) #}
 
+{# DEBUG: Show what data is available #}
+{% comment %}
+DEBUG INFO:
+- patient_identity exists: {{ patient_identity|yesno:"YES,NO" }}
+- patient_contact_info exists: {{ patient_contact_info|yesno:"YES,NO" }}
+{% if patient_contact_info %}
+- patient_contact_info type: {{ patient_contact_info|pprint }}
+- addresses: {{ patient_contact_info.addresses|length }} items
+- telecoms: {{ patient_contact_info.telecoms|length }} items
+{% endif %}
+{% endcomment %}
+
 {% if patient_identity or patient_contact_info %}
 <div class="patient-contact-section mb-4">
     <div class="card border-primary">
@@ -11,6 +23,17 @@
             </h6>
         </div>
         <div class="card-body">
+            {# TEMPORARY DEBUG OUTPUT - Remove after fixing #}
+            <div class="alert alert-info small mb-3">
+                <strong>DEBUG:</strong>
+                <br>patient_identity: {{ patient_identity|yesno:"EXISTS,MISSING" }}
+                <br>patient_contact_info: {{ patient_contact_info|yesno:"EXISTS,MISSING" }}
+                {% if patient_contact_info %}
+                    <br>Addresses count: {{ patient_contact_info.addresses|length }}
+                    <br>Telecoms count: {{ patient_contact_info.telecoms|length }}
+                    <br>Raw data: {{ patient_contact_info }}
+                {% endif %}
+            </div>
             {# Patient Name #}
             <h5 class="text-primary mb-2">
                 <i class="fa-solid fa-user me-2"></i>
