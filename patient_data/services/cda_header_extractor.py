@@ -64,11 +64,11 @@ class AdministrativeData:
     author_hcp: Optional[AuthorInfo] = None
     custodian_organization: Optional[Organization] = None
     legal_authenticator: Optional[AuthorInfo] = None
+    patient_contact_info: Optional[ContactInfo] = None
     guardians: List[Dict[str, Any]] = None
     participants: List[Dict[str, Any]] = None
     document_creation_date: str = ""
     document_set_id: str = ""
-    document_title: str = ""
     document_title: str = ""
 
 
@@ -113,6 +113,7 @@ class CDAHeaderExtractor:
             author_hcp = self._extract_author(root)
             custodian_org = self._extract_custodian(root) 
             legal_auth = self._extract_legal_authenticator(root)
+            patient_contact = self._extract_patient_contact_info(root)
             guardians = self._extract_guardian(root)
             participants = self._extract_participants(root)
             
@@ -125,6 +126,7 @@ class CDAHeaderExtractor:
                 author_hcp=author_hcp,
                 custodian_organization=custodian_org,
                 legal_authenticator=legal_auth,
+                patient_contact_info=patient_contact,
                 guardians=guardians,
                 participants=participants,
                 document_creation_date=doc_date,
@@ -795,3 +797,33 @@ class CDAHeaderExtractor:
             logger.error(f"Error extracting document title: {e}")
             
         return ""
+    
+    def _extract_patient_contact_info(self, root) -> Optional[ContactInfo]:
+        """
+        Extract patient's own contact information from patientRole
+        
+        Note: This extracts the patient's direct contact info (addresses/telecoms)
+        from the patientRole element, NOT guardian/participant contact info.
+        """
+        try:
+            # Find patientRole element
+            if LXML_AVAILABLE:
+                patient_role_elems = root.xpath('//cda:recordTarget/cda:patientRole', namespaces=self.namespaces)
+            else:
+                patient_role_elems = root.findall('.//{urn:hl7-org:v3}recordTarget/{urn:hl7-org:v3}patientRole')
+            
+            if not patient_role_elems:
+                logger.info("[CDA HEADER] No patientRole found for patient contact extraction")
+                return None
+            
+            patient_role = patient_role_elems[0]
+            
+            # Extract contact info from patientRole (addresses and telecoms at patientRole level only)
+            contact_info = self._extract_contact_info(patient_role)
+            
+            logger.info(f"[CDA HEADER] Extracted patient contact info: {len(contact_info.addresses)} addresses, {len(contact_info.telecoms)} telecoms")
+            return contact_info
+            
+        except Exception as e:
+            logger.error(f"Error extracting patient contact info: {e}")
+            return None

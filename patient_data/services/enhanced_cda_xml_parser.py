@@ -214,7 +214,7 @@ class EnhancedCDAXMLParser:
         # Prefer the new CDAHeaderExtractor for enhanced guardian/participant extraction
         if CDA_HEADER_EXTRACTOR_AVAILABLE:
             self.admin_extractor = CDAHeaderExtractor()
-            logger.info("*** 🎉 USING CDAHeaderExtractor for enhanced administrative data extraction! 🎉 ***")
+            logger.info("*** USING CDAHeaderExtractor for enhanced administrative data extraction! ***")
         elif CDAAdministrativeExtractor:
             # Fallback to legacy extractor
             self.admin_extractor = CDAAdministrativeExtractor()
