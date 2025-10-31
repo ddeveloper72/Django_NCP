@@ -197,6 +197,7 @@ class ContextBuilder:
             context['legal_authenticator'] = admin_data.get('legal_authenticator')
             context['document_creation_date'] = admin_data.get('document_creation_date')
             context['document_title'] = admin_data.get('document_title')
+            context['patient_contact_info'] = admin_data.get('patient_contact_info')  # CRITICAL: Patient's own contact info
         elif is_dataclass(admin_data):
             # ARCHITECTURE ALIGNMENT: Convert dataclass to dict following clinical sections pattern
             # Clinical sections return dict structures, so administrative data should match
