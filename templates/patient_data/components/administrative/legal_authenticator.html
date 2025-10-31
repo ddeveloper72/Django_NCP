@@ -13,10 +13,14 @@
         <div class="card-body">
             {# AUTHENTICATOR DETAILS #}
             {% if legal_authenticator.full_name %}
-            <div class="authenticator-section mb-4 pb-3 border-bottom">
+            <div class="authenticator-section mb-3">
+                {# Authenticator Name with Organization #}
                 <h5 class="text-success mb-2">
                     <i class="fa-solid fa-user-shield me-2"></i>
                     {{ legal_authenticator.full_name }}
+                    {% if legal_authenticator.organization.name %}
+                        - {{ legal_authenticator.organization.name }}
+                    {% endif %}
                 </h5>
                 
                 {# Authenticator Role #}
@@ -26,7 +30,7 @@
                 </div>
                 {% endif %}
                 
-                {# Authentication Details #}
+                {# Authentication Time #}
                 {% if legal_authenticator.timestamp %}
                 <div class="mb-3">
                     <strong class="d-block mb-1">
@@ -37,16 +41,16 @@
                 </div>
                 {% endif %}
                 
-                {# Authenticator's Contact Information #}
+                {# Contact Information - Single Address Only #}
                 <div class="mt-3">
                     <strong class="d-block mb-2">
                         <i class="fa-solid fa-address-card me-2 text-success"></i>
                         Contact:
                     </strong>
                     
-                    {# Authenticator's Address #}
+                    {# Show only first address to avoid CDA duplicates #}
                     {% if legal_authenticator.contact_info.addresses %}
-                        {% for address in legal_authenticator.contact_info.addresses %}
+                        {% with address=legal_authenticator.contact_info.addresses.0 %}
                         <div class="ms-3 mb-2">
                             <i class="fa-solid fa-location-dot me-2 text-muted"></i>
                             {% if address.street %}{{ address.street }}<br>{% endif %}
@@ -56,10 +60,10 @@
                             </span>
                             {% if address.country %}<br><span class="ms-4">{{ address.country }}</span>{% endif %}
                         </div>
-                        {% endfor %}
+                        {% endwith %}
                     {% endif %}
                     
-                    {# Authenticator's Telecoms #}
+                    {# Telecoms (phone/email) #}
                     {% if legal_authenticator.contact_info.telecoms %}
                         {% for telecom in legal_authenticator.contact_info.telecoms %}
                             {% if 'tel:' in telecom.value %}
@@ -74,76 +78,6 @@
                                 </div>
                             {% endif %}
                         {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-            
-            {# REPRESENTED ORGANIZATION #}
-            {% if legal_authenticator.organization %}
-            <div class="organization-section">
-                <h6 class="text-secondary mb-3">
-                    <i class="fa-solid fa-hospital me-2"></i>
-                    Represented Organization
-                </h6>
-                
-                <div class="ms-3">
-                    <p class="fw-bold mb-2">{{ legal_authenticator.organization.name }}</p>
-                    
-                    {# Organization Contact Information #}
-                    <div class="mb-3">
-                        <strong class="d-block mb-2 text-muted">
-                            <i class="fa-solid fa-address-book me-2"></i>
-                            Organization Contact:
-                        </strong>
-                        
-                        {# Organization Address #}
-                        {% if legal_authenticator.organization.contact_info.addresses %}
-                            {% for address in legal_authenticator.organization.contact_info.addresses %}
-                            <div class="ms-3 mb-2">
-                                <i class="fa-solid fa-location-dot me-2 text-muted"></i>
-                                {% if address.street %}{{ address.street }}<br>{% endif %}
-                                <span class="ms-4">
-                                    {% if address.city %}{{ address.city }}{% endif %}
-                                    {% if address.postal_code %} {{ address.postal_code }}{% endif %}
-                                </span>
-                                {% if address.country %}<br><span class="ms-4">{{ address.country }}</span>{% endif %}
-                            </div>
-                            {% endfor %}
-                        {% endif %}
-                        
-                        {# Organization Telecoms #}
-                        {% if legal_authenticator.organization.contact_info.telecoms %}
-                            {% for telecom in legal_authenticator.organization.contact_info.telecoms %}
-                                {% if 'tel:' in telecom.value %}
-                                    <div class="ms-3 mb-1">
-                                        <i class="fa-solid fa-phone me-2 text-success"></i>
-                                        <strong>Phone:</strong> {{ telecom.value|slice:"4:" }}
-                                    </div>
-                                {% elif 'mailto:' in telecom.value %}
-                                    <div class="ms-3 mb-1">
-                                        <i class="fa-solid fa-envelope me-2 text-info"></i>
-                                        <strong>Email:</strong> {{ telecom.value|slice:"7:" }}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-                    
-                    {# Organization Identifiers #}
-                    {% if legal_authenticator.organization.identifiers %}
-                    <div class="mb-2">
-                        <strong class="d-block mb-1 text-muted">
-                            <i class="fa-solid fa-id-card me-2"></i>
-                            Organization ID:
-                        </strong>
-                        {% for identifier in legal_authenticator.organization.identifiers %}
-                            <div class="ms-3 mb-1 small text-muted">
-                                {% if identifier.root %}Root: {{ identifier.root }}{% endif %}
-                                {% if identifier.extension %} | Extension: {{ identifier.extension }}{% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
                     {% endif %}
                 </div>
             </div>
