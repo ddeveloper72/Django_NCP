@@ -802,9 +802,12 @@ class CDAHeaderExtractor:
         """
         Extract patient's own contact information from patientRole
         
-        Note: This extracts the patient's direct contact info (addresses/telecoms)
-        from the patientRole element, NOT guardian/participant contact info.
+        Note: This extracts ONLY direct children of patientRole (addresses/telecoms),
+        NOT nested guardian/participant contact info.
         """
+        telecoms = []
+        addresses = []
+        
         try:
             # Find patientRole element
             if LXML_AVAILABLE:
@@ -818,11 +821,58 @@ class CDAHeaderExtractor:
             
             patient_role = patient_role_elems[0]
             
-            # Extract contact info from patientRole (addresses and telecoms at patientRole level only)
-            contact_info = self._extract_contact_info(patient_role)
+            # Extract DIRECT CHILD telecoms only (not descendant search)
+            if LXML_AVAILABLE:
+                telecom_elems = patient_role.xpath('./cda:telecom', namespaces=self.namespaces)
+            else:
+                telecom_elems = patient_role.findall('{urn:hl7-org:v3}telecom')
             
-            logger.info(f"[CDA HEADER] Extracted patient contact info: {len(contact_info.addresses)} addresses, {len(contact_info.telecoms)} telecoms")
-            return contact_info
+            for telecom in telecom_elems:
+                value = telecom.get('value', '')
+                use = telecom.get('use', '')
+                if value:
+                    telecoms.append({'value': value, 'use': use})
+            
+            # Extract DIRECT CHILD addresses only (not descendant search)
+            if LXML_AVAILABLE:
+                addr_elems = patient_role.xpath('./cda:addr', namespaces=self.namespaces)
+            else:
+                addr_elems = patient_role.findall('{urn:hl7-org:v3}addr')
+            
+            for addr in addr_elems:
+                address_info = {}
+                
+                # Extract address components
+                if LXML_AVAILABLE:
+                    street_elems = addr.xpath('./cda:streetAddressLine', namespaces=self.namespaces)
+                    city_elems = addr.xpath('./cda:city', namespaces=self.namespaces)
+                    postal_elems = addr.xpath('./cda:postalCode', namespaces=self.namespaces)
+                    country_elems = addr.xpath('./cda:country', namespaces=self.namespaces)
+                else:
+                    street_elems = addr.findall('{urn:hl7-org:v3}streetAddressLine')
+                    city_elems = addr.findall('{urn:hl7-org:v3}city')
+                    postal_elems = addr.findall('{urn:hl7-org:v3}postalCode')
+                    country_elems = addr.findall('{urn:hl7-org:v3}country')
+                
+                if street_elems and street_elems[0].text:
+                    address_info['street'] = street_elems[0].text
+                if city_elems and city_elems[0].text:
+                    address_info['city'] = city_elems[0].text
+                if postal_elems and postal_elems[0].text:
+                    address_info['postal_code'] = postal_elems[0].text
+                if country_elems and country_elems[0].text:
+                    address_info['country'] = country_elems[0].text
+                    
+                if address_info:
+                    addresses.append(address_info)
+            
+            logger.info(f"[CDA HEADER] Extracted patient contact info: {len(addresses)} addresses, {len(telecoms)} telecoms")
+            
+            if telecoms or addresses:
+                return ContactInfo(telecoms=telecoms, addresses=addresses)
+            else:
+                logger.warning("[CDA HEADER] No patient contact info found in patientRole")
+                return None
             
         except Exception as e:
             logger.error(f"Error extracting patient contact info: {e}")
