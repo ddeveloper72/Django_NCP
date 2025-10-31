@@ -263,11 +263,19 @@ class CDAViewProcessor:
                     
                     # Log extraction results - patient_contact_info is now in administrative_data
                     guardians = administrative_result.get('guardians', [])
-                    patient_contact_info = getattr(admin_data, 'patient_contact_info', None)
+                    # admin_data can be either a dict or dataclass - handle both cases
+                    if isinstance(admin_data, dict):
+                        patient_contact_info = admin_data.get('patient_contact_info', None)
+                    else:
+                        patient_contact_info = getattr(admin_data, 'patient_contact_info', None)
+                    
                     if patient_contact_info:
+                        # patient_contact_info can be DotDict or dict - use .get() for safety
+                        addresses = patient_contact_info.get('addresses', []) if hasattr(patient_contact_info, 'get') else getattr(patient_contact_info, 'addresses', [])
+                        telecoms = patient_contact_info.get('telecoms', []) if hasattr(patient_contact_info, 'get') else getattr(patient_contact_info, 'telecoms', [])
                         logger.info(f"[CDA PROCESSOR] Added administrative fields to context: "
-                                   f"{len(patient_contact_info.telecoms)} telecoms, "
-                                   f"{len(patient_contact_info.addresses)} addresses, "
+                                   f"{len(telecoms)} telecoms, "
+                                   f"{len(addresses)} addresses, "
                                    f"{len(guardians)} guardians")
                     else:
                         logger.info(f"[CDA PROCESSOR] Added administrative fields to context: "

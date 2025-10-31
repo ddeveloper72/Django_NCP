@@ -245,14 +245,24 @@ class ContextBuilder:
                 context['documentation_of'] = doc_of
             
             # Patient's own contact information (from patientRole)
-            patient_contact = getattr(admin_data, 'patient_contact_info', None)
+            # admin_data can be either a dict or dataclass - handle both cases
+            if isinstance(admin_data, dict):
+                patient_contact = admin_data.get('patient_contact_info', None)
+            else:
+                patient_contact = getattr(admin_data, 'patient_contact_info', None)
+            
             if patient_contact and is_dataclass(patient_contact):
                 context['patient_contact_info'] = asdict(patient_contact)
             else:
                 context['patient_contact_info'] = patient_contact
             
-            context['document_creation_date'] = getattr(admin_data, 'document_creation_date', '')
-            context['document_title'] = getattr(admin_data, 'document_title', '')
+            # Extract other fields - handle dict vs dataclass
+            if isinstance(admin_data, dict):
+                context['document_creation_date'] = admin_data.get('document_creation_date', '')
+                context['document_title'] = admin_data.get('document_title', '')
+            else:
+                context['document_creation_date'] = getattr(admin_data, 'document_creation_date', '')
+                context['document_title'] = getattr(admin_data, 'document_title', '')
         
         # Log successful extraction of individual attributes
         author_info = context.get('author_hcp')
