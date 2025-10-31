@@ -101,6 +101,8 @@
                         </button>
                     </li>
 
+                    {% if cda_type != 'L1' %}
+                    <!-- Clinical Information Tab - Only show for L3/FHIR documents with parsed data -->
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="clinical-tab" data-bs-toggle="tab"
                             data-bs-target="#clinical-content" type="button" role="tab"
@@ -109,6 +111,17 @@
                             Clinical Information
                         </button>
                     </li>
+                    {% else %}
+                    <!-- Original Document Tab - Show for L1 documents -->
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="original-doc-tab" data-bs-toggle="tab"
+                            data-bs-target="#original-doc-content" type="button" role="tab"
+                            aria-controls="original-doc-content" aria-selected="false">
+                            <i class="fa-solid fa-file-pdf me-2"></i>
+                            Original Clinical Document
+                        </button>
+                    </li>
+                    {% endif %}
 
                     <!-- PHASE 3B: Healthcare Team & Contacts Tab -->
                     <li class="nav-item" role="presentation">
@@ -320,7 +333,8 @@
                         </div>
                     </div>
 
-                    <!-- Clinical Information Tab Content -->
+                    {% if cda_type != 'L1' %}
+                    <!-- Clinical Information Tab Content - Only for L3/FHIR documents -->
                     <div class="tab-pane fade" id="clinical-content" role="tabpanel" aria-labelledby="clinical-tab">
                         <div class="p-4">
                             {% if clinical_arrays %}
@@ -329,11 +343,81 @@
                                 <div class="alert alert-info">
                                     <i class="fa-solid fa-info-circle me-2"></i>
                                     <strong>No Clinical Information Available</strong>
-                                    <p class="mb-0">Clinical data is not available for this patient or has not been processed yet.</p>
+                                    <p class="mb-0">Clinical data has not been extracted from this document yet.</p>
                                 </div>
                             {% endif %}
                         </div>
                     </div>
+                    {% else %}
+                    <!-- Original Document Tab Content - For L1 documents -->
+                    <div class="tab-pane fade" id="original-doc-content" role="tabpanel" aria-labelledby="original-doc-tab">
+                        <div class="p-4">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h3 class="mb-0">
+                                        <i class="fa-solid fa-file-medical me-2"></i>
+                                        Original Clinical Document (L1)
+                                    </h3>
+                                </div>
+                                <div class="card-body">
+                                    <p class="lead">
+                                        This is the original clinical document from {{ source_country|country_name }}.
+                                        L1 documents contain the complete unprocessed clinical data in its native format.
+                                    </p>
+                                    
+                                    <div class="alert alert-primary">
+                                        <i class="fa-solid fa-info-circle me-2"></i>
+                                        <strong>What is an L1 Document?</strong>
+                                        <p class="mb-0">L1 (Level 1) documents are original clinical documents that have not been transformed 
+                                        to the European Patient Summary format. They contain the complete medical information as provided 
+                                        by the source healthcare facility.</p>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-3">
+                                        {% if session_id %}
+                                        <!-- View PDF Button -->
+                                        <a href="{% url 'patient_data:view_pdf' session_id 0 %}" 
+                                           class="btn btn-lg btn-primary" target="_blank">
+                                            <i class="fa-solid fa-file-pdf me-2"></i>
+                                            View Original Document (PDF)
+                                        </a>
+                                        
+                                        <!-- Download PDF Button -->
+                                        <a href="{% url 'patient_data:download_pdf' session_id 0 %}" 
+                                           class="btn btn-lg btn-outline-primary">
+                                            <i class="fa-solid fa-download me-2"></i>
+                                            Download Original Document
+                                        </a>
+                                        
+                                        <!-- View XML Source Button -->
+                                        <button type="button" class="btn btn-lg btn-outline-secondary" 
+                                                data-bs-toggle="collapse" data-bs-target="#xmlSourceCollapse">
+                                            <i class="fa-solid fa-code me-2"></i>
+                                            View XML Source
+                                        </button>
+                                        
+                                        <div class="collapse mt-3" id="xmlSourceCollapse">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <strong>CDA XML Source</strong>
+                                                </div>
+                                                <div class="card-body">
+                                                    <pre class="bg-light p-3" style="max-height: 500px; overflow-y: auto; font-size: 0.85em;"><code>{{ cda_content|default:"XML content not available" }}</code></pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% else %}
+                                        <div class="alert alert-warning">
+                                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                            Session information is missing. Please return to patient search and try again.
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <!-- PHASE 3B: Healthcare Team & Contacts Tab Content -->
                     <div class="tab-pane fade" id="healthcare-team-content" role="tabpanel" aria-labelledby="healthcare-team-tab">
