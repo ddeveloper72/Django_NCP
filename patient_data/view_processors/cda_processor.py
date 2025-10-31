@@ -121,22 +121,23 @@ class CDAViewProcessor:
                 })
                 return context
             
-            # Parse CDA document
-            parsed_data = self._parse_cda_document(cda_content, session_id)
-            if not parsed_data:
-                context.update({
-                    'processing_failed': True,
-                    'error_type': 'CDA Parsing Failed',
-                    'error_details': "CDA document parsing failed",
-                    'suggested_action': 'Please verify the CDA document is valid.',
-                })
-                return context
+            # Extract administrative data
+            administrative_result = self._extract_administrative_data(cda_content, session_id)
+            if not administrative_result or not administrative_result.get('patient_identity'):
+                logger.warning("[CDA PROCESSOR] No patient identity found in administrative data extraction")
 
             # Store CDA content for comprehensive service
             self._store_cda_content_for_service(cda_content)
 
-            # Build context from parsed CDA data
-            self._build_cda_context(context, parsed_data, match_data, cda_content)
+            # Add administrative data to context
+            if administrative_result:
+                context.update({
+                    'patient_identity': administrative_result.get('patient_identity', {}),
+                    'administrative_data': administrative_result.get('administrative_data', {}),
+                    'patient_extended_data': administrative_result.get('patient_extended_data', {}),
+                    'contact_data': administrative_result.get('contact_data', {}),
+                    'healthcare_data': administrative_result.get('healthcare_data', {})
+                })
             
             # Add CDA-specific metadata
             self._add_cda_metadata(context, match_data, cda_content, actual_cda_type)
@@ -193,13 +194,15 @@ class CDAViewProcessor:
             
             if cda_content:
                 logger.info("[CDA PROCESSOR] *** INVOKING UNIFIED PIPELINE ***")
-                # Process CDA content using specialized service agents (FULL API with session_id)
+                
+                # STEP 1: Extract administrative data (patient identity, demographics, healthcare team)
+                logger.info("[CDA PROCESSOR] Step 1: Extracting administrative data")
+                administrative_result = self._extract_administrative_data(cda_content, session_id)
+                
+                # STEP 2: Process clinical data using unified pipeline
+                logger.info("[CDA PROCESSOR] Step 2: Processing clinical data via unified pipeline")
                 unified_clinical_arrays = clinical_pipeline_manager.process_cda_content(request, session_id, cda_content)
                 logger.info(f"[CDA PROCESSOR] Pipeline returned {len(unified_clinical_arrays)} sections")
-                
-                # CRITICAL FIX: Extract patient identity using Enhanced CDA XML Parser since unified pipeline doesn't handle it
-                logger.info("[CDA PROCESSOR] Extracting patient identity via Enhanced CDA XML Parser")
-                parsed_data = self._parse_cda_document(cda_content, session_id)
                 
                 # Get template context from pipeline manager (FULL API with session_id)
                 pipeline_context = clinical_pipeline_manager.get_template_context(request, session_id)
@@ -241,28 +244,28 @@ class CDAViewProcessor:
                 
                 logger.info(f"[CDA PROCESSOR] Mapped unified pipeline data to template context - clinical sections: {len(pipeline_context) if pipeline_context else 0}")
                 
-                # Add patient identity from Enhanced CDA XML Parser if available
-                if parsed_data and 'patient_identity' in parsed_data:
-                    context['patient_identity'] = parsed_data['patient_identity']
-                    logger.info(f"[CDA PROCESSOR] Added patient identity to context from Enhanced CDA XML Parser")
+                # STEP 3: Add administrative data to context (from Step 1)
+                logger.info("[CDA PROCESSOR] Step 3: Adding administrative data to context")
+                if administrative_result:
+                    # Add patient identity
+                    if administrative_result.get('patient_identity'):
+                        context['patient_identity'] = administrative_result['patient_identity']
+                        logger.info(f"[CDA PROCESSOR] Added patient identity to context")
+                    
+                    # Add administrative data fields
+                    context.update({
+                        'administrative_data': administrative_result.get('administrative_data', {}),
+                        'patient_extended_data': administrative_result.get('patient_extended_data', {}),
+                        'contact_data': administrative_result.get('contact_data', {}),
+                        'healthcare_data': administrative_result.get('healthcare_data', {})
+                    })
+                    logger.info(f"[CDA PROCESSOR] Added {len(administrative_result.get('administrative_data', {}))} administrative fields to context")
                 
                 # Add CDA-specific metadata
                 self._add_cda_metadata(context, match_data, cda_content, actual_cda_type)
                 
                 # Finalize context
                 context = self.context_builder.finalize_context(context)
-                
-                # CRITICAL FIX: Add administrative data processing even for unified pipeline
-                # The unified pipeline focuses on clinical data but doesn't handle administrative data
-                logger.info(f"[CDA PROCESSOR] Adding administrative data to unified pipeline context")
-                try:
-                    # Parse CDA content to get administrative data
-                    parsed_data = self._parse_cda_document(cda_content, session_id)
-                    if parsed_data:
-                        self._build_cda_context(context, parsed_data, match_data, cda_content)
-                        logger.info(f"[CDA PROCESSOR] Successfully added administrative data to unified pipeline context")
-                except Exception as admin_error:
-                    logger.warning(f"[CDA PROCESSOR] Failed to add administrative data: {admin_error}")
                 
                 logger.info(f"[CDA PROCESSOR] Successfully processed via unified pipeline: {len(pipeline_context.get('sections_processed', []))} sections")
                 
@@ -490,21 +493,22 @@ class CDAViewProcessor:
     
     def _parse_cda_document(self, cda_content: str, session_id: str) -> Optional[Dict[str, Any]]:
         """
-        Parse CDA document using specialized extractors from working branch
+        Extract administrative data from CDA document
+        DEPRECATED: Clinical data is now handled by unified pipeline
+        This method only extracts administrative/demographic data
         
         Args:
             cda_content: CDA XML content
             session_id: Session identifier
             
         Returns:
-            Parsed CDA data with actual clinical details
+            Administrative data (patient identity, demographics, healthcare team)
         """
         try:
-            logger.info(f"[CDA PROCESSOR] Parsing CDA document for session {session_id} using specialized extractors")
+            logger.info(f"[CDA PROCESSOR] Extracting administrative data for session {session_id}")
             
-            # Strategy 1: Use specialized extractors for actual clinical data (from working branch)
-            logger.info("[CDA PROCESSOR DEBUG] Trying Strategy 1: specialized extractors")
-            clinical_data = self._extract_with_specialized_extractors(cda_content)
+            # Extract administrative data only (clinical data handled by unified pipeline)
+            clinical_data = self._extract_administrative_data(cda_content, session_id)
             if clinical_data and clinical_data.get('sections'):
                 logger.info(f"[CDA PROCESSOR DEBUG] Strategy 1 SUCCEEDED - {len(clinical_data['sections'])} sections")
                 logger.info(f"[CDA PROCESSOR DEBUG] Strategy 1 admin data: {bool(clinical_data.get('administrative_data'))}")
@@ -906,282 +910,61 @@ class CDAViewProcessor:
             'display_filename': self._get_display_filename(match_data),
         })
     
-    def _extract_with_specialized_extractors(self, cda_content: str) -> Optional[Dict[str, Any]]:
+    def _extract_administrative_data(self, cda_content: str, session_id: str) -> Dict[str, Any]:
         """
-        Extract clinical data using Enhanced CDA XML Parser with Phase 3A administrative methods
+        Extract administrative data (patient demographics, healthcare team, contacts) from CDA
+        Uses Enhanced CDA XML Parser for unified administrative data extraction
         
         Args:
             cda_content: CDA XML content
+            session_id: Session identifier for caching
             
         Returns:
-            Extracted clinical data with administrative data from Phase 3A unified methods
+            Dictionary containing administrative_data and patient_identity
         """
         try:
-            logger.info("[CDA PROCESSOR] Using Enhanced CDA XML Parser with Phase 3A administrative methods")
+            logger.info(f"[CDA PROCESSOR] Extracting administrative data for session {session_id}")
             
-            # PHASE 3A: Use Enhanced CDA XML Parser for unified administrative data extraction
+            # Use Enhanced CDA XML Parser for unified administrative data extraction
             from ..services.enhanced_cda_xml_parser import EnhancedCDAXMLParser
             
             parser = EnhancedCDAXMLParser()
             enhanced_result = parser.parse_cda_content(cda_content)
             
-            # DEBUG: Log what we got from Enhanced CDA XML Parser
-            logger.info(f"[CDA PROCESSOR DEBUG] Enhanced result keys: {list(enhanced_result.keys()) if enhanced_result else 'None'}")
-            admin_data = enhanced_result.get('administrative_data', {}) if enhanced_result else {}
-            logger.info(f"[CDA PROCESSOR DEBUG] Administrative data type: {type(admin_data)}, length: {len(admin_data) if isinstance(admin_data, dict) else 'N/A'}")
-            logger.info(f"[CDA PROCESSOR DEBUG] Has administrative data: {bool(admin_data)}")
-            
-            # MODIFIED: Always use Enhanced CDA XML Parser result if it exists, regardless of administrative_data
             if enhanced_result:
-                logger.info(f"[CDA PROCESSOR] Enhanced CDA XML Parser succeeded - using result")
                 admin_data = enhanced_result.get('administrative_data', {})
-                if admin_data:
-                    logger.info(f"[CDA PROCESSOR] Found {len(admin_data)} administrative data fields")
+                patient_identity = enhanced_result.get('patient_identity', {})
                 
-                # CRITICAL FIX: Don't transform the administrative data - use it as-is from CDAHeaderExtractor
-                # The CDAHeaderExtractor already provides the correct structure that templates expect
-                # transformed_admin_data = self._transform_administrative_data(admin_data) if admin_data else {}
-                # USE THE ORIGINAL ADMINISTRATIVE DATA DIRECTLY
-                original_admin_data = admin_data
-                logger.info(f"[CDA PROCESSOR DEBUG] Preserving original CDAHeaderExtractor administrative data with fields: {list(original_admin_data.keys()) if original_admin_data else []}")
+                logger.info(f"[CDA PROCESSOR] Extracted administrative data: {len(admin_data)} fields, patient_identity: {bool(patient_identity)}")
                 
-                # Check for overlapping sections to avoid duplication in UI
-                sections = enhanced_result.get('sections', [])
-                hide_mandatory_allergies = False
-                hide_mandatory_procedures = False
-                hide_mandatory_devices = False
-                
-                # Check section titles for overlapping content
-                for section in sections:
-                    # Handle title structure from Enhanced CDA XML Parser (dict with coded/translated)
-                    title_data = section.get('title', '')
-                    if isinstance(title_data, dict):
-                        title = title_data.get('translated', title_data.get('coded', '')).lower()
-                    else:
-                        title = str(title_data).lower()
-                    
-                    if 'allerg' in title or 'adverse' in title:
-                        hide_mandatory_allergies = True
-                    elif 'procedure' in title or 'history of procedure' in title:
-                        hide_mandatory_procedures = True
-                    elif 'device' in title or 'medical device' in title:
-                        hide_mandatory_devices = True
-                
-                # CRITICAL: Apply PS Table Renderer to convert raw sections to rich HTML tables
-                logger.info(f"[CDA PROCESSOR] Applying PS Table Renderer to {len(sections)} sections")
-                try:
-                    from ..services.ps_table_renderer import PSTableRenderer
-                    ps_renderer = PSTableRenderer(target_language='en')
-                    
-                    # Render sections using PS Table Renderer for rich formatted display
-                    if sections:
-                        rendered_sections = ps_renderer.render_section_tables(sections)
-                        logger.info(f"[CDA PROCESSOR] PS Table Renderer processed {len(rendered_sections)} sections")
-                        # Use the rendered sections instead of raw sections
-                        sections = rendered_sections
-                    else:
-                        logger.warning("[CDA PROCESSOR] No sections to render with PS Table Renderer")
-                        
-                except Exception as e:
-                    logger.error(f"[CDA PROCESSOR] PS Table Renderer failed: {e}")
-                    logger.warning("[CDA PROCESSOR] Falling back to raw sections without PS rendering")
-                
-                logger.info(f"[CDA PROCESSOR] Hide flags - allergies: {hide_mandatory_allergies}, procedures: {hide_mandatory_procedures}, devices: {hide_mandatory_devices}")
-                
-                # Return enhanced result with ORIGINAL administrative data for Healthcare Team & Contacts tab
                 return {
-                    'success': True,
-                    'sections': sections,
-                    'clinical_data': {},
-                    'administrative_data': original_admin_data,
-                    'patient_identity': enhanced_result.get('patient_identity', {}),
-                    'has_clinical_data': len(sections) > 0,
-                    'has_administrative_data': bool(original_admin_data),
-                    'source': 'enhanced_cda_xml_parser_phase3a',
-                    # Add hide flags to the return context
-                    'hide_mandatory_allergies': hide_mandatory_allergies,
-                    'hide_mandatory_procedures': hide_mandatory_procedures,
-                    'hide_mandatory_devices': hide_mandatory_devices
+                    'administrative_data': admin_data,
+                    'patient_identity': patient_identity,
+                    'patient_extended_data': {},  # Placeholder for future enhancement
+                    'contact_data': {},  # Placeholder for future enhancement
+                    'healthcare_data': {}  # Placeholder for future enhancement
                 }
             
-            # Fallback to original specialized extractors if Enhanced CDA XML Parser fails
-            logger.info("[CDA PROCESSOR] Enhanced CDA XML Parser failed, falling back to specialized extractors")
-            
-            sections = []
-            clinical_arrays = {
-                'medications': [],
-                'allergies': [],
-                'problems': [],
-                'procedures': [],
-                'vital_signs': [],
-                'results': [],
-                'immunizations': [],
-                'medical_devices': [],
+            logger.warning("[CDA PROCESSOR] Enhanced CDA XML Parser returned no administrative data")
+            return {
+                'administrative_data': {},
+                'patient_identity': {},
+                'patient_extended_data': {},
+                'contact_data': {},
+                'healthcare_data': {}
             }
             
-            # Import specialized extractors (fallback for legacy CDA files)
-            from ..services.history_of_past_illness_extractor import HistoryOfPastIllnessExtractor
-            # from ..services.immunizations_extractor import ImmunizationsExtractor  # DISABLED - Replaced by ImmunizationsSectionService
-            from ..services.pregnancy_history_extractor import PregnancyHistoryExtractor
-            from ..services.social_history_extractor import SocialHistoryExtractor
-            from ..services.physical_findings_extractor import PhysicalFindingsExtractor
-            from ..services.coded_results_extractor import CodedResultsExtractor
-            
-            # History of Past Illness Extractor
-            try:
-                history_extractor = HistoryOfPastIllnessExtractor()
-                history_entries = history_extractor.extract_history_of_past_illness(cda_content)
-                if history_entries:
-                    logger.info(f"[SPECIALIZED] History of Past Illness: {len(history_entries)} entries extracted")
-                    
-                    # Convert to clinical arrays format for problems
-                    for entry in history_entries:
-                        clinical_arrays['problems'].append({
-                            'name': entry.problem_name,
-                            'type': entry.problem_type,
-                            'status': entry.problem_status,
-                            'time_period': entry.time_period,
-                            'health_status': entry.health_status,
-                            'code': entry.problem_code,
-                            'code_system': entry.problem_code_system,
-                            'display': entry.problem_code_display,
-                            'source': 'specialized_extractor'
-                        })
-                    
-                    # Create section for template
-                    sections.append({
-                        'title': 'History of Past Illness',
-                        'code': '11348-0',
-                        'entries': history_entries,
-                        'entry_count': len(history_entries),
-                        'has_entries': True,
-                        'medical_terminology_count': sum(1 for e in history_entries if e.problem_code)
-                    })
-            except Exception as e:
-                logger.warning(f"[CDA PROCESSOR] History of Past Illness extraction failed: {e}")
-            
-            # LEGACY IMMUNIZATIONS EXTRACTOR - DISABLED
-            # REASON: Replaced by ImmunizationsSectionService with comprehensive 12-field extraction
-            # The new service provides: vaccine name, brand name, vaccination date, agent codes (SNOMED/ATC),
-            # marketing authorization holder, dose number, batch/lot number, administering center,
-            # health professional ID, country of vaccination, and annotations
-            # This legacy extractor is no longer needed and was creating competing/incomplete data
-            logger.debug("[CDA PROCESSOR] Skipping legacy ImmunizationsExtractor - using ImmunizationsSectionService instead")
-            
-            # try:
-            #     immunizations_extractor = ImmunizationsExtractor()
-            #     immunization_entries = immunizations_extractor.extract_immunizations(cda_content)
-            #     if immunization_entries:
-            #         logger.info(f"[SPECIALIZED] Immunizations: {len(immunization_entries)} entries extracted")
-            #         
-            #         # Convert to clinical arrays format
-            #         for entry in immunization_entries:
-            #             clinical_arrays['immunizations'].append({
-            #                 'name': entry.vaccination_name,
-            #                 'brand_name': entry.brand_name,
-            #                 'date_administered': entry.vaccination_date,
-            #                 'dose_number': entry.dose_number,
-            #                 'agent': entry.agent,
-            #                 'manufacturer': entry.marketing_authorization_holder,
-            #                 'lot_number': entry.batch_lot_number,
-            #                 'code': getattr(entry, 'vaccination_code', ''),
-            #                 'code_system': getattr(entry, 'vaccination_code_system', ''),
-            #                 'source': 'specialized_extractor'
-            #             })
-            #         
-            #         sections.append({
-            #             'title': 'Immunizations',
-            #             'code': '11369-6',
-            #             'entries': immunization_entries,
-            #             'entry_count': len(immunization_entries),
-            #             'has_entries': True,
-            #             'medical_terminology_count': sum(1 for e in immunization_entries if getattr(e, 'vaccination_code', ''))
-            #         })
-            # except Exception as e:
-            #     logger.warning(f"[CDA PROCESSOR] Immunizations extraction failed: {e}")
-            
-            # Physical Findings Extractor (for vital signs and results)
-            try:
-                physical_extractor = PhysicalFindingsExtractor()
-                physical_entries = physical_extractor.extract_physical_findings(cda_content)
-                if physical_entries:
-                    logger.info(f"[SPECIALIZED] Physical Findings: {len(physical_entries)} entries extracted")
-                    
-                    # Convert to clinical arrays format for vital signs and results
-                    for entry in physical_entries:
-                        if 'vital' in entry.observation_type.lower() or 'sign' in entry.observation_type.lower():
-                            clinical_arrays['vital_signs'].append({
-                                'name': entry.observation_type,
-                                'value': entry.observation_value,
-                                'unit': entry.value_unit,
-                                'date': entry.observation_time,
-                                'status': entry.status,
-                                'source': 'specialized_extractor'
-                            })
-                        else:
-                            clinical_arrays['results'].append({
-                                'name': entry.observation_type,
-                                'value': entry.observation_value,
-                                'unit': entry.value_unit,
-                                'date': entry.observation_time,
-                                'status': entry.status,
-                                'source': 'specialized_extractor'
-                            })
-                    
-                    sections.append({
-                        'title': 'Physical Findings',
-                        'code': '29545-1',
-                        'entries': physical_entries,
-                        'entry_count': len(physical_entries),
-                        'has_entries': True,
-                        'medical_terminology_count': sum(1 for e in physical_entries if e.observation_code)
-                    })
-            except Exception as e:
-                logger.warning(f"[CDA PROCESSOR] Physical Findings extraction failed: {e}")
-            
-            # Coded Results Extractor (for blood group and diagnostic results)
-            try:
-                coded_extractor = CodedResultsExtractor()
-                coded_results = coded_extractor.extract_coded_results(cda_content)
-                if coded_results and (coded_results.get('blood_group') or coded_results.get('diagnostic_results')):
-                    logger.info(f"[SPECIALIZED] Coded Results: blood_group={len(coded_results.get('blood_group', []))}, diagnostic={len(coded_results.get('diagnostic_results', []))}")
-                    
-                    # Add blood group and diagnostic results to clinical arrays
-                    if coded_results.get('blood_group'):
-                        clinical_arrays['results'].extend(coded_results['blood_group'])
-                    if coded_results.get('diagnostic_results'):
-                        clinical_arrays['results'].extend(coded_results['diagnostic_results'])
-                    
-                    sections.append({
-                        'title': 'Coded Results',
-                        'code': '30954-2',
-                        'entries': coded_results,
-                        'entry_count': len(coded_results.get('blood_group', [])) + len(coded_results.get('diagnostic_results', [])),
-                        'has_entries': True,
-                        'medical_terminology_count': len(coded_results.get('blood_group', [])) + len(coded_results.get('diagnostic_results', []))
-                    })
-            except Exception as e:
-                logger.warning(f"[CDA PROCESSOR] Coded Results extraction failed: {e}")
-            
-            # Return structured data if we extracted anything
-            if sections or any(clinical_arrays.values()):
-                logger.info(f"[SPECIALIZED] Successfully extracted {len(sections)} sections with specialized extractors")
-                return {
-                    'success': True,
-                    'sections': sections,
-                    'clinical_data': clinical_arrays,
-                    'has_clinical_data': bool(sections),
-                    'source': 'specialized_extractors'
-                }
-            
-            logger.info("[SPECIALIZED] No clinical data extracted with specialized extractors")
-            return None
-            
         except Exception as e:
-            logger.error(f"[CDA PROCESSOR] Specialized extractor error: {e}")
+            logger.error(f"[CDA PROCESSOR] Administrative data extraction error: {e}")
             import traceback
             logger.error(f"Full traceback: {traceback.format_exc()}")
-            return None
+            return {
+                'administrative_data': {},
+                'patient_identity': {},
+                'patient_extended_data': {},
+                'contact_data': {},
+                'healthcare_data': {}
+            }
 
     def _get_display_filename(self, match_data: Dict[str, Any]) -> str:
         """Get appropriate display filename for CDA document"""
