@@ -1301,9 +1301,37 @@ class ClinicalFieldMapper:
             # Extract social history information
             observation_type = social.get("category", "Lifestyle")
             observation_value = social.get("description", "Not specified")
+            quantity = social.get("quantity", "Not specified")
+            frequency = social.get("frequency", "Not specified")
+            value_code = social.get("value_code")
+            value_system = social.get("value_system")
             start_date_raw = social.get("start_date", "")
             end_date_raw = social.get("end_date", "")
             status = social.get("status", "Active")
+            
+            # If we have a quantity, use it as the observation value
+            if quantity != "Not specified" and quantity != "":
+                observation_value = quantity
+            
+            # Try CTS translation for observation value if we have a code
+            if value_code and value_system and observation_value in [value_code, "Not specified"]:
+                logger.info(f"[FIELD_MAPPER] Social history observation value needs translation: '{value_code}'")
+                logger.info(f"[FIELD_MAPPER] Calling CTS for code={value_code}, system={value_system}")
+                
+                from patient_data.services.cts_integration.cts_service import CTSService
+                cts_service = CTSService()
+                cts_result = cts_service.get_term_display(value_code, value_system)
+                
+                logger.info(f"[FIELD_MAPPER] CTS returned for observation value: '{cts_result}'")
+                
+                if cts_result and cts_result != value_code:
+                    observation_value = cts_result
+                    logger.info(f"[FIELD_MAPPER] Using CTS translation: '{observation_value}'")
+                else:
+                    logger.warning(f"[FIELD_MAPPER] CTS returned no useful result for observation value {value_code}")
+                    # Keep original value_code as fallback
+                    if observation_value == "Not specified":
+                        observation_value = f"Code: {value_code}"
             
             # Format dates to European DD/MM/YYYY format
             start_date = self._format_cda_date(start_date_raw) if start_date_raw and start_date_raw != "Not specified" else ""
@@ -1327,7 +1355,9 @@ class ClinicalFieldMapper:
                 },
                 "observation_value": {
                     "display_value": observation_value,
-                    "value": observation_value
+                    "value": observation_value,
+                    "quantity": quantity,
+                    "frequency": frequency
                 },
                 "observation_time": {
                     "display_value": observation_time,
@@ -1348,6 +1378,8 @@ class ClinicalFieldMapper:
             mapped_item["display_name"] = observation_type
             mapped_item["observation_type"] = observation_type
             mapped_item["observation_value"] = observation_value
+            mapped_item["quantity"] = quantity
+            mapped_item["frequency"] = frequency
             mapped_item["observation_time"] = observation_time
             mapped_item["status"] = status
             

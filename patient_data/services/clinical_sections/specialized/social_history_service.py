@@ -18,11 +18,12 @@ import logging
 from typing import Dict, List, Any
 from django.http import HttpRequest
 from ..base.clinical_service_base import ClinicalServiceBase
+from ..cts_integration_mixin import CTSIntegrationMixin
 
 logger = logging.getLogger(__name__)
 
 
-class SocialHistorySectionService(ClinicalServiceBase):
+class SocialHistorySectionService(CTSIntegrationMixin, ClinicalServiceBase):
     """
     Specialized service for social history section data processing.
     
@@ -129,18 +130,32 @@ class SocialHistorySectionService(ClinicalServiceBase):
         """Parse social history section XML into structured data."""
         social_history = []
         
+        # First, build a mapping of observation IDs to narrative text from <text> section
+        narrative_map = {}
+        text_section = section.find('hl7:text', self.namespaces)
+        if text_section is not None:
+            paragraphs = text_section.findall('.//hl7:paragraph', self.namespaces)
+            for para in paragraphs:
+                para_id = para.get('ID')
+                para_text = para.text if para.text else ''
+                if para_id and para_text:
+                    narrative_map[para_id] = para_text.strip()
+        
         entries = section.findall('.//hl7:entry', self.namespaces)
         for entry in entries:
             observation = entry.find('.//hl7:observation', self.namespaces)
             if observation is not None:
-                social_item = self._parse_social_observation(observation)
+                social_item = self._parse_social_observation(observation, narrative_map)
                 if social_item:
                     social_history.append(social_item)
         
         return social_history
     
-    def _parse_social_observation(self, observation) -> Dict[str, Any]:
+    def _parse_social_observation(self, observation, narrative_map: Dict[str, str] = None) -> Dict[str, Any]:
         """Parse social history observation into structured data."""
+        if narrative_map is None:
+            narrative_map = {}
+        
         # Extract category from code
         code_elem = observation.find('hl7:code', self.namespaces)
         category = "Lifestyle"
@@ -160,11 +175,81 @@ class SocialHistorySectionService(ClinicalServiceBase):
             else:
                 category = display_name or "Lifestyle"
         
-        # Extract value/description
+        # Extract value/description with code for CTS translation
         value_elem = observation.find('hl7:value', self.namespaces)
         description = "Not specified"
+        value_code = None
+        value_system = None
+        quantity = "Not specified"
+        frequency = "Not specified"
+        
         if value_elem is not None:
-            description = value_elem.get('displayName', value_elem.get('code', 'Not specified'))
+            # Try to get displayName first
+            description = value_elem.get('displayName', 'Not specified')
+            value_code = value_elem.get('code')
+            value_system = value_elem.get('codeSystem')
+            
+            # Check if value has text content (for quantity/frequency)
+            if value_elem.text:
+                description = value_elem.text.strip()
+            
+            # If no displayName and no text, store code for CTS translation
+            if description == 'Not specified' and value_code:
+                description = value_code  # Will be translated by CTS
+        
+        # Try to extract quantity from value element attributes or child elements
+        # Look for quantity in value[@value] or value/quantity elements
+        if value_elem is not None:
+            quantity_value = value_elem.get('value')
+            quantity_unit = value_elem.get('unit')
+            if quantity_value:
+                if quantity_unit:
+                    quantity = f"{quantity_value} {quantity_unit}"
+                else:
+                    quantity = quantity_value
+        
+        # Look for text content in the observation using reference to narrative
+        text_elem = observation.find('hl7:text', self.namespaces)
+        if text_elem is not None:
+            # Check for reference to paragraph ID
+            reference_elem = text_elem.find('hl7:reference', self.namespaces)
+            if reference_elem is not None:
+                ref_value = reference_elem.get('value', '')
+                # Remove leading '#' from reference
+                if ref_value.startswith('#'):
+                    ref_id = ref_value[1:]
+                    # Look up narrative text from map
+                    if ref_id in narrative_map:
+                        narrative_text = narrative_map[ref_id]
+                        # Parse narrative text for category, quantity and frequency
+                        # Format: "Tobacco use and exposure: 0.5 {pack}/d since 2017-04-15"
+                        if ':' in narrative_text:
+                            parts = narrative_text.split(':', 1)
+                            if len(parts) == 2:
+                                # Update category from narrative if more descriptive
+                                category_from_text = parts[0].strip()
+                                if category_from_text:
+                                    category = category_from_text
+                                
+                                value_part = parts[1].strip()
+                                # Extract quantity/frequency from value_part
+                                if ' since ' in value_part:
+                                    qty_freq = value_part.split(' since ')[0].strip()
+                                    if qty_freq and qty_freq != '':
+                                        quantity = qty_freq
+                                        description = qty_freq
+            elif text_elem.text:
+                # Fallback: direct text content
+                narrative_text = text_elem.text.strip()
+                if ':' in narrative_text:
+                    parts = narrative_text.split(':', 1)
+                    if len(parts) == 2:
+                        value_part = parts[1].strip()
+                        if ' since ' in value_part:
+                            qty_freq = value_part.split(' since ')[0].strip()
+                            if qty_freq and qty_freq != '':
+                                quantity = qty_freq
+                                description = qty_freq
         
         # Extract effective time
         start_date = "Not specified"
@@ -178,9 +263,12 @@ class SocialHistorySectionService(ClinicalServiceBase):
                 start_date = low_elem.get('value', 'Not specified')
             if high_elem is not None:
                 end_date = high_elem.get('value', 'Not specified')
-            else:
-                # Single value time
-                start_date = effective_time.get('value', 'Not specified')
+            
+            # If no low/high elements, try direct value attribute
+            if start_date == 'Not specified' and end_date == 'Not specified':
+                single_value = effective_time.get('value')
+                if single_value:
+                    start_date = single_value
         
         # Extract status
         status_elem = observation.find('hl7:statusCode', self.namespaces)
@@ -191,9 +279,11 @@ class SocialHistorySectionService(ClinicalServiceBase):
         return {
             'category': category,
             'description': description,
+            'value_code': value_code,
+            'value_system': value_system,
             'status': status,
-            'frequency': 'Not specified',
-            'quantity': 'Not specified',
+            'frequency': frequency,
+            'quantity': quantity,
             'start_date': start_date,
             'end_date': end_date
         }
