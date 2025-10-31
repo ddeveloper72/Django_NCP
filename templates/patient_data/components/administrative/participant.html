@@ -42,9 +42,9 @@
                             Contact Information:
                         </strong>
                         
-                        {# Address #}
+                        {# Show only first address to avoid CDA duplicates #}
                         {% if participant.contact_info.addresses %}
-                            {% for address in participant.contact_info.addresses %}
+                            {% with address=participant.contact_info.addresses.0 %}
                             <div class="ms-3 mb-2">
                                 <i class="fa-solid fa-location-dot me-2 text-muted"></i>
                                 {% if address.street %}{{ address.street }}<br>{% endif %}
@@ -54,7 +54,7 @@
                                 </span>
                                 {% if address.country %}<br><span class="ms-4">{{ address.country }}</span>{% endif %}
                             </div>
-                            {% endfor %}
+                            {% endwith %}
                         {% endif %}
                         
                         {# Telecoms (Phone/Email) #}
@@ -80,58 +80,7 @@
                 </div>
                 {% endif %}
                 
-                {# ASSOCIATED ENTITY / ORGANIZATION (if present) #}
-                {% if participant.organization %}
-                <div class="organization-section mt-4 pt-3 border-top">
-                    <h6 class="text-secondary mb-3">
-                        <i class="fa-solid fa-building me-2"></i>
-                        Associated Organization
-                    </h6>
-                    
-                    <div class="ms-3">
-                        <p class="fw-bold mb-2">{{ participant.organization.name }}</p>
-                        
-                        {# Organization Contact Information #}
-                        {% if participant.organization.contact_info %}
-                        <div class="mb-2">
-                            <strong class="d-block mb-1 text-muted">
-                                <i class="fa-solid fa-address-book me-2"></i>
-                                Contact:
-                            </strong>
-                            
-                            {# Organization Address #}
-                            {% if participant.organization.contact_info.addresses %}
-                                {% for address in participant.organization.contact_info.addresses %}
-                                <div class="ms-3 mb-2 small">
-                                    <i class="fa-solid fa-location-dot me-2 text-muted"></i>
-                                    {% if address.street %}{{ address.street }}, {% endif %}
-                                    {% if address.city %}{{ address.city }}{% endif %}
-                                    {% if address.postal_code %} {{ address.postal_code }}{% endif %}
-                                </div>
-                                {% endfor %}
-                            {% endif %}
-                            
-                            {# Organization Telecoms #}
-                            {% if participant.organization.contact_info.telecoms %}
-                                {% for telecom in participant.organization.contact_info.telecoms %}
-                                    {% if 'tel:' in telecom.value %}
-                                        <div class="ms-3 mb-1 small">
-                                            <i class="fa-solid fa-phone me-2 text-success"></i>
-                                            {{ telecom.value|slice:"4:" }}
-                                        </div>
-                                    {% elif 'mailto:' in telecom.value %}
-                                        <div class="ms-3 mb-1 small">
-                                            <i class="fa-solid fa-envelope me-2 text-info"></i>
-                                            {{ telecom.value|slice:"7:" }}
-                                        </div>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
+
                 
                 {# Participation Time (if present) #}
                 {% if participant.time %}
