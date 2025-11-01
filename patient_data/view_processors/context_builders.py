@@ -219,7 +219,18 @@ class ContextBuilder:
             
             legal_auth = getattr(admin_data, 'legal_authenticator', None)
             if legal_auth and is_dataclass(legal_auth):
-                context['legal_authenticator'] = asdict(legal_auth)
+                # Convert to dict and flatten for template access
+                legal_auth_dict = asdict(legal_auth)
+                # Flatten person fields to top level for template compatibility
+                if 'person' in legal_auth_dict:
+                    person_data = legal_auth_dict['person']
+                    legal_auth_dict['full_name'] = person_data.get('full_name', '')
+                    legal_auth_dict['given_name'] = person_data.get('given_name', '')
+                    legal_auth_dict['family_name'] = person_data.get('family_name', '')
+                    legal_auth_dict['role'] = person_data.get('role', '')
+                # Keep timestamp and service_event_signing_time at top level (already there)
+                context['legal_authenticator'] = legal_auth_dict
+                logger.debug(f"[LEGAL_AUTH] Flattened legal_authenticator with timestamp: {legal_auth_dict.get('timestamp')}, service_event_signing_time: {legal_auth_dict.get('service_event_signing_time')}")
             else:
                 context['legal_authenticator'] = legal_auth
             
