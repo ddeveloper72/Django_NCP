@@ -1104,6 +1104,9 @@ class EnhancedCDAXMLParser:
                         "addresses": admin_data.legal_authenticator.contact_info.addresses if admin_data.legal_authenticator and admin_data.legal_authenticator.contact_info else [],
                         "telecoms": admin_data.legal_authenticator.contact_info.telecoms if admin_data.legal_authenticator and admin_data.legal_authenticator.contact_info else [],
                     }),
+                    # CRITICAL: Include timestamp fields for document signing display
+                    "timestamp": admin_data.legal_authenticator.timestamp if admin_data.legal_authenticator else "",
+                    "service_event_signing_time": admin_data.legal_authenticator.service_event_signing_time if admin_data.legal_authenticator else "",
                 }),
                 
                 # Backward compatibility fields with primary author

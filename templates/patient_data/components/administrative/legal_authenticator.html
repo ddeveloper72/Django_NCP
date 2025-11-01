@@ -87,20 +87,23 @@
                         {% endwith %}
                     {% endif %}
                     
-                    {# Telecoms (phone/email) #}
+                    {# Telecoms (phone/email) - Show unique values only #}
                     {% if legal_authenticator.contact_info.telecoms %}
-                        {% for telecom in legal_authenticator.contact_info.telecoms %}
-                            {% if 'tel:' in telecom.value %}
-                                <div class="ms-3 mb-1">
-                                    <i class="fa-solid fa-phone me-2 text-success"></i>
-                                    <strong>Phone:</strong> {{ telecom.value|slice:"4:" }}
-                                </div>
-                            {% elif 'mailto:' in telecom.value %}
-                                <div class="ms-3 mb-1">
-                                    <i class="fa-solid fa-envelope me-2 text-info"></i>
-                                    <strong>Email:</strong> {{ telecom.value|slice:"7:" }}
-                                </div>
-                            {% endif %}
+                        {% regroup legal_authenticator.contact_info.telecoms by value as telecom_groups %}
+                        {% for group in telecom_groups %}
+                            {% with telecom=group.list.0 %}
+                                {% if 'tel:' in telecom.value %}
+                                    <div class="ms-3 mb-1">
+                                        <i class="fa-solid fa-phone me-2 text-success"></i>
+                                        <strong>Phone:</strong> {{ telecom.value|slice:"4:" }}
+                                    </div>
+                                {% elif 'mailto:' in telecom.value %}
+                                    <div class="ms-3 mb-1">
+                                        <i class="fa-solid fa-envelope me-2 text-info"></i>
+                                        <strong>Email:</strong> {{ telecom.value|slice:"7:" }}
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
                         {% endfor %}
                     {% endif %}
                 </div>
