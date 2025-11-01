@@ -1,5 +1,6 @@
 {# CDA legalAuthenticator - Document Signer Component #}
 {# Expected context: legal_authenticator (DotDict with person details and organization) #}
+{% load patient_date_filters %}
 
 {% if legal_authenticator %}
 <div class="legal-authenticator-section mb-4">
@@ -37,7 +38,10 @@
                         <i class="fa-solid fa-calendar-check me-2 text-success"></i>
                         Authentication Time:
                     </strong>
-                    <p class="ms-3 mb-0">{{ legal_authenticator.timestamp }}</p>
+                    <p class="ms-3 mb-0">{{ legal_authenticator.timestamp|document_date }}</p>
+                    <p class="ms-3 mb-0">
+                        <small class="text-muted">{{ legal_authenticator.timestamp }}</small>
+                    </p>
                 </div>
                 {% endif %}
                 
@@ -46,15 +50,16 @@
                 <div class="mb-3">
                     <strong class="d-block mb-1">
                         <i class="fa-solid fa-pen-fancy me-2 text-success"></i>
-                        Document Signing Time:
+                        Document Signing Time (Service Event):
                     </strong>
-                    <p class="ms-3 mb-0 text-muted">
-                        <small>Service Event: {{ legal_authenticator.service_event_signing_time }}</small>
-                    </p>
+                    <p class="ms-3 mb-0">{{ legal_authenticator.service_event_signing_time|document_date }}</p>
                     <p class="ms-3 mb-0">
+                        <small class="text-muted">{{ legal_authenticator.service_event_signing_time }}</small>
+                    </p>
+                    <p class="ms-3 mb-0 mt-1">
                         <small class="text-info">
                             <i class="fa-solid fa-info-circle me-1"></i>
-                            Time when legal authenticator signed the document in the service event
+                            Time when the clinical service event was completed and signed
                         </small>
                     </p>
                 </div>
