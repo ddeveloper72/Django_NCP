@@ -182,9 +182,6 @@ class ContextBuilder:
             context: Context dictionary to update
             admin_data: Administrative data including custodian organization
         """
-        # DEBUG: Log admin_data type at entry
-        logger.info(f"[ADD_ADMIN_DATA] Entry - admin_data type: {type(admin_data).__name__}, is_dataclass: {is_dataclass(admin_data)}")
-        
         context['administrative_data'] = admin_data
         context['has_administrative_data'] = bool(admin_data)
         
@@ -192,7 +189,6 @@ class ContextBuilder:
         # This allows templates to access author_hcp, custodian_organization, guardians, etc. directly
         # Handle both dictionary and dataclass object access
         if isinstance(admin_data, dict):
-            logger.info("[ADD_ADMIN_DATA] Taking DICT branch")
             # Extract individual attributes from the administrative data dictionary
             context['author_hcp'] = admin_data.get('author_hcp')
             context['custodian_organization'] = admin_data.get('custodian_organization')
@@ -202,9 +198,7 @@ class ContextBuilder:
             context['document_creation_date'] = admin_data.get('document_creation_date')
             context['document_title'] = admin_data.get('document_title')
             context['patient_contact_info'] = admin_data.get('patient_contact_info')  # CRITICAL: Patient's own contact info
-            logger.info(f"[ADD_ADMIN_DATA] DICT branch - legal_authenticator type: {type(context['legal_authenticator']).__name__ if context.get('legal_authenticator') else 'None'}")
         elif is_dataclass(admin_data):
-            logger.info("[ADD_ADMIN_DATA] Taking DATACLASS branch")
             # ARCHITECTURE ALIGNMENT: Convert dataclass to dict following clinical sections pattern
             # Clinical sections return dict structures, so administrative data should match
             
@@ -224,12 +218,9 @@ class ContextBuilder:
                 context['custodian_organization'] = custodian_org
             
             legal_auth = getattr(admin_data, 'legal_authenticator', None)
-            logger.info(f"[ADD_ADMIN_DATA] DATACLASS branch - legal_auth type: {type(legal_auth).__name__ if legal_auth else 'None'}, is_dataclass: {is_dataclass(legal_auth) if legal_auth else False}")
             if legal_auth and is_dataclass(legal_auth):
                 # Convert to dict and flatten for template access
                 legal_auth_dict = asdict(legal_auth)
-                logger.info(f"[LEGAL_AUTH] After asdict - keys: {list(legal_auth_dict.keys())}")
-                logger.info(f"[LEGAL_AUTH] Raw values - timestamp: {legal_auth_dict.get('timestamp')}, service_event_signing_time: {legal_auth_dict.get('service_event_signing_time')}")
                 # Flatten person fields to top level for template compatibility
                 if 'person' in legal_auth_dict:
                     person_data = legal_auth_dict['person']
@@ -239,10 +230,9 @@ class ContextBuilder:
                     legal_auth_dict['role'] = person_data.get('role', '')
                 # Keep timestamp and service_event_signing_time at top level (already there)
                 context['legal_authenticator'] = legal_auth_dict
-                logger.info(f"[LEGAL_AUTH] Flattened legal_authenticator with timestamp: {legal_auth_dict.get('timestamp')}, service_event_signing_time: {legal_auth_dict.get('service_event_signing_time')}")
+                logger.debug(f"[LEGAL_AUTH] Flattened legal_authenticator with timestamp: {legal_auth_dict.get('timestamp')}, service_event_signing_time: {legal_auth_dict.get('service_event_signing_time')}")
             else:
                 context['legal_authenticator'] = legal_auth
-                logger.info(f"[LEGAL_AUTH] No flattening - legal_auth is None or not dataclass")
             
             # Convert lists that may contain dataclass objects
             guardians_list = getattr(admin_data, 'guardians', []) or []
