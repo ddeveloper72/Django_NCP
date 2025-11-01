@@ -56,6 +56,7 @@ class AuthorInfo:
     organization: Organization
     contact_info: ContactInfo
     timestamp: str = ""
+    service_event_signing_time: str = ""  # documentationOf/serviceEvent/effectiveTime/high
 
 
 @dataclass
@@ -399,16 +400,66 @@ class CDAHeaderExtractor:
                 role="Legal Authenticator"
             )
             
+            # Extract service event signing time (documentationOf/serviceEvent/effectiveTime/high)
+            service_event_signing_time = self._extract_service_event_signing_time(root)
+            
             return AuthorInfo(
                 person=person_info,
                 organization=organization,
                 contact_info=contact_info,
-                timestamp=timestamp
+                timestamp=timestamp,
+                service_event_signing_time=service_event_signing_time
             )
             
         except Exception as e:
             logger.error(f"Error extracting legal authenticator: {e}")
             return None
+    
+    def _extract_service_event_signing_time(self, root) -> str:
+        """
+        Extract the service event signing time from documentationOf section.
+        
+        This represents when the legal authenticator signed the document,
+        found in: documentationOf/serviceEvent/effectiveTime/high/@value
+        
+        Args:
+            root: CDA XML root element
+            
+        Returns:
+            Signing time as string (e.g., '20250317220000+0000'), empty string if not found
+        """
+        try:
+            # Find documentationOf/serviceEvent/effectiveTime/high
+            if LXML_AVAILABLE:
+                high_elems = root.xpath(
+                    '//cda:documentationOf/cda:serviceEvent/cda:effectiveTime/cda:high/@value',
+                    namespaces=self.namespaces
+                )
+                if high_elems:
+                    signing_time = high_elems[0]
+                    logger.info(f"[SERVICE_EVENT] Extracted signing time: {signing_time}")
+                    return signing_time
+            else:
+                # ElementTree approach
+                doc_of_elems = root.findall('.//{urn:hl7-org:v3}documentationOf')
+                for doc_of in doc_of_elems:
+                    service_event = doc_of.find('.//{urn:hl7-org:v3}serviceEvent')
+                    if service_event is not None:
+                        effective_time = service_event.find('.//{urn:hl7-org:v3}effectiveTime')
+                        if effective_time is not None:
+                            high_elem = effective_time.find('.//{urn:hl7-org:v3}high')
+                            if high_elem is not None:
+                                signing_time = high_elem.get('value', '')
+                                if signing_time:
+                                    logger.info(f"[SERVICE_EVENT] Extracted signing time: {signing_time}")
+                                    return signing_time
+            
+            logger.debug("[SERVICE_EVENT] No service event signing time found")
+            return ""
+            
+        except Exception as e:
+            logger.error(f"[SERVICE_EVENT] Error extracting service event signing time: {e}")
+            return ""
     
     def _extract_guardian(self, root) -> List[Dict[str, Any]]:
         """Extract guardian information from CDA document"""
