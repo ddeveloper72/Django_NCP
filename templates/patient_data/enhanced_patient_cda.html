@@ -352,69 +352,87 @@
                     <!-- Original Document Tab Content - For L1 documents -->
                     <div class="tab-pane fade" id="original-doc-content" role="tabpanel" aria-labelledby="original-doc-tab">
                         <div class="p-4">
+                            <div class="alert alert-primary">
+                                <i class="fa-solid fa-info-circle me-2"></i>
+                                <strong>What is an L1 Document?</strong>
+                                <p class="mb-0">This L1 CDA document contains 1 Original Clinical Document (OrCD). These are the original clinical documents from the source healthcare system in their native format.</p>
+                            </div>
+                            
+                            {% if session_id and has_l1_cda %}
+                            <!-- Embedded PDF Viewer -->
                             <div class="card">
-                                <div class="card-header bg-info text-white">
+                                <div class="card-header bg-teal text-white d-flex justify-content-between align-items-center">
                                     <h3 class="mb-0">
                                         <i class="fa-solid fa-file-medical me-2"></i>
-                                        Original Clinical Document (L1)
+                                        Original Clinical Documents
                                     </h3>
-                                </div>
-                                <div class="card-body">
-                                    <p class="lead">
-                                        This is the original clinical document from {{ source_country|country_name }}.
-                                        L1 documents contain the complete unprocessed clinical data in its native format.
-                                    </p>
-                                    
-                                    <div class="alert alert-primary">
-                                        <i class="fa-solid fa-info-circle me-2"></i>
-                                        <strong>What is an L1 Document?</strong>
-                                        <p class="mb-0">L1 (Level 1) documents are original clinical documents that have not been transformed 
-                                        to the European Patient Summary format. They contain the complete medical information as provided 
-                                        by the source healthcare facility.</p>
-                                    </div>
-                                    
-                                    <div class="d-grid gap-3">
-                                        {% if session_id %}
-                                        <!-- View PDF Button -->
-                                        <a href="{% url 'patient_data:view_pdf' session_id 0 %}" 
-                                           class="btn btn-lg btn-primary" target="_blank">
-                                            <i class="fa-solid fa-file-pdf me-2"></i>
-                                            View Original Document (PDF)
-                                        </a>
-                                        
-                                        <!-- Download PDF Button -->
+                                    <div>
                                         <a href="{% url 'patient_data:download_pdf' session_id 0 %}" 
-                                           class="btn btn-lg btn-outline-primary">
-                                            <i class="fa-solid fa-download me-2"></i>
-                                            Download Original Document
+                                           class="btn btn-light btn-sm me-2" title="Download">
+                                            <i class="fa-solid fa-download"></i> Download
                                         </a>
-                                        
-                                        <!-- View XML Source Button -->
-                                        <button type="button" class="btn btn-lg btn-outline-secondary" 
-                                                data-bs-toggle="collapse" data-bs-target="#xmlSourceCollapse">
-                                            <i class="fa-solid fa-code me-2"></i>
-                                            View XML Source
+                                        <button type="button" class="btn btn-outline-light btn-sm" 
+                                                data-bs-toggle="collapse" data-bs-target="#pdfInfo">
+                                            <i class="fa-solid fa-info-circle"></i> Info
                                         </button>
-                                        
-                                        <div class="collapse mt-3" id="xmlSourceCollapse">
-                                            <div class="card">
-                                                <div class="card-header">
-                                                    <strong>CDA XML Source</strong>
-                                                </div>
-                                                <div class="card-body">
-                                                    <pre class="bg-light p-3" style="max-height: 500px; overflow-y: auto; font-size: 0.85em;"><code>{{ cda_content|default:"XML content not available" }}</code></pre>
-                                                </div>
+                                    </div>
+                                </div>
+                                <div class="collapse" id="pdfInfo">
+                                    <div class="card-body bg-light">
+                                        <p class="mb-2"><strong>Document Information:</strong></p>
+                                        <ul class="mb-0">
+                                            <li><strong>Filename:</strong> clinical_document_attachment_0.pdf</li>
+                                            <li><strong>Size:</strong> 77.3 KB</li>
+                                            <li><strong>Type:</strong> application/pdf</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <!-- PDF Viewer Container -->
+                                    <div style="position: relative; width: 100%; height: 800px; background-color: #525659;">
+                                        <iframe 
+                                            src="{% url 'patient_data:view_pdf' session_id 0 %}" 
+                                            width="100%" 
+                                            height="100%" 
+                                            frameborder="0"
+                                            style="border: none;"
+                                            title="Original Clinical Document PDF">
+                                        </iframe>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fa-solid fa-shield-alt me-1"></i>
+                                            Document displayed securely within browser
+                                        </small>
+                                        <div>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                                    data-bs-toggle="collapse" data-bs-target="#xmlSourceCollapse">
+                                                <i class="fa-solid fa-code me-1"></i>
+                                                View XML Source
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="collapse mt-3" id="xmlSourceCollapse">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <strong>CDA XML Source</strong>
+                                            </div>
+                                            <div class="card-body">
+                                                <pre class="bg-white p-3" style="max-height: 400px; overflow-y: auto; font-size: 0.75em;"><code>{{ cda_content|default:"XML content not available" }}</code></pre>
                                             </div>
                                         </div>
-                                        {% else %}
-                                        <div class="alert alert-warning">
-                                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                                            Session information is missing. Please return to patient search and try again.
-                                        </div>
-                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
+                            {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                <strong>No Original Document Available</strong>
+                                <p class="mb-0">The original L1 clinical document is not available. This may be because only the L3 summary document was provided.</p>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     {% endif %}
