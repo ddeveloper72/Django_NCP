@@ -53,7 +53,9 @@ DEBUG INFO:
                             {% if address.city %}{{ address.city }}{% endif %}
                             {% if address.postal_code %} {{ address.postal_code }}{% endif %}
                         </span>
-                        {% if address.country %}<br><span class="ms-4">{{ address.country }}</span>{% endif %}
+                        {% if address.country %}
+                        <br><span class="ms-4">{{ address.country }}</span>
+                        {% endif %}
                     </div>
                     {% endwith %}
                 {% endif %}
@@ -61,18 +63,28 @@ DEBUG INFO:
                 {# Telecoms (phone/email) #}
                 {% if patient_contact_info.telecoms %}
                     {% for telecom in patient_contact_info.telecoms %}
-                        {% if 'tel:' in telecom.value %}
+                        {% if telecom.system == 'phone' or 'tel:' in telecom.value %}
                             <div class="ms-3 mb-1">
                                 <i class="fa-solid fa-phone me-2 text-success"></i>
-                                <strong>Phone:</strong> {{ telecom.value|slice:"4:" }}
-                                {% if telecom.use %}
+                                <strong>Phone:</strong> 
+                                {% if 'tel:' in telecom.value %}
+                                    {{ telecom.value|slice:"4:" }}
+                                {% else %}
+                                    {{ telecom.value }}
+                                {% endif %}
+                                {% if telecom.use and telecom.use != 'Unknown' %}
                                     <span class="badge bg-light text-dark ms-2">{{ telecom.use }}</span>
                                 {% endif %}
                             </div>
-                        {% elif 'mailto:' in telecom.value %}
+                        {% elif telecom.system == 'email' or 'mailto:' in telecom.value %}
                             <div class="ms-3 mb-1">
                                 <i class="fa-solid fa-envelope me-2 text-info"></i>
-                                <strong>Email:</strong> {{ telecom.value|slice:"7:" }}
+                                <strong>Email:</strong> 
+                                {% if 'mailto:' in telecom.value %}
+                                    {{ telecom.value|slice:"7:" }}
+                                {% else %}
+                                    {{ telecom.value }}
+                                {% endif %}
                             </div>
                         {% endif %}
                     {% endfor %}
@@ -82,4 +94,89 @@ DEBUG INFO:
         </div>
     </div>
 </div>
+
+{# Contact Person / Next of Kin - From contact_data.contacts (FHIR) or participants (CDA) #}
+{% if contact_data.contacts %}
+    {% for contact in contact_data.contacts %}
+    <div class="participant-section mb-4">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="fa-solid fa-user-group me-2"></i>
+                    Contact Person / Next of Kin
+                </h6>
+            </div>
+            <div class="card-body">
+                {# CONTACT PERSON DETAILS #}
+                {% if contact.name.full_name %}
+                <div class="contact-person-section mb-3">
+                    <h5 class="text-warning mb-2">
+                        <i class="fa-solid fa-user me-2"></i>
+                        {{ contact.name.full_name }}
+                    </h5>
+                    
+                    {# Role Badge #}
+                    {% if contact.relationship %}
+                    <div class="mb-3">
+                        {% for rel in contact.relationship %}
+                        <span class="badge bg-warning text-dark">{{ rel }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    {# Contact Information #}
+                    <div class="mt-3">
+                        <strong class="d-block mb-2">
+                            <i class="fa-solid fa-address-card me-2 text-warning"></i>
+                            Contact Information:
+                        </strong>
+                        
+                        {# Address #}
+                        {% if contact.address.full_address %}
+                            <div class="ms-3 mb-2">
+                                <i class="fa-solid fa-location-dot me-2 text-muted"></i>
+                                {% if contact.address.street_lines %}
+                                    {{ contact.address.street_lines.0 }}<br>
+                                {% endif %}
+                                <span class="ms-4">
+                                    {% if contact.address.city %}{{ contact.address.city }}{% endif %}
+                                    {% if contact.address.postal_code %} {{ contact.address.postal_code }}{% endif %}
+                                </span>
+                                {% if contact.address.country %}
+                                <br><span class="ms-4">{{ contact.address.country }}</span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        {# Email #}
+                        {% if contact.telecom %}
+                            {% for telecom in contact.telecom %}
+                                {% if telecom.system == 'email' %}
+                                    <div class="ms-3 mb-1">
+                                        <i class="fa-solid fa-envelope me-2 text-info"></i>
+                                        <strong>Email:</strong> {{ telecom.value }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        
+                        {# Phone #}
+                        {% if contact.telecom %}
+                            {% for telecom in contact.telecom %}
+                                {% if telecom.system == 'phone' %}
+                                    <div class="ms-3 mb-1">
+                                        <i class="fa-solid fa-phone me-2 text-success"></i>
+                                        <strong>Phone:</strong> {{ telecom.value }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
 {% endif %}

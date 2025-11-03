@@ -119,6 +119,7 @@ class FHIRViewProcessor:
             context = self.context_builder.finalize_context(context)
             
             logger.info(f"[FHIR PROCESSOR] Successfully processed FHIR patient view for session {session_id}")
+            logger.info(f"[VIEW PROCESSOR DEBUG] Final context source_country before render: {context.get('source_country')}")
             
             return render(request, 'patient_data/enhanced_patient_cda.html', context)
             
@@ -199,6 +200,13 @@ class FHIRViewProcessor:
         contact_data = parsed_data.get('contact_data', {})
         if contact_data:
             context['contact_data'] = contact_data
+            # CRITICAL: Map contact_data to patient_contact_info for template compatibility with CDA
+            # Templates expect 'patient_contact_info' for patient's own contact details
+            context['patient_contact_info'] = {
+                'addresses': contact_data.get('addresses', []),
+                'telecoms': contact_data.get('telecoms', [])
+            }
+            logger.info(f"[FHIR PROCESSOR] Mapped contact_data to patient_contact_info: {len(contact_data.get('addresses', []))} addresses, {len(contact_data.get('telecoms', []))} telecoms")
         
         # Add extended patient data
         extended_data = parsed_data.get('patient_extended_data', {})
@@ -220,12 +228,18 @@ class FHIRViewProcessor:
             match_data: Session match data
             cda_type: CDA type preference
         """
-        # Extract patient info from match data
+        # Extract patient info from match data and parsed data
         patient_info = match_data.get('patient_data', {})
+        patient_identity = context.get('patient_identity', {})
+        
+        # Get source country from patient identity (extracted from FHIR Patient resource)
+        source_country = patient_identity.get('source_country', 
+                                              patient_info.get('source_country', 'Unknown'))
+        logger.info(f"[VIEW PROCESSOR DEBUG] patient_identity.source_country = {patient_identity.get('source_country')}, final source_country = {source_country}")
         
         metadata = {
             'confidence_score': 0.95,  # FHIR has high confidence
-            'source_country': patient_info.get('source_country', 'Unknown'),
+            'source_country': source_country,
             'source_language': 'en',  # TODO: Extract from FHIR bundle
             'file_path': 'FHIR_BUNDLE',
             'translation_quality': 'High',  # FHIR has structured data

@@ -1248,6 +1248,7 @@ class FHIRBundleParser:
             country_code = address.get('country', 'Unknown')
             if country_code and country_code != 'Unknown':
                 source_country = country_code  # Will be processed by country_name template filter
+                logger.info(f"[PARSER DEBUG] Extracted source_country from Patient.address: {source_country}")
         
         # Extract marital status
         marital_status = 'Unknown'

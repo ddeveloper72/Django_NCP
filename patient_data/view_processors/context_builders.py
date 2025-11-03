@@ -133,6 +133,9 @@ class ContextBuilder:
         # Add to main context
         context.update(patient_context)
         
+        # CRITICAL: Preserve original patient_identity for metadata extraction (source_country, etc.)
+        context['patient_identity'] = patient_data
+        
         logger.info(f"Added unified patient data for: {demographics.get_display_name()}")
     
     def add_patient_data_from_cda(self, context: Dict[str, Any], xml_root) -> None:
@@ -197,7 +200,9 @@ class ContextBuilder:
             context['legal_authenticator'] = admin_data.get('legal_authenticator')
             context['document_creation_date'] = admin_data.get('document_creation_date')
             context['document_title'] = admin_data.get('document_title')
-            context['patient_contact_info'] = admin_data.get('patient_contact_info')  # CRITICAL: Patient's own contact info
+            # CRITICAL: Only set patient_contact_info if not already set (FHIR sets this from contact_data)
+            if 'patient_contact_info' not in context or not context['patient_contact_info']:
+                context['patient_contact_info'] = admin_data.get('patient_contact_info')  # CDA: Patient's own contact info
         elif is_dataclass(admin_data):
             # ARCHITECTURE ALIGNMENT: Convert dataclass to dict following clinical sections pattern
             # Clinical sections return dict structures, so administrative data should match
@@ -257,16 +262,18 @@ class ContextBuilder:
                 context['documentation_of'] = doc_of
             
             # Patient's own contact information (from patientRole)
-            # admin_data can be either a dict or dataclass - handle both cases
-            if isinstance(admin_data, dict):
-                patient_contact = admin_data.get('patient_contact_info', None)
-            else:
-                patient_contact = getattr(admin_data, 'patient_contact_info', None)
-            
-            if patient_contact and is_dataclass(patient_contact):
-                context['patient_contact_info'] = asdict(patient_contact)
-            else:
-                context['patient_contact_info'] = patient_contact
+            # CRITICAL: Only set if not already set (FHIR sets this from contact_data)
+            if 'patient_contact_info' not in context or not context['patient_contact_info']:
+                # admin_data can be either a dict or dataclass - handle both cases
+                if isinstance(admin_data, dict):
+                    patient_contact = admin_data.get('patient_contact_info', None)
+                else:
+                    patient_contact = getattr(admin_data, 'patient_contact_info', None)
+                
+                if patient_contact and is_dataclass(patient_contact):
+                    context['patient_contact_info'] = asdict(patient_contact)
+                else:
+                    context['patient_contact_info'] = patient_contact
             
             # Extract other fields - handle dict vs dataclass
             if isinstance(admin_data, dict):
