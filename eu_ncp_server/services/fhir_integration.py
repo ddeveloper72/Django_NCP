@@ -181,7 +181,34 @@ class HAPIFHIRIntegrationService:
                 }
                 bundle_entries.append({'resource': patient})
             
-            # 2. Get related clinical resources
+            # 2. Get Composition resource (critical for healthcare team enrichment)
+            # FIX: Only include the LATEST composition to prevent duplication
+            try:
+                search_params = {'subject': f"Patient/{patient_id}", '_count': '10'}
+                composition_results = self._make_request('GET', 'Composition', params=search_params)
+                
+                if composition_results.get('entry'):
+                    # Sort compositions by date (newest first) and take only the latest
+                    composition_entries = composition_results['entry']
+                    sorted_compositions = sorted(
+                        composition_entries,
+                        key=lambda e: e.get('resource', {}).get('date', ''),
+                        reverse=True
+                    )
+                    
+                    if sorted_compositions:
+                        latest_composition = sorted_compositions[0]
+                        bundle_entries.append({'resource': latest_composition['resource']})
+                        logger.info(
+                            f"Added latest Composition (ID: {latest_composition['resource'].get('id')}, "
+                            f"Date: {latest_composition['resource'].get('date')}) out of "
+                            f"{len(composition_entries)} found to bundle"
+                        )
+                        
+            except HAPIFHIRIntegrationError:
+                logger.debug(f"No Composition resources found for patient {patient_id}")
+            
+            # 3. Get related clinical resources
             clinical_resources = [
                 'AllergyIntolerance',
                 'MedicationStatement', 
@@ -193,18 +220,39 @@ class HAPIFHIRIntegrationService:
             
             for resource_type in clinical_resources:
                 try:
-                    search_params = {'patient': patient_id, '_count': '50'}
+                    # FIX: Query for latest resources only using FHIR standard search parameters
+                    # _sort=-_lastUpdated: Sort by last updated descending (newest first)
+                    # _count=50: Reasonable limit (will be deduplicated if needed)
+                    search_params = {
+                        'patient': patient_id,
+                        '_sort': '-_lastUpdated',  # Newest first
+                        '_count': '50'
+                    }
                     search_results = self._make_request('GET', resource_type, params=search_params)
                     
                     if search_results.get('entry'):
-                        for entry in search_results['entry']:
+                        entries = search_results['entry']
+                        original_count = len(entries)
+                        
+                        # DEDUPLICATION: Remove duplicate resources based on content
+                        # Public FHIR servers may return duplicates even with _sort parameter
+                        # Deduplicate by comparing medication names, codes, and dosages
+                        deduplicated_entries = self._deduplicate_clinical_resources(entries, resource_type)
+                        
+                        if len(deduplicated_entries) < original_count:
+                            logger.warning(
+                                f"Deduplicated {resource_type}: {original_count} -> {len(deduplicated_entries)} "
+                                f"(removed {original_count - len(deduplicated_entries)} duplicates from HAPI server)"
+                            )
+                        
+                        for entry in deduplicated_entries:
                             bundle_entries.append({'resource': entry['resource']})
                             
                 except HAPIFHIRIntegrationError:
                     logger.debug(f"No {resource_type} resources found for patient {patient_id}")
                     continue
             
-            # 3. Create Patient Summary Bundle
+            # 4. Create Patient Summary Bundle
             summary_bundle = {
                 'resourceType': 'Bundle',
                 'id': f'patient-summary-{patient_id}',
@@ -224,6 +272,155 @@ class HAPIFHIRIntegrationService:
         except Exception as e:
             logger.error(f"Error assembling Patient Summary for {patient_id}: {str(e)}")
             raise HAPIFHIRIntegrationError(f"Patient Summary assembly failed: {str(e)}")
+    
+    def _deduplicate_clinical_resources(self, entries: List[Dict], resource_type: str) -> List[Dict]:
+        """
+        Deduplicate clinical resources based on content, not just ID
+        
+        Some FHIR servers (especially public test servers) may return duplicate resources
+        with different IDs but identical content. This method deduplicates by comparing
+        the actual clinical content (medication name, dosage, dates, etc.)
+        
+        Args:
+            entries: List of FHIR resource entries
+            resource_type: Type of resource (MedicationStatement, Condition, etc.)
+            
+        Returns:
+            Deduplicated list of entries
+        """
+        if not entries or len(entries) <= 1:
+            return entries
+        
+        seen_signatures = set()
+        deduplicated = []
+        
+        for entry in entries:
+            resource = entry.get('resource', {})
+            
+            # Create a content signature based on resource type
+            signature = self._create_resource_signature(resource, resource_type)
+            
+            if signature not in seen_signatures:
+                seen_signatures.add(signature)
+                deduplicated.append(entry)
+        
+        return deduplicated
+    
+    def _create_resource_signature(self, resource: Dict[str, Any], resource_type: str) -> str:
+        """
+        Create a unique signature for a clinical resource based on its content
+        
+        This signature is used to identify duplicate resources that have different IDs
+        but represent the same clinical information.
+        """
+        import hashlib
+        import json
+        
+        signature_parts = []
+        
+        if resource_type == 'MedicationStatement':
+            # Signature: medication name/code + status + effective period
+            med_concept = resource.get('medicationCodeableConcept', {})
+            med_ref = resource.get('medicationReference', {})
+            
+            # Get medication identifier
+            if med_concept.get('coding'):
+                code = med_concept['coding'][0].get('code', '')
+                display = med_concept['coding'][0].get('display', '')
+                signature_parts.extend([code, display])
+            elif med_concept.get('text'):
+                signature_parts.append(med_concept['text'])
+            elif med_ref.get('display'):
+                signature_parts.append(med_ref['display'])
+            
+            # Add status and dates
+            signature_parts.append(resource.get('status', ''))
+            effective = resource.get('effectivePeriod', {})
+            signature_parts.append(effective.get('start', ''))
+            signature_parts.append(effective.get('end', ''))
+            
+            # Add dosage information
+            dosages = resource.get('dosage', [])
+            if dosages:
+                signature_parts.append(dosages[0].get('text', ''))
+        
+        elif resource_type == 'AllergyIntolerance':
+            # Signature: allergen code + clinical status + verification status
+            code = resource.get('code', {})
+            if code.get('coding'):
+                signature_parts.append(code['coding'][0].get('code', ''))
+                signature_parts.append(code['coding'][0].get('display', ''))
+            elif code.get('text'):
+                signature_parts.append(code['text'])
+            
+            clinical_status = resource.get('clinicalStatus', {})
+            if clinical_status.get('coding'):
+                signature_parts.append(clinical_status['coding'][0].get('code', ''))
+            
+            verification_status = resource.get('verificationStatus', {})
+            if verification_status.get('coding'):
+                signature_parts.append(verification_status['coding'][0].get('code', ''))
+        
+        elif resource_type == 'Condition':
+            # Signature: condition code + clinical status + onset date
+            code = resource.get('code', {})
+            if code.get('coding'):
+                signature_parts.append(code['coding'][0].get('code', ''))
+                signature_parts.append(code['coding'][0].get('display', ''))
+            elif code.get('text'):
+                signature_parts.append(code['text'])
+            
+            clinical_status = resource.get('clinicalStatus', {})
+            if clinical_status.get('coding'):
+                signature_parts.append(clinical_status['coding'][0].get('code', ''))
+            
+            signature_parts.append(resource.get('onsetDateTime', ''))
+        
+        elif resource_type == 'Observation':
+            # Signature: observation code + value + effective date
+            code = resource.get('code', {})
+            if code.get('coding'):
+                signature_parts.append(code['coding'][0].get('code', ''))
+            
+            # Add value (can be quantity, string, or codeable concept)
+            if 'valueQuantity' in resource:
+                val = resource['valueQuantity']
+                signature_parts.extend([str(val.get('value', '')), val.get('unit', '')])
+            elif 'valueString' in resource:
+                signature_parts.append(resource['valueString'])
+            elif 'valueCodeableConcept' in resource:
+                val_code = resource['valueCodeableConcept']
+                if val_code.get('coding'):
+                    signature_parts.append(val_code['coding'][0].get('code', ''))
+            
+            signature_parts.append(resource.get('effectiveDateTime', ''))
+        
+        elif resource_type == 'Procedure':
+            # Signature: procedure code + status + performed date
+            code = resource.get('code', {})
+            if code.get('coding'):
+                signature_parts.append(code['coding'][0].get('code', ''))
+                signature_parts.append(code['coding'][0].get('display', ''))
+            
+            signature_parts.append(resource.get('status', ''))
+            signature_parts.append(resource.get('performedDateTime', ''))
+        
+        elif resource_type == 'Immunization':
+            # Signature: vaccine code + status + occurrence date
+            vaccine_code = resource.get('vaccineCode', {})
+            if vaccine_code.get('coding'):
+                signature_parts.append(vaccine_code['coding'][0].get('code', ''))
+            
+            signature_parts.append(resource.get('status', ''))
+            signature_parts.append(resource.get('occurrenceDateTime', ''))
+        
+        else:
+            # Generic signature: resource ID (fallback)
+            signature_parts.append(resource.get('id', ''))
+        
+        # Create hash of signature parts
+        signature_string = '|'.join(str(part) for part in signature_parts if part)
+        return hashlib.md5(signature_string.encode()).hexdigest()
     
     def post_patient_summary(self, patient_summary_bundle: Dict[str, Any], requesting_user: str) -> Dict[str, Any]:
         """
@@ -370,6 +567,99 @@ class HAPIFHIRIntegrationService:
         except Exception as e:
             logger.error(f"Patient document search in HAPI FHIR failed: {str(e)}")
             raise HAPIFHIRIntegrationError(f"Patient document search failed: {str(e)}")
+    
+    def search_practitioners(self, patient_id: str = None) -> List[Dict[str, Any]]:
+        """
+        Search for Practitioner resources related to a patient
+        
+        Args:
+            patient_id: Optional patient identifier to find related practitioners
+            
+        Returns:
+            List of Practitioner resources
+        """
+        try:
+            fhir_params = {
+                '_count': '50'
+            }
+            
+            # If patient_id provided, search for practitioners involved with this patient
+            # Note: HAPI doesn't directly support patient-practitioner search,
+            # so we search all and filter client-side if needed
+            
+            search_results = self._make_request('GET', 'Practitioner', params=fhir_params)
+            
+            practitioners = []
+            for entry in search_results.get('entry', []):
+                resource = entry.get('resource', {})
+                if resource.get('resourceType') == 'Practitioner':
+                    practitioners.append(resource)
+            
+            logger.info(f"Practitioner search in HAPI FHIR: found {len(practitioners)} practitioners")
+            
+            return practitioners
+            
+        except Exception as e:
+            logger.warning(f"Practitioner search in HAPI FHIR failed: {str(e)}")
+            return []
+    
+    def search_organizations(self, patient_id: str = None) -> List[Dict[str, Any]]:
+        """
+        Search for Organization resources related to a patient
+        
+        Args:
+            patient_id: Optional patient identifier to find related organizations
+            
+        Returns:
+            List of Organization resources
+        """
+        try:
+            fhir_params = {
+                '_count': '50'
+            }
+            
+            search_results = self._make_request('GET', 'Organization', params=fhir_params)
+            
+            organizations = []
+            for entry in search_results.get('entry', []):
+                resource = entry.get('resource', {})
+                if resource.get('resourceType') == 'Organization':
+                    organizations.append(resource)
+            
+            logger.info(f"Organization search in HAPI FHIR: found {len(organizations)} organizations")
+            
+            return organizations
+            
+        except Exception as e:
+            logger.warning(f"Organization search in HAPI FHIR failed: {str(e)}")
+            return []
+    
+    def get_resource_by_id(self, resource_type: str, resource_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get a specific FHIR resource by type and ID
+        
+        Args:
+            resource_type: FHIR resource type (e.g., 'Practitioner', 'Organization')
+            resource_id: Resource ID or UUID
+            
+        Returns:
+            Resource dict or None if not found
+        """
+        try:
+            # Handle both regular IDs and UUIDs
+            endpoint = f"{resource_type}/{resource_id}"
+            resource = self._make_request('GET', endpoint)
+            
+            if resource.get('resourceType') == resource_type:
+                logger.info(f"Retrieved {resource_type} resource: {resource_id}")
+                return resource
+            else:
+                logger.warning(f"Resource type mismatch for {resource_id}")
+                return None
+                
+        except Exception as e:
+            logger.warning(f"Failed to retrieve {resource_type}/{resource_id}: {str(e)}")
+            return None
     
     def _extract_composition_info(self, composition_resource: Dict[str, Any]) -> Dict[str, Any]:
         """Extract relevant information from FHIR Composition resource"""

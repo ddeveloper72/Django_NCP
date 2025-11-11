@@ -2015,7 +2015,7 @@ def patient_data_view(request):
                     "clinical_sections": match.patient_data.get("clinical_sections", []),
                     "fhir_patient_id": match.patient_data.get("fhir_patient_id") if match.patient_data.get("source") == "FHIR" else None,
                 }
-
+                
                 # Create PatientSession for secure session management
                 # Handle anonymous users for public patient search
                 session_user = request.user if request.user.is_authenticated else None

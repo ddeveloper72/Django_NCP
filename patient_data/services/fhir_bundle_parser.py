@@ -18,7 +18,7 @@ import json
 import logging
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Union
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 logger = logging.getLogger("ehealth")
 
@@ -34,6 +34,10 @@ class FHIRClinicalSection:
     section_code: Optional[str] = None
     display_name: Optional[str] = None
     has_structured_data: bool = True
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for JSON serialization"""
+        return asdict(self)
 
 
 class FHIRBundleParser:
@@ -168,7 +172,8 @@ class FHIRBundleParser:
             
             contact_data = self._extract_contact_data(
                 resources_by_type.get('Patient', []),
-                resources_by_type.get('RelatedPerson', [])
+                resources_by_type.get('RelatedPerson', []),
+                administrative_data  # Pass administrative_data for other_contacts mapping
             )
             
             # Extract emergency contacts from RelatedPerson resources
@@ -176,10 +181,15 @@ class FHIRBundleParser:
                 resources_by_type.get('RelatedPerson', [])
             )
             
+            practitioner_resources = resources_by_type.get('Practitioner', [])
+            organization_resources = resources_by_type.get('Organization', [])
+            composition_resources = resources_by_type.get('Composition', [])
+            logger.info(f"[PARSER DEBUG] Extracting healthcare data: {len(practitioner_resources)} Practitioners, {len(organization_resources)} Organizations, {len(composition_resources)} Compositions")
+            
             healthcare_data = self._extract_healthcare_data(
-                resources_by_type.get('Practitioner', []),
-                resources_by_type.get('Organization', []),
-                resources_by_type.get('Composition', [])
+                practitioner_resources,
+                organization_resources,
+                composition_resources
             )
             
             # Map custodian organization from healthcare_data to administrative_data for template compatibility
@@ -190,12 +200,18 @@ class FHIRBundleParser:
             # Create clinical arrays for view compatibility
             clinical_arrays = self._create_clinical_arrays(clinical_sections)
             
+            # Convert FHIRClinicalSection objects to dictionaries for JSON serialization
+            serializable_sections = {
+                section_type: section.to_dict() if hasattr(section, 'to_dict') else section
+                for section_type, section in clinical_sections.items()
+            }
+            
             # Create enhanced sections structure (compatible with existing views)
             enhanced_sections = {
                 'success': True,
                 'data_source': 'FHIR Patient Summary Bundle',
-                'sections': list(clinical_sections.values()),
-                'sections_count': len(clinical_sections),
+                'sections': list(serializable_sections.values()),
+                'sections_count': len(serializable_sections),
                 'content_type': 'FHIR',
                 'patient_identity': patient_identity,
                 'patient_information': patient_identity,  # Alias for compatibility
@@ -268,6 +284,8 @@ class FHIRBundleParser:
             else:
                 self._add_resource_to_group(entry, resources_by_type)
         
+        logger.info(f"[PARSER DEBUG] Grouped resources: Practitioner={len(resources_by_type.get('Practitioner', []))}, Organization={len(resources_by_type.get('Organization', []))}, Composition={len(resources_by_type.get('Composition', []))}")
+        
         return resources_by_type
     
     def _add_resource_to_group(self, entry: Dict, resources_by_type: Dict[str, List]):
@@ -279,6 +297,8 @@ class FHIRBundleParser:
             if resource_type not in resources_by_type:
                 resources_by_type[resource_type] = []
             resources_by_type[resource_type].append(resource)
+            if resource_type in ['Practitioner', 'Organization', 'Composition']:
+                logger.info(f"[PARSER DEBUG] Added {resource_type} resource: {resource.get('id', 'unknown-id')}")
     
     def _parse_clinical_section(self, resource_type: str, resources: List[Dict], section_info: Dict) -> FHIRClinicalSection:
         """Parse specific resource type into clinical section"""
@@ -1007,6 +1027,77 @@ class FHIRBundleParser:
             'clinical_significance': self._assess_observation_significance(observation, value_data, reference_ranges, interpretation_text)
         }
     
+    def _is_pregnancy_related(self, observation: Dict[str, Any]) -> bool:
+        """
+        Check if observation is pregnancy/obstetric history related
+        
+        Uses LOINC codes from IPS Pregnancy History section (10162-6)
+        """
+        pregnancy_loinc_codes = {
+            '82810-3',  # Pregnancy status
+            '11636-8',  # [# Births] total
+            '11637-6',  # [# Births].live
+            '11638-4',  # [# Births].still living
+            '11639-2',  # [# Births].term
+            '11640-0',  # [# Births].preterm
+            '11612-9',  # [# Abortions]
+            '11613-7',  # [# Abortions].induced
+            '11614-5',  # [# Abortions].spontaneous
+            '93857-1',  # Date and time of obstetric delivery
+            '11996-6',  # Pregnancy status
+            '49051-6',  # Gestational age
+            '11884-4',  # Gestational age at birth
+            '57064-8',  # Estimated date of delivery
+            '11778-8',  # Delivery date
+        }
+        
+        pregnancy_snomed_codes = {
+            '77386006',  # Pregnant
+            '281050002', # Livebirth
+            '57797005',  # Termination of pregnancy
+            '169836001', # Gravida
+            '364325004', # Parity
+            '161732006', # Gravidity
+            '161733001', # Parity - delivered
+        }
+        
+        # Check code.coding for LOINC/SNOMED codes
+        code_data = observation.get('code_data', observation.get('code', {}))
+        if code_data:
+            for coding in code_data.get('coding', []):
+                code = coding.get('code', '')
+                if code in pregnancy_loinc_codes or code in pregnancy_snomed_codes:
+                    return True
+        
+        # Check category for pregnancy/obstetric
+        category = observation.get('category', '').lower()
+        if 'pregnancy' in category or 'obstetric' in category:
+            return True
+        
+        # Check observation name and display text
+        observation_name = observation.get('observation_name', '').lower()
+        display_text = str(observation.get('code_data', {}).get('text', '')).lower()
+        
+        pregnancy_keywords = [
+            'pregnancy', 'pregnant', 'gravida', 'para', 'gravidity', 'parity',
+            'delivery', 'obstetric', 'gestation', 'livebirth', 'stillbirth',
+            'abortion', 'miscarriage', 'termination of pregnancy'
+        ]
+        
+        return any(keyword in observation_name or keyword in display_text 
+                  for keyword in pregnancy_keywords)
+    
+    def _is_vital_sign(self, observation: Dict[str, Any]) -> bool:
+        """Check if observation is a vital sign"""
+        vital_sign_keywords = [
+            'blood pressure', 'systolic', 'diastolic', 'heart rate', 'pulse',
+            'temperature', 'respiratory rate', 'oxygen saturation', 'spo2',
+            'weight', 'height', 'bmi', 'body mass index'
+        ]
+        
+        observation_text = str(observation.get('code', {})).lower()
+        return any(keyword in observation_text for keyword in vital_sign_keywords)
+    
     def _parse_immunization_resource(self, immunization: Dict[str, Any]) -> Dict[str, Any]:
         """Parse FHIR Immunization resource"""
         # Extract vaccine name
@@ -1090,6 +1181,7 @@ class FHIRBundleParser:
             'procedures': [],
             'observations': [],
             'vital_signs': [],  # Subset of observations
+            'pregnancy_history': [],  # Pregnancy/obstetric history
             'immunizations': [],
             'diagnostic_reports': [],
             'results': []  # Alias for diagnostic_reports
@@ -1108,11 +1200,17 @@ class FHIRBundleParser:
                 clinical_arrays['procedures'] = section_data.entries
             elif section_type == 'observations' and hasattr(section_data, 'entries'):
                 clinical_arrays['observations'] = section_data.entries
-                # Filter for vital signs (basic implementation)
+                
+                # Filter for vital signs
                 clinical_arrays['vital_signs'] = [
                     obs for obs in section_data.entries 
-                    if any(keyword in str(obs.get('code', {})).lower() 
-                          for keyword in ['blood pressure', 'heart rate', 'temperature', 'weight', 'height'])
+                    if self._is_vital_sign(obs)
+                ]
+                
+                # Filter for pregnancy history (LOINC 10162-6 section)
+                clinical_arrays['pregnancy_history'] = [
+                    obs for obs in section_data.entries 
+                    if self._is_pregnancy_related(obs)
                 ]
             elif section_type == 'immunizations' and hasattr(section_data, 'entries'):
                 clinical_arrays['immunizations'] = section_data.entries
@@ -1644,7 +1742,7 @@ class FHIRBundleParser:
         
         return administrative_data
     
-    def _extract_contact_data(self, patient_resources: List[Dict], related_person_resources: List[Dict] = None) -> Dict[str, Any]:
+    def _extract_contact_data(self, patient_resources: List[Dict], related_person_resources: List[Dict] = None, administrative_data: Dict[str, Any] = None) -> Dict[str, Any]:
         """Extract comprehensive contact information for Extended Patient Information tab"""
         contact_data = {
             'addresses': [],
@@ -1808,6 +1906,44 @@ class FHIRBundleParser:
                     'source': 'FHIR RelatedPerson'
                 }
                 contact_data['contacts'].append(formatted_emergency_contact)
+        
+        # FIX: If no RelatedPerson resources, map Next-of-Kin from other_contacts to emergency_contacts
+        # This handles cases like Diana Ferreira where next-of-kin is in Patient.contact, not RelatedPerson
+        if not contact_data['emergency_contacts'] and administrative_data.get('other_contacts'):
+            logger.info("[FHIR PARSER] No RelatedPerson resources found, mapping Next-of-Kin from other_contacts to emergency_contacts")
+            
+            for contact in administrative_data['other_contacts']:
+                relationship = contact.get('relationship', '').lower()
+                
+                # Check if this is an emergency contact or next-of-kin
+                if any(keyword in relationship for keyword in ['next-of-kin', 'emergency', 'guardian']):
+                    # Convert from other_contacts format to emergency_contacts format
+                    emergency_contact = {
+                        'id': f"emergency-{contact.get('given_name', '')}-{contact.get('family_name', '')}".lower().replace(' ', '-'),
+                        'active': True,
+                        'name': {
+                            'given': [contact.get('given_name', '')],
+                            'family': contact.get('family_name', ''),
+                            'full_name': f"{contact.get('given_name', '')} {contact.get('family_name', '')}".strip()
+                        },
+                        'relationship': [{'text': contact.get('relationship', 'Contact')}],
+                        'telecom': [
+                            {'system': 'phone', 'value': contact.get('phone', ''), 'use': 'home'} if contact.get('phone') else None,
+                            {'system': 'email', 'value': contact.get('email', ''), 'use': 'home'} if contact.get('email') else None
+                        ],
+                        'address': [{'full_address': contact.get('address', '')}] if contact.get('address') else [],
+                        'phone': contact.get('phone'),
+                        'email': contact.get('email'),
+                        'full_name': f"{contact.get('given_name', '')} {contact.get('family_name', '')}".strip(),
+                        'relationship_display': contact.get('relationship', 'Contact'),
+                        'source': 'FHIR Patient.contact'
+                    }
+                    
+                    # Remove None values from telecom
+                    emergency_contact['telecom'] = [t for t in emergency_contact['telecom'] if t]
+                    
+                    contact_data['emergency_contacts'].append(emergency_contact)
+                    logger.info(f"[FHIR PARSER] Mapped Next-of-Kin to emergency_contact: {emergency_contact['full_name']}")
         
         return contact_data
     
@@ -2233,15 +2369,25 @@ class FHIRBundleParser:
                 
                 for author in authors:
                     # Create a synthetic practitioner from composition author
-                    display_name = author.get('display', 'Document Author')
+                    # Use display name if available, otherwise extract from reference or use document title
+                    display_name = author.get('display')
                     reference = author.get('reference', '')
                     
-                    # Extract practitioner ID from reference if possible
+                    # Extract practitioner/organization ID from reference
                     practitioner_id = 'composition-author'
                     if reference.startswith('Practitioner/'):
                         practitioner_id = reference.replace('Practitioner/', '')
+                        if not display_name:
+                            display_name = f"Practitioner ({practitioner_id[:20]})"
+                    elif reference.startswith('Organization/'):
+                        practitioner_id = reference.replace('Organization/', '')
+                        if not display_name:
+                            display_name = f"Organization ({practitioner_id[:20]})"
                     elif reference.startswith('urn:uuid:'):
                         practitioner_id = reference.replace('urn:uuid:', '')
+                        if not display_name:
+                            # Use document title as fallback to differentiate entries
+                            display_name = f"{title} Author"
                     
                     synthetic_practitioner = {
                         'id': practitioner_id,

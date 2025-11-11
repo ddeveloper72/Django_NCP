@@ -460,15 +460,31 @@ class EUPatientSearchService:
                     if fhir_documents and len(fhir_documents) > 0:
                         self.logger.info(f"Found {len(fhir_documents)} FHIR patient documents for {credentials.patient_id}")
                         
+                        # FIX: Process only the latest composition to prevent duplication
+                        # Sort documents by date (newest first) and take only the first one
+                        # This prevents processing duplicate/historical compositions
+                        fhir_documents_sorted = sorted(
+                            fhir_documents,
+                            key=lambda doc: doc.get('date', ''),
+                            reverse=True
+                        )
+                        latest_document = fhir_documents_sorted[0] if fhir_documents_sorted else None
+                        
+                        if latest_document:
+                            self.logger.info(
+                                f"Using latest composition (ID: {latest_document.get('id')}, "
+                                f"Date: {latest_document.get('date')}) out of {len(fhir_documents)} found"
+                            )
+                        
                         # Also search for the actual patient resource
                         patient_search_result = hapi_fhir_service.search_patients({
                             'identifier': credentials.patient_id
                         })
                         fhir_patients = patient_search_result.get('patients', [])
                         
-                        # For each patient document, try to get the complete bundle
-                        for fhir_document in fhir_documents:
-                            document_id = fhir_document.get('id')
+                        # Process only the latest document (not all documents)
+                        if latest_document:
+                            document_id = latest_document.get('id')
                             if document_id:
                                 try:
                                     # Get Patient Summary Bundle using the composition
@@ -476,6 +492,10 @@ class EUPatientSearchService:
                                     
                                     if ps_bundle:
                                         self.logger.info(f"Retrieved Patient Summary Bundle for document {document_id}")
+                                        
+                                        # ENHANCEMENT: Enrich bundle with Practitioner and Organization resources
+                                        # FHIR IPS bundles often don't include these, but they're critical for healthcare team display
+                                        self._enrich_bundle_with_healthcare_resources(ps_bundle, credentials.patient_id, hapi_fhir_service)
                                         
                                         # Parse FHIR Bundle using FHIRBundleParser
                                         bundle_parser = FHIRBundleParser()
@@ -504,7 +524,8 @@ class EUPatientSearchService:
                                                     "gender": patient_identity.get('gender', ''),
                                                     "source": "FHIR",
                                                     "fhir_bundle": ps_bundle,  # Store original FHIR Bundle
-                                                    "clinical_sections": parsed_data.get('clinical_sections', []),
+                                                    "clinical_sections": parsed_data.get('sections', []),  # FIX: Use 'sections', not 'clinical_sections'
+                                                    "clinical_arrays": parsed_data.get('clinical_arrays', {}),  # Also include clinical_arrays
                                                     "fhir_document_id": document_id
                                                 },
                                                 available_documents=["FHIR_Patient_Summary"],
@@ -514,13 +535,13 @@ class EUPatientSearchService:
                                                 l1_cda_path=None,
                                                 l3_cda_path=None
                                             )
+                                            
                                             matches.append(match)
                                             
                                             self.logger.info(f"Successfully created PatientMatch from FHIR data for {patient_identity.get('given_name')} {patient_identity.get('family_name')}")
                                             
                                 except Exception as e:
                                     self.logger.error(f"Error processing FHIR document {document_id}: {e}")
-                                    continue
                                     
                     # If FHIR search also found nothing, fall back to mock data                        
                     if not matches:
@@ -633,3 +654,117 @@ class EUPatientSearchService:
         }
 
         return summary
+    
+    def _enrich_bundle_with_healthcare_resources(self, bundle: Dict[str, Any], patient_id: str, hapi_service) -> None:
+        """
+        Enrich FHIR bundle with Practitioner and Organization resources from HAPI server
+        
+        FHIR IPS bundles often don't include Practitioner/Organization resources even though
+        they're referenced in Composition.author and Composition.custodian. This method:
+        1. Finds the Composition in the bundle
+        2. Extracts author and custodian references
+        3. Fetches only those specific resources by ID from HAPI
+        4. Adds them to the bundle
+        
+        Args:
+            bundle: FHIR Bundle to enrich (modified in place)
+            patient_id: Patient identifier for logging
+            hapi_service: HAPI FHIR service instance
+        """
+        try:
+            added_count = 0
+            
+            # Find ALL Composition resources in bundle to get author/custodian references
+            compositions = []
+            for entry in bundle.get('entry', []):
+                resource = entry.get('resource', {})
+                if resource.get('resourceType') == 'Composition':
+                    compositions.append(resource)
+            
+            if not compositions:
+                self.logger.warning(f"No Composition found in bundle for patient {patient_id}, cannot enrich healthcare resources")
+                return
+            
+            self.logger.info(f"Found {len(compositions)} Composition(s) to analyze for healthcare resource references")
+            
+            # Extract referenced Practitioner and Organization IDs from ALL Compositions
+            # Note: author can be EITHER Practitioner OR Organization
+            practitioner_ids = set()  # Use set to avoid duplicates
+            organization_ids = set()
+            
+            for composition in compositions:
+                # Extract from Composition.author
+                for author in composition.get('author', []):
+                    ref = author.get('reference', '')
+                    
+                    # Handle Practitioner references
+                    if ref.startswith('Practitioner/'):
+                        pract_id = ref.split('/')[-1]
+                        practitioner_ids.add(pract_id)
+                    elif ref.startswith('urn:uuid:') and 'practitioner' in ref.lower():
+                        uuid = ref.replace('urn:uuid:', '')
+                        practitioner_ids.add(uuid)
+                    
+                    # Handle Organization references in author (yes, authors can be organizations!)
+                    elif ref.startswith('Organization/'):
+                        org_id = ref.split('/')[-1]
+                        organization_ids.add(org_id)
+                    elif ref.startswith('urn:uuid:') and 'organization' in ref.lower():
+                        uuid = ref.replace('urn:uuid:', '')
+                        organization_ids.add(uuid)
+                    
+                    # Handle bare UUIDs (try as Practitioner first, fallback to Organization)
+                    elif ref.startswith('urn:uuid:'):
+                        uuid = ref.replace('urn:uuid:', '')
+                        # We'll try fetching as Practitioner, if that fails the warning will be logged
+                        practitioner_ids.add(uuid)
+                
+                # Extract referenced Organization ID from Composition.custodian (in addition to author orgs)
+                custodian = composition.get('custodian', {})
+                if custodian:
+                    ref = custodian.get('reference', '')
+                    if ref.startswith('Organization/'):
+                        org_id = ref.split('/')[-1]
+                        organization_ids.add(org_id)
+                    elif ref.startswith('urn:uuid:'):
+                        uuid = ref.replace('urn:uuid:', '')
+                        organization_ids.add(uuid)
+            
+            self.logger.info(f"Extracted {len(practitioner_ids)} Practitioner reference(s) and {len(organization_ids)} Organization reference(s) from Compositions")
+            
+            # Fetch specific Practitioner resources by ID
+            for pract_id in practitioner_ids:
+                try:
+                    practitioner = hapi_service.get_resource_by_id('Practitioner', pract_id)
+                    if practitioner:
+                        bundle.setdefault('entry', []).append({
+                            'fullUrl': f"urn:uuid:{pract_id}",
+                            'resource': practitioner
+                        })
+                        added_count += 1
+                        self.logger.info(f"Added referenced Practitioner {pract_id} to bundle")
+                except Exception as e:
+                    self.logger.warning(f"Could not fetch Practitioner {pract_id}: {str(e)}")
+            
+            # Fetch specific Organization resources by ID
+            for org_id in organization_ids:
+                try:
+                    organization = hapi_service.get_resource_by_id('Organization', org_id)
+                    if organization:
+                        bundle.setdefault('entry', []).append({
+                            'fullUrl': f"urn:uuid:{org_id}",
+                            'resource': organization
+                        })
+                        added_count += 1
+                        self.logger.info(f"Added referenced Organization {org_id} to bundle")
+                except Exception as e:
+                    self.logger.warning(f"Could not fetch Organization {org_id}: {str(e)}")
+            
+            if added_count > 0:
+                self.logger.info(f"Enriched FHIR bundle with {added_count} specific healthcare resources referenced in Composition")
+            else:
+                self.logger.warning(f"No specific Practitioner or Organization resources could be fetched from HAPI for patient {patient_id}")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to enrich bundle with healthcare resources: {str(e)}")
+            # Don't raise - enrichment is optional, continue with original bundle
