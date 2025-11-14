@@ -1099,8 +1099,14 @@ class FHIRBundleParser:
             'strength': strength,
             'dose_quantity': dose_quantity_value,
             'administration_route': administration_route,
-            'schedule': schedule_info
+            'schedule': schedule_info,
+            'period': effective_period if effective_period != 'Not applicable' and effective_period != 'Unknown period' else None
         }
+        
+        # Extract start_date for template compatibility
+        start_date = None
+        if not is_negative_assertion and medication.get('effectivePeriod', {}).get('start'):
+            start_date = medication['effectivePeriod']['start']
 
         return {
             'id': medication.get('id'),
@@ -1111,6 +1117,7 @@ class FHIRBundleParser:
             'status': status.capitalize(),
             'dosage': dosage_text,
             'effective_period': effective_period,
+            'start_date': start_date,  # Template compatibility - used by medication_section.html
             'taken': medication.get('taken', 'Unknown'),
             'notes': notes,  # Full FHIR R4 Annotation data
             'note_text': annotation_text,  # Simple text for display
