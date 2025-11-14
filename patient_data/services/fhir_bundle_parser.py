@@ -51,9 +51,13 @@ class FHIRBundleParser:
     def __init__(self):
         self.supported_resource_types = [
             'Patient', 'Composition', 'AllergyIntolerance', 'MedicationStatement',
+            'Medication',  # Add Medication resources (referenced by MedicationStatement)
             'Condition', 'Procedure', 'Observation', 'Immunization', 
             'DiagnosticReport', 'Practitioner', 'Organization', 'Device', 'RelatedPerson'
         ]
+        
+        # Store Medication resources for reference resolution
+        self.medication_resources = {}
         
         # Clinical section mapping for UI consistency
         self.section_mapping = {
@@ -132,6 +136,14 @@ class FHIRBundleParser:
             
             # Extract resources by type
             resources_by_type = self._group_resources_by_type(fhir_bundle)
+            
+            # Store Medication resources for reference resolution (Azure FHIR now includes these!)
+            if 'Medication' in resources_by_type:
+                for med_resource in resources_by_type['Medication']:
+                    med_id = med_resource.get('id')
+                    if med_id:
+                        self.medication_resources[med_id] = med_resource
+                logger.info(f"Loaded {len(self.medication_resources)} Medication resources for reference resolution")
             
             # Parse each resource type into clinical sections
             clinical_sections = {}
@@ -273,7 +285,7 @@ class FHIRBundleParser:
         )
     
     def _group_resources_by_type(self, fhir_bundle: Dict[str, Any]) -> Dict[str, List[Dict]]:
-        """Group FHIR resources by resourceType"""
+        """Group FHIR resources by resourceType and deduplicate by version"""
         resources_by_type = {}
         
         for entry in fhir_bundle.get('entry', []):
@@ -283,6 +295,9 @@ class FHIRBundleParser:
                     self._add_resource_to_group(sub_entry, resources_by_type)
             else:
                 self._add_resource_to_group(entry, resources_by_type)
+        
+        # Deduplicate resources by keeping only the latest version
+        resources_by_type = self._deduplicate_resources_by_version(resources_by_type)
         
         logger.info(f"[PARSER DEBUG] Grouped resources: Practitioner={len(resources_by_type.get('Practitioner', []))}, Organization={len(resources_by_type.get('Organization', []))}, Composition={len(resources_by_type.get('Composition', []))}")
         
@@ -297,8 +312,187 @@ class FHIRBundleParser:
             if resource_type not in resources_by_type:
                 resources_by_type[resource_type] = []
             resources_by_type[resource_type].append(resource)
-            if resource_type in ['Practitioner', 'Organization', 'Composition']:
-                logger.info(f"[PARSER DEBUG] Added {resource_type} resource: {resource.get('id', 'unknown-id')}")
+            logger.info(f"[PARSER DEBUG] Added {resource_type} resource: {resource.get('id', 'unknown-id')}")
+    
+    def _deduplicate_resources_by_version(self, resources_by_type: Dict[str, List[Dict]]) -> Dict[str, List[Dict]]:
+        """
+        Deduplicate resources by keeping only the latest version of each resource.
+        
+        Azure FHIR may return multiple versions of the same resource (e.g., MedicationStatement v2 and v3).
+        We need to keep only the latest version to avoid duplicates in the UI.
+        
+        Args:
+            resources_by_type: Dictionary of resource type to list of resources
+            
+        Returns:
+            Dictionary with deduplicated resources (only latest version per ID)
+        """
+        deduplicated = {}
+        
+        for resource_type, resources in resources_by_type.items():
+            # Group by resource ID
+            by_id = {}
+            for resource in resources:
+                resource_id = resource.get('id')
+                if not resource_id:
+                    # No ID - keep it (shouldn't happen in Azure FHIR)
+                    if resource_type not in deduplicated:
+                        deduplicated[resource_type] = []
+                    deduplicated[resource_type].append(resource)
+                    continue
+                
+                # Get version from meta.versionId
+                version_id = resource.get('meta', {}).get('versionId', '0')
+                try:
+                    version_num = int(version_id)
+                except (ValueError, TypeError):
+                    version_num = 0
+                
+                # Keep resource with highest version
+                if resource_id not in by_id or version_num > by_id[resource_id]['version']:
+                    by_id[resource_id] = {
+                        'resource': resource,
+                        'version': version_num
+                    }
+            
+            # Extract deduplicated resources
+            if by_id:
+                if resource_type not in deduplicated:
+                    deduplicated[resource_type] = []
+                
+                for resource_id, data in by_id.items():
+                    deduplicated[resource_type].append(data['resource'])
+                    logger.info(f"[DEDUP] Kept {resource_type} {resource_id} version {data['version']}")
+        
+        return deduplicated
+    
+    def _deduplicate_medications_clinically(self, medications: List[Dict]) -> List[Dict]:
+        """
+        Deduplicate medications by clinical identity (medication name or ATC code).
+        
+        Azure FHIR may contain multiple MedicationStatement resources representing the same
+        clinical medication (e.g., two records for "Levothyroxine" with different IDs).
+        This happens when data is migrated or records are updated without proper deduplication.
+        
+        We group medications by their clinical identifier (ATC code preferred, name as fallback)
+        and keep only the medication with the most complete data (highest completeness score).
+        
+        Args:
+            medications: List of parsed medication dictionaries
+            
+        Returns:
+            List of clinically deduplicated medications
+        """
+        if not medications:
+            return medications
+        
+        # Group medications by clinical identifier
+        clinical_groups = {}
+        
+        for med in medications:
+            # Get clinical identifier - prefer ATC code, fallback to medication name
+            atc_code = med.get('atc_code', '').strip().upper()
+            med_name = med.get('medication_name', '').strip().lower()
+            
+            # Create unique key: use ATC code if available, otherwise use medication name
+            if atc_code and atc_code not in ['UNKNOWN', 'NOT SPECIFIED', '']:
+                key = f"ATC:{atc_code}"
+            elif med_name and med_name not in ['unknown', 'not specified', '']:
+                key = f"NAME:{med_name}"
+            else:
+                # No valid identifier - keep this medication (shouldn't deduplicate without identity)
+                key = f"UNKNOWN:{id(med)}"  # Use Python object ID as unique key
+            
+            if key not in clinical_groups:
+                clinical_groups[key] = []
+            clinical_groups[key].append(med)
+        
+        # For each clinical group, keep the medication with most complete data
+        deduplicated = []
+        
+        for key, group in clinical_groups.items():
+            if len(group) == 1:
+                # Only one medication for this clinical identifier - keep it
+                deduplicated.append(group[0])
+                logger.info(f"[CLINICAL DEDUP] Kept unique medication: {key}")
+            else:
+                # Multiple medications for same clinical entity - score by completeness
+                scored_meds = []
+                for med in group:
+                    score = self._calculate_medication_completeness_score(med)
+                    scored_meds.append((score, med))
+                
+                # Sort by score (descending) and keep the best one
+                scored_meds.sort(key=lambda x: x[0], reverse=True)
+                best_med = scored_meds[0][1]
+                best_score = scored_meds[0][0]
+                
+                deduplicated.append(best_med)
+                logger.info(f"[CLINICAL DEDUP] Grouped {len(group)} medications as {key}, kept best (score: {best_score}/5)")
+                
+                # Log rejected duplicates
+                for score, med in scored_meds[1:]:
+                    logger.info(f"[CLINICAL DEDUP] Rejected duplicate with score {score}/5: {med.get('medication_name', 'Unknown')}")
+        
+        logger.info(f"[CLINICAL DEDUP] Clinical deduplication: {len(medications)} medications → {len(deduplicated)} unique medications")
+        return deduplicated
+    
+    def _calculate_medication_completeness_score(self, medication: Dict) -> int:
+        """
+        Calculate completeness score for a medication (0-5, higher = more complete).
+        
+        Scores medication based on presence of key clinical fields:
+        - Pharmaceutical form (tablet, capsule, etc.)
+        - Strength (dose per unit)
+        - Dosage instructions
+        - Route of administration
+        - Schedule/timing
+        
+        Args:
+            medication: Parsed medication dictionary
+            
+        Returns:
+            Integer score (0-5) representing data completeness
+        """
+        score = 0
+        
+        # Define fields to check and invalid values that don't count as "complete"
+        invalid_values = {
+            'not specified',
+            'not available in source document',
+            'unknown',
+            'no dosage information',
+            'not applicable',
+            '',
+            'n/a'
+        }
+        
+        # Check pharmaceutical form
+        pharma_form = medication.get('pharmaceutical_form', '').strip().lower()
+        if pharma_form and pharma_form not in invalid_values:
+            score += 1
+        
+        # Check strength
+        strength = medication.get('strength', '').strip().lower()
+        if strength and strength not in invalid_values:
+            score += 1
+        
+        # Check dosage
+        dosage = medication.get('dosage', '').strip().lower()
+        if dosage and dosage not in invalid_values:
+            score += 1
+        
+        # Check route
+        route = medication.get('route', '').strip().lower()
+        if route and route not in invalid_values:
+            score += 1
+        
+        # Check schedule
+        schedule = medication.get('schedule', '').strip().lower()
+        if schedule and schedule not in invalid_values:
+            score += 1
+        
+        return score
     
     def _parse_clinical_section(self, resource_type: str, resources: List[Dict], section_info: Dict) -> FHIRClinicalSection:
         """Parse specific resource type into clinical section"""
@@ -522,26 +716,76 @@ class FHIRBundleParser:
         }
     
     def _parse_medication_resource(self, medication: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse FHIR MedicationStatement resource with support for negative assertions"""
-        # Extract medication name with support for negative assertions
-        medication_name = 'Unknown medication'
-        is_negative_assertion = False
+        """Parse FHIR MedicationStatement resource with support for negative assertions
         
-        if medication.get('medicationReference', {}).get('display'):
-            medication_name = medication['medicationReference']['display']
-        elif medication.get('medicationCodeableConcept', {}).get('text'):
-            medication_name = medication['medicationCodeableConcept']['text']
-        elif medication.get('medicationCodeableConcept', {}).get('coding'):
+        IMPORTANT: Use CTS agent for medication name lookup (same as CDA XSLT process)
+        - Extract ATC code from FHIR resource
+        - Resolve via CTS agent to get standardized medication name
+        - Ignore display/text fields from foreign member states (may be in local language)
+        - This ensures consistency with CDA clinical sections pipeline
+        """
+        medication_name = 'Unknown medication'
+        atc_code = None
+        is_negative_assertion = False
+        strength_from_text = None  # Extract early before CTS translation
+        referenced_medication = None  # For strength extraction from Medication resource
+        
+        # PRIORITY 1: Check for medicationReference (Azure FHIR now uses this!)
+        if medication.get('medicationReference', {}).get('reference'):
+            med_ref = medication['medicationReference']['reference']
+            # Extract ID from reference (e.g., "Medication/med-h03aa01" -> "med-h03aa01")
+            med_id = med_ref.split('/')[-1] if '/' in med_ref else med_ref
+            
+            # Get referenced Medication resource from bundle
+            if med_id in self.medication_resources:
+                referenced_medication = self.medication_resources[med_id]
+                logger.info(f"Resolved medicationReference: {med_id}")
+                
+                # Extract ATC code from referenced Medication
+                if referenced_medication.get('code', {}).get('coding'):
+                    coding = referenced_medication['code']['coding'][0]
+                    if coding.get('system') == 'http://www.whocc.no/atc':
+                        atc_code = coding.get('code')
+        
+        # EARLY EXTRACTION: Get strength from medicationCodeableConcept.text BEFORE CTS translation
+        # This preserves strength info like "Amoxicillin 500 mg" before name becomes "Amoxicillin and Clavulanic Acid"
+        if medication.get('medicationCodeableConcept', {}).get('text'):
+            import re
+            med_text = medication['medicationCodeableConcept']['text']
+            strength_pattern = r'(\d+(?:\.\d+)?)\s*(mcg|mg|ug|g|ml|iu|units?)'
+            strength_match = re.search(strength_pattern, med_text, re.IGNORECASE)
+            if strength_match:
+                strength_value = strength_match.group(1)
+                strength_unit = strength_match.group(2)
+                # Normalize mcg to ug (UCUM standard)
+                if strength_unit.lower() == 'mcg':
+                    strength_unit = 'ug'
+                strength_from_text = f"{strength_value} {strength_unit}"
+        
+        # Priority 2: Extract ATC code from medicationCodeableConcept (fallback if no reference)
+        if not atc_code and medication.get('medicationCodeableConcept', {}).get('coding'):
             coding = medication['medicationCodeableConcept']['coding'][0]
             code = coding.get('code', '')
-            display = coding.get('display', coding.get('code', 'Unknown medication'))
             
             # Check for negative assertion codes
             if code in ['no-medication-info', 'no-drug-therapy', 'no-current-medication']:
                 is_negative_assertion = True
-                medication_name = display or 'No medication information available'
-            else:
-                medication_name = display
+                medication_name = coding.get('display', 'No medication information available')
+            elif coding.get('system') == 'http://www.whocc.no/atc' and code:
+                # ALWAYS use CTS agent lookup for ATC codes (same as CDA process)
+                atc_code = code
+        
+        # Resolve medication name via CTS if we have ATC code
+        if atc_code and not is_negative_assertion:
+            medication_name = self._get_atc_drug_name(atc_code) or f"ATC Code: {atc_code}"
+        
+        # Priority 2: Fallback to text fields only if no ATC code available
+        # (This maintains compatibility but ATC codes should be preferred)
+        if not atc_code and not is_negative_assertion:
+            if medication.get('medicationCodeableConcept', {}).get('text'):
+                medication_name = medication['medicationCodeableConcept']['text']
+            elif medication.get('medicationReference', {}).get('display'):
+                medication_name = medication['medicationReference']['display']
         
         # Extract enhanced dosage information with FHIR R4 data types
         dosage_text = 'No dosage information'
@@ -640,86 +884,219 @@ class FHIRBundleParser:
         # Enhanced Template Compatibility Fields
         # Add fields that medication templates expect for proper display
         
-        # Extract medication codes from medicationCodeableConcept or medicationReference
-        active_ingredient_code = None
-        active_ingredient_system = None
-        active_ingredient_display = medication_name  # Fallback to medication name
+        # Extract medication codes from medicationCodeableConcept
+        active_ingredient_code = atc_code or None
         
         if medication.get('medicationCodeableConcept', {}).get('coding'):
             # Direct code in MedicationStatement
             coding = medication['medicationCodeableConcept']['coding'][0]
-            active_ingredient_code = coding.get('code')
-            active_ingredient_system = coding.get('system')
-            active_ingredient_display = coding.get('display', medication_name)
-        elif medication.get('medicationReference', {}).get('display'):
-            # Referenced medication - use display name and create mock code for testing
-            ref_display = medication['medicationReference']['display'].strip()
-            active_ingredient_display = ref_display
-            # Create a mock code based on medication name for testing
-            # In real implementation, this would resolve the reference to get actual codes
-            if 'LANTUS' in ref_display.upper():
-                active_ingredient_code = 'A10AE04'  # Insulin glargine ATC code
-                active_ingredient_system = '2.16.840.1.113883.6.73'  # ATC system
+            if not active_ingredient_code:
+                active_ingredient_code = coding.get('code')
         
-        # Create active_ingredients structure for template compatibility
-        active_ingredients = {
-            'code': active_ingredient_code or 'UNKNOWN',
-            'coded': active_ingredient_code or 'UNKNOWN',  # THIS IS THE KEY FIELD FOR TEMPLATES
-            'name': active_ingredient_display,  # Template expects 'name'
-            'display_name': active_ingredient_display,
-            'description': active_ingredient_display,
-            'code_system_id': active_ingredient_system,
-            'code_system_version': None,
-            'languages': {},
-            'cts_metadata': None
-        }
-        
-        # Create active_ingredient (singular) for backward compatibility
-        active_ingredient = active_ingredients.copy()
+        # Create active_ingredient as simple string (matches CDA pipeline structure)
+        # CDA example: "levothyroxine sodium (100 ug / 1)"
+        # FHIR example: "See medication name (ATC: H03AA01)"
+        # 
+        # HAPI FHIR test data only provides ATC codes, no separate brand/generic distinction
+        # To avoid redundant display (medication name appearing twice), show ATC reference
+        if atc_code:
+            # Show ATC code reference instead of duplicating medication name
+            active_ingredient = f"See medication name (ATC: {atc_code})"
+        else:
+            # Fallback when no ATC code available
+            active_ingredient = "Not specified"
         
         # Extract template fields from dosage information
         pharmaceutical_form = 'Not specified'
+        strength = 'Not specified'
         dose_quantity_value = 'Not specified'
         administration_route = 'Not specified'
         schedule_info = 'Not specified'
         
-        # Extract form from medication name (basic parsing)
-        if 'tablet' in medication_name.lower():
-            pharmaceutical_form = 'Tablet'
-        elif 'injection' in medication_name.lower() or 'inj' in medication_name.lower():
-            pharmaceutical_form = 'Injection'
-        elif 'capsule' in medication_name.lower():
-            pharmaceutical_form = 'Capsule'
-        elif 'solution' in medication_name.lower() or 'sol' in medication_name.lower():
-            pharmaceutical_form = 'Solution'
-        
-        # Extract dose from dosage text or medication name
         import re
-        dose_pattern = r'(\d+(?:\.\d+)?)\s*(mg|ug|mcg|g|ml|iu|units?)'
-        dose_match = re.search(dose_pattern, f"{medication_name} {dosage_text}".lower())
-        if dose_match:
-            dose_quantity_value = f"{dose_match.group(1)} {dose_match.group(2)}"
         
-        # Extract route from dosage information
+        # Extract pharmaceutical form from dosage.text (EDQM form codes)
+        # Azure FHIR format: "1-2 1 Form code: 10219000 in the morning"
+        if dosages:
+            dosage = dosages[0]
+            dosage_text_raw = dosage.get('text', '')
+            
+            # Extract EDQM form code from text
+            form_code_match = re.search(r'Form code:\s*(\d+)', dosage_text_raw)
+            if form_code_match:
+                form_code = form_code_match.group(1)
+                # Use CTS to resolve EDQM form code
+                from translation_services.terminology_translator import TerminologyTranslator
+                translator = TerminologyTranslator()
+                resolved_form = translator.resolve_code(form_code, '0.4.0.127.0.16.1.1.2.1')  # EDQM OID
+                if resolved_form:
+                    pharmaceutical_form = resolved_form
+            
+            # Extract strength from multiple sources (priority order)
+            # Pattern 1: BEST - Extract from referenced Medication.ingredient[].strength (Azure FHIR now provides this!)
+            if referenced_medication and referenced_medication.get('ingredient'):
+                strength_parts = []
+                for ingredient in referenced_medication['ingredient']:
+                    if ingredient.get('strength'):
+                        ratio = ingredient['strength']
+                        num = ratio.get('numerator', {})
+                        den = ratio.get('denominator', {})
+                        
+                        num_value = num.get('value')
+                        num_unit = num.get('unit', num.get('code', ''))
+                        den_value = den.get('value', 1)
+                        den_unit = den.get('unit', den.get('code', ''))
+                        
+                        # Format strength as "100 ug/1" or "100 ug/1 tablet"
+                        if num_value:
+                            if den_value == 1 and den_unit in ['1', '']:
+                                strength_parts.append(f"{num_value} {num_unit}")
+                            else:
+                                strength_parts.append(f"{num_value} {num_unit}/{den_value} {den_unit}")
+                
+                # Join multi-ingredient strengths with " + "
+                if strength_parts:
+                    strength = " + ".join(strength_parts)
+                    logger.info(f"Extracted strength from Medication resource: {strength}")
+            
+            # Pattern 2: Use early-extracted strength from medicationCodeableConcept.text
+            elif strength_from_text:
+                strength = strength_from_text
+            
+            # Pattern 3: "Strength code: 12345" in dosage.text (EDQM code via CTS)
+            else:
+                strength_code_match = re.search(r'Strength code:\s*(\d+)', dosage_text_raw)
+                if strength_code_match:
+                    strength_code = strength_code_match.group(1)
+                    # Use CTS to resolve EDQM strength code
+                    translator = TerminologyTranslator()
+                    resolved_strength = translator.resolve_code(strength_code, '0.4.0.127.0.16.1.1.2.2')  # EDQM Strength OID
+                    if resolved_strength:
+                        strength = resolved_strength
+            
+            # Extract dose quantity from doseAndRate
+            if dosage.get('doseAndRate'):
+                dose_rate = dosage['doseAndRate'][0]
+                
+                # Handle doseRange (e.g., 1-2 units)
+                if dose_rate.get('doseRange'):
+                    low = dose_rate['doseRange'].get('low', {})
+                    high = dose_rate['doseRange'].get('high', {})
+                    low_val = low.get('value')
+                    high_val = high.get('value')
+                    unit = low.get('unit', high.get('unit', ''))
+                    ucum_code = low.get('code', high.get('code', ''))
+                    
+                    # Map UCUM code "1" (dimensionless) to pharmaceutical form
+                    if ucum_code == '1' or unit == '1':
+                        if pharmaceutical_form and pharmaceutical_form != 'Not specified':
+                            # Use pharmaceutical form as unit (e.g., "tablet(s)")
+                            unit = pharmaceutical_form.lower() + '(s)' if pharmaceutical_form else 'unit(s)'
+                        else:
+                            unit = 'unit(s)'
+                    
+                    if low_val and high_val:
+                        dose_quantity_value = f"{low_val}-{high_val} {unit}"
+                    elif low_val:
+                        dose_quantity_value = f"{low_val} {unit}"
+                
+                # Handle doseQuantity (e.g., 100 ug)
+                elif dose_rate.get('doseQuantity'):
+                    dose_qty = dose_rate['doseQuantity']
+                    value = dose_qty.get('value')
+                    unit = dose_qty.get('unit', '')
+                    ucum_code = dose_qty.get('code', '')
+                    
+                    # Map UCUM code "1" to pharmaceutical form
+                    if ucum_code == '1' or unit == '1':
+                        if pharmaceutical_form and pharmaceutical_form != 'Not specified':
+                            unit = pharmaceutical_form.lower() + '(s)'
+                        else:
+                            unit = 'unit(s)'
+                    
+                    if value:
+                        dose_quantity_value = f"{value} {unit}"
+        
+        # Fallback: Extract dose from text patterns if structured data not available
+        if dose_quantity_value == 'Not specified':
+            dose_pattern = r'(\d+(?:\.\d+)?(?:-\d+(?:\.\d+)?)?)\s*(mg|ug|mcg|g|ml|iu|units?)'
+            dose_match = re.search(dose_pattern, f"{medication_name} {dosage_text}".lower())
+            if dose_match:
+                dose_quantity_value = f"{dose_match.group(1)} {dose_match.group(2)}"
+        
+        # Extract route from dosage information (CTS already resolves EDQM codes)
         if dosage_route.get('display_text'):
             administration_route = dosage_route['display_text']
-        elif 'injection' in medication_name.lower() or 'inj' in medication_name.lower():
-            administration_route = 'Injection'
-        elif 'oral' in dosage_text.lower() or 'tablet' in medication_name.lower():
-            administration_route = 'Oral'
+        # Fallback: Extract route directly from dosage if not already extracted
+        elif dosages:
+            dosage = dosages[0]
+            if dosage.get('route'):
+                from eu_ncp_server.services.fhir_processing import FHIRResourceProcessor
+                processor = FHIRResourceProcessor()
+                route_data = processor._extract_codeable_concept(dosage['route'])
+                if route_data.get('display_text'):
+                    administration_route = route_data['display_text']
         
-        # Extract schedule from timing
-        if dosage_timing.get('display_text'):
-            schedule_info = dosage_timing['display_text']
-        elif 'once' in dosage_text.lower():
-            schedule_info = 'Once daily'
-        elif 'twice' in dosage_text.lower():
-            schedule_info = 'Twice daily'
+        # Extract schedule from timing.repeat.when codes
+        if dosages:
+            dosage = dosages[0]
+            timing = dosage.get('timing', {})
+            repeat = timing.get('repeat', {})
+            when_codes = repeat.get('when', [])
+            
+            # Map FHIR timing codes to human-readable schedule
+            timing_map = {
+                'MORN': 'Morning',
+                'ACM': 'Morning',  # FHIR EventTiming: ACM = "morning"
+                'ACD': 'Afternoon',  # FHIR EventTiming: ACD = "afternoon"
+                'ACV': 'Evening',  # FHIR EventTiming: ACV = "evening"
+                'ACN': 'Night',  # FHIR EventTiming: ACN = "night"
+                'AFT': 'Afternoon',
+                'EVE': 'Evening',
+                'NIGHT': 'Night',
+                'PHS': 'After sleep',
+                'HS': 'Before sleep',
+                'WAKE': 'Upon waking',
+                'C': 'With meals',
+                'CM': 'With breakfast',
+                'CD': 'With lunch',
+                'CV': 'With dinner',
+                'AC': 'Before meals',
+                'PC': 'After meals',
+                'PCM': 'After breakfast',
+                'PCD': 'After lunch',
+                'PCV': 'After dinner'
+            }
+            
+            if when_codes:
+                schedule_parts = [timing_map.get(code, code) for code in when_codes]
+                schedule_info = ', '.join(schedule_parts)
+                
+                # Add frequency if available
+                frequency = repeat.get('frequency')
+                period = repeat.get('period')
+                period_unit = repeat.get('periodUnit', 'd')
+                
+                if frequency and period:
+                    freq_text = f"{frequency} time(s) per {period} {period_unit}"
+                    schedule_info = f"{schedule_info} - {freq_text}"
+            
+            # Fallback to display_schedule from enhanced processor
+            elif dosage_timing.get('display_schedule'):
+                schedule_info = dosage_timing['display_schedule']
+        
+        # Text-based fallback if structured data not available
+        if schedule_info == 'Not specified':
+            if 'once' in dosage_text.lower():
+                schedule_info = 'Once daily'
+            elif 'twice' in dosage_text.lower():
+                schedule_info = 'Twice daily'
         
         # Create data nested structure for template compatibility
         data_structure = {
-            'ingredient_display': active_ingredient_display,
+            'active_ingredient': active_ingredient,
             'pharmaceutical_form': pharmaceutical_form,
+            'strength': strength,
             'dose_quantity': dose_quantity_value,
             'administration_route': administration_route,
             'schedule': schedule_info
@@ -730,6 +1107,7 @@ class FHIRBundleParser:
             'medication_name': medication_name,
             'name': medication_name,  # Template compatibility
             'display_name': medication_name,  # Template compatibility
+            'strength': strength,  # Top-level for template compatibility
             'status': status.capitalize(),
             'dosage': dosage_text,
             'effective_period': effective_period,
@@ -739,14 +1117,13 @@ class FHIRBundleParser:
             'has_notes': bool(notes),
             'resource_type': 'MedicationStatement',
             
-            # ENHANCED TEMPLATE COMPATIBILITY FIELDS
-            'active_ingredients': [active_ingredients],  # Template expects list of dicts
-            'active_ingredient': active_ingredient,    # Backup (singular)
+            # ENHANCED TEMPLATE COMPATIBILITY FIELDS (matching CDA structure)
+            'active_ingredient': active_ingredient,    # Simple string: "See medication name (ATC: H03AA01)"
             'pharmaceutical_form': pharmaceutical_form,
             'dose_quantity': dose_quantity_value,
             'route': administration_route,
             'schedule': schedule_info,
-            'data': data_structure,  # Nested data structure for template
+            'data': data_structure,  # Nested data structure for template fallbacks
             'display_text': f"Medication: {medication_name} ({status})",
             'is_negative_assertion': is_negative_assertion
         }
@@ -1190,7 +1567,8 @@ class FHIRBundleParser:
         # Map clinical sections to arrays
         for section_type, section_data in clinical_sections.items():
             if section_type == 'medications' and hasattr(section_data, 'entries'):
-                clinical_arrays['medications'] = section_data.entries
+                # Apply clinical deduplication to remove duplicate medications (same ATC/name)
+                clinical_arrays['medications'] = self._deduplicate_medications_clinically(section_data.entries)
             elif section_type == 'allergies' and hasattr(section_data, 'entries'):
                 clinical_arrays['allergies'] = section_data.entries
             elif section_type == 'conditions' and hasattr(section_data, 'entries'):
@@ -2711,6 +3089,65 @@ class FHIRBundleParser:
             return 'Amended result'
         
         return 'Result recorded'
+    
+    def _get_atc_drug_name(self, atc_code: str) -> Optional[str]:
+        """
+        Look up common ATC codes to provide drug names
+        
+        This is a basic lookup for common medications. In production, this should
+        use a comprehensive ATC/drug name database or terminology service.
+        
+        Args:
+            atc_code: ATC classification code (e.g., 'H03AA01')
+            
+        Returns:
+            Drug name or None if not found
+        """
+        # Common ATC codes used in healthcare
+        ATC_LOOKUP = {
+            # Thyroid therapy
+            'H03AA01': 'Levothyroxine',
+            'H03AA02': 'Liothyronine',
+            
+            # Respiratory system - bronchodilators
+            'R03AL02': 'Ipratropium and Salbutamol (combination)',
+            'R03AC02': 'Salbutamol',
+            'R03AL01': 'Ipratropium and Fenoterol (combination)',
+            'R03BB01': 'Ipratropium bromide',
+            
+            # Antibiotics - Beta-lactams
+            'J01CR02': 'Amoxicillin and Clavulanic Acid (Augmentin)',
+            'J01CA04': 'Amoxicillin',
+            'J01CR05': 'Amoxicillin and Sulbactam',
+            
+            # Insulin and analogues
+            'A10AE06': 'Insulin degludec (Tresiba)',
+            'A10AE04': 'Insulin glargine (Lantus)',
+            'A10AE05': 'Insulin detemir',
+            'A10AB01': 'Insulin (human)',
+            'A10AB05': 'Insulin aspart',
+            
+            # ACE inhibitors and combinations
+            'C09BB05': 'Ramipril and Felodipine (combination)',
+            'C09AA05': 'Ramipril',
+            'C09AA02': 'Enalapril',
+            'C09BB07': 'Ramipril and Amlodipine',
+            
+            # Antihypertensives
+            'C08CA01': 'Amlodipine',
+            'C07AB02': 'Metoprolol',
+            'C08CA02': 'Felodipine',
+            
+            # Commonly used medications
+            'A02BC01': 'Omeprazole',
+            'A02BC02': 'Pantoprazole',
+            'B01AC06': 'Acetylsalicylic acid (Aspirin)',
+            'C10AA01': 'Simvastatin',
+            'C10AA05': 'Atorvastatin',
+            'A10BA02': 'Metformin',
+        }
+        
+        return ATC_LOOKUP.get(atc_code)
 
 
 class FHIRBundleParserError(Exception):
