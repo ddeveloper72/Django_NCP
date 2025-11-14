@@ -663,23 +663,69 @@ class FHIRBundleParser:
         }
     
     def _parse_allergy_resource(self, allergy: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse FHIR AllergyIntolerance resource with support for negative assertions"""
+        """Parse FHIR AllergyIntolerance resource with CTS agent code resolution
+        
+        IMPORTANT: Use CTS agent for allergen name lookup (same as CDA XSLT process)
+        - Extract code from FHIR resource (ATC, SNOMED CT, etc.)
+        - Resolve via CTS agent to get standardized allergen name
+        - Same resolution strategy as medications and conditions
+        """
         # Extract allergen with support for negative assertions
         code = allergy.get('code', {})
         allergen = 'Unknown allergen'
         is_negative_assertion = False
+        code_value = ''
+        code_system = ''
         
         if code.get('coding'):
             coding = code['coding'][0]
             code_value = coding.get('code', '')
-            display = coding.get('display', coding.get('code', 'Unknown allergen'))
+            code_system = coding.get('system', '')
+            display = coding.get('display', '')
             
             # Check for negative assertion codes
             if code_value in ['no-allergy-info', 'no-known-allergies', 'no-drug-allergies']:
                 is_negative_assertion = True
                 allergen = display or 'No allergy information available'
             else:
-                allergen = display
+                # PRIORITY 1: Use display name if provided in FHIR
+                if display:
+                    allergen = display
+                    logger.info(f"Using FHIR display for allergy: {allergen}")
+                else:
+                    # PRIORITY 2: Resolve via CTS agent (ATC, SNOMED, etc.)
+                    try:
+                        from translation_services.terminology_translator import TerminologyTranslator
+                        translator = TerminologyTranslator()
+                        
+                        # Attempt to resolve the code based on system
+                        resolved_name = None
+                        
+                        # Try system-specific OID if available
+                        if 'atc' in code_system.lower():
+                            # ATC code - use WHO ATC OID
+                            logger.info(f"Attempting ATC resolution for allergy code: {code_value}")
+                            resolved_name = translator.resolve_code(code_value, '2.16.840.1.113883.6.73')
+                        elif 'snomed' in code_system.lower():
+                            # SNOMED CT code - use SNOMED OID
+                            logger.info(f"Attempting SNOMED CT resolution for allergy code: {code_value}")
+                            resolved_name = translator.resolve_code(code_value, '2.16.840.1.113883.6.96')
+                        else:
+                            # Try generic resolution
+                            logger.info(f"Attempting generic resolution for allergy code: {code_value}")
+                            resolved_name = translator.resolve_code(code_value)
+                        
+                        if resolved_name and resolved_name != code_value:
+                            allergen = resolved_name
+                            logger.info(f"✅ Resolved allergy code {code_value} to: {allergen}")
+                        else:
+                            # Fallback to code value if resolution failed
+                            allergen = code_value
+                            logger.warning(f"Could not resolve allergy code: {code_value} from {code_system}")
+                    
+                    except Exception as e:
+                        logger.warning(f"CTS resolution failed for allergy code {code_value}: {e}")
+                        allergen = code_value
         elif code.get('text'):
             allergen = code['text']
         
