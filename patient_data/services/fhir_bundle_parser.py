@@ -76,10 +76,15 @@ class FHIRBundleParser:
                 'display_name': 'Current Medications',
                 'icon': 'fa-pills'
             },
-            'Condition': {
-                'section_type': 'conditions',
-                'display_name': 'Medical Conditions',
-                'icon': 'fa-stethoscope'
+            'Condition:Active': {
+                'section_type': 'problem_list',
+                'display_name': 'Problem List',
+                'icon': 'fa-list-ul'
+            },
+            'Condition:Resolved': {
+                'section_type': 'past_illness',
+                'display_name': 'History of Past Illness',
+                'icon': 'fa-history'
             },
             'Procedure': {
                 'section_type': 'procedures',
@@ -299,6 +304,9 @@ class FHIRBundleParser:
         # Deduplicate resources by keeping only the latest version
         resources_by_type = self._deduplicate_resources_by_version(resources_by_type)
         
+        # Clinical deduplication for Conditions (same code + onset date)
+        resources_by_type = self._deduplicate_conditions_clinically(resources_by_type)
+        
         logger.info(f"[PARSER DEBUG] Grouped resources: Practitioner={len(resources_by_type.get('Practitioner', []))}, Organization={len(resources_by_type.get('Organization', []))}, Composition={len(resources_by_type.get('Composition', []))}")
         
         return resources_by_type
@@ -309,10 +317,28 @@ class FHIRBundleParser:
         resource_type = resource.get('resourceType')
         
         if resource_type and resource_type in self.supported_resource_types:
-            if resource_type not in resources_by_type:
-                resources_by_type[resource_type] = []
-            resources_by_type[resource_type].append(resource)
-            logger.info(f"[PARSER DEBUG] Added {resource_type} resource: {resource.get('id', 'unknown-id')}")
+            # Special handling for Condition resources - split by clinical status
+            if resource_type == 'Condition':
+                clinical_status = 'active'  # default
+                if resource.get('clinicalStatus', {}).get('coding'):
+                    clinical_status = resource['clinicalStatus']['coding'][0].get('code', 'active')
+                
+                # Create separate resource types for active vs resolved conditions
+                # resolved, inactive, and remission all go to "History of Past Illness"
+                if clinical_status in ['resolved', 'inactive', 'remission']:
+                    condition_type = 'Condition:Resolved'
+                else:
+                    condition_type = 'Condition:Active'
+                
+                if condition_type not in resources_by_type:
+                    resources_by_type[condition_type] = []
+                resources_by_type[condition_type].append(resource)
+                logger.info(f"[PARSER DEBUG] Added {condition_type} resource: {resource.get('id', 'unknown-id')}")
+            else:
+                if resource_type not in resources_by_type:
+                    resources_by_type[resource_type] = []
+                resources_by_type[resource_type].append(resource)
+                logger.info(f"[PARSER DEBUG] Added {resource_type} resource: {resource.get('id', 'unknown-id')}")
     
     def _deduplicate_resources_by_version(self, resources_by_type: Dict[str, List[Dict]]) -> Dict[str, List[Dict]]:
         """
@@ -363,6 +389,66 @@ class FHIRBundleParser:
                 for resource_id, data in by_id.items():
                     deduplicated[resource_type].append(data['resource'])
                     logger.info(f"[DEDUP] Kept {resource_type} {resource_id} version {data['version']}")
+        
+        return deduplicated
+    
+    def _deduplicate_conditions_clinically(self, resources_by_type: Dict[str, List[Dict]]) -> Dict[str, List[Dict]]:
+        """
+        Clinical deduplication for Condition resources.
+        
+        Remove duplicates with same code + onset date, keeping the most complete record.
+        Similar to medication deduplication logic.
+        
+        Args:
+            resources_by_type: Dictionary of resource type to list of resources
+            
+        Returns:
+            Dictionary with clinically deduplicated conditions
+        """
+        deduplicated = {}
+        
+        for resource_type, resources in resources_by_type.items():
+            # Only apply clinical deduplication to Condition resources
+            if resource_type not in ['Condition:Active', 'Condition:Resolved']:
+                deduplicated[resource_type] = resources
+                continue
+            
+            # Group conditions by code + onset date
+            condition_groups = {}
+            
+            for resource in resources:
+                # Extract condition code
+                code = None
+                if resource.get('code', {}).get('coding'):
+                    code = resource['code']['coding'][0].get('code')
+                
+                # Extract onset date
+                onset_date = resource.get('onsetDateTime', '')
+                if not onset_date:
+                    onset_date = resource.get('onsetPeriod', {}).get('start', '')
+                
+                # Create key: code + onset_date
+                key = f"{code}_{onset_date}"
+                
+                if key not in condition_groups:
+                    condition_groups[key] = []
+                condition_groups[key].append(resource)
+            
+            # For each group, keep the most complete record
+            deduplicated[resource_type] = []
+            for key, group in condition_groups.items():
+                if len(group) == 1:
+                    deduplicated[resource_type].append(group[0])
+                else:
+                    # Keep condition with most complete data
+                    # Priority: has severity > has category > has verificationStatus
+                    best_condition = max(group, key=lambda c: (
+                        bool(c.get('severity', {}).get('coding')),
+                        bool(c.get('category')),
+                        bool(c.get('verificationStatus', {}).get('coding'))
+                    ))
+                    deduplicated[resource_type].append(best_condition)
+                    logger.info(f"[CONDITION DEDUP] Removed {len(group) - 1} duplicate(s) for key {key}, kept condition {best_condition.get('id')}")
         
         return deduplicated
     
@@ -505,7 +591,8 @@ class FHIRBundleParser:
             parsed_entries = [self._parse_allergy_resource(resource) for resource in resources]
         elif resource_type == 'MedicationStatement':
             parsed_entries = [self._parse_medication_resource(resource) for resource in resources]
-        elif resource_type == 'Condition':
+        elif resource_type in ['Condition:Active', 'Condition:Resolved']:
+            # Parse condition resources (now split by clinical status)
             parsed_entries = [self._parse_condition_resource(resource) for resource in resources]
         elif resource_type == 'Procedure':
             parsed_entries = [self._parse_procedure_resource(resource) for resource in resources]
@@ -1145,30 +1232,81 @@ class FHIRBundleParser:
         }
     
     def _parse_condition_resource(self, condition: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse FHIR Condition resource with support for negative assertions"""
-        # Extract condition name with support for negative assertions
+        """Parse FHIR Condition resource with ICD-10 code resolution via CTS agent"""
+        # Extract condition name with support for negative assertions and ICD-10 code resolution
         code = condition.get('code', {})
         condition_name = 'Unknown condition'
+        condition_code = None
+        code_system = None
         is_negative_assertion = False
         
         if code.get('coding'):
             coding = code['coding'][0]
             code_value = coding.get('code', '')
-            display = coding.get('display', coding.get('code', 'Unknown condition'))
+            code_system = coding.get('system', '')
+            display = coding.get('display')
             
             # Check for negative assertion codes
             if code_value in ['no-problem-info', 'no-condition-info', 'no-known-problems']:
                 is_negative_assertion = True
                 condition_name = display or 'No condition information available'
             else:
-                condition_name = display
+                condition_code = code_value
+                
+                # PRIORITY 1: Use display if available
+                if display and display not in ['Unknown condition', 'Unknown']:
+                    condition_name = display
+                # PRIORITY 2: Check code.text field
+                elif code.get('text') and code['text'] not in ['Unknown condition', 'Unknown']:
+                    condition_name = code['text']
+                # PRIORITY 3: Try to resolve via CTS agent (ICD-10, SNOMED, etc.)
+                elif code_value:
+                    from translation_services.terminology_translator import TerminologyTranslator
+                    translator = TerminologyTranslator()
+                    
+                    # Try to resolve the code (works for SNOMED, LOINC, ATC, etc.)
+                    resolved_name = None
+                    
+                    # For ICD-10, try with standard OID
+                    if 'icd-10' in code_system.lower():
+                        resolved_name = translator.resolve_code(code_value, '2.16.840.1.113883.6.3')
+                        logger.info(f"Attempting ICD-10 resolution for {code_value}")
+                    
+                    # Try without OID (may match in CTS database)
+                    if not resolved_name:
+                        resolved_name = translator.resolve_code(code_value)
+                    
+                    if resolved_name and resolved_name != code_value:
+                        condition_name = resolved_name
+                        logger.info(f"Resolved condition code {code_value} to: {resolved_name}")
+                    else:
+                        # Fallback: Show code with system identifier
+                        if 'icd-10' in code_system.lower():
+                            condition_name = f"Condition (ICD-10: {code_value})"
+                        elif 'snomed' in code_system.lower():
+                            condition_name = f"Condition (SNOMED: {code_value})"
+                        else:
+                            condition_name = f"Condition code: {code_value}"
+                        logger.warning(f"Could not resolve condition code: {code_value} from {code_system}")
         elif code.get('text'):
             condition_name = code['text']
         
         # Extract clinical status
         clinical_status = 'Unknown'
         if condition.get('clinicalStatus', {}).get('coding'):
-            clinical_status = condition['clinicalStatus']['coding'][0].get('display', 'Unknown')
+            coding = condition['clinicalStatus']['coding'][0]
+            # PRIORITY 1: Use display if available
+            clinical_status = coding.get('display')
+            # PRIORITY 2: Use code field and capitalize it
+            if not clinical_status:
+                code_value = coding.get('code', '')
+                if code_value:
+                    # Capitalize code: 'active' -> 'Active', 'resolved' -> 'Resolved'
+                    clinical_status = code_value.capitalize()
+            # Default fallback
+            if not clinical_status:
+                clinical_status = 'Unknown'
+            
             if is_negative_assertion:
                 clinical_status = 'Not applicable'
         
@@ -1179,21 +1317,50 @@ class FHIRBundleParser:
             if is_negative_assertion:
                 verification_status = 'Not applicable'
         
-        # Extract category (only for actual conditions)
-        category = 'Unknown'
+        # Extract category (problem type) - only for actual conditions
+        category = 'Not specified'
+        category_code = None
         if not is_negative_assertion and condition.get('category'):
             cat = condition['category'][0]
             if cat.get('coding'):
-                category = cat['coding'][0].get('display', 'Unknown')
+                category_coding = cat['coding'][0]
+                # PRIORITY 1: Use display if available
+                category = category_coding.get('display')
+                category_code = category_coding.get('code')
+                
+                # PRIORITY 2: Use code field and format it properly
+                if not category and category_code:
+                    # Format: 'problem-list-item' -> 'Problem List Item'
+                    category = ' '.join(word.capitalize() for word in category_code.replace('-', ' ').split())
+                
+                # Default fallback
+                if not category:
+                    category = 'Not specified'
             elif cat.get('text'):
                 category = cat['text']
         elif is_negative_assertion:
             category = 'Not applicable'
         
         # Extract severity (only for actual conditions)
-        severity = 'Unknown'
+        severity = 'Not specified'
+        severity_code = None
         if not is_negative_assertion and condition.get('severity'):
-            severity = condition.get('severity', {}).get('coding', [{}])[0].get('display', 'Unknown')
+            severity_data = condition.get('severity', {})
+            if severity_data.get('coding'):
+                severity_coding = severity_data['coding'][0]
+                # PRIORITY 1: Use display if available
+                severity = severity_coding.get('display')
+                severity_code = severity_coding.get('code')
+                
+                # PRIORITY 2: Use text field
+                if not severity:
+                    severity = severity_data.get('text')
+                
+                # Default fallback
+                if not severity:
+                    severity = 'Not specified'
+            elif severity_data.get('text'):
+                severity = severity_data['text']
         elif is_negative_assertion:
             severity = 'Not applicable'
         
@@ -1221,10 +1388,15 @@ class FHIRBundleParser:
         return {
             'id': condition.get('id'),
             'condition_name': condition_name,
+            'name': condition_name,  # Template compatibility
+            'condition_code': condition_code,  # ICD-10 or other code
             'clinical_status': clinical_status,
             'verification_status': verification_status,
             'category': category,
+            'category_code': category_code,
+            'problem_type': category,  # Template compatibility - maps to "Problem Type"
             'severity': severity,
+            'severity_code': severity_code,
             'onset_date': onset_date,
             'notes': notes,  # Full FHIR R4 Annotation data
             'note_text': annotation_text,  # Simple text for display
@@ -1570,7 +1742,8 @@ class FHIRBundleParser:
             'medications': [],
             'allergies': [],
             'conditions': [],
-            'problems': [],  # Alias for conditions
+            'problems': [],  # Active conditions (Problem List)
+            'past_illness': [],  # Resolved/inactive conditions (History of Past Illness)
             'procedures': [],
             'observations': [],
             'vital_signs': [],  # Subset of observations
@@ -1587,7 +1760,15 @@ class FHIRBundleParser:
                 clinical_arrays['medications'] = self._deduplicate_medications_clinically(section_data.entries)
             elif section_type == 'allergies' and hasattr(section_data, 'entries'):
                 clinical_arrays['allergies'] = section_data.entries
+            elif section_type == 'problem_list' and hasattr(section_data, 'entries'):
+                # Active conditions (Problem List)
+                clinical_arrays['problems'] = section_data.entries
+                clinical_arrays['conditions'] = section_data.entries  # Alias for backward compatibility
+            elif section_type == 'past_illness' and hasattr(section_data, 'entries'):
+                # Resolved/inactive conditions (History of Past Illness)
+                clinical_arrays['past_illness'] = section_data.entries
             elif section_type == 'conditions' and hasattr(section_data, 'entries'):
+                # Backward compatibility for old single conditions section
                 clinical_arrays['conditions'] = section_data.entries
                 clinical_arrays['problems'] = section_data.entries  # Alias
             elif section_type == 'procedures' and hasattr(section_data, 'entries'):
