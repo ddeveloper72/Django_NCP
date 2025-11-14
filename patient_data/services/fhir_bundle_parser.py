@@ -835,13 +835,16 @@ class FHIRBundleParser:
         else:
             dosage_text = 'Not applicable - no medication information'
         
-        # Extract status and effective period with FHIR R4 Period support
+        # Extract status and effective period/datetime with FHIR R4 support
         status = medication.get('status', 'Unknown')
         if is_negative_assertion:
             status = 'No information available'
             
         effective_period = 'Unknown period'
         effective_period_data = {}
+        start_date = None
+        
+        # PRIORITY 1: Check for effectivePeriod (date range - "between X and Y")
         if not is_negative_assertion and medication.get('effectivePeriod'):
             # Import enhanced FHIR processor for Period extraction
             from eu_ncp_server.services.fhir_processing import FHIRResourceProcessor
@@ -864,6 +867,17 @@ class FHIRBundleParser:
                 start = period.get('start', 'Unknown start')
                 end = period.get('end', 'Ongoing')
                 effective_period = f"{start} to {end}"
+            
+            # Extract start_date for template compatibility
+            start_date = medication['effectivePeriod'].get('start')
+            
+        # PRIORITY 2: Check for effectiveDateTime (single date - "since X")
+        elif not is_negative_assertion and medication.get('effectiveDateTime'):
+            effective_datetime = medication['effectiveDateTime']
+            effective_period = f"Since {effective_datetime}"
+            start_date = effective_datetime
+            logger.info(f"Extracted effectiveDateTime: {effective_datetime}")
+            
         elif is_negative_assertion:
             effective_period = 'Not applicable'
         
@@ -1102,11 +1116,6 @@ class FHIRBundleParser:
             'schedule': schedule_info,
             'period': effective_period if effective_period != 'Not applicable' and effective_period != 'Unknown period' else None
         }
-        
-        # Extract start_date for template compatibility
-        start_date = None
-        if not is_negative_assertion and medication.get('effectivePeriod', {}).get('start'):
-            start_date = medication['effectivePeriod']['start']
 
         return {
             'id': medication.get('id'),
