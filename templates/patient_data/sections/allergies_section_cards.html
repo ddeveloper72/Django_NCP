@@ -91,7 +91,13 @@
                                             Reaction
                                         </div>
                                         <div class="field-value">
-                                            {% if allergy.clinical_table and allergy.clinical_table.rows %}
+                                            {% if allergy.reactions and allergy.reactions|length > 0 %}
+                                                {% for reaction in allergy.reactions %}
+                                                    {% if reaction.manifestation %}
+                                                        {{ reaction.manifestation }}{% if not forloop.last %}, {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% elif allergy.clinical_table and allergy.clinical_table.rows %}
                                                 {% for row in allergy.clinical_table.rows %}
                                                     {% if row.data.manifestation %}
                                                         {% firstof row.data.manifestation.display_value row.data.manifestation.value "Not specified" %}

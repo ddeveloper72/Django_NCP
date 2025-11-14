@@ -81,14 +81,16 @@
                                         </div>
                                         <div class="field-value">
                                             {# Display reaction type with enhanced data fallbacks #}
-                                            {% if entry.data.reaction_type.display_value %}
+                                            {% if entry.type_display %}
+                                                {{ entry.type_display }}
+                                            {% elif entry.data.reaction_type.display_value %}
                                                 {{ entry.data.reaction_type.display_value }}
                                             {% elif entry.reaction_type %}
                                                 {{ entry.reaction_type }}
                                             {% elif entry.data.type.display_value %}
                                                 {{ entry.data.type.display_value }}
                                             {% elif entry.type %}
-                                                {{ entry.type }}
+                                                {{ entry.type|title }}
                                             {% else %}
                                                 <span class="text-muted">Propensity to adverse reaction</span>
                                             {% endif %}
@@ -103,8 +105,14 @@
                                             Clinical Manifestation
                                         </div>
                                         <div class="field-value">
-                                            {# Display clinical manifestation/reaction #}
-                                            {% if entry.data.reaction.display_value %}
+                                            {# Display clinical manifestation/reaction from reactions array #}
+                                            {% if entry.reactions and entry.reactions|length > 0 %}
+                                                {% for reaction in entry.reactions %}
+                                                    {% if reaction.manifestation %}
+                                                        {{ reaction.manifestation }}{% if not forloop.last %}, {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% elif entry.data.reaction.display_value %}
                                                 {{ entry.data.reaction.display_value }}
                                             {% elif entry.reaction %}
                                                 {{ entry.reaction }}
