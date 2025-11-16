@@ -93,7 +93,7 @@
                             {% endif %}
                             
                             {# Procedure Code #}
-                            {% if procedure.procedure_code_data.code %}
+                            {% if procedure.procedure_code_data.primary_coding.code %}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
@@ -102,9 +102,9 @@
                                     </div>
                                     <div class="field-content">
                                         <div class="field-value">
-                                            <code>{{ procedure.procedure_code_data.code }}</code>
-                                            {% if procedure.procedure_code_data.system %}
-                                                <small class="text-muted ms-2">({{ procedure.procedure_code_data.system }})</small>
+                                            <code>{{ procedure.procedure_code_data.primary_coding.code }}</code>
+                                            {% if procedure.procedure_code_data.primary_coding.system %}
+                                                <small class="text-muted ms-2">({{ procedure.procedure_code_data.primary_coding.system }})</small>
                                             {% endif %}
                                         </div>
                                     </div>
