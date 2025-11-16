@@ -305,6 +305,15 @@ def clean_date_format(date_value):
     if re.match(r"^\d{1,2}/\d{1,2}/\d{4}$", date_str):
         return date_str
 
+    # Handle CDA date format (YYYYMMDD) - convert to DD/MM/YYYY
+    if re.match(r"^\d{8}$", date_str):
+        try:
+            from datetime import datetime
+            parsed_date = datetime.strptime(date_str, "%Y%m%d")
+            return parsed_date.strftime("%d/%m/%Y")
+        except:
+            pass
+
     # If it's in ISO format, convert it
     if re.match(r"^\d{4}-\d{2}-\d{2}", date_str):
         try:

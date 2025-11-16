@@ -91,7 +91,9 @@
                                         {% if immunization.data.date.display_value %}
                                             <div class="field-value">{{ immunization.data.date.display_value }}</div>
                                         {% elif immunization.date %}
-                                            <div class="field-value">{{ immunization.date }}</div>
+                                            <div class="field-value">{{ immunization.date|clean_date_format }}</div>
+                                        {% elif immunization.date_administered %}
+                                            <div class="field-value">{{ immunization.date_administered|clean_date_format }}</div>
                                         {% else %}
                                             <div class="field-value text-muted">Not recorded</div>
                                         {% endif %}
