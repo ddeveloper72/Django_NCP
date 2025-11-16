@@ -342,7 +342,7 @@ class ClinicalFieldMapper:
             
             # Extract core immunization information
             vaccine_name = self._extract_vaccine_name(immunization)
-            immunization_date_raw = immunization.get("date", immunization.get("date_administered", ""))
+            immunization_date_raw = immunization.get("date", immunization.get("date_administered", immunization.get("occurrence_date", "")))
             
             # Format date to European DD/MM/YYYY format (centralized formatter)
             from patient_data.services.comprehensive_clinical_data_service import ComprehensiveClinicalDataService

@@ -1714,13 +1714,27 @@ class FHIRBundleParser:
         elif vaccine_code.get('text'):
             vaccine_name = vaccine_code['text']
         
+        # Extract occurrence - FHIR R4 supports occurrenceDateTime or occurrenceString
+        occurrence_date = (immunization.get('occurrenceDateTime') or 
+                          immunization.get('occurrenceString'))
+        
+        # Extract route - handle missing or complex structures
+        route_value = immunization.get('route')
+        if route_value:
+            route_display = route_value.get('coding', [{}])[0].get('display') if isinstance(route_value, dict) else route_value
+        else:
+            route_display = None
+        
+        # Extract lot number - can be None
+        lot_number = immunization.get('lotNumber')
+        
         return {
             'id': immunization.get('id'),
             'vaccine_name': vaccine_name,
             'status': immunization.get('status', 'Unknown'),
-            'occurrence_date': immunization.get('occurrenceDateTime', 'Unknown date'),
-            'lot_number': immunization.get('lotNumber', 'Unknown'),
-            'route': immunization.get('route', {}).get('coding', [{}])[0].get('display', 'Unknown'),
+            'occurrence_date': occurrence_date,  # None if not present
+            'lot_number': lot_number,  # None if not present
+            'route': route_display,  # None if not present
             'resource_type': 'Immunization',
             'display_text': f"Vaccination: {vaccine_name}"
         }
