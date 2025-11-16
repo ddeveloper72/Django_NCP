@@ -319,15 +319,25 @@ class HAPIFHIRIntegrationService:
         signature_parts = []
         
         if resource_type == 'MedicationStatement':
-            # Signature: medication name/code + status + effective period
+            # Signature: ATC code ONLY + status + effective period
+            # CRITICAL: Use ATC code for deduplication, ignore display/text fields
+            # - Different brand names (Eutirox, Levothyroxine) = same ATC code (H03AA01)
+            # - Display text may be in foreign language from member state
+            # - Matches CTS agent approach: deduplicate by clinical code, not name
             med_concept = resource.get('medicationCodeableConcept', {})
             med_ref = resource.get('medicationReference', {})
             
-            # Get medication identifier
+            # Get medication identifier - PREFER ATC CODE ONLY
             if med_concept.get('coding'):
                 code = med_concept['coding'][0].get('code', '')
-                display = med_concept['coding'][0].get('display', '')
-                signature_parts.extend([code, display])
+                system = med_concept['coding'][0].get('system', '')
+                # Use code only (not display) for ATC codes
+                if system == 'http://www.whocc.no/atc' and code:
+                    signature_parts.append(code)  # ATC code only
+                else:
+                    # Non-ATC codes: use both code and display
+                    display = med_concept['coding'][0].get('display', '')
+                    signature_parts.extend([code, display])
             elif med_concept.get('text'):
                 signature_parts.append(med_concept['text'])
             elif med_ref.get('display'):

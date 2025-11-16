@@ -190,10 +190,23 @@ class FHIRViewProcessor:
         sections = parsed_data.get('sections', [])
         if clinical_arrays or sections:
             self.context_builder.add_clinical_data(context, clinical_arrays, sections)
+            
+            # Add enhanced variables for template compatibility (like CDA processor)
+            context['enhanced_pregnancy_history'] = clinical_arrays.get('pregnancy_history', [])
+            context['enhanced_medications'] = clinical_arrays.get('medications', [])
+            context['enhanced_allergies'] = clinical_arrays.get('allergies', [])
+            context['enhanced_problems'] = clinical_arrays.get('problems', [])
+            context['enhanced_procedures'] = clinical_arrays.get('procedures', [])
+            context['enhanced_immunizations'] = clinical_arrays.get('immunizations', [])
+            context['enhanced_vital_signs'] = clinical_arrays.get('vital_signs', [])
+            context['enhanced_results'] = clinical_arrays.get('results', [])
+            
+            logger.info(f"[FHIR PROCESSOR] Added enhanced variables: pregnancy_history={len(context['enhanced_pregnancy_history'])}")
         
         # Add healthcare provider data
         healthcare_data = parsed_data.get('healthcare_data', {})
         if healthcare_data:
+            logger.info(f"[FHIR PROCESSOR DEBUG] healthcare_data from parser: practitioners={len(healthcare_data.get('practitioners', []))}, organizations={len(healthcare_data.get('organizations', []))}")
             self.context_builder.add_healthcare_data(context, healthcare_data)
         
         # Add contact data

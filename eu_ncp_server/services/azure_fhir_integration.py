@@ -43,10 +43,16 @@ class AzureFHIRIntegrationService:
         self.base_url = os.getenv('AZURE_FHIR_BASE_URL', '')
         self.tenant_id = os.getenv('AZURE_FHIR_TENANT_ID', '')
         self.audience = os.getenv('AZURE_FHIR_BASE_URL', '')
+        
+        # Service Principal credentials (for unattended/production use)
+        self.client_id = os.getenv('AZURE_FHIR_CLIENT_ID', '')
+        self.client_secret = os.getenv('AZURE_FHIR_CLIENT_SECRET', '')
+        
         self.timeout = 30
         self.cache_timeout = 300  # 5 minutes
         self._access_token = None
         self._token_expires_at = None
+        self._auth_method = None  # Track which auth method succeeded
         
         # Validate configuration
         if not self.base_url or not self.tenant_id:
@@ -56,55 +62,144 @@ class AzureFHIRIntegrationService:
             )
         
     def _get_access_token(self) -> str:
-        """Get Azure AD access token for FHIR API"""
+        """
+        Get Azure AD access token for FHIR API
+        
+        Attempts authentication in priority order:
+        1. Service Principal (client credentials) - for production/unattended
+        2. Managed Identity - for Azure-hosted apps
+        3. Azure CLI - for development (requires 'az login')
+        """
         # Check if we have a cached valid token
         if self._access_token and self._token_expires_at:
             if datetime.now(timezone.utc) < self._token_expires_at:
                 return self._access_token
         
+        # Method 1: Try Service Principal (client credentials) first
+        if self.client_id and self.client_secret:
+            try:
+                token = self._get_token_via_service_principal()
+                if token:
+                    self._auth_method = 'service_principal'
+                    logger.info("Azure AD token acquired via Service Principal")
+                    return token
+            except Exception as e:
+                logger.warning(f"Service Principal auth failed: {e}")
+        
+        # Method 2: Try Managed Identity (for Azure-hosted apps)
         try:
-            # Use Azure CLI to get token - check common installation paths
-            az_cmd = 'az'
-            possible_paths = [
-                r"C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd",
-                r"C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd",
-                'az'  # Fallback to PATH
-            ]
-            
-            for path in possible_paths:
-                if os.path.exists(path) or path == 'az':
-                    az_cmd = path
-                    break
-            
-            cmd = [
-                az_cmd, 'account', 'get-access-token',
-                '--resource', self.audience,
-                '--query', 'accessToken',
-                '--output', 'tsv'
-            ]
-            
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30, shell=True)
-            
-            if result.returncode == 0:
-                self._access_token = result.stdout.strip()
-                # Tokens typically valid for 1 hour
-                from datetime import timedelta
-                self._token_expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
-                
-                logger.info(f"Azure AD token acquired for FHIR service")
-                return self._access_token
-            else:
-                error_msg = f"Failed to get Azure token: {result.stderr}"
-                logger.error(error_msg)
-                raise Exception(error_msg)
-                
-        except FileNotFoundError:
-            error_msg = "Azure CLI not found. Please install Azure CLI and run 'az login'"
-            logger.error(error_msg)
-            raise Exception(error_msg)
+            token = self._get_token_via_managed_identity()
+            if token:
+                self._auth_method = 'managed_identity'
+                logger.info("Azure AD token acquired via Managed Identity")
+                return token
         except Exception as e:
-            logger.error(f"Error getting Azure token: {e}")
-            raise
+            logger.debug(f"Managed Identity auth not available: {e}")
+        
+        # Method 3: Fall back to Azure CLI (development only)
+        try:
+            token = self._get_token_via_azure_cli()
+            if token:
+                self._auth_method = 'azure_cli'
+                logger.info("Azure AD token acquired via Azure CLI")
+                return token
+        except Exception as e:
+            logger.error(f"Azure CLI auth failed: {e}")
+        
+        # All methods failed
+        error_msg = (
+            "Azure authentication failed. Please configure one of:\n"
+            "1. Service Principal: Set AZURE_FHIR_CLIENT_ID and AZURE_FHIR_CLIENT_SECRET\n"
+            "2. Managed Identity: Deploy to Azure with managed identity enabled\n"
+            "3. Azure CLI: Run 'az login' for development"
+        )
+        logger.error(error_msg)
+        raise Exception(error_msg)
+    
+    def _get_token_via_service_principal(self) -> Optional[str]:
+        """Get token using Service Principal (client credentials flow)"""
+        from datetime import timedelta
+        
+        token_url = f"https://login.microsoftonline.com/{self.tenant_id}/oauth2/v2.0/token"
+        
+        data = {
+            'grant_type': 'client_credentials',
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
+            'scope': f"{self.audience}/.default"
+        }
+        
+        response = requests.post(token_url, data=data, timeout=30)
+        
+        if response.status_code == 200:
+            token_data = response.json()
+            self._access_token = token_data['access_token']
+            # Use expires_in from response (typically 3599 seconds)
+            expires_in = token_data.get('expires_in', 3600)
+            self._token_expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in - 60)
+            return self._access_token
+        else:
+            error_detail = response.json() if response.text else {}
+            raise Exception(f"Service Principal auth failed: {response.status_code} - {error_detail}")
+    
+    def _get_token_via_managed_identity(self) -> Optional[str]:
+        """Get token using Azure Managed Identity (for Azure-hosted apps)"""
+        from datetime import timedelta
+        
+        # Managed Identity endpoint (IMDS)
+        msi_endpoint = "http://169.254.169.254/metadata/identity/oauth2/token"
+        
+        params = {
+            'api-version': '2018-02-01',
+            'resource': self.audience
+        }
+        
+        headers = {'Metadata': 'true'}
+        
+        response = requests.get(msi_endpoint, params=params, headers=headers, timeout=5)
+        
+        if response.status_code == 200:
+            token_data = response.json()
+            self._access_token = token_data['access_token']
+            expires_in = token_data.get('expires_in', 3600)
+            self._token_expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in - 60)
+            return self._access_token
+        else:
+            raise Exception(f"Managed Identity not available: {response.status_code}")
+    
+    def _get_token_via_azure_cli(self) -> Optional[str]:
+        """Get token using Azure CLI (development only)"""
+        from datetime import timedelta
+        
+        # Use Azure CLI to get token - check common installation paths
+        az_cmd = 'az'
+        possible_paths = [
+            r"C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd",
+            r"C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd",
+            'az'  # Fallback to PATH
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(path) or path == 'az':
+                az_cmd = path
+                break
+        
+        cmd = [
+            az_cmd, 'account', 'get-access-token',
+            '--resource', self.audience,
+            '--query', 'accessToken',
+            '--output', 'tsv'
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30, shell=True)
+        
+        if result.returncode == 0:
+            self._access_token = result.stdout.strip()
+            # Tokens typically valid for 1 hour
+            self._token_expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
+            return self._access_token
+        else:
+            raise Exception(f"Azure CLI failed: {result.stderr}")
     
     def _get_headers(self) -> Dict[str, str]:
         """Get standard headers for Azure FHIR API requests including auth token"""

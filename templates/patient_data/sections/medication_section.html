@@ -93,7 +93,7 @@
                                             {# Single active ingredient (most common case) #}
                                             <div class="field-value fw-bold text-primary">{{ med.active_ingredient }}</div>
                                         {% elif med.active_ingredients.coded %}
-                                            {# Fallback to DotDict structure if present #}
+                                            {# CDA DotDict structure #}
                                             <div class="field-value fw-bold text-primary">{{ med.active_ingredients.coded }}</div>
                                         {% elif med.active_ingredients.translated %}
                                             <div class="field-value fw-bold text-primary">{{ med.active_ingredients.translated }}</div>

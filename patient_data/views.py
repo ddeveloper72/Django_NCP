@@ -2724,13 +2724,38 @@ def patient_details_view(request, patient_id):
         healthcare_data = {}
         
         try:
-            # Import and use the comprehensive clinical data service
-            from .services.comprehensive_clinical_data_service import ComprehensiveClinicalDataService
+            # PRIORITY 1: Check for FHIR bundle data FIRST (with deduplication fix)
+            fhir_bundle = match_data.get("fhir_bundle")
+            if fhir_bundle:
+                logger.info(f"[PATIENT_DETAILS] Using FHIR bundle data for patient {patient_id}")
+                
+                from patient_data.services.fhir_bundle_parser import FHIRBundleParser
+                
+                parser = FHIRBundleParser()
+                fhir_result = parser.parse_patient_summary_bundle(fhir_bundle)
+                
+                if fhir_result and isinstance(fhir_result, dict):
+                    # Extract clinical arrays from FHIR (with deduplication)
+                    clinical_arrays = fhir_result.get('clinical_arrays', clinical_arrays)
+                    administrative_data = fhir_result.get('administrative_data', {})
+                    healthcare_data = fhir_result.get('healthcare_data', {})
+                    
+                    logger.info(
+                        f"[PATIENT_DETAILS] FHIR clinical arrays extracted: "
+                        f"problems={len(clinical_arrays['problems'])}, "
+                        f"allergies={len(clinical_arrays['allergies'])}, "
+                        f"medications={len(clinical_arrays['medications'])}"
+                    )
             
-            comprehensive_service = ComprehensiveClinicalDataService()
-            cda_content = match_data.get("cda_content")
-            
-            if cda_content:
+            # FALLBACK: Use CDA content if no FHIR bundle
+            elif match_data.get("cda_content"):
+                logger.info(f"[PATIENT_DETAILS] Using CDA content for patient {patient_id}")
+                
+                # Import and use the comprehensive clinical data service
+                from .services.comprehensive_clinical_data_service import ComprehensiveClinicalDataService
+                
+                comprehensive_service = ComprehensiveClinicalDataService()
+                cda_content = match_data.get("cda_content")
                 logger.info(f"[PATIENT_DETAILS] Extracting clinical arrays for patient {patient_id}")
                 
                 # Extract comprehensive data

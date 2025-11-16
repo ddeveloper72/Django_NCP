@@ -444,15 +444,18 @@ class EUPatientSearchService:
 
             # Search FHIR if enabled (independent of CDA results)
             if use_hapi_fhir:
-                self.logger.info(f"Searching HAPI FHIR server for patient documents for {credentials.patient_id}")
+                self.logger.info(f"Searching FHIR server for patient documents for {credentials.patient_id}")
                 
                 try:
-                    # Import FHIR services
-                    from eu_ncp_server.services.fhir_integration import hapi_fhir_service
+                    # Import FHIR services (uses factory to get correct service)
+                    from eu_ncp_server.services.fhir_service_factory import get_fhir_service
                     from .fhir_bundle_parser import FHIRBundleParser
                     
+                    # Get the configured FHIR service (HAPI or Azure)
+                    fhir_service = get_fhir_service()
+                    
                     # Search for patient documents (Compositions) - this is the key fix!
-                    document_search_result = hapi_fhir_service.search_patient_documents(credentials.patient_id)
+                    document_search_result = fhir_service.search_patient_documents(credentials.patient_id)
                     
                     # Extract documents from search results
                     fhir_documents = document_search_result.get('documents', [])
@@ -477,7 +480,7 @@ class EUPatientSearchService:
                             )
                         
                         # Also search for the actual patient resource
-                        patient_search_result = hapi_fhir_service.search_patients({
+                        patient_search_result = fhir_service.search_patients({
                             'identifier': credentials.patient_id
                         })
                         fhir_patients = patient_search_result.get('patients', [])
@@ -488,14 +491,14 @@ class EUPatientSearchService:
                             if document_id:
                                 try:
                                     # Get Patient Summary Bundle using the composition
-                                    ps_bundle = hapi_fhir_service.get_patient_summary(credentials.patient_id, "document_search")
+                                    ps_bundle = fhir_service.get_patient_summary(credentials.patient_id, "document_search")
                                     
                                     if ps_bundle:
                                         self.logger.info(f"Retrieved Patient Summary Bundle for document {document_id}")
                                         
                                         # ENHANCEMENT: Enrich bundle with Practitioner and Organization resources
                                         # FHIR IPS bundles often don't include these, but they're critical for healthcare team display
-                                        self._enrich_bundle_with_healthcare_resources(ps_bundle, credentials.patient_id, hapi_fhir_service)
+                                        self._enrich_bundle_with_healthcare_resources(ps_bundle, credentials.patient_id, fhir_service)
                                         
                                         # Parse FHIR Bundle using FHIRBundleParser
                                         bundle_parser = FHIRBundleParser()

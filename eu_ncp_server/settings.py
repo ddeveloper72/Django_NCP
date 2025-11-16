@@ -219,10 +219,23 @@ FHIR_CONFIG = {
     },
 }
 
+# FHIR Provider Selection (HAPI or AZURE)
+FHIR_PROVIDER = os.getenv("FHIR_PROVIDER", "HAPI").upper()
+
 # HAPI FHIR Server Configuration
 HAPI_FHIR_BASE_URL = os.getenv("HAPI_FHIR_BASE_URL", "https://hapi.fhir.org/baseR4")
 HAPI_FHIR_TIMEOUT = int(os.getenv("HAPI_FHIR_TIMEOUT", "30"))
 HAPI_FHIR_CACHE_TIMEOUT = int(os.getenv("HAPI_FHIR_CACHE_TIMEOUT", "300"))  # 5 minutes
+
+# Azure FHIR Service Configuration
+AZURE_FHIR_BASE_URL = os.getenv("AZURE_FHIR_BASE_URL", "")
+AZURE_FHIR_TENANT_ID = os.getenv("AZURE_FHIR_TENANT_ID", "")
+AZURE_FHIR_SUBSCRIPTION_ID = os.getenv("AZURE_FHIR_SUBSCRIPTION_ID", "")
+AZURE_FHIR_RESOURCE_GROUP = os.getenv("AZURE_FHIR_RESOURCE_GROUP", "")
+AZURE_FHIR_WORKSPACE = os.getenv("AZURE_FHIR_WORKSPACE", "")
+AZURE_FHIR_SERVICE_NAME = os.getenv("AZURE_FHIR_SERVICE_NAME", "")
+AZURE_FHIR_TIMEOUT = int(os.getenv("AZURE_FHIR_TIMEOUT", "30"))
+AZURE_FHIR_CACHE_TIMEOUT = int(os.getenv("AZURE_FHIR_CACHE_TIMEOUT", "300"))  # 5 minutes
 
 # Patient Portal Configuration
 PORTAL_CONFIG = {
