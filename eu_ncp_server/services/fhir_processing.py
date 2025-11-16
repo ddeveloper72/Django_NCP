@@ -256,7 +256,23 @@ class FHIRResourceProcessor:
         }
     
     def _process_immunization_resource(self, immunization: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract immunization information"""
+        """Extract immunization information including enhanced fields"""
+        # Extract performer (who administered)
+        performers = immunization.get('performer', [])
+        performer_name = None
+        if performers:
+            first_performer = performers[0]
+            actor = first_performer.get('actor', {})
+            performer_name = actor.get('display', actor.get('reference', None))
+        
+        # Extract dose number from protocolApplied
+        protocols = immunization.get('protocolApplied', [])
+        dose_number = None
+        if protocols:
+            first_protocol = protocols[0]
+            dose_number = first_protocol.get('doseNumberPositiveInt', 
+                                            first_protocol.get('doseNumberString', None))
+        
         return {
             'id': immunization.get('id'),
             'status': immunization.get('status'),
@@ -265,7 +281,10 @@ class FHIRResourceProcessor:
             'lot_number': immunization.get('lotNumber'),
             'route': self._extract_coding_display(immunization.get('route', {})),
             'dose_quantity': immunization.get('doseQuantity', {}),
-            'note': self._extract_annotation_text(immunization.get('note', []))
+            'note': self._extract_annotation_text(immunization.get('note', [])),
+            'performer': performer_name,  # NEW: who administered
+            'dose_number': dose_number,    # NEW: dose number from protocol
+            'site': self._extract_coding_display(immunization.get('site', {}))  # NEW: injection site
         }
     
     def _process_allergy_reactions(self, reactions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -872,14 +891,18 @@ class FHIRResourceProcessor:
         return formatted
     
     def _format_immunizations_for_display(self, immunizations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Format immunizations for template display"""
+        """Format immunizations for template display with enhanced fields"""
         formatted = []
         for imm in immunizations:
             formatted.append({
                 'vaccine': imm['vaccine_code'].get('display', 'Unknown vaccine'),
                 'status': imm.get('status', 'Unknown'),
                 'date': imm.get('occurrence', 'Unknown'),
-                'lot_number': imm.get('lot_number', 'Unknown')
+                'lot_number': imm.get('lot_number', 'Unknown'),
+                'route': imm.get('route', {}).get('display', 'Unknown'),
+                'performer': imm.get('performer', 'Unknown'),  # NEW: who administered
+                'dose_number': imm.get('dose_number', None),    # NEW: dose number
+                'site': imm.get('site', {}).get('display', 'Unknown')  # NEW: injection site
             })
         return formatted
     
