@@ -293,7 +293,14 @@ def clean_string_value(value):
 
 @register.filter
 def clean_date_format(date_value):
-    """Clean up date formatting"""
+    """Clean up date formatting with ISO 8601 datetime support.
+    
+    Supports:
+    - CDA date format: YYYYMMDD → DD/MM/YYYY
+    - ISO 8601 date: YYYY-MM-DD → DD/MM/YYYY
+    - ISO 8601 datetime with timezone: YYYY-MM-DDTHH:MM:SS+ZZ:ZZ → DD/MM/YYYY HH:MM
+    - Legacy formats: DD/MM/YYYY (preserved)
+    """
     if not date_value:
         return "N/A"
 
@@ -305,6 +312,24 @@ def clean_date_format(date_value):
     if re.match(r"^\d{1,2}/\d{1,2}/\d{4}$", date_str):
         return date_str
 
+    # Handle FHIR ISO 8601 datetime with timezone (YYYY-MM-DDTHH:MM:SS+ZZ:ZZ)
+    # Example: 1983-01-02T10:30:45+01:00 → 02/01/1983 10:30
+    iso_datetime_match = re.match(r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([\+\-]\d{2}:\d{2})$", date_str)
+    if iso_datetime_match:
+        try:
+            from datetime import datetime
+            # Parse ISO 8601 with timezone
+            parsed_dt = datetime.fromisoformat(date_str)
+            # Format as DD/MM/YYYY HH:MM (show time without seconds for readability)
+            return parsed_dt.strftime("%d/%m/%Y %H:%M")
+        except:
+            # Fallback to date-only extraction if parsing fails
+            try:
+                parsed_date = datetime.strptime(date_str[:10], "%Y-%m-%d")
+                return parsed_date.strftime("%d/%m/%Y")
+            except:
+                pass
+
     # Handle CDA date format (YYYYMMDD) - convert to DD/MM/YYYY
     if re.match(r"^\d{8}$", date_str):
         try:
@@ -314,12 +339,11 @@ def clean_date_format(date_value):
         except:
             pass
 
-    # If it's in ISO format, convert it
-    if re.match(r"^\d{4}-\d{2}-\d{2}", date_str):
+    # If it's in ISO date format (date only), convert it
+    if re.match(r"^\d{4}-\d{2}-\d{2}$", date_str):
         try:
             from datetime import datetime
-
-            parsed_date = datetime.strptime(date_str[:10], "%Y-%m-%d")
+            parsed_date = datetime.strptime(date_str, "%Y-%m-%d")
             return parsed_date.strftime("%d/%m/%Y")
         except:
             pass
