@@ -1732,7 +1732,8 @@ class FHIRBundleParser:
             'id': immunization.get('id'),
             'vaccine_name': vaccine_name,
             'status': immunization.get('status', 'Unknown'),
-            'occurrence_date': occurrence_date,  # None if not present
+            'date': occurrence_date,  # Use 'date' field name for template compatibility
+            'occurrence_date': occurrence_date,  # Keep for backwards compatibility
             'lot_number': lot_number,  # None if not present
             'route': route_display,  # None if not present
             'resource_type': 'Immunization',
