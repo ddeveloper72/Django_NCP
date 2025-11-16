@@ -729,17 +729,25 @@ class FHIRBundleParser:
         elif code.get('text'):
             allergen = code['text']
         
-        # Extract clinical status
+        # Extract clinical status (use code if display not available)
         clinical_status = 'Unknown'
         if allergy.get('clinicalStatus', {}).get('coding'):
-            clinical_status = allergy['clinicalStatus']['coding'][0].get('display', 'Unknown')
+            coding = allergy['clinicalStatus']['coding'][0]
+            clinical_status = coding.get('display') or coding.get('code', 'Unknown')
+            # Capitalize first letter for display
+            if clinical_status != 'Unknown':
+                clinical_status = clinical_status.capitalize()
             if is_negative_assertion:
                 clinical_status = 'Not applicable'
         
-        # Extract verification status
+        # Extract verification status (use code if display not available)
         verification_status = 'Unknown'
         if allergy.get('verificationStatus', {}).get('coding'):
-            verification_status = allergy['verificationStatus']['coding'][0].get('display', 'Unknown')
+            coding = allergy['verificationStatus']['coding'][0]
+            verification_status = coding.get('display') or coding.get('code', 'Unknown')
+            # Capitalize first letter for display
+            if verification_status != 'Unknown':
+                verification_status = verification_status.capitalize()
             if is_negative_assertion:
                 verification_status = 'Not applicable'
         
@@ -837,7 +845,12 @@ class FHIRBundleParser:
             'criticality': criticality,
             'reactions': reactions,
             'reaction_count': len(reactions),
-            'onset_date': allergy.get('onsetDateTime', allergy.get('onsetString', 'Unknown')) if not is_negative_assertion else 'Not applicable',
+            'onset_date': (
+                allergy.get('onsetDateTime') or 
+                allergy.get('onsetString') or 
+                (allergy.get('onsetPeriod', {}).get('start') if allergy.get('onsetPeriod') else None) or
+                'Unknown'
+            ) if not is_negative_assertion else 'Not applicable',
             'notes': notes,  # Full FHIR R4 Annotation data
             'note_text': annotation_text,  # Simple text for display
             'has_notes': bool(notes),
@@ -1278,64 +1291,31 @@ class FHIRBundleParser:
         }
     
     def _parse_condition_resource(self, condition: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse FHIR Condition resource with ICD-10 code resolution via CTS agent"""
-        # Extract condition name with support for negative assertions and ICD-10 code resolution
+        """Parse FHIR Condition resource with ICD-10/SNOMED code resolution via CTS agent"""
+        # Import enhanced FHIR processor for CodeableConcept with CTS support
+        from eu_ncp_server.services.fhir_processing import FHIRResourceProcessor
+        processor = FHIRResourceProcessor()
+        
+        # Extract condition name with support for negative assertions and CTS code resolution
         code = condition.get('code', {})
         condition_name = 'Unknown condition'
         condition_code = None
         code_system = None
         is_negative_assertion = False
+        code_data = {}
         
-        if code.get('coding'):
-            coding = code['coding'][0]
-            code_value = coding.get('code', '')
-            code_system = coding.get('system', '')
-            display = coding.get('display')
+        if code:
+            # Use unified CTS-enabled extraction
+            code_data = processor._extract_codeable_concept(code)
+            condition_code = code_data.get('code', '')
+            code_system = code_data.get('system', '')
+            condition_name = code_data.get('display_text', 'Unknown condition')
             
             # Check for negative assertion codes
-            if code_value in ['no-problem-info', 'no-condition-info', 'no-known-problems']:
+            if condition_code in ['no-problem-info', 'no-condition-info', 'no-known-problems']:
                 is_negative_assertion = True
-                condition_name = display or 'No condition information available'
-            else:
-                condition_code = code_value
-                
-                # PRIORITY 1: Use display if available
-                if display and display not in ['Unknown condition', 'Unknown']:
-                    condition_name = display
-                # PRIORITY 2: Check code.text field
-                elif code.get('text') and code['text'] not in ['Unknown condition', 'Unknown']:
-                    condition_name = code['text']
-                # PRIORITY 3: Try to resolve via CTS agent (ICD-10, SNOMED, etc.)
-                elif code_value:
-                    from translation_services.terminology_translator import TerminologyTranslator
-                    translator = TerminologyTranslator()
-                    
-                    # Try to resolve the code (works for SNOMED, LOINC, ATC, etc.)
-                    resolved_name = None
-                    
-                    # For ICD-10, try with standard OID
-                    if 'icd-10' in code_system.lower():
-                        resolved_name = translator.resolve_code(code_value, '2.16.840.1.113883.6.3')
-                        logger.info(f"Attempting ICD-10 resolution for {code_value}")
-                    
-                    # Try without OID (may match in CTS database)
-                    if not resolved_name:
-                        resolved_name = translator.resolve_code(code_value)
-                    
-                    if resolved_name and resolved_name != code_value:
-                        condition_name = resolved_name
-                        logger.info(f"Resolved condition code {code_value} to: {resolved_name}")
-                    else:
-                        # Fallback: Show code with system identifier
-                        if 'icd-10' in code_system.lower():
-                            condition_name = f"Condition (ICD-10: {code_value})"
-                        elif 'snomed' in code_system.lower():
-                            condition_name = f"Condition (SNOMED: {code_value})"
-                        else:
-                            condition_name = f"Condition code: {code_value}"
-                        logger.warning(f"Could not resolve condition code: {code_value} from {code_system}")
-        elif code.get('text'):
-            condition_name = code['text']
+                if not condition_name or condition_name == 'Unknown condition':
+                    condition_name = 'No condition information available'
         
         # Extract clinical status
         clinical_status = 'Unknown'
@@ -1436,6 +1416,8 @@ class FHIRBundleParser:
             'condition_name': condition_name,
             'name': condition_name,  # Template compatibility
             'condition_code': condition_code,  # ICD-10 or other code
+            'condition_code_data': code_data,  # Full CodeableConcept with CTS translation
+            'code_system': code_system,
             'clinical_status': clinical_status,
             'verification_status': verification_status,
             'category': category,
@@ -1453,15 +1435,18 @@ class FHIRBundleParser:
         }
     
     def _parse_procedure_resource(self, procedure: Dict[str, Any]) -> Dict[str, Any]:
-        """Parse FHIR Procedure resource"""
-        # Extract procedure name
+        """Parse FHIR Procedure resource with CTS translation for SNOMED procedure codes"""
+        # Import enhanced FHIR processor for CodeableConcept with CTS support
+        from eu_ncp_server.services.fhir_processing import FHIRResourceProcessor
+        processor = FHIRResourceProcessor()
+        
+        # Extract procedure name with CTS translation
         code = procedure.get('code', {})
         procedure_name = 'Unknown procedure'
-        if code.get('coding'):
-            coding = code['coding'][0]
-            procedure_name = coding.get('display', coding.get('code', 'Unknown procedure'))
-        elif code.get('text'):
-            procedure_name = code['text']
+        code_data = {}
+        if code:
+            code_data = processor._extract_codeable_concept(code)
+            procedure_name = code_data.get('display_text', 'Unknown procedure')
         
         # Extract status and performed date
         status = procedure.get('status', 'Unknown')
@@ -1471,12 +1456,21 @@ class FHIRBundleParser:
         elif procedure.get('performedPeriod', {}).get('start'):
             performed_date = procedure['performedPeriod']['start']
         
+        # Extract category with CTS translation
+        category_text = 'Unknown'
+        category_data = {}
+        if procedure.get('category'):
+            category_data = processor._extract_codeable_concept(procedure['category'])
+            category_text = category_data.get('display_text', 'Unknown')
+        
         return {
             'id': procedure.get('id'),
             'procedure_name': procedure_name,
+            'procedure_code_data': code_data,  # Full CodeableConcept with CTS translation
             'status': status.capitalize(),
             'performed_date': performed_date,
-            'category': procedure.get('category', {}).get('coding', [{}])[0].get('display', 'Unknown'),
+            'category': category_text,
+            'category_data': category_data,  # Full category CodeableConcept
             'resource_type': 'Procedure',
             'display_text': f"Procedure: {procedure_name} ({status})"
         }

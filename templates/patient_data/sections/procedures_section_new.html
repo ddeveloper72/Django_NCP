@@ -78,7 +78,7 @@
                         <div class="row g-3">
                             
                             {# Procedure Date #}
-                            {% if procedure.date %}
+                            {% if procedure.performed_date %}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
@@ -86,14 +86,14 @@
                                         <span class="field-label">Procedure Date</span>
                                     </div>
                                     <div class="field-content">
-                                        <div class="field-value">{{ procedure.date|clean_date_format }}</div>
+                                        <div class="field-value">{{ procedure.performed_date|clean_date_format }}</div>
                                     </div>
                                 </div>
                             </div>
                             {% endif %}
                             
                             {# Procedure Code #}
-                            {% if procedure.procedure_code %}
+                            {% if procedure.procedure_code_data.code %}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
@@ -102,9 +102,9 @@
                                     </div>
                                     <div class="field-content">
                                         <div class="field-value">
-                                            <code>{{ procedure.procedure_code }}</code>
-                                            {% if procedure.code_system %}
-                                                <small class="text-muted ms-2">({{ procedure.code_system }})</small>
+                                            <code>{{ procedure.procedure_code_data.code }}</code>
+                                            {% if procedure.procedure_code_data.system %}
+                                                <small class="text-muted ms-2">({{ procedure.procedure_code_data.system }})</small>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -187,7 +187,7 @@
                                 <div class="small mt-2 font-monospace">
                                     <div class="mb-2 p-2 bg-white rounded">
                                         <strong>Normalized Fields (Top-Level):</strong><br>
-                                        <code class="text-primary">date: {{ procedure.date|default:"[empty]" }}</code><br>
+                                        <code class="text-primary">performed_date: {{ procedure.performed_date|default:"[empty]" }}</code><br>
                                         <code class="text-primary">procedure_code: {{ procedure.procedure_code|default:"[empty]" }}</code><br>
                                         <code class="text-primary">code_system: {{ procedure.code_system|default:"[empty]" }}</code><br>
                                         <code class="text-primary">target_site: {{ procedure.target_site|default:"[empty]" }}</code><br>

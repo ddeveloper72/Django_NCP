@@ -22,6 +22,7 @@ from fhir.resources.allergyintolerance import AllergyIntolerance
 from fhir.resources.medicationstatement import MedicationStatement
 from fhir.resources.condition import Condition
 from fhir.resources.observation import Observation
+from translation_services.terminology_translator import TerminologyTranslator
 
 logger = logging.getLogger("ehealth")
 
@@ -34,6 +35,8 @@ class FHIRResourceProcessor:
             'Patient', 'AllergyIntolerance', 'Medication', 'MedicationStatement',
             'Condition', 'Observation', 'Procedure', 'Immunization'
         ]
+        # Initialize CTS translator for code resolution
+        self.cts_translator = TerminologyTranslator()
     
     def parse_patient_summary_bundle(self, fhir_bundle: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -666,17 +669,40 @@ class FHIRResourceProcessor:
             return f"{size_bytes / (1024 * 1024):.1f} MB"
     
     def _extract_coding_data(self, coding: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract FHIR R4 Coding data structure"""
+        """Extract FHIR R4 Coding data structure with CTS terminology translation"""
         if not coding:
             return {}
         
+        # Get display text, falling back to CTS lookup or code value
+        display_text = coding.get('display')
+        code = coding.get('code', 'Unknown code')
+        code_system = coding.get('system', '')
+        
+        # If no display text, use CTS translator to resolve the code
+        if not display_text and code != 'Unknown code' and code_system:
+            try:
+                # Convert FHIR code system URL to OID format if needed
+                code_system_oid = self._convert_code_system_to_oid(code_system)
+                
+                # Try CTS translation for all code systems
+                resolved_display = self.cts_translator.resolve_code(code, code_system_oid)
+                if resolved_display:
+                    display_text = resolved_display
+                    logger.debug(f"[CTS] Resolved {code} ({code_system_oid}) -> {display_text}")
+            except Exception as e:
+                logger.warning(f"[CTS] Failed to resolve code {code} ({code_system}): {e}")
+        
+        # Final fallback to code value
+        if not display_text:
+            display_text = code
+        
         return {
-            'system': coding.get('system'),
+            'system': code_system,
             'version': coding.get('version'),
-            'code': coding.get('code'),
+            'code': code,
             'display': coding.get('display'),
             'user_selected': coding.get('userSelected', False),
-            'display_text': coding.get('display', coding.get('code', 'Unknown code'))
+            'display_text': display_text
         }
     
     def _extract_codeable_concept(self, concept: Dict[str, Any]) -> Dict[str, Any]:
@@ -695,6 +721,42 @@ class FHIRResourceProcessor:
             'has_multiple_codings': len(codings) > 1,
             'primary_coding': codings[0] if codings else {}
         }
+    
+    def _convert_code_system_to_oid(self, code_system_url: str) -> str:
+        """
+        Convert FHIR code system URL to OID format for CTS lookup
+        
+        Args:
+            code_system_url: FHIR code system URL (e.g., "http://standardterms.edqm.eu")
+            
+        Returns:
+            OID or original URL if no mapping found
+        """
+        # Common FHIR code system URL to OID mappings
+        url_to_oid = {
+            # EDQM pharmaceutical forms and routes
+            'http://standardterms.edqm.eu': '0.4.0.127.0.16.1.1.2.1',
+            # ATC medication codes
+            'http://www.whocc.no/atc': '2.16.840.1.113883.6.73',
+            # SNOMED CT
+            'http://snomed.info/sct': '2.16.840.1.113883.6.96',
+            # LOINC
+            'http://loinc.org': '2.16.840.1.113883.6.1',
+            # ICD-10
+            'http://hl7.org/fhir/sid/icd-10': '2.16.840.1.113883.6.3',
+        }
+        
+        # If already an OID, return as-is
+        if code_system_url and code_system_url[0].isdigit():
+            return code_system_url
+        
+        # Try to find mapping
+        for url_pattern, oid in url_to_oid.items():
+            if url_pattern in code_system_url:
+                return oid
+        
+        # Return original if no mapping found
+        return code_system_url
     
     def _validate_bundle(self, bundle: Dict[str, Any]) -> bool:
         """Validate FHIR Bundle structure"""
