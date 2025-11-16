@@ -273,11 +273,15 @@ class FHIRResourceProcessor:
             dose_number = first_protocol.get('doseNumberPositiveInt', 
                                             first_protocol.get('doseNumberString', None))
         
+        # Extract occurrence - FHIR R4 supports occurrenceDateTime or occurrenceString
+        occurrence = (immunization.get('occurrenceDateTime') or 
+                     immunization.get('occurrenceString'))
+        
         return {
             'id': immunization.get('id'),
             'status': immunization.get('status'),
             'vaccine_code': self._extract_coding_display(immunization.get('vaccineCode', {})),
-            'occurrence': immunization.get('occurrenceDateTime'),
+            'occurrence': occurrence,
             'lot_number': immunization.get('lotNumber'),
             'route': self._extract_coding_display(immunization.get('route', {})),
             'dose_quantity': immunization.get('doseQuantity', {}),
@@ -894,15 +898,29 @@ class FHIRResourceProcessor:
         """Format immunizations for template display with enhanced fields"""
         formatted = []
         for imm in immunizations:
+            # Extract route - handle both dict and string, default to None for template
+            route_value = imm.get('route')
+            if isinstance(route_value, dict):
+                route_display = route_value.get('display')
+            else:
+                route_display = route_value
+            
+            # Extract site - handle both dict and string
+            site_value = imm.get('site')
+            if isinstance(site_value, dict):
+                site_display = site_value.get('display')
+            else:
+                site_display = site_value
+            
             formatted.append({
                 'vaccine': imm['vaccine_code'].get('display', 'Unknown vaccine'),
                 'status': imm.get('status', 'Unknown'),
-                'date': imm.get('occurrence', 'Unknown'),
-                'lot_number': imm.get('lot_number', 'Unknown'),
-                'route': imm.get('route', {}).get('display', 'Unknown'),
-                'performer': imm.get('performer', 'Unknown'),  # NEW: who administered
-                'dose_number': imm.get('dose_number', None),    # NEW: dose number
-                'site': imm.get('site', {}).get('display', 'Unknown')  # NEW: injection site
+                'date': imm.get('occurrence'),  # Keep None if not present, let template handle
+                'lot_number': imm.get('lot_number'),  # Keep None if not present
+                'route': route_display,  # Keep None if not present
+                'performer': imm.get('performer'),  # Keep None if not present
+                'dose_number': imm.get('dose_number'),  # Keep None if not present
+                'site': site_display  # Keep None if not present
             })
         return formatted
     

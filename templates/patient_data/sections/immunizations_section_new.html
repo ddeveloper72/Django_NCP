@@ -175,8 +175,8 @@
                             </div>
                             {% endif %}
                             
-                            {# Healthcare Provider #}
-                            {% if immunization.provider or immunization.data.provider %}
+                            {# Healthcare Provider / Performer #}
+                            {% if immunization.performer or immunization.provider or immunization.data.provider or immunization.health_professional_name %}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
@@ -186,8 +186,12 @@
                                     <div class="field-content">
                                         {% if immunization.data.provider.display_value %}
                                             <div class="field-value">{{ immunization.data.provider.display_value }}</div>
+                                        {% elif immunization.performer %}
+                                            <div class="field-value">{{ immunization.performer }}</div>
                                         {% elif immunization.provider %}
                                             <div class="field-value">{{ immunization.provider }}</div>
+                                        {% elif immunization.health_professional_name %}
+                                            <div class="field-value">{{ immunization.health_professional_name }}</div>
                                         {% else %}
                                             <div class="field-value text-muted">Not specified</div>
                                         {% endif %}
@@ -197,7 +201,6 @@
                             {% endif %}
                             
                             {# Route of Administration #}
-                            {% if immunization.route or immunization.data.route %}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
@@ -210,12 +213,11 @@
                                         {% elif immunization.route %}
                                             <div class="field-value">{{ immunization.route }}</div>
                                         {% else %}
-                                            <div class="field-value text-muted">Intramuscular</div>
+                                            <div class="field-value text-muted">Not recorded</div>
                                         {% endif %}
                                     </div>
                                 </div>
                             </div>
-                            {% endif %}
                             
                             {# Site of Administration #}
                             {% if immunization.site or immunization.data.site %}
@@ -239,7 +241,6 @@
                             {% endif %}
                             
                             {# Batch/Lot Number #}
-                            {% if immunization.lot_number or immunization.batch_number or immunization.data.lot_number.display_value %}
                             <div class="col-lg-6">
                                 <div class="field-group">
                                     <div class="field-header">
@@ -259,7 +260,6 @@
                                     </div>
                                 </div>
                             </div>
-                            {% endif %}
                             
                             {# Marketing Authorization Holder #}
                             {% if immunization.marketing_authorization_holder or immunization.data.marketing_holder.display_value %}
