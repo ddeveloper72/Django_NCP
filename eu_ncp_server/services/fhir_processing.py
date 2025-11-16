@@ -679,18 +679,15 @@ class FHIRResourceProcessor:
         code_system = coding.get('system', '')
         
         # If no display text, use CTS translator to resolve the code
-        if not display_text and code != 'Unknown code' and code_system:
+        if not display_text and code != 'Unknown code':
             try:
-                # Convert FHIR code system URL to OID format if needed
-                code_system_oid = self._convert_code_system_to_oid(code_system)
-                
-                # Try CTS translation for all code systems
-                resolved_display = self.cts_translator.resolve_code(code, code_system_oid)
-                if resolved_display:
+                # Try CTS translation WITHOUT OID first (works best for ICD-10 and other codes)
+                resolved_display = self.cts_translator.resolve_code(code)
+                if resolved_display and resolved_display != code:
                     display_text = resolved_display
-                    logger.debug(f"[CTS] Resolved {code} ({code_system_oid}) -> {display_text}")
+                    logger.debug(f"[CTS] Resolved {code} -> {display_text}")
             except Exception as e:
-                logger.warning(f"[CTS] Failed to resolve code {code} ({code_system}): {e}")
+                logger.warning(f"[CTS] Failed to resolve code {code}: {e}")
         
         # Final fallback to code value
         if not display_text:
