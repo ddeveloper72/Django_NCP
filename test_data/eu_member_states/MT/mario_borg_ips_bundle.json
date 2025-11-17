@@ -1,0 +1,476 @@
+{
+  "resourceType": "Bundle",
+  "id": "ips-3b2a79e3-efe0-4ce2-b219-6a7399e7103f",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/ips/StructureDefinition/Bundle-uv-ips|2.0.0"
+    ]
+  },
+  "identifier": {
+    "system": "urn:ietf:rfc:3986",
+    "value": "urn:uuid:2ffeab32-4c84-41ed-858e-94ac6384bac8"
+  },
+  "type": "document",
+  "timestamp": "2025-11-02T22:59:03.976369Z",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:66f11b8f-e6e0-4542-8d80-e2238362bb60",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "ea5e40da-e3c6-481b-b56e-6312a9eb079d",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Composition-uv-ips"
+          ]
+        },
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "60591-5",
+              "display": "Patient summary Document"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:47127751-311e-405b-83ea-610f2be6dffe"
+        },
+        "date": "2025-11-02T22:59:03.975370Z",
+        "author": [
+          {
+            "reference": "urn:uuid:df263a3f-38b1-44c4-a734-49d450bd820b"
+          }
+        ],
+        "title": "Patient Summary",
+        "custodian": {
+          "reference": "urn:uuid:4baf9198-f839-4236-8952-ce55c3191f61"
+        },
+        "section": [
+          {
+            "title": "Allergies and Intolerances",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "48765-2",
+                  "display": "Allergies and adverse reactions Document"
+                }
+              ]
+            },
+            "text": {
+              "status": "additional",
+              "div": "<div xmlns='http://www.w3.org/1999/xhtml'><table><thead><tr><th>Onset Date</th><th>Category</th><th>Description</th><th>Criticality</th><th>Manifestations</th></tr></thead><tbody><tr><td>12-Jan-2018</td><td>BETA-LACTAM ANTIBACTERIALS, PENICILLINS</td><td>Allergic disposition , Allergy to Penicillin                                                                                                                                                                                                                                         </td><td>No information</td><td>No information</td></tr></tbody></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:d737408b-0862-4579-94a6-63f49d7bdbd5"
+              }
+            ]
+          },
+          {
+            "title": "Problem List",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "11450-4",
+                  "display": "Problem list - Reported"
+                }
+              ]
+            },
+            "text": {
+              "status": "additional",
+              "div": "<div xmlns='http://www.w3.org/1999/xhtml'><table><thead><tr><th>Onset Date</th><th>Description</th></tr></thead><tbody><tr><td>12-Jan-2018</td><td>Unilateral or unspecified inguinal hernia, without obstruction or gangrene, Right inguinal hernia (RIH)</td></tr></tbody></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:85902b74-5186-4aca-a58f-41b9c4c08a53"
+              }
+            ]
+          },
+          {
+            "title": "History of Procedures",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "47519-4",
+                  "display": "History of Procedures Document"
+                }
+              ]
+            },
+            "text": {
+              "status": "additional",
+              "div": "<div xmlns='http://www.w3.org/1999/xhtml'><table><thead><tr><th>Procedure date</th><th>Description</th></tr></thead><tbody><tr><td>11-Jan-2018</td><td>Right inguinal hernia repair</td></tr></tbody></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:b27374bd-e773-4596-b661-5da7400b6ec0"
+              }
+            ]
+          },
+          {
+            "title": "Medication Summary",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "10160-0",
+                  "display": "History of Medication use Narrative"
+                }
+              ]
+            },
+            "text": {
+              "status": "additional",
+              "div": "<div xmlns='http://www.w3.org/1999/xhtml'><table><thead><tr><th>Start date</th><th>End date</th><th>Description</th><th>Frequency</th></tr></thead><tbody><tr><td>12-Jan-2018</td><td>UNK</td><td>ASPIRIN 75mg Enteric-coated (EC) tablet, Oral use</td><td>UNK</td></tr><tr><td>12-Jan-2018</td><td>19-Jan-2018</td><td>CLARITHROMYCIN 250mg Tablet, Oral use</td><td>UNK</td></tr></tbody></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:dbc2f20e-f71b-4f07-aa9d-a04a8d0dfca6"
+              },
+              {
+                "reference": "urn:uuid:844f0a74-d12f-4241-a724-ababdb9cbc65"
+              }
+            ]
+          }
+        ],
+        "attester": [
+          {
+            "mode": "legal",
+            "time": "2025-03-18T15:09:29Z",
+            "party": {
+              "reference": "urn:uuid:df263a3f-38b1-44c4-a734-49d450bd820b"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:47127751-311e-405b-83ea-610f2be6dffe",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "9999002M",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Patient-uv-ips"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.470.1.100.1.1.1000.990.1.1",
+            "value": "9999002M"
+          }
+        ],
+        "name": [
+          {
+            "family": "Borg",
+            "given": [
+              "Mario"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1951-04-25",
+        "address": [
+          {
+            "line": [
+              "1234 Main Street"
+            ],
+            "city": "QORMI",
+            "country": "MT"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:df263a3f-38b1-44c4-a734-49d450bd820b",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "legal.authenticator.gov.mt",
+        "name": [
+          {
+            "family": "Ministry for Health, Government of Malta",
+            "given": [
+              "Ministry for Health, Government of Malta"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4baf9198-f839-4236-8952-ce55c3191f61",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "mhec.gov.mt",
+        "name": "Ministry for Health, Government of Malta"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d737408b-0862-4579-94a6-63f49d7bdbd5",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "d737408b-0862-4579-94a6-63f49d7bdbd5",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/AllergyIntolerance-uv-ips"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "inactive"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "J01C",
+              "display": "BETA-LACTAM ANTIBACTERIALS, PENICILLINS"
+            }
+          ],
+          "text": "BETA-LACTAM ANTIBACTERIALS, PENICILLINS"
+        },
+        "patient": {
+          "reference": "urn:uuid:47127751-311e-405b-83ea-610f2be6dffe"
+        },
+        "onsetDateTime": "2018-01-12",
+        "recordedDate": "2018-01-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:85902b74-5186-4aca-a58f-41b9c4c08a53",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "85902b74-5186-4aca-a58f-41b9c4c08a53",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "code": "K40.9",
+              "display": "Unilateral or unspecified inguinal hernia, without obstruction or gangrene"
+            }
+          ],
+          "text": "Unilateral or unspecified inguinal hernia, without obstruction or gangrene"
+        },
+        "subject": {
+          "reference": "urn:uuid:47127751-311e-405b-83ea-610f2be6dffe"
+        },
+        "onsetDateTime": "2018-01-12"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b27374bd-e773-4596-b661-5da7400b6ec0",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "b27374bd-e773-4596-b661-5da7400b6ec0",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Procedure-uv-ips"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "44558001",
+              "display": "Repair of inguinal hernia"
+            }
+          ],
+          "text": "Repair of inguinal hernia"
+        },
+        "subject": {
+          "reference": "urn:uuid:47127751-311e-405b-83ea-610f2be6dffe"
+        },
+        "performedDateTime": "2018-01-11T00:00:00Z"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:dbc2f20e-f71b-4f07-aa9d-a04a8d0dfca6",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "dbc2f20e-f71b-4f07-aa9d-a04a8d0dfca6",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationStatement-uv-ips"
+          ]
+        },
+        "status": "active",
+        "subject": {
+          "reference": "urn:uuid:47127751-311e-405b-83ea-610f2be6dffe"
+        },
+        "effectiveDateTime": "2018-01-12T00:00:00Z",
+        "dosage": [
+          {
+            "text": "Oral use",
+            "route": {
+              "coding": [
+                {
+                  "system": "http://standardterms.edqm.eu",
+                  "code": "20053000",
+                  "display": "Oral use"
+                }
+              ]
+            }
+          }
+        ],
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "B01AC06",
+              "display": "acetylsalicylic acid"
+            }
+          ],
+          "text": "acetylsalicylic acid"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:844f0a74-d12f-4241-a724-ababdb9cbc65",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "844f0a74-d12f-4241-a724-ababdb9cbc65",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationStatement-uv-ips"
+          ]
+        },
+        "status": "completed",
+        "subject": {
+          "reference": "urn:uuid:47127751-311e-405b-83ea-610f2be6dffe"
+        },
+        "effectiveDateTime": "2018-01-12T00:00:00Z",
+        "dosage": [
+          {
+            "text": "Oral use",
+            "route": {
+              "coding": [
+                {
+                  "system": "http://standardterms.edqm.eu",
+                  "code": "20053000",
+                  "display": "Oral use"
+                }
+              ]
+            }
+          }
+        ],
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "J01FA09",
+              "display": "clarithromycin"
+            }
+          ],
+          "text": "clarithromycin"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:2284978c-3e78-4025-be95-7ec083870138",
+      "resource": {
+        "resourceType": "RelatedPerson",
+        "id": "2284978c-3e78-4025-be95-7ec083870138",
+        "patient": {
+          "reference": "urn:uuid:47127751-311e-405b-83ea-610f2be6dffe"
+        },
+        "relationship": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                "code": "ECON",
+                "display": "Emergency Contact"
+              }
+            ]
+          }
+        ],
+        "name": [
+          {
+            "family": "Ministry for Health",
+            "given": [
+              "Government of Malta"
+            ]
+          }
+        ],
+        "address": [
+          {
+            "use": "home"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:962997b0-4bec-410f-b989-3d58310d9b75",
+      "resource": {
+        "resourceType": "Provenance",
+        "id": "962997b0-4bec-410f-b989-3d58310d9b75",
+        "target": [
+          {
+            "reference": "urn:uuid:66f11b8f-e6e0-4542-8d80-e2238362bb60"
+          }
+        ],
+        "recorded": "2025-03-17T22:00:00Z",
+        "activity": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
+              "code": "UPDATE",
+              "display": "Update"
+            }
+          ]
+        },
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author",
+                  "display": "Author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "urn:uuid:df263a3f-38b1-44c4-a734-49d450bd820b"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

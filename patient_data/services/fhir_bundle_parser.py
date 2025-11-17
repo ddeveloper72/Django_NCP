@@ -1670,6 +1670,9 @@ class FHIRBundleParser:
             '11884-4',  # Gestational age at birth
             '57064-8',  # Estimated date of delivery
             '11778-8',  # Delivery date
+            '8339-4',   # Birth weight
+            '72149-8',  # Type of delivery
+            '73812-0',  # Delivery complications
         }
         
         pregnancy_snomed_codes = {
@@ -1707,6 +1710,124 @@ class FHIRBundleParser:
         
         return any(keyword in observation_name or keyword in display_text 
                   for keyword in pregnancy_keywords)
+    
+    def _transform_pregnancy_observations(self, observations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Transform pregnancy-related observations into template-compatible structure
+        
+        Template expects:
+        - pregnancy_type: 'current' or 'past'
+        - data.status.display_value: Pregnancy status
+        - data.outcome.display_value: Pregnancy outcome (live birth, etc.)
+        - data.observation_date.display_value: Observation date
+        - data.delivery_date.display_value: Delivery date
+        - data.delivery_date_estimated.display_value: Estimated delivery date
+        - data.number_of_births_live.display_value: Number of live births
+        - data.number_of_births_stillborn.display_value: Number of stillbirths
+        """
+        if not observations:
+            return []
+        
+        pregnancy_records = []
+        
+        # Group observations by related pregnancy context
+        # For now, create individual pregnancy records for each observation
+        for obs in observations:
+            # Extract code from nested code_data structure
+            code_data = obs.get('code_data', {})
+            # Handle both single coding dict and list of codings
+            if isinstance(code_data.get('coding'), list) and code_data['coding']:
+                code = code_data['coding'][0].get('code', '')
+            else:
+                code = code_data.get('code', '')
+            
+            observation_name = obs.get('observation_name', '').lower()
+            value_text = obs.get('value', 'Not specified')
+            effective_date_text = obs.get('effective_date', 'Not recorded')
+            
+            # Determine pregnancy type based on code and observation name
+            is_current_pregnancy = any(keyword in observation_name for keyword in [
+                'pregnancy status', 'gestational age', 'estimated date of delivery', 
+                'estimated delivery', 'edd'
+            ]) and obs.get('status', '').lower() in ['final', 'preliminary', 'amended']
+            
+            pregnancy_type = 'current' if is_current_pregnancy else 'past'
+            
+            # Build pregnancy record structure with proper field extraction
+            pregnancy_record = {
+                'pregnancy_type': pregnancy_type,
+                'observation_id': obs.get('id', ''),
+                'resource_type': 'PregnancyObservation',
+                
+                # Main data structure matching template expectations
+                'data': {
+                    'status': {
+                        'display_value': value_text if '82810-3' in code else None,
+                        'code': code if '82810-3' in code else None
+                    },
+                    'outcome': {
+                        'display_value': value_text if any(c in code for c in ['11636-8', '11637-6', '93857-1']) else None,
+                        'code': code
+                    },
+                    'observation_date': {
+                        'display_value': effective_date_text,
+                        'raw_value': obs.get('effective_data', {})
+                    },
+                    'delivery_date': {
+                        'display_value': effective_date_text if any(c in code for c in ['11778-8', '93857-1']) else None,
+                        'raw_value': obs.get('effective_data', {})
+                    },
+                    'delivery_date_estimated': {
+                        'display_value': value_text if '57064-8' in code else None,
+                        'raw_value': obs.get('value_data', {})
+                    },
+                    'number_of_births_live': {
+                        'display_value': value_text if '11637-6' in code else None,
+                        'raw_value': obs.get('value_data', {})
+                    },
+                    'number_of_births_stillborn': {
+                        'display_value': value_text if '11638-4' in code else None,
+                        'raw_value': obs.get('value_data', {})
+                    },
+                    'gestational_age': {
+                        'display_value': value_text if any(c in code for c in ['49051-6', '11884-4']) else None,
+                        'raw_value': obs.get('value_data', {})
+                    },
+                    'birth_weight': {
+                        'display_value': value_text if '8339-4' in code else None,
+                        'raw_value': obs.get('value_data', {})
+                    },
+                    'delivery_method': {
+                        'display_value': value_text if '72149-8' in code else None,
+                        'raw_value': obs.get('value_data', {})
+                    },
+                    'complications': {
+                        'display_value': value_text if '73812-0' in code else None,
+                        'raw_value': obs.get('value_data', {})
+                    }
+                },
+                
+                # Direct field access for simpler templates
+                'status': value_text if '82810-3' in code else None,
+                'outcome': value_text if any(c in code for c in ['11636-8', '11637-6', '93857-1']) else None,
+                'observation_date': effective_date_text,
+                'delivery_date': effective_date_text if any(c in code for c in ['11778-8', '93857-1']) else None,
+                'delivery_date_estimated': value_text if '57064-8' in code else None,
+                'birth_weight': value_text if '8339-4' in code else None,
+                'delivery_method': value_text if '72149-8' in code else None,
+                'complications': value_text if '73812-0' in code else 'None reported',
+                
+                # Preserve original observation for debugging
+                '_original_observation': obs,
+                'observation_name': obs.get('observation_name', 'Pregnancy Observation'),
+                'observation_code': code,
+                'observation_value': value_text
+            }
+            
+            pregnancy_records.append(pregnancy_record)
+        
+        logger.info(f"[PREGNANCY TRANSFORM] Transformed {len(observations)} pregnancy observations into {len(pregnancy_records)} pregnancy records")
+        return pregnancy_records
     
     def _is_vital_sign(self, observation: Dict[str, Any]) -> bool:
         """Check if observation is a vital sign"""
@@ -1853,11 +1974,12 @@ class FHIRBundleParser:
                     if self._is_vital_sign(obs)
                 ]
                 
-                # Filter for pregnancy history (LOINC 10162-6 section)
-                clinical_arrays['pregnancy_history'] = [
+                # Filter for pregnancy history (LOINC 10162-6 section) and transform to template structure
+                pregnancy_observations = [
                     obs for obs in section_data.entries 
                     if self._is_pregnancy_related(obs)
                 ]
+                clinical_arrays['pregnancy_history'] = self._transform_pregnancy_observations(pregnancy_observations)
             elif section_type == 'immunizations' and hasattr(section_data, 'entries'):
                 clinical_arrays['immunizations'] = section_data.entries
             elif section_type == 'diagnostic_reports' and hasattr(section_data, 'entries'):

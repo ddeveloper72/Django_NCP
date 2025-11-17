@@ -55,5 +55,7 @@
   ],
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
-  }
+  },
+  // Terminal settings
+  "terminal.integrated.defaultProfile.windows": "Git Bash"
 }

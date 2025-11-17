@@ -1,0 +1,698 @@
+{
+  "resourceType": "Bundle",
+  "id": "ips-c49c58f2-e666-4535-a422-8fb0d3ee31b3",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/ips/StructureDefinition/Bundle-uv-ips|2.0.0"
+    ]
+  },
+  "identifier": {
+    "system": "urn:ietf:rfc:3986",
+    "value": "urn:uuid:06615990-cc5d-49a2-84f4-5825fde89058"
+  },
+  "type": "document",
+  "timestamp": "2025-11-02T22:43:01.207693Z",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:490c9f12-8269-4c4a-b3ef-cb0e0c2164ca",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "8e60df32-5066-4a54-98f3-4ae41bc3c7e4",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Composition-uv-ips"
+          ]
+        },
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "60591-5",
+              "display": "Patient summary Document"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        },
+        "date": "2025-11-02T22:43:01.199158Z",
+        "author": [
+          {
+            "reference": "urn:uuid:05ddfdeb-fe08-4554-a663-d8f563027344"
+          }
+        ],
+        "title": "Patient Summary",
+        "custodian": {
+          "reference": "urn:uuid:4020bfa3-89b8-4356-a0ac-cbec937eccc6"
+        },
+        "section": [
+          {
+            "title": "Allergies and Intolerances",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "48765-2",
+                  "display": "Allergies and adverse reactions Document"
+                }
+              ]
+            },
+            "text": {
+              "status": "additional",
+              "div": "<div xmlns='http://www.w3.org/1999/xhtml'><table>\n                     <thead>\n                        <tr>\n                           <th>Code (SNOMED-CT)</th>\n                           <th>Type</th>\n                           <th>Agent</th>\n                           <th>Symptôme</th>\n                           <th>Gravité</th>\n                           <th>Date de début</th>\n                           <th>Date de fin</th>\n                           <th>Notes</th>\n                        </tr>\n                     </thead>\n                     <tbody>\n                        <tr>\n                           <td>416098002</td>\n                           <td>Allergie médicamenteuse</td>\n                           <td>abacavir sulfate</td>\n                           <td>Anaphylaxie</td>\n                           <td>Sévère</td>\n                           <td>01/08/2022</td>\n                           <td></td>\n                           <td>note</td>\n                        </tr>\n                     </tbody>\n                  </table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:a9f183b1-f7ce-4d29-afb4-23725b23cecb"
+              }
+            ]
+          },
+          {
+            "title": "Problem List",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "11450-4",
+                  "display": "Problem list - Reported"
+                }
+              ]
+            },
+            "text": {
+              "status": "additional",
+              "div": "<div xmlns='http://www.w3.org/1999/xhtml'><table>\n                     <thead>\n                        <tr>\n                           <th>Code (ICD-10CM)</th>\n                           <th>Type</th>\n                           <th>Description</th>\n                           <th>Date d'apparition présumée</th>\n                           <th>Date d'fin présumée</th>\n                           <th>Prise en charge</th>\n                        </tr>\n                     </thead>\n                     <tbody>\n                        <tr>\n                           <td>A06.6</td>\n                           <td>abcès amibien de l'encéphale</td>\n                           <td>abc</td>\n                           <td>01/08/2022</td>\n                           <td></td>\n                           <td>Dr. Laurent Vandenhove</td>\n                        </tr>\n                        <tr>\n                           <td>B20</td>\n                           <td>immunodéficience humaine virale [VIH], à l'origine de maladies infectieuses et parasitaires</td>\n                           <td></td>\n                           <td>02/08/2022</td>\n                           <td></td>\n                           <td>Dr. Laurent Vandenhove</td>\n                        </tr>\n                     </tbody>\n                  </table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:6ee7fae2-78f8-43d2-b23b-69dd681dd398"
+              },
+              {
+                "reference": "urn:uuid:0bc6c86f-0df4-4961-8763-edf15779d344"
+              }
+            ]
+          },
+          {
+            "title": "History of Procedures",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "47519-4",
+                  "display": "History of Procedures Document"
+                }
+              ]
+            },
+            "text": {
+              "status": "additional",
+              "div": "<div xmlns='http://www.w3.org/1999/xhtml'><table>\n                     <thead>\n                        <tr>\n                           <th>Code (SNOMED-CT)</th>\n                           <th>Procédure</th>\n                           <th>Date de début</th>\n                           <th>Date de fin</th>\n                           <th>Note</th>\n                        </tr>\n                     </thead>\n                     <tbody>\n                        <tr>\n                           <td>118950002</td>\n                           <td>Intervention sur la tête et/ou le cou</td>\n                           <td>03/08/2022</td>\n                           <td>03/08/2022</td>\n                           <td>abcès amibien de l'encéphale</td>\n                        </tr>\n                     </tbody>\n                  </table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:b7005cf8-06af-4fd5-a457-18b3075bd3ce"
+              }
+            ]
+          },
+          {
+            "title": "Medication Summary",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "10160-0",
+                  "display": "History of Medication use Narrative"
+                }
+              ]
+            },
+            "text": {
+              "status": "additional",
+              "div": "<div xmlns='http://www.w3.org/1999/xhtml'><table>\n                     <thead>\n                        <tr>\n                           <th>Code</th>\n                           <th>Nom commercial</th>\n                           <th>Principe actif et dosage</th>\n                           <th>Forme pharmaceutique</th>\n                           <th>Route</th>\n                           <th>Posologie</th>\n                           <th>Date de début</th>\n                           <th>Date de fin</th>\n                           <th>Notes</th>\n                        </tr>\n                     </thead>\n                     <tbody>\n                        <tr>\n                           <td>2009050307</td>\n                           <td>RETROVIR</td>\n                           <td>zidovudine 10.0mg/ml</td>\n                           <td>sol buv</td>\n                           <td>orale</td>\n                           <td>300 mg par 12 Heure</td>\n                           <td>01/08/2022</td>\n                           <td>18/08/2023</td>\n                           <td>abc</td>\n                        </tr>\n                        <tr>\n                           <td>2007029189</td>\n                           <td>VIREAD</td>\n                           <td>ténofovir disoproxil fumarate 245.0mg</td>\n                           <td>cp</td>\n                           <td>orale</td>\n                           <td>1 cp par Jour</td>\n                           <td>01/08/2022</td>\n                           <td>18/08/2023</td>\n                           <td></td>\n                        </tr>\n                        <tr>\n                           <td>2008039720</td>\n                           <td>VIRAMUNE</td>\n                           <td>névirapine 200.0mg</td>\n                           <td>cp</td>\n                           <td>orale</td>\n                           <td>1 cp par Jour</td>\n                           <td>01/08/2022</td>\n                           <td>18/08/2023</td>\n                           <td></td>\n                        </tr>\n                     </tbody>\n                  </table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:419cc858-087b-48ea-8752-da3b1c59b099"
+              },
+              {
+                "reference": "urn:uuid:ccd523b4-fdf7-44aa-ad91-10baa5651514"
+              },
+              {
+                "reference": "urn:uuid:8614a2f9-c48c-4dd5-be01-bb6e2e6b9723"
+              }
+            ]
+          },
+          {
+            "title": "History of Immunizations",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "11369-6",
+                  "display": "History of Immunization note"
+                }
+              ]
+            },
+            "text": {
+              "status": "additional",
+              "div": "<div xmlns='http://www.w3.org/1999/xhtml'><table>\n                     <thead>\n                        <tr>\n                           <th>Nom commercial</th>\n                           <th>Type</th>\n                           <th>Date d'administration</th>\n                           <th>Producteur</th>\n                           <th>Numéro de lot</th>\n                           <th>Date d'expiration</th>\n                           <th>Site</th>\n                           <th>Voie</th>\n                           <th>Status</th>\n                           <th>Quantité</th>\n                           <th>Vaccinateur</th>\n                           <th>Réaction</th>\n                           <th>Note</th>\n                           <th>Protocole</th>\n                        </tr>\n                     </thead>\n                     <tbody>\n                        <tr>\n                           <td>BOOSTRIX-POLIO</td>\n                           <td>Vaccin ant diphtérique</td>\n                           <td>01/08/2022</td>\n                           <td>GSK</td>\n                           <td>123456789</td>\n                           <td>31/08/2022</td>\n                           <td>Bras supérieur droit</td>\n                           <td>orale</td>\n                           <td>Délivré </td>\n                           <td>Dose complète</td>\n                           <td></td>\n                           <td>sevère</td>\n                           <td></td>\n                           <td></td>\n                        </tr>\n                        <tr>\n                           <td>PREVENAR 13</td>\n                           <td>Vaccin anti pneumococcique</td>\n                           <td>01/09/2022</td>\n                           <td>Pfizer</td>\n                           <td>167813785</td>\n                           <td></td>\n                           <td>Bras supérieur droit</td>\n                           <td>intramusculaire</td>\n                           <td>Délivré </td>\n                           <td>Dose complète</td>\n                           <td></td>\n                           <td></td>\n                           <td></td>\n                           <td></td>\n                        </tr>\n                        <tr>\n                           <td>NEIS-VAC-C</td>\n                           <td>Vaccin anti méningococcique</td>\n                           <td>02/10/2022</td>\n                           <td>Pfizer</td>\n                           <td>9853788125</td>\n                           <td></td>\n                           <td>Bras supérieur droit</td>\n                           <td>intramusculaire</td>\n                           <td>Délivré </td>\n                           <td>Dose complète</td>\n                           <td></td>\n                           <td></td>\n                           <td></td>\n                           <td></td>\n                        </tr>\n                        <tr>\n                           <td>PRIORIX</td>\n                           <td>Vaccin rougeole-oreillons-rubéole</td>\n                           <td>08/09/2022</td>\n                           <td>GSK</td>\n                           <td>8321487624</td>\n                           <td></td>\n                           <td>Bras supérieur droit</td>\n                           <td>intramusculaire</td>\n                           <td>Délivré </td>\n                           <td>Dose complète</td>\n                           <td></td>\n                           <td></td>\n                           <td></td>\n                           <td></td>\n                        </tr>\n                     </tbody>\n                  </table></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:5f572d57-9b96-4b25-87a4-6b62be8ab11d"
+              },
+              {
+                "reference": "urn:uuid:c457410e-ba94-4075-96f2-46b5cfbf858f"
+              },
+              {
+                "reference": "urn:uuid:8bc9fd0c-b989-42de-ad38-73ae0e97c372"
+              },
+              {
+                "reference": "urn:uuid:d59ee3e5-c83a-40fc-8202-eb7fa3ecec54"
+              }
+            ]
+          }
+        ],
+        "attester": [
+          {
+            "mode": "legal",
+            "time": "2024-06-03T11:18:54Z",
+            "party": {
+              "reference": "urn:uuid:05ddfdeb-fe08-4554-a663-d8f563027344"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "3843082788",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Patient-uv-ips"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "urn:oid:1.3.182.2.4.2",
+            "value": "3843082788"
+          }
+        ],
+        "name": [
+          {
+            "family": "DOE-CALLA",
+            "given": [
+              "CELESTINA"
+            ]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1968-10-15",
+        "address": [
+          {
+            "line": [
+              "1133 RUE DES PRES"
+            ],
+            "city": "INGELDORF",
+            "postalCode": "9160",
+            "country": "LU"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:05ddfdeb-fe08-4554-a663-d8f563027344",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "2999980475",
+        "name": [
+          {
+            "family": "FERRING",
+            "given": [
+              "JENS"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4020bfa3-89b8-4356-a0ac-cbec937eccc6",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "2999980475",
+        "name": "Cabinet Médicale"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a9f183b1-f7ce-4d29-afb4-23725b23cecb",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "a9f183b1-f7ce-4d29-afb4-23725b23cecb",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/AllergyIntolerance-uv-ips"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "inactive"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "J05AF06",
+              "display": "abacavir"
+            }
+          ],
+          "text": "abacavir"
+        },
+        "patient": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        },
+        "onsetDateTime": "2022-08-01",
+        "recordedDate": "2022-08-01"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6ee7fae2-78f8-43d2-b23b-69dd681dd398",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "6ee7fae2-78f8-43d2-b23b-69dd681dd398",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "code": "A06.6",
+              "display": "Amoebic brain abscess"
+            }
+          ],
+          "text": "Amoebic brain abscess"
+        },
+        "subject": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0bc6c86f-0df4-4961-8763-edf15779d344",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "0bc6c86f-0df4-4961-8763-edf15779d344",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Condition-uv-ips"
+          ]
+        },
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "code": "B20",
+              "display": "Human immunodeficiency virus [HIV] disease resulting in infectious and parasitic diseases"
+            }
+          ],
+          "text": "Human immunodeficiency virus [HIV] disease resulting in infectious and parasitic diseases"
+        },
+        "subject": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b7005cf8-06af-4fd5-a457-18b3075bd3ce",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "b7005cf8-06af-4fd5-a457-18b3075bd3ce",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/Procedure-uv-ips"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "118950002",
+              "display": "Procedure on head AND/OR neck"
+            }
+          ],
+          "text": "Procedure on head AND/OR neck"
+        },
+        "subject": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        },
+        "performedDateTime": "2022-08-03"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:419cc858-087b-48ea-8752-da3b1c59b099",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "419cc858-087b-48ea-8752-da3b1c59b099",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationStatement-uv-ips"
+          ]
+        },
+        "status": "completed",
+        "subject": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        },
+        "effectiveDateTime": "2022-08-01",
+        "dosage": [
+          {
+            "text": "Oral use",
+            "route": {
+              "coding": [
+                {
+                  "system": "http://standardterms.edqm.eu",
+                  "code": "20053000",
+                  "display": "Oral use"
+                }
+              ]
+            }
+          }
+        ],
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "J05AF01",
+              "display": "zidovudine"
+            }
+          ],
+          "text": "zidovudine"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ccd523b4-fdf7-44aa-ad91-10baa5651514",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "ccd523b4-fdf7-44aa-ad91-10baa5651514",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationStatement-uv-ips"
+          ]
+        },
+        "status": "completed",
+        "subject": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        },
+        "effectiveDateTime": "2022-08-01",
+        "dosage": [
+          {
+            "text": "Oral use",
+            "route": {
+              "coding": [
+                {
+                  "system": "http://standardterms.edqm.eu",
+                  "code": "20053000",
+                  "display": "Oral use"
+                }
+              ]
+            }
+          }
+        ],
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "J05AF07",
+              "display": "tenofovir disoproxil"
+            }
+          ],
+          "text": "tenofovir disoproxil"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8614a2f9-c48c-4dd5-be01-bb6e2e6b9723",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "8614a2f9-c48c-4dd5-be01-bb6e2e6b9723",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationStatement-uv-ips"
+          ]
+        },
+        "status": "completed",
+        "subject": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        },
+        "effectiveDateTime": "2022-08-01",
+        "dosage": [
+          {
+            "text": "Oral use",
+            "route": {
+              "coding": [
+                {
+                  "system": "http://standardterms.edqm.eu",
+                  "code": "20053000",
+                  "display": "Oral use"
+                }
+              ]
+            }
+          }
+        ],
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "J05AG01",
+              "display": "nevirapine"
+            }
+          ],
+          "text": "nevirapine"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5f572d57-9b96-4b25-87a4-6b62be8ab11d",
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "5f572d57-9b96-4b25-87a4-6b62be8ab11d",
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "J07AF",
+              "display": "BOOSTRIX-POLIO"
+            }
+          ],
+          "text": "BOOSTRIX-POLIO"
+        },
+        "lotNumber": "123456789",
+        "patient": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        },
+        "occurrenceDateTime": "2022-08-01"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c457410e-ba94-4075-96f2-46b5cfbf858f",
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "c457410e-ba94-4075-96f2-46b5cfbf858f",
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "J07AL",
+              "display": "PREVENAR 13"
+            }
+          ],
+          "text": "PREVENAR 13"
+        },
+        "lotNumber": "167813785",
+        "patient": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        },
+        "occurrenceDateTime": "2022-09-01"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8bc9fd0c-b989-42de-ad38-73ae0e97c372",
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "8bc9fd0c-b989-42de-ad38-73ae0e97c372",
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "J07AH",
+              "display": "NEIS-VAC-C"
+            }
+          ],
+          "text": "NEIS-VAC-C"
+        },
+        "lotNumber": "9853788125",
+        "patient": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        },
+        "occurrenceDateTime": "2022-10-02"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d59ee3e5-c83a-40fc-8202-eb7fa3ecec54",
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "d59ee3e5-c83a-40fc-8202-eb7fa3ecec54",
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "J07BD52",
+              "display": "PRIORIX"
+            }
+          ],
+          "text": "PRIORIX"
+        },
+        "lotNumber": "8321487624",
+        "patient": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        },
+        "occurrenceDateTime": "2022-09-08"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:536e2a49-f9ff-4b31-a22e-96062c228ea6",
+      "resource": {
+        "resourceType": "RelatedPerson",
+        "id": "536e2a49-f9ff-4b31-a22e-96062c228ea6",
+        "patient": {
+          "reference": "urn:uuid:76e9978a-cf3c-4f76-bb10-f9d3409e0038"
+        },
+        "relationship": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                "code": "ECON",
+                "display": "Emergency Contact"
+              }
+            ]
+          }
+        ],
+        "name": [
+          {
+            "family": "FERRING",
+            "given": [
+              "JENS"
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "(352)2712501839"
+          }
+        ],
+        "address": [
+          {
+            "use": "home",
+            "line": [
+              "2-4, route Eugène Ruppert"
+            ],
+            "city": "Luxembourg",
+            "postalCode": "2453",
+            "country": "LU"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b2104141-9650-4732-a66c-18199d386e06",
+      "resource": {
+        "resourceType": "Provenance",
+        "id": "b2104141-9650-4732-a66c-18199d386e06",
+        "target": [
+          {
+            "reference": "urn:uuid:490c9f12-8269-4c4a-b3ef-cb0e0c2164ca"
+          }
+        ],
+        "recorded": "2024-06-03T11:18:54Z",
+        "activity": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
+              "code": "UPDATE",
+              "display": "Update"
+            }
+          ]
+        },
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "author",
+                  "display": "Author"
+                }
+              ]
+            },
+            "who": {
+              "reference": "urn:uuid:05ddfdeb-fe08-4554-a663-d8f563027344"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

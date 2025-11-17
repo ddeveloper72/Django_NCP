@@ -804,6 +804,7 @@ Although being real choices for the different diseases and conditions, the selec
                                                 <observation classCode="OBS" moodCode="EVN">
                                                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1"/>
                                                     <templateId root="2.16.840.1.113883.10.20.1.55"/>
+                            <id root="2.999.obs.31"/>
                                                     <code code="SEV" codeSystem="2.16.840.1.113883.5.4"/>
                                                     <text><reference value="#code-9"/></text>
                                                     <statusCode code="completed"/>
@@ -816,6 +817,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="SUBJ">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.33"/>
+                            <id root="2.999.obs.30"/>
                                             <code code="82606-5" codeSystem="2.16.840.1.113883.6.1"/>
                                             <text>
                                                 <reference value="#criticality-1"/>
@@ -828,6 +830,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="SUBJ">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.35"/>
+                            <id root="2.999.obs.29"/>
                                             <code code="66455-7" codeSystem="2.16.840.1.113883.6.1" displayName="Condition status"/>
                                             <text>
                                                 <reference value="#certainty-1"/>
@@ -840,6 +843,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="REFR">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.34"/>
+                            <id root="2.999.obs.28"/>
                                             <code code="33999-4" codeSystem="2.16.840.1.113883.6.1" displayName="Status"/>
                                             <text>
                                                 <reference value="#status-1"/>
@@ -908,6 +912,7 @@ Although being real choices for the different diseases and conditions, the selec
                                                 <observation classCode="OBS" moodCode="EVN">
                                                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1"/>
                                                     <templateId root="2.16.840.1.113883.10.20.1.55"/>
+                            <id root="2.999.obs.27"/>
                                                     <code code="SEV" codeSystem="2.16.840.1.113883.5.4"/>
                                                     <text><reference value="#code-9"/></text>
                                                     <statusCode code="completed"/>
@@ -920,6 +925,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="SUBJ">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.33"/>
+                            <id root="2.999.obs.26"/>
                                             <code code="82606-5" codeSystem="2.16.840.1.113883.6.1"/>
                                             <text>
                                                 <reference value="#criticality-2"/>
@@ -932,6 +938,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="SUBJ">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.35"/>
+                            <id root="2.999.obs.25"/>
                                             <code code="66455-7" codeSystem="2.16.840.1.113883.6.1" displayName="Condition status"/>
                                             <text>
                                                 <reference value="#certainty-2"/>
@@ -944,6 +951,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="REFR">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.34"/>
+                            <id root="2.999.obs.24"/>
                                             <code code="33999-4" codeSystem="2.16.840.1.113883.6.1" displayName="Status"/>
                                             <text>
                                                 <reference value="#status-2"/>
@@ -1013,6 +1021,7 @@ Although being real choices for the different diseases and conditions, the selec
                                                 <observation classCode="OBS" moodCode="EVN">
                                                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1"/>
                                                     <templateId root="2.16.840.1.113883.10.20.1.55"/>
+                            <id root="2.999.obs.23"/>
                                                     <code code="SEV" codeSystem="2.16.840.1.113883.5.4"/>
                                                     <text><reference value="#code-9"/></text>
                                                     <statusCode code="completed"/>
@@ -1025,6 +1034,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="SUBJ">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.33"/>
+                            <id root="2.999.obs.22"/>
                                             <code code="82606-5" codeSystem="2.16.840.1.113883.6.1"/>
                                             <text>
                                                 <reference value="#criticality-3"/>
@@ -1037,6 +1047,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="SUBJ">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.35"/>
+                            <id root="2.999.obs.21"/>
                                             <code code="66455-7" codeSystem="2.16.840.1.113883.6.1" displayName="Condition status"/>
                                             <text>
                                                 <reference value="#certainty-3"/>
@@ -1049,6 +1060,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="REFR">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.34"/>
+                            <id root="2.999.obs.20"/>
                                             <code code="33999-4" codeSystem="2.16.840.1.113883.6.1" displayName="Status"/>
                                             <text>
                                                 <reference value="#status-3"/>
@@ -1125,6 +1137,7 @@ Although being real choices for the different diseases and conditions, the selec
                                                 <observation classCode="OBS" moodCode="EVN">
                                                     <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1"/>
                                                     <templateId root="2.16.840.1.113883.10.20.1.55"/>
+                            <id root="2.999.obs.19"/>
                                                     <code code="SEV" codeSystem="2.16.840.1.113883.5.4"/>
                                                     <text><reference value="#code-9"/></text>
                                                     <statusCode code="completed"/>
@@ -1137,6 +1150,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="SUBJ">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.33"/>
+                            <id root="2.999.obs.18"/>
                                             <code code="82606-5" codeSystem="2.16.840.1.113883.6.1"/>
                                             <text>
                                                 <reference value="#criticality-4"/>
@@ -1149,6 +1163,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="SUBJ">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.35"/>
+                            <id root="2.999.obs.17"/>
                                             <code code="66455-7" codeSystem="2.16.840.1.113883.6.1" displayName="Condition status"/>
                                             <text>
                                                 <reference value="#criticality-4"/>
@@ -1161,6 +1176,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="REFR">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.34"/>
+                            <id root="2.999.obs.16"/>
                                             <code code="33999-4" codeSystem="2.16.840.1.113883.6.1" displayName="Status"/>
                                             <text>
                                                 <reference value="#status-4"/>
@@ -1284,6 +1300,7 @@ Although being real choices for the different diseases and conditions, the selec
                                             <templateId root="2.16.840.1.113883.10.20.1.57"/>
                                             <templateId root="2.16.840.1.113883.10.20.1.50"/>
                                             <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1.1"/>
+                            <id root="2.999.obs.15"/>
                                             <code code="33999-4" codeSystem="2.16.840.1.113883.6.1" displayName="Status" codeSystemName="LOINC"/>
                                             <text>
                                                 <reference value="#pca-1"/>
@@ -1296,6 +1313,7 @@ Although being real choices for the different diseases and conditions, the selec
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="2.16.840.1.113883.10.20.1.51"/>
                                             <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1.2"/>
+                            <id root="2.999.obs.14"/>
                                             <code code="11323-3" displayName="Health Status" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
                                             <text>
                                                 <reference value="#pca-1"/>
@@ -1434,6 +1452,7 @@ Although being real choices for the different diseases and conditions, the selec
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1"/>
                                             <templateId root="2.16.840.1.113883.10.20.1.55"/>
+                            <id root="2.999.obs.13"/>
                                             <code code="SEV" codeSystem="2.16.840.1.113883.5.4" codeSystemName="ActCode"/>
                                             <text><reference value="#obs-14"/></text>
                                             <statusCode code="completed"/>
@@ -1476,6 +1495,7 @@ Although being real choices for the different diseases and conditions, the selec
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1"/>
                                             <templateId root="2.16.840.1.113883.10.20.1.55"/>
+                            <id root="2.999.obs.12"/>
                                             <code code="SEV" codeSystem="2.16.840.1.113883.5.4" codeSystemName="ActCode"/>
                                             <text><reference value="#obs-16"/></text>
                                             <statusCode code="completed"/>
@@ -1516,6 +1536,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="SUBJ" inversionInd="true">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.49"/>
+                            <id root="2.999.obs.11"/>
                                             <code code="66455-7" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
                                             <text><reference value="#obs-16"/></text>
                                             <statusCode code="completed"/>
@@ -1690,6 +1711,7 @@ Although being real choices for the different diseases and conditions, the selec
                                             <templateId root="1.3.6.1.4.1.19376.1.5.3.1.4.1.1"/>
                                             <templateId root="2.16.840.1.113883.10.20.1.57"/>
                                             <templateId root="2.16.840.1.113883.10.20.1.50"/>
+                            <id root="2.999.obs.10"/>
                                             <code code="33999-4" codeSystem="2.16.840.1.113883.6.1" displayName="Problem Status" codeSystemName="LOINC">
                                                 <originalText><reference value="#code-45"/></originalText>
                                             </code>
@@ -1702,6 +1724,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="REFR">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.10"/>
+                            <id root="2.999.obs.9"/>
                                             <code code="11323-3" codeSystem="2.16.840.1.113883.6.1" displayName="Health Status" codeSystemName="LOINC">
                                                 <originalText><reference value="#code-45"/></originalText>
                                             </code>
@@ -1748,6 +1771,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     <entryRelationship typeCode="REFR">
                                         <observation classCode="OBS" moodCode="EVN">
                                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.10"/>
+                            <id root="2.999.obs.8"/>
                                             <code code="11323-3" codeSystem="2.16.840.1.113883.6.1" displayName="Health Status" codeSystemName="LOINC">
                                                 <originalText><reference value="#code-45"/></originalText>
                                             </code>
@@ -1847,6 +1871,7 @@ Although being real choices for the different diseases and conditions, the selec
                             <entryRelationship typeCode="SUBJ">
                                 <observation classCode="OBS" moodCode="EVN">
                                     <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.28"/>
+                            <id root="2.999.obs.7"/>
                                     <code code="30973-2" displayName="Dose Number" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
                                     <statusCode code="completed"/>
                                     <value xsi:type="INT" value="12"/>
@@ -1980,6 +2005,7 @@ Although being real choices for the different diseases and conditions, the selec
                     <entry typeCode="COMP">
                         <observation classCode="OBS" moodCode="EVN">
                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.45"/>
+                            <id root="2.999.8.1"/>
                             <code code="82810-3" codeSystem="2.16.840.1.113883.6.1"/>
                             <text>
                                 <reference value="#obs-21a"/>
@@ -2008,6 +2034,7 @@ Although being real choices for the different diseases and conditions, the selec
                     <entry typeCode="COMP">
                         <observation classCode="OBS" moodCode="EVN">
                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.46"/>
+                            <id root="2.999.8.2"/>
                             <code code="281050002" displayName="Livebirth" codeSystemVersion="2022-07-31" codeSystem="2.16.840.1.113883.6.96"/>
                             <text>
                                 <reference value="#obs-23a"/>
@@ -2019,6 +2046,7 @@ Although being real choices for the different diseases and conditions, the selec
                     <entry typeCode="COMP">
                         <observation classCode="OBS" moodCode="EVN">
                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.46"/>
+                            <id root="2.999.obs.6"/>
                             <code code="57797005" displayName="Termination of pregnancy" codeSystemVersion="2022-07-31" codeSystem="2.16.840.1.113883.6.96"/>
                             <text>
                                 <reference value="#obs-23b"/>
@@ -2030,6 +2058,7 @@ Although being real choices for the different diseases and conditions, the selec
                     <entry typeCode="COMP">
                         <observation classCode="OBS" moodCode="EVN">
                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.47"/>
+                            <id root="2.999.obs.5"/>
                             <code code="93857-1" codeSystem="2.16.840.1.113883.6.1" displayName="Pregnancy outcome"/>
                             <text>
                                 <reference value="#pregnancy-outcome-1"/>
@@ -2042,6 +2071,7 @@ Although being real choices for the different diseases and conditions, the selec
                     <entry typeCode="COMP">
                         <observation classCode="OBS" moodCode="EVN">
                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.47"/>
+                            <id root="2.999.obs.4"/>
                             <code code="93857-1" codeSystem="2.16.840.1.113883.6.1" displayName="Pregnancy outcome"/>
                             <text>
                                 <reference value="#pregnancy-outcome-2"/>
@@ -2054,6 +2084,7 @@ Although being real choices for the different diseases and conditions, the selec
                     <entry typeCode="COMP">
                         <observation classCode="OBS" moodCode="EVN">
                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.47"/>
+                            <id root="2.999.obs.3"/>
                             <code code="93857-1" codeSystem="2.16.840.1.113883.6.1" displayName="Pregnancy outcome"/>
                             <text>
                                 <reference value="#pregnancy-outcome-3"/>
@@ -2066,6 +2097,7 @@ Although being real choices for the different diseases and conditions, the selec
                     <entry typeCode="COMP">
                         <observation classCode="OBS" moodCode="EVN">
                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.47"/>
+                            <id root="2.999.obs.2"/>
                             <code code="93857-1" codeSystem="2.16.840.1.113883.6.1"/>
                             <text>
                                 <reference value="#pregnancy-1"/>
@@ -2078,6 +2110,7 @@ Although being real choices for the different diseases and conditions, the selec
                     <entry typeCode="COMP">
                         <observation classCode="OBS" moodCode="EVN">
                             <templateId root="1.3.6.1.4.1.12559.11.10.1.3.1.3.47"/>
+                            <id root="2.999.obs.1"/>
                             <code code="93857-1" codeSystem="2.16.840.1.113883.6.1"/>
                             <text>
                                 <reference value="#pregnancy-2"/>
@@ -2127,7 +2160,7 @@ Although being real choices for the different diseases and conditions, the selec
                                 <low value="20170415"/>
                                 <high value="2022"/>
                             </effectiveTime>
-                            <value xsi:type="PQ" value="0.5" unit="{pack}/d"/>
+                            <value xsi:type="PQ" value="0.5" unit="/d"/>
                         </observation>
                     </entry>
                     <entry>
@@ -2146,7 +2179,7 @@ Although being real choices for the different diseases and conditions, the selec
                             <effectiveTime>
                                 <low value="20160415"/>
                             </effectiveTime>
-                            <value xsi:type="PQ" value="4" unit="{glass}/d"/>
+                            <value xsi:type="PQ" value="4" unit="/d"/>
                         </observation>
                     </entry>
                 </section>
@@ -2400,7 +2433,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     </text>
                                     <statusCode code="completed"/>
                                     <effectiveTime value="20220613" />
-                                    <value xsi:type="CE" code="b710.1" displayName="MILD impairment for mobility of joint" codeSystem="1.2.3" />
+                                    <value xsi:type="CE" code="b710" displayName="Mobility of joint functions" codeSystem="2.16.840.1.113883.6.254" />
                                 </observation>
                             </component>
                             <component>
@@ -2414,7 +2447,7 @@ Although being real choices for the different diseases and conditions, the selec
                                     </text>
                                     <statusCode code="completed"/>
                                     <effectiveTime value="20220613" />
-                                    <value xsi:type="CE" code="b710.1" displayName="MILD impairment for mobility of joint" codeSystem="1.2.3" />
+                                    <value xsi:type="CE" code="b710" displayName="Mobility of joint functions" codeSystem="2.16.840.1.113883.6.254" />
                                 </observation>
                             </component>
                         </organizer>

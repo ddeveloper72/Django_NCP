@@ -1,0 +1,393 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:edd-current-pregnancy",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "edd-current-pregnancy",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "57064-8",
+              "display": "Estimated date of delivery"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "effectiveDateTime": "2022-06-15",
+        "valueDateTime": "2023-02-15"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/edd-current-pregnancy"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:delivery-2021-09-08",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "gestational-age-2021-09-08",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11884-4",
+              "display": "Gestational age at birth"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "effectiveDateTime": "2021-09-08",
+        "valueQuantity": {
+          "value": 39,
+          "unit": "weeks",
+          "system": "http://unitsofmeasure.org",
+          "code": "wk"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/gestational-age-2021-09-08"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:birth-weight-2021-09-08",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "birth-weight-2021-09-08",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8339-4",
+              "display": "Birth weight"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "effectiveDateTime": "2021-09-08",
+        "valueQuantity": {
+          "value": 3400,
+          "unit": "g",
+          "system": "http://unitsofmeasure.org",
+          "code": "g"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/birth-weight-2021-09-08"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:delivery-method-2021-09-08",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "delivery-method-2021-09-08",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "72149-8",
+              "display": "Type of delivery"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "effectiveDateTime": "2021-09-08",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "177184002",
+              "display": "Normal vaginal delivery"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/delivery-method-2021-09-08"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:complications-2021-09-08",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "complications-2021-09-08",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "73812-0",
+              "display": "Delivery complications"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "effectiveDateTime": "2021-09-08",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "289365005",
+              "display": "Finding of no clinical significance"
+            }
+          ],
+          "text": "None reported"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/complications-2021-09-08"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:delivery-2020-02-05",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "delivery-2020-02-05",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "93857-1",
+              "display": "Date and time of obstetric delivery"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "effectiveDateTime": "2020-02-05",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "281050002",
+              "display": "Livebirth"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/delivery-2020-02-05"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:gestational-age-2020-02-05",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "gestational-age-2020-02-05",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11884-4",
+              "display": "Gestational age at birth"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "effectiveDateTime": "2020-02-05",
+        "valueQuantity": {
+          "value": 40,
+          "unit": "weeks",
+          "system": "http://unitsofmeasure.org",
+          "code": "wk"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/gestational-age-2020-02-05"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:birth-weight-2020-02-05",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "birth-weight-2020-02-05",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8339-4",
+              "display": "Birth weight"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "effectiveDateTime": "2020-02-05",
+        "valueQuantity": {
+          "value": 3200,
+          "unit": "g",
+          "system": "http://unitsofmeasure.org",
+          "code": "g"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/birth-weight-2020-02-05"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:delivery-method-2020-02-05",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "delivery-method-2020-02-05",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "72149-8",
+              "display": "Type of delivery"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "effectiveDateTime": "2020-02-05",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "11466000",
+              "display": "Cesarean section"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/delivery-method-2020-02-05"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:complications-2020-02-05",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "complications-2020-02-05",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "73812-0",
+              "display": "Delivery complications"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "effectiveDateTime": "2020-02-05",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "289365005",
+              "display": "Finding of no clinical significance"
+            }
+          ],
+          "text": "None reported"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/complications-2020-02-05"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:delivery-2010-07-03",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "delivery-2010-07-03",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11778-8",
+              "display": "Delivery date"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "effectiveDateTime": "2010-07-03",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "57797005",
+              "display": "Termination of pregnancy"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/delivery-2010-07-03"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:gestational-age-2010-07-03",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "gestational-age-2010-07-03",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "49051-6",
+              "display": "Gestational age"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/2-1234-W7"
+        },
+        "effectiveDateTime": "2010-07-03",
+        "valueQuantity": {
+          "value": 8,
+          "unit": "weeks",
+          "system": "http://unitsofmeasure.org",
+          "code": "wk"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/gestational-age-2010-07-03"
+      }
+    }
+  ]
+}
