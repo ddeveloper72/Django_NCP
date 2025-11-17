@@ -734,10 +734,19 @@ class FHIRResourceProcessor:
         for coding in concept.get('coding', []):
             codings.append(self._extract_coding_data(coding))
         
+        # Determine display text: prioritize coding display over generic text
+        text = concept.get('text')
+        # Skip unhelpful generic text values
+        if text and text.lower() in ['unknown condition', 'unknown', 'not specified', 'n/a']:
+            text = None
+        
+        # Priority: specific text -> resolved coding display -> fallback
+        display_text = text or (codings[0]['display_text'] if codings else 'Unknown concept')
+        
         return {
             'coding': codings,
-            'text': concept.get('text'),
-            'display_text': concept.get('text') or (codings[0]['display_text'] if codings else 'Unknown concept'),
+            'text': concept.get('text'),  # Keep original text for reference
+            'display_text': display_text,  # Use resolved display text
             'has_multiple_codings': len(codings) > 1,
             'primary_coding': codings[0] if codings else {}
         }
