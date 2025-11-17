@@ -1339,7 +1339,19 @@ class FHIRBundleParser:
         # Extract verification status
         verification_status = 'Unknown'
         if condition.get('verificationStatus', {}).get('coding'):
-            verification_status = condition['verificationStatus']['coding'][0].get('display', 'Unknown')
+            coding = condition['verificationStatus']['coding'][0]
+            # PRIORITY 1: Use display if available
+            verification_status = coding.get('display')
+            # PRIORITY 2: Use code field and capitalize it
+            if not verification_status:
+                code_value = coding.get('code', '')
+                if code_value:
+                    # Capitalize code: 'confirmed' -> 'Confirmed', 'unconfirmed' -> 'Unconfirmed'
+                    verification_status = code_value.capitalize()
+            # Default fallback
+            if not verification_status:
+                verification_status = 'Unknown'
+            
             if is_negative_assertion:
                 verification_status = 'Not applicable'
         
@@ -1415,17 +1427,21 @@ class FHIRBundleParser:
             'id': condition.get('id'),
             'condition_name': condition_name,
             'name': condition_name,  # Template compatibility
+            'problem_name': condition_name,  # Template compatibility (alternative name)
             'condition_code': condition_code,  # ICD-10 or other code
             'condition_code_data': code_data,  # Full CodeableConcept with CTS translation
             'code_system': code_system,
             'clinical_status': clinical_status,
+            'problem_status': clinical_status,  # Template compatibility - maps to "Problem Status"
             'verification_status': verification_status,
+            'health_status': verification_status,  # Template compatibility - maps to "Health Status"
             'category': category,
             'category_code': category_code,
             'problem_type': category,  # Template compatibility - maps to "Problem Type"
             'severity': severity,
             'severity_code': severity_code,
             'onset_date': onset_date,
+            'time_period': onset_date,  # Template compatibility - maps to "Time"
             'notes': notes,  # Full FHIR R4 Annotation data
             'note_text': annotation_text,  # Simple text for display
             'has_notes': bool(notes),
