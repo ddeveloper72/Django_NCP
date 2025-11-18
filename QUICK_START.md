@@ -1,10 +1,14 @@
 # Quick Start Guide - Transaction Bundle Upload
 
-## Problem
-Healthcare Team shows "Practitioner (nnn)" instead of "António Pereira" because HAPI's document bundle upload doesn't resolve `urn:uuid:` references.
+> **⚠️ LEGACY DOCUMENT**: This guide references HAPI FHIR (legacy test server).  
+> **Current Production Service**: Azure FHIR  
+> **See Migration Guide**: `.github/FHIR_MIGRATION_HAPI_TO_AZURE.md`
 
-## Solution
-Upload Diana's bundle as a **transaction bundle** so HAPI automatically resolves all references.
+## Problem (Historical)
+Healthcare Team shows "Practitioner (nnn)" instead of "António Pereira" because FHIR document bundle upload doesn't resolve `urn:uuid:` references.
+
+## Solution (Historical)
+Upload Diana's bundle as a **transaction bundle** so the FHIR server automatically resolves all references.
 
 ## Steps
 
