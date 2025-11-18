@@ -23,6 +23,7 @@ from fhir.resources.medicationstatement import MedicationStatement
 from fhir.resources.condition import Condition
 from fhir.resources.observation import Observation
 from translation_services.terminology_translator import TerminologyTranslator
+from patient_data.utils.date_formatter import ClinicalDateFormatter
 
 logger = logging.getLogger("ehealth")
 
@@ -420,17 +421,15 @@ class FHIRResourceProcessor:
         return 'unknown'
     
     def _format_datetime_display(self, datetime_str: Optional[str]) -> Optional[str]:
-        """Format FHIR dateTime for display"""
+        """Format FHIR dateTime for clinical display with user-friendly formatting"""
         if not datetime_str:
             return None
         
-        try:
-            from datetime import datetime
-            # Parse FHIR dateTime format (ISO 8601)
-            dt = datetime.fromisoformat(datetime_str.replace('Z', '+00:00'))
-            return dt.strftime('%Y-%m-%d %H:%M')
-        except (ValueError, AttributeError):
-            return datetime_str  # Return as-is if parsing fails
+        # Use ClinicalDateFormatter for consistent formatting across CDA and FHIR
+        return ClinicalDateFormatter.format_clinical_date(
+            datetime_str,
+            include_time=True  # Include time for observations/procedures
+        )
     
     # ===================================================================
     # FHIR R4 Data Type Processors
@@ -696,6 +695,18 @@ class FHIRResourceProcessor:
         if not coding:
             return {}
         
+        # Handle case where coding is a string instead of dict
+        if isinstance(coding, str):
+            logger.warning(f"[FHIR] Coding is string instead of dict: {coding}")
+            return {
+                'system': '',
+                'version': None,
+                'code': coding,
+                'display': coding,
+                'user_selected': False,
+                'display_text': coding
+            }
+        
         # Get display text, falling back to CTS lookup or code value
         display_text = coding.get('display')
         code = coding.get('code', 'Unknown code')
@@ -729,6 +740,17 @@ class FHIRResourceProcessor:
         """Extract FHIR R4 CodeableConcept data structure"""
         if not concept:
             return {}
+        
+        # Handle case where concept is a string instead of dict
+        if isinstance(concept, str):
+            logger.warning(f"[FHIR] CodeableConcept is string instead of dict: {concept}")
+            return {
+                'coding': [],
+                'text': concept,
+                'display_text': concept,
+                'has_multiple_codings': False,
+                'primary_coding': {}
+            }
         
         codings = []
         for coding in concept.get('coding', []):

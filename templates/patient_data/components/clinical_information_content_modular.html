@@ -50,9 +50,9 @@
         {% include 'patient_data/sections/past_illness_section_new.html' with section_data=past_illness section_count=past_illness|length section_type='past_illness' section_title='Past Illness' %}
     {% endif %}
     
-    {# Pregnancy History Section #}
+    {# Pregnancy History Section - IPS Compliant #}
     {% if pregnancy_history and pregnancy_history|length > 0 %}
-        {% include 'patient_data/sections/pregnancy_history_section_new.html' with section_data=pregnancy_history section_count=pregnancy_history|length section_type='pregnancy_history' section_title='Pregnancy History' %}
+        {% include 'patient_data/sections/pregnancy_history_section.html' with section_data=pregnancy_history section_count=pregnancy_history|length section_type='pregnancy_history' section_title='Pregnancy History' %}
     {% endif %}
     
     {# Social History Section #}

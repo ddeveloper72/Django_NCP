@@ -2,7 +2,7 @@
 FHIR Service Factory
 
 Factory pattern to instantiate the correct FHIR integration service
-based on Django settings (HAPI vs Azure)
+based on Django settings. Azure FHIR is the default production service.
 """
 
 import logging
@@ -16,20 +16,20 @@ def get_fhir_service():
     Get the configured FHIR integration service instance
     
     Returns appropriate service based on FHIR_PROVIDER setting:
-    - 'HAPI': HAPIFHIRIntegrationService (public test server)
-    - 'AZURE': AzureFHIRIntegrationService (Azure Healthcare APIs)
+    - 'AZURE': AzureFHIRIntegrationService (Azure Healthcare APIs) [DEFAULT]
+    - 'HAPI': HAPIFHIRIntegrationService (legacy public test server)
     
     Returns:
-        HAPIFHIRIntegrationService or AzureFHIRIntegrationService instance
+        AzureFHIRIntegrationService or HAPIFHIRIntegrationService instance
     """
-    fhir_provider = getattr(settings, 'FHIR_PROVIDER', 'HAPI').upper()
+    fhir_provider = getattr(settings, 'FHIR_PROVIDER', 'AZURE').upper()
     
     if fhir_provider == 'AZURE':
         logger.info("Using Azure FHIR integration service")
         from .azure_fhir_integration import AzureFHIRIntegrationService
         return AzureFHIRIntegrationService()
     else:
-        logger.info("Using HAPI FHIR integration service")
+        logger.warning("Using legacy HAPI FHIR integration service (not recommended for production)")
         from .fhir_integration import HAPIFHIRIntegrationService
         return HAPIFHIRIntegrationService()
 

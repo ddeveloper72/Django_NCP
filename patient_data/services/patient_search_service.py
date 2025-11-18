@@ -295,21 +295,21 @@ class EUPatientSearchService:
                 "gender": "",
             }
 
-    def search_patient(self, credentials: PatientCredentials, use_local_cda: bool = True, use_hapi_fhir: bool = True) -> List[PatientMatch]:
+    def search_patient(self, credentials: PatientCredentials, use_local_cda: bool = True, use_fhir: bool = True) -> List[PatientMatch]:
         """
         Search for patient documents using NCP-to-NCP query with development options
 
         Args:
             credentials: Country code and patient identifier
             use_local_cda: Whether to search local CDA documents (default: True)
-            use_hapi_fhir: Whether to search HAPI FHIR server (default: True)
+            use_fhir: Whether to search FHIR server (Azure FHIR) (default: True)
 
         Returns:
             List of patient matches from selected sources
         """
         self.logger.info(
             f"NCP Query - Patient ID: {credentials.patient_id} from {credentials.country_code} "
-            f"(CDA: {use_local_cda}, FHIR: {use_hapi_fhir})"
+            f"(CDA: {use_local_cda}, FHIR: {use_fhir})"
         )
 
         matches = []
@@ -443,7 +443,7 @@ class EUPatientSearchService:
                         self.logger.info(f"No CDA documents found for patient {credentials.patient_id}")
 
             # Search FHIR if enabled (independent of CDA results)
-            if use_hapi_fhir:
+            if use_fhir:
                 self.logger.info(f"Searching FHIR server for patient documents for {credentials.patient_id}")
                 
                 try:
@@ -451,7 +451,7 @@ class EUPatientSearchService:
                     from eu_ncp_server.services.fhir_service_factory import get_fhir_service
                     from .fhir_bundle_parser import FHIRBundleParser
                     
-                    # Get the configured FHIR service (HAPI or Azure)
+                    # Get the configured FHIR service (Azure FHIR by default)
                     fhir_service = get_fhir_service()
                     
                     # Search for patient documents (Compositions) - this is the key fix!
@@ -658,21 +658,21 @@ class EUPatientSearchService:
 
         return summary
     
-    def _enrich_bundle_with_healthcare_resources(self, bundle: Dict[str, Any], patient_id: str, hapi_service) -> None:
+    def _enrich_bundle_with_healthcare_resources(self, bundle: Dict[str, Any], patient_id: str, fhir_service) -> None:
         """
-        Enrich FHIR bundle with Practitioner and Organization resources from HAPI server
+        Enrich FHIR bundle with Practitioner and Organization resources from FHIR server
         
         FHIR IPS bundles often don't include Practitioner/Organization resources even though
         they're referenced in Composition.author and Composition.custodian. This method:
         1. Finds the Composition in the bundle
         2. Extracts author and custodian references
-        3. Fetches only those specific resources by ID from HAPI
+        3. Fetches only those specific resources by ID from FHIR server (Azure or HAPI)
         4. Adds them to the bundle
         
         Args:
             bundle: FHIR Bundle to enrich (modified in place)
             patient_id: Patient identifier for logging
-            hapi_service: HAPI FHIR service instance
+            fhir_service: FHIR service instance (Azure or HAPI)
         """
         try:
             added_count = 0
@@ -738,7 +738,7 @@ class EUPatientSearchService:
             # Fetch specific Practitioner resources by ID
             for pract_id in practitioner_ids:
                 try:
-                    practitioner = hapi_service.get_resource_by_id('Practitioner', pract_id)
+                    practitioner = fhir_service.get_resource_by_id('Practitioner', pract_id)
                     if practitioner:
                         bundle.setdefault('entry', []).append({
                             'fullUrl': f"urn:uuid:{pract_id}",
@@ -752,7 +752,7 @@ class EUPatientSearchService:
             # Fetch specific Organization resources by ID
             for org_id in organization_ids:
                 try:
-                    organization = hapi_service.get_resource_by_id('Organization', org_id)
+                    organization = fhir_service.get_resource_by_id('Organization', org_id)
                     if organization:
                         bundle.setdefault('entry', []).append({
                             'fullUrl': f"urn:uuid:{org_id}",
@@ -766,7 +766,7 @@ class EUPatientSearchService:
             if added_count > 0:
                 self.logger.info(f"Enriched FHIR bundle with {added_count} specific healthcare resources referenced in Composition")
             else:
-                self.logger.warning(f"No specific Practitioner or Organization resources could be fetched from HAPI for patient {patient_id}")
+                self.logger.warning(f"No specific Practitioner or Organization resources could be fetched from FHIR server for patient {patient_id}")
                 
         except Exception as e:
             self.logger.error(f"Failed to enrich bundle with healthcare resources: {str(e)}")

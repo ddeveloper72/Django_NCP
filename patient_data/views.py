@@ -1952,7 +1952,7 @@ def patient_data_view(request):
             
             # Extract development flags
             use_local_cda = form.cleaned_data.get("use_local_cda", True)
-            use_hapi_fhir = form.cleaned_data.get("use_hapi_fhir", True)
+            use_fhir = form.cleaned_data.get("use_fhir", True)
 
             # Log the NCP query with development options
             logger.info(
@@ -1960,7 +1960,7 @@ def patient_data_view(request):
                 patient_id,
                 country_code,
                 use_local_cda,
-                use_hapi_fhir,
+                use_fhir,
             )
 
             # Create search credentials for NCP-to-NCP query
@@ -1971,7 +1971,7 @@ def patient_data_view(request):
 
             # Search for matching documents with development options
             search_service = EUPatientSearchService()
-            matches = search_service.search_patient(credentials, use_local_cda, use_hapi_fhir)
+            matches = search_service.search_patient(credentials, use_local_cda, use_fhir)
 
             if matches:
                 # Get the first (best) match
@@ -2715,8 +2715,11 @@ def patient_details_view(request, patient_id):
             "problems": [],
             "procedures": [],
             "vital_signs": [],
+            "social_history": [],
+            "laboratory_results": [],
             "results": [],
             "immunizations": [],
+            "pregnancy_history": [],
         }
         
         # PHASE 3B: Initialize administrative data variables for template context
@@ -2866,8 +2869,11 @@ def patient_details_view(request, patient_id):
                     "problems": clinical_arrays["problems"],
                     "procedures": clinical_arrays["procedures"],
                     "vital_signs": clinical_arrays["vital_signs"],
+                    "social_history": clinical_arrays.get("social_history", []),
+                    "laboratory_results": clinical_arrays.get("laboratory_results", []),
                     "results": clinical_arrays["results"],
                     "immunizations": clinical_arrays["immunizations"],
+                    "pregnancy_history": clinical_arrays.get("pregnancy_history", []),
                     "coded_results": {"blood_group": [], "diagnostic_results": []},  # Initialize for template compatibility
                 }
             )
@@ -2977,7 +2983,10 @@ def patient_details_view(request, patient_id):
                     "problems": [],
                     "procedures": [],
                     "vital_signs": [],
+                    "social_history": [],
+                    "laboratory_results": [],
                     "results": [],
+                    "pregnancy_history": [],
                     "immunizations": [],
                     "coded_results": {"blood_group": [], "diagnostic_results": []},  # Initialize for template compatibility
                 }

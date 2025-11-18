@@ -80,24 +80,24 @@ class PatientDataForm(forms.Form):
         help_text="Search Patient Summary documents in local CDA test data",
     )
 
-    use_hapi_fhir = forms.BooleanField(
+    use_fhir = forms.BooleanField(
         required=False,
         initial=True,
         widget=forms.CheckboxInput(attrs={"class": "development-search-checkbox"}),
-        label="Search HAPI FHIR Server",
-        help_text="Search Patient Summary Bundles from hapi.fhir.org/baseR4",
+        label="Search Azure FHIR Service",
+        help_text="Search Patient Summary Bundles from Azure FHIR R4 service",
     )
 
     def clean(self):
         """Validate that at least one data source is selected"""
         cleaned_data = super().clean()
         use_local_cda = cleaned_data.get("use_local_cda")
-        use_hapi_fhir = cleaned_data.get("use_hapi_fhir")
+        use_fhir = cleaned_data.get("use_fhir")
 
-        # Ensure at least one data source is selected
-        if not use_local_cda and not use_hapi_fhir:
+        # At least one data source must be selected
+        if not use_local_cda and not use_fhir:
             raise forms.ValidationError(
-                "Please select at least one data source to search (Local CDA or HAPI FHIR Server)."
+                "Please select at least one data source to search (Local CDA or FHIR Server)."
             )
 
         return cleaned_data

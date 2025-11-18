@@ -21,9 +21,14 @@ import logging
 import json
 from typing import Dict, Any, Optional
 
-# Import our new FHIR services
-from eu_ncp_server.services.fhir_integration import hapi_fhir_service, HAPIFHIRIntegrationError
+# Import FHIR services via factory pattern
+from eu_ncp_server.services.fhir_service_factory import get_fhir_service
 from eu_ncp_server.services.fhir_processing import fhir_processor, FHIRProcessingError
+
+# Custom exception for FHIR integration errors
+class FHIRIntegrationError(Exception):
+    """Exception for FHIR service integration errors"""
+    pass
 
 logger = logging.getLogger("ehealth")
 audit_logger = logging.getLogger("audit")
@@ -46,8 +51,9 @@ def get_fhir_patient_summary(request, patient_id: str):
         FHIR Bundle containing Patient Summary components
     """
     try:
-        # Use HAPI FHIR integration service to retrieve Patient Summary
-        fhir_bundle = hapi_fhir_service.get_patient_summary(patient_id, request.user.username)
+        # Get configured FHIR service (Azure FHIR by default)
+        fhir_service = get_fhir_service()
+        fhir_bundle = fhir_service.get_patient_summary(patient_id, request.user.username)
         
         # Process FHIR bundle into structured format
         processed_summary = fhir_processor.parse_patient_summary_bundle(fhir_bundle)
@@ -62,14 +68,14 @@ def get_fhir_patient_summary(request, patient_id: str):
             'metadata': {
                 'patient_id': patient_id,
                 'retrieved_at': processed_summary['metadata']['processed_at'],
-                'source': 'HPI FHIR R4 Server'
+                'source': 'Azure FHIR R4 Server'
             }
         }, status=status.HTTP_200_OK)
         
-    except HAPIFHIRIntegrationError as e:
-        logger.error(f"HAPI FHIR integration error for patient {patient_id}: {str(e)}")
+    except FHIRIntegrationError as e:
+        logger.error(f"FHIR integration error for patient {patient_id}: {str(e)}")
         return Response(
-            {"error": "HAPI FHIR server communication failed", "details": str(e)},
+            {"error": "FHIR server communication failed", "details": str(e)},
             status=status.HTTP_503_SERVICE_UNAVAILABLE
         )
     except FHIRProcessingError as e:
@@ -263,8 +269,9 @@ def search_healthcare_providers(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Use HAPI FHIR service to search patients 
-        search_results = hapi_fhir_service.search_patients(search_params)
+        # Get configured FHIR service and search patients
+        fhir_service = get_fhir_service()
+        search_results = fhir_service.search_patients(search_params)
         
         return Response({
             'status': 'success',
@@ -272,8 +279,8 @@ def search_healthcare_providers(request):
             'search_parameters': search_params
         }, status=status.HTTP_200_OK)
         
-    except HAPIFHIRIntegrationError as e:
-        logger.error(f"HAPI FHIR patient search error: {str(e)}")
+    except FHIRIntegrationError as e:
+        logger.error(f"FHIR patient search error: {str(e)}")
         return Response(
             {"error": "Patient search failed", "details": str(e)},
             status=status.HTTP_503_SERVICE_UNAVAILABLE

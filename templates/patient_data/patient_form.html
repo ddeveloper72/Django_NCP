@@ -130,18 +130,18 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="development-search-option">
-                                    {{ form.use_hapi_fhir }}
+                                    {{ form.use_fhir }}
                                     <div class="development-search-content">
-                                        <label for="{{ form.use_hapi_fhir.id_for_label }}" class="development-search-label">
-                                            <i class="fa-solid fa-cloud me-1"></i>{{ form.use_hapi_fhir.label }}
+                                        <label for="{{ form.use_fhir.id_for_label }}" class="development-search-label">
+                                            <i class="fa-solid fa-cloud me-1"></i>{{ form.use_fhir.label }}
                                         </label>
                                         <div class="development-search-description">
-                                            {{ form.use_hapi_fhir.help_text }}
+                                            {{ form.use_fhir.help_text }}
                                         </div>
                                     </div>
-                                    {% if form.use_hapi_fhir.errors %}
+                                    {% if form.use_fhir.errors %}
                                     <div class="field-errors">
-                                        {% for error in form.use_hapi_fhir.errors %}
+                                        {% for error in form.use_fhir.errors %}
                                         <span class="error-message">{{ error }}</span>
                                         {% endfor %}
                                     </div>
@@ -261,7 +261,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const cdaCheckbox = document.getElementById('id_use_local_cda');
-    const fhirCheckbox = document.getElementById('id_use_hapi_fhir');
+    const fhirCheckbox = document.getElementById('id_use_fhir');
     const form = document.querySelector('.patient-search-form');
     
     function updateCheckboxVisualState() {
