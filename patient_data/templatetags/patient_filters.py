@@ -920,3 +920,154 @@ def total_l3_documents(patients):
         total += l3_count
     
     return total
+
+
+@register.filter(name='select_attr')
+def select_attr(items, filter_string):
+    """
+    Filter items by attribute value.
+    
+    Usage: items|select_attr:'attribute_name:attribute_value'
+    Example: pregnancies|select_attr:'pregnancy_type:current'
+    
+    Args:
+        items: List of dictionaries or objects
+        filter_string: String in format 'attribute:value'
+    
+    Returns:
+        List of items where item[attribute] == value
+    """
+    if not items or not filter_string:
+        return []
+    
+    try:
+        attr_name, attr_value = filter_string.split(':', 1)
+        attr_name = attr_name.strip()
+        attr_value = attr_value.strip()
+        
+        filtered = []
+        for item in items:
+            # Handle both dict-like and object-like access
+            if hasattr(item, 'get'):
+                # Dictionary access
+                if item.get(attr_name) == attr_value:
+                    filtered.append(item)
+            elif hasattr(item, attr_name):
+                # Object attribute access
+                if getattr(item, attr_name) == attr_value:
+                    filtered.append(item)
+        
+        return filtered
+    except (ValueError, AttributeError):
+        return []
+
+
+@register.filter(name='group_by')
+def group_by(items, attribute):
+    """
+    Group items by attribute value and return a dictionary of lists.
+    
+    Usage: items|group_by:'attribute_name'
+    Example: pregnancies|group_by:'outcome'
+    
+    Args:
+        items: List of dictionaries or objects
+        attribute: Attribute name to group by
+    
+    Returns:
+        Dictionary where keys are unique attribute values and values are lists of items
+    """
+    if not items or not attribute:
+        return {}
+    
+    grouped = {}
+    for item in items:
+        # Get the grouping key
+        if hasattr(item, 'get'):
+            # Dictionary access
+            key = item.get(attribute, 'Unknown')
+        elif hasattr(item, attribute):
+            # Object attribute access
+            key = getattr(item, attribute, 'Unknown')
+        else:
+            key = 'Unknown'
+        
+        # Add to grouped dict
+        if key not in grouped:
+            grouped[key] = []
+        grouped[key].append(item)
+    
+    return grouped
+
+
+@register.filter(name='selectattr_pregnancy_type_current')
+def selectattr_pregnancy_type_current(items):
+    """
+    Filter items where pregnancy_type == 'current'
+    
+    Usage: items|selectattr_pregnancy_type_current
+    """
+    if not items:
+        return []
+    
+    filtered = []
+    for item in items:
+        if hasattr(item, 'get'):
+            if item.get('pregnancy_type') == 'current':
+                filtered.append(item)
+        elif hasattr(item, 'pregnancy_type'):
+            if getattr(item, 'pregnancy_type') == 'current':
+                filtered.append(item)
+    
+    return filtered
+
+
+@register.filter(name='selectattr_pregnancy_type_past')
+def selectattr_pregnancy_type_past(items):
+    """
+    Filter items where pregnancy_type == 'past'
+    
+    Usage: items|selectattr_pregnancy_type_past
+    """
+    if not items:
+        return []
+    
+    filtered = []
+    for item in items:
+        if hasattr(item, 'get'):
+            if item.get('pregnancy_type') == 'past':
+                filtered.append(item)
+        elif hasattr(item, 'pregnancy_type'):
+            if getattr(item, 'pregnancy_type') == 'past':
+                filtered.append(item)
+    
+    return filtered
+
+
+@register.filter(name='groupby_outcome')
+def groupby_outcome(items):
+    """
+    Group pregnancy items by outcome.
+    
+    Usage: items|groupby_outcome
+    Returns: Dictionary with outcome as key and list of pregnancies as value
+    """
+    if not items:
+        return {}
+    
+    grouped = {}
+    for item in items:
+        # Get the outcome key
+        if hasattr(item, 'get'):
+            outcome = item.get('outcome', 'Unknown')
+        elif hasattr(item, 'outcome'):
+            outcome = getattr(item, 'outcome', 'Unknown')
+        else:
+            outcome = 'Unknown'
+        
+        # Add to grouped dict
+        if outcome not in grouped:
+            grouped[outcome] = []
+        grouped[outcome].append(item)
+    
+    return grouped

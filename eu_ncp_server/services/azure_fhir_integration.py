@@ -377,6 +377,26 @@ class AzureFHIRIntegrationService:
             logger.error(f"Patient document search in Azure FHIR failed: {str(e)}")
             raise Exception(f"Patient document search failed: {str(e)}")
     
+    def get_resource_by_id(self, resource_type: str, resource_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get a specific FHIR resource by its ID
+        
+        Args:
+            resource_type: FHIR resource type (e.g., 'Practitioner', 'Organization')
+            resource_id: Resource ID
+            
+        Returns:
+            FHIR resource or None if not found
+        """
+        try:
+            resource = self._make_request('GET', f'{resource_type}/{resource_id}')
+            if resource:
+                logger.info(f"Retrieved {resource_type}/{resource_id} from Azure FHIR")
+            return resource
+        except Exception as e:
+            logger.warning(f"Failed to retrieve {resource_type}/{resource_id}: {str(e)}")
+            return None
+    
     def _extract_patient_info(self, patient_resource: Dict[str, Any]) -> Dict[str, Any]:
         """Extract patient information from FHIR Patient resource"""
         info = {
@@ -509,10 +529,18 @@ class AzureFHIRIntegrationService:
                     return f"{system}|{code}"
         
         elif resource_type == 'Observation':
-            # Use observation code
+            # Use observation code + effectiveDateTime for time-series observations
             if resource.get('code', {}).get('coding'):
                 code = resource['code']['coding'][0].get('code', '')
                 system = resource['code']['coding'][0].get('system', '')
+                
+                # For pregnancy/obstetric delivery observations, include date to distinguish multiple pregnancies
+                if code in ['93857-1', '11636-8', '11637-6', '11612-9', '11613-7', '11614-5']:
+                    effective_date = resource.get('effectiveDateTime', resource.get('effectivePeriod', {}).get('start', ''))
+                    if effective_date and code:
+                        return f"{system}|{code}|{effective_date}"
+                
+                # For other observations, use code only
                 if code:
                     return f"{system}|{code}"
         
@@ -634,10 +662,10 @@ class AzureFHIRIntegrationService:
                         # Filter to get only latest version of each resource
                         entries = self._filter_latest_versions(entries, resource_type)
                         
-                        # Deduplicate resources (by clinical signature)
-                        from eu_ncp_server.services.fhir_integration import HAPIFHIRIntegrationService
-                        hapi_service = HAPIFHIRIntegrationService()
-                        deduplicated_entries = hapi_service._deduplicate_clinical_resources(entries, resource_type)
+                        # Note: Latest version filtering already handles deduplication
+                        # by grouping resources with same clinical signature (ATC code, SNOMED, etc.)
+                        # and keeping only the highest versionId
+                        deduplicated_entries = entries
                         
                         for entry in deduplicated_entries:
                             resource = entry['resource']

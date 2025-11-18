@@ -1,124 +1,510 @@
-{% extends 'patient_data/sections/base_clinical_section.html' %}
 {% load patient_filters %}
+{# Pregnancy History Section - HL7 FHIR IPS Compliant Structure #}
 
-{% block section_content %}
-{# Pregnancy History Section Template - Enhanced Pipeline Data #}
-
-{% if section_data %}
-    {% for pregnancy in section_data %}
-    <div class="field-group">
-        <div class="field-group-header">
-            <div class="field-primary">
-                <i class="fas fa-baby me-2" style="color: var(--pink-color, #e91e63);"></i>
-                <span class="field-title">Pregnancy {{ pregnancy.pregnancy_number|default:forloop.counter }}</span>
-                {% if pregnancy.status %}
-                <span class="clinical-badge status-{{ pregnancy.status|slugify }}">{{ pregnancy.status }}</span>
-                {% endif %}
-            </div>
+<div class="pregnancy-history-section" id="pregnancy-history-section">
+{% if section_data and section_data|length > 0 %}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-pregnancy-history" class="toggle-input" type="checkbox" checked>
+            <label for="toggle-pregnancy-history" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-baby me-2" style="color: #e91e63;"></i>
+                        <span>Pregnancy History</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge populated">{{ section_data|length }} Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                
+                {# IPS-Compliant Content Structure #}
+                {% if section_data %}
+    {# Manually filter by pregnancy type: current vs past #}
+    {% with current_pregnancies=section_data|selectattr_pregnancy_type_current past_pregnancies=section_data|selectattr_pregnancy_type_past %}
+    
+    {# === CURRENT PREGNANCY SUBSECTION === #}
+    {% if current_pregnancies %}
+    <div class="pregnancy-subsection current-pregnancy-subsection mb-4">
+        <div class="subsection-header">
+            <h6 class="subsection-title">
+                <i class="fas fa-baby-carriage me-2" style="color: var(--primary-color, #1976d2);"></i>
+                Current Pregnancy Status
+            </h6>
+            <span class="clinical-badge ips-profile">IPS: Pregnancy Status</span>
         </div>
         
-        <div class="field-group-content">
-            {% if pregnancy.outcome %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-heart me-1"></i>
-                    Outcome
+        {% for pregnancy in current_pregnancies %}
+        <div class="pregnancy-card current-pregnancy">
+            <div class="row g-3">
+                {# Observation Date #}
+                {% if pregnancy.observation_date %}
+                <div class="col-md-4">
+                    <div class="pregnancy-field">
+                        <div class="field-label">
+                            <i class="fas fa-calendar-check me-1"></i>
+                            Observation Date
+                        </div>
+                        <div class="field-value">
+                            {{ pregnancy.observation_date }}
+                        </div>
+                    </div>
                 </div>
-                <div class="field-value">{{ pregnancy.outcome }}</div>
+                {% endif %}
+                
+                {# Pregnancy Status #}
+                {% if pregnancy.status %}
+                <div class="col-md-4">
+                    <div class="pregnancy-field">
+                        <div class="field-label">
+                            <i class="fas fa-heartbeat me-1"></i>
+                            Pregnancy Status
+                        </div>
+                        <div class="field-value">
+                            <span class="status-badge pregnant">
+                                {{ pregnancy.status|capfirst }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {# Estimated Delivery Date (EDD) #}
+                {% if pregnancy.expected_delivery_date %}
+                <div class="col-md-4">
+                    <div class="pregnancy-field">
+                        <div class="field-label">
+                            <i class="fas fa-calendar-plus me-1"></i>
+                            Estimated Delivery Date
+                        </div>
+                        <div class="field-value">
+                            {{ pregnancy.expected_delivery_date }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {# Gestational Age (if available) #}
+                {% if pregnancy.gestational_age %}
+                <div class="col-md-4">
+                    <div class="pregnancy-field">
+                        <div class="field-label">
+                            <i class="fas fa-clock me-1"></i>
+                            Gestational Age
+                        </div>
+                        <div class="field-value">
+                            {{ pregnancy.gestational_age }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
             
-            {% if pregnancy.delivery_date or pregnancy.date %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-calendar-check me-1"></i>
-                    Delivery Date
+            {# FHIR IPS Summary Counts #}
+            {% if pregnancy.live_births_count is not none or pregnancy.abortions_count is not none %}
+            <div class="row g-3 mt-2 pt-3 border-top">
+                <div class="col-12">
+                    <h6 class="text-muted mb-3">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Pregnancy History Summary (FHIR IPS)
+                    </h6>
                 </div>
-                <div class="field-value">{{ pregnancy.delivery_date|default:pregnancy.date|date:"M d, Y" }}</div>
-            </div>
-            {% endif %}
-            
-            {% if pregnancy.gestational_age %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-clock me-1"></i>
-                    Gestational Age
+                {% if pregnancy.live_births_count is not none %}
+                <div class="col-md-4">
+                    <div class="pregnancy-field">
+                        <div class="field-label">
+                            <i class="fas fa-baby me-1 text-success"></i>
+                            Live Births (Total)
+                        </div>
+                        <div class="field-value">
+                            <span class="badge bg-success">{{ pregnancy.live_births_count }}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="field-value">{{ pregnancy.gestational_age }}</div>
-            </div>
-            {% endif %}
-            
-            {% if pregnancy.birth_weight %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-weight me-1"></i>
-                    Birth Weight
+                {% endif %}
+                {% if pregnancy.abortions_count is not none %}
+                <div class="col-md-4">
+                    <div class="pregnancy-field">
+                        <div class="field-label">
+                            <i class="fas fa-times-circle me-1 text-warning"></i>
+                            Terminations (Total)
+                        </div>
+                        <div class="field-value">
+                            <span class="badge bg-warning">{{ pregnancy.abortions_count }}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="field-value">{{ pregnancy.birth_weight }}</div>
-            </div>
-            {% endif %}
-            
-            {% if pregnancy.delivery_method %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-hospital me-1"></i>
-                    Delivery Method
-                </div>
-                <div class="field-value">{{ pregnancy.delivery_method }}</div>
-            </div>
-            {% endif %}
-            
-            {% if pregnancy.complications %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-exclamation-triangle me-1"></i>
-                    Complications
-                </div>
-                <div class="field-value">{{ pregnancy.complications }}</div>
-            </div>
-            {% endif %}
-            
-            {% if pregnancy.prenatal_care %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-user-md me-1"></i>
-                    Prenatal Care
-                </div>
-                <div class="field-value">{{ pregnancy.prenatal_care }}</div>
-            </div>
-            {% endif %}
-            
-            {% if pregnancy.number_of_births %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-users me-1"></i>
-                    Number of Births
-                </div>
-                <div class="field-value">{{ pregnancy.number_of_births }}</div>
-            </div>
-            {% endif %}
-            
-            {% if pregnancy.code or pregnancy.pregnancy_code %}
-            <div class="field-row">
-                <div class="field-label">
-                    <i class="fas fa-code me-1"></i>
-                    Code
-                </div>
-                <div class="field-value">
-                    <span class="medical-code">{{ pregnancy.code|default:pregnancy.pregnancy_code }}</span>
-                    {% if pregnancy.coding_system %}
-                    <span class="text-muted ms-1">({{ pregnancy.coding_system }})</span>
-                    {% endif %}
-                </div>
+                {% endif %}
             </div>
             {% endif %}
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+    {% endif %}
+    
+    {# === PAST PREGNANCIES SUBSECTION === #}
+    {% if past_pregnancies %}
+    <div class="pregnancy-subsection past-pregnancies-subsection mb-4">
+        <div class="subsection-header">
+            <h6 class="subsection-title">
+                <i class="fas fa-history me-2" style="color: var(--info-color, #0288d1);"></i>
+                History of Previous Pregnancies
+            </h6>
+            <span class="clinical-badge ips-profile">IPS: Pregnancy Outcome</span>
+            <span class="badge bg-secondary ms-2">{{ past_pregnancies|length }} outcome(s)</span>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover pregnancy-outcomes-table">
+                <thead>
+                    <tr>
+                        <th scope="col">
+                            <i class="fas fa-flag me-1"></i>
+                            Outcome
+                        </th>
+                        <th scope="col">
+                            <i class="fas fa-calendar me-1"></i>
+                            Date
+                        </th>
+                        <th scope="col">
+                            <i class="fas fa-code me-1"></i>
+                            SNOMED Code
+                        </th>
+                        <th scope="col">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Details
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pregnancy in past_pregnancies %}
+                    <tr>
+                        <td>
+                            <div class="outcome-cell">
+                                {% if pregnancy.outcome == 'Livebirth' or 'livebirth' in pregnancy.outcome|lower %}
+                                    <i class="fas fa-baby text-success me-2"></i>
+                                    <span class="outcome-badge livebirth">Livebirth</span>
+                                {% elif pregnancy.outcome == 'Termination of pregnancy' or 'termination' in pregnancy.outcome|lower %}
+                                    <i class="fas fa-times-circle text-warning me-2"></i>
+                                    <span class="outcome-badge termination">Termination of pregnancy</span>
+                                {% elif pregnancy.outcome == 'Stillbirth' or 'stillbirth' in pregnancy.outcome|lower %}
+                                    <i class="fas fa-heart-broken text-danger me-2"></i>
+                                    <span class="outcome-badge stillbirth">Stillbirth</span>
+                                {% else %}
+                                    <i class="fas fa-circle me-2"></i>
+                                    <span class="outcome-badge">{{ pregnancy.outcome|default:"Pregnancy outcome" }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="outcome-date">
+                                {{ pregnancy.delivery_date|default:"Unknown date" }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if pregnancy.outcome_code %}
+                            <span class="medical-code">
+                                {{ pregnancy.outcome_code }}
+                            </span>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="pregnancy-details">
+                                {% if pregnancy.number_of_births %}
+                                <small class="text-muted">
+                                    <i class="fas fa-users me-1"></i>
+                                    Births: {{ pregnancy.number_of_births }}
+                                </small>
+                                {% endif %}
+                                
+                                {% if pregnancy.gestational_age %}
+                                <small class="text-muted ms-2">
+                                    <i class="fas fa-clock me-1"></i>
+                                    {{ pregnancy.gestational_age }}
+                                </small>
+                                {% endif %}
+                                
+                                {% if pregnancy.complications and pregnancy.complications != 'None reported' %}
+                                <small class="text-warning ms-2">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    {{ pregnancy.complications }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    
+    {# === PREGNANCY OVERVIEW SUBSECTION === #}
+    {% if past_pregnancies %}
+    <div class="pregnancy-subsection pregnancy-overview-subsection">
+        <div class="subsection-header">
+            <h6 class="subsection-title">
+                <i class="fas fa-chart-bar me-2" style="color: var(--success-color, #388e3c);"></i>
+                Previous Pregnancies Overview
+            </h6>
+            <span class="clinical-badge ips-summary">Summary Statistics</span>
+        </div>
+        
+        {% comment %}
+        Group outcomes by type for summary view
+        {% endcomment %}
+        {% with outcome_groups=past_pregnancies|groupby_outcome %}
+        <div class="row g-3">
+            {% for outcome_type, pregnancies in outcome_groups.items %}
+            <div class="col-md-6">
+                <div class="overview-card">
+                    <div class="overview-header">
+                        <h6 class="overview-title">
+                            {% if outcome_type == 'Livebirth' or 'livebirth' in outcome_type|lower %}
+                                <i class="fas fa-baby text-success me-2"></i>
+                                Livebirth
+                            {% elif outcome_type == 'Termination of pregnancy' or 'termination' in outcome_type|lower %}
+                                <i class="fas fa-times-circle text-warning me-2"></i>
+                                Termination of pregnancy
+                            {% elif outcome_type == 'Stillbirth' or 'stillbirth' in outcome_type|lower %}
+                                <i class="fas fa-heart-broken text-danger me-2"></i>
+                                Stillbirth
+                            {% else %}
+                                <i class="fas fa-circle me-2"></i>
+                                {{ outcome_type }}
+                            {% endif %}
+                        </h6>
+                        <span class="outcome-count badge bg-primary">{{ pregnancies|length }}</span>
+                    </div>
+                    
+                    <div class="overview-content">
+                        <div class="overview-label">Outcome Date(s):</div>
+                        <div class="outcome-dates-list">
+                            {% for pregnancy in pregnancies %}
+                            <span class="outcome-date-pill">
+                                {{ pregnancy.delivery_date|default:"Unknown" }}
+                            </span>
+                            {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        {% comment %}Show first code for reference{% endcomment %}
+                        {% if pregnancies.0.outcome_code %}
+                        <div class="overview-code mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-code me-1"></i>
+                                {{ pregnancies.0.outcome_code }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endwith %}
+    </div>
+    {% endif %}
+    
+    {% endwith %}
+{% endif %}
+                
+                </div>
+            </div>
+        </div>
+    </div>
 {% else %}
-    <div class="no-data-message">
-        <i class="fas fa-baby me-2"></i>
-        No pregnancy history information available
+    {# Empty state #}
+    <div class="clinical-section">
+        <div class="collapsible-wrapper">
+            <input id="toggle-pregnancy-history-empty" class="toggle-input" type="checkbox">
+            <label for="toggle-pregnancy-history-empty" class="collapsible-label-title">
+                <div class="clinical-section-title-row">
+                    <div class="clinical-section-title">
+                        <i class="fa-solid fa-baby me-2 text-muted"></i>
+                        <span>Pregnancy History</span>
+                    </div>
+                    <div class="clinical-badge-container">
+                        <span class="clinical-badge empty">0 Found</span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+            </label>
+            <div class="collapsible-content-title">
+                <div class="content-inner-title">
+                    <p class="text-muted">No pregnancy history information available</p>
+                </div>
+            </div>
+        </div>
     </div>
 {% endif %}
-{% endblock %}
+</div>
+
+<style>
+    /* Pregnancy Subsection Styles */
+    .pregnancy-subsection {
+        background: var(--section-background, #ffffff);
+        border: 1px solid var(--border-color, #e0e0e0);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .subsection-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--primary-color, #1976d2);
+    }
+    
+    .subsection-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary, #212529);
+    }
+    
+    .ips-profile, .ips-summary {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        background: var(--info-light, #e3f2fd);
+        color: var(--info-dark, #01579b);
+    }
+    
+    /* Pregnancy Card Styles */
+    .pregnancy-card {
+        background: var(--card-background, #f8f9fa);
+        border-radius: 6px;
+        padding: 1rem;
+    }
+    
+    .pregnancy-field {
+        background: var(--field-background, #ffffff);
+        border-radius: 4px;
+        padding: 0.75rem;
+        height: 100%;
+    }
+    
+    .pregnancy-field .field-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary, #6c757d);
+        margin-bottom: 0.5rem;
+    }
+    
+    .pregnancy-field .field-value {
+        font-size: 1rem;
+        color: var(--text-primary, #212529);
+    }
+    
+    .status-badge.pregnant {
+        background: var(--success-light, #c8e6c9);
+        color: var(--success-dark, #2e7d32);
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+    
+    /* Pregnancy Outcomes Table */
+    .pregnancy-outcomes-table {
+        margin-bottom: 0;
+    }
+    
+    .pregnancy-outcomes-table thead {
+        background: var(--table-header, #f5f5f5);
+    }
+    
+    .pregnancy-outcomes-table tbody tr:hover {
+        background: var(--table-hover, #f8f9fa);
+    }
+    
+    .outcome-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .outcome-badge.livebirth {
+        background: var(--success-light, #c8e6c9);
+        color: var(--success-dark, #2e7d32);
+    }
+    
+    .outcome-badge.termination {
+        background: var(--warning-light, #fff3cd);
+        color: var(--warning-dark, #856404);
+    }
+    
+    .outcome-badge.stillbirth {
+        background: var(--danger-light, #f8d7da);
+        color: var(--danger-dark, #721c24);
+    }
+    
+    /* Overview Cards */
+    .overview-card {
+        background: var(--card-background, #ffffff);
+        border: 1px solid var(--border-color, #dee2e6);
+        border-radius: 6px;
+        padding: 1rem;
+        height: 100%;
+    }
+    
+    .overview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color, #dee2e6);
+    }
+    
+    .overview-title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    
+    .outcome-count {
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+    
+    .overview-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary, #6c757d);
+        margin-bottom: 0.5rem;
+    }
+    
+    .outcome-dates-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .outcome-date-pill {
+        background: var(--primary-light, #e3f2fd);
+        color: var(--primary-dark, #0d47a1);
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+    }
+    
+    .medical-code {
+        font-family: 'Courier New', monospace;
+        background: var(--code-background, #f5f5f5);
+        padding: 0.125rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.875rem;
+    }
+</style>
+```

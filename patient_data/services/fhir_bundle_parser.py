@@ -19,6 +19,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass, asdict
+from patient_data.utils.date_formatter import ClinicalDateFormatter
 
 logger = logging.getLogger("ehealth")
 
@@ -266,7 +267,9 @@ class FHIRBundleParser:
             return enhanced_sections
             
         except Exception as e:
+            import traceback
             logger.error(f"Error parsing FHIR Bundle: {str(e)}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
             return {
                 'success': False,
                 'error': str(e),
@@ -520,7 +523,7 @@ class FHIRBundleParser:
                 for score, med in scored_meds[1:]:
                     logger.info(f"[CLINICAL DEDUP] Rejected duplicate with score {score}/5: {med.get('medication_name', 'Unknown')}")
         
-        logger.info(f"[CLINICAL DEDUP] Clinical deduplication: {len(medications)} medications → {len(deduplicated)} unique medications")
+        logger.info(f"[CLINICAL DEDUP] Clinical deduplication: {len(medications)} medications -> {len(deduplicated)} unique medications")
         return deduplicated
     
     def _calculate_medication_completeness_score(self, medication: Dict) -> int:
@@ -662,6 +665,32 @@ class FHIRBundleParser:
             'display_text': f"Patient: {' '.join(name_parts) if name_parts else 'Unknown'}"
         }
     
+    def _format_allergy_onset_date(self, allergy: Dict[str, Any], is_negative_assertion: bool) -> str:
+        """Format allergy onset date using ClinicalDateFormatter
+        
+        Args:
+            allergy: FHIR AllergyIntolerance resource
+            is_negative_assertion: Whether this is a negative assertion
+            
+        Returns:
+            Formatted date string
+        """
+        if is_negative_assertion:
+            return 'Not applicable'
+        
+        # Extract raw onset date from various fields
+        raw_onset = (
+            allergy.get('onsetDateTime') or 
+            allergy.get('onsetString') or 
+            (allergy.get('onsetPeriod', {}).get('start') if allergy.get('onsetPeriod') else None) or
+            'Unknown'
+        )
+        
+        # Format the date if it's not a placeholder
+        if raw_onset and raw_onset not in ('Unknown', 'Not applicable'):
+            return ClinicalDateFormatter.format_clinical_date(raw_onset)
+        return raw_onset
+    
     def _parse_allergy_resource(self, allergy: Dict[str, Any]) -> Dict[str, Any]:
         """Parse FHIR AllergyIntolerance resource with CTS agent code resolution
         
@@ -717,7 +746,7 @@ class FHIRBundleParser:
                         
                         if resolved_name and resolved_name != code_value:
                             allergen = resolved_name
-                            logger.info(f"✅ Resolved allergy code {code_value} to: {allergen}")
+                            logger.info(f"[ALLERGY] Resolved allergy code {code_value} to: {allergen}")
                         else:
                             # Fallback to code value if resolution failed
                             allergen = code_value
@@ -845,12 +874,7 @@ class FHIRBundleParser:
             'criticality': criticality,
             'reactions': reactions,
             'reaction_count': len(reactions),
-            'onset_date': (
-                allergy.get('onsetDateTime') or 
-                allergy.get('onsetString') or 
-                (allergy.get('onsetPeriod', {}).get('start') if allergy.get('onsetPeriod') else None) or
-                'Unknown'
-            ) if not is_negative_assertion else 'Not applicable',
+            'onset_date': self._format_allergy_onset_date(allergy, is_negative_assertion),
             'notes': notes,  # Full FHIR R4 Annotation data
             'note_text': annotation_text,  # Simple text for display
             'has_notes': bool(notes),
@@ -1057,7 +1081,7 @@ class FHIRBundleParser:
         # CDA example: "levothyroxine sodium (100 ug / 1)"
         # FHIR example: "See medication name (ATC: H03AA01)"
         # 
-        # HAPI FHIR test data only provides ATC codes, no separate brand/generic distinction
+        # FHIR data typically provides ATC codes; brand/generic distinction varies by implementation
         # To avoid redundant display (medication name appearing twice), show ATC reference
         if atc_code:
             # Show ATC code reference instead of duplicating medication name
@@ -1099,6 +1123,13 @@ class FHIRBundleParser:
                 for ingredient in referenced_medication['ingredient']:
                     if ingredient.get('strength'):
                         ratio = ingredient['strength']
+                        
+                        # Type check: strength should be dict (Ratio), not string
+                        if isinstance(ratio, str):
+                            logger.warning(f"[FHIR] Medication strength is string instead of Ratio dict: {ratio}")
+                            strength_parts.append(ratio)
+                            continue
+                        
                         num = ratio.get('numerator', {})
                         den = ratio.get('denominator', {})
                         
@@ -1405,7 +1436,12 @@ class FHIRBundleParser:
         # Extract onset date (only for actual conditions)
         onset_date = 'Unknown'
         if not is_negative_assertion:
-            onset_date = condition.get('onsetDateTime', condition.get('onsetString', 'Unknown'))
+            raw_onset = condition.get('onsetDateTime', condition.get('onsetString', 'Unknown'))
+            # Format the onset date using ClinicalDateFormatter
+            if raw_onset and raw_onset not in ('Unknown', 'Not applicable'):
+                onset_date = ClinicalDateFormatter.format_clinical_date(raw_onset)
+            else:
+                onset_date = raw_onset
         else:
             onset_date = 'Not applicable'
         
@@ -1467,10 +1503,17 @@ class FHIRBundleParser:
         # Extract status and performed date
         status = procedure.get('status', 'Unknown')
         performed_date = 'Unknown date'
+        raw_date = None
         if procedure.get('performedDateTime'):
-            performed_date = procedure['performedDateTime']
+            raw_date = procedure['performedDateTime']
         elif procedure.get('performedPeriod', {}).get('start'):
-            performed_date = procedure['performedPeriod']['start']
+            raw_date = procedure['performedPeriod']['start']
+        
+        # Format the date using ClinicalDateFormatter
+        if raw_date and raw_date != 'Unknown date':
+            performed_date = ClinicalDateFormatter.format_procedure_date(raw_date)
+        else:
+            performed_date = raw_date or 'Unknown date'
         
         # Extract category with CTS translation
         category_text = 'Unknown'
@@ -1622,15 +1665,33 @@ class FHIRBundleParser:
             method_data = processor._extract_codeable_concept(observation['method'])
             method_text = method_data.get('display_text', '')
 
+        # Extract code details for template compatibility
+        observation_code = code_data.get('code', '')
+        observation_code_system = code_data.get('system', '')
+        
+        # Extract numeric value and unit for template compatibility
+        value_numeric = None
+        value_unit = None
+        if value_type == 'quantity' and value_data:
+            value_numeric = value_data.get('value')
+            value_unit = value_data.get('unit')
+        
         return {
             'id': observation.get('id'),
             'observation_name': observation_name,
+            'observation_type': observation_name,  # Template alias
             'code_data': code_data,
+            'observation_code': observation_code,  # Template alias
+            'observation_code_system': observation_code_system,  # Template alias
             'value': value_text,
+            'observation_value': value_text,  # Template alias
             'value_data': value_data,
             'value_type': value_type,
+            'value_numeric': value_numeric,  # Template alias
+            'value_unit': value_unit,  # Template alias
             'status': status.capitalize(),
             'effective_date': effective_date,
+            'observation_time': effective_date,  # Template alias
             'effective_data': effective_data,
             'category': category_text,
             'category_data': category_data,
@@ -1685,13 +1746,17 @@ class FHIRBundleParser:
             '161733001', # Parity - delivered
         }
         
-        # Check code.coding for LOINC/SNOMED codes
-        code_data = observation.get('code_data', observation.get('code', {}))
-        if code_data:
-            for coding in code_data.get('coding', []):
-                code = coding.get('code', '')
-                if code in pregnancy_loinc_codes or code in pregnancy_snomed_codes:
-                    return True
+        # Check observation_code field (primary method after _parse_observation_resource)
+        observation_code = observation.get('observation_code', '')
+        if observation_code and (observation_code in pregnancy_loinc_codes or observation_code in pregnancy_snomed_codes):
+            return True
+        
+        # Also check code_data.code for backwards compatibility
+        code_data = observation.get('code_data', {})
+        if isinstance(code_data, dict):
+            code = code_data.get('code', '')
+            if code and (code in pregnancy_loinc_codes or code in pregnancy_snomed_codes):
+                return True
         
         # Check category for pregnancy/obstetric
         category = observation.get('category', '').lower()
@@ -1728,109 +1793,318 @@ class FHIRBundleParser:
         if not observations:
             return []
         
-        pregnancy_records = []
+        # Group observations by delivery date to create cohesive pregnancy records
+        pregnancy_groups = {}
+        current_pregnancy_obs = []
         
-        # Group observations by related pregnancy context
-        # For now, create individual pregnancy records for each observation
         for obs in observations:
             # Extract code from nested code_data structure
             code_data = obs.get('code_data', {})
-            # Handle both single coding dict and list of codings
             if isinstance(code_data.get('coding'), list) and code_data['coding']:
                 code = code_data['coding'][0].get('code', '')
             else:
                 code = code_data.get('code', '')
             
             observation_name = obs.get('observation_name', '').lower()
-            value_text = obs.get('value', 'Not specified')
-            effective_date_text = obs.get('effective_date', 'Not recorded')
             
-            # Determine pregnancy type based on code and observation name
-            is_current_pregnancy = any(keyword in observation_name for keyword in [
-                'pregnancy status', 'gestational age', 'estimated date of delivery', 
-                'estimated delivery', 'edd'
-            ]) and obs.get('status', '').lower() in ['final', 'preliminary', 'amended']
+            # Identify current pregnancy observations (no delivery date yet)
+            # CRITICAL: 93857-1 (Date and time of obstetric delivery) is PAST pregnancy, NOT current
+            is_current_pregnancy = (
+                code == '82810-3' or  # Pregnancy status LOINC code  
+                any(keyword in observation_name for keyword in [
+                    'gestational age', 'estimated date of delivery', 
+                    'estimated delivery', 'edd'
+                ])
+            ) and code != '93857-1'  # Explicitly exclude delivery date observations
             
-            pregnancy_type = 'current' if is_current_pregnancy else 'past'
+            if is_current_pregnancy:
+                logger.debug(f"[PREGNANCY] Classified as CURRENT: {observation_name} (code: {code})")
+                current_pregnancy_obs.append(obs)
+                continue
+            else:
+                logger.debug(f"[PREGNANCY] Classified as PAST: {observation_name} (code: {code})")
             
-            # Build pregnancy record structure with proper field extraction
+            # For past pregnancies, group by delivery date
+            # CRITICAL: Use RAW effectiveDateTime from effective_data, NOT formatted effective_date
+            delivery_date_raw = None
+            
+            # Extract raw ISO date from effective_data structure
+            effective_data = obs.get('effective_data', {})
+            if isinstance(effective_data, dict) and effective_data.get('value'):
+                # This is the raw FHIR effectiveDateTime value (e.g., "2021-09-08")
+                delivery_date_raw = effective_data['value']
+            
+            # Always get value_data as it may contain outcome information
+            value_data = obs.get('value_data', {})
+            
+            # If not found in effective_data, check value_data for valueDateTime
+            if not delivery_date_raw:
+                if isinstance(value_data, dict) and value_data.get('datetime'):
+                    delivery_date_raw = value_data['datetime']
+            
+            # Normalize date format (remove time if present) for grouping key
+            if delivery_date_raw and delivery_date_raw != 'Not recorded':
+                delivery_date_key = delivery_date_raw.split('T')[0] if 'T' in delivery_date_raw else delivery_date_raw.split(' ')[0]
+            else:
+                # Log warning and skip this observation if no valid date found
+                logger.warning(f"[PREGNANCY] Skipping observation {obs.get('id')} - no valid date found. effective_data: {effective_data}, value_data: {value_data}")
+                continue
+            
+            # CRITICAL FIX: Group by date AND outcome code to handle cases where
+            # the same date has both Livebirth and Termination observations
+            # Extract outcome code for grouping key
+            outcome_code_for_grouping = None
+            if code in ['281050002', '57797005']:
+                outcome_code_for_grouping = code
+            elif code == '93857-1' and isinstance(value_data, dict) and value_data.get('coding'):
+                # Extract outcome code from valueCodeableConcept
+                outcome_coding = value_data['coding'][0] if isinstance(value_data['coding'], list) else value_data['coding']
+                outcome_code_for_grouping = outcome_coding.get('code', '')
+            
+            # Create composite key: date + outcome_code (if available)
+            if outcome_code_for_grouping:
+                group_key = f"{delivery_date_key}-{outcome_code_for_grouping}"
+            else:
+                group_key = delivery_date_key
+            
+            if group_key not in pregnancy_groups:
+                pregnancy_groups[group_key] = []
+            pregnancy_groups[group_key].append(obs)
+        
+        # Build pregnancy records from groups
+        pregnancy_records = []
+        
+        # Process past pregnancies (grouped by delivery date + outcome code)
+        for group_key, group_obs in sorted(pregnancy_groups.items(), reverse=True):
+            # Extract delivery_date from composite key (format: "YYYY-MM-DD" or "YYYY-MM-DD-SNOMEDCODE")
+            if '-281050002' in group_key or '-57797005' in group_key:
+                # Composite key: extract date part
+                delivery_date_key = group_key.rsplit('-', 1)[0]  # Remove last segment (SNOMED code)
+            else:
+                # Simple date key
+                delivery_date_key = group_key
+            
+            # Initialize pregnancy record
             pregnancy_record = {
-                'pregnancy_type': pregnancy_type,
-                'observation_id': obs.get('id', ''),
-                'resource_type': 'PregnancyObservation',
-                
-                # Main data structure matching template expectations
-                'data': {
-                    'status': {
-                        'display_value': value_text if '82810-3' in code else None,
-                        'code': code if '82810-3' in code else None
-                    },
-                    'outcome': {
-                        'display_value': value_text if any(c in code for c in ['11636-8', '11637-6', '93857-1']) else None,
-                        'code': code
-                    },
-                    'observation_date': {
-                        'display_value': effective_date_text,
-                        'raw_value': obs.get('effective_data', {})
-                    },
-                    'delivery_date': {
-                        'display_value': effective_date_text if any(c in code for c in ['11778-8', '93857-1']) else None,
-                        'raw_value': obs.get('effective_data', {})
-                    },
-                    'delivery_date_estimated': {
-                        'display_value': value_text if '57064-8' in code else None,
-                        'raw_value': obs.get('value_data', {})
-                    },
-                    'number_of_births_live': {
-                        'display_value': value_text if '11637-6' in code else None,
-                        'raw_value': obs.get('value_data', {})
-                    },
-                    'number_of_births_stillborn': {
-                        'display_value': value_text if '11638-4' in code else None,
-                        'raw_value': obs.get('value_data', {})
-                    },
-                    'gestational_age': {
-                        'display_value': value_text if any(c in code for c in ['49051-6', '11884-4']) else None,
-                        'raw_value': obs.get('value_data', {})
-                    },
-                    'birth_weight': {
-                        'display_value': value_text if '8339-4' in code else None,
-                        'raw_value': obs.get('value_data', {})
-                    },
-                    'delivery_method': {
-                        'display_value': value_text if '72149-8' in code else None,
-                        'raw_value': obs.get('value_data', {})
-                    },
-                    'complications': {
-                        'display_value': value_text if '73812-0' in code else None,
-                        'raw_value': obs.get('value_data', {})
-                    }
-                },
-                
-                # Direct field access for simpler templates
-                'status': value_text if '82810-3' in code else None,
-                'outcome': value_text if any(c in code for c in ['11636-8', '11637-6', '93857-1']) else None,
-                'observation_date': effective_date_text,
-                'delivery_date': effective_date_text if any(c in code for c in ['11778-8', '93857-1']) else None,
-                'delivery_date_estimated': value_text if '57064-8' in code else None,
-                'birth_weight': value_text if '8339-4' in code else None,
-                'delivery_method': value_text if '72149-8' in code else None,
-                'complications': value_text if '73812-0' in code else 'None reported',
-                
-                # Preserve original observation for debugging
-                '_original_observation': obs,
-                'observation_name': obs.get('observation_name', 'Pregnancy Observation'),
-                'observation_code': code,
-                'observation_value': value_text
+                'pregnancy_type': 'past',
+                'observation_id': f"pregnancy-{group_key}",  # Use full group_key for uniqueness
+                'resource_type': 'PregnancyGroup',
+                'delivery_date': ClinicalDateFormatter.format_pregnancy_date(delivery_date_key),  # Format for display
+                'delivery_date_raw': delivery_date_key,  # Keep raw for sorting
+                'outcome': None,
+                'outcome_code': None,  # Add SNOMED code for outcome
+                'gestational_age': None,
+                'birth_weight': None,
+                'delivery_method': None,
+                'complications': 'None reported',
+                'observation_date': delivery_date_key,
+                'data': {}
             }
+            
+            # Extract values from grouped observations
+            for obs in group_obs:
+                code_data = obs.get('code_data', {})
+                value_data = obs.get('value_data', {})
+                
+                if isinstance(code_data.get('coding'), list) and code_data['coding']:
+                    code = code_data['coding'][0].get('code', '')
+                else:
+                    code = code_data.get('code', '')
+                
+                value_text = obs.get('value', '')
+                observation_name = obs.get('observation_name', '')
+                
+                # Extract outcome (Livebirth, Termination, etc.) from observation name or value
+                if code in ['281050002', '57797005']:
+                    # For SNOMED outcome codes, use the observation name (e.g., "Livebirth")
+                    pregnancy_record['outcome'] = observation_name
+                    pregnancy_record['outcome_code'] = code  # Store SNOMED code
+                elif code == '93857-1':
+                    # For 93857-1 observations, check valueCodeableConcept for outcome
+                    if isinstance(value_data, dict) and value_data.get('coding'):
+                        # Extract outcome from valueCodeableConcept
+                        outcome_coding = value_data['coding'][0] if isinstance(value_data['coding'], list) else value_data['coding']
+                        outcome_code = outcome_coding.get('code', '')
+                        outcome_display = value_data.get('display_text', value_text)
+                        
+                        if outcome_code in ['281050002', '57797005'] or outcome_display in ['Livebirth', 'Termination of pregnancy']:
+                            pregnancy_record['outcome'] = outcome_display
+                            pregnancy_record['outcome_code'] = outcome_code
+                elif 'livebirth' in observation_name.lower():
+                    pregnancy_record['outcome'] = 'Livebirth'
+                    if not pregnancy_record['outcome_code']:
+                        pregnancy_record['outcome_code'] = '281050002'
+                elif 'termination' in observation_name.lower():
+                    pregnancy_record['outcome'] = 'Termination of pregnancy'
+                    if not pregnancy_record['outcome_code']:
+                        pregnancy_record['outcome_code'] = '57797005'
+                elif 'livebirth' in value_text.lower():
+                    pregnancy_record['outcome'] = 'Livebirth'
+                    if not pregnancy_record['outcome_code']:
+                        pregnancy_record['outcome_code'] = '281050002'
+                elif 'termination' in value_text.lower():
+                    pregnancy_record['outcome'] = 'Termination of pregnancy'
+                    if not pregnancy_record['outcome_code']:
+                        pregnancy_record['outcome_code'] = '57797005'
+                
+                # Extract delivery date from valueDateTime (for 93857-1)
+                if code == '93857-1':
+                    value_data = obs.get('value_data', {})
+                    # First try datetime from value_data (FHIR valueDateTime)
+                    if isinstance(value_data, dict) and value_data.get('datetime'):
+                        pregnancy_record['delivery_date'] = value_data['datetime']
+                    # If value_data has CodeableConcept (like "Livebirth"), use effectiveDateTime
+                    elif isinstance(value_data, dict) and value_data.get('coding'):
+                        # This 93857-1 has valueCodeableConcept not valueDateTime - use effective_date
+                        if obs.get('effective_date') and obs.get('effective_date') != 'Not recorded':
+                            pregnancy_record['delivery_date'] = obs.get('effective_date')
+                    # Otherwise use value_text if it looks like a date
+                    elif value_text and value_text not in ['No value', 'Not recorded', 'Livebirth', 'Termination of pregnancy']:
+                        pregnancy_record['delivery_date'] = value_text
+                
+                # Extract birth weight
+                if code == '8339-4':
+                    pregnancy_record['birth_weight'] = value_text
+                
+                # Extract gestational age
+                if code in ['49051-6', '11884-4']:
+                    pregnancy_record['gestational_age'] = value_text
+                
+                # Extract delivery method
+                if code == '72149-8':
+                    pregnancy_record['delivery_method'] = value_text
+                
+                # Extract complications
+                if code == '73812-0':
+                    pregnancy_record['complications'] = value_text if value_text else 'None reported'
             
             pregnancy_records.append(pregnancy_record)
         
-        logger.info(f"[PREGNANCY TRANSFORM] Transformed {len(observations)} pregnancy observations into {len(pregnancy_records)} pregnancy records")
+        # Extract FHIR IPS summary counts from all observations
+        live_births_count = None
+        abortions_count = None
+        
+        for obs in observations:
+            code_data = obs.get('code_data', {})
+            if isinstance(code_data.get('coding'), list) and code_data['coding']:
+                code = code_data['coding'][0].get('code', '')
+            else:
+                code = code_data.get('code', '')
+            
+            value_text = obs.get('value', '')
+            
+            # Extract live births count (11636-8)
+            if code == '11636-8':
+                try:
+                    live_births_count = int(value_text) if value_text else None
+                except (ValueError, TypeError):
+                    live_births_count = value_text
+            
+            # Extract abortions count (11612-9)
+            if code == '11612-9':
+                try:
+                    abortions_count = int(value_text) if value_text else None
+                except (ValueError, TypeError):
+                    abortions_count = value_text
+        
+        # Process current pregnancy
+        if current_pregnancy_obs:
+            pregnancy_record = {
+                'pregnancy_type': 'current',
+                'observation_id': 'current-pregnancy',
+                'resource_type': 'PregnancyGroup',
+                'delivery_date': None,
+                'expected_delivery_date': None,  # Match template field name
+                'outcome': None,
+                'gestational_age': None,
+                'birth_weight': None,
+                'delivery_method': None,
+                'complications': None,
+                'status': None,
+                'observation_date': None,
+                'live_births_count': live_births_count,  # FHIR IPS summary count
+                'abortions_count': abortions_count,      # FHIR IPS summary count
+                'data': {}
+            }
+            
+            for obs in current_pregnancy_obs:
+                code_data = obs.get('code_data', {})
+                if isinstance(code_data.get('coding'), list) and code_data['coding']:
+                    code = code_data['coding'][0].get('code', '')
+                else:
+                    code = code_data.get('code', '')
+                
+                value_text = obs.get('value', '')
+                effective_date = obs.get('effective_date', '')
+                
+                # Extract pregnancy status (82810-3)
+                if code == '82810-3':
+                    pregnancy_record['status'] = value_text
+                    pregnancy_record['observation_date'] = ClinicalDateFormatter.format_observation_date(effective_date)
+                
+                # Extract estimated delivery date (11778-8, 57064-8)
+                if code in ['11778-8', '57064-8']:
+                    # For valueDateTime observations, extract from value_data
+                    value_data = obs.get('value_data', {})
+                    if isinstance(value_data, dict) and value_data.get('datetime'):
+                        raw_date = value_data['datetime']
+                    else:
+                        raw_date = value_text
+                    # Format using ClinicalDateFormatter for consistency
+                    pregnancy_record['expected_delivery_date'] = ClinicalDateFormatter.format_pregnancy_date(raw_date)
+                
+                # Extract gestational age (49051-6, 11884-4)
+                if code in ['49051-6', '11884-4']:
+                    pregnancy_record['gestational_age'] = value_text
+            
+            pregnancy_records.append(pregnancy_record)
+        
+        logger.info(f"[PREGNANCY TRANSFORM] Transformed {len(observations)} pregnancy observations into {len(pregnancy_records)} pregnancy records ({len(pregnancy_groups)} past, {1 if current_pregnancy_obs else 0} current)")
         return pregnancy_records
     
     def _is_vital_sign(self, observation: Dict[str, Any]) -> bool:
-        """Check if observation is a vital sign"""
+        """Check if observation is a vital sign using LOINC codes and keywords"""
+        # LOINC codes for vital signs (primary method)
+        vital_sign_loinc_codes = [
+            '85354-9',  # Blood pressure panel
+            '8480-6',   # Systolic blood pressure
+            '8462-4',   # Diastolic blood pressure
+            '8867-4',   # Heart rate
+            '8310-5',   # Body temperature
+            '9279-1',   # Respiratory rate
+            '2710-2',   # Oxygen saturation
+            '29463-7',  # Body weight
+            '8302-2',   # Body height
+            '39156-5',  # Body mass index
+        ]
+        
+        # Check category first (most reliable)
+        category = observation.get('category', [])
+        
+        # Type check: category should be list of dicts, but might be a string
+        if isinstance(category, str):
+            logger.warning(f"[FHIR] Observation category is string instead of list: {category}")
+            category = []
+        
+        for cat in category:
+            # Type check: each category entry should be dict (CodeableConcept), not string
+            if not isinstance(cat, dict):
+                logger.warning(f"[FHIR] Observation category entry is not dict: {type(cat)} - {cat}")
+                continue
+            
+            coding = cat.get('coding', [])
+            for code in coding:
+                if code.get('code') == 'vital-signs':
+                    return True
+        
+        # Check LOINC code
+        code_data = observation.get('code', {})
+        if code_data.get('coding'):
+            for coding in code_data['coding']:
+                if coding.get('system') == 'http://loinc.org' and coding.get('code') in vital_sign_loinc_codes:
+                    return True
+        
+        # Fallback to keyword matching
         vital_sign_keywords = [
             'blood pressure', 'systolic', 'diastolic', 'heart rate', 'pulse',
             'temperature', 'respiratory rate', 'oxygen saturation', 'spo2',
@@ -1839,6 +2113,78 @@ class FHIRBundleParser:
         
         observation_text = str(observation.get('code', {})).lower()
         return any(keyword in observation_text for keyword in vital_sign_keywords)
+    
+    def _is_social_history(self, observation: Dict[str, Any]) -> bool:
+        """Check if observation is social history using LOINC codes and category"""
+        # Check category first (most reliable)
+        category = observation.get('category', [])
+        
+        # Type check: category should be list of dicts, but might be a string
+        if isinstance(category, str):
+            category = []
+        
+        for cat in category:
+            # Type check: each category entry should be dict (CodeableConcept)
+            if not isinstance(cat, dict):
+                continue
+            
+            coding = cat.get('coding', [])
+            for code in coding:
+                if code.get('code') == 'social-history':
+                    return True
+        
+        # LOINC codes for social history
+        social_history_loinc_codes = [
+            '72166-2',  # Tobacco smoking status
+            '74013-4',  # Alcoholic drinks per day
+            '11331-6',  # History of occupation
+            '63512-8',  # Number of living children
+            '93043-8',  # Housing status
+            '76689-9',  # Sex assigned at birth
+        ]
+        
+        code_data = observation.get('code', {})
+        if code_data.get('coding'):
+            for coding in code_data['coding']:
+                if coding.get('system') == 'http://loinc.org' and coding.get('code') in social_history_loinc_codes:
+                    return True
+        
+        # Fallback to keyword matching
+        social_keywords = [
+            'smoking', 'tobacco', 'alcohol', 'occupation', 'employment',
+            'housing', 'living', 'marital', 'education', 'social'
+        ]
+        
+        observation_text = str(observation.get('code', {})).lower()
+        return any(keyword in observation_text for keyword in social_keywords)
+    
+    def _is_laboratory_result(self, observation: Dict[str, Any]) -> bool:
+        """Check if observation is a laboratory result"""
+        # Check category first (most reliable)
+        category = observation.get('category', [])
+        
+        # Type check: category should be list of dicts, but might be a string
+        if isinstance(category, str):
+            category = []
+        
+        for cat in category:
+            # Type check: each category entry should be dict (CodeableConcept)
+            if not isinstance(cat, dict):
+                continue
+            
+            coding = cat.get('coding', [])
+            for code in coding:
+                if code.get('code') in ['laboratory', 'lab']:
+                    return True
+        
+        # Common lab result LOINC patterns
+        lab_keywords = [
+            'blood', 'serum', 'plasma', 'urine', 'hemoglobin', 'glucose',
+            'cholesterol', 'creatinine', 'panel', 'group', 'test', 'lab'
+        ]
+        
+        observation_text = str(observation.get('code', {})).lower()
+        return any(keyword in observation_text for keyword in lab_keywords)
     
     def _parse_immunization_resource(self, immunization: Dict[str, Any]) -> Dict[str, Any]:
         """Parse FHIR Immunization resource"""
@@ -1852,8 +2198,14 @@ class FHIRBundleParser:
             vaccine_name = vaccine_code['text']
         
         # Extract occurrence - FHIR R4 supports occurrenceDateTime or occurrenceString
-        occurrence_date = (immunization.get('occurrenceDateTime') or 
-                          immunization.get('occurrenceString'))
+        raw_occurrence = (immunization.get('occurrenceDateTime') or 
+                         immunization.get('occurrenceString'))
+        
+        # Format the occurrence date using ClinicalDateFormatter
+        if raw_occurrence:
+            occurrence_date = ClinicalDateFormatter.format_clinical_date(raw_occurrence)
+        else:
+            occurrence_date = None
         
         # Extract route - handle missing or complex structures
         route_value = immunization.get('route')
@@ -1939,6 +2291,8 @@ class FHIRBundleParser:
             'procedures': [],
             'observations': [],
             'vital_signs': [],  # Subset of observations
+            'social_history': [],  # Social history observations
+            'laboratory_results': [],  # Lab test results
             'pregnancy_history': [],  # Pregnancy/obstetric history
             'immunizations': [],
             'diagnostic_reports': [],
@@ -1974,11 +2328,26 @@ class FHIRBundleParser:
                     if self._is_vital_sign(obs)
                 ]
                 
+                # Filter for social history
+                clinical_arrays['social_history'] = [
+                    obs for obs in section_data.entries 
+                    if self._is_social_history(obs)
+                ]
+                
+                # Filter for laboratory results
+                clinical_arrays['laboratory_results'] = [
+                    obs for obs in section_data.entries 
+                    if self._is_laboratory_result(obs)
+                ]
+                
                 # Filter for pregnancy history (LOINC 10162-6 section) and transform to template structure
                 pregnancy_observations = [
                     obs for obs in section_data.entries 
                     if self._is_pregnancy_related(obs)
                 ]
+                logger.info(f"[PREGNANCY FILTER] Found {len(pregnancy_observations)} pregnancy-related observations from {len(section_data.entries)} total observations")
+                for obs in pregnancy_observations:
+                    logger.debug(f"[PREGNANCY OBS] {obs.get('observation_name')} (code: {obs.get('observation_code', 'N/A')}, id: {obs.get('id')})")
                 clinical_arrays['pregnancy_history'] = self._transform_pregnancy_observations(pregnancy_observations)
             elif section_type == 'immunizations' and hasattr(section_data, 'entries'):
                 clinical_arrays['immunizations'] = section_data.entries

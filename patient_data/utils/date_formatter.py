@@ -166,10 +166,10 @@ class PatientDateFormatter:
 
     def _parse_cda_date(self, date_str: str) -> Optional[datetime]:
         """
-        Parse various CDA date formats into a datetime object.
+        Parse various CDA and FHIR date formats into a datetime object.
 
         Args:
-            date_str: Date string from CDA document
+            date_str: Date string from CDA document or FHIR resource
 
         Returns:
             Parsed datetime or None if parsing fails
@@ -180,7 +180,41 @@ class PatientDateFormatter:
         # Clean up the input
         date_clean = date_str.strip()
 
-        # Remove timezone offset and milliseconds for parsing (we'll handle display separately)
+        # FHIR ISO 8601 with 'Z' timezone indicator: 2022-06-15T00:00:00Z
+        if 'Z' in date_clean:
+            try:
+                # Remove 'Z' and parse as UTC
+                clean_input = date_clean.replace('Z', '')
+                if 'T' in clean_input:
+                    parsed = datetime.strptime(clean_input, "%Y-%m-%dT%H:%M:%S")
+                else:
+                    parsed = datetime.strptime(clean_input, "%Y-%m-%d")
+                logger.debug(f"Successfully parsed FHIR ISO date with Z: '{date_str}'")
+                return parsed
+            except ValueError:
+                pass
+        
+        # FHIR ISO 8601 with timezone offset: 2022-06-15T00:00:00+01:00
+        if 'T' in date_clean and ('+' in date_clean[10:] or date_clean.count('-') > 2):
+            try:
+                # Python 3.7+ supports fromisoformat with timezone
+                parsed = datetime.fromisoformat(date_clean.replace('Z', '+00:00'))
+                logger.debug(f"Successfully parsed FHIR ISO date with timezone: '{date_str}'")
+                return parsed
+            except (ValueError, AttributeError):
+                # Fallback: strip timezone and parse
+                try:
+                    clean_input = re.sub(r'[+-]\d{2}:\d{2}$', '', date_clean)
+                    if 'T' in clean_input:
+                        parsed = datetime.strptime(clean_input, "%Y-%m-%dT%H:%M:%S")
+                    else:
+                        parsed = datetime.strptime(clean_input, "%Y-%m-%d")
+                    logger.debug(f"Successfully parsed FHIR ISO date (timezone stripped): '{date_str}'")
+                    return parsed
+                except ValueError:
+                    pass
+
+        # Remove CDA timezone offset and milliseconds for parsing
         date_clean = re.sub(r"\.\d{3}[+-]\d{4}$", "", date_clean)  # Remove .000+0100
         date_clean = re.sub(r"[+-]\d{4}$", "", date_clean)  # Remove +0100
 
@@ -339,6 +373,162 @@ class PatientDateFormatter:
 
 # Global formatter instance with European default
 default_formatter = PatientDateFormatter(default_format="dd/mm/yyyy", locale="en-GB")
+
+
+class ClinicalDateFormatter:
+    """
+    Enhanced clinical date formatter for FHIR and CDA data sources
+    Provides consistent formatting across all clinical sections
+    
+    This class serves as a unified interface for date formatting,
+    supporting both the existing PatientDateFormatter methods and
+    new FHIR-specific formatting requirements.
+    """
+    
+    # European healthcare standard format (day first, full month name)
+    HEALTHCARE_FORMAT = "%d %B %Y"  # "15 June 2022"
+    
+    # Alternative US format
+    US_FORMAT = "%B %d, %Y"  # "June 15, 2022"
+    
+    @classmethod
+    def format_clinical_date(
+        cls,
+        date_input: Optional[str],
+        include_time: bool = False,
+        use_us_format: bool = False,
+        default_text: str = "Not recorded"
+    ) -> str:
+        """
+        Format date for clinical display with professional healthcare formatting
+        
+        Supports both FHIR ISO 8601 and CDA compact formats, outputting
+        user-friendly dates with full month names.
+        
+        Args:
+            date_input: Date string in FHIR or CDA format
+            include_time: Include time component if available
+            use_us_format: Use US date format instead of European
+            default_text: Text to return if date is missing
+            
+        Returns:
+            Formatted date: "15 June 2022" or "June 15, 2022"
+        """
+        if not date_input or date_input in ["Not specified", "Unknown", "Not recorded", ""]:
+            return default_text
+        
+        try:
+            # Parse using existing PatientDateFormatter
+            parsed_date = default_formatter._parse_cda_date(date_input)
+            
+            if not parsed_date:
+                logger.debug(f"Could not parse clinical date: {date_input}")
+                return date_input
+            
+            # Format with full month name
+            format_str = cls.US_FORMAT if use_us_format else cls.HEALTHCARE_FORMAT
+            formatted = parsed_date.strftime(format_str)
+            
+            # Remove leading zero from day (01 -> 1, 08 -> 8)
+            # This makes dates more natural: "8 September 2021" not "08 September 2021"
+            if not use_us_format:
+                # European format: "DD Month YYYY" - strip leading zero from day
+                parts = formatted.split(' ')
+                if len(parts) >= 2 and parts[0].startswith('0'):
+                    parts[0] = parts[0].lstrip('0')
+                    formatted = ' '.join(parts)
+            else:
+                # US format: "Month DD, YYYY" - strip leading zero from day
+                parts = formatted.split(' ')
+                if len(parts) >= 2 and parts[1].startswith('0'):
+                    parts[1] = parts[1].lstrip('0')
+                    formatted = ' '.join(parts)
+            
+            # Add time if requested and significant (not midnight)
+            if include_time and (parsed_date.hour != 0 or parsed_date.minute != 0):
+                time_str = parsed_date.strftime("%H:%M")
+                formatted += f" at {time_str}"
+            
+            return formatted
+            
+        except Exception as e:
+            logger.warning(f"Clinical date formatting error for '{date_input}': {e}")
+            return date_input
+    
+    @classmethod
+    def format_pregnancy_date(cls, date_input: Optional[str]) -> str:
+        """
+        Format date for pregnancy history display
+        Always uses full month name without time
+        
+        Examples:
+            "2022-06-15" -> "15 June 2022"
+            "20220615" -> "15 June 2022"
+        """
+        return cls.format_clinical_date(date_input, include_time=False)
+    
+    @classmethod
+    def format_observation_date(cls, date_input: Optional[str]) -> str:
+        """
+        Format date for observation/vital signs display
+        Includes time if significant
+        """
+        return cls.format_clinical_date(date_input, include_time=True)
+    
+    @classmethod
+    def format_medication_date(cls, date_input: Optional[str]) -> str:
+        """Format date for medication statements"""
+        return cls.format_clinical_date(date_input, include_time=False)
+    
+    @classmethod
+    def format_procedure_date(cls, date_input: Optional[str]) -> str:
+        """Format date for procedure records with time"""
+        return cls.format_clinical_date(date_input, include_time=True)
+    
+    @classmethod
+    def to_iso_date(cls, date_input: Optional[str]) -> Optional[str]:
+        """
+        Convert any date format to ISO (YYYY-MM-DD) for sorting
+        
+        Returns:
+            ISO date string or None
+        """
+        if not date_input:
+            return None
+        
+        try:
+            parsed_date = default_formatter._parse_cda_date(date_input)
+            if parsed_date:
+                return parsed_date.strftime("%Y-%m-%d")
+        except Exception:
+            pass
+        
+        return None
+    
+    @classmethod
+    def format_date_range(
+        cls,
+        start_date: Optional[str],
+        end_date: Optional[str],
+        separator: str = " to "
+    ) -> str:
+        """
+        Format a date range for display
+        
+        Returns:
+            "15 June 2022 to 20 June 2022" or appropriate variations
+        """
+        formatted_start = cls.format_clinical_date(start_date)
+        formatted_end = cls.format_clinical_date(end_date)
+        
+        if formatted_start == "Not recorded" and formatted_end == "Not recorded":
+            return "Not recorded"
+        elif formatted_start == "Not recorded":
+            return f"Until {formatted_end}"
+        elif formatted_end == "Not recorded":
+            return f"From {formatted_start}"
+        else:
+            return f"{formatted_start}{separator}{formatted_end}"
 
 
 # Convenience functions for templates
