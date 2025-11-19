@@ -1,55 +1,80 @@
-{# CDA legalAuthenticator - Document Signer Component #}
+{# CDA legalAuthenticator - Document Signer Component (Accordion Design) #}
 {# Expected context: legal_authenticator (DotDict with person details and organization) #}
 
 {% if legal_authenticator %}
-<div class="legal-authenticator-section bg-white border rounded-3 shadow-sm overflow-hidden mb-3">
-    <div class="table-responsive">
-        <table class="table table-bordered mb-0">
-            <tbody>
-                {# Legal Authenticator Row #}
-                <tr>
-                    <td class="table-light fw-bold" style="width: 20%;">Legal Authenticator</td>
-                    <td style="width: 40%;">
-                        <div class="d-flex align-items-start">
-                            <i class="fa-solid fa-certificate me-2 text-success mt-1"></i>
-                            <div>
-                                <strong>{{ legal_authenticator.full_name|default:"Unknown" }}</strong>
-                                {% if legal_authenticator.organization.name %}
-                                    of {{ legal_authenticator.organization.name }}
-                                {% endif %}
-                                <div class="small text-muted mt-1">
-                                    signed at {{ legal_authenticator.timestamp|default:"Unknown date" }}
-                                </div>
-                            </div>
+<div class="legal-authenticator-section mb-4">
+    <div class="collapsible-wrapper">
+        <input id="toggle-legal-authenticator" class="toggle-input" type="checkbox" checked>
+        <label for="toggle-legal-authenticator" class="collapsible-label-title">
+            <div class="clinical-section-title-row">
+                <div class="clinical-section-title">
+                    <i class="fa-solid fa-certificate me-2"></i>
+                    <span>Legal Authenticator</span>
+                </div>
+                <div class="clinical-badge-container">
+                    <span class="clinical-badge populated">{{ legal_authenticator.full_name|default:"Unknown" }}</span>
+                </div>
+            </div>
+            <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+        </label>
+        <div class="collapsible-content-title">
+            <div class="content-inner-title">
+                
+                {# Legal Authenticator Details #}
+                <div class="mb-3">
+                    <div class="d-flex align-items-start mb-2">
+                        <i class="fa-solid fa-certificate me-2 text-success mt-1"></i>
+                        <div>
+                            <h6 class="text-dark mb-1">{{ legal_authenticator.full_name|default:"Unknown" }}</h6>
+                            {% if legal_authenticator.organization.name %}
+                            <p class="text-muted small mb-1">{{ legal_authenticator.organization.name }}</p>
+                            {% endif %}
+                            <p class="small text-muted mb-0">
+                                <i class="fa-solid fa-calendar-check me-1"></i>
+                                Signed: {{ legal_authenticator.timestamp|default:"Unknown date" }}
+                            </p>
                         </div>
-                    </td>
-                    <td class="table-light fw-bold" style="width: 15%;">Contact Details</td>
-                    <td style="width: 25%;">
-                        {# Address #}
-                        {% if legal_authenticator.contact_info.addresses %}
-                            {% with address=legal_authenticator.contact_info.addresses.0 %}
-                            <div class="mb-1 small">{{ legal_authenticator.organization.workplace|default:"Workplace" }}: {% if address.street %}{{ address.street }}{% endif %}</div>
-                            <div class="mb-1 small">{% if address.city %}{{ address.city }}{% endif %}{% if address.postal_code %} {{ address.postal_code }}{% endif %}</div>
-                            <div class="mb-1 small">{% if address.country %}{{ address.country }}{% endif %}</div>
+                    </div>
+                </div>
+                
+                {# Contact Information #}
+                <div class="contact-info">
+                    <h6 class="mb-2 small"><i class="fa-solid fa-address-book me-2"></i>Contact Information:</h6>
+                    {% if legal_authenticator.contact_info.addresses %}
+                        {% with address=legal_authenticator.contact_info.addresses.0 %}
+                        <p class="mb-1 small">
+                            <i class="fa-solid fa-location-dot me-2 text-muted"></i>
+                            <strong>{{ legal_authenticator.organization.workplace|default:"Workplace" }}:</strong> {% if address.street %}{{ address.street }}{% endif %}
+                        </p>
+                        <p class="mb-1 small ms-4">
+                            {% if address.city %}{{ address.city }}{% endif %}{% if address.postal_code %} {{ address.postal_code }}{% endif %}
+                        </p>
+                        <p class="mb-2 small ms-4">{% if address.country %}{{ address.country }}{% endif %}</p>
+                        {% endwith %}
+                    {% endif %}
+                    
+                    {% if legal_authenticator.contact_info.telecoms %}
+                        {% regroup legal_authenticator.contact_info.telecoms by value as telecom_groups %}
+                        {% for group in telecom_groups %}
+                            {% with telecom=group.list.0 %}
+                                {% if 'tel:' in telecom.value %}
+                                <p class="mb-1 small">
+                                    <i class="fa-solid fa-phone me-2 text-muted"></i>
+                                    <strong>Phone Workplace:</strong> {{ telecom.value|slice:"4:" }}
+                                </p>
+                                {% elif 'mailto:' in telecom.value %}
+                                <p class="mb-1 small">
+                                    <i class="fa-solid fa-envelope me-2 text-muted"></i>
+                                    <strong>Email Workplace:</strong> {{ telecom.value|slice:"7:" }}
+                                </p>
+                                {% endif %}
                             {% endwith %}
-                        {% endif %}
-                        {# Telecoms #}
-                        {% if legal_authenticator.contact_info.telecoms %}
-                            {% regroup legal_authenticator.contact_info.telecoms by value as telecom_groups %}
-                            {% for group in telecom_groups %}
-                                {% with telecom=group.list.0 %}
-                                    {% if 'tel:' in telecom.value %}
-                                    <div class="small">Tel Workplace: {{ telecom.value|slice:"4:" }}</div>
-                                    {% elif 'mailto:' in telecom.value %}
-                                    <div class="small">Mail Workplace: {{ telecom.value|slice:"7:" }}</div>
-                                    {% endif %}
-                                {% endwith %}
-                            {% endfor %}
-                        {% endif %}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+            </div>
+        </div>
     </div>
 </div>
 {% endif %}

@@ -1,39 +1,59 @@
-{# CDA Document Information Component #}
+{# CDA Document Information Component (Accordion Design) #}
 {# Expected context: document_id, document_set_id, document_created_time #}
 
 {% if document_id or document_set_id or document_created_time %}
-<div class="document-info-section bg-white border rounded-3 shadow-sm overflow-hidden mb-3">
-    <div class="table-responsive">
-        <table class="table table-bordered mb-0">
-            <tbody>
-                {# Document Row #}
-                <tr>
-                    <td class="table-light fw-bold" style="width: 20%;">Document</td>
-                    <td style="width: 40%;">
-                        <div>
-                            {% if document_id %}
-                            <div class="mb-1">
-                                <strong><em>ID</em></strong> {{ document_id }}
-                            </div>
-                            {% endif %}
-                            {% if document_set_id %}
-                            <div class="mb-1">
-                                <strong><em>Set-ID</em></strong> {{ document_set_id }}
-                            </div>
-                            {% endif %}
-                        </div>
-                    </td>
-                    <td class="table-light fw-bold" style="width: 15%;">Created On</td>
-                    <td style="width: 25%;">
+<div class="document-info-section mb-4">
+    <div class="collapsible-wrapper">
+        <input id="toggle-document-info" class="toggle-input" type="checkbox" checked>
+        <label for="toggle-document-info" class="collapsible-label-title">
+            <div class="clinical-section-title-row">
+                <div class="clinical-section-title">
+                    <i class="fa-solid fa-file-medical me-2"></i>
+                    <span>Document</span>
+                </div>
+                <div class="clinical-badge-container">
+                    {% if document_id %}
+                    <span class="clinical-badge populated">{{ document_id|truncatechars:20 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+        </label>
+        <div class="collapsible-content-title">
+            <div class="content-inner-title">
+                
+                {# Document Identifiers #}
+                <div class="mb-3">
+                    <h6 class="text-dark mb-2">
+                        <i class="fa-solid fa-file-medical me-2 text-primary"></i>
+                        Document Information
+                    </h6>
+                    {% if document_id %}
+                    <p class="mb-2 small">
+                        <strong><em>ID:</em></strong> {{ document_id }}
+                    </p>
+                    {% endif %}
+                    {% if document_set_id %}
+                    <p class="mb-2 small">
+                        <strong><em>Set-ID:</em></strong> {{ document_set_id }}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                {# Creation Timestamp #}
+                <div class="mb-3">
+                    <h6 class="mb-2 small"><i class="fa-solid fa-calendar-plus me-2"></i>Created On:</h6>
+                    <p class="mb-0 small">
                         {% if document_created_time %}
                         {{ document_created_time }}
                         {% else %}
                         Unknown
                         {% endif %}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                    </p>
+                </div>
+                
+            </div>
+        </div>
     </div>
 </div>
 {% endif %}

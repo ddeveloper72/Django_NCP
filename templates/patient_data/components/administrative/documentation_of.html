@@ -1,16 +1,24 @@
-{# CDA documentationOf - Service Event with Performers Component #}
+{# CDA documentationOf - Service Event with Performers Component (Accordion Design) #}
 {# Expected context: documentation_of (DotDict with serviceEvent details and performers) #}
 
 {% if documentation_of %}
 <div class="documentation-of-section mb-4">
-    <div class="card border-secondary">
-        <div class="card-header bg-secondary text-white">
-            <h6 class="mb-0">
-                <i class="fa-solid fa-file-medical me-2"></i>
-                Documentation Of - Service Event
-            </h6>
-        </div>
-        <div class="card-body">
+    <div class="collapsible-wrapper">
+        <input id="toggle-documentation-of" class="toggle-input" type="checkbox" checked>
+        <label for="toggle-documentation-of" class="collapsible-label-title">
+            <div class="clinical-section-title-row">
+                <div class="clinical-section-title">
+                    <i class="fa-solid fa-file-medical me-2"></i>
+                    <span>Documentation Of - Service Event</span>
+                </div>
+                <div class="clinical-badge-container">
+                    <span class="clinical-badge populated">Service Event</span>
+                </div>
+            </div>
+            <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+        </label>
+        <div class="collapsible-content-title">
+            <div class="content-inner-title">
             {# SERVICE EVENT DETAILS #}
             {% if documentation_of.effective_time %}
             <div class="service-event-section mb-4 pb-3 border-bottom">
@@ -221,6 +229,8 @@
                 </small>
             </div>
             {% endif %}
+                
+            </div>
         </div>
     </div>
 </div>

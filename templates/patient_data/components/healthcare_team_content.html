@@ -5,20 +5,14 @@
     {# Check if we have any administrative, healthcare data, or healthcare team data #}
     {% if healthcare_team or administrative_data or healthcare_data or author_hcp or custodian_organization.name or guardians or participants %}
         
-        {# === CDA ADMINISTRATIVE SECTIONS === #}
-        {# Using modular component templates for each CDA administrative element #}
-        
-        {# 1. Assigned Author - Medical Doctor (from <author>) #}
-        {% include 'patient_data/components/administrative/assigned_author.html' %}
-        
-        {# 2. Legal Authenticator - Document Signer (from <legalAuthenticator>) #}
-        {% include 'patient_data/components/administrative/legal_authenticator.html' %}
-        
-        {# 3. Documentation Of - Service Event (from <documentationOf>) #}
-        {# NOTE: Requires CDAHeaderExtractor enhancement to extract documentation_of field #}
-        {% include 'patient_data/components/administrative/documentation_of.html' %}
-
-        {# CUSTODIAN ORGANIZATION - Collapsible Accordion #}
+    {# === CDA ADMINISTRATIVE SECTIONS (Accordion Design) === #}
+    {# Each administrative component in its own collapsible accordion #}
+    {# Matches FHIR design system with consistent accordion pattern #}
+    
+    {% include 'patient_data/components/administrative/assigned_author.html' %}
+    {% include 'patient_data/components/administrative/legal_authenticator.html' %}
+    {% include 'patient_data/components/administrative/documentation_of.html' %}
+    {% include 'patient_data/components/administrative/document_info.html' %}        {# CUSTODIAN ORGANIZATION - Collapsible Accordion #}
         {% if custodian_organization.name %}
         <div class="custodian-section mb-4">
             <div class="collapsible-wrapper">

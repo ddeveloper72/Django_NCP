@@ -1,82 +1,111 @@
-{# CDA assignedAuthor - Document Author Component #}
+{# CDA assignedAuthor - Document Author Component (Accordion Design) #}
 {# Expected context: author_hcp (DotDict with flattened person fields + nested organization) #}
 
 {% if author_hcp %}
-<div class="assigned-author-section bg-white border rounded-3 shadow-sm overflow-hidden mb-3">
-    <div class="table-responsive">
-        <table class="table table-bordered mb-0">
-            <tbody>
-                {# Author Row #}
-                <tr>
-                    <td class="table-light fw-bold" style="width: 20%;">Author</td>
-                    <td style="width: 40%;">
-                        <div class="d-flex align-items-start">
-                            <i class="fa-solid fa-user-doctor me-2 text-primary mt-1"></i>
-                            <div>
-                                <strong>{{ author_hcp.full_name|default:"Unknown Practitioner" }}</strong>
-                                {% if author_hcp.role %}
-                                    <span class="text-muted">- Code:</span> <span class="badge bg-primary ms-1">{{ author_hcp.role }}</span>
-                                {% endif %}
-                                {% if author_hcp.specialty %}
-                                    <span class="badge bg-info ms-1">{{ author_hcp.specialty }}</span>
-                                {% endif %}
-                                {% if author_hcp.organization %}
-                                <div class="text-muted small mt-1">
-                                    <i class="fa-solid fa-building me-1"></i>
-                                    Organization: {% if author_hcp.organization.name %}{{ author_hcp.organization.name }}{% else %}{{ author_hcp.organization }}{% endif %}
-                                </div>
-                                {% endif %}
-                            </div>
+<div class="assigned-author-section mb-4">
+    <div class="collapsible-wrapper">
+        <input id="toggle-assigned-author" class="toggle-input" type="checkbox" checked>
+        <label for="toggle-assigned-author" class="collapsible-label-title">
+            <div class="clinical-section-title-row">
+                <div class="clinical-section-title">
+                    <i class="fa-solid fa-user-doctor me-2"></i>
+                    <span>Author</span>
+                </div>
+                <div class="clinical-badge-container">
+                    <span class="clinical-badge populated">{{ author_hcp.full_name|default:"Unknown Practitioner" }}</span>
+                </div>
+            </div>
+            <i class="fas fa-chevron-down toggle-icon" aria-hidden="true"></i>
+        </label>
+        <div class="collapsible-content-title">
+            <div class="content-inner-title">
+                
+                {# Author Details #}
+                <div class="mb-3">
+                    <div class="d-flex align-items-start mb-2">
+                        <i class="fa-solid fa-user-doctor me-2 text-primary mt-1"></i>
+                        <div>
+                            <h6 class="text-dark mb-1">{{ author_hcp.full_name|default:"Unknown Practitioner" }}</h6>
+                            {% if author_hcp.role %}
+                                <span class="badge bg-primary">{{ author_hcp.role }}</span>
+                            {% endif %}
+                            {% if author_hcp.specialty %}
+                                <span class="badge bg-info ms-1">{{ author_hcp.specialty }}</span>
+                            {% endif %}
                         </div>
-                    </td>
-                    <td class="table-light fw-bold" style="width: 15%;">Contact Details</td>
-                    <td style="width: 25%;">
-                        {# Practitioner Contact #}
-                        {% if author_hcp.addresses %}
-                            {% with address=author_hcp.addresses.0 %}
-                            <div class="mb-1 small">
-                                {% for line in address.line %}{{ line }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                                {% if not address.line and address.street %}{{ address.street }}{% endif %}
+                    </div>
+                    
+                    {% if author_hcp.organization %}
+                    <p class="mb-2 small text-muted">
+                        <i class="fa-solid fa-building me-2"></i>
+                        {% if author_hcp.organization.name %}{{ author_hcp.organization.name }}{% else %}{{ author_hcp.organization }}{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                {# Contact Information #}
+                <div class="contact-info">
+                    <h6 class="mb-2 small"><i class="fa-solid fa-address-book me-2"></i>Contact Information:</h6>
+                    {% if author_hcp.addresses %}
+                        {% with address=author_hcp.addresses.0 %}
+                        <p class="mb-1 small">
+                            <i class="fa-solid fa-location-dot me-2 text-muted"></i>
+                            {% for line in address.line %}{{ line }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                            {% if not address.line and address.street %}{{ address.street }}{% endif %}
+                        </p>
+                        <p class="mb-1 small ms-4">
+                            {% if address.city %}{{ address.city }}{% endif %}{% if address.postal_code %} {{ address.postal_code }}{% endif %}
+                        </p>
+                        <p class="mb-2 small ms-4">{% if address.country %}{{ address.country }}{% endif %}</p>
+                        {% endwith %}
+                    {% endif %}
+                    
+                    {% if author_hcp.telecoms %}
+                        {% for telecom in author_hcp.telecoms %}
+                            {% if telecom.system == 'phone' %}
+                            <p class="mb-1 small">
+                                <i class="fa-solid fa-phone me-2 text-muted"></i>
+                                <strong>Phone {% if telecom.use %}{{ telecom.use|title }}{% endif %}:</strong> {{ telecom.value }}
+                            </p>
+                            {% elif telecom.system == 'email' %}
+                            <p class="mb-1 small">
+                                <i class="fa-solid fa-envelope me-2 text-muted"></i>
+                                <strong>Email:</strong> {{ telecom.value }}
+                            </p>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {# Organization Contact #}
+                    {% if author_hcp.organization.contact %}
+                        {% for contact in author_hcp.organization.contact %}
+                            {% if contact.address %}
+                            <div class="mt-3 pt-3 border-top">
+                                <h6 class="mb-2 small"><i class="fa-solid fa-building me-2"></i>Organization Contact:</h6>
+                                <p class="mb-1 small">
+                                    <i class="fa-solid fa-location-dot me-2 text-muted"></i>
+                                    {% for line in contact.address.line %}{{ line }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                </p>
+                                <p class="mb-1 small ms-4">{{ contact.address.city }} {{ contact.address.postalCode }}</p>
+                                <p class="mb-2 small ms-4">{{ contact.address.country }}</p>
                             </div>
-                            <div class="mb-1 small">
-                                {% if address.city %}{{ address.city }}{% endif %}{% if address.postal_code %} {{ address.postal_code }}{% endif %}
-                            </div>
-                            <div class="mb-1 small">{% if address.country %}{{ address.country }}{% endif %}</div>
-                            {% endwith %}
-                        {% endif %}
-                        {% if author_hcp.telecoms %}
-                            {% for telecom in author_hcp.telecoms %}
-                                {% if telecom.system == 'phone' %}
-                                <div class="small">Tel {{ telecom.use|title }}: {{ telecom.value }}</div>
-                                {% elif telecom.system == 'email' %}
-                                <div class="small">Mail: {{ telecom.value }}</div>
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
-                        {# Organization Contact #}
-                        {% if author_hcp.organization.contact %}
-                            {% for contact in author_hcp.organization.contact %}
-                                {% if contact.address %}
-                                <div class="mt-2 pt-2 border-top small text-muted">
-                                    <strong>Organization:</strong><br>
-                                    {% for line in contact.address.line %}{{ line }}{% if not forloop.last %}, {% endif %}{% endfor %}<br>
-                                    {{ contact.address.city }} {{ contact.address.postalCode }}<br>
-                                    {{ contact.address.country }}
-                                </div>
-                                {% endif %}
-                                {% if contact.telecom %}
-                                    {% for telecom in contact.telecom %}
-                                        {% if telecom.system == 'email' %}
-                                        <div class="small text-muted">Mail {{ telecom.use|title }}: {{ telecom.value }}</div>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                            {% endif %}
+                            {% if contact.telecom %}
+                                {% for telecom in contact.telecom %}
+                                    {% if telecom.system == 'email' %}
+                                    <p class="mb-1 small">
+                                        <i class="fa-solid fa-envelope me-2 text-muted"></i>
+                                        <strong>Email {% if telecom.use %}{{ telecom.use|title }}{% endif %}:</strong> {{ telecom.value }}
+                                    </p>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+            </div>
+        </div>
     </div>
 </div>
 {% endif %}
