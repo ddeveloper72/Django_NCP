@@ -367,6 +367,7 @@ class ContextBuilder:
                 'observations': clinical_arrays.get('observations', []),
                 'medical_devices': clinical_arrays.get('medical_devices', []),
                 'past_illness': clinical_arrays.get('past_illness', []),
+                'history_of_past_illness': clinical_arrays.get('past_illness', []),  # Template expects this name
                 'pregnancy_history': clinical_arrays.get('pregnancy_history', []),
                 'social_history': clinical_arrays.get('social_history', []),
                 'advance_directives': clinical_arrays.get('advance_directives', []),
