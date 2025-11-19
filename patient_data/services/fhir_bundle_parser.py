@@ -54,7 +54,8 @@ class FHIRBundleParser:
             'Patient', 'Composition', 'AllergyIntolerance', 'MedicationStatement',
             'Medication',  # Add Medication resources (referenced by MedicationStatement)
             'Condition', 'Procedure', 'Observation', 'Immunization', 
-            'DiagnosticReport', 'Practitioner', 'Organization', 'Device', 'RelatedPerson'
+            'DiagnosticReport', 'Practitioner', 'Organization', 'Device', 'RelatedPerson',
+            'Consent'  # Advance directives and patient consent
         ]
         
         # Store Medication resources for reference resolution
@@ -111,6 +112,11 @@ class FHIRBundleParser:
                 'section_type': 'medical_devices',
                 'display_name': 'Medical Devices',
                 'icon': 'fa-microchip'
+            },
+            'Consent': {
+                'section_type': 'advance_directives',
+                'display_name': 'Advance Directives',
+                'icon': 'fa-file-contract'
             },
             'RelatedPerson': {
                 'section_type': 'emergency_contacts',
@@ -607,6 +613,8 @@ class FHIRBundleParser:
             parsed_entries = [self._parse_diagnostic_report_resource(resource) for resource in resources]
         elif resource_type == 'Device':
             parsed_entries = [self._parse_device_resource(resource) for resource in resources]
+        elif resource_type == 'Consent':
+            parsed_entries = [self._parse_consent_resource(resource) for resource in resources]
         else:
             # Generic resource parsing
             parsed_entries = [self._parse_generic_resource(resource) for resource in resources]
@@ -2186,6 +2194,51 @@ class FHIRBundleParser:
         observation_text = str(observation.get('code', {})).lower()
         return any(keyword in observation_text for keyword in lab_keywords)
     
+    def _is_physical_finding(self, observation: Dict[str, Any]) -> bool:
+        """Check if observation is a physical examination finding"""
+        # Check category first (most reliable)
+        category = observation.get('category', [])
+        
+        # Type check: category should be list of dicts, but might be a string
+        if isinstance(category, str):
+            category = []
+        
+        for cat in category:
+            # Type check: each category entry should be dict (CodeableConcept)
+            if not isinstance(cat, dict):
+                continue
+            
+            coding = cat.get('coding', [])
+            for code in coding:
+                if code.get('code') in ['exam', 'physical-exam', 'physical-finding']:
+                    return True
+        
+        # LOINC codes for physical examination findings
+        physical_exam_loinc_codes = [
+            '8716-3',   # Vital signs panel (sometimes used for physical exam)
+            '29274-8',  # Physical findings
+            '11384-5',  # Physical examination
+            '32423-6',  # Physical findings of Abdomen
+            '11391-0',  # Physical findings of Chest
+            '11413-2',  # Physical findings of Skin
+        ]
+        
+        code_data = observation.get('code', {})
+        if code_data.get('coding'):
+            for coding in code_data['coding']:
+                if coding.get('system') == 'http://loinc.org' and coding.get('code') in physical_exam_loinc_codes:
+                    return True
+        
+        # Fallback to keyword matching
+        physical_exam_keywords = [
+            'physical exam', 'examination', 'inspection', 'palpation',
+            'auscultation', 'percussion', 'abdomen', 'chest', 'skin',
+            'appearance', 'finding'
+        ]
+        
+        observation_text = str(observation.get('code', {})).lower()
+        return any(keyword in observation_text for keyword in physical_exam_keywords)
+    
     def _parse_immunization_resource(self, immunization: Dict[str, Any]) -> Dict[str, Any]:
         """Parse FHIR Immunization resource"""
         # Extract vaccine name
@@ -2268,6 +2321,50 @@ class FHIRBundleParser:
             'display_text': f"Device: {device_name}"
         }
     
+    def _parse_consent_resource(self, consent: Dict[str, Any]) -> Dict[str, Any]:
+        """Parse FHIR Consent resource for advance directives"""
+        # Extract consent scope and category
+        scope = consent.get('scope', {})
+        scope_text = scope.get('text') or scope.get('coding', [{}])[0].get('display', 'Unknown')
+        
+        category = consent.get('category', [])
+        category_text = 'Advance Directive'
+        if category:
+            cat_coding = category[0].get('coding', [{}])
+            if cat_coding:
+                category_text = cat_coding[0].get('display', category_text)
+        
+        # Extract decision (permit/deny)
+        provision = consent.get('provision', {})
+        decision = provision.get('type', 'Unknown')
+        
+        # Extract effective dates
+        effective_start = consent.get('dateTime')
+        effective_period = consent.get('period', {})
+        effective_time = effective_start or effective_period.get('start', 'Unknown')
+        
+        # Build directive name
+        directive_name = category_text
+        if scope_text and scope_text != 'Unknown':
+            directive_name = f"{category_text}: {scope_text}"
+        
+        return {
+            'id': consent.get('id'),
+            'name': directive_name,
+            'code': {
+                'code': category[0].get('coding', [{}])[0].get('code', 'Unknown') if category else 'Unknown',
+                'display': category_text,
+                'system': category[0].get('coding', [{}])[0].get('system', 'Unknown') if category else 'Unknown'
+            },
+            'status': consent.get('status', 'Unknown'),
+            'decision': decision,
+            'scope': scope_text,
+            'description': provision.get('code', [{}])[0].get('text') if provision.get('code') else None,
+            'effective_time': effective_time,
+            'resource_type': 'Consent',
+            'display_text': f"Advance Directive: {directive_name}"
+        }
+    
     def _parse_generic_resource(self, resource: Dict[str, Any]) -> Dict[str, Any]:
         """Parse generic FHIR resource"""
         resource_type = resource.get('resourceType', 'Unknown')
@@ -2292,9 +2389,12 @@ class FHIRBundleParser:
             'observations': [],
             'vital_signs': [],  # Subset of observations
             'social_history': [],  # Social history observations
+            'physical_findings': [],  # Physical examination observations
             'laboratory_results': [],  # Lab test results
             'pregnancy_history': [],  # Pregnancy/obstetric history
             'immunizations': [],
+            'medical_devices': [],  # Implanted/prescribed medical devices
+            'advance_directives': [],  # Patient consent and advance care directives
             'diagnostic_reports': [],
             'results': []  # Alias for diagnostic_reports
         }
@@ -2334,6 +2434,12 @@ class FHIRBundleParser:
                     if self._is_social_history(obs)
                 ]
                 
+                # Filter for physical findings (physical examination observations)
+                clinical_arrays['physical_findings'] = [
+                    obs for obs in section_data.entries 
+                    if self._is_physical_finding(obs)
+                ]
+                
                 # Filter for laboratory results
                 clinical_arrays['laboratory_results'] = [
                     obs for obs in section_data.entries 
@@ -2351,6 +2457,12 @@ class FHIRBundleParser:
                 clinical_arrays['pregnancy_history'] = self._transform_pregnancy_observations(pregnancy_observations)
             elif section_type == 'immunizations' and hasattr(section_data, 'entries'):
                 clinical_arrays['immunizations'] = section_data.entries
+            elif section_type == 'medical_devices' and hasattr(section_data, 'entries'):
+                # Medical devices (implanted/prescribed devices)
+                clinical_arrays['medical_devices'] = section_data.entries
+            elif section_type == 'advance_directives' and hasattr(section_data, 'entries'):
+                # Advance directives (Consent resources)
+                clinical_arrays['advance_directives'] = section_data.entries
             elif section_type == 'diagnostic_reports' and hasattr(section_data, 'entries'):
                 clinical_arrays['diagnostic_reports'] = section_data.entries
                 clinical_arrays['results'] = section_data.entries  # Alias

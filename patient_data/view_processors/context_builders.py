@@ -362,6 +362,8 @@ class ContextBuilder:
                 'conditions': clinical_arrays.get('conditions', []),
                 'procedures': clinical_arrays.get('procedures', []),
                 'vital_signs': clinical_arrays.get('vital_signs', []),
+                'physical_findings': clinical_arrays.get('physical_findings', []),
+                'laboratory_results': clinical_arrays.get('laboratory_results', []),
                 'results': clinical_arrays.get('results', []),
                 'immunizations': clinical_arrays.get('immunizations', []),
                 'observations': clinical_arrays.get('observations', []),
