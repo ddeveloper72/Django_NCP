@@ -252,17 +252,19 @@ class CDAViewProcessor:
                         context['patient_identity'] = administrative_result['patient_identity']
                         logger.info(f"[CDA PROCESSOR] Added patient identity to context")
                     
-                    # Add administrative data fields including contact info and guardians
+                    # Add administrative data fields including contact info, guardians, and participants
                     admin_data = administrative_result.get('administrative_data', {})
                     context.update({
                         'administrative_data': admin_data,
                         'patient_extended_data': administrative_result.get('patient_extended_data', {}),
                         'guardians': administrative_result.get('guardians', []),
+                        'participants': administrative_result.get('participants', []),
                         'healthcare_data': administrative_result.get('healthcare_data', {})
                     })
                     
                     # Log extraction results - patient_contact_info is now in administrative_data
                     guardians = administrative_result.get('guardians', [])
+                    participants = administrative_result.get('participants', [])
                     # admin_data can be either a dict or dataclass - handle both cases
                     if isinstance(admin_data, dict):
                         patient_contact_info = admin_data.get('patient_contact_info', None)
@@ -276,10 +278,12 @@ class CDAViewProcessor:
                         logger.info(f"[CDA PROCESSOR] Added administrative fields to context: "
                                    f"{len(telecoms)} telecoms, "
                                    f"{len(addresses)} addresses, "
-                                   f"{len(guardians)} guardians")
+                                   f"{len(guardians)} guardians, "
+                                   f"{len(participants)} participants")
                     else:
                         logger.info(f"[CDA PROCESSOR] Added administrative fields to context: "
-                                   f"0 telecoms, 0 addresses, {len(guardians)} guardians")
+                                   f"0 telecoms, 0 addresses, {len(guardians)} guardians, "
+                                   f"{len(participants)} participants")
                 
                 # Add CDA-specific metadata
                 self._add_cda_metadata(context, match_data, cda_content, actual_cda_type)
@@ -990,11 +994,15 @@ class CDAViewProcessor:
                 admin_data = enhanced_result.get('administrative_data', {})
                 patient_identity = enhanced_result.get('patient_identity', {})
                 
-                # Extract guardians from administrative data
+                # Extract guardians and participants from administrative data
                 guardians = []
+                participants = []
                 if hasattr(admin_data, 'guardians'):
                     guardians = admin_data.guardians
                     logger.info(f"[CDA PROCESSOR] Extracted {len(guardians)} guardians")
+                if hasattr(admin_data, 'participants'):
+                    participants = admin_data.participants
+                    logger.info(f"[CDA PROCESSOR] Extracted {len(participants)} participants")
                 
                 logger.info(f"[CDA PROCESSOR] Extracted administrative data: {len(admin_data.__dict__ if hasattr(admin_data, '__dict__') else admin_data)} fields, "
                            f"patient_identity: {bool(patient_identity)}")
@@ -1003,6 +1011,7 @@ class CDAViewProcessor:
                     'administrative_data': admin_data,  # Contains patient_contact_info from CDAHeaderExtractor
                     'patient_identity': patient_identity,
                     'guardians': guardians,  # Guardian information with contact details
+                    'participants': participants,  # Participant/emergency contact information
                     'patient_extended_data': {},  # Placeholder for future enhancement
                     'healthcare_data': {}  # Placeholder for future enhancement
                 }
@@ -1012,6 +1021,7 @@ class CDAViewProcessor:
                 'administrative_data': {},
                 'patient_identity': {},
                 'guardians': [],
+                'participants': [],
                 'patient_extended_data': {},
                 'healthcare_data': {}
             }
@@ -1024,6 +1034,7 @@ class CDAViewProcessor:
                 'administrative_data': {},
                 'patient_identity': {},
                 'guardians': [],
+                'participants': [],
                 'patient_extended_data': {},
                 'healthcare_data': {}
             }
